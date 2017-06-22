@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from skimage import restoration
 
 
 def gaussian_low_pass(img, sigma, ksize=None, border=None):
@@ -25,3 +26,12 @@ def gaussian_high_pass(img, sigma, ksize=None, border=None):
     res[over_flow_ind] = 0
 
     return res
+
+
+def richardson_lucy_deconv(img, psf, num_iter, clip=False):
+    img_deconv = restoration.richardson_lucy(img, psf, iterations=num_iter, clip=clip)
+
+    # here be dragons. img_deconv is a float. this should not work, but the result looks nice
+    # modulo boundary values? wtf indeed.
+    img_deconv = img_deconv.astype(np.uint8)
+    return img_deconv

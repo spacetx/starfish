@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from showit import image
 
 
+
 class WatershedSegmenter:
     def __init__(self, dapi_img, stain_img):
         self.dapi = dapi_img / dapi_img.max()

@@ -23,5 +23,5 @@ def gaussian_high_pass(img, sigma, ksize=None, border=None):
     over_flow_ind = img < blurred
     res = img - blurred
     res[over_flow_ind] = 0
-    
+
     return res

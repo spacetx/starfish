@@ -4,18 +4,23 @@ from skimage import restoration
 
 
 def gaussian_low_pass(img, sigma, ksize=None, border=None):
+    img_swap = swap(img)
+    print img_swap.shape
     if ksize is None:
         ksize = int(2 * np.ceil(2 * sigma) + 1)
 
     if border is None:
         border = cv2.BORDER_REPLICATE
 
-    blurred = cv2.GaussianBlur(img,
+    blurred = cv2.GaussianBlur(img_swap,
                                (ksize, ksize),
                                sigma,
                                borderType=border
                                )
-    return blurred.astype(np.int16)
+
+    blurred = blurred.astype(np.int16)
+    print swap(blurred).shape
+    return swap(blurred)
 
 
 def gaussian_high_pass(img, sigma, ksize=None, border=None):
@@ -29,9 +34,15 @@ def gaussian_high_pass(img, sigma, ksize=None, border=None):
 
 
 def richardson_lucy_deconv(img, psf, num_iter, clip=False):
-    img_deconv = restoration.richardson_lucy(img, psf, iterations=num_iter, clip=clip)
+    img_swap = swap(img)
+    img_deconv = restoration.richardson_lucy(img_swap, psf, iterations=num_iter, clip=clip)
 
     # here be dragons. img_deconv is a float. this should not work, but the result looks nice
     # modulo boundary values? wtf indeed.
-    img_deconv = img_deconv.astype(np.uint8)
-    return img_deconv
+    img_deconv = img_deconv.astype(np.uint16)
+    return swap(img_deconv)
+
+
+def swap(img):
+    img_swap = img.swapaxes(0, img.ndim - 1)
+    return img_swap

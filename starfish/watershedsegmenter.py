@@ -1,12 +1,11 @@
-import numpy as np
 from __future__ import division
 
+import matplotlib.pyplot as plt
+import numpy as np
 import scipy.ndimage.measurements as spm
 from centrosome.cpmorphology import relabel
-from skimage.morphology import watershed
-import matplotlib.pyplot as plt
 from showit import image
-
+from skimage.morphology import watershed
 
 
 class WatershedSegmenter:

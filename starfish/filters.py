@@ -41,6 +41,19 @@ def richardson_lucy_deconv(img, psf, num_iter, clip=False):
     return swap(img_deconv)
 
 
+def clip_stack(stack, lim):
+    num_stacks = stack.shape[0]
+    for k in range(num_stacks):
+        im = stack[k:]
+        stack[k:] = clip_im(im, lim[k])
+    return stack
+
+
+def clip_im(im, lim):
+    im[im >= lim] = lim
+    return im
+
+
 def swap(img):
     img_swap = img.swapaxes(0, img.ndim - 1)
     return img_swap

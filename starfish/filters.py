@@ -1,6 +1,7 @@
-import numpy as np
 import cv2
+import numpy as np
 from skimage import restoration
+from skimage.morphology import binary_erosion, binary_dilation, disk, binary_opening, binary_closing
 
 
 def gaussian_low_pass(img, sigma, ksize=None, border=None):
@@ -50,19 +51,30 @@ def richardson_lucy_deconv(img, num_iter, psf=None, gpar=None, clip=False):
     return swap(img_deconv)
 
 
-def clip_stack(stack, lim):
-    num_stacks = stack.shape[0]
-    for k in range(num_stacks):
-        im = stack[k:]
-        stack[k:] = clip_im(im, lim[k])
-    return stack
-
-
-def clip_im(im, lim):
-    im[im >= lim] = lim
-    return im
-
-
 def swap(img):
     img_swap = img.swapaxes(0, img.ndim - 1)
     return img_swap
+
+
+def bin_eroode(im, disk_size):
+    selem = disk(disk_size)
+    res = binary_erosion(im, selem)
+    return res
+
+
+def bin_dilate(im, disk_size):
+    selem = disk(disk_size)
+    res = binary_dilation(im, selem)
+    return res
+
+
+def bin_open(im, disk_size):
+    selem = disk(disk_size)
+    res = binary_opening(im, selem)
+    return res
+
+
+def bin_close(im, disk_size):
+    selem = disk(disk_size)
+    res = binary_closing(im, selem)
+    return res

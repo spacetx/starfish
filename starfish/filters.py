@@ -31,7 +31,16 @@ def gaussian_high_pass(img, sigma, ksize=None, border=None):
     return res
 
 
-def richardson_lucy_deconv(img, psf, num_iter, clip=False):
+def richardson_lucy_deconv(img, num_iter, psf=None, gpar=None, clip=False):
+    if psf is None:
+        if gpar is None:
+            msg = 'Must specify a gaussian (kernel size, sigma) if a psf is not specified'
+            raise ValueError(msg)
+    else:
+        ksize, sigma = gpar
+        psf = cv2.getGaussianKernel(ksize, sigma, cv2.CV_32F)
+        psf = np.dot(psf, psf.T)
+
     img_swap = swap(img)
     img_deconv = restoration.richardson_lucy(img_swap, psf, iterations=num_iter, clip=clip)
 

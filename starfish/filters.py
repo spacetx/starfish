@@ -5,7 +5,6 @@ from skimage import restoration
 
 def gaussian_low_pass(img, sigma, ksize=None, border=None):
     img_swap = swap(img)
-    print img_swap.shape
     if ksize is None:
         ksize = int(2 * np.ceil(2 * sigma) + 1)
 
@@ -18,8 +17,7 @@ def gaussian_low_pass(img, sigma, ksize=None, border=None):
                                borderType=border
                                )
 
-    blurred = blurred.astype(np.int16)
-    print swap(blurred).shape
+    blurred = blurred.astype(np.uint16)
     return swap(blurred)
 
 

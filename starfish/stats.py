@@ -22,8 +22,8 @@ def im_stat(im):
 
 
 def regions_stat(label_mat):
-    coo = coo_matrix(label_mat)
-    regions = [region_for(cell, coo) for cell in set(coo.data)]
+    label_mat_coo = coo_matrix(label_mat)
+    regions = [region_for(label_mat_coo, label) for label in set(label_mat_coo.data)]
     return Many(regions)
 
 

@@ -45,23 +45,28 @@ def gaussian_high_pass(img, sigma, ksize=None, border=None, skimage=False):
     return res
 
 
-def richardson_lucy_deconv(img, num_iter, psf=None, gpar=None, clip=False):
+def richardson_lucy_deconv(stack, num_iter, psf=None, gpar=None, clip=False):
+    ims = stack_to_list(stack)
+    # TODO threadpool executor here for parallelization?
+    res = [richardson_lucy_deconv_img(im, num_iter, psf, gpar, clip) for im in ims]
+    return list_to_stack(res)
+
+
+def richardson_lucy_deconv_img(img, num_iter, psf=None, gpar=None, clip=False):
     if psf is None:
         if gpar is None:
             msg = 'Must specify a gaussian (kernel size, sigma) if a psf is not specified'
             raise ValueError(msg)
-    else:
         ksize, sigma = gpar
         psf = cv2.getGaussianKernel(ksize, sigma, cv2.CV_32F)
         psf = np.dot(psf, psf.T)
 
-    img_swap = swap(img)
-    img_deconv = restoration.richardson_lucy(img_swap, psf, iterations=num_iter, clip=clip)
+    img_deconv = restoration.richardson_lucy(img, psf, iterations=num_iter, clip=clip)
 
     # here be dragons. img_deconv is a float. this should not work, but the result looks nice
     # modulo boundary values? wtf indeed.
     img_deconv = img_deconv.astype(np.uint16)
-    return swap(img_deconv)
+    return img_deconv
 
 
 def swap(img):
@@ -69,7 +74,16 @@ def swap(img):
     return img_swap
 
 
-def bin_eroode(im, disk_size):
+def stack_to_list(stack):
+    num_ims = stack.shape[0]
+    return [stack[im, :] for im in range(num_ims)]
+
+
+def list_to_stack(list):
+    return np.array(list)
+
+
+def bin_erode(im, disk_size):
     selem = disk(disk_size)
     res = binary_erosion(im, selem)
     return res

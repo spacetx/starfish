@@ -4,6 +4,8 @@ from skimage import restoration
 from skimage.filters import gaussian
 from skimage.morphology import binary_erosion, binary_dilation, disk, binary_opening, binary_closing
 
+from starfish.munge import swap, stack_to_list, list_to_stack
+
 
 def gaussian_low_pass(img, sigma, ksize=None, border=None, skimage=False):
     img_swap = swap(img)
@@ -67,21 +69,6 @@ def richardson_lucy_deconv_img(img, num_iter, psf=None, gpar=None, clip=False):
     # modulo boundary values? wtf indeed.
     img_deconv = img_deconv.astype(np.uint16)
     return img_deconv
-
-
-def swap(img):
-    img_swap = img.swapaxes(0, img.ndim - 1)
-    return img_swap
-
-
-def stack_to_list(stack):
-    num_ims = stack.shape[0]
-    return [stack[im, :] for im in range(num_ims)]
-
-
-def list_to_stack(list):
-    return np.array(list)
-
 
 def bin_erode(im, disk_size):
     selem = disk(disk_size)

@@ -1,10 +1,11 @@
 import cv2
 import numpy as np
 from skimage import restoration
+from skimage.filters import gaussian
 from skimage.morphology import binary_erosion, binary_dilation, disk, binary_opening, binary_closing
 
 
-def gaussian_low_pass(img, sigma, ksize=None, border=None):
+def gaussian_low_pass(img, sigma, ksize=None, border=None, skimage=False):
     img_swap = swap(img)
     if ksize is None:
         ksize = int(2 * np.ceil(2 * sigma) + 1)
@@ -12,18 +13,30 @@ def gaussian_low_pass(img, sigma, ksize=None, border=None):
     if border is None:
         border = cv2.BORDER_REPLICATE
 
-    blurred = cv2.GaussianBlur(img_swap,
-                               (ksize, ksize),
-                               sigma,
-                               borderType=border
-                               )
+    if not skimage:
+        blurred = cv2.GaussianBlur(img_swap,
+                                   (ksize, ksize),
+                                   sigma,
+                                   borderType=border
+                                   )
+    else:
+
+        blurred = gaussian(img_swap,
+                           sigma=sigma,
+                           output=None,
+                           cval=0,
+                           multichannel=True,
+                           preserve_range=True,
+                           truncate=4.0
+                           )
 
     blurred = blurred.astype(np.uint16)
+
     return swap(blurred)
 
 
-def gaussian_high_pass(img, sigma, ksize=None, border=None):
-    blurred = gaussian_low_pass(img, sigma, ksize, border)
+def gaussian_high_pass(img, sigma, ksize=None, border=None, skimage=False):
+    blurred = gaussian_low_pass(img, sigma, ksize, border, skimage)
 
     over_flow_ind = img < blurred
     res = img - blurred

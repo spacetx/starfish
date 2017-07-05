@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 from scipy.sparse import coo_matrix
-from scipy.ndimage import morphology
-from skimage.morphology import erosion, dilation, opening
 from regional import one as One
 from regional import many as Many
 

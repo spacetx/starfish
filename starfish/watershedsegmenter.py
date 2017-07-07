@@ -7,6 +7,9 @@ from centrosome.cpmorphology import relabel
 from showit import image
 from skimage.morphology import watershed
 
+from starfish.filters import bin_thresh, bin_open
+from starfish.stats import label_to_regions
+
 
 class WatershedSegmenter:
     def __init__(self, dapi_img, stain_img):
@@ -19,15 +22,19 @@ class WatershedSegmenter:
         self.mask = None
         self.segmented = None
 
-    def segment(self, dapi_thresh, stain_thresh, min_allowed_size, max_allowed_size):
-        self.threshold_dapi(dapi_thresh)
+    def segment(self, dapi_thresh, stain_thresh, size_lim, disk_size_markers=None, disk_size_mask=None):
+        min_allowed_size, max_allowed_size = size_lim
+        self.dapi_thresholded = self.filter_dapi(dapi_thresh, disk_size_markers)
         self.markers, self.num_cells = self.label_nuclei(min_allowed_size, max_allowed_size)
-        self.mask = self.watershed_mask(stain_thresh, self.markers)
+        self.mask = self.watershed_mask(stain_thresh, self.markers, disk_size_mask)
         self.segmented = self.watershed(self.markers, self.mask)
         return self.segmented
 
-    def threshold_dapi(self, dapi_thresh):
-        self.dapi_thresholded = self.dapi >= dapi_thresh
+    def filter_dapi(self, dapi_thresh, disk_size):
+        dapi_filt = bin_thresh(self.dapi, dapi_thresh)
+        if disk_size is not None:
+            dapi_filt = bin_open(dapi_filt, disk_size)
+        return dapi_filt
 
     def label_nuclei(self, min_allowed_size, max_allowed_size):
         markers, num_objs = spm.label(self.dapi_thresholded)
@@ -48,9 +55,11 @@ class WatershedSegmenter:
 
         return markers_reduced, num_objs
 
-    def watershed_mask(self, stain_thresh, markers):
+    def watershed_mask(self, stain_thresh, markers, disk_size):
         st = self.stain >= stain_thresh
         watershed_mask = np.logical_or(st, markers > 0)
+        if disk_size is not None:
+            watershed_mask = bin_open(watershed_mask, disk_size)
         return watershed_mask
 
     def watershed(self, markers, watershed_mask):
@@ -84,11 +93,15 @@ class WatershedSegmenter:
         plt.title('Watershed Mask')
 
         plt.subplot(325)
-        image(self.markers, cmap=plt.cm.spectral, bar=True, ax=plt.gca())
+        marker_regions = label_to_regions(self.markers)
+        im = marker_regions.mask(background=[0.9, 0.9, 0.9], dims=self.markers.shape, stroke=None, cmap='rainbow')
+        image(im, size=20, ax=plt.gca())
         plt.title('Found: {} cells'.format(self.num_cells))
 
         plt.subplot(326)
-        image(self.segmented, cmap=plt.cm.spectral, bar=True, ax=plt.gca())
-        plt.title('Cel'.format(self.num_cells))
+        segmented_regions = label_to_regions(self.segmented)
+        im = segmented_regions.mask(background=[0.9, 0.9, 0.9], dims=self.segmented.shape, stroke=None, cmap='rainbow')
+        image(im, size=20, ax=plt.gca())
+        plt.title('Segmented Cells'.format(self.num_cells))
 
         return plt.gca()

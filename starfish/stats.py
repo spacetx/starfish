@@ -1,17 +1,20 @@
 import numpy as np
 import pandas as pd
-from scipy.sparse import coo_matrix
-from regional import one as One
+import scipy.ndimage.measurements as spm
 from regional import many as Many
+from regional import one as One
+from scipy.sparse import coo_matrix
+
+from starfish.munge import stack_to_list
 
 
-def stack_stat(stack):
+def stack_describe(stack):
     num_hybs = stack.shape[0]
-    stats = [im_stat(stack[k, :]) for k in range(num_hybs)]
+    stats = [im_describe(stack[k, :]) for k in range(num_hybs)]
     return stats
 
 
-def im_stat(im):
+def im_describe(im):
     shape = im.shape
     flat_dims = reduce(lambda x, y: x * y, shape)
     flat_im = np.reshape(im, flat_dims)

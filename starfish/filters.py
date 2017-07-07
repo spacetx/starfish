@@ -92,3 +92,7 @@ def bin_close(im, disk_size):
     selem = disk(disk_size)
     res = binary_closing(im, selem)
     return res
+
+def bin_thresh(im, thresh):
+    res = im >= thresh
+    return res

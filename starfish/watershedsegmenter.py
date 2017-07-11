@@ -73,6 +73,10 @@ class WatershedSegmenter:
 
         return res
 
+    def to_regions(self):
+        regions = label_to_regions(self.segmented)
+        return regions
+
     def show(self, figsize=(10, 10)):
         plt.figure(figsize=figsize)
 

@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 
-from starfish.stats import stack_describe
-
 
 def swap(img):
     img_swap = img.swapaxes(0, img.ndim - 1)
@@ -24,6 +22,7 @@ def max_proj(stack):
 
 
 def scale(stack, metric, clip=False):
+    from starfish.stats import stack_describe
     stats = stack_describe(stack)
     ims = stack_to_list(stack)
     res = [im / s[metric] for im, s in zip(ims, stats)]

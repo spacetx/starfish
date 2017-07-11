@@ -5,9 +5,6 @@ from regional import many as Many
 from regional import one as One
 from scipy.sparse import coo_matrix
 
-from starfish.munge import stack_to_list
-
-
 def stack_describe(stack):
     num_hybs = stack.shape[0]
     stats = [im_describe(stack[k, :]) for k in range(num_hybs)]
@@ -44,6 +41,8 @@ def measure_mean(im, labels, num_objs):
 
 
 def measure_mean_stack(stack, labels, num_objs):
+    from starfish.munge import stack_to_list
     ims = stack_to_list(stack)
     res = [measure_mean(im, labels, num_objs) for im in ims]
     return res
+

@@ -20,12 +20,14 @@ class SimpleSpotDetector:
         self.areas = None
         self.intensities = None
 
+        self.regions = None
         self.spots_df = None
 
     def detect(self):
         self.mp_thresh = self._threshold()
         self.labels, self.num_objs = self._label()
         self.areas, self.intensities = self._measure()
+        return self
 
     def _threshold(self):
         mp = scale(self.stack, 'max')
@@ -47,6 +49,7 @@ class SimpleSpotDetector:
 
     def to_regions(self):
         regions = label_to_regions(self.labels)
+        self.regions = regions
         return regions
 
     def to_dataframe(self, tidy_flag):
@@ -61,14 +64,16 @@ class SimpleSpotDetector:
         if tidy_flag:
             res = gather(res, 'hybs', 'vals', cols)
 
-        return res
+        self.spots_df = res
+
+        return self.spots_df
 
     def show(self, figsize=(10, 10)):
         plt.figure(figsize=figsize)
-        plt.subplot(211)
-        image(self.mp_thresh, bar=True, size=10, ax=plt.gca())
+        plt.subplot(121)
+        image(self.mp_thresh, size=10, ax=plt.gca())
 
-        plt.subplot(212)
+        plt.subplot(122)
         regions = self.to_regions()
         image(regions.mask(background=[0.9, 0.9, 0.9],
                            dims=self.labels.shape,

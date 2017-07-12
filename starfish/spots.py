@@ -27,6 +27,7 @@ class SimpleSpotDetector:
         self.mp_thresh = self._threshold()
         self.labels, self.num_objs = self._label()
         self.areas, self.intensities = self._measure()
+        self.regions = self._to_regions()
         return self
 
     def _threshold(self):
@@ -42,17 +43,16 @@ class SimpleSpotDetector:
     def _measure(self):
         areas = spm.sum(np.ones(self.labels.shape),
                         self.labels,
-                        np.array(range(0, self.num_objs + 1), dtype=np.int32))
+                        range(0, self.num_objs))
 
         intensity = measure_mean_stack(self.stack, self.labels, self.num_objs)
         return areas, intensity
 
-    def to_regions(self):
+    def _to_regions(self):
         regions = label_to_regions(self.labels)
-        self.regions = regions
         return regions
 
-    def to_dataframe(self, tidy_flag):
+    def to_encoder_dataframe(self, tidy_flag):
         num_hybs = self.stack.shape[0]
         cols = range(num_hybs)
         cols = ['hyb_{}'.format(c + 1) for c in cols]
@@ -68,13 +68,23 @@ class SimpleSpotDetector:
 
         return self.spots_df
 
+    def to_viz_dataframe(self):
+        res = pd.DataFrame(self.regions.center)
+        res = res.rename(columns=dict(zip(res.columns, ['x', 'y', 'z'])))
+
+        if 'z' not in res.columns:
+            res['z'] = None
+        res['spot_id'] = res.index
+        res['area'] = self.areas
+        return res
+
     def show(self, figsize=(10, 10)):
         plt.figure(figsize=figsize)
         plt.subplot(121)
         image(self.mp_thresh, size=10, ax=plt.gca())
 
         plt.subplot(122)
-        regions = self.to_regions()
+        regions = self.regions
         image(regions.mask(background=[0.9, 0.9, 0.9],
                            dims=self.labels.shape,
                            stroke=None,

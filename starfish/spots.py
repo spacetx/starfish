@@ -10,10 +10,11 @@ from starfish.stats import label_to_regions, measure_mean_stack
 
 
 class SimpleSpotDetector:
-    def __init__(self, stack, thresh):
+    def __init__(self, stack, thresh, blobs=None):
         self.stack = stack
         self.thresh = thresh
 
+        self.blobs = blobs
         self.mp_thresh = None
         self.labels = None
         self.num_objs = None
@@ -31,8 +32,11 @@ class SimpleSpotDetector:
         return self
 
     def _threshold(self):
-        mp = scale(self.stack, 'max')
-        mp = max_proj(mp)
+        if self.blobs is None:
+            mp = scale(self.stack, 'max')
+            mp = max_proj(mp)
+        else:
+            mp = self.blobs
         mp_thresh = bin_thresh(mp, self.thresh)
         return mp_thresh
 

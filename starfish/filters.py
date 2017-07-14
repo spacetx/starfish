@@ -3,6 +3,7 @@ import numpy as np
 from skimage import restoration
 from skimage.filters import gaussian
 from skimage.morphology import binary_erosion, binary_dilation, disk, binary_opening, binary_closing
+from scipy.ndimage.filters import maximum_filter, minimum_filter
 
 from starfish.munge import swap, stack_to_list, list_to_stack
 
@@ -70,6 +71,7 @@ def richardson_lucy_deconv_img(img, num_iter, psf=None, gpar=None, clip=False):
     img_deconv = img_deconv.astype(np.uint16)
     return img_deconv
 
+
 def bin_erode(im, disk_size):
     selem = disk(disk_size)
     res = binary_erosion(im, selem)
@@ -93,6 +95,15 @@ def bin_close(im, disk_size):
     res = binary_closing(im, selem)
     return res
 
+
 def bin_thresh(im, thresh):
     res = im >= thresh
+    return res
+
+
+def white_top_hat(im, disk_size):
+    selem = disk(disk_size)
+    min_filt = minimum_filter(im, footprint=selem)
+    max_filt = maximum_filter(min_filt, footprint=selem)
+    res = im - max_filt
     return res

@@ -6,7 +6,7 @@ from showit import image
 
 from starfish.filters import bin_thresh
 from starfish.munge import scale, max_proj, gather
-from starfish.stats import label_to_regions, measure_mean_stack
+from starfish.stats import label_to_regions, measure_stack
 
 
 class SimpleSpotDetector:
@@ -24,10 +24,10 @@ class SimpleSpotDetector:
         self.regions = None
         self.spots_df = None
 
-    def detect(self):
+    def detect(self, measurement_type='mean'):
         self.mp_thresh = self._threshold()
         self.labels, self.num_objs = self._label()
-        self.areas, self.intensities = self._measure()
+        self.areas, self.intensities = self._measure(measurement_type)
         self.regions = self._to_regions()
         return self
 
@@ -44,12 +44,12 @@ class SimpleSpotDetector:
         labels, num_objs = spm.label(self.mp_thresh)
         return labels, num_objs
 
-    def _measure(self):
+    def _measure(self, measurement_type):
         areas = spm.sum(np.ones(self.labels.shape),
                         self.labels,
                         range(0, self.num_objs))
 
-        intensity = measure_mean_stack(self.stack, self.labels, self.num_objs)
+        intensity = measure_stack(self.stack, self.labels, self.num_objs, measurement_type)
         return areas, intensity
 
     def _to_regions(self):

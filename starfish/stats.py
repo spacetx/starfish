@@ -5,6 +5,7 @@ from regional import many as Many
 from regional import one as One
 from scipy.sparse import coo_matrix
 
+
 def stack_describe(stack):
     num_hybs = stack.shape[0]
     stats = [im_describe(stack[k, :]) for k in range(num_hybs)]
@@ -35,14 +36,19 @@ def label_to_regions(labels):
     return Many(regions)
 
 
-def measure_mean(im, labels, num_objs):
-    means = spm.mean(im, labels, range(0, num_objs))
-    return means
+def measure(im, labels, num_objs, measurement_type='mean'):
+    if measurement_type == 'mean':
+        res = spm.mean(im, labels, range(0, num_objs))
+    elif measurement_type == 'max':
+        res = spm.maximum(im, labels, range(0, num_objs))
+    else:
+        raise ValueError('Unsporrted measurement type: {}'.format(measurement_type))
 
-
-def measure_mean_stack(stack, labels, num_objs):
-    from starfish.munge import stack_to_list
-    ims = stack_to_list(stack)
-    res = [measure_mean(im, labels, num_objs) for im in ims]
     return res
 
+
+def measure_stack(stack, labels, num_objs, measurement_type='mean'):
+    from starfish.munge import stack_to_list
+    ims = stack_to_list(stack)
+    res = [measure(im, labels, num_objs, measurement_type) for im in ims]
+    return res

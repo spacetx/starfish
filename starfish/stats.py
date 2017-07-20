@@ -31,7 +31,8 @@ def label_to_regions(labels):
         re = One(zip(x, y))
         return re
 
-    regions = [region_for(label_mat_coo, label) for label in set(label_mat_coo.data)]
+    unique_labels = sorted(set(label_mat_coo.data))
+    regions = [region_for(label_mat_coo, label) for label in unique_labels]
 
     return Many(regions)
 

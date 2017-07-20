@@ -5,12 +5,12 @@ import scipy.ndimage.measurements as spm
 from showit import image
 
 from starfish.filters import bin_thresh
-from starfish.munge import scale, max_proj, gather
+from starfish.munge import gather
 from starfish.stats import label_to_regions, measure_stack
 
 
-class SimpleSpotDetector:
-    def __init__(self, stack, thresh, blobs=None):
+class BinarySpotDetector:
+    def __init__(self, stack, thresh, blobs):
         self.stack = stack
         self.thresh = thresh
 
@@ -32,13 +32,8 @@ class SimpleSpotDetector:
         return self
 
     def _threshold(self):
-        if self.blobs is None:
-            mp = scale(self.stack, 'max')
-            mp = max_proj(mp)
-        else:
-            mp = self.blobs
-        mp_thresh = bin_thresh(mp, self.thresh)
-        return mp_thresh
+        blobs_binary = bin_thresh(self.blobs, self.thresh)
+        return blobs_binary
 
     def _label(self):
         labels, num_objs = spm.label(self.mp_thresh)

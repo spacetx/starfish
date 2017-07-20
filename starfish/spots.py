@@ -15,7 +15,7 @@ class BinarySpotDetector:
         self.thresh = thresh
 
         self.blobs = blobs
-        self.mp_thresh = None
+        self.blobs_binary = None
         self.labels = None
         self.num_objs = None
         self.areas = None
@@ -25,7 +25,7 @@ class BinarySpotDetector:
         self.spots_df = None
 
     def detect(self, measurement_type='mean'):
-        self.mp_thresh = self._threshold()
+        self.blobs_binary = self._threshold()
         self.labels, self.num_objs = self._label()
         self.areas, self.intensities = self._measure(measurement_type)
         self.regions = self._to_regions()
@@ -36,7 +36,7 @@ class BinarySpotDetector:
         return blobs_binary
 
     def _label(self):
-        labels, num_objs = spm.label(self.mp_thresh)
+        labels, num_objs = spm.label(self.blobs_binary)
         return labels, num_objs
 
     def _measure(self, measurement_type):
@@ -80,7 +80,7 @@ class BinarySpotDetector:
     def show(self, figsize=(10, 10)):
         plt.figure(figsize=figsize)
         plt.subplot(121)
-        image(self.mp_thresh, size=10, ax=plt.gca())
+        image(self.blobs_binary, size=10, ax=plt.gca())
 
         plt.subplot(122)
         regions = self.regions

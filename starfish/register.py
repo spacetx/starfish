@@ -11,7 +11,7 @@ def compute_shift(im, ref, upsample_factor=1):
 
 
 def shift_im(im, shift):
-    fim_shift = fourier_shift(np.fft.fftn(im), shift)
+    fim_shift = fourier_shift(np.fft.fftn(im), map(lambda x: -x, shift))
     im_shift = np.fft.ifftn(fim_shift)
     return im_shift.real
 

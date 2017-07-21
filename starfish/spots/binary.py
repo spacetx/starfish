@@ -42,13 +42,13 @@ class BinarySpotDetector:
     def _measure(self, measurement_type):
         areas = spm.sum(np.ones(self.labels.shape),
                         self.labels,
-                        range(0, self.num_objs))
+                        range(1, self.num_objs))
 
         intensity = measure_stack(self.stack, self.labels, self.num_objs, measurement_type)
         return areas, intensity
 
     def _to_regions(self):
-        regions = label_to_regions(self.labels)
+        regions = label_to_regions(self.labels)[1:]
         return regions
 
     def to_encoder_dataframe(self, tidy_flag):
@@ -56,7 +56,7 @@ class BinarySpotDetector:
         cols = range(num_hybs)
         cols = ['hyb_{}'.format(c + 1) for c in cols]
         d = dict(zip(cols, self.intensities))
-        d['spot_id'] = range(self.num_objs)
+        d['spot_id'] = range(self.num_objs-1)
 
         res = pd.DataFrame(d)
 

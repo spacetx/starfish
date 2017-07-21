@@ -5,15 +5,17 @@ import pandas as pd
 from skimage import io
 import click
 import matplotlib.pyplot as plt
-
+from showit import image
 import sys
 
 sys.path.append("/Users/dganguli/src/starfish/")
+sys.path.append("/Users/dganguli/src/starfish/spots/")
 
 from starfish.filters import white_top_hat
 from starfish.munge import list_to_stack, stack_to_list, max_proj, scale
 from starfish.register import compute_shift, shift_im
-from starfish.spots import BinarySpotDetector
+from starfish.spots.binary import BinarySpotDetector
+from starfish.spots.gaussian import GaussianSpotDetector
 from starfish.stats import im_describe
 from starfish.watershedsegmenter import WatershedSegmenter
 
@@ -21,6 +23,8 @@ from starfish.watershedsegmenter import WatershedSegmenter
 def load_data(base_path='/Users/dganguli/Downloads/ExampleInSituSequencing/'):
     def load_tiff_stack(path):
         stack = io.imread(path)
+        stack = stack.astype(np.float32)
+        stack = stack / 255
         return stack
 
     def load_hyb_chan(hyb, chan):
@@ -86,7 +90,7 @@ def detect_spots(stack, dots, spot_sig=3, measurement_type='max'):
     stats = im_describe(dots)
     thresh = stats['mean'] + spot_sig * stats['std']
 
-    s = BinarySpotDetector(stack, thresh, blobs=dots).detect(measurement_type)
+    s = BinarySpotDetector(stack, thresh, dots).detect(measurement_type)
 
     spots_df_tidy = s.to_encoder_dataframe(tidy_flag=True)
     spots_df_tidy = spots_df_tidy.ix[1:]
@@ -96,6 +100,15 @@ def detect_spots(stack, dots, spot_sig=3, measurement_type='max'):
     spots_labels = s.labels
 
     return spots_df_tidy, spots_df_viz, spots_labels
+
+
+def detect_spots_gaussian(stack, dots, min_sigma, max_sigma, num_sigma, thresh):
+    s = GaussianSpotDetector(stack, dots)
+    s.detect(min_sigma, max_sigma, num_sigma, thresh)
+    spots_df_tidy = s.to_encoder_dataframe(tidy_flag=True)
+    spots_df_viz = s.spots_df_viz
+    spots_df_viz['spot_id'] = spots_df_viz.index
+    return spots_df_tidy, spots_df_viz
 
 
 def segment(dapi, dots):
@@ -173,13 +186,32 @@ def decode(spots_df_tidy):
     return dec
 
 
+def show(dapi, dots_filt, dec, top_gene):
+    from skimage.color import rgb2gray
+
+    rgb = np.zeros((980, 1330, 3))
+    rgb[:, :, 0] = dapi
+    rgb[:, :, 1] = dots_filt
+    do = rgb2gray(rgb)
+    do = do / (do.max())
+
+    plt.figure()
+    image(do, size=15)
+    plt.plot(dec[dec.gene == top_gene.index[0]].y, dec[dec.gene == top_gene.index[0]].x, 'ob',
+             markerfacecolor='None')
+    plt.plot(dec[dec.gene == top_gene.index[1]].y, dec[dec.gene == top_gene.index[1]].x, 'or',
+             markerfacecolor='None')
+    plt.show()
+
+
 @click.command()
 @click.option('--disk_size', default=15, help='White Top Hat Filter')
 @click.option('--reg', default=0, prompt='Amount of registration')
 @click.option('--reg_type', default='max', prompt='Max or Comb')
 @click.option('--spot_sig', default=3.0, prompt='Spot threshold')
 @click.option('--spot_type', default='max', prompt='Spot threshold')
-def main(disk_size, reg, reg_type, spot_sig, spot_type):
+@click.option('--detect_method', default='binary')
+def main(disk_size, reg, reg_type, spot_sig, spot_type, detect_method):
     print 'loading data'
     stack, dapi, dots = load_data()
 
@@ -193,18 +225,29 @@ def main(disk_size, reg, reg_type, spot_sig, spot_type):
     else:
         stack_reg = register(stack_filt, dots_filt, reg, comb_type=reg_type)
 
-    print 'detecting spots. spot_sig: {}, spot_type: {}'.format(spot_sig, spot_type)
-
-    spots_df_tidy, spots_df_viz, spots_labels = detect_spots(stack_reg, dots_filt, spot_sig, spot_type)
+    if detect_method == 'binary':
+        print 'detecting spots. spot_sig: {}, spot_type: {}'.format(spot_sig, spot_type)
+        spots_df_tidy, spots_df_viz, spots_labels = detect_spots(stack_reg, dots_filt, spot_sig, spot_type)
+    else:
+        spots_df_tidy, spots_df_viz = detect_spots_gaussian(stack_reg,
+                                                            dots_filt,
+                                                            min_sigma=4,
+                                                            max_sigma=6,
+                                                            num_sigma=20,
+                                                            thresh=.01)
 
     print 'decoding'
     dec = decode(spots_df_tidy)
 
     top_gene = dec.gene.value_counts()[0:5]
-    plt.figure()
-    plt.hist(dec.qual, bins=20)
-    plt.show()
     print top_gene
+
+    plt.figure()
+    plt.hist(dec.dropna().qual, bins=20)
+    plt.show()
+
+    dec_filt = pd.merge(dec, spots_df_viz, on='spot_id', how='left')
+    show(dapi, dots_filt, dec_filt, top_gene)
 
 
 if __name__ == '__main__':

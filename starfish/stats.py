@@ -39,9 +39,9 @@ def label_to_regions(labels):
 
 def measure(im, labels, num_objs, measurement_type='mean'):
     if measurement_type == 'mean':
-        res = spm.mean(im, labels, range(0, num_objs))
+        res = spm.mean(im, labels, range(1, num_objs))
     elif measurement_type == 'max':
-        res = spm.maximum(im, labels, range(0, num_objs))
+        res = spm.maximum(im, labels, range(1, num_objs))
     else:
         raise ValueError('Unsporrted measurement type: {}'.format(measurement_type))
 

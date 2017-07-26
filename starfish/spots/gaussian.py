@@ -25,6 +25,7 @@ class GaussianSpotDetector:
         spots_df_viz = self._fitted_blobs_to_df(fitted_blobs)
         intensity = self._measure(self.blobs, spots_df_viz)
         spots_df_viz['intensity'] = intensity
+        spots_df_viz['spot_id'] = spots_df_viz.index
         self.spots_df_viz = spots_df_viz
         self.intensities = self._measure_stack()
 

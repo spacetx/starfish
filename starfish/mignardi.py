@@ -252,3 +252,4 @@ def main(disk_size, reg, reg_type, spot_sig, spot_type, detect_method):
 
 if __name__ == '__main__':
     main()
+

@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.ndimage.measurements as spm
 from centrosome.cpmorphology import relabel
+from scipy.ndimage import distance_transform_edt
 from showit import image
+from skimage.feature import peak_local_max
 from skimage.morphology import watershed
 
 from starfish.filters import bin_thresh, bin_open
@@ -22,10 +24,10 @@ class WatershedSegmenter:
         self.mask = None
         self.segmented = None
 
-    def segment(self, dapi_thresh, stain_thresh, size_lim, disk_size_markers=None, disk_size_mask=None):
+    def segment(self, dapi_thresh, stain_thresh, size_lim, disk_size_markers=None, disk_size_mask=None, min_dist=None):
         min_allowed_size, max_allowed_size = size_lim
         self.dapi_thresholded = self.filter_dapi(dapi_thresh, disk_size_markers)
-        self.markers, self.num_cells = self.label_nuclei(min_allowed_size, max_allowed_size)
+        self.markers, self.num_cells = self.label_nuclei(min_allowed_size, max_allowed_size, min_dist)
         self.mask = self.watershed_mask(stain_thresh, self.markers, disk_size_mask)
         self.segmented = self.watershed(self.markers, self.mask)
         return self.segmented
@@ -36,8 +38,12 @@ class WatershedSegmenter:
             dapi_filt = bin_open(dapi_filt, disk_size)
         return dapi_filt
 
-    def label_nuclei(self, min_allowed_size, max_allowed_size):
-        markers, num_objs = spm.label(self.dapi_thresholded)
+    def label_nuclei(self, min_allowed_size, max_allowed_size, min_dist=None):
+
+        if min_dist is None:
+            markers, num_objs = spm.label(self.dapi_thresholded)
+        else:
+            markers, num_objs = self._unclump(min_dist)
 
         min_allowed_area = min_allowed_size ** 2
         max_allowed_area = max_allowed_size ** 2
@@ -54,6 +60,14 @@ class WatershedSegmenter:
         markers_reduced, num_objs = relabel(markers)
 
         return markers_reduced, num_objs
+
+    def _unclump(self, min_dist):
+        im = self.dapi_thresholded
+        distance = distance_transform_edt(im)
+        local_maxi = peak_local_max(distance, labels=im, indices=False, min_distance=min_dist)
+        markers, num_objs = spm.label(local_maxi)
+        labels_ws = watershed(-distance, markers, mask=im)
+        return labels_ws, num_objs
 
     def watershed_mask(self, stain_thresh, markers, disk_size):
         st = self.stain >= stain_thresh

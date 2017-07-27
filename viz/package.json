@@ -1,0 +1,34 @@
+{
+  "name": "starfish",
+  "version": "1.0.0",
+  "description": "visualization prototype for starfish",
+  "main": "index.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/chanzuckerberg/starfish.git"
+  },
+  "keywords": [
+    "visualization",
+    "human",
+    "cell",
+    "atlas"
+  ],
+  "author": "chanzuckerberg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chanzuckerberg/starfish/issues"
+  },
+  "homepage": "https://github.com/chanzuckerberg/starfish#readme",
+  "dependencies": {
+    "dom-css": "^2.1.0",
+    "js-viewpane": "^0.2.0",
+    "pan-zoom": "^2.0.0",
+    "rune.js": "^1.0.2"
+  }
+}

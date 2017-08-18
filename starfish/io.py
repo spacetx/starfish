@@ -15,7 +15,7 @@ class Stack:
         self.num_hybs = None
         self.num_chans = None
         self.dims = None
-        self.shape = None
+        self.im_shape = None
         self.is_volume = None
 
         self.dapi = None
@@ -27,17 +27,29 @@ class Stack:
 
     def _read_fov(self):
         self.fov_df = pd.read_csv(self.fov_path)
-        self.num_hybs = self.fov_df.hyb.max() + 1
-        self.num_chans = self.fov_df.ch.max() + 1
+        self.num_hybs = self.fov_df.hyb.max()
+        self.num_chans = self.fov_df.ch.max()
 
+        # correct for off by one error
+        if self.fov_df.hyb.min() == 0:
+            self.num_hybs += 1
+        elif self.fov_df.hyb.min() == 1:
+            self.fov_df.hyb -= 1
+
+        if self.fov_df.ch.min() == 0:
+            self.num_chans += 1
+        elif self.fov_df.ch.min() == 1:
+            self.fov_df.ch -= 1
+
+        # determine image shape, set volumetric flag
         im = io.imread(self.fov_df.file[0])
-        self.shape = im.shape
+        self.im_shape = im.shape
 
-        if len(self.shape) == 2:
-            self.stack = np.zeros((self.num_hybs, self.num_chans, self.shape[0], self.shape[1]))
+        if len(self.im_shape) == 2:
+            self.stack = np.zeros((self.num_hybs, self.num_chans, self.im_shape[0], self.im_shape[1]))
             self.is_volume = False
         else:
-            self.stack = np.zeros((self.num_hybs, self.num_chans, self.shape[0], self.shape[1], self.shape[2]))
+            self.stack = np.zeros((self.num_hybs, self.num_chans, self.im_shape[0], self.im_shape[1], self.im_shape[2]))
             self.is_volume = True
 
         org = zip(self.fov_df.hyb.values, self.fov_df.ch.values, self.fov_df.file)
@@ -84,3 +96,6 @@ class Stack:
             res = self.stack
 
         return res
+
+    def combine_hyb_ch(self):
+        pass

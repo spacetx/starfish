@@ -97,9 +97,19 @@ class Stack:
 
     def set_stack(self, new_stack):
         if new_stack.shape != self.shape:
-            msg = "Shape mismatch. Current data shape: {}, new data shape: {}".formmat(self.shape, new_stack.shape)
+            msg = "Shape mismatch. Current data shape: {}, new data shape: {}".format(self.shape, new_stack.shape)
             raise AttributeError(msg)
         self.data = new_stack
+
+    def set_aux(self, key, img):
+        if key in self.aux_dict:
+            old_stack = self.aux_dict[key]
+            if old_stack.shape != img.shape:
+                msg = "Shape mismatch. Current data shape: {}, new data shape: {}".format(old_stack.shape,
+                                                                                          img.shape)
+                raise AttributeError(msg)
+        else:
+            self.aux_dict[key] = img
 
     def max_proj(self, dim):
         valid_dims = ['hyb', 'ch', 'z']

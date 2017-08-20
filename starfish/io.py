@@ -2,6 +2,8 @@ import pandas as pd
 from skimage import io
 import numpy as np
 
+from starfish.munge import list_to_stack
+
 
 class Stack:
     def __init__(self):
@@ -130,5 +132,17 @@ class Stack:
         return new_data
 
     def un_squeeze(self, stack):
+        if type(stack) is list:
+            stack = list_to_stack(stack)
+
         new_shape = (self.num_hybs, self.num_chans) + self.im_shape
-        pass
+        res = np.zeros(new_shape)
+
+        # TODO this can probably done smartly without a double for loop
+        ind = 0
+        for h in range(self.num_hybs):
+            for c in range(self.num_chans):
+                res[h, c, :] = stack[ind, :]
+                ind += 1
+
+        return res

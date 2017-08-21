@@ -6,11 +6,13 @@ from starfish.munge import list_to_stack
 
 
 class Stack:
-    def __init__(self):
+    def __init__(self, is_tiff=True):
 
         # data organization, dataframes
+        # TODO should these be json instead of csv files?
         self.org = None
         self.aux_org = None
+        self.is_tiff = is_tiff
 
         # numpy array (num_hybs, num_chans, x, y, z)
         self.data = None
@@ -26,26 +28,17 @@ class Stack:
         self.dapi = None
         self.aux_dict = dict()
 
+    @property
+    def shape(self):
+        if self.data is None:
+            return None
+        else:
+            return self.data.shape
+
     def read(self, fov_path, aux_path):
         self._read_fov(fov_path)
         if aux_path is not None:
             self._read_aux(aux_path)
-
-    def write(self, dir_name, ext):
-
-        hybs = self.org.hyb.values
-        chs = self.org.ch.values
-        inds = zip(hybs, chs)
-
-        fnames = []
-        for h, c in inds:
-            im = self.data[h, c, :]
-            fname = dir_name + '/h{}_c{}.{}'.format(h, c, ext)
-            io.imsave(fname, im)
-            fnames.append(fname)
-
-        org = pd.DataFrame({'file': fnames, 'hyb': hybs, 'ch': chs})
-        org.to_csv(dir_name + '/org.csv', index=False)
 
     def _read_fov(self, fov_path):
         self.org = pd.read_csv(fov_path)
@@ -63,8 +56,12 @@ class Stack:
         elif self.org.ch.min() == 1:
             self.org.ch -= 1
 
-        # determine image shape, set volumetric flag
-        im = io.imread(self.org.file[0])
+        # determine image shape in order to set volumetric flag
+        if self.is_tiff:
+            im = io.imread(self.org.file[0])
+        else:
+            im = np.load(self.org.file[0])
+
         self.im_shape = im.shape
 
         if len(self.im_shape) == 2:
@@ -77,24 +74,62 @@ class Stack:
         org = zip(self.org.hyb.values, self.org.ch.values, self.org.file)
 
         for h, c, fname in org:
-            self.data[h, c, :] = io.imread(fname)
+            if self.is_tiff:
+                self.data[h, c, :] = io.imread(fname)
+            else:
+                self.data[h, c, :] = np.load(fname)
 
     def _read_aux(self, aux_path):
         self.aux_org = pd.read_csv(aux_path)
-        dapi_path = self.aux_org[self.aux_org.type == 'dapi'].file.values[0]
-        self.dapi = io.imread(dapi_path)
 
         org = zip(self.aux_org.type.values, self.aux_org.file.values)
 
         for typ, fname in org:
-            if typ == 'dapi':
-                self.dapi = io.imread(fname)
-            else:
+            if self.is_tiff:
                 self.aux_dict[typ] = io.imread(fname)
+            else:
+                self.aux_dict[typ] = np.load(fname)
 
-    @property
-    def shape(self):
-        return self.data.shape
+        self.dapi = self.aux_dict['dapi']
+        del self.aux_dict['dapi']
+
+    # TODO should this thing write npy?
+    def write(self, dir_name):
+        self._write_fov(dir_name)
+
+        if self.aux_dict:
+            self._write_aux(dir_name)
+
+    def _write_fov(self, dir_name):
+        hybs = self.org.hyb.values
+        chs = self.org.ch.values
+        inds = zip(hybs, chs)
+
+        fnames = []
+        for h, c in inds:
+            im = self.data[h, c, :]
+            fname = dir_name + '/h{}_c{}'.format(h, c)
+            np.save(fname, im)
+            fnames.append(fname + '.npy')
+
+        org = pd.DataFrame({'file': fnames, 'hyb': hybs, 'ch': chs})
+        org.to_csv(dir_name + '/org.csv', index=False)
+
+    def _write_aux(self, dir_name):
+
+        fnames = [dir_name + '/dapi.npy']
+        typs = ['dapi']
+
+        np.save(fnames[0], self.dapi)
+
+        for name, im in self.aux_dict.iteritems():
+            fname = dir_name + '/{}'.format(name)
+            np.save(fname, im)
+            typs.append(name)
+            fnames.append(fname + '.npy')
+
+        org = pd.DataFrame({'file': fnames, 'type': typs})
+        org.to_csv(dir_name + '/aux_org.csv', index=False)
 
     def set_stack(self, new_stack):
         if new_stack.shape != self.shape:

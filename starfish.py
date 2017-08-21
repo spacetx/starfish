@@ -63,12 +63,19 @@ def filter(data_file, aux_file, out_dir, ds, tiff):
     s.read(data_file, aux_file)
 
     # filter raw images, for all hybs and channels
-    stack_filt = [white_top_hat(im, ds) for im in s.squeeze()]
+    stack_filt = []
+    for im_num, im in enumerate(s.squeeze()):
+        print "Filtering image: {}...".format(im_num)
+        im_filt = white_top_hat(im, ds)
+        stack_filt.append(im_filt)
+
     stack_filt = s.un_squeeze(stack_filt)
 
     # filter dots
+    print "Filtering dots ..."
     dots_filt = white_top_hat(s.aux_dict['dots'], ds)
 
+    print "Writing results ..."
     # create a 'stain' for segmentation
     stain = np.mean(s.max_proj('ch'), axis=0)
     stain = stain / stain.max()
@@ -84,12 +91,11 @@ def filter(data_file, aux_file, out_dir, ds, tiff):
 @starfish.command()
 @click.argument('data_file', type=click.Path(exists=True))
 @click.option('--tiff/--not-tiff', default=True)
-@click.option('--s', default=10, help='Figure size', type=int)
-def show(data_file, tiff):
+@click.option('--sz', default=10, help='Figure size', type=int)
+def show(data_file, tiff, sz):
     s = Stack(is_tiff=tiff)
     s.read(data_file, None)
-    plt.figure()
-    tile(s.squeeze(), size=s, bar=True)
+    tile(s.squeeze(), size=sz, bar=True)
     plt.show()
 
 

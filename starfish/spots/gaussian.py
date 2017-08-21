@@ -67,17 +67,18 @@ class GaussianSpotDetector:
         intensities = [self._measure(img, self.spots_df_viz) for img in stack_to_list(self.stack)]
         return intensities
 
-    def to_encoder_dataframe(self, tidy_flag):
-        num_hybs = self.stack.shape[0]
-        cols = range(num_hybs)
-        cols = ['hyb_{}'.format(c + 1) for c in cols]
-        d = dict(zip(cols, self.intensities))
+    def to_encoder_dataframe(self, tidy_flag, mapping=None):
+        inds = range(self.stack.shape[0])
+        d = dict(zip(inds, self.intensities))
         d['spot_id'] = range(self.num_objs)
 
         res = pd.DataFrame(d)
 
         if tidy_flag:
-            res = gather(res, 'hybs', 'vals', cols)
+            res = gather(res, 'ind', 'val', inds)
+            if mapping is not None:
+                res = pd.merge(res, mapping, on='ind', how='left')
+                del res['ind']
 
         self.spots_df = res
 

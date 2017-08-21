@@ -20,6 +20,7 @@ class Stack:
         self.num_chans = None
         self.im_shape = None
         self.is_volume = None
+        self.squeeze_map = None
 
         # auxilary images
         self.dapi = None
@@ -132,12 +133,21 @@ class Stack:
         new_shape = ((self.num_hybs * self.num_chans),) + self.im_shape
         new_data = np.zeros(new_shape)
 
-        # TODO this can probably done smartly with np.reshape instead of a double for loop
+        # TODO this can all probably be done smartly with np.reshape instead of a double for loop
         ind = 0
+        inds = []
+        hybs = []
+        chs = []
+
         for h in range(self.num_hybs):
             for c in range(self.num_chans):
                 new_data[ind, :] = self.data[h, c, :]
+                inds.append(ind)
+                hybs.append(h)
+                chs.append(c)
                 ind += 1
+
+        self.squeeze_map = pd.DataFrame({'ind': inds, 'hyb': hybs, 'ch': chs})
 
         return new_data
 

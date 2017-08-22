@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from showit import tile
 
-from starfish.filters import white_top_hat
-from starfish.io import Stack
-from starfish.register import compute_shift, shift_im
+from .filters import white_top_hat
+from .io import Stack
+from .register import compute_shift, shift_im
 
 
 @click.group()

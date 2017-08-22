@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage import fourier_shift
 from skimage.feature import register_translation
 
-from starfish.munge import stack_to_list, list_to_stack
+from .munge import stack_to_list, list_to_stack
 
 
 def compute_shift(im, ref, upsample_factor=1):

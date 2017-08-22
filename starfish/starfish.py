@@ -43,7 +43,7 @@ def register(data_file, aux_file, out_dir, u, tiff):
         shift, error = compute_shift(mp[h, :, :], s.aux_dict['dots'], u)
         print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
 
-        for c in range(s.num_chans):
+        for c in range(s.num_chs):
             # apply shift to all channels and hyb ronds
             res[h, c, :] = shift_im(s.data[h, c, :], shift)
 

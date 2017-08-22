@@ -3,30 +3,31 @@ from skimage import io
 import numpy as np
 
 from .munge import list_to_stack
+import json
 
 
 class Stack:
-    def __init__(self, is_tiff=True):
+    def __init__(self):
 
-        # data organization, dataframes
-        # TODO should these be json instead of csv files?
+        # data organization
         self.org = None
-        self.aux_org = None
-        self.is_tiff = is_tiff
 
         # numpy array (num_hybs, num_chans, x, y, z)
         self.data = None
 
-        # shape of array
+        # auxilary images
+        self.aux_dict = dict()
+
+        # shape data
         self.num_hybs = None
-        self.num_chans = None
+        self.num_chs = None
         self.im_shape = None
         self.is_volume = None
         self.squeeze_map = None
 
-        # auxilary images
-        self.dapi = None
-        self.aux_dict = dict()
+        # readers and writers
+        self.read_fn = None  # set by self._read_meta_data
+        self.write_fn = np.save  # asserted for now
 
     @property
     def shape(self):
@@ -35,63 +36,47 @@ class Stack:
         else:
             return self.data.shape
 
-    def read(self, fov_path, aux_path):
-        self._read_fov(fov_path)
-        if aux_path is not None:
-            self._read_aux(aux_path)
+    def read(self, in_json):
+        with open(in_json, 'r') as in_file:
+            self.org = json.load(in_file)
 
-    def _read_fov(self, fov_path):
-        self.org = pd.read_csv(fov_path)
-        self.num_hybs = self.org.hyb.max()
-        self.num_chans = self.org.ch.max()
+        self._read_meta_data()
+        self._read_stack()
+        self._read_aux()
 
-        # correct for off by one error
-        if self.org.hyb.min() == 0:
-            self.num_hybs += 1
-        elif self.org.hyb.min() == 1:
-            self.org.hyb -= 1
+    def _read_meta_data(self):
+        d = self.org['meta_data']
+        self.num_hybs = d['num_hybs']
+        self.num_chs = d['num_chs']
+        self.im_shape = tuple(d['shape'])
 
-        if self.org.ch.min() == 0:
-            self.num_chans += 1
-        elif self.org.ch.min() == 1:
-            self.org.ch -= 1
-
-        # determine image shape in order to set volumetric flag
-        if self.is_tiff:
-            im = io.imread(self.org.file[0])
+        self.is_volume = d['is_volume']
+        if not self.is_volume:
+            self.data = np.zeros((self.num_hybs, self.num_chs, self.im_shape[0], self.im_shape[1]))
         else:
-            im = np.load(self.org.file[0])
+            self.data = np.zeros((self.num_hybs, self.num_chs, self.im_shape[0], self.im_shape[1], self.im_shape[2]))
 
-        self.im_shape = im.shape
-
-        if len(self.im_shape) == 2:
-            self.data = np.zeros((self.num_hybs, self.num_chans, self.im_shape[0], self.im_shape[1]))
-            self.is_volume = False
+        if d['format'] == 'tiff':
+            self.read_fn = io.imread
         else:
-            self.data = np.zeros((self.num_hybs, self.num_chans, self.im_shape[0], self.im_shape[1], self.im_shape[2]))
-            self.is_volume = True
+            self.read_fn = np.load
 
-        org = zip(self.org.hyb.values, self.org.ch.values, self.org.file)
+    def _read_stack(self):
+        data_dicts = self.org['data']
 
-        for h, c, fname in org:
-            if self.is_tiff:
-                self.data[h, c, :] = io.imread(fname)
-            else:
-                self.data[h, c, :] = np.load(fname)
+        for d in data_dicts:
+            h = d['hyb']
+            c = d['ch']
+            fname = d['file']
+            self.data[h, c, :] = self.read_fn(fname)
 
-    def _read_aux(self, aux_path):
-        self.aux_org = pd.read_csv(aux_path)
+    def _read_aux(self):
+        data_dicts = self.org['aux_data']
 
-        org = zip(self.aux_org.type.values, self.aux_org.file.values)
-
-        for typ, fname in org:
-            if self.is_tiff:
-                self.aux_dict[typ] = io.imread(fname)
-            else:
-                self.aux_dict[typ] = np.load(fname)
-
-        self.dapi = self.aux_dict['dapi']
-        del self.aux_dict['dapi']
+        for d in data_dicts:
+            typ = d['type']
+            fname = d['file']
+            self.aux_dict[typ] = io.imread(fname)
 
     # TODO should this thing write npy?
     def write(self, dir_name):
@@ -165,7 +150,7 @@ class Stack:
         return res
 
     def squeeze(self):
-        new_shape = ((self.num_hybs * self.num_chans),) + self.im_shape
+        new_shape = ((self.num_hybs * self.num_chs),) + self.im_shape
         new_data = np.zeros(new_shape)
 
         # TODO this can all probably be done smartly with np.reshape instead of a double for loop
@@ -175,7 +160,7 @@ class Stack:
         chs = []
 
         for h in range(self.num_hybs):
-            for c in range(self.num_chans):
+            for c in range(self.num_chs):
                 new_data[ind, :] = self.data[h, c, :]
                 inds.append(ind)
                 hybs.append(h)
@@ -190,13 +175,13 @@ class Stack:
         if type(stack) is list:
             stack = list_to_stack(stack)
 
-        new_shape = (self.num_hybs, self.num_chans) + self.im_shape
+        new_shape = (self.num_hybs, self.num_chs) + self.im_shape
         res = np.zeros(new_shape)
 
         # TODO this can probably done smartly without a double for loop
         ind = 0
         for h in range(self.num_hybs):
-            for c in range(self.num_chans):
+            for c in range(self.num_chs):
                 res[h, c, :] = stack[ind, :]
                 ind += 1
 

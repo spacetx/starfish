@@ -2,7 +2,7 @@ import pandas as pd
 from skimage import io
 import numpy as np
 
-from starfish.munge import list_to_stack
+from .munge import list_to_stack
 
 
 class Stack:

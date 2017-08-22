@@ -5,7 +5,7 @@ from skimage.filters import gaussian
 from skimage.morphology import binary_erosion, binary_dilation, disk, binary_opening, binary_closing
 from scipy.ndimage.filters import maximum_filter, minimum_filter
 
-from starfish.munge import swap, stack_to_list, list_to_stack
+from .munge import swap, stack_to_list, list_to_stack
 
 
 def gaussian_low_pass(img, sigma, ksize=None, border=None, skimage=False):

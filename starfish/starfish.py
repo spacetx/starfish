@@ -13,15 +13,15 @@ from .register import compute_shift, shift_im
 @click.group()
 def starfish():
     art = """
-         _              __ _     _     
-        | |            / _(_)   | |    
-     ___| |_ __ _ _ __| |_ _ ___| |__  
-    / __| __/ _` | '__|  _| / __| '_ \ 
+         _              __ _     _
+        | |            / _(_)   | |
+     ___| |_ __ _ _ __| |_ _ ___| |__
+    / __| __/ _` | '__|  _| / __| '_ \
     \__ \ || (_| | |  | | | \__ \ | | |
     |___/\__\__,_|_|  |_| |_|___/_| |_|
-                                                              
+
     """
-    print art
+    print(art)
 
 
 @starfish.command()
@@ -31,7 +31,7 @@ def starfish():
 @click.option('--u', default=1, help='Amount of up-sampling', type=int)
 @click.option('--tiff/--not-tiff', default=True)
 def register(data_file, aux_file, out_dir, u, tiff):
-    print 'Registering ...'
+    print('Registering ...')
     s = Stack(is_tiff=tiff)
     s.read(data_file, aux_file)
 
@@ -41,7 +41,7 @@ def register(data_file, aux_file, out_dir, u, tiff):
     for h in range(s.num_hybs):
         # compute shift between maximum projection (across channels) and dots, for each hyb round
         shift, error = compute_shift(mp[h, :, :], s.aux_dict['dots'], u)
-        print "For hyb: {}, Shift: {}, Error: {}".format(h, shift, error)
+        print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
 
         for c in range(s.num_chans):
             # apply shift to all channels and hyb ronds
@@ -57,25 +57,25 @@ def register(data_file, aux_file, out_dir, u, tiff):
 @click.option('--ds', default=15, help='Disk size', type=int)
 @click.option('--tiff/--not-tiff', default=True)
 def filter(data_file, aux_file, out_dir, ds, tiff):
-    print 'Filtering ...'
-    print 'Reading data'
+    print('Filtering ...')
+    print('Reading data')
     s = Stack(is_tiff=tiff)
     s.read(data_file, aux_file)
 
     # filter raw images, for all hybs and channels
     stack_filt = []
     for im_num, im in enumerate(s.squeeze()):
-        print "Filtering image: {}...".format(im_num)
+        print("Filtering image: {}...".format(im_num))
         im_filt = white_top_hat(im, ds)
         stack_filt.append(im_filt)
 
     stack_filt = s.un_squeeze(stack_filt)
 
     # filter dots
-    print "Filtering dots ..."
+    print("Filtering dots ...")
     dots_filt = white_top_hat(s.aux_dict['dots'], ds)
 
-    print "Writing results ..."
+    print("Writing results ...")
     # create a 'stain' for segmentation
     stain = np.mean(s.max_proj('ch'), axis=0)
     stain = stain / stain.max()

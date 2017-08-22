@@ -97,10 +97,3 @@ def show(data_file, tiff, sz):
     s.read(data_file, None)
     tile(s.squeeze(), size=sz, bar=True)
     plt.show()
-
-
-if __name__ == '__main__':
-    path_to_starfish = "/Users/dganguli/src/starfish/"
-    sys.path.append(path_to_starfish)
-
-    starfish()

@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from skimage.measure import points_in_poly
 
-from starfish.stats import label_to_regions
+from .stats import label_to_regions
 
 
 def assign(cells_label, spots, use_hull=True, verbose=False):

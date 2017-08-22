@@ -8,9 +8,9 @@ from showit import image
 from skimage.feature import peak_local_max
 from skimage.morphology import watershed
 
-from starfish.filters import bin_thresh, bin_open
-from starfish.munge import relabel
-from starfish.stats import label_to_regions
+from .filters import bin_thresh, bin_open
+from .munge import relabel
+from .stats import label_to_regions
 
 
 class WatershedSegmenter:

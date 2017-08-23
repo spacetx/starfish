@@ -101,7 +101,7 @@ class Stack:
         new_org['data'] = [format(d) for d in new_org['data']]
         new_org['aux_data'] = [format(d) for d in new_org['aux_data']]
 
-        with open(dir_name + 'org.json', 'w') as outfile:
+        with open(os.path.join(dir_name, 'org.json'), 'w') as outfile:
             json.dump(new_org, outfile, indent=4)
 
         self.org = new_org
@@ -111,13 +111,13 @@ class Stack:
             h = d['hyb']
             c = d['ch']
             fname = d['file']
-            self.write_fn(dir_name + fname, self.data[h, c, :])
+            self.write_fn(os.path.join(dir_name, fname), self.data[h, c, :])
 
     def _write_aux(self, dir_name):
         for d in self.org['aux_data']:
             typ = d['type']
             fname = d['file']
-            self.write_fn(dir_name + fname, self.aux_dict[typ])
+            self.write_fn(os.path.join(dir_name, fname), self.aux_dict[typ])
 
     def _swap_ext(self, fname):
         if self.format == 'tiff':

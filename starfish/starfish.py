@@ -9,6 +9,23 @@ from .filters import white_top_hat
 from .io import Stack
 from .register import compute_shift, shift_im
 
+# mkdir /tmp/starfish/raw
+# mkdir /tmp/starfish/formatted
+# mkdir /tmp/starfish/registered
+# mkdir /tmp/starfish/filtered
+#
+# python examples/get_iss_data.py /tmp/starfish/raw /tmp/starfish/formatted --d 1
+#
+# starfish register /tmp/starfish/formatted/org.json /tmp/starfish/registered/ --u 1000
+#
+# starfish filter /tmp/starfish/registered/org.json /tmp/starfish/filtered/ --ds 15
+#
+# starfish show /tmp/starfish/filtered/org.json
+#
+# rm -rf /tmp/starfish/raw
+# rm -rf /tmp/starfish/formatted
+# rm -rf /tmp/starfish/registered
+# rm -rf /tmp/starfish/filtered
 
 @click.group()
 def starfish():
@@ -25,15 +42,13 @@ def starfish():
 
 
 @starfish.command()
-@click.argument('data_file', type=click.Path(exists=True))
-@click.argument('aux_file', type=click.Path(exists=True))
+@click.argument('in_json', type=click.Path(exists=True))
 @click.argument('out_dir', type=click.Path(exists=True))
 @click.option('--u', default=1, help='Amount of up-sampling', type=int)
-@click.option('--tiff/--not-tiff', default=True)
-def register(data_file, aux_file, out_dir, u, tiff):
+def register(in_json, out_dir, u):
     print('Registering ...')
-    s = Stack(is_tiff=tiff)
-    s.read(data_file, aux_file)
+    s = Stack()
+    s.read(in_json)
 
     mp = s.max_proj('ch')
     res = np.zeros(s.shape)
@@ -43,7 +58,7 @@ def register(data_file, aux_file, out_dir, u, tiff):
         shift, error = compute_shift(mp[h, :, :], s.aux_dict['dots'], u)
         print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
 
-        for c in range(s.num_chans):
+        for c in range(s.num_chs):
             # apply shift to all channels and hyb ronds
             res[h, c, :] = shift_im(s.data[h, c, :], shift)
 
@@ -51,16 +66,14 @@ def register(data_file, aux_file, out_dir, u, tiff):
 
 
 @starfish.command()
-@click.argument('data_file', type=click.Path(exists=True))
-@click.argument('aux_file', type=click.Path(exists=True))
+@click.argument('in_json', type=click.Path(exists=True))
 @click.argument('out_dir', type=click.Path(exists=True))
 @click.option('--ds', default=15, help='Disk size', type=int)
-@click.option('--tiff/--not-tiff', default=True)
-def filter(data_file, aux_file, out_dir, ds, tiff):
+def filter(in_json, out_dir, ds):
     print('Filtering ...')
     print('Reading data')
-    s = Stack(is_tiff=tiff)
-    s.read(data_file, aux_file)
+    s = Stack()
+    s.read(in_json)
 
     # filter raw images, for all hybs and channels
     stack_filt = []
@@ -89,11 +102,10 @@ def filter(data_file, aux_file, out_dir, ds, tiff):
 
 
 @starfish.command()
-@click.argument('data_file', type=click.Path(exists=True))
-@click.option('--tiff/--not-tiff', default=True)
+@click.argument('in_json', type=click.Path(exists=True))
 @click.option('--sz', default=10, help='Figure size', type=int)
-def show(data_file, tiff, sz):
-    s = Stack(is_tiff=tiff)
-    s.read(data_file, None)
+def show(in_json, sz):
+    s = Stack()
+    s.read(in_json)
     tile(s.squeeze(), size=sz, bar=True)
     plt.show()

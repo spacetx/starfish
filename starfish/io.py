@@ -3,30 +3,34 @@ from skimage import io
 import numpy as np
 
 from .munge import list_to_stack
+import json
+import os
 
 
 class Stack:
-    def __init__(self, is_tiff=True):
+    def __init__(self):
 
-        # data organization, dataframes
-        # TODO should these be json instead of csv files?
+        # data organization
         self.org = None
-        self.aux_org = None
-        self.is_tiff = is_tiff
+        self.path = None
+        self.format = None
 
         # numpy array (num_hybs, num_chans, x, y, z)
         self.data = None
 
-        # shape of array
+        # auxilary images
+        self.aux_dict = dict()
+
+        # shape data
         self.num_hybs = None
-        self.num_chans = None
+        self.num_chs = None
         self.im_shape = None
         self.is_volume = None
         self.squeeze_map = None
 
-        # auxilary images
-        self.dapi = None
-        self.aux_dict = dict()
+        # readers and writers
+        self.read_fn = None  # set by self._read_meta_data
+        self.write_fn = np.save  # asserted for now
 
     @property
     def shape(self):
@@ -35,101 +39,92 @@ class Stack:
         else:
             return self.data.shape
 
-    def read(self, fov_path, aux_path):
-        self._read_fov(fov_path)
-        if aux_path is not None:
-            self._read_aux(aux_path)
+    def read(self, in_json):
+        with open(in_json, 'r') as in_file:
+            self.org = json.load(in_file)
 
-    def _read_fov(self, fov_path):
-        self.org = pd.read_csv(fov_path)
-        self.num_hybs = self.org.hyb.max()
-        self.num_chans = self.org.ch.max()
+        self.path = os.path.dirname(os.path.abspath(in_json)) + '/'
+        self._read_meta_data()
+        self._read_stack()
+        self._read_aux()
 
-        # correct for off by one error
-        if self.org.hyb.min() == 0:
-            self.num_hybs += 1
-        elif self.org.hyb.min() == 1:
-            self.org.hyb -= 1
+    def _read_meta_data(self):
+        d = self.org['meta_data']
+        self.num_hybs = d['num_hybs']
+        self.num_chs = d['num_chs']
+        self.im_shape = tuple(d['shape'])
 
-        if self.org.ch.min() == 0:
-            self.num_chans += 1
-        elif self.org.ch.min() == 1:
-            self.org.ch -= 1
-
-        # determine image shape in order to set volumetric flag
-        if self.is_tiff:
-            im = io.imread(self.org.file[0])
+        self.is_volume = d['is_volume']
+        if not self.is_volume:
+            self.data = np.zeros((self.num_hybs, self.num_chs, self.im_shape[0], self.im_shape[1]))
         else:
-            im = np.load(self.org.file[0])
+            self.data = np.zeros((self.num_hybs, self.num_chs, self.im_shape[0], self.im_shape[1], self.im_shape[2]))
 
-        self.im_shape = im.shape
+        self.format = d['format']
 
-        if len(self.im_shape) == 2:
-            self.data = np.zeros((self.num_hybs, self.num_chans, self.im_shape[0], self.im_shape[1]))
-            self.is_volume = False
+        if self.format == 'tiff':
+            self.read_fn = io.imread
         else:
-            self.data = np.zeros((self.num_hybs, self.num_chans, self.im_shape[0], self.im_shape[1], self.im_shape[2]))
-            self.is_volume = True
+            self.read_fn = np.load
 
-        org = zip(self.org.hyb.values, self.org.ch.values, self.org.file)
+    def _read_stack(self):
+        data_dicts = self.org['data']
 
-        for h, c, fname in org:
-            if self.is_tiff:
-                self.data[h, c, :] = io.imread(fname)
-            else:
-                self.data[h, c, :] = np.load(fname)
+        for d in data_dicts:
+            h = d['hyb']
+            c = d['ch']
+            fname = d['file']
+            self.data[h, c, :] = self.read_fn(self.path + fname)
 
-    def _read_aux(self, aux_path):
-        self.aux_org = pd.read_csv(aux_path)
+    def _read_aux(self):
+        data_dicts = self.org['aux_data']
 
-        org = zip(self.aux_org.type.values, self.aux_org.file.values)
-
-        for typ, fname in org:
-            if self.is_tiff:
-                self.aux_dict[typ] = io.imread(fname)
-            else:
-                self.aux_dict[typ] = np.load(fname)
-
-        self.dapi = self.aux_dict['dapi']
-        del self.aux_dict['dapi']
+        for d in data_dicts:
+            typ = d['type']
+            fname = d['file']
+            self.aux_dict[typ] = self.read_fn(self.path + fname)
 
     # TODO should this thing write npy?
     def write(self, dir_name):
-        self._write_fov(dir_name)
+        self._write_meta_data(dir_name)
+        self._write_stack(dir_name)
+        self._write_aux(dir_name)
 
-        if self.aux_dict:
-            self._write_aux(dir_name)
+    def _write_meta_data(self, dir_name):
+        new_org = self.org
+        new_org['meta_data']['format'] = 'npy'
 
-    def _write_fov(self, dir_name):
-        hybs = self.org.hyb.values
-        chs = self.org.ch.values
-        inds = zip(hybs, chs)
+        def format(d):
+            d['file'] = self._swap_ext(d['file']) + '.npy'
+            return d
 
-        fnames = []
-        for h, c in inds:
-            im = self.data[h, c, :]
-            fname = dir_name + '/h{}_c{}'.format(h, c)
-            np.save(fname, im)
-            fnames.append(fname + '.npy')
+        new_org['data'] = [format(d) for d in new_org['data']]
+        new_org['aux_data'] = [format(d) for d in new_org['aux_data']]
 
-        org = pd.DataFrame({'file': fnames, 'hyb': hybs, 'ch': chs})
-        org.to_csv(dir_name + '/org.csv', index=False)
+        with open(os.path.join(dir_name, 'org.json'), 'w') as outfile:
+            json.dump(new_org, outfile, indent=4)
+
+        self.org = new_org
+
+    def _write_stack(self, dir_name):
+        for d in self.org['data']:
+            h = d['hyb']
+            c = d['ch']
+            fname = d['file']
+            self.write_fn(os.path.join(dir_name, fname), self.data[h, c, :])
 
     def _write_aux(self, dir_name):
+        for d in self.org['aux_data']:
+            typ = d['type']
+            fname = d['file']
+            self.write_fn(os.path.join(dir_name, fname), self.aux_dict[typ])
 
-        fnames = [dir_name + '/dapi.npy']
-        typs = ['dapi']
-
-        np.save(fnames[0], self.dapi)
-
-        for name, im in self.aux_dict.iteritems():
-            fname = dir_name + '/{}'.format(name)
-            np.save(fname, im)
-            typs.append(name)
-            fnames.append(fname + '.npy')
-
-        org = pd.DataFrame({'file': fnames, 'type': typs})
-        org.to_csv(dir_name + '/aux_org.csv', index=False)
+    def _swap_ext(self, fname):
+        if self.format == 'tiff':
+            fname = fname.replace('.tiff', '')
+        else:
+            fname = fname.replace('.npy', '')
+        return fname
 
     def set_stack(self, new_stack):
         if new_stack.shape != self.shape:
@@ -165,7 +160,7 @@ class Stack:
         return res
 
     def squeeze(self):
-        new_shape = ((self.num_hybs * self.num_chans),) + self.im_shape
+        new_shape = ((self.num_hybs * self.num_chs),) + self.im_shape
         new_data = np.zeros(new_shape)
 
         # TODO this can all probably be done smartly with np.reshape instead of a double for loop
@@ -175,7 +170,7 @@ class Stack:
         chs = []
 
         for h in range(self.num_hybs):
-            for c in range(self.num_chans):
+            for c in range(self.num_chs):
                 new_data[ind, :] = self.data[h, c, :]
                 inds.append(ind)
                 hybs.append(h)
@@ -190,13 +185,13 @@ class Stack:
         if type(stack) is list:
             stack = list_to_stack(stack)
 
-        new_shape = (self.num_hybs, self.num_chans) + self.im_shape
+        new_shape = (self.num_hybs, self.num_chs) + self.im_shape
         res = np.zeros(new_shape)
 
         # TODO this can probably done smartly without a double for loop
         ind = 0
         for h in range(self.num_hybs):
-            for c in range(self.num_chans):
+            for c in range(self.num_chs):
                 res[h, c, :] = stack[ind, :]
                 ind += 1
 

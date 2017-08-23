@@ -5,3 +5,4 @@ opencv-python
 pandas
 scikit-image
 showit
+requests

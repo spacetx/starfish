@@ -74,7 +74,8 @@ class Stack:
             h = d['hyb']
             c = d['ch']
             fname = d['file']
-            self.data[h, c, :] = self.read_fn(self.path + fname)
+            im = self.read_fn(os.path.join(self.path, fname))
+            self.data[h, c, :] = im
 
     def _read_aux(self):
         data_dicts = self.org['aux_data']
@@ -82,7 +83,7 @@ class Stack:
         for d in data_dicts:
             typ = d['type']
             fname = d['file']
-            self.aux_dict[typ] = self.read_fn(self.path + fname)
+            self.aux_dict[typ] = self.read_fn(os.path.join(self.path, fname))
 
     # TODO should this thing write npy?
     def write(self, dir_name):

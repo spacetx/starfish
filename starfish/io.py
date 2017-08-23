@@ -4,6 +4,7 @@ import numpy as np
 
 from .munge import list_to_stack
 import json
+import os
 
 
 class Stack:
@@ -11,6 +12,8 @@ class Stack:
 
         # data organization
         self.org = None
+        self.path = None
+        self.format = None
 
         # numpy array (num_hybs, num_chans, x, y, z)
         self.data = None
@@ -40,6 +43,7 @@ class Stack:
         with open(in_json, 'r') as in_file:
             self.org = json.load(in_file)
 
+        self.path = os.path.dirname(os.path.abspath(in_json)) + '/'
         self._read_meta_data()
         self._read_stack()
         self._read_aux()
@@ -56,7 +60,9 @@ class Stack:
         else:
             self.data = np.zeros((self.num_hybs, self.num_chs, self.im_shape[0], self.im_shape[1], self.im_shape[2]))
 
-        if d['format'] == 'tiff':
+        self.format = d['format']
+
+        if self.format == 'tiff':
             self.read_fn = io.imread
         else:
             self.read_fn = np.load
@@ -68,7 +74,7 @@ class Stack:
             h = d['hyb']
             c = d['ch']
             fname = d['file']
-            self.data[h, c, :] = self.read_fn(fname)
+            self.data[h, c, :] = self.read_fn(self.path + fname)
 
     def _read_aux(self):
         data_dicts = self.org['aux_data']
@@ -76,45 +82,49 @@ class Stack:
         for d in data_dicts:
             typ = d['type']
             fname = d['file']
-            self.aux_dict[typ] = io.imread(fname)
+            self.aux_dict[typ] = self.read_fn(self.path + fname)
 
     # TODO should this thing write npy?
     def write(self, dir_name):
-        self._write_fov(dir_name)
+        self._write_meta_data(dir_name)
+        self._write_stack(dir_name)
+        self._write_aux(dir_name)
 
-        if self.aux_dict:
-            self._write_aux(dir_name)
+    def _write_meta_data(self, dir_name):
+        new_org = self.org
+        new_org['meta_data']['format'] = 'npy'
 
-    def _write_fov(self, dir_name):
-        hybs = self.org.hyb.values
-        chs = self.org.ch.values
-        inds = zip(hybs, chs)
+        def format(d):
+            d['file'] = self._swap_ext(d['file']) + '.npy'
+            return d
 
-        fnames = []
-        for h, c in inds:
-            im = self.data[h, c, :]
-            fname = dir_name + '/h{}_c{}'.format(h, c)
-            np.save(fname, im)
-            fnames.append(fname + '.npy')
+        new_org['data'] = [format(d) for d in new_org['data']]
+        new_org['aux_data'] = [format(d) for d in new_org['aux_data']]
 
-        org = pd.DataFrame({'file': fnames, 'hyb': hybs, 'ch': chs})
-        org.to_csv(dir_name + '/org.csv', index=False)
+        with open(dir_name + 'org.json', 'w') as outfile:
+            json.dump(new_org, outfile, indent=4)
+
+        self.org = new_org
+
+    def _write_stack(self, dir_name):
+        for d in self.org['data']:
+            h = d['hyb']
+            c = d['ch']
+            fname = d['file']
+            self.write_fn(dir_name + fname, self.data[h, c, :])
 
     def _write_aux(self, dir_name):
+        for d in self.org['aux_data']:
+            typ = d['type']
+            fname = d['file']
+            self.write_fn(dir_name + fname, self.aux_dict[typ])
 
-        fnames = [dir_name + '/dapi.npy']
-        typs = ['dapi']
-
-        np.save(fnames[0], self.dapi)
-
-        for name, im in self.aux_dict.iteritems():
-            fname = dir_name + '/{}'.format(name)
-            np.save(fname, im)
-            typs.append(name)
-            fnames.append(fname + '.npy')
-
-        org = pd.DataFrame({'file': fnames, 'type': typs})
-        org.to_csv(dir_name + '/aux_org.csv', index=False)
+    def _swap_ext(self, fname):
+        if self.format == 'tiff':
+            fname = fname.replace('.tiff', '')
+        else:
+            fname = fname.replace('.npy', '')
+        return fname
 
     def set_stack(self, new_stack):
         if new_stack.shape != self.shape:

@@ -111,7 +111,4 @@ def format(input_dir, output_dir, d):
 
 
 if __name__ == '__main__':
-    path_to_starfish = "/Users/dganguli/src/starfish/"
-    sys.path.append(path_to_starfish)
-
     format()

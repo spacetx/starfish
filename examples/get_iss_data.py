@@ -52,16 +52,16 @@ def load_and_write_data(input_dir, output_dir):
             path = output_dir + fname
             d = {'hyb': h,
                  'ch': c,
-                 'file': path}
+                 'file': fname}
             res['data'].append(d)
-            imsave(d['file'], img)
+            imsave(path, img)
 
-    dapi_fname = output_dir + '{}_{}.tiff'.format(prefix, 'dapi')
-    imsave(dapi_fname, dapi)
+    dapi_fname = '{}_{}.tiff'.format(prefix, 'dapi')
+    imsave(output_dir + dapi_fname, dapi)
     res['aux_data'].append({'type': 'dapi', 'file': dapi_fname})
 
-    dots_fname = output_dir + '{}_{}.tiff'.format(prefix, 'dots')
-    imsave(dots_fname, dots)
+    dots_fname = '{}_{}.tiff'.format(prefix, 'dots')
+    imsave(output_dir + dots_fname, dots)
     res['aux_data'].append({'type': 'dots', 'file': dots_fname})
 
     if len(img.shape) == 2:

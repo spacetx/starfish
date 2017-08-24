@@ -145,12 +145,11 @@ def detect_spots(in_json, results_dir, aux_img, min_sigma, max_sigma, num_sigma,
 @starfish.command()
 @click.argument('in_json', type=click.Path(exists=True))
 @click.argument('results_dir', type=click.Path(exists=True))
-@click.argument('out_dir', type=click.Path(exists=True))
 @click.argument('aux_image')
 @click.option('--dt', default=.16, help='DAPI threshold', type=float)
 @click.option('--st', default=.22, help='Input threshold', type=float)
 @click.option('--md', default=57, help='Minimum distance between cells', type=int)
-def segment(in_json, results_dir, out_dir, aux_image, dt, st, md):
+def segment(in_json, results_dir, aux_image, dt, st, md):
     s = Stack()
     s.read(in_json)
 
@@ -167,7 +166,7 @@ def segment(in_json, results_dir, out_dir, aux_image, dt, st, md):
     points = spots_geo.loc[:, ['x', 'y']].values
     res = assign(cells_labels, points, use_hull=True)
 
-    path = os.path.join(out_dir, 'regions.csv')
+    path = os.path.join(results_dir, 'regions.csv')
     print("Writing | cell_id | spot_id to: {}".format(path))
     res.to_csv(path, index=False)
 

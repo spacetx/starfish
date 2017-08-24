@@ -21,6 +21,6 @@ def assign(cells_label, spots, use_hull=True, verbose=False):
         res.loc[res.spot_id[in_poly], 'cell_id'] = cell_id
         if verbose:
             cnt = np.sum(in_poly)
-            print cell_id, cnt
+            print(cell_id, cnt)
 
     return res

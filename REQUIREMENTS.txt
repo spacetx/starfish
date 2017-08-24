@@ -3,6 +3,7 @@ matplotlib
 numpy
 opencv-python
 pandas
+regional
+requests
 scikit-image
 showit
-requests

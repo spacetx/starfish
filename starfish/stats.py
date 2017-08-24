@@ -28,7 +28,9 @@ def label_to_regions(labels):
         # TODO does this work in 3D?
         x = label_mat_coo.row[ind]
         y = label_mat_coo.col[ind]
-        re = One(zip(x, y))
+        # LOL -- in python3 zip returns an iterator. to force it to
+        # a list we call list(zip). In Python 2.7 this is effectively a noop
+        re = One(list(zip(x, y)))
         return re
 
     unique_labels = sorted(set(label_mat_coo.data))

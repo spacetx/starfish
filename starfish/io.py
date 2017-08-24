@@ -141,7 +141,8 @@ class Stack:
                                                                                           img.shape)
                 raise AttributeError(msg)
         else:
-            self.aux_dict[key] = img
+            self.org['aux_data'].append({'file': key, 'type': key})
+        self.aux_dict[key] = img
 
     def max_proj(self, dim):
         valid_dims = ['hyb', 'ch', 'z']

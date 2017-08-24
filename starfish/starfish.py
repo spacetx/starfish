@@ -5,19 +5,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 from showit import tile
 
+from .assign import assign
 from .filters import white_top_hat
 from .io import Stack
 from .register import compute_shift, shift_im
 from .spots.gaussian import GaussianSpotDetector
+from .watershedsegmenter import WatershedSegmenter
 
+import pandas as pd
 
 # usage
 
-# mkdir /tmp/starfish/raw
-# mkdir /tmp/starfish/formatted
-# mkdir /tmp/starfish/registered
-# mkdir /tmp/starfish/filtered
-# mkdir /tmp/starfish/detected
+# mkdir -p /tmp/starfish/raw
+# mkdir -p /tmp/starfish/formatted
+# mkdir -p /tmp/starfish/registered
+# mkdir -p /tmp/starfish/filtered
+# mkdir -p /tmp/starfish/results
 #
 # python examples/get_iss_data.py /tmp/starfish/raw /tmp/starfish/formatted --d 1
 #
@@ -27,13 +30,11 @@ from .spots.gaussian import GaussianSpotDetector
 #
 # starfish show /tmp/starfish/filtered/org.json
 #
-# starfish detect_spots /tmp/starfish/filtered/org.json /tmp/starfish/detected dots --min_sigma 4 --max_sigma 6  --num_sigma 20 --t 0.01 --show 1
+# starfish detect_spots /tmp/starfish/filtered/org.json /tmp/starfish/results dots --min_sigma 4 --max_sigma 6  --num_sigma 20 --t 0.01
 #
-# rm -rf /tmp/starfish/raw
-# rm -rf /tmp/starfish/formatted
-# rm -rf /tmp/starfish/registered
-# rm -rf /tmp/starfish/filtered
-# rm -rf /tmp/starfish/detected
+# starfish segment /tmp/starfish/filtered/org.json /tmp/starfish/results /tmp/starfish/results stain --dt .16 --st .22 --md 57
+#
+# starfish decode /tmp/starfish/results --decoder_type iss
 
 @click.group()
 def starfish():
@@ -111,14 +112,14 @@ def filter(in_json, out_dir, ds):
 
 @starfish.command()
 @click.argument('in_json', type=click.Path(exists=True))
-@click.argument('out_dir', type=click.Path(exists=True))
+@click.argument('results_dir', type=click.Path(exists=True))
 @click.argument('aux_img', type=str)
 @click.option('--min_sigma', default=4, help='Minimum spot size (in standard deviation)', type=int)
 @click.option('--max_sigma', default=6, help='Maximum spot size (in standard deviation)', type=int)
 @click.option('--num_sigma', default=20, help='Number of scales to try', type=int)
 @click.option('--t', default=.01, help='Dots threshold', type=float)
 @click.option('--show', default=False, help='Dots threshold', type=bool)
-def detect_spots(in_json, out_dir, aux_img, min_sigma, max_sigma, num_sigma, t, show):
+def detect_spots(in_json, results_dir, aux_img, min_sigma, max_sigma, num_sigma, t, show):
     print('Finding spots...')
     s = Stack()
     s.read(in_json)
@@ -132,13 +133,59 @@ def detect_spots(in_json, out_dir, aux_img, min_sigma, max_sigma, num_sigma, t, 
     spots_viz = gsp.spots_df_viz
     spots_df_tidy = gsp.to_encoder_dataframe(tidy_flag=True, mapping=s.squeeze_map)
 
-    path = os.path.join(out_dir, 'spots_geo.csv')
+    path = os.path.join(results_dir, 'spots_geo.csv')
     print("Writing | spot_id | x | y | z | to: {}".format(path))
     spots_viz.to_csv(path, index=False)
 
-    path = os.path.join(out_dir, 'encoder_table.csv')
+    path = os.path.join(results_dir, 'encoder_table.csv')
     print("Writing | spot_id | hyb | ch | val | to: {}".format(path))
     spots_df_tidy.to_csv(path, index=False)
+
+
+@starfish.command()
+@click.argument('in_json', type=click.Path(exists=True))
+@click.argument('results_dir', type=click.Path(exists=True))
+@click.argument('out_dir', type=click.Path(exists=True))
+@click.argument('aux_image')
+@click.option('--dt', default=.16, help='DAPI threshold', type=float)
+@click.option('--st', default=.22, help='Input threshold', type=float)
+@click.option('--md', default=57, help='Minimum distance between cells', type=int)
+def segment(in_json, results_dir, out_dir, aux_image, dt, st, md):
+    s = Stack()
+    s.read(in_json)
+
+    # TODO make these parameterizable or determine whether they are useful or not
+    size_lim = (10, 10000)
+    disk_size_markers = None
+    disk_size_mask = None
+
+    seg = WatershedSegmenter(s.aux_dict['dapi'], s.aux_dict[aux_image])
+    cells_labels = seg.segment(dt, st, size_lim, disk_size_markers, disk_size_mask, md)
+
+    spots_geo = pd.read_csv(os.path.join(results_dir, 'spots_geo.csv'))
+    # TODO only works in 3D
+    points = spots_geo.loc[:, ['x', 'y']].values
+    res = assign(cells_labels, points, use_hull=True)
+
+    path = os.path.join(out_dir, 'regions.csv')
+    print("Writing | cell_id | spot_id to: {}".format(path))
+    res.to_csv(path, index=False)
+
+
+@starfish.command()
+@click.argument('results_dir', type=click.Path(exists=True))
+@click.option('--decoder_type', default='iss', help='Decoder type')
+def decode(results_dir, decoder_type):
+    if decoder_type == 'iss':
+        from .decoders.iss import decode as dec
+    else:
+        raise ValueError('Decoder type: {} not supported'.format(decoder_type))
+
+    encoder_table = pd.read_csv(os.path.join(results_dir, 'encoder_table.csv'))
+    res = dec(encoder_table)
+    path = os.path.join(results_dir, 'decoder_table.csv')
+    print("Writing | spot_id | gene_id to: {}".format(path))
+    res.to_csv(path, index=False)
 
 
 @starfish.command()

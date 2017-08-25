@@ -13,24 +13,24 @@ window.addEventListener('resize', fit(canvas), false)
 // load spots
 var spots = require('./example/spots.json')
 spots = spots.map(function (spot) {
-	var xy = spot.geometry.coordinates
-	return [xy[1] / 665 - 1.0, xy[0] / 490 - 1]
+  var xy = spot.geometry.coordinates
+  return [xy[1] / 665 - 1.0, xy[0] / 490 - 1]
 })
 
 // setup control panel and state
 var state = {
-	show:  true,
-	color: [0.6, 0.2, 0.9]
+  show:  true,
+  color: [0.6, 0.2, 0.9]
 }
 var panel = control([
-	{type: 'color', label: 'dot color', format: 'array', initial: state.color},
-	{type: 'checkbox', label: 'show dots', initial: state.show}
+  {type: 'color', label: 'dot color', format: 'array', initial: state.color},
+  {type: 'checkbox', label: 'show dots', initial: state.show}
 ],
-	{theme: 'dark', position: 'top-left'}
+  {theme: 'dark', position: 'top-left'}
 )
 panel.on('input', function (data) {
-	state.color = typeof(data['dot color']) == 'string' ? state.color : data['dot color']
-	state.show = data['show dots']
+  state.color = typeof(data['dot color']) == 'string' ? state.color : data['dot color']
+  state.show = data['show dots']
 })
 
 // create regl spot drawing function
@@ -63,8 +63,8 @@ const drawSpots = regl({
   },
 
   uniforms: {
-  	color: regl.prop('color'),
-  	distance: regl.prop('distance'),
+    color: regl.prop('color'),
+    distance: regl.prop('distance'),
     view: () => camera.view(),
     projection: ({viewportWidth, viewportHeight}) =>
       mat4.perspective([],
@@ -133,16 +133,16 @@ resl({
     const texture = regl.texture(background)
 
     regl.frame(() => {
-    	regl.clear({
-		    depth: 1,
-		    color: [0, 0, 0, 1]
-		})
-		if (state.show) {
-			drawSpots({distance: camera.distance, color: state.color})
-		}
-    	drawBackground({background: texture})
-    	camera.tick()
-    	console.log(camera.view())
+      regl.clear({
+        depth: 1,
+        color: [0, 0, 0, 1]
+    })
+    if (state.show) {
+      drawSpots({distance: camera.distance, color: state.color})
+    }
+      drawBackground({background: texture})
+      camera.tick()
+      console.log(camera.view())
     })
   }
 })

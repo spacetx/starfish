@@ -7,7 +7,8 @@
     "example": "example"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "budo index.js"
   },
   "repository": {
     "type": "git",
@@ -26,9 +27,18 @@
   },
   "homepage": "https://github.com/chanzuckerberg/starfish#readme",
   "dependencies": {
+    "canvas-fit": "^1.5.0",
+    "canvas-orbit-camera": "^1.0.2",
+    "control-panel": "^1.2.0",
     "dom-css": "^2.1.0",
-    "js-viewpane": "^0.2.0",
-    "pan-zoom": "^2.0.0",
-    "rune.js": "^1.0.2"
+    "gl-mat4": "^1.1.4",
+    "key-pressed": "0.0.1",
+    "mouse-position": "^1.0.0",
+    "mouse-pressed": "0.0.1",
+    "orbit-camera": "0.0.3",
+    "regl": "^1.3.0",
+    "regl-camera": "^2.1.1",
+    "resl": "^1.0.3",
+    "scroll-speed": "^1.0.0"
   }
 }

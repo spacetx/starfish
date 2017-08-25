@@ -68,8 +68,10 @@ def register(in_json, out_dir, u):
         print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
 
         for c in range(s.num_chs):
-            # apply shift to all channels and hyb ronds
+            # apply shift to all channels and hyb rounds
             res[h, c, :] = shift_im(s.data[h, c, :], shift)
+
+    s.set_stack(res)
 
     s.write(out_dir)
 

@@ -3,6 +3,7 @@ import os
 import click
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 from showit import tile
 
 from .assign import assign
@@ -11,6 +12,8 @@ from .io import Stack
 from .register import compute_shift, shift_im
 from .spots.gaussian import GaussianSpotDetector
 from .watershedsegmenter import WatershedSegmenter
+from .stats import label_to_regions
+from .munge import spots_to_geojson, regions_to_geojson
 
 import pandas as pd
 
@@ -135,6 +138,13 @@ def detect_spots(in_json, results_dir, aux_img, min_sigma, max_sigma, num_sigma,
     spots_viz = gsp.spots_df_viz
     spots_df_tidy = gsp.to_encoder_dataframe(tidy_flag=True, mapping=s.squeeze_map)
 
+    geojson = spots_to_geojson(spots_viz)
+    
+    path = os.path.join(results_dir, 'spots.json')
+    print("Writing | spots geojson to: {}".format(path))
+    with open(path, 'w') as f:
+        f.write(json.dumps(geojson))
+
     path = os.path.join(results_dir, 'spots_geo.csv')
     print("Writing | spot_id | x | y | z | to: {}".format(path))
     spots_viz.to_csv(path, index=False)
@@ -142,6 +152,7 @@ def detect_spots(in_json, results_dir, aux_img, min_sigma, max_sigma, num_sigma,
     path = os.path.join(results_dir, 'encoder_table.csv')
     print("Writing | spot_id | hyb | ch | val | to: {}".format(path))
     spots_df_tidy.to_csv(path, index=False)
+
 
 
 @starfish.command()
@@ -162,6 +173,14 @@ def segment(in_json, results_dir, aux_image, dt, st, md):
 
     seg = WatershedSegmenter(s.aux_dict['dapi'], s.aux_dict[aux_image])
     cells_labels = seg.segment(dt, st, size_lim, disk_size_markers, disk_size_mask, md)
+
+    r = label_to_regions(cells_labels)
+    geojson = regions_to_geojson(r)
+
+    path = os.path.join(results_dir, 'regions.json')
+    print("Writing | regions geojson to: {}".format(path))
+    with open(path, 'w') as f:
+        f.write(json.dumps(geojson))
 
     spots_geo = pd.read_csv(os.path.join(results_dir, 'spots_geo.csv'))
     # TODO only works in 3D

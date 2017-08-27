@@ -13,21 +13,25 @@ window.addEventListener('resize', fit(canvas), false)
 const drawBackground = require('./draw/background')(regl)
 const drawSpots = require('./draw/spots')(regl)
 const drawRegions = require('./draw/regions')(regl)
+const drawOutlines = require('./draw/outlines')(regl)
 
 // setup control panel and state
 var state = {
-  show:  true,
-  color: [0.6, 0.2, 0.9]
+  color: [0.6, 0.2, 0.9],
+  showSpots: true,
+  showRegions: true
 }
 var panel = control([
   {type: 'color', label: 'dot color', format: 'array', initial: state.color},
-  {type: 'checkbox', label: 'show dots', initial: state.show}
+  {type: 'checkbox', label: 'show spots', initial: state.showSpots},
+  {type: 'checkbox', label: 'show regions', initial: state.showRegions}
 ],
   {theme: 'dark', position: 'top-left'}
 )
 panel.on('input', function (data) {
   state.color = typeof(data['dot color']) == 'string' ? state.color : data['dot color']
-  state.show = data['show dots']
+  state.showSpots = data['show spots']
+  state.showRegions = data['show regions']
 })
 
 // load assets and draw
@@ -75,7 +79,7 @@ resl({
         color: [0, 0, 0, 1]
       })
   
-      if (state.show) {
+      if (state.showSpots) {
         drawSpots({
           distance: camera.distance, 
           color: state.color,
@@ -92,16 +96,29 @@ resl({
         scale: scale
       })
 
-      drawRegions(vertices.map(function (v) {
-        return {
-          distance: camera.distance, 
-          color: state.color,
-          vertices: v,
-          count: v.length,
-          view: camera.view(),
-          scale: scale
-        }})
-      )
+      if (state.showRegions) {
+        drawRegions(vertices.map(function (v) {
+          return {
+            distance: camera.distance, 
+            color: state.color,
+            vertices: v,
+            count: v.length,
+            view: camera.view(),
+            scale: scale
+          }})
+        )
+
+        drawOutlines(vertices.map(function (v) {
+          return {
+            distance: camera.distance, 
+            color: state.color,
+            vertices: v,
+            count: v.length,
+            view: camera.view(),
+            scale: scale
+          }})
+        )
+      }
 
       camera.tick()
     })

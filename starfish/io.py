@@ -29,7 +29,7 @@ class Stack:
         self.squeeze_map = None
 
         # readers and writers
-        self.read_fn = None  # set by self._read_meta_data
+        self.read_fn = None  # set by self._read_metadata
         self.write_fn = np.save  # asserted for now
 
     @property
@@ -44,12 +44,12 @@ class Stack:
             self.org = json.load(in_file)
 
         self.path = os.path.dirname(os.path.abspath(in_json)) + '/'
-        self._read_meta_data()
+        self._read_metadata()
         self._read_stack()
         self._read_aux()
 
-    def _read_meta_data(self):
-        d = self.org['meta_data']
+    def _read_metadata(self):
+        d = self.org['metadata']
         self.num_hybs = d['num_hybs']
         self.num_chs = d['num_chs']
         self.im_shape = tuple(d['shape'])
@@ -78,7 +78,7 @@ class Stack:
             self.data[h, c, :] = im
 
     def _read_aux(self):
-        data_dicts = self.org['aux_data']
+        data_dicts = self.org['aux']
 
         for d in data_dicts:
             typ = d['type']
@@ -87,20 +87,20 @@ class Stack:
 
     # TODO should this thing write npy?
     def write(self, dir_name):
-        self._write_meta_data(dir_name)
+        self._write_metadata(dir_name)
         self._write_stack(dir_name)
         self._write_aux(dir_name)
 
-    def _write_meta_data(self, dir_name):
+    def _write_metadata(self, dir_name):
         new_org = self.org
-        new_org['meta_data']['format'] = 'npy'
+        new_org['metadata']['format'] = 'npy'
 
         def format(d):
             d['file'] = self._swap_ext(d['file']) + '.npy'
             return d
 
         new_org['data'] = [format(d) for d in new_org['data']]
-        new_org['aux_data'] = [format(d) for d in new_org['aux_data']]
+        new_org['aux'] = [format(d) for d in new_org['aux']]
 
         with open(os.path.join(dir_name, 'org.json'), 'w') as outfile:
             json.dump(new_org, outfile, indent=4)
@@ -115,7 +115,7 @@ class Stack:
             self.write_fn(os.path.join(dir_name, fname), self.data[h, c, :])
 
     def _write_aux(self, dir_name):
-        for d in self.org['aux_data']:
+        for d in self.org['aux']:
             typ = d['type']
             fname = d['file']
             self.write_fn(os.path.join(dir_name, fname), self.aux_dict[typ])
@@ -141,7 +141,7 @@ class Stack:
                                                                                           img.shape)
                 raise AttributeError(msg)
         else:
-            self.org['aux_data'].append({'file': key, 'type': key})
+            self.org['aux'].append({'file': key, 'type': key})
         self.aux_dict[key] = img
 
     def max_proj(self, dim):

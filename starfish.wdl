@@ -2,18 +2,16 @@ task register {
   File input_path
   Int upsampling
   
-  String dollar = "$"
-
-  command {
+  command <<<
     mkdir inputs
     for input_file in '${input_path}'/*; do
-      mv ${dollar}input_file inputs/
+      mv $input_file inputs/
     done
 
     mkdir registered
 
     starfish register inputs/org.json registered --u '${upsampling}'
-  }
+  >>>
 
   output {
     Array[File] registered_collection = glob("registered/*")
@@ -25,18 +23,16 @@ task filter {
   Array[File] input_collection
   Int disk_size
 
-  String dollar = "$"
-
-  command {
+  command <<<
     mkdir inputs
     for input_file in ${sep=' ' input_collection}; do
-      mv ${dollar}input_file inputs/
+      mv $input_file inputs/
     done
 
     mkdir filtered
 
     starfish filter inputs/org.json filtered --ds '${disk_size}'
-  }
+  >>>
 
   output {
     Array[File] filtered_collection = glob("filtered/*")
@@ -51,19 +47,17 @@ task detect_spots {
   Int num_sigma
   Float threshold
 
-  String dollar = "$"
-
-  command {
+  command <<<
     mkdir inputs
     for input_file in ${sep=' ' input_collection}; do
-      mv ${dollar}input_file inputs/
+      mv $input_file inputs/
     done
 
     mkdir detected
 
     starfish detect_spots inputs/org.json detected dots --min_sigma '${min_sigma}' \
       --max_sigma '${max_sigma}' --num_sigma '${num_sigma}' --t '${threshold}'
-  }
+  >>>
 
   output {
     File spots_geo = "detected/spots_geo.csv"
@@ -80,12 +74,10 @@ task segment {
   Float stain_threshold
   Int minimum_distance
 
-  String dollar = "$"
-
-  command {
+  command <<<
     mkdir inputs
     for input_file in ${sep=' ' input_collection}; do
-      mv ${dollar}input_file inputs/
+      mv $input_file inputs/
     done
 
     mkdir segmented
@@ -95,7 +87,7 @@ task segment {
 
     starfish segment inputs/org.json segmented stain --dt '${dapi_threshold}' \
       --st '${stain_threshold}' --md '${minimum_distance}'
-  }
+  >>>
 
   output {
     Array[File] segmented_collection = glob("segmented/*")
@@ -107,16 +99,14 @@ task decode {
   Array[File] input_collection
   String decoder_type
 
-  String dollar = "$"
-
-  command {
+  command <<<
     mkdir inputs
     for input_file in ${sep=' ' input_collection}; do
-      mv ${dollar}input_file inputs/
+      mv $input_file inputs/
     done
 
     starfish decode inputs --decoder_type '${decoder_type}'
-  }
+  >>>
 
   output {
     Array[File] output_collection = glob("inputs/*")

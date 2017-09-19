@@ -37,16 +37,18 @@ def gather(df, key, value, cols):
     return pd.melt(df, id_vars, id_values, var_name, value_name)
 
 
-def spots_to_geojson(r):
+def spots_to_geojson(spots_viz):
     '''
     Convert spot geometrical data to geojson format
     '''
+
     def make_dict(row):
         row = row[1]
         d = dict()
-        d['properties'] = {'id':int(row.spot_id), 'radius': int(row.r)}
-        d['geometry'] = {'type':'Point', 'coordinates': [int(row.x), int(row.y)]}
+        d['properties'] = {'id': int(row.spot_id), 'radius': int(row.r)}
+        d['geometry'] = {'type': 'Point', 'coordinates': [int(row.x), int(row.y)]}
         return d
+
     return [make_dict(row) for row in spots_viz.iterrows()]
 
 
@@ -54,12 +56,14 @@ def regions_to_geojson(r):
     '''
     Convert region geometrical data to geojson format
     '''
+
     def make_dict(id, verts):
         d = dict()
         c = list(map(lambda x: list(x), list(map(lambda v: [int(v[0]), int(v[1])], verts))))
-        d["properties"] = {"id":id}
-        d["geometry"] = {"type":"Polygon", "coordinates": c}
+        d["properties"] = {"id": id}
+        d["geometry"] = {"type": "Polygon", "coordinates": c}
         return d
+
     return [make_dict(id, verts) for id, verts in enumerate(r.hull)]
 
 

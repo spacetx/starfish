@@ -1,14 +1,12 @@
 from __future__ import division
 
-import sys
+import io
+import json
+import zipfile
 
 import click
-import io
 import requests
-import zipfile
 from skimage.io import imread, imsave
-
-import json
 
 
 def download(input_dir, url):
@@ -93,7 +91,7 @@ def write_json(res, output_dir):
 @click.argument('input_dir', type=click.Path(exists=True))
 @click.argument('output_dir', type=click.Path(exists=True))
 @click.option('--d', default=False, help='Download data', type=bool)
-def format(input_dir, output_dir, d):
+def format_data(input_dir, output_dir, d):
     if not input_dir.endswith('/'):
         input_dir += '/'
 
@@ -111,4 +109,4 @@ def format(input_dir, output_dir, d):
 
 
 if __name__ == '__main__':
-    format()
+    format_data()

@@ -17,6 +17,7 @@ from .munge import spots_to_geojson, regions_to_geojson
 
 import pandas as pd
 
+
 # usage
 
 # mkdir -p /tmp/starfish/raw
@@ -139,7 +140,7 @@ def detect_spots(in_json, results_dir, aux_img, min_sigma, max_sigma, num_sigma,
     spots_df_tidy = gsp.to_encoder_dataframe(tidy_flag=True, mapping=s.squeeze_map)
 
     geojson = spots_to_geojson(spots_viz)
-    
+
     path = os.path.join(results_dir, 'spots.json')
     print("Writing | spots geojson to: {}".format(path))
     with open(path, 'w') as f:
@@ -152,7 +153,6 @@ def detect_spots(in_json, results_dir, aux_img, min_sigma, max_sigma, num_sigma,
     path = os.path.join(results_dir, 'encoder_table.csv')
     print("Writing | spot_id | hyb | ch | val | to: {}".format(path))
     spots_df_tidy.to_csv(path, index=False)
-
 
 
 @starfish.command()

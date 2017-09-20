@@ -53,7 +53,7 @@ class WatershedSegmenter:
                         np.array(range(0, num_objs + 1), dtype=np.int32))
 
         area_image = areas[markers]
-        
+
         markers[area_image <= min_allowed_area] = 0
         markers[area_image >= max_allowed_area] = 0
 
@@ -120,6 +120,6 @@ class WatershedSegmenter:
         segmented_regions = label_to_regions(self.segmented)
         im = segmented_regions.mask(background=[0.9, 0.9, 0.9], dims=self.segmented.shape, stroke=None, cmap='rainbow')
         image(im, size=20, ax=plt.gca())
-        plt.title('Segmented Cells'.format(self.num_cells))
+        plt.title('Segmented Cells')
 
         return plt.gca()

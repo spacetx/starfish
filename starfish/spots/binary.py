@@ -56,7 +56,7 @@ class BinarySpotDetector:
         cols = range(num_hybs)
         cols = ['hyb_{}'.format(c + 1) for c in cols]
         d = dict(zip(cols, self.intensities))
-        d['spot_id'] = range(self.num_objs-1)
+        d['spot_id'] = range(self.num_objs - 1)
 
         res = pd.DataFrame(d)
 

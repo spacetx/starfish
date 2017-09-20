@@ -13,6 +13,10 @@ task register {
     starfish register inputs/org.json registered --u '${upsampling}'
   >>>
 
+  runtime {
+    docker: "marcusczi/starfish:latest"
+  }
+
   output {
     Array[File] registered_collection = glob("registered/*")
   }
@@ -33,6 +37,10 @@ task filter {
 
     starfish filter inputs/org.json filtered --ds '${disk_size}'
   >>>
+
+  runtime {
+    docker: "marcusczi/starfish:latest"
+  }
 
   output {
     Array[File] filtered_collection = glob("filtered/*")
@@ -58,6 +66,10 @@ task detect_spots {
     starfish detect_spots inputs/org.json detected dots --min_sigma '${min_sigma}' \
       --max_sigma '${max_sigma}' --num_sigma '${num_sigma}' --t '${threshold}'
   >>>
+
+  runtime {
+    docker: "marcusczi/starfish:latest"
+  }
 
   output {
     File spots_geo = "detected/spots_geo.csv"
@@ -89,6 +101,10 @@ task segment {
       --st '${stain_threshold}' --md '${minimum_distance}'
   >>>
 
+  runtime {
+    docker: "marcusczi/starfish:latest"
+  }
+
   output {
     Array[File] segmented_collection = glob("segmented/*")
   }
@@ -107,6 +123,10 @@ task decode {
 
     starfish decode inputs --decoder_type '${decoder_type}'
   >>>
+
+  runtime {
+    docker: "marcusczi/starfish:latest"
+  }
 
   output {
     Array[File] output_collection = glob("inputs/*")

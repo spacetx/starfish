@@ -1,12 +1,10 @@
 task register {
-  File input_path
+  File input_tarball
   Int upsampling
   
   command <<<
     mkdir inputs
-    for input_file in '${input_path}'/*; do
-      mv $input_file inputs/
-    done
+    tar xf '${input_tarball}' -C inputs --strip-components 1
 
     mkdir registered
 
@@ -147,10 +145,10 @@ workflow starfish {
   Int minimum_distance
   String decoder_type
 
-  File input_path
+  File input_tarball
   
   call register {
-    input: input_path=input_path, upsampling=upsampling
+    input: input_tarball=input_tarball, upsampling=upsampling
   }
 
   call filter {

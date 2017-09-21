@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/chanzuckerberg/starfish#readme",
   "dependencies": {
+    "budo": "^10.0.4",
     "canvas-fit": "^1.5.0",
     "canvas-orbit-camera": "^1.0.2",
     "control-panel": "^1.2.0",

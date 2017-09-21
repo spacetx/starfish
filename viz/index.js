@@ -39,18 +39,18 @@ resl({
   manifest: {
     'background': {
       type: 'image',
-      src: '../example/background.png'
+      src: '../example_2/background.png'
     },
 
     'spots': {
       type: 'text',
-      src: '../example/spots.json',
+      src: '../example_2/spots.json',
       parser: JSON.parse
     },
 
     'regions': {
       type: 'text',
-      src: '../example/regions.json',
+      src: '../example_2/regions.json',
       parser: JSON.parse
     }
   },

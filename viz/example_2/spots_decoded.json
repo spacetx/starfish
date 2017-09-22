@@ -28628,7 +28628,7 @@
             ]
         }, 
         "properties": {
-            "qual": NaN, 
+            "qual": 0.0, 
             "gene": "unknown", 
             "radius": 5, 
             "id": 1908
@@ -28643,7 +28643,7 @@
             ]
         }, 
         "properties": {
-            "qual": NaN, 
+            "qual": 0.0, 
             "gene": "unknown", 
             "radius": 5, 
             "id": 1909
@@ -28658,7 +28658,7 @@
             ]
         }, 
         "properties": {
-            "qual": NaN, 
+            "qual": 0.0, 
             "gene": "unknown", 
             "radius": 5, 
             "id": 1910
@@ -28673,7 +28673,7 @@
             ]
         }, 
         "properties": {
-            "qual": NaN, 
+            "qual": 0.0, 
             "gene": "unknown", 
             "radius": 5, 
             "id": 1911
@@ -28688,7 +28688,7 @@
             ]
         }, 
         "properties": {
-            "qual": NaN, 
+            "qual": 0.0, 
             "gene": "unknown", 
             "radius": 5, 
             "id": 1912

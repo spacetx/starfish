@@ -1,18 +1,18 @@
 task register {
-  File input_path
+  File input_tarball
   Int upsampling
   
-  String dollar = "$"
-
-  command {
+  command <<<
     mkdir inputs
-    for input_file in '${input_path}'/*; do
-      mv ${dollar}input_file inputs/
-    done
+    tar xf '${input_tarball}' -C inputs --strip-components 1
 
     mkdir registered
 
     starfish register inputs/org.json registered --u '${upsampling}'
+  >>>
+
+  runtime {
+    docker: "marcusczi/starfish:latest"
   }
 
   output {
@@ -25,17 +25,19 @@ task filter {
   Array[File] input_collection
   Int disk_size
 
-  String dollar = "$"
-
-  command {
+  command <<<
     mkdir inputs
     for input_file in ${sep=' ' input_collection}; do
-      mv ${dollar}input_file inputs/
+      mv $input_file inputs/
     done
 
     mkdir filtered
 
     starfish filter inputs/org.json filtered --ds '${disk_size}'
+  >>>
+
+  runtime {
+    docker: "marcusczi/starfish:latest"
   }
 
   output {
@@ -51,18 +53,20 @@ task detect_spots {
   Int num_sigma
   Float threshold
 
-  String dollar = "$"
-
-  command {
+  command <<<
     mkdir inputs
     for input_file in ${sep=' ' input_collection}; do
-      mv ${dollar}input_file inputs/
+      mv $input_file inputs/
     done
 
     mkdir detected
 
     starfish detect_spots inputs/org.json detected dots --min_sigma '${min_sigma}' \
       --max_sigma '${max_sigma}' --num_sigma '${num_sigma}' --t '${threshold}'
+  >>>
+
+  runtime {
+    docker: "marcusczi/starfish:latest"
   }
 
   output {
@@ -80,12 +84,10 @@ task segment {
   Float stain_threshold
   Int minimum_distance
 
-  String dollar = "$"
-
-  command {
+  command <<<
     mkdir inputs
     for input_file in ${sep=' ' input_collection}; do
-      mv ${dollar}input_file inputs/
+      mv $input_file inputs/
     done
 
     mkdir segmented
@@ -95,6 +97,10 @@ task segment {
 
     starfish segment inputs/org.json segmented stain --dt '${dapi_threshold}' \
       --st '${stain_threshold}' --md '${minimum_distance}'
+  >>>
+
+  runtime {
+    docker: "marcusczi/starfish:latest"
   }
 
   output {
@@ -107,15 +113,17 @@ task decode {
   Array[File] input_collection
   String decoder_type
 
-  String dollar = "$"
-
-  command {
+  command <<<
     mkdir inputs
     for input_file in ${sep=' ' input_collection}; do
-      mv ${dollar}input_file inputs/
+      mv $input_file inputs/
     done
 
     starfish decode inputs --decoder_type '${decoder_type}'
+  >>>
+
+  runtime {
+    docker: "marcusczi/starfish:latest"
   }
 
   output {
@@ -137,10 +145,10 @@ workflow starfish {
   Int minimum_distance
   String decoder_type
 
-  File input_path
+  File input_tarball
   
   call register {
-    input: input_path=input_path, upsampling=upsampling
+    input: input_tarball=input_tarball, upsampling=upsampling
   }
 
   call filter {

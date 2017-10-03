@@ -3,11 +3,14 @@ from __future__ import division
 import numpy as np
 import pandas as pd
 from skimage.filters import threshold_otsu
+import scipy.ndimage.measurements as spm
+from starfish.stats import label_to_regions
 
 
 class PixelSpotDetector:
-    def __init__(self, stack):
+    def __init__(self, stack, blobs):
         self.stack = stack
+        self.blobs = blobs
 
         self.num_objs = None
         self.spots_df = None
@@ -52,11 +55,9 @@ class PixelSpotDetector:
         """
 
         # determine threshold
-        mp = self.stack.max_proj('hyb')
-        mp = np.max(mp, axis=0)
-        t = threshold_otsu(mp)
-        ind = np.argwhere(mp > t)
-        self.num_objs = np.sum(mp > t)
+        t = threshold_otsu(self.blobs)
+        blobs_binary = self.blobs > t
+        ind = np.argwhere(blobs_binary)
         self.threshold = ind
 
         # construct spots_viz
@@ -65,6 +66,16 @@ class PixelSpotDetector:
         df['spot_id'] = range(self.num_objs)
         df['x'] = ind[:, 0]
         df['y'] = ind[:, 1]
+
+        # assign groupings to spots (pixels)
+        labels, num_objs = spm.label(blobs_binary)
+        regions = label_to_regions(labels)
+        for grp_num, r in enumerate(regions):
+            cond_1 = df.x.isin(r.coordinates[:, 0])
+            cond_2 = df.y.isin(r.coordinates[:, 1])
+            cond = cond_1 & cond_2
+            df.loc[cond, 'spot_group'] = grp_num
+
         self.spots_df_viz = df
 
         return self.spots_df_viz

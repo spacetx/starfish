@@ -30,9 +30,8 @@ class PixelSpotDetector:
             sq = squeezed_stack[r.ind]
             sqt = sq[self.threshold[:, 0], self.threshold[:, 1]]
             val = sqt.ravel()
-            num_vals = len(val)
             d = pd.DataFrame()
-            d['spot_id'] = range(num_vals)
+            d['spot_id'] = range(self.num_objs)
             d['val'] = val
             d['hyb'] = r.hyb
             d['ch'] = r.ch
@@ -57,14 +56,15 @@ class PixelSpotDetector:
         mp = np.max(mp, axis=0)
         t = threshold_otsu(mp)
         ind = np.argwhere(mp > t)
+        self.num_objs = np.sum(mp > t)
         self.threshold = ind
 
         # construct spots_viz
         self.num_objs = ind.shape[0]
         df = pd.DataFrame()
-        df['val'] = mp[ind[:, 0], ind[:, 1]].ravel()
-        df['x'] = ind[:, 1]
-        df['y'] = ind[:, 0]
+        df['spot_id'] = range(self.num_objs)
+        df['x'] = ind[:, 0]
+        df['y'] = ind[:, 1]
         self.spots_df_viz = df
 
         return self.spots_df_viz

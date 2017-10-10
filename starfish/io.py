@@ -161,7 +161,7 @@ class Stack:
 
         return res
 
-    def squeeze(self):
+    def squeeze(self, bit_map_flag=False):
         new_shape = ((self.num_hybs * self.num_chs),) + self.im_shape
         new_data = np.zeros(new_shape)
 
@@ -180,6 +180,11 @@ class Stack:
                 ind += 1
 
         self.squeeze_map = pd.DataFrame({'ind': inds, 'hyb': hybs, 'ch': chs})
+
+        if bit_map_flag:
+            mp = [(d['hyb'], d['ch'], d['bit']) for d in self.org['data']]
+            mp = pd.DataFrame(mp, columns=['hyb', 'ch', 'bit'])
+            self.squeeze_map = pd.merge(self.squeeze_map, mp, on=['ch', 'hyb'], how='left')
 
         return new_data
 

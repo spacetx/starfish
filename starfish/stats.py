@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from functools import reduce
 import scipy.ndimage.measurements as spm
 from regional import many as Many
 from regional import one as One

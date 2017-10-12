@@ -48,14 +48,7 @@ def gaussian_high_pass(img, sigma, ksize=None, border=None, skimage=False):
     return res
 
 
-def richardson_lucy_deconv(stack, num_iter, psf=None, gpar=None, clip=False):
-    ims = stack_to_list(stack)
-    # TODO threadpool executor here for parallelization?
-    res = [richardson_lucy_deconv_img(im, num_iter, psf, gpar, clip) for im in ims]
-    return list_to_stack(res)
-
-
-def richardson_lucy_deconv_img(img, num_iter, psf=None, gpar=None, clip=False):
+def richardson_lucy_deconv(img, num_iter, psf=None, gpar=None, clip=False):
     if psf is None:
         if gpar is None:
             msg = 'Must specify a gaussian (kernel size, sigma) if a psf is not specified'

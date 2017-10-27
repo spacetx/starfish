@@ -1,0 +1,15 @@
+language: python
+python:
+- 2.7
+- 3.4
+- 3.5
+- 3.6
+dist: trusty
+install:
+- pip install -r REQUIREMENTS.txt
+- pip install -e .
+script:
+- set -eo pipefail
+- starfish --help
+after_success:
+- bash <(curl -s https://codecov.io/bash)

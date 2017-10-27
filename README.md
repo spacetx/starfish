@@ -8,7 +8,10 @@ See this [document](https://docs.google.com/document/d/1IHIngoMKr-Tnft2xOI3Q-5rL
 ![alt text](https://github.com/chanzuckerberg/starfish/raw/master/design/pipeline-diagram.png "candidate pipeline")
 
 ## usage
-Clone the repo then run ```pip install -e .```
+Install the starfish package:
+```
+% pip install starfish
+```
 
 See the [notebook](https://github.com/chanzuckerberg/starfish/blob/master/notebooks/Starfish%20Mignardi%20Pipeline.ipynb) for a fully worked example.
 
@@ -45,3 +48,33 @@ To see an interactive web-visualization of the final decoded result, run the fol
 3. Install budo ```npm install budo```
 4. From starfish/viz run ```npm install```
 5. From starfish/viz run ```npm start```
+
+## Development
+
+Clone the repo.
+```
+% git clone git@github.com:chanzuckerberg/starfish.git
+% cd starfish
+```
+
+### Virtualenv
+While not required, you may wish to set up a [virtualenv](https://virtualenv.pypa.io/en/stable/).  If you are using python < 3.3, you should run:
+
+```
+% virtualenv .venv
+```
+
+If you are using python >= 3.3, you should run:
+
+```
+% python -m venv .venv
+```
+
+### Installing
+
+Install the starfish module in edit-mode and all the dependencies for starfish:
+
+```
+% pip install -e .
+% pip install -r REQUIREMENTS.txt
+```

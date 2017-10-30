@@ -1,22 +1,9 @@
 #!/usr/bin/env python
+
+import json
 import os
 
 import click
-import matplotlib.pyplot as plt
-import numpy as np
-import json
-from showit import tile
-
-from .assign import assign
-from .filters import white_top_hat
-from .io import Stack
-from .register import compute_shift, shift_im
-from .spots.gaussian import GaussianSpotDetector
-from .watershedsegmenter import WatershedSegmenter
-from .stats import label_to_regions
-from .munge import spots_to_geojson, regions_to_geojson
-
-import pandas as pd
 
 
 @click.group()
@@ -38,6 +25,11 @@ def starfish():
 @click.argument('out_dir', type=click.Path(exists=True))
 @click.option('--u', default=1, help='Amount of up-sampling', type=int)
 def register(in_json, out_dir, u):
+    import numpy as np
+
+    from .io import Stack
+    from .register import compute_shift, shift_im
+
     print('Registering ...')
     s = Stack()
     s.read(in_json)
@@ -64,6 +56,11 @@ def register(in_json, out_dir, u):
 @click.argument('out_dir', type=click.Path(exists=True))
 @click.option('--ds', default=15, help='Disk size', type=int)
 def filter(in_json, out_dir, ds):
+    import numpy as np
+
+    from .filters import white_top_hat
+    from .io import Stack
+
     print('Filtering ...')
     print('Reading data')
     s = Stack()
@@ -105,6 +102,10 @@ def filter(in_json, out_dir, ds):
 @click.option('--t', default=.01, help='Dots threshold', type=float)
 @click.option('--show', default=False, help='Dots threshold', type=bool)
 def detect_spots(in_json, results_dir, aux_img, min_sigma, max_sigma, num_sigma, t, show):
+    from .io import Stack
+    from .munge import spots_to_geojson
+    from .spots.gaussian import GaussianSpotDetector
+
     print('Finding spots...')
     s = Stack()
     s.read(in_json)
@@ -142,6 +143,14 @@ def detect_spots(in_json, results_dir, aux_img, min_sigma, max_sigma, num_sigma,
 @click.option('--st', default=.22, help='Input threshold', type=float)
 @click.option('--md', default=57, help='Minimum distance between cells', type=int)
 def segment(in_json, results_dir, aux_image, dt, st, md):
+    import pandas as pd
+
+    from .assign import assign
+    from .io import Stack
+    from .munge import regions_to_geojson
+    from .stats import label_to_regions
+    from .watershedsegmenter import WatershedSegmenter
+
     s = Stack()
     s.read(in_json)
 
@@ -175,6 +184,8 @@ def segment(in_json, results_dir, aux_image, dt, st, md):
 @click.argument('results_dir', type=click.Path(exists=True))
 @click.option('--decoder_type', default='iss', help='Decoder type')
 def decode(results_dir, decoder_type):
+    import pandas as pd
+
     if decoder_type == 'iss':
         from .decoders.iss import decode as dec
     else:
@@ -191,6 +202,11 @@ def decode(results_dir, decoder_type):
 @click.argument('in_json', type=click.Path(exists=True))
 @click.option('--sz', default=10, help='Figure size', type=int)
 def show(in_json, sz):
+    import matplotlib.pyplot as plt
+    from showit import tile
+
+    from .io import Stack
+
     s = Stack()
     s.read(in_json)
     tile(s.squeeze(), size=sz, bar=True)

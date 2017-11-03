@@ -6,10 +6,11 @@ python:
 - 3.6
 dist: trusty
 install:
-- pip install -r REQUIREMENTS.txt
+- pip install -r REQUIREMENTS-DEV.txt
 - pip install -e .
+- pip freeze
 script:
 - set -eo pipefail
-- starfish --help
+- make test
 after_success:
 - bash <(curl -s https://codecov.io/bash)

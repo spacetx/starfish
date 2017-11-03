@@ -83,6 +83,15 @@ class TestWithIssData(unittest.TestCase):
                     element(tempdir=tempdir) if callable(element) else element
                     for element in stage
                 ]
+                if cmdline[0] == 'starfish':
+                    coverage_cmdline = [
+                        "coverage", "run",
+                        "-p",
+                        "--source", "starfish",
+                        "-m", "starfish.starfish",
+                    ]
+                    coverage_cmdline.extend(cmdline[1:])
+                    cmdline = coverage_cmdline
                 with clock.timeit(callback):
                     subprocess.check_call(cmdline)
         finally:

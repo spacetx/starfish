@@ -212,5 +212,5 @@ def show(in_json, sz):
     tile(s.squeeze(), size=sz, bar=True)
     plt.show()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     starfish()

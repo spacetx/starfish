@@ -6,6 +6,13 @@ import tempfile
 import unittest
 
 
+pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))  # noqa
+sys.path.insert(0, pkg_root)  # noqa
+
+
+from starfish.util import clock
+
+
 class TestWithIssData(unittest.TestCase):
     SUBDIRS = (
         "raw",
@@ -64,6 +71,9 @@ class TestWithIssData(unittest.TestCase):
     def test_run_pipeline(self):
         tempdir = tempfile.mkdtemp()
 
+        def callback(interval):
+            print(" ".join(stage[:2]), " ==> {} seconds".format(interval))
+
         try:
             for subdir in TestWithIssData.SUBDIRS:
                 os.makedirs("{tempdir}".format(
@@ -73,6 +83,7 @@ class TestWithIssData(unittest.TestCase):
                     element(tempdir=tempdir) if callable(element) else element
                     for element in stage
                 ]
-                subprocess.check_call(cmdline)
+                with clock.timeit(callback):
+                    subprocess.check_call(cmdline)
         finally:
             shutil.rmtree(tempdir)

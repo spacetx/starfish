@@ -1,13 +1,29 @@
 #!/usr/bin/env python
 
+import cProfile
 import json
 import os
+try:
+    from pstats import Stats  # python 3.x
+except ImportError:
+    from profile import Stats  # python 2.x
 
 import click
 
 
+PROFILER_KEY = "profiler"
+"""This is the dictionary key we use to attach the profiler to pass to the resultcallback."""
+PROFILER_LINES = 15
+"""This is the number of profiling rows to dump when --profile is enabled."""
+PROFILER_NOOP_ENVVAR = 'PROFILE_TEST'
+"""If this environment variable is present, we create a no-op command for the purposes of testing the profiler."""
+
+
+
 @click.group()
-def starfish():
+@click.option("--profile", is_flag=True)
+@click.pass_context
+def starfish(ctx, profile):
     art = """
          _              __ _     _
         | |            / _(_)   | |
@@ -18,6 +34,21 @@ def starfish():
 
     """
     print(art)
+    if profile:
+        if ctx.obj is None:
+            ctx.obj = dict()
+        ctx.obj[PROFILER_KEY] = cProfile.Profile()
+        ctx.obj[PROFILER_KEY].enable()
+
+
+@starfish.resultcallback()
+def starfish_epilogue(*args, **kwargs):
+    ctx = click.get_current_context()
+    if isinstance(ctx.obj, dict):
+        if PROFILER_KEY in ctx.obj:
+            ctx.obj[PROFILER_KEY].disable()
+            stats = Stats(ctx.obj[PROFILER_KEY])
+            stats.sort_stats('tottime').print_stats(PROFILER_LINES)
 
 
 @starfish.command()
@@ -211,6 +242,13 @@ def show(in_json, sz):
     s.read(in_json)
     tile(s.squeeze(), size=sz, bar=True)
     plt.show()
+
+
+if PROFILER_NOOP_ENVVAR in os.environ:
+    @starfish.command()
+    def noop():
+        pass
+
 
 if __name__ == "__main__":
     starfish()

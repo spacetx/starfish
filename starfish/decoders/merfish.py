@@ -5,11 +5,14 @@ import pandas as pd
 
 
 class MerfishDecoder:
-    def __init__(self, spots_df_tidy, codebook):
-        self.spots_df_tidy = spots_df_tidy
+    def __init__(self, encoded, codebook):
+        self.encoded = encoded
         self.codebook = codebook
 
         self.decoded_df = None
+        self.decoded_img = None
+        self.label_image = None
+        self.spot_props = None
 
     def decode(self,
                img_size=(2048, 2048),
@@ -33,6 +36,7 @@ class MerfishDecoder:
         decoded_img[decoded_dist > distance_threshold] = 0
         decoded_img[local_magnitude < magnitude_threshold] = 0
         decoded_img = self._crop(decoded_img, crop_size)
+        self.decoded_img = decoded_img
 
         decoded_df = self._find_spots(decoded_img, area_threshold)
         decoded_df = pd.merge(decoded_df, self.codebook, on='barcode', how='left')
@@ -48,7 +52,7 @@ class MerfishDecoder:
 
     def _parse_pixel_traces(self):
         # parse spots into pixel traces, normalize and filter
-        df = self.spots_df_tidy.loc[:, ['spot_id', 'bit', 'val']]
+        df = self.encoded.loc[:, ['spot_id', 'bit', 'val']]
         # TODO this assumes that bits are sorted
         pixel_traces = df.pivot(index='spot_id', columns='bit', values='val')
         pixel_traces = pixel_traces.values
@@ -82,5 +86,8 @@ class MerfishDecoder:
 
         spots_df = pd.DataFrame(spots)
         spots_df['spot_id'] = range(len(spots_df))
+
+        self.label_image = label_image
+        self.spot_props = props
 
         return spots_df

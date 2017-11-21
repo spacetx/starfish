@@ -3,16 +3,14 @@ import pandas as pd
 
 
 class IssDecoder:
-    def __init__(self, encoded, codebook):
-        self.encoded = encoded
+    def __init__(self, codebook, letters):
         self.codebook = codebook
+        self.letters = letters
 
-        self.decoded_df = None
-
-    def decode(self, letters):
-        num_ch = self.encoded.ch.max() + 1
-        num_hy = self.encoded.hyb.max() + 1
-        num_spots = self.encoded.spot_id.max() + 1
+    def decode(self, encoded):
+        num_ch = encoded.ch.max() + 1
+        num_hy = encoded.hyb.max() + 1
+        num_spots = encoded.spot_id.max() + 1
 
         seq_res = np.zeros((num_spots, num_hy))
         seq_stren = np.zeros((num_spots, num_hy))
@@ -20,7 +18,7 @@ class IssDecoder:
 
         for spot_id in range(num_spots):
 
-            sid_df = self.encoded[self.encoded.spot_id == spot_id]
+            sid_df = encoded[encoded.spot_id == spot_id]
 
             mat = np.zeros((num_hy, num_ch))
             inds = zip(sid_df.hyb.values, sid_df.ch.values, sid_df.val)
@@ -42,7 +40,7 @@ class IssDecoder:
         for k in range(seq_res.shape[0]):
             letter_inds = seq_res[k, :]
             letter_inds = letter_inds.astype(np.int)
-            res = ''.join([letters[j] for j in letter_inds])
+            res = ''.join([self.letters[j] for j in letter_inds])
             codes.append(res)
 
         dec = pd.DataFrame({'spot_id': range(num_spots),
@@ -50,6 +48,5 @@ class IssDecoder:
                             'qual': max_qual})
 
         dec = pd.merge(dec, self.codebook, on='barcode', how='left')
-        self.decoded_df = dec
 
         return dec

@@ -142,14 +142,15 @@ def detect_spots(in_json, results_dir, aux_img, min_sigma, max_sigma, num_sigma,
 
     # create 'encoder table' standard (tidy) file format.
     gsp = GaussianSpotDetector(s)
-    spots_df_tidy = gsp.detect(min_sigma=min_sigma,
-                               max_sigma=max_sigma,
-                               num_sigma=num_sigma,
-                               threshold=t,
-                               blobs=aux_img,
-                               measurement_type='max',
-                               bit_map_flag=False
-                               )
+    spots_df_tidy = gsp.detect(
+        min_sigma=min_sigma,
+        max_sigma=max_sigma,
+        num_sigma=num_sigma,
+        threshold=t,
+        blobs=aux_img,
+        measurement_type='max',
+        bit_map_flag=False
+    )
 
     if show:
         gsp.show(figsize=(10, 10))
@@ -228,11 +229,11 @@ def decode(results_dir, decoder_type):
     codebook = pd.DataFrame(d)
     if decoder_type == 'iss':
         from .decoders.iss import IssDecoder
-        decoder = IssDecoder(encoder_table, codebook)
+        decoder = IssDecoder(codebook, letters=['T', 'G', 'C', 'A'])
     else:
         raise ValueError('Decoder type: {} not supported'.format(decoder_type))
 
-    res = decoder.decode(letters=['T', 'G', 'C', 'A'])
+    res = decoder.decode(encoder_table)
     path = os.path.join(results_dir, 'decoder_table.csv')
     print("Writing | spot_id | gene_id to: {}".format(path))
     res.to_csv(path, index=False)

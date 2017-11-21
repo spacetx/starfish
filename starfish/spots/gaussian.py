@@ -52,15 +52,9 @@ class GaussianSpotDetector:
             row = row[1]
             subset = img[int(row.xmin):int(row.xmax), int(row.ymin):int(row.ymax)]
             if self.measurement_type == 'max':
-                try:
-                    res.append(subset.max())
-                except:
-                    res.append(np.NAN)
+                res.append(subset.max())
             else:
-                try:
-                    res.append(subset.mean())
-                except:
-                    res.append(np.NAN)
+                res.append(subset.mean())
         return res
 
     def _measure_stack(self):

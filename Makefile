@@ -5,7 +5,7 @@ lint:
 
 test_srcs := $(wildcard tests/test_*.py)
 
-test: $(test_srcs) # TODO: re-enable lint when the codebase is ready for it.
+test: $(test_srcs) lint
 	coverage combine
 	rm -f .coverage.*
 

@@ -19,7 +19,6 @@ PROFILER_NOOP_ENVVAR = 'PROFILE_TEST'
 """If this environment variable is present, we create a no-op command for the purposes of testing the profiler."""
 
 
-
 @click.group()
 @click.option("--profile", is_flag=True)
 @click.pass_context

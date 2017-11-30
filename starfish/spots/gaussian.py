@@ -53,17 +53,13 @@ class GaussianSpotDetector:
         for row in spots_df.iterrows():
             row = row[1]
             subset = img[int(row.xmin):int(row.xmax), int(row.ymin):int(row.ymax)]
-            if measurement_type == 'max':
-                try:
-                    res.append(subset.max())
-                except:
-                    res.append(np.NAN)
+
+            if self.measurement_type == 'max':
+                res.append(subset.max())
             else:
-                try:
-                    res.append(subset.mean())
-                except:
-                    res.append(np.NAN)
-        return res
+                res.append(subset.mean())
+
+         return res
 
     def _measure_stack(self, measurement_type):
         intensities = [self._measure(img, self.spots_df_viz, measurement_type) for img in self.stack.squeeze()]

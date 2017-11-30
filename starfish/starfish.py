@@ -3,13 +3,13 @@
 import cProfile
 import json
 import os
+
 try:
     from pstats import Stats  # python 3.x
 except ImportError:
     from profile import Stats  # python 2.x
 
 import click
-
 
 PROFILER_KEY = "profiler"
 """This is the dictionary key we use to attach the profiler to pass to the resultcallback."""
@@ -140,15 +140,22 @@ def detect_spots(in_json, results_dir, aux_img, min_sigma, max_sigma, num_sigma,
     s = Stack()
     s.read(in_json)
 
-    gsp = GaussianSpotDetector(s.squeeze(), s.aux_dict[aux_img])
+    # create 'encoder table' standard (tidy) file format.
+    gsp = GaussianSpotDetector(s)
+    spots_df_tidy = gsp.detect(
+        min_sigma=min_sigma,
+        max_sigma=max_sigma,
+        num_sigma=num_sigma,
+        threshold=t,
+        blobs=aux_img,
+        measurement_type='max',
+        bit_map_flag=False
+    )
 
-    gsp.detect(min_sigma, max_sigma, num_sigma, t)
     if show:
         gsp.show(figsize=(10, 10))
 
     spots_viz = gsp.spots_df_viz
-    spots_df_tidy = gsp.to_encoder_dataframe(tidy_flag=True, mapping=s.squeeze_map)
-
     geojson = spots_to_geojson(spots_viz)
 
     path = os.path.join(results_dir, 'spots.json')
@@ -216,13 +223,17 @@ def segment(in_json, results_dir, aux_image, dt, st, md):
 def decode(results_dir, decoder_type):
     import pandas as pd
 
+    encoder_table = pd.read_csv(os.path.join(results_dir, 'encoder_table.csv'))
+    # TODO this should be loaded from disk
+    d = {'barcode': ['AAGC', 'AGGC'], 'gene': ['ACTB_human', 'ACTB_mouse']}
+    codebook = pd.DataFrame(d)
     if decoder_type == 'iss':
-        from .decoders.iss import decode as dec
+        from .decoders.iss import IssDecoder
+        decoder = IssDecoder(codebook, letters=['T', 'G', 'C', 'A'])
     else:
         raise ValueError('Decoder type: {} not supported'.format(decoder_type))
 
-    encoder_table = pd.read_csv(os.path.join(results_dir, 'encoder_table.csv'))
-    res = dec(encoder_table)
+    res = decoder.decode(encoder_table)
     path = os.path.join(results_dir, 'decoder_table.csv')
     print("Writing | spot_id | gene_id to: {}".format(path))
     res.to_csv(path, index=False)
@@ -247,7 +258,6 @@ if PROFILER_NOOP_ENVVAR in os.environ:
     @starfish.command()
     def noop():
         pass
-
 
 if __name__ == "__main__":
     starfish()

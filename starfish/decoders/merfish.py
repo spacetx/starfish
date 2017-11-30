@@ -1,25 +1,23 @@
+import collections
+
 import numpy as np
+import pandas as pd
 from skimage.measure import regionprops, label
 from sklearn.neighbors import NearestNeighbors
-import pandas as pd
 
 
 class MerfishDecoder:
     def __init__(self, codebook):
         self.codebook = codebook
 
-        self.decoded_img = None
-        self.label_image = None
-        self.spot_props = None
-
-    def decode(self,
-               encoded,
-               img_size=(2048, 2048),
-               distance_threshold=0.5176,
-               magnitude_threshold=1,
-               area_threshold=2,
-               crop_size=40):
-
+    def _decode(
+            self,
+            encoded,
+            img_size,
+            distance_threshold,
+            magnitude_threshold,
+            area_threshold,
+            crop_size):
         codes = self._parse_barcodes()
         pixel_traces, pixel_traces_l2_norm = self._parse_pixel_traces(encoded)
 
@@ -35,11 +33,21 @@ class MerfishDecoder:
         decoded_img[decoded_dist > distance_threshold] = 0
         decoded_img[local_magnitude < magnitude_threshold] = 0
         decoded_img = self._crop(decoded_img, crop_size)
-        self.decoded_img = decoded_img
 
-        decoded_df = self._find_spots(decoded_img, area_threshold)
+        spot_props, label_image, decoded_df = self._find_spots(decoded_img, area_threshold)
         decoded_df = pd.merge(decoded_df, self.codebook, on='barcode', how='left')
-        return decoded_df
+        return _MerfishDecoderResults(decoded_df, decoded_img, label_image, spot_props)
+
+    def decode(
+            self,
+            encoded,
+            img_size=(2048, 2048),
+            distance_threshold=0.5176,
+            magnitude_threshold=1,
+            area_threshold=2,
+            crop_size=40):
+        return self._decode(
+            encoded, img_size, distance_threshold, magnitude_threshold, area_threshold, crop_size).result
 
     def _parse_barcodes(self):
         # parse barcode into numpy array and normalize by l2_norm
@@ -85,7 +93,9 @@ class MerfishDecoder:
         spots_df = pd.DataFrame(spots)
         spots_df['spot_id'] = range(len(spots_df))
 
-        self.label_image = label_image
-        self.spot_props = props
+        return props, label_image, spots_df
 
-        return spots_df
+
+_MerfishDecoderResults = collections.namedtuple(
+    '_MerfishDecoderResults',
+    ['result', 'decoded_img', 'label_img', 'spot_props'])

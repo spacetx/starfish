@@ -258,6 +258,3 @@ if PROFILER_NOOP_ENVVAR in os.environ:
     @starfish.command()
     def noop():
         pass
-
-if __name__ == "__main__":
-    starfish()

@@ -15,6 +15,6 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=install_requires,
     entry_points={
-        'console_scripts': "starfish=starfish.starfish:starfish"
+        'console_scripts': "starfish=starfish.__main__"
     }
 )

@@ -13,6 +13,7 @@ except ImportError:
 
 
 from .util.argparse import FsExistsType
+from . import registration
 
 
 def build_parser():
@@ -27,11 +28,7 @@ def build_parser():
         noop_group = subparsers.add_parser("noop", add_help=False)
         noop_group.set_defaults(starfish_command=noop)
 
-    register_group = subparsers.add_parser("register")
-    register_group.add_argument("in_json", type=FsExistsType())
-    register_group.add_argument("out_dir", type=FsExistsType())
-    register_group.add_argument("--u", default=1, type=int, help="Amount of up-sampling")
-    register_group.set_defaults(starfish_command=register)
+    registration.Registration.add_to_parser(subparsers)
 
     filter_group = subparsers.add_parser("filter")
     filter_group.add_argument("in_json", type=FsExistsType())
@@ -108,33 +105,6 @@ def starfish():
     if args.profile:
         stats = Stats(profiler)
         stats.sort_stats('tottime').print_stats(PROFILER_LINES)
-
-
-def register(args):
-    import numpy as np
-
-    from .io import Stack
-    from .register import compute_shift, shift_im
-
-    print('Registering ...')
-    s = Stack()
-    s.read(args.in_json)
-
-    mp = s.max_proj('ch')
-    res = np.zeros(s.shape)
-
-    for h in range(s.num_hybs):
-        # compute shift between maximum projection (across channels) and dots, for each hyb round
-        shift, error = compute_shift(mp[h, :, :], s.aux_dict['dots'], args.u)
-        print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
-
-        for c in range(s.num_chs):
-            # apply shift to all channels and hyb rounds
-            res[h, c, :] = shift_im(s.data[h, c, :], shift)
-
-    s.set_stack(res)
-
-    s.write(args.out_dir)
 
 
 def filter(args):

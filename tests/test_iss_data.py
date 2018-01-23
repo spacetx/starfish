@@ -35,6 +35,7 @@ class TestWithIssData(unittest.TestCase):
             "starfish", "register",
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted", "org.json"),
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered"),
+            "fourier_shift",
             "--u", "1000",
         ],
         [

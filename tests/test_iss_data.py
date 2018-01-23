@@ -89,7 +89,7 @@ class TestWithIssData(unittest.TestCase):
                         "coverage", "run",
                         "-p",
                         "--source", "starfish",
-                        "-m", "starfish.starfish",
+                        "-m", "starfish",
                     ]
                     coverage_cmdline.extend(cmdline[1:])
                     cmdline = coverage_cmdline

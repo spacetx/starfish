@@ -14,12 +14,18 @@ from starfish.starfish import PROFILER_NOOP_ENVVAR
 class TestProfiler(unittest.TestCase):
 
     def test_profiler(self):
-        """Make sure that `starfish --profile noop works."""
+        """Make sure that `starfish --profile --noop works."""
         cmdline = [
             "starfish",
             "--profile",
-            "noop",
+            "--noop",
         ]
+        env = os.environ.copy()
+        if sys.version_info < (3, 0):
+            # this is a hideous hack because argparse is not consistent between 2.7 and 3.x about whether the subcommand
+            # is required.  this entire hack can be dropped if we deprecate python2.7.
+            cmdline.append("noop")
+            env[PROFILER_NOOP_ENVVAR] = ""
         if cmdline[0] == 'starfish':
             coverage_cmdline = [
                 "coverage", "run",
@@ -29,32 +35,4 @@ class TestProfiler(unittest.TestCase):
             ]
             coverage_cmdline.extend(cmdline[1:])
             cmdline = coverage_cmdline
-        env = os.environ.copy()
-        env[PROFILER_NOOP_ENVVAR] = ""
         subprocess.check_call(cmdline, env=env)
-
-    def test_noop_hiding(self):
-        """
-        Ensure we do not expose the noop command unless the magic environment flag is present.  This is to avoid
-        confusion from the end users.
-        """
-        cmdline = [
-            "starfish",
-            "noop",
-        ]
-        if cmdline[0] == 'starfish':
-            coverage_cmdline = [
-                "coverage", "run",
-                "-p",
-                "--source", "starfish",
-                "-m", "starfish",
-            ]
-            coverage_cmdline.extend(cmdline[1:])
-            cmdline = coverage_cmdline
-
-        env = os.environ.copy()
-        env[PROFILER_NOOP_ENVVAR] = ""
-        subprocess.check_call(cmdline, env=env)
-
-        with self.assertRaises(subprocess.CalledProcessError):
-            subprocess.check_call(cmdline)

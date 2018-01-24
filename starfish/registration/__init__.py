@@ -1,52 +1,55 @@
+import collections
+
 from ..util.argparse import FsExistsType
+from . import _base
+from . import _fourier_shift
 
 
 class Registration(object):
+    algorithm_to_class_map = dict()
+
     @classmethod
     def add_to_parser(cls, subparsers):
+        """Adds the registration component to the CLI argument parser."""
         register_group = subparsers.add_parser("register")
         register_group.add_argument("in_json", type=FsExistsType())
         register_group.add_argument("out_dir", type=FsExistsType())
-        register_group.set_defaults(starfish_command=Registration.register)
-        registration_subparsers = register_group.add_subparsers(dest="registration_algorithm")
+        register_group.set_defaults(starfish_command=Registration._cli)
+        registration_subparsers = register_group.add_subparsers(dest="registration_algorithm_class")
 
-        fourier_shift_group = registration_subparsers.add_parser("fourier_shift")
-        fourier_shift_group.add_argument("--u", default=1, type=int, help="Amount of up-sampling")
-        fourier_shift_group.set_defaults(registration_algorithm=Registration.fourier_shift)
+        cls._ensure_algorithms_setup()
+        for algorithm_cls in cls.algorithm_to_class_map.values():
+            algorithm_cls.add_to_parser(registration_subparsers)
 
         cls.register_group = register_group
 
     @classmethod
-    def register(cls, args):
-        if args.registration_algorithm is None:
+    def _cli(cls, args):
+        """Runs the registration component based on parsed arguments."""
+        if args.registration_algorithm_class is None:
             cls.register_group.print_help()
             cls.register_group.exit(status=2)
 
-        args.registration_algorithm(args)
-
-    @classmethod
-    def fourier_shift(cls, args):
-        import numpy as np
+        instance = args.registration_algorithm_class.from_cli_args(args)
 
         from ..io import Stack
-        from ..register import compute_shift, shift_im
 
         print('Registering ...')
         s = Stack()
         s.read(args.in_json)
 
-        mp = s.max_proj('ch')
-        res = np.zeros(s.shape)
-
-        for h in range(s.num_hybs):
-            # compute shift between maximum projection (across channels) and dots, for each hyb round
-            shift, error = compute_shift(mp[h, :, :], s.aux_dict['dots'], args.u)
-            print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
-
-            for c in range(s.num_chs):
-                # apply shift to all channels and hyb rounds
-                res[h, c, :] = shift_im(s.data[h, c, :], shift)
-
-        s.set_stack(res)
+        instance.register(s)
 
         s.write(args.out_dir)
+
+    @classmethod
+    def _ensure_algorithms_setup(cls):
+        if len(cls.algorithm_to_class_map) != 0:
+            return
+
+        queue = collections.deque(_base.RegistrationAlgorithmBase.__subclasses__())
+        while len(queue) > 0:
+            algorithm_cls = queue.popleft()
+            queue.extend(algorithm_cls.__subclasses__())
+
+            cls.algorithm_to_class_map[algorithm_cls.__name__] = algorithm_cls

@@ -24,6 +24,14 @@ class Registration(object):
         cls.register_group = register_group
 
     @classmethod
+    def run(cls, algorithm_name, stack, *args, **kwargs):
+        """Runs the registration component using the algorithm name, stack, and arguments for the specific algorithm."""
+        cls._ensure_algorithms_setup()
+        algorithm_cls = cls.algorithm_to_class_map[algorithm_name]
+        instance = algorithm_cls(*args, **kwargs)
+        return instance.register(stack)
+
+    @classmethod
     def _cli(cls, args):
         """Runs the registration component based on parsed arguments."""
         if args.registration_algorithm_class is None:

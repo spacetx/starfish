@@ -18,8 +18,6 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
     def register(self, stack):
         import numpy as np
 
-        from ..register import compute_shift, shift_im
-
         mp = stack.max_proj('ch')
         res = np.zeros(stack.shape)
 
@@ -35,3 +33,19 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
         stack.set_stack(res)
 
         return stack
+
+
+def compute_shift(im, ref, upsample_factor=1):
+    from skimage.feature import register_translation
+
+    shift, error, diffphase = register_translation(im, ref, upsample_factor)
+    return shift, error
+
+
+def shift_im(im, shift):
+    import numpy as np
+    from scipy.ndimage import fourier_shift
+
+    fim_shift = fourier_shift(np.fft.fftn(im), map(lambda x: -x, shift))
+    im_shift = np.fft.ifftn(fim_shift)
+    return im_shift.real

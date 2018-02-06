@@ -62,7 +62,7 @@ class Stack:
 
         self.format = d['format']
 
-        if self.format == 'tiff':
+        if self.format == 'TIFF':
             self.read_fn = io.imread
         else:
             self.read_fn = np.load
@@ -93,7 +93,7 @@ class Stack:
 
     def _write_metadata(self, dir_name):
         new_org = self.org
-        new_org['metadata']['format'] = 'npy'
+        new_org['metadata']['format'] = 'NPY'
 
         def format(d):
             d['file'] = self._swap_ext(d['file']) + '.npy'
@@ -121,7 +121,7 @@ class Stack:
             self.write_fn(os.path.join(dir_name, fname), self.aux_dict[typ])
 
     def _swap_ext(self, fname):
-        if self.format == 'tiff':
+        if self.format == 'TIFF':
             fname = fname.replace('.tiff', '')
         else:
             fname = fname.replace('.npy', '')

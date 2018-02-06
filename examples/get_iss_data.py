@@ -56,11 +56,11 @@ def load_and_write_data(input_dir, output_dir):
 
     dapi_fname = '{}_{}.tiff'.format(prefix, 'dapi')
     imsave(output_dir + dapi_fname, dapi)
-    res['aux'].append({'type': 'dapi', 'file': dapi_fname})
+    res['aux'].append({'type': 'dapi', 'file': dapi_fname, 'format': "TIFF"})
 
     dots_fname = '{}_{}.tiff'.format(prefix, 'dots')
     imsave(output_dir + dots_fname, dots)
-    res['aux'].append({'type': 'dots', 'file': dots_fname})
+    res['aux'].append({'type': 'dots', 'file': dots_fname, 'format': "TIFF"})
 
     if len(img.shape) == 2:
         is_volume = False
@@ -73,7 +73,7 @@ def load_and_write_data(input_dir, output_dir):
     res['metadata']['num_chs'] = 4
     res['metadata']['shape'] = img.shape
     res['metadata']['is_volume'] = is_volume
-    res['metadata']['format'] = 'tiff'
+    res['metadata']['format'] = "TIFF"
 
     return res
 

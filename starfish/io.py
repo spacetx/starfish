@@ -1,10 +1,11 @@
-import pandas as pd
-from skimage import io
-import numpy as np
-
-from .munge import list_to_stack
 import json
 import os
+
+import numpy as np
+import pandas as pd
+from skimage import io
+
+from .munge import list_to_stack
 
 
 class Stack:
@@ -92,20 +93,17 @@ class Stack:
         self._write_aux(dir_name)
 
     def _write_metadata(self, dir_name):
-        new_org = self.org
-        new_org['metadata']['format'] = 'NPY'
+        self.org['metadata']['format'] = 'NPY'
 
         def format(d):
-            d['file'] = self._swap_ext(d['file']) + '.npy'
+            d['file'] = "{}.{}".format(os.path.splitext(d['file'])[0], 'npy')
             return d
 
-        new_org['data'] = [format(d) for d in new_org['data']]
-        new_org['aux'] = [format(d) for d in new_org['aux']]
+        self.org['data'] = [format(d) for d in self.org['data']]
+        self.org['aux'] = [format(d) for d in self.org['aux']]
 
         with open(os.path.join(dir_name, 'org.json'), 'w') as outfile:
-            json.dump(new_org, outfile, indent=4)
-
-        self.org = new_org
+            json.dump(self.org, outfile, indent=4)
 
     def _write_stack(self, dir_name):
         for d in self.org['data']:
@@ -119,13 +117,6 @@ class Stack:
             typ = d['type']
             fname = d['file']
             self.write_fn(os.path.join(dir_name, fname), self.aux_dict[typ])
-
-    def _swap_ext(self, fname):
-        if self.format == 'TIFF':
-            fname = fname.replace('.tiff', '')
-        else:
-            fname = fname.replace('.npy', '')
-        return fname
 
     def set_stack(self, new_stack):
         if new_stack.shape != self.shape:

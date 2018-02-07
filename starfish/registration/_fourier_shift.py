@@ -19,16 +19,16 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
         import numpy as np
 
         mp = stack.max_proj('ch')
-        res = np.zeros(stack.shape)
+        res = np.zeros(stack.image.shape)
 
-        for h in range(stack.num_hybs):
+        for h in range(stack.image.num_hybs):
             # compute shift between maximum projection (across channels) and dots, for each hyb round
             shift, error = compute_shift(mp[h, :, :], stack.aux_dict['dots'], self.upsampling)
             print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
 
-            for c in range(stack.num_chs):
+            for c in range(stack.image.num_chs):
                 # apply shift to all channels and hyb rounds
-                res[h, c, :] = shift_im(stack.data[h, c, :], shift)
+                res[h, c, :] = shift_im(stack.image.numpy_array[h, c, :], shift)
 
         stack.set_stack(res)
 

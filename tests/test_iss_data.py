@@ -25,7 +25,7 @@ class TestWithIssData(unittest.TestCase):
 
     STAGES = (
         [
-            "python",
+            sys.executable,
             "examples/get_iss_data.py",
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "raw"),
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted"),

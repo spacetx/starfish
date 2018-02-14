@@ -1,6 +1,6 @@
 click
 matplotlib
-numpy != 1.13.0
+numpy != 1.13.0, < 1.14.0
 opencv-python
 pandas
 regional

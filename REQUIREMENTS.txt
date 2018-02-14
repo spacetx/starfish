@@ -2,6 +2,8 @@ click
 matplotlib
 numpy != 1.13.0, < 1.14.0
 opencv-python
+boto3
+botocore
 pandas
 regional
 requests

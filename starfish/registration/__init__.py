@@ -12,8 +12,8 @@ class Registration(object):
     def add_to_parser(cls, subparsers):
         """Adds the registration component to the CLI argument parser."""
         register_group = subparsers.add_parser("register")
-        register_group.add_argument("in_json", type=FsExistsType())
-        register_group.add_argument("out_dir", type=FsExistsType())
+        register_group.add_argument("-i", "--input", type=FsExistsType(), required=True)
+        register_group.add_argument("-o", "--output", type=FsExistsType(), required=True)
         register_group.set_defaults(starfish_command=Registration._cli)
         registration_subparsers = register_group.add_subparsers(dest="registration_algorithm_class")
 
@@ -44,11 +44,11 @@ class Registration(object):
 
         print('Registering ...')
         s = Stack()
-        s.read(args.in_json)
+        s.read(args.input)
 
         instance.register(s)
 
-        s.write(args.out_dir)
+        s.write(args.output)
 
     @classmethod
     def _ensure_algorithms_setup(cls):

@@ -7,6 +7,10 @@ import pandas as pd
 from .image import ImageFormat, ImageStack
 from .munge import list_to_stack
 
+import boto3
+from botocore.exceptions import ClientError
+import zipfile
+
 
 class Stack:
     def __init__(self):
@@ -21,6 +25,48 @@ class Stack:
         # readers and writers
         self.read_fn = None  # set by self._read_metadata
         self.write_fn = np.save  # asserted for now
+
+    @classmethod
+    def download(cls, dataset, directory=None):
+        """load an example dataset as a stack
+
+        :param str dataset: name of the dataset to download
+        :param str directory: (optional, default=None) if provided, localize the stack object to
+          this directory
+        :return Stack:
+        """
+        bucket = None  # wherever your data is
+        s3 = boto3.resource('s3')
+
+        # set a place to download the file
+        if directory is None:
+            directory = os.environ['TMPDIR']  # this isn't the most portable solution.
+        if not directory.endswith('/'):  # neither is this, I hate windows.
+            directory += '/'
+
+        try:
+            s3.Bucket(bucket).download_file(dataset, directory + dataset)
+        except ClientError as e:
+            if e.response['Error']['Code'] == "404":
+                print("The object does not exist.")
+            else:
+                raise
+
+        # unzip the archive
+        archive = zipfile.ZipFile(directory + dataset, 'r')
+        archive.extractall(directory)
+        archive.close()
+
+        # read in the archive
+        # looks like your zip files have more than one stack. do you want download to give multiple
+        # stacks? or should we pare down the number of fovs in the archive?
+        stack = cls()
+
+        # do we hard code the examples to have the same json name and location within the archive
+        # to support this kind of unpacking?
+        stack.read(directory + "org.json")
+
+        return stack
 
     def read(self, in_json):
         # TODO: (ttung) remove this hackery

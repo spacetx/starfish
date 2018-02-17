@@ -1,4 +1,5 @@
 import collections
+import functools
 
 from ..util.argparse import FsExistsType
 from . import _base
@@ -17,16 +18,16 @@ class Registration(object):
         register_group.set_defaults(starfish_command=Registration._cli)
         registration_subparsers = register_group.add_subparsers(dest="registration_algorithm_class")
 
-        cls._ensure_algorithms_setup()
         for algorithm_cls in cls.algorithm_to_class_map.values():
-            algorithm_cls.add_to_parser(registration_subparsers)
+            group_parser = registration_subparsers.add_parser(algorithm_cls.get_algorithm_name())
+            group_parser.set_defaults(registration_algorithm_class=algorithm_cls)
+            algorithm_cls.add_arguments(group_parser)
 
         cls.register_group = register_group
 
     @classmethod
     def run(cls, algorithm_name, stack, *args, **kwargs):
         """Runs the registration component using the algorithm name, stack, and arguments for the specific algorithm."""
-        cls._ensure_algorithms_setup()
         algorithm_cls = cls.algorithm_to_class_map[algorithm_name]
         instance = algorithm_cls(*args, **kwargs)
         return instance.register(stack)
@@ -61,3 +62,6 @@ class Registration(object):
             queue.extend(algorithm_cls.__subclasses__())
 
             cls.algorithm_to_class_map[algorithm_cls.__name__] = algorithm_cls
+
+
+Registration._ensure_algorithms_setup()

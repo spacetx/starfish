@@ -14,10 +14,12 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
         return FourierShiftRegistration(args.u)
 
     @classmethod
-    def add_to_parser(cls, subparsers):
-        fourier_shift_group = subparsers.add_parser("fourier_shift")
-        fourier_shift_group.add_argument("--u", default=1, type=int, help="Amount of up-sampling")
-        fourier_shift_group.set_defaults(registration_algorithm_class=FourierShiftRegistration)
+    def get_algorithm_name(cls):
+        return "fourier_shift"
+
+    @classmethod
+    def add_arguments(cls, group_parser):
+        group_parser.add_argument("--u", default=1, type=int, help="Amount of up-sampling")
 
     def register(self, stack):
         import numpy as np

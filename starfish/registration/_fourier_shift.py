@@ -2,6 +2,10 @@ from ._base import RegistrationAlgorithmBase
 
 
 class FourierShiftRegistration(RegistrationAlgorithmBase):
+    """
+    Implements fourier shift registration.  TODO: (dganguli) FILL IN DETAILS HERE PLS.
+    """
+
     def __init__(self, upsampling):
         self.upsampling = upsampling
 

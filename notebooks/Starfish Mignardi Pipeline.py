@@ -50,21 +50,21 @@ image(s.aux_dict['dots'], size=10)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.register import register_stack, compute_shift, shift_im
+from starfish.registration._fourier_shift import compute_shift, shift_im
 
 upsample = 1000
 
 mp = s.max_proj('ch')
-res = np.zeros(s.shape)
+res = np.zeros(s.image.shape)
 
-for h in range(s.num_hybs):
+for h in range(s.image.num_hybs):
     # compute shift between maximum projection (across channels) and dots, for each hyb round
     shift, error = compute_shift(mp[h,:,:], s.aux_dict['dots'], upsample)
     print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
 
-    for c in range(s.num_chs):
+    for c in range(s.image.num_chs):
         # apply shift to all channels and hyb rounds
-        res[h, c, :] = shift_im(s.data[h, c, :], shift)
+        res[h, c, :] = shift_im(s.image.numpy_array[h, c, :], shift)
 
 s.set_stack(res)
 tile(s.squeeze(), size=10);
@@ -189,7 +189,9 @@ from starfish.stats import label_to_regions
 dec_filt = pd.merge(dec, spots_viz, on='spot_id',how='left')
 dec_filt = dec_filt[dec_filt.qual>.25]
 
-rgb = np.zeros(s.im_shape + (3,))
+assert s.aux_dict['dapi'].shape == s.aux_dict['dots'].shape
+
+rgb = np.zeros(s.aux_dict['dapi'].shape + (3,))
 rgb[:,:,0] = s.aux_dict['dapi']
 rgb[:,:,1] = s.aux_dict['dots']
 do = rgb2gray(rgb)

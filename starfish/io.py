@@ -1,5 +1,8 @@
 import json
 import os
+import zipfile
+import posixpath
+import tempfile
 
 import numpy as np
 import pandas as pd
@@ -9,7 +12,6 @@ from .munge import list_to_stack
 
 import boto3
 from botocore.exceptions import ClientError
-import zipfile
 
 
 class Stack:
@@ -25,48 +27,6 @@ class Stack:
         # readers and writers
         self.read_fn = None  # set by self._read_metadata
         self.write_fn = np.save  # asserted for now
-
-    @classmethod
-    def download(cls, dataset, directory=None):
-        """load an example dataset as a stack
-
-        :param str dataset: name of the dataset to download
-        :param str directory: (optional, default=None) if provided, localize the stack object to
-          this directory
-        :return Stack:
-        """
-        bucket = None  # wherever your data is
-        s3 = boto3.resource('s3')
-
-        # set a place to download the file
-        if directory is None:
-            directory = os.environ['TMPDIR']  # this isn't the most portable solution.
-        if not directory.endswith('/'):  # neither is this, I hate windows.
-            directory += '/'
-
-        try:
-            s3.Bucket(bucket).download_file(dataset, directory + dataset)
-        except ClientError as e:
-            if e.response['Error']['Code'] == "404":
-                print("The object does not exist.")
-            else:
-                raise
-
-        # unzip the archive
-        archive = zipfile.ZipFile(directory + dataset, 'r')
-        archive.extractall(directory)
-        archive.close()
-
-        # read in the archive
-        # looks like your zip files have more than one stack. do you want download to give multiple
-        # stacks? or should we pare down the number of fovs in the archive?
-        stack = cls()
-
-        # do we hard code the examples to have the same json name and location within the archive
-        # to support this kind of unpacking?
-        stack.read(directory + "org.json")
-
-        return stack
 
     def read(self, in_json):
         # TODO: (ttung) remove this hackery
@@ -84,6 +44,55 @@ class Stack:
             fname = d['file']
             img_format = ImageFormat[d['format']]
             self.aux_dict[typ] = img_format.reader_func(os.path.join(self.path, fname))
+
+    @classmethod
+    def download(cls, dataset, directory=None, return_codebook=True):
+        """
+        load an example dataset as a stack
+
+        :param str dataset: name of the dataset to download. Options: [MERFISH, ISS]
+        :param str directory: (optional, default=None) if provided, localize the stack object to
+          this directory
+        :param bool return_codebook: (optional, default=True) if true, also return the appropriate
+          codebook for the downloaded data.
+        :return Stack: Stack class containing requested data
+        :return pd.DataFrame: (optional) codebook containing gene: code map.
+        """
+        bucket = 'dp-lab-data'
+        key_prefix = 'starfish-public/'
+        s3 = boto3.resource('s3')
+
+        # set a place to download the file
+        if directory is None:
+            directory = tempfile.mkdtemp()
+        zip_archive_name = posixpath.join(directory, dataset + '.zip')
+
+        try:
+            s3.Bucket(bucket).download_file(key_prefix + dataset + '.zip', zip_archive_name)
+        except ClientError as e:
+            if e.response['Error']['Code'] == "404":
+                print("The object does not exist.")
+            else:
+                raise
+
+        # unzip the archive
+        archive = zipfile.ZipFile(zip_archive_name, 'r')
+        archive.extractall(directory)
+        archive.close()
+
+        # uncompressed data
+        uncompressed_directory = directory.rstrip('.zip')
+
+        stack = cls()
+        stack.read(posixpath.join(uncompressed_directory, dataset, 'fov_001', 'org.json'))
+
+        if return_codebook:
+            return stack, pd.read_csv(posixpath.join(
+                uncompressed_directory, dataset, 'codebook.csv'),
+                dtype={'barcode': object}
+            )
+        else:
+            return stack
 
     # TODO should this thing write npy?
     def write(self, dir_name):

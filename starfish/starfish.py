@@ -12,8 +12,8 @@ except ImportError:
     from profile import Stats  # python 2.x
 
 
+from .pipeline import registration
 from .util.argparse import FsExistsType
-from . import registration
 
 
 def build_parser():

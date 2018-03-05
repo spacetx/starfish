@@ -1,7 +1,7 @@
 import collections
 import functools
 
-from ..util.argparse import FsExistsType
+from starfish.util.argparse import FsExistsType
 from . import _base
 from . import _fourier_shift
 
@@ -41,7 +41,7 @@ class Registration(object):
 
         instance = args.registration_algorithm_class.from_cli_args(args)
 
-        from ..io import Stack
+        from starfish.io import Stack
 
         print('Registering ...')
         s = Stack()

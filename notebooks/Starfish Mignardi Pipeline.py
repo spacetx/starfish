@@ -11,11 +11,9 @@
 
 # EPY: START code
 from __future__ import division
-import sys
 
 import pandas as pd
 import numpy as np
-from skimage import io
 from skimage.color import rgb2gray
 
 import matplotlib.pyplot as plt
@@ -50,7 +48,7 @@ image(s.aux_dict['dots'], size=10)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.registration._fourier_shift import compute_shift, shift_im
+from starfish.pipeline.registration._fourier_shift import compute_shift, shift_im
 
 upsample = 1000
 
@@ -133,7 +131,6 @@ spots_viz.head()
 # EPY: END markdown
 
 # EPY: START code
-from starfish.filters import gaussian_low_pass
 from starfish.watershedsegmenter import WatershedSegmenter
 
 dapi_thresh = .16

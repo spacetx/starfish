@@ -1,4 +1,5 @@
 import collections
+import json
 import os
 import shutil
 import subprocess
@@ -96,16 +97,15 @@ class TestWithIssData(unittest.TestCase):
                     cmdline = coverage_cmdline
                 with clock.timeit(callback):
                     subprocess.check_call(cmdline)
-            with open(os.path.join(tempdir, "results", "decoder_table.csv")) as fh:
-                lines = fh.readlines()
-                counts = collections.defaultdict(lambda: 0)
-                for line in lines[1:]:
-                    line_barcode = line.split(",")[0]
-                    counts[line_barcode] += 1
+            with open(os.path.join(tempdir, "results", "decoder_table.json")) as fh:
+                results = json.load(fh)
 
-                tuples = [(count, barcode) for barcode, count in counts.items()]
-                tuples.sort(reverse=True)
-                self.assertEqual("AAGC", tuples[0][1])
-                self.assertEqual("AGGC", tuples[1][1])
+            counts = collections.defaultdict(lambda: 0)
+            for record in results:
+                counts[record['barcode']] += 1
+            tuples = [(count, barcode) for barcode, count in counts.items()]
+            tuples.sort(reverse=True)
+            self.assertEqual("AAGC", tuples[0][1])
+            self.assertEqual("AGGC", tuples[1][1])
         finally:
             shutil.rmtree(tempdir)

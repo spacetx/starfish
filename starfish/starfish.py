@@ -176,13 +176,13 @@ def detect_spots(args):
     with open(path, 'w') as f:
         f.write(json.dumps(geojson))
 
-    path = os.path.join(args.results_dir, 'spots_geo.csv')
+    path = os.path.join(args.results_dir, 'spots_geo.json')
     print("Writing | spot_id | x | y | z | to: {}".format(path))
-    spots_viz.to_csv(path, index=False)
+    spots_viz.to_json(path, orient="records")
 
-    path = os.path.join(args.results_dir, 'encoder_table.csv')
+    path = os.path.join(args.results_dir, 'encoder_table.json')
     print("Writing | spot_id | hyb | ch | val | to: {}".format(path))
-    spots_df_tidy.to_csv(path, index=False)
+    spots_df_tidy.to_json(path, orient="records")
 
 
 def segment(args):
@@ -213,20 +213,20 @@ def segment(args):
     with open(path, 'w') as f:
         f.write(json.dumps(geojson))
 
-    spots_geo = pd.read_csv(os.path.join(args.results_dir, 'spots_geo.csv'))
+    spots_geo = pd.read_json(os.path.join(args.results_dir, 'spots_geo.json'), orient="records")
     # TODO only works in 3D
     points = spots_geo.loc[:, ['x', 'y']].values
     res = assign(cells_labels, points, use_hull=True)
 
-    path = os.path.join(args.results_dir, 'regions.csv')
+    path = os.path.join(args.results_dir, 'regions.json')
     print("Writing | cell_id | spot_id to: {}".format(path))
-    res.to_csv(path, index=False)
+    res.to_json(path, orient="records")
 
 
 def decode(args):
     import pandas as pd
 
-    encoder_table = pd.read_csv(os.path.join(args.results_dir, 'encoder_table.csv'))
+    encoder_table = pd.read_json(os.path.join(args.results_dir, 'encoder_table.json'), orient="records")
     # TODO this should be loaded from disk
     d = {'barcode': ['AAGC', 'AGGC'], 'gene': ['ACTB_human', 'ACTB_mouse']}
     codebook = pd.DataFrame(d)
@@ -237,9 +237,9 @@ def decode(args):
         raise ValueError('Decoder type: {} not supported'.format(args.decoder_type))
 
     res = decoder.decode(encoder_table)
-    path = os.path.join(args.results_dir, 'decoder_table.csv')
+    path = os.path.join(args.results_dir, 'decoder_table.json')
     print("Writing | spot_id | gene_id to: {}".format(path))
-    res.to_csv(path, index=False)
+    res.to_json(path, orient="records")
 
 
 def show(args):

@@ -27,7 +27,7 @@ mkdir -p /tmp/starfish/results
 
 python examples/get_iss_data.py /tmp/starfish/raw /tmp/starfish/formatted --d 1
 
-starfish register /tmp/starfish/formatted/org.json /tmp/starfish/registered --u 1000
+starfish register -i /tmp/starfish/formatted/org.json -o /tmp/starfish/registered fourier_shift --u 1000
 
 starfish filter /tmp/starfish/registered/org.json /tmp/starfish/filtered/ --ds 15
 

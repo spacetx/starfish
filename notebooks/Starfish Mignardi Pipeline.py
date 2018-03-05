@@ -48,23 +48,11 @@ image(s.aux_dict['dots'], size=10)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.registration._fourier_shift import compute_shift, shift_im
+from starfish.pipeline.registration import Registration
 
-upsample = 1000
+registration = Registration.fourier_shift(upsampling=1000)
+registration.register(s)
 
-mp = s.max_proj('ch')
-res = np.zeros(s.image.shape)
-
-for h in range(s.image.num_hybs):
-    # compute shift between maximum projection (across channels) and dots, for each hyb round
-    shift, error = compute_shift(mp[h,:,:], s.aux_dict['dots'], upsample)
-    print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
-
-    for c in range(s.image.num_chs):
-        # apply shift to all channels and hyb rounds
-        res[h, c, :] = shift_im(s.image.numpy_array[h, c, :], shift)
-
-s.set_stack(res)
 tile(s.squeeze(), size=10);
 # EPY: END code
 

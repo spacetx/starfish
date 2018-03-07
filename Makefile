@@ -13,3 +13,5 @@ $(test_srcs): %.py :
 	coverage run -p --source=starfish -m unittest $(subst /,.,$*)
 
 .PHONY : $(test_srcs)
+
+include notebooks/subdir.mk

@@ -202,7 +202,7 @@ def segment(args):
     disk_size_markers = None
     disk_size_mask = None
 
-    seg = WatershedSegmenter(s.aux_dict['dapi'], s.aux_dict[args.aux_image])
+    seg = WatershedSegmenter(s.aux_dict['nuclei'], s.aux_dict[args.aux_image])
     cells_labels = seg.segment(args.dt, args.st, size_lim, disk_size_markers, disk_size_mask, args.md)
 
     r = label_to_regions(cells_labels)

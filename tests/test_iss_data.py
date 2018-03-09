@@ -34,20 +34,20 @@ class TestWithIssData(unittest.TestCase):
         ],
         [
             "starfish", "register",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted", "org.json"),
+            "--input", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted", "experiment.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered"),
             "fourier_shift",
             "--u", "1000",
         ],
         [
             "starfish", "filter",
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered", "org.json"),
+            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered", "experiment.json"),
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered"),
             "--ds", "15",
         ],
         [
             "starfish", "detect_spots",
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "org.json"),
+            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "experiment.json"),
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
             "dots",
             "--min_sigma", "4",
@@ -57,7 +57,7 @@ class TestWithIssData(unittest.TestCase):
         ],
         [
             "starfish", "segment",
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "org.json"),
+            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "experiment.json"),
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
             "stain",
             "--dt", ".16",

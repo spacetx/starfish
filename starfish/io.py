@@ -27,17 +27,14 @@ class Stack:
         self.path = os.path.dirname(in_json)
         with open(in_json, 'r') as in_file:
             self.org = json.load(in_file)
-        self.image = ImageStack.from_org_json(in_json)
+        self.image = ImageStack.from_image_stack(os.path.join(self.path, self.org['hybridization']))
         self._read_aux()
 
     def _read_aux(self):
-        data_dicts = self.org['aux']
-
-        for d in data_dicts:
-            typ = d['type']
-            fname = d['file']
-            img_format = ImageFormat[d['format']]
-            self.aux_dict[typ] = img_format.reader_func(os.path.join(self.path, fname))
+        for aux_key, aux_data in self.org['aux_img'].items():
+            fname = aux_data['file']
+            img_format = ImageFormat[aux_data['tile_format']]
+            self.aux_dict[aux_key] = img_format.reader_func(os.path.join(self.path, fname))
 
     # TODO should this thing write npy?
     def write(self, dir_name):
@@ -46,21 +43,20 @@ class Stack:
         self._write_metadata(dir_name)
 
     def _write_metadata(self, dir_name):
-        self.org['metadata']['format'] = ImageFormat.NUMPY.name
-
-        with open(os.path.join(dir_name, 'org.json'), 'w') as outfile:
+        with open(os.path.join(dir_name, 'experiment.json'), 'w') as outfile:
             json.dump(self.org, outfile, indent=4)
 
     def _write_stack(self, dir_name):
-        self.org['data'] = self.image.write(os.path.join(dir_name, "org.json"))
+        stack_path = os.path.join(dir_name, "hybridization.json")
+        self.image.write(stack_path)
+        self.org['hybridization'] = stack_path
 
     def _write_aux(self, dir_name):
-        for d in self.org['aux']:
-            typ = d['type']
-            fname = os.path.splitext(d['file'])[0]
-            d['file'] = "{}.{}".format(fname, ImageFormat.NUMPY.file_ext)
-            d['format'] = ImageFormat.NUMPY.name
-            self.write_fn(os.path.join(dir_name, fname), self.aux_dict[typ])
+        for aux_key, aux_data in self.org['aux_img'].items():
+            fname = os.path.splitext(aux_data['file'])[0]
+            aux_data['file'] = "{}.{}".format(fname, ImageFormat.NUMPY.file_ext)
+            aux_data['tile_format'] = ImageFormat.NUMPY.name
+            self.write_fn(os.path.join(dir_name, fname), self.aux_dict[aux_key])
 
     def set_stack(self, new_stack):
         if new_stack.shape != self.image.shape:
@@ -78,7 +74,11 @@ class Stack:
                     old_img.shape, img.shape)
                 raise AttributeError(msg)
         else:
-            self.org['aux'].append({'file': key, 'type': key, 'format': ImageFormat.NUMPY.name})
+            self.org['aux_img'][key] = {
+                'file': key,
+                'tile_format': ImageFormat.NUMPY.name,
+                'tile_shape': img.shape,
+            }
         self.aux_dict[key] = img
 
     def max_proj(self, dim):

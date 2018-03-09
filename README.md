@@ -27,15 +27,15 @@ mkdir -p /tmp/starfish/results
 
 python examples/get_iss_data.py /tmp/starfish/raw /tmp/starfish/formatted --d 1
 
-starfish register -i /tmp/starfish/formatted/org.json -o /tmp/starfish/registered fourier_shift --u 1000
+starfish register -i /tmp/starfish/formatted/experiment.json -o /tmp/starfish/registered fourier_shift --u 1000
 
-starfish filter /tmp/starfish/registered/org.json /tmp/starfish/filtered/ --ds 15
+starfish filter /tmp/starfish/registered/experiment.json /tmp/starfish/filtered/ --ds 15
 
-starfish show /tmp/starfish/filtered/org.json
+starfish show /tmp/starfish/filtered/experiment.json
 
-starfish detect_spots /tmp/starfish/filtered/org.json /tmp/starfish/results dots --min_sigma 4 --max_sigma 6  --num_sigma 20 --t 0.01
+starfish detect_spots /tmp/starfish/filtered/experiment.json /tmp/starfish/results dots --min_sigma 4 --max_sigma 6  --num_sigma 20 --t 0.01
 
-starfish segment /tmp/starfish/filtered/org.json /tmp/starfish/results stain --dt .16 --st .22 --md 57
+starfish segment /tmp/starfish/filtered/experiment.json /tmp/starfish/results stain --dt .16 --st .22 --md 57
 
 starfish decode /tmp/starfish/results --decoder_type iss
 ```

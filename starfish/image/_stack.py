@@ -22,24 +22,22 @@ class ImageStack(ImageBase):
             self._is_volume = True
 
     @classmethod
-    def from_org_json(cls, org_json_path):
-        with open(org_json_path, 'r') as in_file:
-            org_json = json.load(in_file)
-        metadata_dict = org_json['metadata']
-        num_hybs = metadata_dict['num_hybs']
-        num_chs = metadata_dict['num_chs']
-        tile_shape = tuple(metadata_dict['shape'])
+    def from_image_stack(cls, image_stack_json_path):
+        base_path = os.path.dirname(image_stack_json_path)
 
+        with open(image_stack_json_path, 'r') as in_file:
+            image_stack = json.load(in_file)
+
+        num_hybs = len(set(tile['coordinates']['hyb'] for tile in image_stack['tiles']))
+        num_chs = len(set(tile['coordinates']['ch'] for tile in image_stack['tiles']))
+        tile_shape = tuple(image_stack['legend']['default_tile_shape'])
+        tile_format = ImageFormat[image_stack['legend']['default_tile_format']]
         data = numpy.zeros((num_hybs, num_chs) + tile_shape)
-        tile_format = ImageFormat[metadata_dict['format']]
 
-        data_dicts = org_json['data']
-        base_path = os.path.dirname(org_json_path)
-
-        for data_dict in data_dicts:
-            h = data_dict['hyb']
-            c = data_dict['ch']
-            fname = data_dict['file']
+        for tile_dict in image_stack['tiles']:
+            h = tile_dict['coordinates']['hyb']
+            c = tile_dict['coordinates']['ch']
+            fname = tile_dict['file']
             im = tile_format.reader_func(os.path.join(base_path, fname))
             data[h, c, :] = im
 
@@ -79,20 +77,33 @@ class ImageStack(ImageBase):
             def tile_filename_formatter(x, y, hyb, ch):
                 return "{}-x_{}-y_{}-h_{}-c_{}".format(prefix, x, y, hyb, ch)
 
-        data = list()
+        image_stack = {
+            'version': "0.0.0",
+            'legend': {
+                'dimensions': ["x", "y", "hyb", "ch"],
+                'default_tile_shape': self._data[0, 0, :].shape,
+                'default_tile_format': ImageFormat.NUMPY.name,
+            },
+            'tiles': [],
+        }
 
         for hyb in range(self._num_hybs):
             for ch in range(self._num_chs):
                 tile_filename = tile_filename_formatter(0, 0, hyb, ch)
                 tile = {
-                    'hyb': hyb,
-                    'ch': ch,
+                    'coordinates': {
+                        'x': 0,
+                        'y': 0,
+                        'hyb': hyb,
+                        'ch': ch,
+                    },
                     'file': "{}.{}".format(tile_filename, ImageFormat.NUMPY.file_ext),
                 }
                 numpy.save(os.path.join(basepath, tile_filename), self._data[hyb, ch, :])
-                data.append(tile)
+                image_stack['tiles'].append(tile)
 
-        return data
+        with open(filepath, "w") as fh:
+            fh.write(json.dumps(image_stack))
 
     def max_proj(self, dim):
         valid_dims = ['hyb', 'ch', 'z']

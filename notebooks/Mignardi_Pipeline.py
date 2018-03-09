@@ -128,7 +128,7 @@ disk_size_markers = None
 disk_size_mask = None
 min_dist = 57
 
-seg = WatershedSegmenter(s.aux_dict['dapi'], s.aux_dict['stain'])
+seg = WatershedSegmenter(s.aux_dict['nuclei'], s.aux_dict['stain'])
 cells_labels = seg.segment(dapi_thresh, stain_thresh, size_lim, disk_size_markers, disk_size_mask, min_dist)
 seg.show()
 # EPY: END code
@@ -174,10 +174,10 @@ from starfish.stats import label_to_regions
 dec_filt = pd.merge(dec, spots_viz, on='spot_id',how='left')
 dec_filt = dec_filt[dec_filt.qual>.25]
 
-assert s.aux_dict['dapi'].shape == s.aux_dict['dots'].shape
+assert s.aux_dict['nuclei'].shape == s.aux_dict['dots'].shape
 
-rgb = np.zeros(s.aux_dict['dapi'].shape + (3,))
-rgb[:,:,0] = s.aux_dict['dapi']
+rgb = np.zeros(s.aux_dict['nuclei'].shape + (3,))
+rgb[:,:,0] = s.aux_dict['nuclei']
 rgb[:,:,1] = s.aux_dict['dots']
 do = rgb2gray(rgb)
 do = do/(do.max())

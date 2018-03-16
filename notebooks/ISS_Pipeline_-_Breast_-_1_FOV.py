@@ -131,11 +131,10 @@ tile_lims(stack_filt, 2, size=10);
 # EPY: END markdown
 
 # EPY: START code
-from starfish.registration._fourier_shift import FourierShiftRegistration
-from starfish.registration import Registration
+from starfish.pipeline.registration import Registration
 
-upsample = 1000
-s = Registration.run("FourierShiftRegistration", s, upsample)
+registration = Registration.fourier_shift(upsampling=1000)
+registration.register(s)
 # EPY: END code
 
 # EPY: START markdown

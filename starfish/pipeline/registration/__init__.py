@@ -26,9 +26,9 @@ class Registration(PipelineComponent):
         cls.register_group = register_group
 
     @classmethod
-    def _cli(cls, args):
+    def _cli(cls, args, print_help=False):
         """Runs the registration component based on parsed arguments."""
-        if args.registration_algorithm_class is None:
+        if args.registration_algorithm_class is None or print_help:
             cls.register_group.print_help()
             cls.register_group.exit(status=2)
 

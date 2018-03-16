@@ -81,7 +81,7 @@ PROFILER_NOOP_ENVVAR = 'PROFILE_TEST'
 
 def starfish():
     parser = build_parser()
-    args = parser.parse_args()
+    args, argv = parser.parse_known_args()
 
     art = """
          _              __ _     _
@@ -100,14 +100,14 @@ def starfish():
     if args.starfish_command is None:
         parser.print_help()
         parser.exit(status=2)
-    args.starfish_command(args)
+    args.starfish_command(args, len(argv) != 0)
 
     if args.profile:
         stats = Stats(profiler)
         stats.sort_stats('tottime').print_stats(PROFILER_LINES)
 
 
-def filter(args):
+def filter(args, print_help=False):
     import numpy as np
 
     from .filters import white_top_hat
@@ -144,7 +144,7 @@ def filter(args):
     s.write(args.out_dir)
 
 
-def detect_spots(args):
+def detect_spots(args, print_help=False):
     from .io import Stack
     from .munge import spots_to_geojson
     from .spots.gaussian import GaussianSpotDetector
@@ -185,7 +185,7 @@ def detect_spots(args):
     spots_df_tidy.to_json(path, orient="records")
 
 
-def segment(args):
+def segment(args, print_help=False):
     import pandas as pd
 
     from .assign import assign
@@ -223,7 +223,7 @@ def segment(args):
     res.to_json(path, orient="records")
 
 
-def decode(args):
+def decode(args, print_help=False):
     import pandas as pd
 
     encoder_table = pd.read_json(os.path.join(args.results_dir, 'encoder_table.json'), orient="records")
@@ -242,7 +242,7 @@ def decode(args):
     res.to_json(path, orient="records")
 
 
-def show(args):
+def show(args, print_help=False):
     import matplotlib.pyplot as plt
     from showit import tile
 
@@ -254,5 +254,5 @@ def show(args):
     plt.show()
 
 
-def noop(args):
+def noop(args, print_help=False):
     pass

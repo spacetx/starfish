@@ -171,12 +171,12 @@ def detect_spots(args, print_help=False):
     spots_viz = gsp.spots_df_viz
     geojson = spots_to_geojson(spots_viz)
 
-    path = os.path.join(args.results_dir, 'spots.json')
+    path = os.path.join(args.results_dir, 'spots.geojson')
     print("Writing | spots geojson to: {}".format(path))
     with open(path, 'w') as f:
         f.write(json.dumps(geojson))
 
-    path = os.path.join(args.results_dir, 'spots_geo.json')
+    path = os.path.join(args.results_dir, 'spots.json')
     print("Writing | spot_id | x | y | z | to: {}".format(path))
     spots_viz.to_json(path, orient="records")
 
@@ -208,14 +208,14 @@ def segment(args, print_help=False):
     r = label_to_regions(cells_labels)
     geojson = regions_to_geojson(r)
 
-    path = os.path.join(args.results_dir, 'regions.json')
+    path = os.path.join(args.results_dir, 'regions.geojson')
     print("Writing | regions geojson to: {}".format(path))
     with open(path, 'w') as f:
         f.write(json.dumps(geojson))
 
-    spots_geo = pd.read_json(os.path.join(args.results_dir, 'spots_geo.json'), orient="records")
+    spots = pd.read_json(os.path.join(args.results_dir, 'spots.json'), orient="records")
     # TODO only works in 3D
-    points = spots_geo.loc[:, ['x', 'y']].values
+    points = spots.loc[:, ['x', 'y']].values
     res = assign(cells_labels, points, use_hull=True)
 
     path = os.path.join(args.results_dir, 'regions.json')

@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import regional
 
 
 def swap(img):
@@ -52,7 +53,7 @@ def spots_to_geojson(spots_viz):
     return [make_dict(row) for row in spots_viz.iterrows()]
 
 
-def regions_to_geojson(r):
+def regions_to_geojson(r, use_hull=True):
     '''
     Convert region geometrical data to geojson format
     '''
@@ -64,7 +65,11 @@ def regions_to_geojson(r):
         d["geometry"] = {"type": "Polygon", "coordinates": c}
         return d
 
-    return [make_dict(id, verts) for id, verts in enumerate(r.hull)]
+    if use_hull:
+        coordinates = r.hull
+    else:
+        coordinates = r.coordinates
+    return [make_dict(id, verts) for id, verts in enumerate(coordinates)]
 
 
 def relabel(image):

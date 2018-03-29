@@ -2,12 +2,8 @@ import numpy as np
 import pandas as pd
 from skimage.measure import points_in_poly
 
-from .stats import label_to_regions
 
-
-def assign(cells_label, spots, use_hull=True, verbose=False):
-    cells_region = label_to_regions(cells_label)
-
+def assign(cells_region, spots, use_hull=True, verbose=False):
     res = pd.DataFrame({'spot_id': range(0, spots.shape[0])})
     res['cell_id'] = None
 

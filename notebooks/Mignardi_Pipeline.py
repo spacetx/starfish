@@ -139,9 +139,11 @@ seg.show()
 
 # EPY: START code
 from starfish.assign import assign
+from starfish.stats import label_to_regions
 
 points = spots_viz.loc[:, ['x', 'y']].values
-ass = assign(cells_labels, points, use_hull=True)
+regions = label_to_regions(cells_labels)
+ass = assign(regions, points, use_hull=True)
 ass.groupby('cell_id',as_index=False).count().rename(columns={'spot_id':'num spots'})
 # EPY: END code
 

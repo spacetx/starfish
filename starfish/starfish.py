@@ -205,8 +205,8 @@ def segment(args, print_help=False):
     seg = WatershedSegmenter(s.aux_dict['dapi'], s.aux_dict[args.aux_image])
     cells_labels = seg.segment(args.dt, args.st, size_lim, disk_size_markers, disk_size_mask, args.md)
 
-    r = label_to_regions(cells_labels)
-    geojson = regions_to_geojson(r)
+    regions = label_to_regions(cells_labels)
+    geojson = regions_to_geojson(regions)
 
     path = os.path.join(args.results_dir, 'regions.geojson')
     print("Writing | regions geojson to: {}".format(path))
@@ -216,7 +216,7 @@ def segment(args, print_help=False):
     spots = pd.read_json(os.path.join(args.results_dir, 'spots.json'), orient="records")
     # TODO only works in 3D
     points = spots.loc[:, ['x', 'y']].values
-    res = assign(cells_labels, points, use_hull=True)
+    res = assign(regions, points, use_hull=True)
 
     path = os.path.join(args.results_dir, 'regions.json')
     print("Writing | cell_id | spot_id to: {}".format(path))

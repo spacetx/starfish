@@ -72,6 +72,18 @@ def regions_to_geojson(r, use_hull=True):
     return [make_dict(id, verts) for id, verts in enumerate(coordinates)]
 
 
+def geojson_to_region(geojson):
+    """
+    Convert geojson data to region geometrical data.
+    """
+    def make_region(geometry):
+        assert geometry['geometry']['type'] == "Polygon"
+
+        return regional.one([(coordinates[0], coordinates[1]) for coordinates in geometry['geometry']['coordinates']])
+
+    return regional.many([make_region(geometry) for geometry in geojson])
+
+
 def relabel(image):
     '''
     This is a local implementation of centrosome.cpmorphology.relabel

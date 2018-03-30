@@ -73,6 +73,7 @@ class TestWithIssData(unittest.TestCase):
 
     def test_run_pipeline(self):
         tempdir = tempfile.mkdtemp()
+        coverage_enabled = "STARFISH_COVERAGE" in os.environ
 
         def callback(interval):
             print(" ".join(stage[:2]), " ==> {} seconds".format(interval))
@@ -86,7 +87,7 @@ class TestWithIssData(unittest.TestCase):
                     element(tempdir=tempdir) if callable(element) else element
                     for element in stage
                 ]
-                if cmdline[0] == 'starfish':
+                if cmdline[0] == 'starfish' and coverage_enabled:
                     coverage_cmdline = [
                         "coverage", "run",
                         "-p",

@@ -103,11 +103,11 @@ class WatershedSegmenter:
         plt.title('Stain')
 
         plt.subplot(323)
-        image(self.dapi_thresholded, bar=True, ax=plt.gca())
+        image(self.dapi_thresholded, bar=False, ax=plt.gca())
         plt.title('DAPI Thresholded')
 
         plt.subplot(324)
-        image(self.mask, bar=True, ax=plt.gca())
+        image(self.mask, bar=False, ax=plt.gca())
         plt.title('Watershed Mask')
 
         plt.subplot(325)

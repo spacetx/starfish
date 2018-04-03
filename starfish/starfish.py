@@ -13,6 +13,7 @@ except ImportError:
 
 
 from .pipeline import registration
+from .pipeline.decoder import Decoder
 from .util.argparse import FsExistsType
 
 
@@ -58,10 +59,7 @@ def build_parser():
     segment_group.add_argument("--md", default=57, type=int, help="Minimum distance between cells")
     segment_group.set_defaults(starfish_command=segment)
 
-    decode_group = subparsers.add_parser("decode")
-    decode_group.add_argument("results_dir", type=FsExistsType())
-    decode_group.add_argument("--decoder_type", default="iss", help="Decoder type")
-    decode_group.set_defaults(starfish_command=decode)
+    Decoder.add_to_parser(subparsers)
 
     show_group = subparsers.add_parser("show")
     show_group.add_argument("in_json", type=FsExistsType())
@@ -220,25 +218,6 @@ def segment(args, print_help=False):
 
     path = os.path.join(args.results_dir, 'regions.json')
     print("Writing | cell_id | spot_id to: {}".format(path))
-    res.to_json(path, orient="records")
-
-
-def decode(args, print_help=False):
-    import pandas as pd
-
-    encoder_table = pd.read_json(os.path.join(args.results_dir, 'encoder_table.json'), orient="records")
-    # TODO this should be loaded from disk
-    d = {'barcode': ['AAGC', 'AGGC'], 'gene': ['ACTB_human', 'ACTB_mouse']}
-    codebook = pd.DataFrame(d)
-    if args.decoder_type == 'iss':
-        from .decoders.iss import IssDecoder
-        decoder = IssDecoder(codebook, letters=['T', 'G', 'C', 'A'])
-    else:
-        raise ValueError('Decoder type: {} not supported'.format(args.decoder_type))
-
-    res = decoder.decode(encoder_table)
-    path = os.path.join(args.results_dir, 'decoder_table.json')
-    print("Writing | spot_id | gene_id to: {}".format(path))
     res.to_json(path, orient="records")
 
 

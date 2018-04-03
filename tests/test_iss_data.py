@@ -66,8 +66,11 @@ class TestWithIssData(unittest.TestCase):
         ],
         [
             "starfish", "decode",
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
-            "--decoder_type", "iss",
+            "-i", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "encoder_table.json"),
+            # TODO: this should reflect the codebook path.  right now we're pointing at the encoder table.
+            "-c", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "encoder_table.json"),
+            "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "decoder_table.json"),
+            "iss",
         ],
     )
 

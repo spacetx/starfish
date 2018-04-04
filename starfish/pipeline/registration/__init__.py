@@ -1,13 +1,13 @@
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
-from . import _base
-from . import _fourier_shift
+from . import fourier_shift
+from ._base import RegistrationAlgorithmBase
 
 
 class Registration(PipelineComponent):
     @classmethod
     def implementing_algorithms(cls):
-        return _base.RegistrationAlgorithmBase.__subclasses__()
+        return RegistrationAlgorithmBase.__subclasses__()
 
     @classmethod
     def add_to_parser(cls, subparsers):

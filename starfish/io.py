@@ -90,10 +90,14 @@ class Stack:
         new_shape = (first_dim,) + self.image.tile_shape
         new_data = self.image.numpy_array.reshape(new_shape)
 
-        self.squeeze_map = pd.DataFrame(
-            {'ind': np.arange(first_dim),
-             'hyb': np.arange(self.image.num_hybs),
-             'ch': np.arange(self.image.num_chs)})
+        ind = np.arange(first_dim)
+
+        # e.g. 0, 1, 2, 3 --> 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3
+        hyb = np.repeat(np.arange(self.image.num_hybs), self.image.num_chs)
+
+        # e.g. 0, 1, 2, 3 --> 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3
+        ch = np.tile(np.arange(self.image.num_chs), self.image.num_hybs)
+        self.squeeze_map = pd.DataFrame(dict(ind=ind, hyb=hyb, ch=ch))
 
         if bit_map_flag:
             mp = [(d['hyb'], d['ch'], d['bit']) for d in self.org['data']]

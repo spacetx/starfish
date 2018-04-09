@@ -4,6 +4,10 @@ from ._base import RegistrationAlgorithmBase
 class FourierShiftRegistration(RegistrationAlgorithmBase):
     """
     Implements fourier shift registration.  TODO: (dganguli) FILL IN DETAILS HERE PLS.
+
+    Performs a simple translation registration
+
+    .. seealso: https://en.wikipedia.org/wiki/Phase_correlation
     """
 
     def __init__(self, upsampling):

@@ -88,7 +88,7 @@ class Stack:
         first_dim = self.image.num_hybs * self.image.num_chs
 
         new_shape = (first_dim,) + self.image.tile_shape
-        new_data = self.images.reshape(new_shape)
+        new_data = self.images.numpy_array.reshape(new_shape)
 
         self.squeeze_map = pd.DataFrame(
             {'ind': np.arange(first_dim),

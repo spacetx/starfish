@@ -146,10 +146,13 @@ def bin_thresh(img, thresh):
 
 def white_top_hat(img, disk_size):
     """
-    Performs white top hat filtering of an image to enhance spots
+    Performs "white top hat" filtering of an image to enhance spots. "White top
+    hat filtering" finds spots that are both smaller and brighter than their
+    surroundings.
     :param img: Image to filter. :type numpy array
     :param disk_size: Radius of the disk-shaped structuring element.  :type int
     :return: Filtered image, same shape as input :type ndarray
+    .. seealso:: https://en.wikipedia.org/wiki/Top-hat_transform
     """
     selem = disk(disk_size)
     min_filt = minimum_filter(img, footprint=selem)

@@ -35,12 +35,4 @@ class PipelineComponent(object):
 
             cls._algorithm_to_class_map[algorithm_cls.__name__] = algorithm_cls
 
-            setattr(cls, algorithm_cls.get_algorithm_name(), cls._trampoline_maker(algorithm_cls))
-
-    @staticmethod
-    def _trampoline_maker(algorithm_cls):
-        def trampoline(*args, **kwargs):
-            return algorithm_cls(*args, **kwargs)
-
-        functools.update_wrapper(trampoline, algorithm_cls)
-        return trampoline
+            setattr(cls, algorithm_cls.get_algorithm_name(), algorithm_cls)

@@ -12,7 +12,7 @@ regenerate_py: $(py_regenerate_targets)
 $(ipynb_validate_targets): TEMPFILE := $(shell mktemp)
 $(ipynb_validate_targets): validate__%.ipynb :
 	nbencdec encode $*.ipynb $(TEMPFILE)
-	diff -q <( cat $*.py | egrep -v '^# EPY: stripped_notebook: ') <( cat $(TEMPFILE) | egrep -v '# EPY: stripped_notebook: ' )
+	diff -q <(cat $*.py | egrep -v '^# EPY: stripped_notebook: ') <(cat $(TEMPFILE) | egrep -v '# EPY: stripped_notebook: ')
 
 $(ipynb_regenerate_targets): regenerate__%.ipynb : %.py
 	nbencdec decode $< $*.ipynb

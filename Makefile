@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 MODULES=starfish tests
 
 lint:

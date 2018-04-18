@@ -85,24 +85,19 @@ class Stack:
         return self.image.max_proj(dim)
 
     def squeeze(self, bit_map_flag=False):
-        new_shape = ((self.image.num_hybs * self.image.num_chs),) + self.image.tile_shape
-        new_data = np.zeros(new_shape)
+        first_dim = self.image.num_hybs * self.image.num_chs
 
-        # TODO this can all probably be done smartly with np.reshape instead of a double for loop
-        ind = 0
-        inds = []
-        hybs = []
-        chs = []
+        new_shape = (first_dim,) + self.image.tile_shape
+        new_data = self.image.numpy_array.reshape(new_shape)
 
-        for h in range(self.image.num_hybs):
-            for c in range(self.image.num_chs):
-                new_data[ind, :] = self.image.numpy_array[h, c, :]
-                inds.append(ind)
-                hybs.append(h)
-                chs.append(c)
-                ind += 1
+        ind = np.arange(first_dim)
 
-        self.squeeze_map = pd.DataFrame({'ind': inds, 'hyb': hybs, 'ch': chs})
+        # e.g. 0, 1, 2, 3 --> 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3
+        hyb = np.repeat(np.arange(self.image.num_hybs), self.image.num_chs)
+
+        # e.g. 0, 1, 2, 3 --> 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3
+        ch = np.tile(np.arange(self.image.num_chs), self.image.num_hybs)
+        self.squeeze_map = pd.DataFrame(dict(ind=ind, hyb=hyb, ch=ch))
 
         if bit_map_flag:
             mp = [(d['hyb'], d['ch'], d['bit']) for d in self.org['data']]
@@ -116,13 +111,5 @@ class Stack:
             stack = list_to_stack(stack)
 
         new_shape = (self.image.num_hybs, self.image.num_chs) + self.image.tile_shape
-        res = np.zeros(new_shape)
-
-        # TODO this can probably done smartly without a double for loop
-        ind = 0
-        for h in range(self.image.num_hybs):
-            for c in range(self.image.num_chs):
-                res[h, c, :] = stack[ind, :]
-                ind += 1
-
+        res = stack.reshape(new_shape)
         return res

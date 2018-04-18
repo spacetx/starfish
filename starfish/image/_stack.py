@@ -107,6 +107,6 @@ class ImageStack(ImageBase):
         elif dim == 'z' and len(self._tile_shape) > 2:
             res = numpy.max(self._data, axis=4)
         else:
-            res = self.data
+            res = self._data
 
         return res

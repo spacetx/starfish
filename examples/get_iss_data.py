@@ -62,17 +62,9 @@ def load_and_write_data(input_dir, output_dir):
     imsave(output_dir + dots_fname, dots)
     res['aux'].append({'type': 'dots', 'file': dots_fname, 'format': "TIFF"})
 
-    if len(img.shape) == 2:
-        is_volume = False
-    elif len(img.shape) == 3:
-        is_volume = True
-    else:
-        raise ValueError('Images must be 2D or 3D. Found: {}'.format(img.shape))
-
     res['metadata']['num_hybs'] = 4
     res['metadata']['num_chs'] = 4
     res['metadata']['shape'] = img.shape
-    res['metadata']['is_volume'] = is_volume
     res['metadata']['format'] = "TIFF"
 
     return res

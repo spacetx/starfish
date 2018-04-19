@@ -18,10 +18,7 @@ class PixelSpotDetector:
         sq = self.stack.squeeze(bit_map_flag=bit_map_flag)
         num_bits = self.stack.squeeze_map.bit.max() + 1
 
-        if self.stack.image.is_volume:
-            mat = np.reshape(sq.copy(), (sq.shape[0], sq.shape[1] * sq.shape[2] * sq.shape[3]))
-        else:
-            mat = np.reshape(sq.copy(), (sq.shape[0], sq.shape[1] * sq.shape[2]))
+        mat = np.reshape(sq.copy(), (sq.shape[0], sq.shape[1] * sq.shape[2]))
 
         res = pd.DataFrame(mat.T)
         res['spot_id'] = range(len(res))

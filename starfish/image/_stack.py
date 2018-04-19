@@ -16,11 +16,6 @@ class ImageStack(ImageBase):
         self._num_chs = num_chs
         self._tile_shape = tile_shape
 
-        if len(tile_shape) == 2:
-            self._is_volume = False
-        else:
-            self._is_volume = True
-
     @classmethod
     def from_org_json(cls, org_json_path):
         with open(org_json_path, 'r') as in_file:
@@ -67,10 +62,6 @@ class ImageStack(ImageBase):
     @property
     def tile_shape(self):
         return self._tile_shape
-
-    @property
-    def is_volume(self):
-        return self._is_volume
 
     def write(self, filepath, tile_filename_formatter=None):
         prefix = os.path.splitext(os.path.basename(filepath))[0]

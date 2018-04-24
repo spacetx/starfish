@@ -15,7 +15,7 @@ class Decoder(PipelineComponent):
         decoder_group = subparsers.add_parser("decode")
         decoder_group.add_argument("-i", "--input", type=FsExistsType(), required=True)
         decoder_group.add_argument("-o", "--output", required=True)
-        decoder_group.add_argument("-c", "--codebook", type=FsExistsType(), required=True)
+        decoder_group.add_argument("--codebook", type=FsExistsType(), required=True)
         decoder_group.set_defaults(starfish_command=Decoder._cli)
         decoder_subparsers = decoder_group.add_subparsers(dest="decoder_algorithm_class")
 

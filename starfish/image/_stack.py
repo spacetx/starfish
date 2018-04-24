@@ -1,48 +1,43 @@
-import json
 import os
 
 import numpy
+from slicedimage import Reader, Writer
 
-from ._base import ImageBase, ImageFormat
+from ._base import ImageBase
 
 
 class ImageStack(ImageBase):
-    def __init__(self, data, tile_format, num_hybs, num_chs, tile_shape):
-        self._data = data
-        self._tile_format = tile_format
+    def __init__(self, image_partition):
+        self._image_partition = image_partition
+        self._num_hybs = image_partition.get_dimension_shape('hyb')
+        self._num_chs = image_partition.get_dimension_shape('ch')
+        self._tile_shape = tuple(image_partition.default_tile_shape)
 
-        # shape data
-        self._num_hybs = num_hybs
-        self._num_chs = num_chs
-        self._tile_shape = tile_shape
+        self._data = numpy.zeros((self._num_hybs, self._num_chs) + self._tile_shape)
+        self._data_needs_writeback = False
+
+        for tile in image_partition.tiles():
+            h = tile.indices['hyb']
+            c = tile.indices['ch']
+            self._data[h, c, :] = tile.numpy_array
 
     @classmethod
-    def from_org_json(cls, org_json_path):
-        with open(org_json_path, 'r') as in_file:
-            org_json = json.load(in_file)
-        metadata_dict = org_json['metadata']
-        num_hybs = metadata_dict['num_hybs']
-        num_chs = metadata_dict['num_chs']
-        tile_shape = tuple(metadata_dict['shape'])
+    def from_image_stack(cls, image_stack_name_or_url, baseurl):
+        image_partition = Reader.parse_doc(image_stack_name_or_url, baseurl)
 
-        data = numpy.zeros((num_hybs, num_chs) + tile_shape)
-        tile_format = ImageFormat[metadata_dict['format']]
-
-        data_dicts = org_json['data']
-        base_path = os.path.dirname(org_json_path)
-
-        for data_dict in data_dicts:
-            h = data_dict['hyb']
-            c = data_dict['ch']
-            fname = data_dict['file']
-            im = tile_format.reader_func(os.path.join(base_path, fname))
-            data[h, c, :] = im
-
-        return ImageStack(data, tile_format, num_hybs, num_chs, tile_shape)
+        return ImageStack(image_partition)
 
     @property
     def numpy_array(self):
-        return self._data
+        result = self._data.view()
+        result.setflags(write=False)
+        return result
+
+    @numpy_array.setter
+    def numpy_array(self, data):
+        self._data = data.view()
+        self._data_needs_writeback = True
+        data.setflags(write=False)
 
     @property
     def shape(self):
@@ -63,27 +58,50 @@ class ImageStack(ImageBase):
     def tile_shape(self):
         return self._tile_shape
 
-    def write(self, filepath, tile_filename_formatter=None):
-        prefix = os.path.splitext(os.path.basename(filepath))[0]
-        basepath = os.path.dirname(filepath)
-        if tile_filename_formatter is None:
-            def tile_filename_formatter(x, y, hyb, ch):
-                return "{}-x_{}-y_{}-h_{}-c_{}".format(prefix, x, y, hyb, ch)
+    def write(self, filepath, tile_opener=None):
+        if self._data_needs_writeback:
+            for tile in self._image_partition.tiles():
+                h = tile.indices['hyb']
+                c = tile.indices['ch']
+                tile.numpy_array = self._data[h, c, :]
+            self._data_needs_writeback = False
 
-        data = list()
+        seen_x_coords, seen_y_coords = set(), set()
+        for tile in self._image_partition.tiles():
+            seen_x_coords.add(tile.coordinates['x'])
+            seen_y_coords.add(tile.coordinates['y'])
 
-        for hyb in range(self._num_hybs):
-            for ch in range(self._num_chs):
-                tile_filename = tile_filename_formatter(0, 0, hyb, ch)
-                tile = {
-                    'hyb': hyb,
-                    'ch': ch,
-                    'file': "{}.{}".format(tile_filename, ImageFormat.NUMPY.file_ext),
-                }
-                numpy.save(os.path.join(basepath, tile_filename), self._data[hyb, ch, :])
-                data.append(tile)
+        sorted_x_coords = sorted(seen_x_coords)
+        sorted_y_coords = sorted(seen_y_coords)
+        x_coords_to_idx = {coords: idx for idx, coords in enumerate(sorted_x_coords)}
+        y_coords_to_idx = {coords: idx for idx, coords in enumerate(sorted_y_coords)}
+        # TODO: should handle Z.
 
-        return data
+        if tile_opener is None:
+            def tile_opener(toc_path, tile, ext):
+                tile_basename = os.path.splitext(toc_path)[0]
+                xcoord = tile.coordinates['x']
+                ycoord = tile.coordinates['y']
+                xcoord = tuple(xcoord) if isinstance(xcoord, list) else xcoord
+                ycoord = tuple(ycoord) if isinstance(ycoord, list) else ycoord
+                xval = x_coords_to_idx[xcoord]
+                yval = y_coords_to_idx[ycoord]
+                return open(
+                    "{}-X{}-Y{}-H{}-C{}.{}".format(
+                        tile_basename,
+                        xval,
+                        yval,
+                        tile.indices['hyb'],
+                        tile.indices['ch'],
+                        ext,
+                    ),
+                    "wb")
+
+        Writer.write_to_path(
+            self._image_partition,
+            filepath,
+            pretty=True,
+            tile_opener=tile_opener)
 
     def max_proj(self, dim):
         valid_dims = ['hyb', 'ch', 'z']

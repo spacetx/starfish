@@ -1,9 +1,3 @@
-import enum
-
-import numpy
-import skimage.io
-
-
 class ImageBase(object):
     @property
     def numpy_array(self):

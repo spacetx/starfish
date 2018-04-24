@@ -68,8 +68,8 @@ class TestWithIssData(unittest.TestCase):
             "starfish", "decode",
             "-i", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "encoder_table.json"),
             # TODO: this should reflect the codebook path.  right now we're pointing at the encoder table.
-            "-c", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "encoder_table.json"),
-            "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "decoder_table.json"),
+            "--codebook", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "encoder_table.json"),
+            "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "decoded_table.json"),
             "iss",
         ],
     )
@@ -101,7 +101,7 @@ class TestWithIssData(unittest.TestCase):
                     cmdline = coverage_cmdline
                 with clock.timeit(callback):
                     subprocess.check_call(cmdline)
-            with open(os.path.join(tempdir, "results", "decoder_table.json")) as fh:
+            with open(os.path.join(tempdir, "results", "decoded_table.json")) as fh:
                 results = json.load(fh)
 
             counts = collections.defaultdict(lambda: 0)

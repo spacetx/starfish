@@ -37,7 +37,7 @@ starfish detect_spots /tmp/starfish/filtered/org.json /tmp/starfish/results dots
 
 starfish segment /tmp/starfish/filtered/org.json /tmp/starfish/results stain --dt .16 --st .22 --md 57
 
-starfish decode /tmp/starfish/results --decoder_type iss
+starfish decode -i /tmp/starfish/results/encoder_table.json --codebook /tmp/starfish/results/encoder_table.json -o /tmp/starfish/results/decoded_table.json iss
 ```
 
 ## visualization quickstart

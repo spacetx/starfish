@@ -5,12 +5,7 @@ import cProfile
 import json
 import os
 import sys
-
-try:
-    from pstats import Stats  # python 3.x
-except ImportError:
-    from profile import Stats  # python 2.x
-
+from pstats import Stats
 
 from .pipeline import registration
 from .pipeline.decoder import Decoder

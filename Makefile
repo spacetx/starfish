@@ -2,8 +2,13 @@ SHELL := /bin/bash
 
 MODULES=starfish tests
 
+all:	lint mypy test
+
 lint:
 	flake8 $(MODULES)
+
+mypy:
+	mypy --ignore-missing-imports $(MODULES)
 
 test_srcs := $(wildcard tests/test_*.py)
 

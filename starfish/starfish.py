@@ -111,14 +111,13 @@ def filter(args, print_help=False):
     s = Stack()
     s.read(args.in_json)
 
-    # filter raw images, for all hybs and channels
-    stack_filt = []
-    for im_num, im in enumerate(s.squeeze()):
-        print("Filtering image: {}...".format(im_num))
-        im_filt = white_top_hat(im, args.ds)
-        stack_filt.append(im_filt)
+    res = np.zeros(s.image.shape)
 
-    stack_filt = s.un_squeeze(stack_filt)
+    # filter raw images, for all hybs, channels
+    for hyb in range(s.image.num_hybs):
+        for ch in range(s.image.num_chs):
+            print("Filtering image: hyb={} ch={}...".format(hyb, ch))
+            res[hyb, ch, :, :] = white_top_hat(s.image.numpy_array[hyb, ch, :, :], args.ds)
 
     # filter dots
     print("Filtering dots ...")
@@ -130,7 +129,7 @@ def filter(args, print_help=False):
     stain = stain / stain.max()
 
     # update stack
-    s.set_stack(stack_filt)
+    s.set_stack(res)
     s.set_aux('dots', dots_filt)
     s.set_aux('stain', stain)
 

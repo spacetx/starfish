@@ -45,7 +45,7 @@ def build_hybridization_stack(input_dir):
     return hybridization_images
 
 
-def build_fov(input_dir, hybridization_stack_name, output_dir):
+def build_fov(input_dir, hybridization_stack_name, codebook_json_filename, output_dir):
     prefix = "fov_0"
 
     nuclei = imread(input_dir + "DO/c1.TIF")
@@ -54,6 +54,7 @@ def build_fov(input_dir, hybridization_stack_name, output_dir):
     experiment = {
         'version': "0.0.0",
         'hybridization_images': hybridization_stack_name,
+        'codebook': codebook_json_filename,
         'auxiliary_images': {},
     }
 
@@ -135,7 +136,14 @@ def format_data(input_dir, output_dir, d):
         tile_opener=tile_opener,
         tile_writer=tile_writer)
 
-    starfish_input = build_fov(input_dir, image_stack_name, output_dir)
+    codebook = [
+        {'barcode': "AAGC", 'gene': "ACTB_human"},
+        {'barcode': "AGGC", 'gene': "ACTB_mouse"},
+    ]
+    codebook_json_filename = "codebook.json"
+    write_json(codebook, os.path.join(output_dir, codebook_json_filename))
+
+    starfish_input = build_fov(input_dir, image_stack_name, codebook_json_filename, output_dir)
     starfish_input_name = "experiment.json"
     write_json(starfish_input, os.path.join(output_dir, starfish_input_name))
 

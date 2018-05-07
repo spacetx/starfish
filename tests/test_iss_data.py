@@ -7,12 +7,32 @@ import sys
 import tempfile
 import unittest
 
+import jsonpath_rw
+
 
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
 
 
 from starfish.util import clock
+
+
+def get_field_from(json_filepath, jsonpath_expr, nth=0):
+    """
+    Load up a JSON document from ``json_filepath`` and return the `nth` result matching the JSONPath expression
+    ``jsonpath_expr``.
+    """
+    parser = jsonpath_rw.parse(jsonpath_expr)
+    with open(json_filepath, "r") as fh:
+        document = json.load(fh)
+    return parser.find(document)[nth].value
+
+
+def get_codebook(tempdir):
+    filename = get_field_from(
+        os.path.join(tempdir, "formatted", "experiment.json"),
+        "$.[codebook]")
+    return os.path.join(tempdir, "formatted", filename)
 
 
 class TestWithIssData(unittest.TestCase):
@@ -67,8 +87,7 @@ class TestWithIssData(unittest.TestCase):
         [
             "starfish", "decode",
             "-i", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "encoder_table.json"),
-            # TODO: this should reflect the codebook path.  right now we're pointing at the encoder table.
-            "--codebook", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "encoder_table.json"),
+            "--codebook", lambda tempdir, *args, **kwargs: get_codebook(tempdir),
             "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "decoded_table.json"),
             "iss",
         ],

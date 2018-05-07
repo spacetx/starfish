@@ -1,5 +1,6 @@
 coverage
 flake8
+jsonpath-rw
 mypy
 nbencdec
 -r REQUIREMENTS.txt

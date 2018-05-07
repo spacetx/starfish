@@ -24,7 +24,7 @@ class Stack:
 
     def read(self, in_json):
         # TODO: (ttung) remove this hackery
-        self.path = os.path.dirname(in_json)
+        self.path = os.path.dirname(os.path.abspath(in_json))
         with open(in_json, 'r') as in_file:
             self.org = json.load(in_file)
         self.image = ImageStack.from_org_json(in_json)

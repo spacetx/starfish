@@ -213,10 +213,10 @@ p.spots_df_viz.head()
 # EPY: END markdown
 
 # EPY: START code
-from starfish.decoders.iss import IssDecoder
+from starfish.pipeline.decoder._iss import IssDecoder
 
-decoder = IssDecoder(codebook, letters = ['T', 'G', 'C', 'A']) # letters = channels
-res = decoder.decode(encoded)
+decoder = IssDecoder()
+res = decoder.decode(encoded, codebook, letters=['T', 'G', 'C', 'A'])  # letters = channels
 res.head()
 
 # below, 2, 3 are NaN because not defined in codebook. 

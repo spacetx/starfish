@@ -1,3 +1,4 @@
+import collections
 import os
 import typing
 
@@ -155,11 +156,17 @@ class ImageStack(ImageBase):
         return tuple(slice_list), axes
 
     @property
-    def shape(self):
+    def shape(self) -> typing.Optional[dict]:
         if self._data is None:
             return None
-        else:
-            return self._data.shape
+
+        result = collections.OrderedDict()
+        for name, idx in ImageStack.AXES_MAP.items():
+            result[name] = self._data.shape[idx]
+        result['y'] = self._data.shape[-2]
+        result['x'] = self._data.shape[-1]
+
+        return result
 
     @property
     def num_hybs(self):

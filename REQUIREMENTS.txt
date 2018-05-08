@@ -6,3 +6,4 @@ regional
 requests
 scikit-image
 showit
+slicedimage

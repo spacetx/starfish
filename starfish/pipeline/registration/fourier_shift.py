@@ -25,7 +25,8 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
     def register(self, stack):
         import numpy as np
 
-        mp = stack.max_proj(Indices.CH)
+        # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in registration?
+        mp = stack.max_proj(Indices.CH, Indices.Z)
         res = np.zeros(stack.image.shape)
 
         for h in range(stack.image.num_hybs):
@@ -34,8 +35,9 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
             print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
 
             for c in range(stack.image.num_chs):
-                # apply shift to all channels and hyb rounds
-                res[h, c, :] = shift_im(stack.image.numpy_array[h, c, :], shift)
+                for z in range(stack.image.num_zlayers):
+                    # apply shift to all zlayers, channels, and hyb rounds
+                    res[h, c, z, :] = shift_im(stack.image.numpy_array[h, c, z, :], shift)
 
         stack.set_stack(res)
 

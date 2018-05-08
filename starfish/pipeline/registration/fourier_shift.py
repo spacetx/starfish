@@ -1,3 +1,4 @@
+from starfish.image import Indices
 from ._base import RegistrationAlgorithmBase
 
 
@@ -24,7 +25,7 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
     def register(self, stack):
         import numpy as np
 
-        mp = stack.max_proj('ch')
+        mp = stack.max_proj(Indices.CH)
         res = np.zeros(stack.image.shape)
 
         for h in range(stack.image.num_hybs):

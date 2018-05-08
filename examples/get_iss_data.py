@@ -8,6 +8,7 @@ import requests
 from skimage.io import imread, imsave
 from slicedimage import ImageFormat, ImagePartition, Tile, Writer
 
+from starfish.image import Coordinates, Indices
 from starfish.util.argparse import FsExistsType
 
 
@@ -21,18 +22,23 @@ def download(input_dir, url):
 def build_hybridization_stack(input_dir):
     default_shape = imread(os.path.join(input_dir, str(1), "c{}.TIF".format(1))).shape
 
-    hybridization_images = ImagePartition(["x", "y", "hyb", "ch"], {'hyb': 4, 'ch': 4}, default_shape, ImageFormat.TIFF)
+    hybridization_images = ImagePartition(
+        [Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH],
+        {Indices.HYB: 4, Indices.CH: 4},
+        default_shape,
+        ImageFormat.TIFF,
+    )
 
     for hyb in range(4):
         for ch in range(4):
             tile = Tile(
                 {
-                    'x': (0.0, 0.0001),
-                    'y': (0.0, 0.0001),
+                    Coordinates.X: (0.0, 0.0001),
+                    Coordinates.Y: (0.0, 0.0001),
                 },
                 {
-                    'hyb': hyb,
-                    'ch': ch,
+                    Indices.HYB: hyb,
+                    Indices.CH: ch,
                 },
             )
             path = os.path.join(input_dir, str(hyb + 1), "c{}.TIF".format(ch + 2))
@@ -98,8 +104,8 @@ def tile_opener(toc_path, tile, ext):
     return open(
         "{}-H{}-C{}.{}".format(
             tile_basename,
-            tile.indices['hyb'],
-            tile.indices['ch'],
+            tile.indices[Indices.HYB],
+            tile.indices[Indices.CH],
             "tiff",  # this is not `ext` because ordinarily, output is saved as .npy.  since we're copying the data, it
                      # should stay .tiff
         ),

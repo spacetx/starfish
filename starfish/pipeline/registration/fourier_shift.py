@@ -23,23 +23,23 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
         group_parser.add_argument("--u", default=1, type=int, help="Amount of up-sampling")
 
     def register(self, stack):
-        import numpy as np
-
         # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in registration?
         mp = stack.max_proj(Indices.CH, Indices.Z)
-        res = np.zeros(stack.image.shape)
 
         for h in range(stack.image.num_hybs):
             # compute shift between maximum projection (across channels) and dots, for each hyb round
+            # TODO: make the max projection array ignorant of axes ordering.
             shift, error = compute_shift(mp[h, :, :], stack.aux_dict['dots'], self.upsampling)
             print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
 
             for c in range(stack.image.num_chs):
                 for z in range(stack.image.num_zlayers):
                     # apply shift to all zlayers, channels, and hyb rounds
-                    res[h, c, z, :] = shift_im(stack.image.numpy_array[h, c, z, :], shift)
-
-        stack.set_stack(res)
+                    indices = {Indices.HYB: h, Indices.CH: c, Indices.Z: z}
+                    data, axes = stack.image.get_slice(indices=indices)
+                    assert len(axes) == 0
+                    result = shift_im(data, shift)
+                    stack.image.set_slice(indices=indices, data=result)
 
         return stack
 

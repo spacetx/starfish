@@ -65,13 +65,13 @@ class ImageStack(ImageBase):
             ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
             ImageStack Implicit axes: X, Y with shape 10, 20, respectively.
             Called to slice with indices {Z: 5}.
-            Result: a 4-dimensional numpy array with shape (3, 4, 10, 20) and the remaining axes [H, C].
+            Result: a 4-dimensional numpy array with shape (3, 4, 20, 10) and the remaining axes [H, C].
 
         Example:
             Original axes: H, C, and Z.
             Implicit axes: X, Y.
             Called to slice with indices {Z: 5, C: slice(2, 4)}.
-            Result: a 4-dimensional numpy array with shape (3, 2, 10, 20) and the remaining axes [H, C].
+            Result: a 4-dimensional numpy array with shape (3, 2, 20, 10) and the remaining axes [H, C].
         """
         slice_list, axes = self._build_slice_list(indices)
         result = self._data[slice_list]

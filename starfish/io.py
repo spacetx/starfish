@@ -6,7 +6,7 @@ import pandas as pd
 from slicedimage import ImageFormat
 from slicedimage.io import resolve_url
 
-from .image import ImageStack
+from .image import ImageStack, Indices
 from .munge import list_to_stack
 
 
@@ -105,9 +105,9 @@ class Stack:
         self.squeeze_map = pd.DataFrame(dict(ind=ind, hyb=hyb, ch=ch))
 
         if bit_map_flag:
-            mp = [(d['hyb'], d['ch'], d['bit']) for d in self.org['data']]
-            mp = pd.DataFrame(mp, columns=['hyb', 'ch', 'bit'])
-            self.squeeze_map = pd.merge(self.squeeze_map, mp, on=['ch', 'hyb'], how='left')
+            mp = [(d[Indices.HYB], d[Indices.CH], d['bit']) for d in self.org['data']]
+            mp = pd.DataFrame(mp, columns=[Indices.HYB, Indices.CH, 'bit'])
+            self.squeeze_map = pd.merge(self.squeeze_map, mp, on=[Indices.CH, Indices.HYB], how='left')
 
         return new_data
 

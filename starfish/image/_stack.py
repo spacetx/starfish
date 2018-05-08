@@ -4,21 +4,22 @@ import numpy
 from slicedimage import Reader, Writer
 
 from ._base import ImageBase
+from ._constants import Coordinates, Indices
 
 
 class ImageStack(ImageBase):
     def __init__(self, image_partition):
         self._image_partition = image_partition
-        self._num_hybs = image_partition.get_dimension_shape('hyb')
-        self._num_chs = image_partition.get_dimension_shape('ch')
+        self._num_hybs = image_partition.get_dimension_shape(Indices.HYB)
+        self._num_chs = image_partition.get_dimension_shape(Indices.CH)
         self._tile_shape = tuple(image_partition.default_tile_shape)
 
         self._data = numpy.zeros((self._num_hybs, self._num_chs) + self._tile_shape)
         self._data_needs_writeback = False
 
         for tile in image_partition.tiles():
-            h = tile.indices['hyb']
-            c = tile.indices['ch']
+            h = tile.indices[Indices.HYB]
+            c = tile.indices[Indices.CH]
             self._data[h, c, :] = tile.numpy_array
 
     @classmethod
@@ -61,15 +62,15 @@ class ImageStack(ImageBase):
     def write(self, filepath, tile_opener=None):
         if self._data_needs_writeback:
             for tile in self._image_partition.tiles():
-                h = tile.indices['hyb']
-                c = tile.indices['ch']
+                h = tile.indices[Indices.HYB]
+                c = tile.indices[Indices.CH]
                 tile.numpy_array = self._data[h, c, :]
             self._data_needs_writeback = False
 
         seen_x_coords, seen_y_coords = set(), set()
         for tile in self._image_partition.tiles():
-            seen_x_coords.add(tile.coordinates['x'])
-            seen_y_coords.add(tile.coordinates['y'])
+            seen_x_coords.add(tile.coordinates[Coordinates.X])
+            seen_y_coords.add(tile.coordinates[Coordinates.Y])
 
         sorted_x_coords = sorted(seen_x_coords)
         sorted_y_coords = sorted(seen_y_coords)
@@ -80,8 +81,8 @@ class ImageStack(ImageBase):
         if tile_opener is None:
             def tile_opener(toc_path, tile, ext):
                 tile_basename = os.path.splitext(toc_path)[0]
-                xcoord = tile.coordinates['x']
-                ycoord = tile.coordinates['y']
+                xcoord = tile.coordinates[Coordinates.X]
+                ycoord = tile.coordinates[Coordinates.Y]
                 xcoord = tuple(xcoord) if isinstance(xcoord, list) else xcoord
                 ycoord = tuple(ycoord) if isinstance(ycoord, list) else ycoord
                 xval = x_coords_to_idx[xcoord]
@@ -91,8 +92,8 @@ class ImageStack(ImageBase):
                         tile_basename,
                         xval,
                         yval,
-                        tile.indices['hyb'],
-                        tile.indices['ch'],
+                        tile.indices[Indices.HYB],
+                        tile.indices[Indices.CH],
                         ext,
                     ),
                     "wb")
@@ -104,16 +105,16 @@ class ImageStack(ImageBase):
             tile_opener=tile_opener)
 
     def max_proj(self, dim):
-        valid_dims = ['hyb', 'ch', 'z']
+        valid_dims = [Indices.HYB, Indices.CH, Indices.Z]
         if dim not in valid_dims:
             msg = "Dimension: {} not supported. Expecting one of: {}".format(dim, valid_dims)
             raise ValueError(msg)
 
-        if dim == 'hyb':
+        if dim == Indices.HYB:
             res = numpy.max(self._data, axis=0)
-        elif dim == 'ch':
+        elif dim == Indices.CH:
             res = numpy.max(self._data, axis=1)
-        elif dim == 'z' and len(self._tile_shape) > 2:
+        elif dim == Indices.Z and len(self._tile_shape) > 2:
             res = numpy.max(self._data, axis=4)
         else:
             res = self._data

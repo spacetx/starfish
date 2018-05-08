@@ -15,6 +15,13 @@ sys.path.insert(0, pkg_root)  # noqa
 from starfish.util import clock
 
 
+def get_codebook(tempdir):
+    json_filepath = os.path.join(tempdir, "formatted", "experiment.json")
+    with open(json_filepath, "r") as fh:
+        document = json.load(fh)
+        return os.path.join(tempdir, "formatted", document['codebook'])
+
+
 class TestWithIssData(unittest.TestCase):
     SUBDIRS = (
         "raw",
@@ -67,8 +74,7 @@ class TestWithIssData(unittest.TestCase):
         [
             "starfish", "decode",
             "-i", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "encoder_table.json"),
-            # TODO: this should reflect the codebook path.  right now we're pointing at the encoder table.
-            "--codebook", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "encoder_table.json"),
+            "--codebook", lambda tempdir, *args, **kwargs: get_codebook(tempdir),
             "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "decoded_table.json"),
             "iss",
         ],

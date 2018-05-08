@@ -1,3 +1,4 @@
+from starfish.decoders import iss
 from ._base import DecoderAlgorithmBase
 
 
@@ -15,12 +16,6 @@ class IssDecoder(DecoderAlgorithmBase):
         pass
 
     def decode(self, encoded, codebook):
-        import pandas
-        from starfish.decoders import iss
-
-        # TODO this should be loaded from disk
-        d = {'barcode': ['AAGC', 'AGGC'], 'gene': ['ACTB_human', 'ACTB_mouse']}
-        codebook = pandas.DataFrame(d)
         decoder = iss.IssDecoder(codebook, letters=['T', 'G', 'C', 'A'])
 
         return decoder.decode(encoded)

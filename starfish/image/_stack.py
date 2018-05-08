@@ -104,19 +104,17 @@ class ImageStack(ImageBase):
             pretty=True,
             tile_opener=tile_opener)
 
-    def max_proj(self, dim):
-        valid_dims = [Indices.HYB, Indices.CH, Indices.Z]
-        if dim not in valid_dims:
-            msg = "Dimension: {} not supported. Expecting one of: {}".format(dim, valid_dims)
-            raise ValueError(msg)
+    def max_proj(self, *dims):
+        valid_dims = {
+            Indices.HYB: 0,
+            Indices.CH: 1,
+            Indices.Z: 2,
+        }
+        axes = list()
+        for dim in dims:
+            try:
+                axes.append(valid_dims[dim])
+            except KeyError:
+                raise ValueError("Dimension: {} not supported. Expecting one of: {}".format(dim, valid_dims.keys()))
 
-        if dim == Indices.HYB:
-            res = numpy.max(self._data, axis=0)
-        elif dim == Indices.CH:
-            res = numpy.max(self._data, axis=1)
-        elif dim == Indices.Z and len(self._tile_shape) > 2:
-            res = numpy.max(self._data, axis=4)
-        else:
-            res = self._data
-
-        return res
+        return numpy.max(self._data, axis=tuple(axes))

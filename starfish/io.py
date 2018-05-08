@@ -86,8 +86,8 @@ class Stack:
             }
         self.aux_dict[key] = img
 
-    def max_proj(self, dim):
-        return self.image.max_proj(dim)
+    def max_proj(self, *dims):
+        return self.image.max_proj(*dims)
 
     def squeeze(self, bit_map_flag=False):
         first_dim = self.image.num_hybs * self.image.num_chs

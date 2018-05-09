@@ -1,7 +1,7 @@
 import collections
 import os
 from functools import partial
-from typing import Any, Iterable, Iterator, Mapping, MutableSequence, Sequence, Tuple, Union
+from typing import Any, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
 
 import numpy
 from scipy.stats import scoreatpercentile
@@ -276,7 +276,7 @@ class ImageStack(ImageBase):
             array, axes = self.get_slice(inds)
             yield array
 
-    def apply(self, func, is_volume=False, **kwargs):
+    def apply(self, func, is_volume=False, in_place=True, **kwargs) -> Optional[List]:
         """Apply func over all tiles or volumes in self
 
         Parameters
@@ -286,16 +286,17 @@ class ImageStack(ImageBase):
             numpy.ndarray. If inplace is True, must return an array of the same shape.
         is_volume : bool
             (default False) If True, pass 3d volumes (x, y, z) to func
-        inplace : bool
+        in_place : bool
             (default True) If True, function is executed in place. If n_proc is not 1, the tile or
-            volume will be copied once during execution. Not currently implemented.
+            volume will be copied once during execution. If false, the outputs of the function executed on individual
+            tiles or volumes will be output as a list
         kwargs : dict
             Additional arguments to pass to func
 
         Returns
         -------
-        Optional[ImageStack]
-            If inplace is False, return a new ImageStack containing the output of apply
+        Optional[List]
+            If inplace is False, return the results of applying func to stored image data
         """
         mapfunc = map  # TODO: ambrosejcarr posix-compliant multiprocessing
         indices = list(self._iter_indices(is_volume=is_volume))
@@ -305,10 +306,11 @@ class ImageStack(ImageBase):
 
         results = mapfunc(applyfunc, tiles)
 
+        if not in_place:
+            return list(results)
+
         for r, inds in zip(results, indices):
             self.set_slice(inds, r)
-
-        # TODO: ambrosejcarr implement inplace=False
 
     @property
     def raw_shape(self) -> Tuple[int]:

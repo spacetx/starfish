@@ -33,7 +33,11 @@ class ValidatedTable:
 
         """
         self._validate_table(table, required_fields)
-        self.data = table
+        self._data = table
+
+    @property
+    def data(self):
+        return self._data
 
     @staticmethod
     def _validate_table(table: pd.DataFrame, required_fields: set):

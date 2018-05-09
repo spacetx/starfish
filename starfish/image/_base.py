@@ -1,3 +1,6 @@
+import typing
+
+
 class ImageBase(object):
     @property
     def numpy_array(self):
@@ -5,8 +8,13 @@ class ImageBase(object):
         raise NotImplementedError()
 
     @property
+    def raw_shape(self) -> typing.Optional[list]:
+        """Retrieves the shape of the image data, as a list of the sizes of the indices."""
+        raise NotImplementedError()
+
+    @property
     def shape(self):
-        """Retrieves the shape of the image data."""
+        """Retrieves the shape of the image data, as an ordered mapping between index names to the size of the index."""
         raise NotImplementedError()
 
     def write(self, filepath):

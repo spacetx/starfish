@@ -65,7 +65,7 @@ class Stack:
             self.write_fn(os.path.join(dir_name, fname), self.aux_dict[aux_key])
 
     def set_stack(self, new_stack):
-        if new_stack.shape != self.image.shape:
+        if self.image.raw_shape != new_stack.shape:
             msg = "Shape mismatch. Current data shape: {}, new data shape: {}".format(
                 self.image.shape, new_stack.shape)
             raise AttributeError(msg)

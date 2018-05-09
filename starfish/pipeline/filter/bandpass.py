@@ -7,11 +7,28 @@ from ._base import FilterAlgorithmBase
 
 class Bandpass(FilterAlgorithmBase):
 
-    def __init__(self, lshort, llong, threshold, truncate, **kwargs):
+    def __init__(self, lshort, llong, threshold, truncate, verbose=False, **kwargs):
+        """
+
+        Parameters
+        ----------
+        lshort : float
+            filter frequencies below this value
+        llong : int
+            filter frequencies above this odd integer value
+        threshold : float
+            zero any pixels below this intensity value
+        truncate : float
+            # todo document
+        verbose : bool
+            If True, report on the percentage completed (default = False) during processing
+        kwargs
+        """
         self.lshort = lshort
         self.llong = llong
         self.threshold = threshold
         self.truncate = truncate
+        self.verbose = verbose
 
     @classmethod
     def get_algorithm_name(cls):
@@ -64,7 +81,7 @@ class Bandpass(FilterAlgorithmBase):
         bandpass_ = partial(
             self.bandpass, lshort=self.lshort, llong=self.llong, threshold=self.threshold, truncate=self.truncate
         )
-        stack.image.apply(bandpass_)
+        stack.image.apply(bandpass_, verbose=self.verbose)
 
         # apply to aux dict too:
         for auxiliary_image in stack.auxiliary_images.values():

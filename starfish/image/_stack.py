@@ -1,20 +1,44 @@
 import collections
 import os
 from functools import partial
-from typing import Any, Iterable, Iterator, Mapping, MutableSequence, Sequence, Tuple, Union
+from itertools import product
 from warnings import warn
+from typing import Any, Callable, Iterable, Iterator, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
 
 import numpy
 from scipy.stats import scoreatpercentile
 from skimage import exposure
 from slicedimage import Reader, Writer
+from tqdm import tqdm
 
 from starfish.constants import Coordinates, Indices
 from starfish.errors import DataFormatWarning
+from starfish.pipeline.features.spot_attributes import SpotAttributes
 from ._base import ImageBase
 
 
 class ImageStack(ImageBase):
+    """Container for a TileSet (field of view)
+
+    Methods
+    -------
+    get_slice    retrieve a slice of the image tensor
+    set_slice    set a slice of the image tensor
+    apply        apply a 2d or 3d function across all Tiles in the image tensor
+    max_proj     return a max projection over one or more axis of the image tensor
+    show_stack   show an interactive, pageable view of the image tensor, or a slice of the image tensor
+    write        save the (potentially modified) image tensor to disk
+
+    Properties
+    ----------
+    num_chs      the number of channels stored in the image tensor
+    num_hybs     the number of hybridization rounds stored in the image tensor
+    num_zlayers  the number of z-layers stored in the image tensor
+    numpy_array  the 5-d image tensor is stored in this array
+    raw_shape    the shape of the image tensor (in integers)
+    shape        the shape of the image tensor by categorical index (channels, hybridization rounds, z-layers)
+    """
+
     AXES_MAP = {
         Indices.HYB: 0,
         Indices.CH: 1,
@@ -184,7 +208,8 @@ class ImageStack(ImageBase):
 
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],
-            color_map: str= 'gray', rescale: bool=False, figure_size: Tuple[int, int]=(10, 10)):
+            color_map: str= 'gray', rescale: bool=False, figure_size: Tuple[int, int]=(10, 10),
+            show_spots: Optional[SpotAttributes]=None):
         """Create an interactive visualization of an image stack
 
         Produces a slider that flips through the selected volume tile-by-tile
@@ -200,6 +225,9 @@ class ImageStack(ImageBase):
             if True, rescale the data to exclude high and low-value outliers (see skimage.exposure.rescale_intensity)
         figure_size : Tuple[int, int] (default = (10, 10))
             size of the figure in inches
+        show_spots : Optional[SpotAttributes]
+            [Preliminary functionality] if provided, should be a SpotAttribute table that corresponds
+            to the volume being displayed. This will be paired automatically in the future.
 
         Notes
         -----
@@ -222,10 +250,10 @@ class ImageStack(ImageBase):
         n = numpy.dot(*data.shape[:-2])
 
         # linearize the array
-        linear_view = data.reshape((n,) + data.shape[-2:])
+        linear_view: numpy.ndarray = data.reshape((n,) + data.shape[-2:])
 
         # set the labels for the linearized tiles
-        from itertools import product
+
         labels = []
         for index, size in zip(remaining_inds, data.shape[:-2]):
             labels.append([f'{index}{n}' for n in range(size)])
@@ -242,21 +270,66 @@ class ImageStack(ImageBase):
                 out_range=numpy.float32
             ).astype(numpy.float32)
 
-        def show_plane(ax, plane, cmap="gray", title=None):
+        show_spot_function = self._show_spots
+
+        def show_plane(ax, plane, plane_index, cmap="gray", title=None):
             ax.imshow(plane, cmap=cmap)
+            if show_spots:
+                # this is slow. This link might have something to help:
+                # https://bastibe.de/2013-05-30-speeding-up-matplotlib.html
+                show_spot_function(show_spots.data, ax=ax, z=plane_index)
             ax.set_xticks([])
             ax.set_yticks([])
 
             if title:
                 ax.set_title(title)
 
-        @interact(plane=(0, n - 1))
-        def display_slice(plane=34):
+        @interact(plane_index=(0, n - 1))
+        def display_slice(plane_index=0):
             fig, ax = plt.subplots(figsize=figure_size)
-            show_plane(ax, linear_view[plane], title=f'{labels[plane]}', cmap=color_map)
+            show_plane(ax, linear_view[plane_index], plane_index, title=f'{labels[plane_index]}', cmap=color_map)
             plt.show()
 
         return display_slice
+
+    @staticmethod
+    def _show_spots(result_df, ax, z=None, size=1, z_dist=1.5, scale_radius=5) -> None:
+        """function to plot spot finding results on top of any image as hollow red circles
+
+        called spots are colored by category
+
+        Parameters:
+        -----------
+        img : np.ndarray
+            2-d image
+        result_df : pd.Dataframe
+            result dataframe containing spot calls that correspond to the image channel
+        z : Optional[int]
+            If provided, z-plane to plot spot calls for. Default (None): plot all provided spots.
+        size : int
+            width of line to plot around the identified spot
+        z_dist : float
+            plot spots if within this distance of the z-plane. Ignored if z is not passed.
+        vmin, vmax : int
+            clipping thresholds for the image plot
+        ax, matplotlib.Axes.Axis
+            axis to plot spots on
+
+        """
+        import matplotlib.pyplot as plt
+
+        if z is not None:
+            inds = numpy.abs(result_df['z'] - z) < z_dist
+        else:
+            inds = numpy.ones(result_df.shape[0]).astype(bool)
+
+        # get the data needed to plot
+        selected = result_df.loc[inds, ['r', 'x', 'y']]
+
+        for i in numpy.arange(selected.shape[0]):
+            r, x, y = selected.iloc[i, :]  # radius is a duplicate, and is present twice
+            c = plt.Circle((x, y), r * scale_radius, color='r', linewidth=size, fill=False)
+            ax.add_patch(c)
 
     def _build_slice_list(
             self,
@@ -325,7 +398,7 @@ class ImageStack(ImageBase):
             array, axes = self.get_slice(inds)
             yield array
 
-    def apply(self, func, is_volume=False, **kwargs):
+    def apply(self, func, is_volume=False, in_place=True, verbose: bool=False, **kwargs):
         """Apply func over all tiles or volumes in self
 
         Parameters
@@ -335,29 +408,38 @@ class ImageStack(ImageBase):
             numpy.ndarray. If inplace is True, must return an array of the same shape.
         is_volume : bool
             (default False) If True, pass 3d volumes (x, y, z) to func
-        inplace : bool
+        in_place : bool
             (default True) If True, function is executed in place. If n_proc is not 1, the tile or
-            volume will be copied once during execution. Not currently implemented.
+            volume will be copied once during execution. If false, the outputs of the function executed on individual
+            tiles or volumes will be output as a list
+        verbose : bool
+            If True, report on the percentage completed (default = False) during processing
         kwargs : dict
             Additional arguments to pass to func
 
         Returns
         -------
-        Optional[ImageStack]
-            If inplace is False, return a new ImageStack containing the output of apply
+        Optional[List]
+            If inplace is False, return the results of applying func to stored image data
         """
-        mapfunc = map  # TODO: ambrosejcarr posix-compliant multiprocessing
+        mapfunc: Callable = map  # TODO: ambrosejcarr posix-compliant multiprocessing
         indices = list(self._iter_indices(is_volume=is_volume))
-        tiles = self._iter_tiles(indices)
 
-        applyfunc = partial(func, **kwargs)
+        if verbose:
+            tiles = tqdm(self._iter_tiles(indices))
+        else:
+            tiles = self._iter_tiles(indices)
 
+        applyfunc: Callable = partial(func, **kwargs)
         results = mapfunc(applyfunc, tiles)
+
+        if not in_place:
+            return list(results)
 
         for r, inds in zip(results, indices):
             self.set_slice(inds, r)
 
-        # TODO: ambrosejcarr implement inplace=False
+        return None
 
     @property
     def raw_shape(self) -> Tuple[int]:
@@ -392,7 +474,16 @@ class ImageStack(ImageBase):
     def tile_shape(self):
         return self._tile_shape
 
-    def write(self, filepath, tile_opener=None):
+    def write(self, filepath: str, tile_opener=None) -> None:
+        """write the image tensor to disk
+
+        Parameters
+        ----------
+        filepath : str
+            path + prefix for writing the image tensor
+        tile_opener : TODO ttung: doc me.
+
+        """
         if self._data_needs_writeback:
             for tile in self._image_partition.tiles():
                 h = tile.indices[Indices.HYB]
@@ -450,7 +541,20 @@ class ImageStack(ImageBase):
             pretty=True,
             tile_opener=tile_opener)
 
-    def max_proj(self, *dims):
+    def max_proj(self, *dims: Indices) -> numpy.ndarray:
+        """return a max projection over one or more axis of the image tensor
+
+        Parameters
+        ----------
+        dims : Tuple[Indices]
+            a tuple of the axes to project over
+
+        Returns
+        -------
+        numpy.ndarray :
+            max projection
+
+        """
         axes = list()
         for dim in dims:
             try:

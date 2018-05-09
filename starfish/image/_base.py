@@ -70,7 +70,7 @@ class ImageBase(object):
         """
         raise NotImplementedError()
 
-    def max_proj(self, *dims: Sequence[Indices]) -> ndarray:
+    def max_proj(self, *dims: Indices) -> ndarray:
         """
         Returns max projection of this image across one of the dimensions extrinsic to the image.  For instance, if this
         is an X-Y image in a C-H-Y-X space, then one can take the max projection across the combinations of C and H.

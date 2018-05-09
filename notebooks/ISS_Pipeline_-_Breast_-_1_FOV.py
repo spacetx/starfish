@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 #
-# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.3"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
+# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.4"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
 # ## Reproduce Marco's results with Starfish
@@ -31,7 +31,7 @@ import pprint
 from starfish.io import Stack
 
 s = Stack()
-s.read('ISS/fov_001/org.json')
+s.read('ISS/fov_001/experiment.json')
 # s.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 tile(s.squeeze());  
 # EPY: END code
@@ -73,7 +73,7 @@ image(s.aux_dict['dots'])
 # EPY: END markdown
 
 # EPY: START code
-image(s.aux_dict['dapi'])
+image(s.aux_dict['nuclei'])
 # EPY: END code
 
 # EPY: START markdown
@@ -245,6 +245,7 @@ res.gene.value_counts()
 
 # EPY: START code
 from starfish.filters import gaussian_low_pass
+from starfish.image import Indices
 from starfish.watershedsegmenter import WatershedSegmenter
 
 dapi_thresh = .16  # binary mask for cell (nuclear) locations
@@ -254,11 +255,11 @@ disk_size_markers = None
 disk_size_mask = None
 min_dist = 57
 
-stain = np.mean(s.max_proj('ch'), axis=0)
+stain = np.mean(s.max_proj(Indices.CH, Indices.Z), axis=0)
 stain = stain/stain.max()
 
 
-seg = WatershedSegmenter(s.aux_dict['dapi'], stain)  # uses skimage watershed. 
+seg = WatershedSegmenter(s.aux_dict['nuclei'], stain)  # uses skimage watershed. 
 cells_labels = seg.segment(dapi_thresh, stain_thresh, size_lim, disk_size_markers, disk_size_mask, min_dist)
 seg.show()
 # EPY: END code
@@ -277,7 +278,7 @@ from skimage.color import rgb2gray
 results = pd.merge(res, p.spots_df_viz, on='spot_id', how='left')
 
 rgb = np.zeros(s.image.tile_shape + (3,))
-rgb[:,:,0] = s.aux_dict['dapi']
+rgb[:,:,0] = s.aux_dict['nuclei']
 rgb[:,:,1] = s.aux_dict['dots']
 do = rgb2gray(rgb)
 do = do/(do.max())

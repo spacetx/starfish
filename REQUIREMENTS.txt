@@ -9,4 +9,5 @@ scikit-learn
 scipy
 showit
 slicedimage == 0.0.0-dev21
+tqdm
 trackpy

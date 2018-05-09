@@ -33,7 +33,11 @@ class ValidatedTable:
 
         """
         self._validate_table(table, required_fields)
-        self.data = table
+        self._data = table
+
+    @property
+    def data(self):
+        return self._data
 
     @staticmethod
     def _validate_table(table: pd.DataFrame, required_fields: set):
@@ -68,4 +72,4 @@ class ValidatedTable:
 
         """
 
-        return cls(pd.read_json(json_file), required_fields=cls.required_fields)
+        return cls(pd.read_json(json_file))  # type: ignore # all the subclasses have this signature for constructor.

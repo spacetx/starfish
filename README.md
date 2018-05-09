@@ -66,6 +66,13 @@ To see an interactive web-visualization of the final decoded result, run the fol
 4. From starfish/viz run `npm install`
 5. From starfish/viz run `npm start`
 
+To use the interactive notebook widgets, run the following commands. Please note that the widget currently 
+supports Jupyter notebooks, but not Jupyter Lab. 
+```
+pip3 install -r REQUIREMENTS-NOTEBOOK.txt
+jupyter nbextension enable --py widgetsnbextension
+```
+
 ## Development
 
 Clone the repo and look through (CONTRIBUTING.md)[CONTRIBUTING.md]

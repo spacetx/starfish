@@ -1,24 +1,32 @@
 from functools import partial
+from typing import Union, Tuple
 
 import numpy
 from skimage.filters import gaussian
 
-from starfish.munge import swap
 from ._base import FilterAlgorithmBase
 
 
 class GaussianLowPass(FilterAlgorithmBase):
 
-    def __init__(self, sigma, **kwargs) -> None:
+    def __init__(self, sigma: Union[float, Tuple[float]], is_volume: bool=False, verbose=False, **kwargs) -> None:
         """Multi-dimensional low-pass gaussian filter.
 
         Parameters
         ----------
-        sigma : float
+        sigma : Union[float, Tuple[float]]
             Standard deviation for Gaussian kernel.
+        is_volume : bool
+            If True, 3d (z, y, x) volumes will be passed to self.low_pass. Otherwise, 2d tiles will be passed
+        verbose : bool
+            If True, report on the percentage completed (default = False) during processing
 
         """
-        self.sigma = sigma
+        if isinstance(sigma, float):
+            sigma = (sigma,)
+        self.sigma: Tuple[float] = sigma
+        self.is_volume = is_volume
+        self.verbose = verbose
 
     @classmethod
     def get_algorithm_name(cls):
@@ -30,15 +38,16 @@ class GaussianLowPass(FilterAlgorithmBase):
             "--sigma", default=1, type=int, help="standard deviation of gaussian kernel")
 
     @staticmethod
-    def low_pass(image, sigma):
+    def low_pass(image, sigma: Tuple[float]) -> numpy.ndarray:
         """Apply a Gaussian blur operation over a multi-dimensional image.
 
         Parameters
         ----------
         image : np.ndarray
             Image data
-        sigma : float
-            Standard deviation of the Gaussian kernel that will be applied.
+        sigma : Tuple[float]
+            Standard deviation of the Gaussian kernel that will be applied. If a float, an isotropic kernel will be
+            assumed, otherwise the dimensions of the kernel give (z, x, y)
 
         Returns
         -------
@@ -46,15 +55,12 @@ class GaussianLowPass(FilterAlgorithmBase):
             Blurred data in same shape as input image.
 
         """
-        # TODO: ambrosejcarr what is the assumed axis order, and can we do away with swap?
-        image_swap = swap(image)
-
         blurred = gaussian(
-            image_swap, sigma=sigma, output=None, cval=0, multichannel=True, preserve_range=True, truncate=4.0)
+            image, sigma=sigma, output=None, cval=0, multichannel=True, preserve_range=True, truncate=4.0)
 
         blurred = blurred.astype(numpy.uint16)
 
-        return swap(blurred)
+        return blurred
 
     def filter(self, stack) -> None:
         """Perform in-place filtering of an image stack and all contained aux images.
@@ -66,7 +72,7 @@ class GaussianLowPass(FilterAlgorithmBase):
 
         """
         low_pass = partial(self.low_pass, sigma=self.sigma)
-        stack.image.apply(low_pass)
+        stack.image.apply(low_pass, is_volume=self.is_volume, verbose=self.verbose)
 
         # apply to aux dict too:
         for auxiliary_image in stack.auxiliary_images.values():

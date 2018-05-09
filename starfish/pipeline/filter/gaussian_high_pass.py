@@ -1,6 +1,6 @@
 import argparse
 from functools import partial
-from typing import Callable
+from typing import Callable, Tuple
 
 import numpy as np
 
@@ -32,7 +32,7 @@ class GaussianHighPass(FilterAlgorithmBase):
             "--sigma", default=1, type=int, help="standard deviation of gaussian kernel")
 
     @staticmethod
-    def gaussian_high_pass(img: np.ndarray, sigma: int) -> np.ndarray:
+    def gaussian_high_pass(img: np.ndarray, sigma: Tuple[float]) -> np.ndarray:
         """
         Applies a gaussian high pass filter to an image
 

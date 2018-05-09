@@ -119,6 +119,6 @@ class Stack:
         if type(stack) is list:
             stack = list_to_stack(stack)
 
-        new_shape = (self.image.num_hybs, self.image.num_chs) + self.image.tile_shape
+        new_shape = (self.image.num_hybs, self.image.num_chs, self.image.num_zlayers) + self.image.tile_shape
         res = stack.reshape(new_shape)
         return res

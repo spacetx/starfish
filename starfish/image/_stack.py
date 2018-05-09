@@ -156,6 +156,13 @@ class ImageStack(ImageBase):
         return tuple(slice_list), axes
 
     @property
+    def raw_shape(self) -> typing.Optional[list]:
+        if self._data is None:
+            return None
+
+        return self._data.shape
+
+    @property
     def shape(self) -> typing.Optional[dict]:
         if self._data is None:
             return None

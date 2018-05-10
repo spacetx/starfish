@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 from slicedimage import ImageFormat
-from slicedimage.io import resolve_name_or_url
+from slicedimage.io import resolve_url
 
 from .image import ImageStack, Indices
 from .munge import list_to_stack
@@ -38,7 +38,7 @@ class Stack:
         for aux_key, aux_data in self.org['auxiliary_images'].items():
             name_or_url = aux_data['file']
             img_format = ImageFormat[aux_data['tile_format']]
-            backend, name, _ = resolve_name_or_url(name_or_url, "file://{}".format(self.path))
+            backend, name, _ = resolve_url(name_or_url, "file://{}".format(self.path))
             with backend.read_file_handle(name) as fh:
                 self.aux_dict[aux_key] = img_format.reader_func(fh)
 

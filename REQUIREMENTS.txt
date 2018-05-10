@@ -6,4 +6,4 @@ regional
 requests
 scikit-image
 showit
-slicedimage == 0.0.0-dev14
+slicedimage == 0.0.0-dev15

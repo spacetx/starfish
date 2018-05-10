@@ -232,7 +232,7 @@ res.head()
 # EPY: END markdown
 
 # EPY: START code
-res.gene.value_counts()
+res.gene.value_counts().sort_index(ascending=False).sort_values(kind='mergesort', ascending=False)
 # EPY: END code
 
 # EPY: START markdown

@@ -9,6 +9,7 @@ from pstats import Stats
 
 from .image import Indices
 from .pipeline import registration
+from .pipeline.gene_assignment import GeneAssignment
 from .pipeline.decoder import Decoder
 from .util.argparse import FsExistsType
 
@@ -55,6 +56,7 @@ def build_parser():
     segment_group.add_argument("--md", default=57, type=int, help="Minimum distance between cells")
     segment_group.set_defaults(starfish_command=segment)
 
+    GeneAssignment.add_to_parser(subparsers)
     Decoder.add_to_parser(subparsers)
 
     show_group = subparsers.add_parser("show")
@@ -181,9 +183,6 @@ def detect_spots(args, print_help=False):
 
 
 def segment(args, print_help=False):
-    import pandas as pd
-
-    from .assign import assign
     from .io import Stack
     from .munge import regions_to_geojson
     from .stats import label_to_regions
@@ -201,21 +200,12 @@ def segment(args, print_help=False):
     cells_labels = seg.segment(args.dt, args.st, size_lim, disk_size_markers, disk_size_mask, args.md)
 
     regions = label_to_regions(cells_labels)
-    geojson = regions_to_geojson(regions)
+    geojson = regions_to_geojson(regions, use_hull=False)
 
     path = os.path.join(args.results_dir, 'regions.geojson')
     print("Writing | regions geojson to: {}".format(path))
     with open(path, 'w') as f:
         f.write(json.dumps(geojson))
-
-    spots = pd.read_json(os.path.join(args.results_dir, 'spots.json'), orient="records")
-    # TODO only works in 3D
-    points = spots.loc[:, ['x', 'y']].values
-    res = assign(regions, points, use_hull=True)
-
-    path = os.path.join(args.results_dir, 'regions.json')
-    print("Writing | cell_id | spot_id to: {}".format(path))
-    res.to_json(path, orient="records")
 
 
 def show(args, print_help=False):

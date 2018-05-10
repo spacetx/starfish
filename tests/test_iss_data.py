@@ -72,6 +72,14 @@ class TestWithIssData(unittest.TestCase):
             "--md", "57",
         ],
         [
+            "starfish", "gene_assignment",
+            "--coordinates-geojson",
+            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.geojson"),
+            "--spots-json", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.json"),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.json"),
+            "point_in_poly",
+        ],
+        [
             "starfish", "decode",
             "-i", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "encoder_table.json"),
             "--codebook", lambda tempdir, *args, **kwargs: get_codebook(tempdir),

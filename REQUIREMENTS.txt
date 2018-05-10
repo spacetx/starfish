@@ -6,4 +6,4 @@ regional
 requests
 scikit-image
 showit
-slicedimage
+-e git+https://github.com/spacetx/slicedimage.git@fda8e19a38a59246f4946024440c910852640c3a#egg=slicedimage

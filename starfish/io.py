@@ -1,10 +1,11 @@
+import codecs
 import json
 import os
 
 import numpy as np
 import pandas as pd
 from slicedimage import ImageFormat
-from slicedimage.io import resolve_url
+from slicedimage.io import resolve_url, resolve_path_or_url
 
 from .image import ImageStack, Indices
 from .munge import list_to_stack
@@ -14,7 +15,6 @@ class Stack:
     def __init__(self):
         # data organization
         self.org = None
-        self.path = None
         self.image = None
 
         # auxilary images
@@ -23,22 +23,24 @@ class Stack:
         # readers and writers
         self.write_fn = np.save  # asserted for now
 
-    def read(self, in_json):
-        # TODO: (ttung) remove this hackery
-        self.path = os.path.dirname(os.path.abspath(in_json))
-        with open(in_json, 'r') as in_file:
-            self.org = json.load(in_file)
+        # backend & baseurl
+        self.backend = None
+        self.baseurl = None
 
-        image_stack_name_or_url = self.org['hybridization_images']
+    def read(self, in_json_path_or_url):
+        self.backend, name, self.baseurl = resolve_path_or_url(in_json_path_or_url)
+        with self.backend.read_file_handle(name) as fh:
+            reader = codecs.getreader("utf-8")
+            self.org = json.load(reader(fh))
 
-        self.image = ImageStack.from_image_stack(image_stack_name_or_url, "file://{}".format(self.path))
+        self.image = ImageStack.from_image_stack(self.org['hybridization_images'], self.baseurl)
         self._read_aux()
 
     def _read_aux(self):
         for aux_key, aux_data in self.org['auxiliary_images'].items():
             name_or_url = aux_data['file']
             img_format = ImageFormat[aux_data['tile_format']]
-            backend, name, _ = resolve_url(name_or_url, "file://{}".format(self.path))
+            backend, name, _ = resolve_url(name_or_url, self.baseurl)
             with backend.read_file_handle(name) as fh:
                 self.aux_dict[aux_key] = img_format.reader_func(fh)
 

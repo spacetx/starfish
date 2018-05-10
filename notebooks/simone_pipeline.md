@@ -1,10 +1,19 @@
-
-
 # Summary of Simone's pipeline
 
-## `process_standalone_experiment.py`
+## Overview of methods needed
 
-This is primarily about munging files, and loads in `counting.filtering_and_counting` to do the work.
+1. 3d gaussian filter (`skimage.filters.gaussian` or `scipy.ndimage.gaussian`) -> `starfish.filters.gaussian` (already present)
+2. `ndimage.gaussian_laplace` -> `starfish.filters.gaussian_laplace`
+	1. Can we assume that any trimming of the image to fit within the dynamic range should be associated with the function that produces the aberration? E.g. `gaussian_laplace` can produce negative values -- should we wrap that function so that it doesn't have this characteristic?
+  2. If no, we will need some clean-up functions
+3. `max_projection` over z -> `starfish.image._stack` (currently present)
+4. Threshold finding (is there an equivalent library function for the gradient calculation + trimming that this func does? -> `starfish.stats.calculate_peak_threshold_abs`. Replace `calculate` with your favorite word.
+5. `peak_local_max` -> `starfish.spots.peakfinder` (location from brian-long)
+
+## The pipeline:
+
+- First, `process_standalone_experiment.py` is called. 
+- This is primarily about munging files, and loads in `counting.filtering_and_counting` to do the work.
 
 ### Arguments:
 
@@ -15,9 +24,11 @@ This is primarily about munging files, and loads in `counting.filtering_and_coun
 5. min-plane (default None) - allows selection of a plane to start from (exclude out-of-focus)
 6. max-plane (default None) - allows selection of a plane to end at (exclude out-of-focus)
 
-## `counting.filtering_and_counting`:
+- Next, `counting.filtering_and_counting` is called
 
 ### Arguments:
+
+List Simone's, they're well documented. 
 
 ```
 fpath_img_to_filter: str
@@ -46,18 +57,17 @@ skip_tags_counting: list
 list of the tags inside the genes/stainings name to avoid to count.
 ```
 
+Procedure: 
 
-Pipeline:
-
-Expects np.float64 images (how to address this? will everything work?)
+Note: Expects np.float64 images (how to address this? will everything work?)
 
 1. `filtering.nuclei_filtering`
 	1. called if this is in part of skip-genes, designed to skip nuclei, I think
-  2. 3d gaussian filter, sigma (2, 100, 100) (z, y, x?)  # todo check, not explicit
+  2. 3d gaussian filter, sigma (2, 100, 100) (z, y, x) (could be z, x, y), but x <-> y for our purposes.
   3. set negative values to zero
   4. max project over z (np.amax(stack, axis=0)
-2. `filtering.smFISH_filtering`
-  1. Gaussian filter, sigma=(1, 8, 8)
+2. otherwise, call `filtering.smFISH_filtering`
+  1. `gaussian_filter`, sigma=(1, 8, 8)
   2. `gaussian_laplace(stack, (0.2, 0.5, 0.5)`  # todo look up
     3. this makes the peaks negative, so invert signal `img_stack = -img_stack`
     4. ... and zero out the negative values again
@@ -67,7 +77,8 @@ Expects np.float64 images (how to address this? will everything work?)
 
 ### Thr Calculator
 
-This method calculates a threshold to determine if dots are peaks or not.
+This method calculates a threshold to determine if dots are peaks or not. Specifically, it estimates
+threshold_abs for `skimage.feature.peak_local_max`
 
 Arguments:
 1. `min_distance`: if two peaks are not > 5 pixels apart they are the same peak

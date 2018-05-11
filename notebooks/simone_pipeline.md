@@ -7,7 +7,7 @@
 	1. Can we assume that any trimming of the image to fit within the dynamic range should be associated with the function that produces the aberration? E.g. `gaussian_laplace` can produce negative values -- should we wrap that function so that it doesn't have this characteristic?
   2. If no, we will need some clean-up functions
 3. `max_projection` over z -> `starfish.image._stack` (currently present)
-4. Threshold finding (is there an equivalent library function for the gradient calculation + trimming that this func does? -> `starfish.stats.calculate_peak_threshold_abs`. Replace `calculate` with your favorite word.
+4. Threshold finding. Is there an equivalent library function for the gradient calculation + trimming that this func does? -> `starfish.stats.calculate_peak_threshold_abs`. Replace `calculate` with your favorite word.
 5. `peak_local_max` -> `starfish.spots.peakfinder` (location from brian-long)
 
 ## The pipeline:

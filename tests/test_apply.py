@@ -44,7 +44,7 @@ class TestSetSliceAPI(unittest.TestCase):
                         }
                     )
                     tile.numpy_array = numpy.ones(
-                            (TestSetSliceAPI.HEIGHT, TestSetSliceAPI.WIDTH))
+                        (TestSetSliceAPI.HEIGHT, TestSetSliceAPI.WIDTH))
 
                     img.add_tile(tile)
 
@@ -57,4 +57,3 @@ class TestSetSliceAPI(unittest.TestCase):
     def test_apply_3d(self):
         self.stack.apply(multiply, value=4, is_3d=True)
         assert (self.stack.numpy_array == 4).all()
-

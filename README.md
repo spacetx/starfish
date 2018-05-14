@@ -13,7 +13,7 @@ Install the starfish package:
 % pip install starfish
 ```
 
-See the [notebook](notebooks/Starfish%20Simple%20ISS%20tutorial%20%7C%20Mouse%20vs.%20Human%20Fibroblasts.ipynb) for a fully worked example.
+See the [notebook](notebooks/ISS_Simple_tutorial_-_Mouse_vs._Human_Fibroblasts.ipynb) for a fully worked example.
 
 You can also re-produce the notebook results with the command line tool. For usage, run ```starfish --help```
 

@@ -1,8 +1,7 @@
-import os
 import unittest
 
-from slicedimage import ImagePartition, Tile
 import numpy
+from slicedimage import ImagePartition, Tile
 
 from starfish.image import Coordinates, ImageStack, Indices
 

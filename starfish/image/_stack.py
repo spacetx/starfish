@@ -1,8 +1,7 @@
 import collections
-import os
-import typing
-from typing import Iterable, Mapping, Iterator, Union
 from functools import partial
+import os
+from typing import Iterable, Iterator, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
 
 import numpy
 from slicedimage import Reader, Writer
@@ -58,8 +57,8 @@ class ImageStack(ImageBase):
 
     def get_slice(
             self,
-            indices: typing.Mapping[Indices, typing.Union[int, slice]]
-    ) -> typing.Tuple[numpy.ndarray, typing.Sequence[Indices]]:
+            indices: Mapping[Indices, Union[int, slice]]
+    ) -> Tuple[numpy.ndarray, Sequence[Indices]]:
         """
         Given a dictionary mapping the index name to either a value or a slice range, return a numpy array representing
         the slice, and a list of the remaining axes beyond the normal x-y tile.
@@ -83,9 +82,9 @@ class ImageStack(ImageBase):
 
     def set_slice(
             self,
-            indices: typing.Mapping[Indices, typing.Union[int, slice]],
+            indices: Mapping[Indices, Union[int, slice]],
             data: numpy.ndarray,
-            axes: typing.Sequence[Indices]=None):
+            axes: Sequence[Indices]=None):
         """
         Given a dictionary mapping the index name to either a value or a slice range and a source numpy array, set the
         slice of the array of this ImageStack to the values in the source numpy array.  If the optional parameter axes
@@ -134,12 +133,12 @@ class ImageStack(ImageBase):
 
     def _build_slice_list(
             self,
-            indices: typing.Mapping[Indices, typing.Union[int, slice]]
-    ) -> typing.Tuple[typing.Tuple[typing.Union[int, slice], ...], typing.Sequence[Indices]]:
+            indices: Mapping[Indices, Union[int, slice]]
+    ) -> Tuple[Tuple[Union[int, slice], ...], Sequence[Indices]]:
         slice_list = [
             slice(None, None, None)
             for _ in range(ImageStack.N_AXES)
-        ]  # type: typing.MutableSequence[typing.Union[int, slice]]
+        ]  # type: MutableSequence[Union[int, slice]]
         axes = []
         removed_axes = set()
         for name, value in indices.items():
@@ -180,7 +179,6 @@ class ImageStack(ImageBase):
                     for z in numpy.arange(self.shape['z']):
                         yield {Indices.HYB: hyb, Indices.CH: ch, Indices.Z: z}
 
-    # TODO: ambrosejcarr this should support slices, too (e.g. all images for a channel)
     def _iter_tiles(
             self, indices: Iterable[Mapping[Indices, Union[int, slice]]]
     ) -> Iterable[numpy.ndarray]:
@@ -207,7 +205,8 @@ class ImageStack(ImageBase):
         Parameters
         ----------
         func, Callable
-          function to apply. Must expect a first argument which is a 2d or 3d numpy array (see is_3d)
+          function to apply. must expect a first argument which is a 2d or 3d numpy array (see is_3d) and return a
+          numpy.ndarray of the same shape
         is_3d, bool
           (default False) if True, pass 3d volumes (x, y, z) to func
         inplace, bool
@@ -221,7 +220,7 @@ class ImageStack(ImageBase):
         Optional[ImageStack]
           if inplace is False, return a new ImageStack containing the output of apply
         """
-        mapfunc = map  # TODO: posix-compliant multiprocessing
+        mapfunc = map  # TODO: ambrosejcarr posix-compliant multiprocessing
         indices = list(self._iter_indices(is_3d=is_3d))
         tiles = self._iter_tiles(indices)
 
@@ -232,17 +231,17 @@ class ImageStack(ImageBase):
         for r, inds in zip(results, indices):
             self.set_slice(inds, r)
 
-        # todo implement inplace=False
+        # TODO: ambrosejcarr implement inplace=False
 
     @property
-    def raw_shape(self) -> typing.Optional[list]:
+    def raw_shape(self) -> Optional[Tuple]:
         if self._data is None:
             return None
 
         return self._data.shape
 
     @property
-    def shape(self) -> typing.Optional[dict]:
+    def shape(self) -> Optional[dict]:
         if self._data is None:
             return None
 

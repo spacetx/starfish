@@ -6,7 +6,7 @@ import zipfile
 
 import requests
 from skimage.io import imread, imsave
-from slicedimage import ImageFormat, ImagePartition, Tile, Writer
+from slicedimage import ImageFormat, Tile, TileSet, Writer
 
 from starfish.image import Coordinates, Indices
 from starfish.util.argparse import FsExistsType
@@ -22,7 +22,7 @@ def download(input_dir, url):
 def build_hybridization_stack(input_dir):
     default_shape = imread(os.path.join(input_dir, str(1), "c{}.TIF".format(1))).shape
 
-    hybridization_images = ImagePartition(
+    hybridization_images = TileSet(
         [Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH],
         {Indices.HYB: 4, Indices.CH: 4},
         default_shape,
@@ -99,8 +99,8 @@ def write_json(res, output_path):
         json.dump(res, outfile, indent=4)
 
 
-def tile_opener(toc_path, tile, ext):
-    tile_basename = os.path.splitext(toc_path)[0]
+def tile_opener(tileset_path, tile, ext):
+    tile_basename = os.path.splitext(tileset_path)[0]
     return open(
         "{}-H{}-C{}.{}".format(
             tile_basename,

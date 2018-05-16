@@ -1,4 +1,4 @@
-from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.pipeline.pipeline_component import PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import fourier_shift
 from ._base import RegistrationAlgorithmBase

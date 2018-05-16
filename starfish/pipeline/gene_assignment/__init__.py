@@ -1,6 +1,6 @@
 import json
 
-from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.pipeline.pipeline_component import PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import _base
 from . import point_in_poly

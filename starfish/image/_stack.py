@@ -1,6 +1,7 @@
 import collections
 import os
-from typing import Any, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
+from functools import partial
+from typing import Any, Iterable, Iterator, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
 
 import numpy
 from slicedimage import Reader, Writer
@@ -155,8 +156,85 @@ class ImageStack(ImageBase):
 
         return tuple(slice_list), axes
 
+    def _iter_indices(self, is_volume: bool=False) -> Iterator[Mapping[Indices, int]]:
+        """Iterate over indices of image tiles or image volumes if is_volume is True
+
+        Parameters
+        ----------
+        is_volume, bool
+            If True, yield indices necessary to extract volumes from self, else return
+            indices for tiles
+
+        Yields
+        ------
+        Dict[str, int]
+            Mapping of dimension name to index
+
+        """
+        for hyb in numpy.arange(self.shape[Indices.HYB]):
+            for ch in numpy.arange(self.shape[Indices.CH]):
+                if is_volume:
+                    yield {Indices.HYB: hyb, Indices.CH: ch}
+                else:
+                    for z in numpy.arange(self.shape[Indices.Z]):
+                        yield {Indices.HYB: hyb, Indices.CH: ch, Indices.Z: z}
+
+    def _iter_tiles(
+            self, indices: Iterable[Mapping[Indices, Union[int, slice]]]
+    ) -> Iterable[numpy.ndarray]:
+        """Given an iterable of indices, return a generator of numpy arrays from self.image
+
+        Parameters
+        ----------
+        indices, Iterable[Mapping[str, int]]
+            Iterable of indices that map a dimension (str) to a value (int)
+
+
+        Yields
+        ------
+        numpy.ndarray
+            Numpy array that corresponds to provided indices
+        """
+        for inds in indices:
+            array, axes = self.get_slice(inds)
+            yield array
+
+    def apply(self, func, is_volume=False, **kwargs):
+        """Apply func over all tiles or volumes in self
+
+        Parameters
+        ----------
+        func : Callable
+            Function to apply. must expect a first argument which is a 2d or 3d numpy array (see is_volume) and return a
+            numpy.ndarray. If inplace is True, must return an array of the same shape.
+        is_volume : bool
+            (default False) If True, pass 3d volumes (x, y, z) to func
+        inplace : bool
+            (default True) If True, function is executed in place. If n_proc is not 1, the tile or
+            volume will be copied once during execution. Not currently implemented.
+        kwargs : dict
+            Additional arguments to pass to func
+
+        Returns
+        -------
+        Optional[ImageStack]
+            If inplace is False, return a new ImageStack containing the output of apply
+        """
+        mapfunc = map  # TODO: ambrosejcarr posix-compliant multiprocessing
+        indices = list(self._iter_indices(is_volume=is_volume))
+        tiles = self._iter_tiles(indices)
+
+        applyfunc = partial(func, **kwargs)
+
+        results = mapfunc(applyfunc, tiles)
+
+        for r, inds in zip(results, indices):
+            self.set_slice(inds, r)
+
+        # TODO: ambrosejcarr implement inplace=False
+
     @property
-    def raw_shape(self) -> Optional[list]:
+    def raw_shape(self) -> Optional[Tuple[int]]:
         if self._data is None:
             return None
 

@@ -6,14 +6,7 @@
 # EPY: START markdown
 # ## Reproduce In-situ Sequencing results with Starfish
 # 
-# The ISS.zip file needed to follow along with this notebook can be downloaded [here](https://drive.google.com/open?id=1YQ3QcOBIoL6Yz3SStC0vigbVaH0C7DkW)
-# 
-# This notebook walks through a work flow that reproduces an ISS result for one field of view using the starfish package. It assumes that you have unzipped ISS.zip in the same directory as this notebook. Thus, you should see: 
-# 
-# ```
-# ISS/
-# ISS Pipeline - Breast - 1 FOV.ipynb
-# ```
+# This notebook walks through a work flow that reproduces an ISS result for one field of view using the starfish package.
 # 
 # ## Load tiff stack and visualize one field of view
 # EPY: END markdown
@@ -31,7 +24,7 @@ import pprint
 from starfish.io import Stack
 
 s = Stack()
-s.read('ISS/fov_001/experiment.json')
+s.read('https://dmf0bdeheu4zf.cloudfront.net/ISS/fov_001/experiment.json')
 # s.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 tile(s.squeeze());  
 # EPY: END code
@@ -85,7 +78,7 @@ image(s.aux_dict['nuclei'])
 # EPY: END markdown
 
 # EPY: START code
-codebook = pd.read_csv('ISS/codebook.csv', dtype={'barcode': object})
+codebook = pd.read_csv('http://czi.starfish.data.public.s3-website-us-east-1.amazonaws.com/ISS/codebook.csv', dtype={'barcode': object})
 codebook.head(20)
 # EPY: END code
 

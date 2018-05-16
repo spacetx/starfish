@@ -10,7 +10,7 @@ from pstats import Stats
 from .image import Indices
 from .pipeline import registration
 from .pipeline.gene_assignment import GeneAssignment
-from .pipeline.spots.detector import SpotFinder
+from starfish.pipeline.features.spots.detector import SpotFinder
 from .pipeline.decoder import Decoder
 from .util.argparse import FsExistsType
 

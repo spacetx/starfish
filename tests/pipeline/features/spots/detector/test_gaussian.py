@@ -1,7 +1,7 @@
 import os
 
 from starfish.io import Stack
-from starfish.pipeline.spots.detector.gaussian import GaussianSpotDetector
+from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
 from starfish.util.test import DATA_DIR
 
 

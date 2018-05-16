@@ -72,8 +72,10 @@ class GaussianSpotDetector:
         d = dict(zip(inds, self.intensities))
         d['spot_id'] = range(self.num_objs)
 
+        # TODO: (ambrosejcarr) explicitly specify data types.
         res = pd.DataFrame(d)
         res = gather(res, 'ind', 'val', inds)
+        res = res.infer_objects()
         res = pd.merge(res, mapping, on='ind', how='left')
 
         return res

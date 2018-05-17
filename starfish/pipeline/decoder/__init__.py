@@ -1,7 +1,7 @@
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import _base
-from . import _iss
+from . import iss
 
 
 class Decoder(PipelineComponent):

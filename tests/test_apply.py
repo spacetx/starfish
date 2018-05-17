@@ -1,7 +1,7 @@
 import unittest
 
 import numpy
-from slicedimage import ImagePartition, Tile
+from slicedimage import Tile, TileSet
 
 from starfish.image import Coordinates, ImageStack, Indices
 
@@ -18,7 +18,7 @@ class TestSetSliceAPI(unittest.TestCase):
     X = 20
 
     def setUp(self):
-        img = ImagePartition(
+        img = TileSet(
             {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
             {
                 Indices.HYB: TestSetSliceAPI.NUM_HYB,

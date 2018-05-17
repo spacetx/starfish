@@ -234,17 +234,14 @@ class ImageStack(ImageBase):
         # TODO: ambrosejcarr implement inplace=False
 
     @property
-    def raw_shape(self) -> Optional[Tuple[int]]:
-        if self._data is None:
-            return None
-
+    def raw_shape(self) -> Tuple[int]:
         return self._data.shape
 
     @property
-    def shape(self) -> Optional[dict]:
-        if self._data is None:
-            return None
-
+    def shape(self) -> collections.OrderedDict:
+        # TODO: (ttung) Note that the return type should be ..OrderedDict[Any, str], but python3.6 has a bug where this
+        # breaks horribly.  Can't find a bug id to link to, but see
+        # https://stackoverflow.com/questions/41207128/how-do-i-specify-ordereddict-k-v-types-for-mypy-type-annotation
         result = collections.OrderedDict()  # type: collections.OrderedDict[Any, str]
         for name, idx in ImageStack.AXES_MAP.items():
             result[name] = self._data.shape[idx]

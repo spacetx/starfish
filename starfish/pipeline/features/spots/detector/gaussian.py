@@ -1,5 +1,7 @@
 from __future__ import division
 
+from typing import Tuple
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -9,6 +11,9 @@ from skimage.feature import blob_log
 from starfish.munge import gather
 from starfish.io import Stack
 from ._base import SpotFinderAlgorithmBase
+from starfish.pipeline.algorithm_base import AlgorithmBase
+from starfish.pipeline.features.spot_attributes import SpotAttributes
+from starfish.pipeline.features.encoded_spots import EncodedSpots
 
 
 class GaussianSpotDetector(SpotFinderAlgorithmBase):
@@ -122,3 +127,69 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         plt.title('Num blobs: {}'.format(len(blobs_log)))
         plt.show()
+
+
+class GaussianSpotDetectorNew(AlgorithmBase):
+
+    def __init__(self, min_sigma, max_sigma, num_sigma, threshold, blobs, measurement_type='max', **kwargs):
+        self.min_sigma = min_sigma
+        self.max_sigma = max_sigma
+        self.num_sigma = num_sigma
+        self.threshold = threshold
+        self.blobs = blobs
+
+        try:
+            self.measurement_function = getattr(np, measurement_type)
+        except AttributeError:
+            raise ValueError(
+                'measurement_type must be a numpy reduce function such as "max" or "mean". {} not found.'.format(
+                    measurement_type)
+            )
+
+    def fit(self):
+        fitted_blobs = pd.DataFrame(
+            data=blob_log(self.blobs, self.min_sigma, self.max_sigma, self.num_sigma, self.threshold),
+            columns=['x', 'y', 'r']
+        )
+        # TODO ambrosejcarr: why is this necessary? (check docs)
+        fitted_blobs['r'] *= np.sqrt(2)
+
+        fitted_blobs['x_min'] = np.floor(fitted_blobs.x - fitted_blobs.r)
+        fitted_blobs['x_max'] = np.ceil(fitted_blobs.x + fitted_blobs.r)
+        fitted_blobs['y_min'] = np.floor(fitted_blobs.y - fitted_blobs.r)
+        fitted_blobs['y_max'] = np.ceil(fitted_blobs.y + fitted_blobs.r)
+
+        # TODO ambrosejcarr: are these not already ints?
+        fitted_blobs['intensity'] = fitted_blobs.astype(int).apply(
+            lambda row: self.measurement_function(self.blobs[row.x_min:row.x_max, row.y_min:row.y_max])
+        )
+
+        fitted_blobs['spot_id'] = np.arange(fitted_blobs.shape[0])
+
+        return SpotAttributes(fitted_blobs)
+
+    def run(self, image_stack) -> Tuple[SpotAttributes, EncodedSpots]:
+        spot_attributes = self.fit()
+        encoded_spots = spot_attributes.encode(image_stack)
+        return spot_attributes, encoded_spots
+
+    @classmethod
+    def from_cli_args(cls, args):
+        return cls(**vars(args))
+
+    @classmethod
+    def get_algorithm_name(cls):
+        return 'gaussian_spot_detector_new'
+
+    @classmethod
+    def add_arguments(cls, group_parser):
+        group_parser.add_argument("--blobs", type=str, help='aux image key')
+        group_parser.add_argument(
+            "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
+        group_parser.add_argument(
+            "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)")
+        group_parser.add_argument("--num-sigma", default=20, type=int, help="Number of scales to try")
+        group_parser.add_argument("--threshold", default=.01, type=float, help="Dots threshold")
+        group_parser.add_argument("--show", default=False, type=bool, help="Dots threshold")
+
+

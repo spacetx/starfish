@@ -1,8 +1,10 @@
 import collections
-import functools
 
 
 class PipelineComponent(object):
+
+    _algorithm_to_class_map = None
+
     @classmethod
     def implementing_algorithms(cls):
         """
@@ -17,15 +19,15 @@ class PipelineComponent(object):
         return cls._algorithm_to_class_map
 
     @classmethod
-    def run(cls, algorithm_name, stack, *args, **kwargs):
+    def _cli(cls, algorithm_name, stack, *args, **kwargs):
         """Runs the registration component using the algorithm name, stack, and arguments for the specific algorithm."""
         algorithm_cls = cls._algorithm_to_class_map[algorithm_name]
         instance = algorithm_cls(*args, **kwargs)
-        return instance.register(stack)
+        return instance.run(stack)
 
     @classmethod
     def _ensure_algorithms_setup(cls):
-        if not hasattr(cls, '_algorithm_to_class_map'):
+        if not hasattr(cls, '_algorithm_to_class_map') or cls._algorithm_to_class_map is None:
             cls._algorithm_to_class_map = dict()
 
         queue = collections.deque(cls.implementing_algorithms())

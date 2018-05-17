@@ -1,0 +1,3 @@
+
+class DecodedSpots:
+    pass

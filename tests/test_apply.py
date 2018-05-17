@@ -14,8 +14,8 @@ class TestSetSliceAPI(unittest.TestCase):
     NUM_HYB = 2
     NUM_CH = 3
     NUM_Z = 4
-    HEIGHT = 30
-    WIDTH = 20
+    Y = 30
+    X = 20
 
     def setUp(self):
         img = ImagePartition(
@@ -25,7 +25,7 @@ class TestSetSliceAPI(unittest.TestCase):
                 Indices.CH: TestSetSliceAPI.NUM_CH,
                 Indices.Z: TestSetSliceAPI.NUM_Z,
             },
-            default_tile_shape=(TestSetSliceAPI.HEIGHT, TestSetSliceAPI.WIDTH),
+            default_tile_shape=(TestSetSliceAPI.Y, TestSetSliceAPI.X),
         )
         for hyb in range(TestSetSliceAPI.NUM_HYB):
             for ch in range(TestSetSliceAPI.NUM_CH):
@@ -43,7 +43,7 @@ class TestSetSliceAPI(unittest.TestCase):
                         }
                     )
                     tile.numpy_array = numpy.ones(
-                        (TestSetSliceAPI.HEIGHT, TestSetSliceAPI.WIDTH))
+                        (TestSetSliceAPI.Y, TestSetSliceAPI.X))
 
                     img.add_tile(tile)
 
@@ -54,5 +54,5 @@ class TestSetSliceAPI(unittest.TestCase):
         assert (self.stack.numpy_array == 2).all()
 
     def test_apply_3d(self):
-        self.stack.apply(multiply, value=4, is_3d=True)
+        self.stack.apply(multiply, value=4, is_volume=True)
         assert (self.stack.numpy_array == 4).all()

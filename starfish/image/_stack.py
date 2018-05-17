@@ -156,27 +156,27 @@ class ImageStack(ImageBase):
 
         return tuple(slice_list), axes
 
-    def _iter_indices(self, is_3d: bool=False) -> Iterator[Mapping[Indices, int]]:
-        """Iterate over indices of image tiles or image volumes if is_3d is True
+    def _iter_indices(self, is_volume: bool=False) -> Iterator[Mapping[Indices, int]]:
+        """Iterate over indices of image tiles or image volumes if is_volume is True
 
         Parameters
         ----------
-        is_3d, bool
-          if True, yield indices necessary to extract volumes from self, else return
-          indices for tiles
+        is_volume, bool
+            If True, yield indices necessary to extract volumes from self, else return
+            indices for tiles
 
         Yields
         ------
         Dict[str, int]
-          mapping of dimension name to index
+            Mapping of dimension name to index
 
         """
-        for hyb in numpy.arange(self.shape['hyb']):
-            for ch in numpy.arange(self.shape['ch']):
-                if is_3d:
+        for hyb in numpy.arange(self.shape[Indices.HYB]):
+            for ch in numpy.arange(self.shape[Indices.CH]):
+                if is_volume:
                     yield {Indices.HYB: hyb, Indices.CH: ch}
                 else:
-                    for z in numpy.arange(self.shape['z']):
+                    for z in numpy.arange(self.shape[Indices.Z]):
                         yield {Indices.HYB: hyb, Indices.CH: ch, Indices.Z: z}
 
     def _iter_tiles(
@@ -187,41 +187,41 @@ class ImageStack(ImageBase):
         Parameters
         ----------
         indices, Iterable[Mapping[str, int]]
-          iterable of indices that map a dimension (str) to a value (int)
+            Iterable of indices that map a dimension (str) to a value (int)
 
 
         Yields
         ------
         numpy.ndarray
-          numpy array that corresponds to provided indices
+            Numpy array that corresponds to provided indices
         """
         for inds in indices:
             array, axes = self.get_slice(inds)
             yield array
 
-    def apply(self, func, is_3d=False, **kwargs):
+    def apply(self, func, is_volume=False, **kwargs):
         """Apply func over all tiles or volumes in self
 
         Parameters
         ----------
-        func, Callable
-          function to apply. must expect a first argument which is a 2d or 3d numpy array (see is_3d) and return a
-          numpy.ndarray of the same shape
-        is_3d, bool
-          (default False) if True, pass 3d volumes (x, y, z) to func
-        inplace, bool
-          (default True) if True, function is executed in place. If n_proc is not 1, the tile or
-          volume will be copied once during execution
-        kwargs, dict
-          additional arguments to pass to func
+        func : Callable
+            Function to apply. must expect a first argument which is a 2d or 3d numpy array (see is_volume) and return a
+            numpy.ndarray. If inplace is True, must return an array of the same shape.
+        is_volume : bool
+            (default False) If True, pass 3d volumes (x, y, z) to func
+        inplace : bool
+            (default True) If True, function is executed in place. If n_proc is not 1, the tile or
+            volume will be copied once during execution. Not currently implemented.
+        kwargs : dict
+            Additional arguments to pass to func
 
         Returns
         -------
         Optional[ImageStack]
-          if inplace is False, return a new ImageStack containing the output of apply
+            If inplace is False, return a new ImageStack containing the output of apply
         """
         mapfunc = map  # TODO: ambrosejcarr posix-compliant multiprocessing
-        indices = list(self._iter_indices(is_3d=is_3d))
+        indices = list(self._iter_indices(is_volume=is_volume))
         tiles = self._iter_tiles(indices)
 
         applyfunc = partial(func, **kwargs)
@@ -234,7 +234,7 @@ class ImageStack(ImageBase):
         # TODO: ambrosejcarr implement inplace=False
 
     @property
-    def raw_shape(self) -> Optional[Tuple]:
+    def raw_shape(self) -> Optional[Tuple[int]]:
         if self._data is None:
             return None
 

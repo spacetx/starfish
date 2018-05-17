@@ -16,8 +16,8 @@ class Coordinates(Enum):
 
 
 class Indices(Enum):
-    HYB = 'hyb'
-    CH = 'ch'
+    HYB = 'h'
+    CH = 'c'
     Z = 'z'
 
     def __hash__(self):

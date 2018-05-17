@@ -1,4 +1,4 @@
-import typing
+from typing import Optional
 
 
 class ImageBase(object):
@@ -8,7 +8,7 @@ class ImageBase(object):
         raise NotImplementedError()
 
     @property
-    def raw_shape(self) -> typing.Optional[list]:
+    def raw_shape(self) -> Optional[list]:
         """Retrieves the shape of the image data, as a list of the sizes of the indices."""
         raise NotImplementedError()
 

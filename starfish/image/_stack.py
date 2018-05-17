@@ -217,8 +217,8 @@ class ImageStack(ImageBase):
         z_coords_to_idx = {coords: idx for idx, coords in enumerate(sorted_z_coords)}
 
         if tile_opener is None:
-            def tile_opener(toc_path, tile, ext):
-                tile_basename = os.path.splitext(toc_path)[0]
+            def tile_opener(tileset_path, tile, ext):
+                tile_basename = os.path.splitext(tileset_path)[0]
                 xcoord = tile.coordinates[Coordinates.X]
                 ycoord = tile.coordinates[Coordinates.Y]
                 zcoord = tile.coordinates.get(Coordinates.Z, None)

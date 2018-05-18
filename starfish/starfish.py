@@ -2,13 +2,13 @@
 
 import argparse
 import cProfile
-import json
 import os
 import sys
 from pstats import Stats
 
 from .constants import Indices
-from .pipeline import registration
+from .pipeline.features.spots.detector import SpotFinder
+from .pipeline.registration import Registration
 from .pipeline.decoder import Decoder
 from .pipeline.gene_assignment import GeneAssignment
 from .pipeline.segmentation import Segmentation
@@ -28,23 +28,9 @@ def build_parser():
         noop_group = subparsers.add_parser("noop", add_help=False)
         noop_group.set_defaults(starfish_command=noop)
 
-    registration.Registration.add_to_parser(subparsers)
-
+    Registration.add_to_parser(subparsers)
     Filter.add_to_parser(subparsers)
-
-    detect_spots_group = subparsers.add_parser("detect_spots")
-    detect_spots_group.add_argument("in_json", type=FsExistsType())
-    detect_spots_group.add_argument("results_dir", type=FsExistsType())
-    detect_spots_group.add_argument("aux_image")
-    detect_spots_group.add_argument(
-        "--min_sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
-    detect_spots_group.add_argument(
-        "--max_sigma", default=6, type=int, help="Maximum spot size (in standard deviation)")
-    detect_spots_group.add_argument("--num_sigma", default=20, type=int, help="Number of scales to try")
-    detect_spots_group.add_argument("--t", default=.01, type=float, help="Dots threshold")
-    detect_spots_group.add_argument("--show", default=False, type=bool, help="Dots threshold")
-    detect_spots_group.set_defaults(starfish_command=detect_spots)
-
+    SpotFinder.add_to_parser(subparsers)
     Segmentation.add_to_parser(subparsers)
     GeneAssignment.add_to_parser(subparsers)
     Decoder.add_to_parser(subparsers)
@@ -91,47 +77,6 @@ def starfish():
     if args.profile:
         stats = Stats(profiler)
         stats.sort_stats('tottime').print_stats(PROFILER_LINES)
-
-
-def detect_spots(args, print_help=False):
-    from .io import Stack
-    from .munge import spots_to_geojson
-    from .spots.gaussian import GaussianSpotDetector
-
-    print('Finding spots...')
-    s = Stack()
-    s.read(args.in_json)
-
-    # create 'encoder table' standard (tidy) file format.
-    gsp = GaussianSpotDetector(s)
-    spots_df_tidy = gsp.detect(
-        min_sigma=args.min_sigma,
-        max_sigma=args.max_sigma,
-        num_sigma=args.num_sigma,
-        threshold=args.t,
-        blobs=args.aux_image,
-        measurement_type='max',
-        bit_map_flag=False
-    )
-
-    if args.show:
-        gsp.show(figsize=(10, 10))
-
-    spots_viz = gsp.spots_df_viz
-    geojson = spots_to_geojson(spots_viz)
-
-    path = os.path.join(args.results_dir, 'spots.geojson')
-    print("Writing | spots geojson to: {}".format(path))
-    with open(path, 'w') as f:
-        f.write(json.dumps(geojson))
-
-    path = os.path.join(args.results_dir, 'spots.json')
-    print("Writing | spot_id | x | y | z | to: {}".format(path))
-    spots_viz.to_json(path, orient="records")
-
-    path = os.path.join(args.results_dir, 'encoder_table.json')
-    print("Writing | spot_id | hyb | ch | val | to: {}".format(path))
-    spots_df_tidy.to_json(path, orient="records")
 
 
 def show(args, print_help=False):

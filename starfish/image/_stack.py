@@ -189,7 +189,6 @@ class ImageStack(ImageBase):
         indices, Iterable[Mapping[str, int]]
             Iterable of indices that map a dimension (str) to a value (int)
 
-
         Yields
         ------
         numpy.ndarray

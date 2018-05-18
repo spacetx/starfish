@@ -50,7 +50,6 @@ def build_parser():
     segment_group = subparsers.add_parser("segment")
     segment_group.add_argument("in_json", type=FsExistsType())
     segment_group.add_argument("results_dir", type=FsExistsType())
-    segment_group.add_argument("aux_image")
     segment_group.add_argument("--dt", default=.16, type=float, help="DAPI threshold")
     segment_group.add_argument("--st", default=.22, type=float, help="Input threshold")
     segment_group.add_argument("--md", default=57, type=int, help="Minimum distance between cells")
@@ -104,8 +103,6 @@ def starfish():
 
 
 def filter(args, print_help=False):
-    import numpy as np
-
     from .filters import white_top_hat
     from .io import Stack
 
@@ -117,11 +114,6 @@ def filter(args, print_help=False):
     # filter dots
     print("Filtering dots ...")
     dots_filt = white_top_hat(s.aux_dict['dots'], args.ds)
-
-    # create a 'stain' for segmentation
-    # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in stain generation?
-    stain = np.mean(s.max_proj(Indices.CH, Indices.Z), axis=0)
-    stain = stain / stain.max()
 
     # filter raw images, for all hybs, channels
     for hyb in range(s.image.num_hybs):
@@ -136,7 +128,6 @@ def filter(args, print_help=False):
 
     print("Writing results ...")
     s.set_aux('dots', dots_filt)
-    s.set_aux('stain', stain)
 
     s.write(args.out_dir)
 
@@ -183,6 +174,7 @@ def detect_spots(args, print_help=False):
 
 
 def segment(args, print_help=False):
+    import numpy as np
     from .io import Stack
     from .munge import regions_to_geojson
     from .stats import label_to_regions
@@ -191,12 +183,17 @@ def segment(args, print_help=False):
     s = Stack()
     s.read(args.in_json)
 
+    # create a 'stain' for segmentation
+    # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in stain generation?
+    stain = np.mean(s.max_proj(Indices.CH, Indices.Z), axis=0)
+    stain = stain / stain.max()
+
     # TODO make these parameterizable or determine whether they are useful or not
     size_lim = (10, 10000)
     disk_size_markers = None
     disk_size_mask = None
 
-    seg = WatershedSegmenter(s.aux_dict['nuclei'], s.aux_dict[args.aux_image])
+    seg = WatershedSegmenter(s.aux_dict['nuclei'], stain)
     cells_labels = seg.segment(args.dt, args.st, size_lim, disk_size_markers, disk_size_mask, args.md)
 
     regions = label_to_regions(cells_labels)

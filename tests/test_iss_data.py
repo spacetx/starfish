@@ -61,7 +61,6 @@ class TestWithIssData(unittest.TestCase):
             "starfish", "segment",
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "experiment.json"),
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
-            "stain",
             "--dt", ".16",
             "--st", ".22",
             "--md", "57",

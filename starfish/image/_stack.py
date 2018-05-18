@@ -1,7 +1,7 @@
 import collections
 import os
 from functools import partial
-from typing import Any, Iterable, Iterator, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
+from typing import Any, Iterable, Iterator, Mapping, MutableSequence, Sequence, Tuple, Union
 
 import numpy
 from slicedimage import Reader, Writer

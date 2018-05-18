@@ -44,7 +44,7 @@ class GeneAssignment(PipelineComponent):
 
         spots = pandas.read_json(args.spots_json, orient="records")
 
-        instance = args.gene_assignment_algorithm_class.from_cli_args(args)
+        instance = args.gene_assignment_algorithm_class(**vars(args))
 
         result = instance.assign_genes(spots, regions)
 

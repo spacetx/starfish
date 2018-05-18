@@ -32,7 +32,7 @@ class Registration(PipelineComponent):
             cls.register_group.print_help()
             cls.register_group.exit(status=2)
 
-        instance = args.registration_algorithm_class.from_cli_args(args)
+        instance = args.registration_algorithm_class(**vars(args))
 
         from starfish.io import Stack
 

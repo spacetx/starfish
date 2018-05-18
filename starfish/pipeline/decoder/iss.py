@@ -2,9 +2,8 @@ from ._base import DecoderAlgorithmBase
 
 
 class IssDecoder(DecoderAlgorithmBase):
-    @classmethod
-    def from_cli_args(cls, args):
-        return IssDecoder()
+    def __init__(self, **kwargs):
+        pass
 
     @classmethod
     def get_algorithm_name(cls):

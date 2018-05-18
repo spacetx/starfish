@@ -1,7 +1,7 @@
 import collections
 
 
-class PipelineComponent(object):
+class PipelineComponent:
     @classmethod
     def implementing_algorithms(cls):
         """

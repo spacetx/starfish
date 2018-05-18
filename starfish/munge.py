@@ -53,25 +53,6 @@ def spots_to_geojson(spots_viz):
     return [make_dict(row) for row in spots_viz.iterrows()]
 
 
-def regions_to_geojson(r, use_hull=True):
-    '''
-    Convert region geometrical data to geojson format
-    '''
-
-    def make_dict(id, verts):
-        d = dict()
-        c = list(map(lambda x: list(x), list(map(lambda v: [int(v[0]), int(v[1])], verts))))
-        d["properties"] = {"id": id}
-        d["geometry"] = {"type": "Polygon", "coordinates": c}
-        return d
-
-    if use_hull:
-        coordinates = r.hull
-    else:
-        coordinates = r.coordinates
-    return [make_dict(id, verts) for id, verts in enumerate(coordinates)]
-
-
 def geojson_to_region(geojson):
     """
     Convert geojson data to region geometrical data.

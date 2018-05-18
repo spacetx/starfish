@@ -5,5 +5,7 @@ pandas
 regional
 requests
 scikit-image
+scipy
 showit
 slicedimage == 0.0.0-dev16
+trackpy

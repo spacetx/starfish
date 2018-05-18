@@ -7,11 +7,11 @@ import os
 import sys
 from pstats import Stats
 
-from .image import Indices
 from .pipeline import registration
 from .pipeline.decoder import Decoder
 from .pipeline.gene_assignment import GeneAssignment
 from .pipeline.segmentation import Segmentation
+from .pipeline.filter import Filter
 from .util.argparse import FsExistsType
 
 
@@ -29,11 +29,7 @@ def build_parser():
 
     registration.Registration.add_to_parser(subparsers)
 
-    filter_group = subparsers.add_parser("filter")
-    filter_group.add_argument("in_json", type=FsExistsType())
-    filter_group.add_argument("out_dir", type=FsExistsType())
-    filter_group.add_argument("--ds", default=15, type=int, help="Disk size")
-    filter_group.set_defaults(starfish_command=filter)
+    Filter.add_to_parser(subparsers)
 
     detect_spots_group = subparsers.add_parser("detect_spots")
     detect_spots_group.add_argument("in_json", type=FsExistsType())
@@ -94,36 +90,6 @@ def starfish():
     if args.profile:
         stats = Stats(profiler)
         stats.sort_stats('tottime').print_stats(PROFILER_LINES)
-
-
-def filter(args, print_help=False):
-    from .filters import white_top_hat
-    from .io import Stack
-
-    print('Filtering ...')
-    print('Reading data')
-    s = Stack()
-    s.read(args.in_json)
-
-    # filter dots
-    print("Filtering dots ...")
-    dots_filt = white_top_hat(s.aux_dict['dots'], args.ds)
-
-    # filter raw images, for all hybs, channels
-    for hyb in range(s.image.num_hybs):
-        for ch in range(s.image.num_chs):
-            for zlayer in range(s.image.num_zlayers):
-                print("Filtering image: hyb={} ch={} zlayer={}...".format(hyb, ch, zlayer))
-                indices = {Indices.HYB: hyb, Indices.CH: ch, Indices.Z: zlayer}
-                data, axes = s.image.get_slice(indices=indices)
-                assert len(axes) == 0
-                result = white_top_hat(data, args.ds)
-                s.image.set_slice(indices=indices, data=result)
-
-    print("Writing results ...")
-    s.set_aux('dots', dots_filt)
-
-    s.write(args.out_dir)
 
 
 def detect_spots(args, print_help=False):

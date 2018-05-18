@@ -43,9 +43,10 @@ class TestWithIssData(unittest.TestCase):
         ],
         [
             "starfish", "filter",
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered", "experiment.json"),
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered"),
-            "--ds", "15",
+            "--input", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered", "experiment.json"),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered"),
+            "white_tophat",
+            "--disk-size", "15",
         ],
         [
             "starfish", "detect_spots",

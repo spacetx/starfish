@@ -1,34 +1,8 @@
 import numpy as np
-from scipy.ndimage.filters import maximum_filter, minimum_filter
 from skimage import restoration
-from skimage.filters import gaussian
 from skimage.morphology import binary_erosion, binary_dilation, disk, binary_opening, binary_closing
 
-from .munge import swap
-
-
-def gaussian_low_pass(img, sigma):
-    """
-    Applies a gaussian low pass filter to an image. Implementation simply calls
-    skimage.filters.gaussian
-    :param img: Image to filter. :type numpy array
-    :param sigma: Standard deviation of gaussian kernel: type int
-    :return: Filtered image, same shape as input :type ndarray
-    """
-    img_swap = swap(img)
-
-    blurred = gaussian(img_swap,
-                       sigma=sigma,
-                       output=None,
-                       cval=0,
-                       multichannel=True,
-                       preserve_range=True,
-                       truncate=4.0
-                       )
-
-    blurred = blurred.astype(np.uint16)
-
-    return swap(blurred)
+from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
 
 
 def gaussian_high_pass(img, sigma):
@@ -38,7 +12,7 @@ def gaussian_high_pass(img, sigma):
     :param sigma: Standard deviation of gaussian kernel :type int
     :return: Filtered image, same shape as input :type ndarray
     """
-    blurred = gaussian_low_pass(img, sigma)
+    blurred = GaussianLowPass.low_pass(img, sigma)
 
     over_flow_ind = img < blurred
     res = img - blurred
@@ -141,18 +115,4 @@ def bin_thresh(img, thresh):
     :return: Binarized image, same shape as input :type ndarray
     """
     res = img >= thresh
-    return res
-
-
-def white_top_hat(img, disk_size):
-    """
-    Performs white top hat filtering of an image to enhance spots
-    :param img: Image to filter. :type numpy array
-    :param disk_size: Radius of the disk-shaped structuring element.  :type int
-    :return: Filtered image, same shape as input :type ndarray
-    """
-    selem = disk(disk_size)
-    min_filt = minimum_filter(img, footprint=selem)
-    max_filt = maximum_filter(min_filt, footprint=selem)
-    res = img - max_filt
     return res

@@ -35,7 +35,7 @@ class Decoder(PipelineComponent):
             cls.decoder_group.print_help()
             cls.decoder_group.exit(status=2)
 
-        instance = args.decoder_algorithm_class.from_cli_args(args)
+        instance = args.decoder_algorithm_class(**vars(args))
 
         encoded = pandas.read_json(args.input, orient="records")
         codebook = pandas.read_json(args.codebook, orient="records")

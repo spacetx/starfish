@@ -2,9 +2,8 @@ from ._base import GeneAssignmentAlgorithm
 
 
 class PointInPoly(GeneAssignmentAlgorithm):
-    @classmethod
-    def from_cli_args(cls, args):
-        return PointInPoly()
+    def __init__(self, **kwargs):
+        pass
 
     @classmethod
     def get_algorithm_name(cls):

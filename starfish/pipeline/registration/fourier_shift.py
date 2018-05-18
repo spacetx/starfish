@@ -6,13 +6,8 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
     """
     Implements fourier shift registration.  TODO: (dganguli) FILL IN DETAILS HERE PLS.
     """
-
-    def __init__(self, upsampling):
+    def __init__(self, upsampling, **kwargs):
         self.upsampling = upsampling
-
-    @classmethod
-    def from_cli_args(cls, args):
-        return FourierShiftRegistration(args.u)
 
     @classmethod
     def get_algorithm_name(cls):
@@ -20,7 +15,7 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
 
     @classmethod
     def add_arguments(cls, group_parser):
-        group_parser.add_argument("--u", default=1, type=int, help="Amount of up-sampling")
+        group_parser.add_argument("--upsampling", default=1, type=int, help="Amount of up-sampling")
 
     def register(self, stack):
         # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in registration?

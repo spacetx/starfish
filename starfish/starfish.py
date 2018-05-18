@@ -9,8 +9,9 @@ from pstats import Stats
 
 from .image import Indices
 from .pipeline import registration
-from .pipeline.gene_assignment import GeneAssignment
 from .pipeline.decoder import Decoder
+from .pipeline.gene_assignment import GeneAssignment
+from .pipeline.segmentation import Segmentation
 from .util.argparse import FsExistsType
 
 
@@ -47,14 +48,7 @@ def build_parser():
     detect_spots_group.add_argument("--show", default=False, type=bool, help="Dots threshold")
     detect_spots_group.set_defaults(starfish_command=detect_spots)
 
-    segment_group = subparsers.add_parser("segment")
-    segment_group.add_argument("in_json", type=FsExistsType())
-    segment_group.add_argument("results_dir", type=FsExistsType())
-    segment_group.add_argument("--dt", default=.16, type=float, help="DAPI threshold")
-    segment_group.add_argument("--st", default=.22, type=float, help="Input threshold")
-    segment_group.add_argument("--md", default=57, type=int, help="Minimum distance between cells")
-    segment_group.set_defaults(starfish_command=segment)
-
+    Segmentation.add_to_parser(subparsers)
     GeneAssignment.add_to_parser(subparsers)
     Decoder.add_to_parser(subparsers)
 
@@ -171,38 +165,6 @@ def detect_spots(args, print_help=False):
     path = os.path.join(args.results_dir, 'encoder_table.json')
     print("Writing | spot_id | hyb | ch | val | to: {}".format(path))
     spots_df_tidy.to_json(path, orient="records")
-
-
-def segment(args, print_help=False):
-    import numpy as np
-    from .io import Stack
-    from .munge import regions_to_geojson
-    from .stats import label_to_regions
-    from .watershedsegmenter import WatershedSegmenter
-
-    s = Stack()
-    s.read(args.in_json)
-
-    # create a 'stain' for segmentation
-    # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in stain generation?
-    stain = np.mean(s.max_proj(Indices.CH, Indices.Z), axis=0)
-    stain = stain / stain.max()
-
-    # TODO make these parameterizable or determine whether they are useful or not
-    size_lim = (10, 10000)
-    disk_size_markers = None
-    disk_size_mask = None
-
-    seg = WatershedSegmenter(s.aux_dict['nuclei'], stain)
-    cells_labels = seg.segment(args.dt, args.st, size_lim, disk_size_markers, disk_size_mask, args.md)
-
-    regions = label_to_regions(cells_labels)
-    geojson = regions_to_geojson(regions, use_hull=False)
-
-    path = os.path.join(args.results_dir, 'regions.geojson')
-    print("Writing | regions geojson to: {}".format(path))
-    with open(path, 'w') as f:
-        f.write(json.dumps(geojson))
 
 
 def show(args, print_help=False):

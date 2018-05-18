@@ -59,11 +59,12 @@ class TestWithIssData(unittest.TestCase):
         ],
         [
             "starfish", "segment",
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "experiment.json"),
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
-            "--dt", ".16",
-            "--st", ".22",
-            "--md", "57",
+            "-i", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "experiment.json"),
+            "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.geojson"),
+            "watershed",
+            "--dapi-threshold", ".16",
+            "--input-threshold", ".22",
+            "--min-distance", "57",
         ],
         [
             "starfish", "gene_assignment",

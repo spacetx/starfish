@@ -1,12 +1,17 @@
+from functools import partial
+
 from trackpy import bandpass
 
 from ._base import FilterAlgorithmBase
 
 
 class Bandpass(FilterAlgorithmBase):
-    @classmethod
-    def from_cli_args(cls, args):
-        return cls()
+
+    def __init__(self, lshort, llong, threshold, truncate, **kwargs):
+        self.lshort = lshort
+        self.llong = llong
+        self.threshold = threshold
+        self.truncate = truncate
 
     @classmethod
     def get_algorithm_name(cls):
@@ -19,15 +24,26 @@ class Bandpass(FilterAlgorithmBase):
         group_parser.add_argument("--threshold", default=1, type=int, help="clip pixels below this intensity value")
         group_parser.add_argument("--truncate", default=4, type=int)
 
-    @classmethod
-    def filter(cls, image, lshort=0.5, llong=7, threshold=1, truncate=4):
+    @staticmethod
+    def bandpass(image, lshort, llong, threshold, truncate):
         """Apply a bandpass filter to remove noise and background variation
 
-        :param np.ndarray image: Image to filter
-        :param float lshort: filter frequencies below this value
-        :param int llong: filter frequencies above this odd integer value
-        :param float threshold: zero any pixels below this intensity value
-        :param float truncate:  # todo document
+        Parameters
+        ----------
+        image : np.ndarray
+        lshort : float
+            filter frequencies below this value
+        llong : int
+            filter frequencies above this odd integer value
+        threshold : float
+            zero any pixels below this intensity value
+        truncate : float
+            # todo document
+
+        Returns
+        -------
+        np.ndarray :
+            bandpassed image
 
         """
         bandpassed = bandpass(
@@ -35,3 +51,21 @@ class Bandpass(FilterAlgorithmBase):
             truncate=truncate
         )
         return bandpassed
+
+    def filter(self, stack) -> None:
+        """Perform in-place filtering of an image stack and all contained aux images.
+
+        Parameters
+        ----------
+        stack : starfish.Stack
+            Stack to be filtered.
+
+        """
+        bandpass_ = partial(
+            self.bandpass, lshort=self.lshort, llong=self.llong, threshold=self.threshold, truncate=self.truncate
+        )
+        stack.image.apply(bandpass_)
+
+        # apply to aux dict too:
+        for k, val in stack.aux_dict.items():
+            stack.aux_dict[k] = self.bandpass(val, self.lshort, self.llong, self.threshold, self.truncate)

@@ -1,12 +1,24 @@
 import numpy
+from functools import partial
 
 from ._base import FilterAlgorithmBase
 
 
 class Clip(FilterAlgorithmBase):
-    @classmethod
-    def from_cli_args(cls, args):
-        return cls()
+
+    def __init__(self, p_min, p_max, **kwargs):
+        """Image clipping filter
+
+        Parameters
+        ----------
+        p_min : float
+            values below this percentile are set to p_min
+        p_max : float
+            values above this percentile are set to p_max
+        kwargs
+        """
+        self.p_min: float = p_min
+        self.p_max: float = p_max
 
     @classmethod
     def get_algorithm_name(cls):
@@ -14,11 +26,11 @@ class Clip(FilterAlgorithmBase):
 
     @classmethod
     def add_arguments(cls, group_parser):
-        group_parser.add_argument("--p_min", default=0, type=float, help="clip intensities below this percentile")
-        group_parser.add_argument("--p_max", default=100, type=float, help="clip intensities above this percentile")
+        group_parser.add_argument("--p-min", default=0, type=float, help="clip intensities below this percentile")
+        group_parser.add_argument("--p-max", default=100, type=float, help="clip intensities above this percentile")
 
-    @classmethod
-    def filter(cls, image, p_min, p_max, *args, **kwargs):
+    @staticmethod
+    def clip(image, p_min, p_max):
         """Clip values of img below and above percentiles p_min and p_max
 
         Parameters
@@ -47,3 +59,19 @@ class Clip(FilterAlgorithmBase):
         dtype = image.dtype
         image = image.clip(min=v_min, max=v_max)
         return image.astype(dtype)
+
+    def filter(self, stack) -> None:
+        """Perform in-place filtering of an image stack and all contained aux images.
+
+        Parameters
+        ----------
+        stack : starfish.Stack
+            Stack to be filtered.
+
+        """
+        clip = partial(self.clip, p_min=self.p_min, p_max=self.p_max)
+        stack.image.apply(clip)
+
+        # apply to aux dict too:
+        for k, val in stack.aux_dict.items():
+            stack.aux_dict[k] = self.clip(val, self.p_min, self.p_max)

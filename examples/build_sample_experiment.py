@@ -139,7 +139,7 @@ def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimension
         json.dump(experiment_doc, fh, indent=4)
 
 
-class StarfishIndex(object):
+class StarfishIndex:
     def __call__(self, spec_json):
         try:
             spec = json.loads(spec_json)

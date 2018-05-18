@@ -135,10 +135,10 @@ class ImageStack(ImageBase):
             self,
             indices: Mapping[Indices, Union[int, slice]]
     ) -> Tuple[Tuple[Union[int, slice], ...], Sequence[Indices]]:
-        slice_list = [
+        slice_list: MutableSequence[Union[int, slice]] = [
             slice(None, None, None)
             for _ in range(ImageStack.N_AXES)
-        ]  # type: MutableSequence[Union[int, slice]]
+        ]
         axes = []
         removed_axes = set()
         for name, value in indices.items():
@@ -242,7 +242,7 @@ class ImageStack(ImageBase):
         # TODO: (ttung) Note that the return type should be ..OrderedDict[Any, str], but python3.6 has a bug where this
         # breaks horribly.  Can't find a bug id to link to, but see
         # https://stackoverflow.com/questions/41207128/how-do-i-specify-ordereddict-k-v-types-for-mypy-type-annotation
-        result = collections.OrderedDict()  # type: collections.OrderedDict[Any, str]
+        result: collections.OrderedDict[Any, str] = collections.OrderedDict()
         for name, idx in ImageStack.AXES_MAP.items():
             result[name] = self._data.shape[idx]
         result['y'] = self._data.shape[-2]

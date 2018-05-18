@@ -1,4 +1,5 @@
-from typing import Optional
+import collections
+from typing import Tuple
 
 
 class ImageBase(object):
@@ -8,12 +9,12 @@ class ImageBase(object):
         raise NotImplementedError()
 
     @property
-    def raw_shape(self) -> Optional[list]:
+    def raw_shape(self) -> Tuple[int]:
         """Retrieves the shape of the image data, as a list of the sizes of the indices."""
         raise NotImplementedError()
 
     @property
-    def shape(self):
+    def shape(self) -> collections.OrderedDict:
         """Retrieves the shape of the image data, as an ordered mapping between index names to the size of the index."""
         raise NotImplementedError()
 

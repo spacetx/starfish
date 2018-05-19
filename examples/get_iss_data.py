@@ -8,7 +8,7 @@ import requests
 from skimage.io import imread, imsave
 from slicedimage import ImageFormat, Tile, TileSet, Writer
 
-from starfish.image import Coordinates, Indices
+from starfish.constants import Coordinates, Indices
 from starfish.util.argparse import FsExistsType
 
 

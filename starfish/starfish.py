@@ -7,6 +7,7 @@ import os
 import sys
 from pstats import Stats
 
+from .constants import Indices
 from .pipeline import registration
 from .pipeline.decoder import Decoder
 from .pipeline.gene_assignment import GeneAssignment

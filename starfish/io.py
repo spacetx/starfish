@@ -6,7 +6,8 @@ import pandas as pd
 from slicedimage import ImageFormat
 from slicedimage.io import resolve_url, resolve_path_or_url
 
-from .image import ImageStack, Indices
+from starfish.constants import Indices
+from .image import ImageStack
 from .munge import list_to_stack
 
 

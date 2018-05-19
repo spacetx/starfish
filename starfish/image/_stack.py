@@ -6,8 +6,8 @@ from typing import Any, Iterable, Iterator, Mapping, MutableSequence, Sequence, 
 import numpy
 from slicedimage import Reader, Writer
 
+from starfish.constants import Coordinates, Indices
 from ._base import ImageBase
-from ._constants import Coordinates, Indices
 
 
 class ImageStack(ImageBase):

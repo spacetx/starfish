@@ -1,4 +1,3 @@
-import codecs
 import json
 import os
 
@@ -30,8 +29,7 @@ class Stack:
     def read(self, in_json_path_or_url):
         self.backend, name, self.baseurl = resolve_path_or_url(in_json_path_or_url)
         with self.backend.read_file_handle(name) as fh:
-            reader = codecs.getreader("utf-8")
-            self.org = json.load(reader(fh))
+            self.org = json.load(fh)
 
         self.image = ImageStack.from_image_stack(self.org['hybridization_images'], self.baseurl)
         self._read_aux()

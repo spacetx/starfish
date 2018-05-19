@@ -3,7 +3,8 @@ import unittest
 import numpy
 from slicedimage import Tile, TileSet
 
-from starfish.image import Coordinates, ImageStack, Indices
+from starfish.constants import Coordinates, Indices
+from starfish.image import ImageStack
 
 
 class TestGetSliceAPI(unittest.TestCase):

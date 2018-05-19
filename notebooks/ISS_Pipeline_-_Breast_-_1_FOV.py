@@ -237,8 +237,8 @@ res.gene.value_counts().sort_index(ascending=False).sort_values(kind='mergesort'
 # EPY: END markdown
 
 # EPY: START code
+from starfish.constants import Indices
 from starfish.filters import gaussian_low_pass
-from starfish.image import Indices
 from starfish.watershedsegmenter import WatershedSegmenter
 
 dapi_thresh = .16  # binary mask for cell (nuclear) locations

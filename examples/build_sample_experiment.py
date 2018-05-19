@@ -11,10 +11,7 @@ from slicedimage import (
     Writer,
 )
 
-from starfish.image import (
-    Coordinates,
-    Indices,
-)
+from starfish.constants import Coordinates, Indices
 from starfish.util.argparse import FsExistsType
 
 

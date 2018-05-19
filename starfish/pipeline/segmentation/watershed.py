@@ -1,4 +1,4 @@
-from starfish.image import Indices
+from starfish.constants import Indices
 from ._base import SegmentationAlgorithmBase
 
 

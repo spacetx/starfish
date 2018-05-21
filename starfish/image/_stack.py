@@ -38,10 +38,10 @@ class ImageStack(ImageBase):
             self.set_slice(indices={Indices.HYB: h, Indices.CH: c, Indices.Z: zlayer}, data=tile.numpy_array)
 
     @classmethod
-    def from_image_stack(cls, image_stack_name_or_url, baseurl):
-        image_partition = Reader.parse_doc(image_stack_name_or_url, baseurl)
+    def from_url(cls, relativeurl, baseurl):
+        image_partition = Reader.parse_doc(relativeurl, baseurl)
 
-        return ImageStack(image_partition)
+        return cls(image_partition)
 
     @property
     def numpy_array(self):

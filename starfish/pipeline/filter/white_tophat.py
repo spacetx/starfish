@@ -2,6 +2,14 @@ from ._base import FilterAlgorithmBase
 
 
 class WhiteTophat(FilterAlgorithmBase):
+    """
+    Performs "white top hat" filtering of an image to enhance spots. "White top hat filtering" finds spots that are both
+    smaller and brighter than their surroundings.
+
+    See Also
+    --------
+    https://en.wikipedia.org/wiki/Top-hat_transform
+    """
 
     def __init__(self, disk_size, **kwargs):
         """Instance of a white top hat morphological masking filter which masks objects larger than `disk_size`

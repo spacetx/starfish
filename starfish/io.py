@@ -32,7 +32,7 @@ class Stack:
         with self.backend.read_file_handle(name) as fh:
             self.org = json.load(fh)
 
-        self.image = ImageStack.from_image_stack(self.org['hybridization_images'], self.baseurl)
+        self.image = ImageStack.from_url(self.org['hybridization_images'], self.baseurl)
         self._read_aux()
 
     def _read_aux(self):

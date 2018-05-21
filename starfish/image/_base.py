@@ -3,6 +3,10 @@ from typing import Tuple
 
 
 class ImageBase(object):
+    @classmethod
+    def from_url(cls, relativeurl, baseurl):
+        raise NotImplementedError()
+
     @property
     def numpy_array(self):
         """Retrieves the image data as a numpy array."""

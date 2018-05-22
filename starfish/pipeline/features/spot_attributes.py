@@ -1,12 +1,18 @@
 import json
-
 import pandas as pd
 
+from ._validated_table import ValidatedTable
 
-from starfish.pipeline.features.encoded_spots import EncodedSpots
 
+class SpotAttributes(ValidatedTable):
 
-class SpotAttributes:
+    required_fields = {
+        'x',  # spot x-coordinate
+        'y',  # spot y-coordinate
+        'r',  # spot radius
+        'intensity',  # intensity of spot (commonly max or average)
+        'spot_id'  # integer spot id
+    }
 
     def __init__(self, spot_attributes):
         """Construct a SpotAttributes instance
@@ -16,20 +22,8 @@ class SpotAttributes:
         spot_attributes : pd.DataFrame
 
         """
-        required_fields = {
-            'x',  # spot x-coordinate
-            'y',  # spot y-coordinate
-            'r',  # spot radius
-            'intensity',  # intensity of spot (commonly max or average)
-            'spot_id'  # integer spot id
-        }
-        missing_fields = required_fields.difference(spot_attributes.columns)
-        if missing_fields:
-            raise ValueError(f'spot attributes missing {missing_fields:!r} required fields')
+        super().__init__(spot_attributes, SpotAttributes.required_fields)
 
-        self.data = spot_attributes
-
-    # TODO ambrosejcarr: why geojson in addition to json?
     def save_geojson(self, output_file_name):
 
         # TODO ambrosejcarr: write a test for this
@@ -42,13 +36,6 @@ class SpotAttributes:
 
         with open(output_file_name, 'w') as f:
             f.write(json.dumps(geojson))
-
-    def save(self, output_file_name):
-        self.data.to_json(output_file_name, orient='records')
-
-    @classmethod
-    def load(cls, file):
-        return cls(pd.read_json(file))
 
     def display(self, background_image):
         """

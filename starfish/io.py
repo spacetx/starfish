@@ -12,6 +12,7 @@ from .munge import list_to_stack
 
 
 class Stack:
+
     def __init__(self):
         # data organization
         self.org = None
@@ -26,6 +27,9 @@ class Stack:
         # backend & baseurl
         self.backend = None
         self.baseurl = None
+
+        # map 1d list of tiles to indices
+        self.squeeze_map = None
 
     def read(self, in_json_path_or_url):
         self.backend, name, self.baseurl = resolve_path_or_url(in_json_path_or_url)
@@ -96,18 +100,19 @@ class Stack:
         new_shape = (first_dim,) + self.image.tile_shape
         new_data = self.image.numpy_array.reshape(new_shape)
 
-        ind = np.arange(first_dim)
+        data = {
+            # @ttung: this column index recurs in the codebase. Should we put it in constants?
+            'barcode_index': np.arange(first_dim),
+            # e.g., 0, 1, 2, 3 --> 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3
+            Indices.HYB.value: np.tile(
+                np.repeat(np.arange(self.image.num_hybs), self.image.num_chs), self.image.num_zlayers),
+            # e.g., 0, 1, 2, 3 --> 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3
+            Indices.CH.value: np.tile(np.arange(self.image.num_chs), self.image.num_hybs * self.image.num_zlayers),
+            # e.g., 0, 1, 2, 3 --> 0 (repeated 16 times), 1 (repeated 16 times), ...
+            Indices.Z.value: np.repeat(np.arange(self.image.num_zlayers), self.image.num_hybs * self.image.num_chs),
+        }
 
-        # e.g., 0, 1, 2, 3 --> 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3
-        hyb = np.tile(np.repeat(np.arange(self.image.num_hybs), self.image.num_chs), self.image.num_zlayers)
-
-        # e.g., 0, 1, 2, 3 --> 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3
-        ch = np.tile(np.arange(self.image.num_chs), self.image.num_hybs * self.image.num_zlayers)
-
-        # e.g., 0, 1, 2, 3 --> 0 (repeated 16 times), 1 (repeated 16 times), ...
-        zlayers = np.repeat(np.arange(self.image.num_zlayers), self.image.num_hybs * self.image.num_chs)
-
-        self.squeeze_map = pd.DataFrame(dict(ind=ind, hyb=hyb, ch=ch, zlayers=zlayers))
+        self.squeeze_map = pd.DataFrame(data)
 
         if bit_map_flag:
             mp = [(d[Indices.HYB], d[Indices.CH], d['bit']) for d in self.org['data']]

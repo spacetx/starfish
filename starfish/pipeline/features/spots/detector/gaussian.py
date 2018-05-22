@@ -70,9 +70,9 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         res = pd.DataFrame(d)
 
-        res = gather(res, 'ind', 'val', inds)  # TODO ambrosejcarr this produces an object
+        res = gather(res, 'barcode_index', 'intensity', inds)  # TODO ambrosejcarr this produces an object
         res = res.infer_objects()
-        res = pd.merge(res, mapping, on='ind', how='left')
+        res = pd.merge(res, mapping, on='barcode_index', how='left')
         return EncodedSpots(res)
 
     def fit(self, blobs_image):

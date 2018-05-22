@@ -1,5 +1,6 @@
 import argparse
 import os
+from typing import Optional
 
 from starfish.io import Stack
 from starfish.pipeline.pipelinecomponent import PipelineComponent
@@ -11,6 +12,7 @@ from . import gaussian
 class SpotFinder(PipelineComponent):
 
     spot_finder_algorithm_class = None
+    spot_finder_group: argparse.ArgumentParser
 
     @classmethod
     def implementing_algorithms(cls):

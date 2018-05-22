@@ -50,6 +50,3 @@ class GeneAssignment(PipelineComponent):
 
         print("Writing | cell_id | spot_id to: {}".format(args.output))
         result.to_json(args.output, orient="records")
-
-
-GeneAssignment._ensure_algorithms_setup()

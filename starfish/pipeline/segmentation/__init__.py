@@ -1,5 +1,4 @@
 import json
-import os
 
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
@@ -49,9 +48,6 @@ class Segmentation(PipelineComponent):
         print("Writing | regions geojson to: {}".format(args.output))
         with open(args.output, "w") as f:
             f.write(json.dumps(geojson))
-
-
-Segmentation._ensure_algorithms_setup()
 
 
 def regions_to_geojson(r, use_hull=True):

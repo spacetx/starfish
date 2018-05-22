@@ -45,5 +45,3 @@ class Filter(PipelineComponent):
         instance.filter(s)
 
         s.write(args.output)
-
-Filter._ensure_algorithms_setup()

@@ -43,6 +43,3 @@ class Registration(PipelineComponent):
         instance.register(s)
 
         s.write(args.output)
-
-
-Registration._ensure_algorithms_setup()

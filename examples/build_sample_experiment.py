@@ -68,7 +68,7 @@ def build_image(fov_count, hyb_count, ch_count, z_count, default_shape=(1536, 10
             [Coordinates.X, Coordinates.Y, Indices.Z, Indices.HYB, Indices.CH],
             {Indices.HYB: hyb_count, Indices.CH: ch_count, Indices.Z: z_count},
             default_shape,
-            ImageFormat.TIFF,
+            ImageFormat.NUMPY,
         )
 
         for z_ix in range(z_count):
@@ -110,6 +110,7 @@ def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimension
     experiment_doc = {
         'version': "0.0.0",
         'auxiliary_images': {},
+        'extras': {},
     }
     hybridization_image = build_image(
         fov_count, hyb_dimensions[Indices.Z], hyb_dimensions[Indices.HYB], hyb_dimensions[Indices.CH])

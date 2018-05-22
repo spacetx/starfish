@@ -1,5 +1,5 @@
 import collections
-from typing import Mapping, Type
+from typing import Mapping, Optional, Type
 
 
 class PipelineComponentType(type):
@@ -29,7 +29,7 @@ class PipelineComponentType(type):
 
 
 class PipelineComponent(metaclass=PipelineComponentType):
-    _algorithm_to_class_map: Mapping[str, Type] = None
+    _algorithm_to_class_map: Optional[Mapping[str, Type]] = None
 
     @classmethod
     def implementing_algorithms(cls):

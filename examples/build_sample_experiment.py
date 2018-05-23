@@ -20,7 +20,7 @@ AUX_IMAGE_NAMES = {
 }
 
 
-def tile_opener(toc_path, tile, ext):
+def tile_opener(toc_path, tile, file_ext):
     tile_basename = os.path.splitext(toc_path)[0]
     return open(
         "{}-Z{}-H{}-C{}.{}".format(
@@ -28,7 +28,7 @@ def tile_opener(toc_path, tile, ext):
             tile.indices[Indices.Z],
             tile.indices[Indices.HYB],
             tile.indices[Indices.CH],
-            ext.file_ext,
+            file_ext,
         ),
         "wb")
 
@@ -119,6 +119,7 @@ def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimension
         os.path.join(path, "hybridization.json"),
         pretty=True,
         partition_path_generator=fov_path_generator,
+        tile_opener=tile_opener,
     )
     experiment_doc['hybridization_images'] = "hybridization.json"
 
@@ -130,6 +131,7 @@ def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimension
             os.path.join(path, "{}.json".format(aux_name)),
             pretty=True,
             partition_path_generator=fov_path_generator,
+            tile_opener=tile_opener,
         )
         experiment_doc['auxiliary_images'][aux_name] = "{}.json".format(aux_name)
 

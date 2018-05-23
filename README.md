@@ -29,7 +29,7 @@ python examples/get_iss_data.py /tmp/starfish/raw /tmp/starfish/formatted --d 1
 
 starfish register -i /tmp/starfish/formatted/experiment.json -o /tmp/starfish/registered fourier_shift --u 1000
 
-starfish filter /tmp/starfish/registered/experiment.json /tmp/starfish/filtered/ --ds 15
+starfish filter -i /tmp/starfish/registered/experiment.json -o /tmp/starfish/filtered/ white_tophat --disk-size 15
 
 starfish show /tmp/starfish/filtered/experiment.json
 

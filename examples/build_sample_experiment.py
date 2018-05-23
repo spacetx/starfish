@@ -17,6 +17,7 @@ from starfish.util.argparse import FsExistsType
 
 AUX_IMAGE_NAMES = {
     'nuclei',
+    'dots',
 }
 
 

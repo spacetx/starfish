@@ -17,6 +17,7 @@ from starfish.util.argparse import FsExistsType
 
 AUX_IMAGE_NAMES = {
     'nuclei',
+    'dots',
 }
 
 
@@ -124,6 +125,8 @@ def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimension
     experiment_doc['hybridization_images'] = "hybridization.json"
 
     for aux_name, aux_dimensions in aux_name_to_dimensions.items():
+        if aux_dimensions is None:
+            continue
         auxiliary_image = build_image(
             fov_count, aux_dimensions[Indices.Z], aux_dimensions[Indices.HYB], aux_dimensions[Indices.CH])
         Writer.write_to_path(
@@ -167,7 +170,7 @@ if __name__ == "__main__":
                             Indices.Z.value))
     name_arg_map = dict()
     for aux_image_name in AUX_IMAGE_NAMES:
-        arg = parser.add_argument("--{}-dimensions".format(aux_image_name), type=StarfishIndex(), required=True,
+        arg = parser.add_argument("--{}-dimensions".format(aux_image_name), type=StarfishIndex(),
                             help="Dimensions for the {} images.  Should be a json dict, with {}, {}, and {} as "
                                  "the possible keys.  The value should be the shape along that dimension.  If a key is "
                                  "not present, the value is assumed to be 0.".format(

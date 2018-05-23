@@ -90,7 +90,7 @@ class DumbImageFetcher(ImageFetcher):
         return DumbFetchedImage()
 
 
-def build_image(fov_count, hyb_count, ch_count, z_count, image_fetcher: ImageFetcher, default_shape=(1536, 1024)):
+def build_image(fov_count, hyb_count, ch_count, z_count, image_fetcher: ImageFetcher, default_shape: Tuple[int, int]):
     """
     Build and returns an image set with the following characteristics:
 
@@ -151,6 +151,7 @@ def write_experiment_json(
         hyb_image_fetcher=None,
         aux_image_fetcher=None,
         postprocess_func=None,
+        default_shape=(1536, 1024),
 ):
     """
     Build and returns a top-level experiment description with the following characteristics:
@@ -173,6 +174,8 @@ def write_experiment_json(
     postprocess_func : Optional[Callable[[dict], dict]]
         If provided, this is called with the experiment document for any postprocessing.  The callable should return
         what is to be written as the experiment document.
+    default_shape : Tuple[int, int]
+        Default shape for the tiles in this experiment.
     """
     if hyb_image_fetcher is None:
         hyb_image_fetcher = DumbImageFetcher()
@@ -189,7 +192,9 @@ def write_experiment_json(
     hybridization_image = build_image(
         fov_count,
         hyb_dimensions[Indices.HYB], hyb_dimensions[Indices.CH], hyb_dimensions[Indices.Z],
-        hyb_image_fetcher)
+        hyb_image_fetcher,
+        default_shape=default_shape,
+    )
     Writer.write_to_path(
         hybridization_image,
         os.path.join(path, "hybridization.json"),
@@ -206,7 +211,8 @@ def write_experiment_json(
         auxiliary_image = build_image(
             fov_count,
             aux_dimensions[Indices.HYB], aux_dimensions[Indices.CH], aux_dimensions[Indices.Z],
-            aux_image_fetcher.get(aux_name, DumbImageFetcher())
+            aux_image_fetcher.get(aux_name, DumbImageFetcher()),
+            default_shape=default_shape,
         )
         Writer.write_to_path(
             auxiliary_image,

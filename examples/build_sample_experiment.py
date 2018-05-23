@@ -113,7 +113,7 @@ def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimension
         'extras': {},
     }
     hybridization_image = build_image(
-        fov_count, hyb_dimensions[Indices.Z], hyb_dimensions[Indices.HYB], hyb_dimensions[Indices.CH])
+        fov_count, hyb_dimensions[Indices.HYB], hyb_dimensions[Indices.CH], hyb_dimensions[Indices.Z])
     Writer.write_to_path(
         hybridization_image,
         os.path.join(path, "hybridization.json"),
@@ -124,7 +124,7 @@ def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimension
 
     for aux_name, aux_dimensions in aux_name_to_dimensions.items():
         auxiliary_image = build_image(
-            fov_count, aux_dimensions[Indices.Z], aux_dimensions[Indices.HYB], aux_dimensions[Indices.CH])
+            fov_count, aux_dimensions[Indices.HYB], aux_dimensions[Indices.CH], aux_dimensions[Indices.Z])
         Writer.write_to_path(
             auxiliary_image,
             os.path.join(path, "{}.json".format(aux_name)),

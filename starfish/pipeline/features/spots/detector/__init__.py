@@ -42,6 +42,7 @@ class SpotFinder(PipelineComponent):
             cls.spot_finder_group.print_help()
             cls.spot_finder_group.exit(status=2)
 
+        print('Detecting Spots ...')
         s = Stack()
         s.read(args.input)
         instance = args.spot_finder_algorithm_class(**vars(args))

@@ -6,7 +6,7 @@ from showit import image
 from skimage.feature import peak_local_max
 from skimage.morphology import watershed
 
-from .filters import bin_thresh, bin_open
+from .pipeline.filter.util import bin_thresh, bin_open
 from .munge import relabel
 from .stats import label_to_regions
 

@@ -4,8 +4,8 @@ import pandas as pd
 import scipy.ndimage.measurements as spm
 from showit import image
 
-from starfish.filters import bin_thresh
 from starfish.munge import gather
+from starfish.pipeline.filter.util import bin_thresh
 from starfish.stats import label_to_regions, measure_stack
 
 

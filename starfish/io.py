@@ -144,6 +144,12 @@ class Stack:
         figsize : Tuple[int, int] (default = (10, 10))
             size of the figure in inches
 
+        Notes
+        -----
+        For this widget to function interactively in the notebook, after ipywidgets has been installed, the user must
+        register the widget with jupyter by typing the following command into the terminal:
+        jupyter nbextension enable --py widgetsnbextension
+
         """
         from skimage import exposure
 

@@ -18,7 +18,7 @@ class GaussianSpotDetector:
         self.intensities = None
 
     def detect(self, min_sigma, max_sigma, num_sigma, threshold, blobs, measurement_type, bit_map_flag):
-        self.blobs = self.stack.aux_dict[blobs]
+        self.blobs = self.stack.aux_dict[blobs].numpy_array
         fitted_blobs = self._fit(min_sigma, max_sigma, num_sigma, threshold)
         spots_df_viz = self._fitted_blobs_to_df(fitted_blobs)
         intensity = self._measure(self.blobs, spots_df_viz, measurement_type)

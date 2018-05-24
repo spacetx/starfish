@@ -26,11 +26,12 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
     def register(self, stack):
         # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in registration?
         mp = stack.max_proj(Indices.CH, Indices.Z)
+        dots = stack.aux_dict['dots'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
 
         for h in range(stack.image.num_hybs):
             # compute shift between maximum projection (across channels) and dots, for each hyb round
             # TODO: make the max projection array ignorant of axes ordering.
-            shift, error = compute_shift(mp[h, :, :], stack.aux_dict['dots'], self.upsampling)
+            shift, error = compute_shift(mp[h, :, :], dots, self.upsampling)
             print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
 
             for c in range(stack.image.num_chs):

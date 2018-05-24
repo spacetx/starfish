@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from skimage.feature import blob_log
 
+from starfish.constants import Indices
 from starfish.munge import gather
 from starfish.pipeline.features.encoded_spots import EncodedSpots
 from starfish.pipeline.features.spot_attributes import SpotAttributes
@@ -96,7 +97,8 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         return SpotAttributes(fitted_blobs)
 
     def find(self, image_stack) -> Tuple[SpotAttributes, EncodedSpots]:
-        spot_attributes = self.fit(image_stack.aux_dict[self.blobs])
+        blobs = image_stack.aux_dict[self.blobs].max_proj(Indices.HYB, Indices.CH, Indices.Z)
+        spot_attributes = self.fit(blobs)
         encoded_spots = self.encode(image_stack, spot_attributes.data)
         return spot_attributes, encoded_spots
 

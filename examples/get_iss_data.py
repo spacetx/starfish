@@ -1,15 +1,20 @@
 import argparse
+from typing import IO, Tuple
+
 import io
 import os
 import json
 import zipfile
 
 import requests
-from skimage.io import imread, imsave
-from slicedimage import ImageFormat, Tile, TileSet, Writer
+from slicedimage import ImageFormat
 
-from starfish.constants import Coordinates, Indices
+from starfish.constants import Indices
 from starfish.util.argparse import FsExistsType
+from examples.support import FetchedImage, ImageFetcher, write_experiment_json
+
+
+SHAPE = (980, 1330)
 
 
 def download(input_dir, url):
@@ -19,76 +24,36 @@ def download(input_dir, url):
     z.extractall(input_dir)
 
 
-def build_hybridization_stack(input_dir):
-    default_shape = imread(os.path.join(input_dir, str(1), "c{}.TIF".format(1))).shape
+class ISSImage(FetchedImage):
+    def __init__(self, file_path):
+        self.file_path = file_path
 
-    hybridization_images = TileSet(
-        [Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH],
-        {Indices.HYB: 4, Indices.CH: 4},
-        default_shape,
-        ImageFormat.TIFF,
-    )
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return SHAPE
 
-    for hyb in range(4):
-        for ch in range(4):
-            tile = Tile(
-                {
-                    Coordinates.X: (0.0, 0.0001),
-                    Coordinates.Y: (0.0, 0.0001),
-                },
-                {
-                    Indices.HYB: hyb,
-                    Indices.CH: ch,
-                },
-            )
-            path = os.path.join(input_dir, str(hyb + 1), "c{}.TIF".format(ch + 2))
-            tile.set_source_fh_contextmanager(
-                lambda _path=path: open(_path, "rb"),
-                ImageFormat.TIFF,
-            )
-            hybridization_images.add_tile(tile)
+    @property
+    def format(self) -> ImageFormat:
+        return ImageFormat.TIFF
 
-    return hybridization_images
+    def image_data_handle(self) -> IO:
+        return open(self.file_path, "rb")
 
 
-def build_fov(input_dir, hybridization_stack_name, codebook_json_filename, output_dir):
-    prefix = "fov_0"
+class HybridizationImageFetcher(ImageFetcher):
+    def __init__(self, input_dir):
+        self.input_dir = input_dir
 
-    nuclei = imread(input_dir + "DO/c1.TIF")
-    dots = imread(input_dir + "DO/c2.TIF")
+    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
+        return ISSImage(os.path.join(self.input_dir, str(hyb + 1), "c{}.TIF".format(ch + 2)))
 
-    experiment = {
-        'version': "0.0.0",
-        'hybridization_images': hybridization_stack_name,
-        'codebook': codebook_json_filename,
-        'auxiliary_images': {},
-    }
 
-    nuclei_fname = "{}_{}.tiff".format(prefix, "nuclei")
-    imsave(output_dir + nuclei_fname, nuclei)
-    experiment['auxiliary_images']['nuclei'] = {
-        'file': nuclei_fname,
-        'tile_shape': nuclei.shape,
-        'tile_format': "TIFF",
-        'coordinates': {
-            'x': (0.0, 0.0001),
-            'y': (0.0, 0.0001),
-        },
-    }
+class AuxImageFetcher(ImageFetcher):
+    def __init__(self, path):
+        self.path = path
 
-    dots_fname = "{}_{}.tiff".format(prefix, "dots")
-    imsave(output_dir + dots_fname, dots)
-    experiment['auxiliary_images']['dots'] = {
-        'file': dots_fname,
-        'tile_shape': dots.shape,
-        'tile_format': "TIFF",
-        'coordinates': {
-            'x': (0.0, 0.0001),
-            'y': (0.0, 0.0001),
-        },
-    }
-
-    return experiment
+    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
+        return ISSImage(self.path)
 
 
 def write_json(res, output_path):
@@ -97,24 +62,6 @@ def write_json(res, output_path):
     print("Writing to: {}".format(output_path))
     with open(output_path, "w") as outfile:
         json.dump(res, outfile, indent=4)
-
-
-def tile_opener(tileset_path, tile, ext):
-    tile_basename = os.path.splitext(tileset_path)[0]
-    return open(
-        "{}-H{}-C{}.{}".format(
-            tile_basename,
-            tile.indices[Indices.HYB],
-            tile.indices[Indices.CH],
-            "tiff",  # this is not `ext` because ordinarily, output is saved as .npy.  since we're copying the data, it
-                     # should stay .tiff
-        ),
-        "wb")
-
-
-def tile_writer(tile, fh):
-    tile.copy(fh)
-    return ImageFormat.TIFF
 
 
 def format_data(input_dir, output_dir, d):
@@ -133,14 +80,44 @@ def format_data(input_dir, output_dir, d):
         input_dir += "ExampleInSituSequencing/"
         print("Using data in : {}".format(input_dir))
 
-    image_stack = build_hybridization_stack(input_dir)
-    image_stack_name = "hybridization.json"
-    Writer.write_to_path(
-        image_stack,
-        os.path.join(output_dir, image_stack_name),
-        pretty=True,
-        tile_opener=tile_opener,
-        tile_writer=tile_writer)
+    def add_codebook(experiment_json_doc):
+        experiment_json_doc['codebook'] = "codebook.json"
+
+        # TODO: (ttung) remove the following unholy hacks.  this is because we want to point at a tileset rather than
+        # a collection.
+        experiment_json_doc['hybridization_images'] = "hybridization-fov_000.json"
+        experiment_json_doc['auxiliary_images']['nuclei'] = "nuclei-fov_000.json"
+        experiment_json_doc['auxiliary_images']['dots'] = "dots-fov_000.json"
+        return experiment_json_doc
+
+    write_experiment_json(
+        output_dir,
+        1,
+        {
+            Indices.HYB: 4,
+            Indices.CH: 4,
+            Indices.Z: 1,
+        },
+        {
+            'nuclei': {
+                Indices.HYB: 1,
+                Indices.CH: 1,
+                Indices.Z: 1,
+            },
+            'dots': {
+                Indices.HYB: 1,
+                Indices.CH: 1,
+                Indices.Z: 1,
+            }
+        },
+        hyb_image_fetcher=HybridizationImageFetcher(input_dir),
+        aux_image_fetcher={
+            'nuclei': AuxImageFetcher(os.path.join(input_dir, "DO", "c1.TIF")),
+            'dots': AuxImageFetcher(os.path.join(input_dir, "DO", "c2.TIF")),
+        },
+        postprocess_func=add_codebook,
+        default_shape=SHAPE,
+    )
 
     codebook = [
         {'barcode': "AAGC", 'gene': "ACTB_human"},
@@ -148,10 +125,6 @@ def format_data(input_dir, output_dir, d):
     ]
     codebook_json_filename = "codebook.json"
     write_json(codebook, os.path.join(output_dir, codebook_json_filename))
-
-    starfish_input = build_fov(input_dir, image_stack_name, codebook_json_filename, output_dir)
-    starfish_input_name = "experiment.json"
-    write_json(starfish_input, os.path.join(output_dir, starfish_input_name))
 
 
 if __name__ == "__main__":

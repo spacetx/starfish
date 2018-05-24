@@ -28,14 +28,31 @@ class ImageStack(ImageBase):
             self._num_zlayers = 1
         self._tile_shape = tuple(image_partition.default_tile_shape)
 
-        self._data = numpy.zeros((self._num_hybs, self._num_chs, self._num_zlayers) + self._tile_shape)
-        self._data_needs_writeback = False
+        kind = None
+        max_size = 0
+        for tile in image_partition.tiles():
+            dtype = tile.numpy_array.dtype
+            if kind is None:
+                kind = dtype.kind
+            else:
+                if kind != dtype.kind:
+                    raise TypeError("All tiles should have the same kind of dtype")
+            if dtype.itemsize > max_size:
+                max_size = dtype.itemsize
+
+        self._data = numpy.zeros(
+            shape=(self._num_hybs, self._num_chs, self._num_zlayers) + self._tile_shape,
+            dtype=numpy.dtype(f"{kind}{max_size}")
+        )
 
         for tile in image_partition.tiles():
             h = tile.indices[Indices.HYB]
             c = tile.indices[Indices.CH]
             zlayer = tile.indices.get(Indices.Z, 0)
             self.set_slice(indices={Indices.HYB: h, Indices.CH: c, Indices.Z: zlayer}, data=tile.numpy_array)
+
+        # set_slice will mark the data as needing writeback, so we need to unset that.
+        self._data_needs_writeback = False
 
     @classmethod
     def from_url(cls, relativeurl, baseurl):

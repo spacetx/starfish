@@ -68,4 +68,5 @@ class Bandpass(FilterAlgorithmBase):
 
         # apply to aux dict too:
         for k, val in stack.aux_dict.items():
-            stack.aux_dict[k] = self.bandpass(val, self.lshort, self.llong, self.threshold, self.truncate)
+            stack.aux_dict[k].numpy_array = self.bandpass(
+                val.numpy_array, self.lshort, self.llong, self.threshold, self.truncate)

@@ -14,7 +14,7 @@ class EncodedSpots(ValidatedTable):
         Indices.HYB.value,  # hybridization round
     }
 
-    def __init__(self, encoded_spots):
+    def __init__(self, encoded_spots: pd.DataFrame):
         """
 
         Parameters

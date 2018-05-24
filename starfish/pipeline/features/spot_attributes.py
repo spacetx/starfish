@@ -1,4 +1,5 @@
 import json
+import numpy as np
 import pandas as pd
 
 from ._validated_table import ValidatedTable
@@ -14,7 +15,7 @@ class SpotAttributes(ValidatedTable):
         'spot_id'  # integer spot id
     }
 
-    def __init__(self, spot_attributes):
+    def __init__(self, spot_attributes: pd.DataFrame):
         """Construct a SpotAttributes instance
 
         Parameters
@@ -24,7 +25,15 @@ class SpotAttributes(ValidatedTable):
         """
         super().__init__(spot_attributes, SpotAttributes.required_fields)
 
-    def save_geojson(self, output_file_name):
+    def save_geojson(self, output_file_name: str) -> None:
+        """Save to geojson for web visualization
+
+        Parameters
+        ----------
+        output_file_name : str
+            name of output json file
+
+        """
 
         # TODO ambrosejcarr: write a test for this
         geojson = [
@@ -37,7 +46,7 @@ class SpotAttributes(ValidatedTable):
         with open(output_file_name, 'w') as f:
             f.write(json.dumps(geojson))
 
-    def display(self, background_image):
+    def display(self, background_image: np.ndarray) -> None:
         """
 
         Parameters

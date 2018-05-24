@@ -12,7 +12,7 @@ class DecodedSpots(ValidatedTable):
         'gene'  # string gene name
     }
 
-    def __init__(self, decoded_spots):
+    def __init__(self, decoded_spots: pd.DataFrame):
         """
 
         Parameters

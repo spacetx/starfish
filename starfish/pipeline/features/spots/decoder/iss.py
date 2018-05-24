@@ -1,4 +1,6 @@
 from ._base import DecoderAlgorithmBase
+from starfish.constants import Indices
+from starfish.pipeline.features.decoded_spots import DecodedSpots
 
 
 class IssDecoder(DecoderAlgorithmBase):
@@ -13,24 +15,24 @@ class IssDecoder(DecoderAlgorithmBase):
     def add_arguments(cls, group_parser):
         pass
 
-    def decode(self, encoded, codebook, letters=['T', 'G', 'C', 'A']):
+    def decode(self, encoded, codebook, letters=('T', 'G', 'C', 'A')):
         import numpy as np
         import pandas as pd
 
-        num_ch = encoded.ch.max() + 1
-        num_hy = encoded.hyb.max() + 1
-        num_spots = encoded.spot_id.max() + 1
+        num_ch = encoded[Indices.CH.value].max() + 1
+        num_hyb = encoded[Indices.HYB.value].max() + 1
+        num_spots = encoded['spot_id'].max() + 1
 
-        seq_res = np.zeros((num_spots, num_hy))
-        seq_stren = np.zeros((num_spots, num_hy))
-        seq_qual = np.zeros((num_spots, num_hy))
+        seq_res = np.zeros((num_spots, num_hyb))
+        seq_stren = np.zeros((num_spots, num_hyb))
+        seq_qual = np.zeros((num_spots, num_hyb))
 
         for spot_id in range(num_spots):
 
             sid_df = encoded[encoded.spot_id == spot_id]
 
-            mat = np.zeros((num_hy, num_ch))
-            inds = zip(sid_df.hyb.values, sid_df.ch.values, sid_df.val)
+            mat = np.zeros((num_hyb, num_ch))
+            inds = zip(sid_df[Indices.HYB.value].values, sid_df[Indices.CH.value].values, sid_df['intensity'])
 
             for tup in inds:
                 mat[tup[0], tup[1]] = tup[2]
@@ -54,8 +56,8 @@ class IssDecoder(DecoderAlgorithmBase):
 
         dec = pd.DataFrame({'spot_id': range(num_spots),
                             'barcode': codes,
-                            'qual': max_qual})
+                            'quality': max_qual})
 
         dec = pd.merge(dec, codebook, on='barcode', how='left')
 
-        return dec
+        return DecodedSpots(dec)

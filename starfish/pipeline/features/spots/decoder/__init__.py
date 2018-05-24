@@ -42,4 +42,4 @@ class Decoder(PipelineComponent):
 
         results = instance.decode(encoded, codebook)
         print("Writing | spot_id | gene_id to: {}".format(args.output))
-        results.to_json(args.output, orient="records")
+        results.save(args.output)

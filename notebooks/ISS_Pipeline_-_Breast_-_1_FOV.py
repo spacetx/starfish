@@ -15,9 +15,7 @@
 import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
-import os
-from showit import image, tile 
-import time
+from showit import image, tile
 import pprint
 # EPY: ESCAPE %matplotlib inline
 
@@ -206,7 +204,7 @@ p.spots_df_viz.head()
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.decoder._iss import IssDecoder
+from starfish.pipeline.features.spots.decoder.iss import IssDecoder
 
 decoder = IssDecoder()
 res = decoder.decode(encoded, codebook, letters=['T', 'G', 'C', 'A'])  # letters = channels
@@ -238,7 +236,6 @@ res.gene.value_counts().sort_index(ascending=False).sort_values(kind='mergesort'
 
 # EPY: START code
 from starfish.constants import Indices
-from starfish.filters import gaussian_low_pass
 from starfish.watershedsegmenter import WatershedSegmenter
 
 dapi_thresh = .16  # binary mask for cell (nuclear) locations

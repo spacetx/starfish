@@ -1,9 +1,20 @@
 import pandas as pd
 
+from starfish.constants import Indices
+from ._validated_table import ValidatedTable
 
-class EncodedSpots:
 
-    def __init__(self, encoded_spots):
+class EncodedSpots(ValidatedTable):
+
+    required_fields = {
+        'spot_id',  # integer spot id
+        'barcode_index',  # position in barcode
+        'intensity',  # spot intensity
+        Indices.CH.value,  # channel
+        Indices.HYB.value,  # hybridization round
+    }
+
+    def __init__(self, encoded_spots: pd.DataFrame):
         """
 
         Parameters
@@ -11,12 +22,4 @@ class EncodedSpots:
         encoded_spots : pd.DataFrame
 
         """
-        # todo typechecking here
-        self.data = encoded_spots
-
-    def save(self, output_file_name):
-        self.data.to_json(output_file_name, orient='records')
-
-    @classmethod
-    def load(cls, json_file):
-        return cls(pd.read_json(json_file))
+        super().__init__(encoded_spots, EncodedSpots.required_fields)

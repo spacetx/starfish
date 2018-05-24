@@ -6,10 +6,9 @@ import os
 import sys
 from pstats import Stats
 
-from .constants import Indices
 from .pipeline.features.spots.detector import SpotFinder
 from .pipeline.registration import Registration
-from .pipeline.decoder import Decoder
+from starfish.pipeline.features.spots.decoder import Decoder
 from .pipeline.gene_assignment import GeneAssignment
 from .pipeline.segmentation import Segmentation
 from .pipeline.filter import Filter

@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -123,3 +124,59 @@ class Stack:
         new_shape = (self.image.num_hybs, self.image.num_chs, self.image.num_zlayers) + self.image.tile_shape
         res = stack.reshape(new_shape)
         return res
+
+    def show_z_stack(
+            self, h: int=1, c: int=0, cmap: str='gray', rescale: bool=False, figsize: Tuple[int, int]=(10, 10)):
+        """Create an interactive visualization of a z-stack
+
+        Produces a slider that flips through the z-series of 2-d x-y images
+
+        Parameters
+        ----------
+        h : int
+            hybridization round to visualize
+        c : int
+            channel to visualize
+        cmap : str (default = 'gray')
+            string id of a matplotlib colormap
+        rescale : bool (default = True)
+            if True, rescale the data to exclude high and low-value outliers (see skimage.exposure.rescale_intensity)
+        figsize : Tuple[int, int] (default = (10, 10))
+            size of the figure in inches
+
+        """
+        from skimage import exposure
+
+        from starfish.constants import Indices
+
+        import matplotlib.pyplot as plt
+        from ipywidgets import interact
+        from scipy.stats import scoreatpercentile
+
+        n = self.image.shape[Indices.Z]
+
+        data = self.image.get_slice({Indices.CH: c, Indices.HYB: h})[0]
+        if rescale:
+            print("Rescaling ...")
+            vmin, vmax = scoreatpercentile(data, (0.5, 99.5))
+            data = exposure.rescale_intensity(
+                data,
+                in_range=(vmin, vmax),
+                out_range=np.float32
+            ).astype(np.float32)
+
+        def show_plane(ax, plane, cmap="gray", title=None):
+            ax.imshow(plane, cmap=cmap)
+            ax.set_xticks([])
+            ax.set_yticks([])
+
+            if title:
+                ax.set_title(title)
+
+        @interact(plane=(0, n - 1))
+        def display_slice(plane=34):
+            fig, ax = plt.subplots(figsize=figsize)
+            show_plane(ax, data[plane], title="Plane {}".format(plane), cmap=cmap)
+            plt.show()
+
+        return display_slice

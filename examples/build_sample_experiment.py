@@ -1,8 +1,12 @@
 import argparse
 import json
 import os
+from typing import IO, Tuple
+
+from io import BytesIO
 
 import numpy
+from skimage.io import imsave
 from slicedimage import (
     Collection,
     ImageFormat,
@@ -29,9 +33,14 @@ def tile_opener(toc_path, tile, file_ext):
             tile.indices[Indices.Z],
             tile.indices[Indices.HYB],
             tile.indices[Indices.CH],
-            file_ext,
+            ImageFormat.TIFF.file_ext,
         ),
         "wb")
+
+
+def tile_writer(tile, fh):
+    tile.copy(fh)
+    return ImageFormat.TIFF
 
 
 def fov_path_generator(parent_toc_path, toc_name):
@@ -40,6 +49,37 @@ def fov_path_generator(parent_toc_path, toc_name):
         os.path.dirname(parent_toc_path),
         "{}-{}.json".format(toc_basename, toc_name),
     )
+
+
+class FetchedImage:
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        raise NotImplementedError()
+
+    @property
+    def format(self) -> ImageFormat:
+        raise NotImplementedError()
+
+    @property
+    def image_data_handle(self) -> IO:
+        raise NotImplementedError()
+
+
+class DumbFetchedImage(FetchedImage):
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return 1536, 1024
+
+    @property
+    def format(self) -> ImageFormat:
+        return ImageFormat.TIFF
+
+    def image_data_handle(self) -> IO:
+        arr = numpy.random.randint(0, 256, size=self.shape, dtype=numpy.uint8)
+        output = BytesIO()
+        imsave(output, arr, plugin="tifffile")
+        output.seek(0)
+        return output
 
 
 def build_image(fov_count, hyb_count, ch_count, z_count, default_shape=(1536, 1024)):
@@ -69,12 +109,13 @@ def build_image(fov_count, hyb_count, ch_count, z_count, default_shape=(1536, 10
             [Coordinates.X, Coordinates.Y, Indices.Z, Indices.HYB, Indices.CH],
             {Indices.HYB: hyb_count, Indices.CH: ch_count, Indices.Z: z_count},
             default_shape,
-            ImageFormat.NUMPY,
+            ImageFormat.TIFF,
         )
 
         for z_ix in range(z_count):
             for hyb_ix in range(hyb_count):
                 for ch_ix in range(ch_count):
+                    image = DumbFetchedImage()
                     tile = Tile(
                         {
                             Coordinates.X: (0.0, 0.0001),
@@ -86,8 +127,9 @@ def build_image(fov_count, hyb_count, ch_count, z_count, default_shape=(1536, 10
                             Indices.HYB: hyb_ix,
                             Indices.CH: ch_ix,
                         },
+                        image.shape,
                     )
-                    tile.numpy_array = numpy.zeros(default_shape)
+                    tile.set_source_fh_contextmanager(image.image_data_handle, image.format)
                     fov_images.add_tile(tile)
         collection.add_partition("fov_{:03}".format(fov_ix), fov_images)
     return collection
@@ -121,6 +163,7 @@ def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimension
         pretty=True,
         partition_path_generator=fov_path_generator,
         tile_opener=tile_opener,
+        tile_writer=tile_writer,
     )
     experiment_doc['hybridization_images'] = "hybridization.json"
 
@@ -135,6 +178,7 @@ def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimension
             pretty=True,
             partition_path_generator=fov_path_generator,
             tile_opener=tile_opener,
+            tile_writer=tile_writer,
         )
         experiment_doc['auxiliary_images'][aux_name] = "{}.json".format(aux_name)
 
@@ -165,19 +209,19 @@ if __name__ == "__main__":
                         help="Dimensions for the hybridization images.  Should be a json dict, with {}, {}, and {} as "
                              "the possible keys.  The value should be the shape along that dimension.  If a key is "
                              "not present, the value is assumed to be 0.".format(
-                            Indices.HYB.value,
-                            Indices.CH.value,
-                            Indices.Z.value))
+                        Indices.HYB.value,
+                        Indices.CH.value,
+                        Indices.Z.value))
     name_arg_map = dict()
     for aux_image_name in AUX_IMAGE_NAMES:
         arg = parser.add_argument("--{}-dimensions".format(aux_image_name), type=StarfishIndex(),
-                            help="Dimensions for the {} images.  Should be a json dict, with {}, {}, and {} as "
-                                 "the possible keys.  The value should be the shape along that dimension.  If a key is "
-                                 "not present, the value is assumed to be 0.".format(
-                                aux_image_name,
-                                Indices.HYB.value,
-                                Indices.CH.value,
-                                Indices.Z.value))
+                                  help="Dimensions for the {} images.  Should be a json dict, with {}, {}, and {} as "
+                                       "the possible keys.  The value should be the shape along that dimension.  If a "
+                                       "key is not present, the value is assumed to be 0.".format(
+                                  aux_image_name,
+                                  Indices.HYB.value,
+                                  Indices.CH.value,
+                                  Indices.Z.value))
         name_arg_map[aux_image_name] = arg.dest
 
     args = parser.parse_args()

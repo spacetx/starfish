@@ -9,7 +9,7 @@ from ._base import FilterAlgorithmBase
 
 class GaussianLowPass(FilterAlgorithmBase):
 
-    def __init__(self, sigma, **kwargs):
+    def __init__(self, sigma, **kwargs) -> None:
         """Multi-dimensional low-pass gaussian filter.
 
         Parameters

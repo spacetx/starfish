@@ -2,6 +2,9 @@ import pandas as pd
 
 
 class ValidatedTable:
+
+    required_fields = NotImplemented
+
     """
     This base class defines common methods for the json outputs of the starfish package, each of which is stored
     internally as a pandas dataframe.
@@ -64,4 +67,5 @@ class ValidatedTable:
             Table containing the loaded data
 
         """
-        return cls(pd.read_json(json_file))  # type: ignore # all the subclasses have this signature for constructor.
+
+        return cls(pd.read_json(json_file), required_fields=cls.required_fields)

@@ -1,3 +1,4 @@
+import argparse
 import collections
 from typing import Mapping, Optional, Type
 
@@ -7,6 +8,9 @@ class PipelineComponentType(type):
     This is the metaclass for PipelineComponent.  As each subclass that is _not_ PipelineComponent is created, it sets
     up a map between the algorithm name and the class that implements it.
     """
+
+    _algorithm_to_class_map: Optional[Mapping[str, Type]] = None
+
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
         if len(bases) != 0:
@@ -29,7 +33,8 @@ class PipelineComponentType(type):
 
 
 class PipelineComponent(metaclass=PipelineComponentType):
-    _algorithm_to_class_map: Optional[Mapping[str, Type]] = None
+
+    _algorithm_to_class_map: Mapping[str, Type]
 
     @classmethod
     def implementing_algorithms(cls):
@@ -50,3 +55,7 @@ class PipelineComponent(metaclass=PipelineComponentType):
         algorithm_cls = cls._algorithm_to_class_map[algorithm_name]
         instance = algorithm_cls(*args, **kwargs)
         return instance.register(stack)
+
+    @classmethod
+    def _cli(cls, args: argparse.Namespace):
+        raise NotImplementedError()

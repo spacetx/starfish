@@ -1,4 +1,5 @@
 import json
+
 import numpy as np
 import pandas as pd
 
@@ -58,5 +59,5 @@ class SpotAttributes(ValidatedTable):
         -------
 
         """
-        # TODO re-implement this from the show() method
+        # TODO ambrosejcarr: re-implement this from the show() method
         pass

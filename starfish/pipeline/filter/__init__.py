@@ -1,3 +1,5 @@
+import argparse
+
 from starfish.io import Stack
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
@@ -8,7 +10,7 @@ from . import white_tophat
 
 class Filter(PipelineComponent):
 
-    filter_group = None
+    filter_group: argparse.ArgumentParser
 
     @classmethod
     def implementing_algorithms(cls):

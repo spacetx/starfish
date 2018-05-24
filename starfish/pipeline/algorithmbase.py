@@ -1,3 +1,6 @@
+import argparse
+
+
 class AlgorithmBase:
     @classmethod
     def get_algorithm_name(cls):
@@ -8,6 +11,6 @@ class AlgorithmBase:
         raise NotImplementedError()
 
     @classmethod
-    def add_arguments(cls, group_parser):
+    def add_arguments(cls, group_parser: argparse.ArgumentParser):
         """Adds the arguments for the algorithm."""
         raise NotImplementedError()

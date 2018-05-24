@@ -39,6 +39,7 @@ class Filter(PipelineComponent):
             cls.filter_group.print_help()
             cls.filter_group.exit(status=2)
 
+        print('Filtering images ...')
         s = Stack()
         s.read(args.input)
         instance = args.filter_algorithm_class(**vars(args))

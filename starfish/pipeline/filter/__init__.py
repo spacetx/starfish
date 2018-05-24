@@ -14,7 +14,6 @@ class Filter(PipelineComponent):
     def implementing_algorithms(cls):
         return _base.FilterAlgorithmBase.__subclasses__()
 
-    # TODO: ttung why does this need to be a method and not programmed directly into the class?
     @classmethod
     def add_to_parser(cls, subparsers):
         """Adds the filter component to the CLI argument parser."""

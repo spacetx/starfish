@@ -72,7 +72,9 @@ codebook.head(20)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.filters import gaussian_high_pass, gaussian_low_pass, richardson_lucy_deconv, gaussian_kernel
+from starfish.pipeline.filter.gaussian_high_pass import GaussianHighPass
+from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
+from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
 from starfish.viz import tile_lims
 # EPY: END code
 
@@ -81,9 +83,10 @@ from starfish.viz import tile_lims
 # EPY: END markdown
 
 # EPY: START code
-sigma = 3
 # bit_map_flag = True orders the list of single-plane images by bit
-stack_high_pass = [gaussian_high_pass(im, sigma) for im in s.squeeze(bit_map_flag=True)]
+# TODO ambrosejcarr: why is this important? This got dropped in the conversion to pipeline components
+ghp = GaussianHighPass(sigma=3)
+ghp.filter(s)
 # EPY: END code
 
 # EPY: START markdown
@@ -91,11 +94,8 @@ stack_high_pass = [gaussian_high_pass(im, sigma) for im in s.squeeze(bit_map_fla
 # EPY: END markdown
 
 # EPY: START code
-num_iter=15
-sigma = 2
-kernel_size = int(2*np.ceil(2*sigma)+1)
-psf = gaussian_kernel(shape = (kernel_size, kernel_size), sigma=sigma)
-stack_deconv = [richardson_lucy_deconv(im, num_iter, psf) for im in stack_high_pass]
+dpsf = DeconvolvePSF(num_iter=15, sigma=2)
+dpsf.filter(s)
 # EPY: END code
 
 # EPY: START markdown
@@ -105,8 +105,8 @@ stack_deconv = [richardson_lucy_deconv(im, num_iter, psf) for im in stack_high_p
 # EPY: END markdown
 
 # EPY: START code
-sigma = 1
-stack_blurred = [gaussian_low_pass(im, sigma) for im in stack_deconv]
+glp = GaussianLowPass(sigma=1)
+glp.filter(s)
 # EPY: END code
 
 # EPY: START markdown
@@ -114,6 +114,7 @@ stack_blurred = [gaussian_low_pass(im, sigma) for im in stack_deconv]
 # EPY: END markdown
 
 # EPY: START code
+stack_blurred = s.image.numpy_array
 sc = s.org['metadata']['scale']
 sc_df = pd.DataFrame([(int(k), v) for k,v in sc.items()], columns = ['bit', 'scale'])
 mp = pd.merge(s.squeeze_map, sc_df, on='bit', how='left')

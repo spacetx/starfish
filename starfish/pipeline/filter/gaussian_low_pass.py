@@ -27,7 +27,7 @@ class GaussianLowPass(FilterAlgorithmBase):
     @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument(
-            "--sigma", default=1, type=int, help="size of morphological masking disk")
+            "--sigma", default=1, type=int, help="standard deviation of gaussian kernel")
 
     @staticmethod
     def low_pass(image, sigma):

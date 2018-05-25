@@ -68,7 +68,7 @@ class FetchedImage:
         raise NotImplementedError()
 
 
-class DumbFetchedImage(FetchedImage):
+class RandomNoiseImage(FetchedImage):
     """
     This is a simple implementation of :class:`.FetchedImage` that simply regenerates random data for the image.
     """
@@ -121,7 +121,7 @@ def build_image(fov_count, hyb_count, ch_count, z_count, default_shape=(1536, 10
         for z_ix in range(z_count):
             for hyb_ix in range(hyb_count):
                 for ch_ix in range(ch_count):
-                    image = DumbFetchedImage()
+                    image = RandomNoiseImage()
                     tile = Tile(
                         {
                             Coordinates.X: (0.0, 0.0001),

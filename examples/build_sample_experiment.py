@@ -68,6 +68,18 @@ class FetchedImage:
         raise NotImplementedError()
 
 
+class ImageFetcher:
+    """
+    This is the contract for providing the image data for constructing a :class:`slicedimage.Collection`.
+    """
+    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
+        """
+        Given fov, hyb, ch, and z, return an instance of a :class:`.FetchedImage` that can be queried for the image
+        data.
+        """
+        raise NotImplementedError()
+
+
 class RandomNoiseImage(FetchedImage):
     """
     This is a simple implementation of :class:`.FetchedImage` that simply regenerates random data for the image.
@@ -88,7 +100,16 @@ class RandomNoiseImage(FetchedImage):
         return output
 
 
-def build_image(fov_count, hyb_count, ch_count, z_count, default_shape=(1536, 1024)):
+class RandomNoiseImageFetcher(ImageFetcher):
+    """
+    This is a simple implementation of :class:`.ImageFetcher` that simply returns a :class:`.RandomNoiseImage` for every
+    fov, hyb, ch, z combination.
+    """
+    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
+        return RandomNoiseImage()
+
+
+def build_image(fov_count, hyb_count, ch_count, z_count, image_fetcher: ImageFetcher, default_shape=(1536, 1024)):
     """
     Build and returns an image set with the following characteristics:
 
@@ -121,7 +142,7 @@ def build_image(fov_count, hyb_count, ch_count, z_count, default_shape=(1536, 10
         for z_ix in range(z_count):
             for hyb_ix in range(hyb_count):
                 for ch_ix in range(ch_count):
-                    image = RandomNoiseImage()
+                    image = image_fetcher.get_image(fov_ix, hyb_ix, ch_ix, z_ix)
                     tile = Tile(
                         {
                             Coordinates.X: (0.0, 0.0001),
@@ -141,7 +162,15 @@ def build_image(fov_count, hyb_count, ch_count, z_count, default_shape=(1536, 10
     return collection
 
 
-def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimensions):
+def write_experiment_json(
+        path,
+        fov_count,
+        hyb_dimensions,
+        aux_name_to_dimensions,
+        hyb_image_fetcher=None,
+        aux_image_fetcher=None,
+        postprocess_func=None,
+):
     """
     Build and returns a top-level experiment description with the following characteristics:
 
@@ -155,14 +184,34 @@ def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimension
         Dictionary mapping dimension name to dimension size for the hybridization image.
     aux_name_to_dimensions : Mapping[str, Mapping[str, int]]
         Dictionary mapping the auxiliary image type to dictionaries, which map from dimension name to dimension size.
+    hyb_image_fetcher : Optional[ImageFetcher]
+        ImageFetcher for hybridization images.  Set this if you want specific image data to be set for the hybridization
+        images.  If not provided, the image data is set to random noise via :class:`RandomNoiseImageFetcher`.
+    aux_image_fetcher : Optional[Mapping[str, ImageFetcher]]
+        ImageFetchers for auxiliary images.  Set this if you want specific image data to be set for one or more aux
+        image types.  If not provided for any given aux image, the image data is set to random noise via
+        :class:`RandomNoiseImageFetcher`.
+    postprocess_func : Optional[Callable[[dict], dict]]
+        If provided, this is called with the experiment document for any postprocessing.  An example of this would be to
+        add something to one of the top-level extras field.  The callable should return what is to be written as the
+        experiment document.
     """
+    if hyb_image_fetcher is None:
+        hyb_image_fetcher = RandomNoiseImageFetcher()
+    if aux_image_fetcher is None:
+        aux_image_fetcher = {}
+    if postprocess_func is None:
+        postprocess_func = lambda doc: doc
+
     experiment_doc = {
         'version': "0.0.0",
         'auxiliary_images': {},
         'extras': {},
     }
     hybridization_image = build_image(
-        fov_count, hyb_dimensions[Indices.HYB], hyb_dimensions[Indices.CH], hyb_dimensions[Indices.Z])
+        fov_count,
+        hyb_dimensions[Indices.HYB], hyb_dimensions[Indices.CH], hyb_dimensions[Indices.Z],
+        hyb_image_fetcher)
     Writer.write_to_path(
         hybridization_image,
         os.path.join(path, "hybridization.json"),
@@ -177,7 +226,10 @@ def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimension
         if aux_dimensions is None:
             continue
         auxiliary_image = build_image(
-            fov_count, aux_dimensions[Indices.HYB], aux_dimensions[Indices.CH], aux_dimensions[Indices.Z])
+            fov_count,
+            aux_dimensions[Indices.HYB], aux_dimensions[Indices.CH], aux_dimensions[Indices.Z],
+            aux_image_fetcher.get(aux_name, RandomNoiseImageFetcher())
+        )
         Writer.write_to_path(
             auxiliary_image,
             os.path.join(path, "{}.json".format(aux_name)),
@@ -188,6 +240,7 @@ def write_experiment_json(path, fov_count, hyb_dimensions, aux_name_to_dimension
         )
         experiment_doc['auxiliary_images'][aux_name] = "{}.json".format(aux_name)
 
+    experiment_doc = postprocess_func(experiment_doc)
     with open(os.path.join(path, "experiment.json"), "w") as fh:
         json.dump(experiment_doc, fh, indent=4)
 

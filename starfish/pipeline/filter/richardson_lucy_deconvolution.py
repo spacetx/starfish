@@ -68,6 +68,11 @@ class DeconvolvePSF(FilterAlgorithmBase):
             Deconvolved image, same shape as input
 
         """
+
+        # TODO ambrosejcarr: the restoration function is producing the following warning:
+        # /usr/local/lib/python3.6/site-packages/skimage/restoration/deconvolution.py:389: RuntimeWarning: invalid value
+        # encountered in true_divide:
+        # relative_blur = image / convolve_method(im_deconv, psf, 'same')
         img_deconv: np.ndarray = restoration.richardson_lucy(img, psf, iterations=num_iter, clip=clip)
 
         # here be dragons. img_deconv is a float. this should not work, but the result looks nice

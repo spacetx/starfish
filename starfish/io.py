@@ -1,5 +1,6 @@
 import json
 import os
+from collections import defaultdict
 
 import numpy as np
 import pandas as pd
@@ -27,9 +28,6 @@ class Stack:
         # backend & baseurl
         self.backend = None
         self.baseurl = None
-
-        # map 1d list of tiles to indices
-        self.squeeze_map = None
 
     def read(self, in_json_path_or_url):
         self.backend, name, self.baseurl = resolve_path_or_url(in_json_path_or_url)
@@ -94,32 +92,45 @@ class Stack:
     def max_proj(self, *dims):
         return self.image.max_proj(*dims)
 
-    def squeeze(self, bit_map_flag=False):
-        first_dim = self.image.num_hybs * self.image.num_chs * self.image.num_zlayers
+    def squeeze(self) -> np.ndarray:
+        """return an array that is linear over categorical dimensions and z
 
+        Returns
+        -------
+        np.ndarray :
+            array of shape (num_hybs + num_channels + num_z_layers, x, y).
+
+        """
+        first_dim = self.image.num_hybs * self.image.num_chs * self.image.num_zlayers
         new_shape = (first_dim,) + self.image.tile_shape
         new_data = self.image.numpy_array.reshape(new_shape)
 
-        data = {
-            # @ttung: this column index recurs in the codebase. Should we put it in constants?
-            'barcode_index': np.arange(first_dim),
-            # e.g., 0, 1, 2, 3 --> 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3
-            Indices.HYB.value: np.tile(
-                np.repeat(np.arange(self.image.num_hybs), self.image.num_chs), self.image.num_zlayers),
-            # e.g., 0, 1, 2, 3 --> 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3
-            Indices.CH.value: np.tile(np.arange(self.image.num_chs), self.image.num_hybs * self.image.num_zlayers),
-            # e.g., 0, 1, 2, 3 --> 0 (repeated 16 times), 1 (repeated 16 times), ...
-            Indices.Z.value: np.repeat(np.arange(self.image.num_zlayers), self.image.num_hybs * self.image.num_chs),
-        }
-
-        self.squeeze_map = pd.DataFrame(data)
-
-        if bit_map_flag:
-            mp = [(d[Indices.HYB], d[Indices.CH], d['bit']) for d in self.org['data']]
-            mp = pd.DataFrame(mp, columns=[Indices.HYB, Indices.CH, 'bit'])
-            self.squeeze_map = pd.merge(self.squeeze_map, mp, on=[Indices.CH, Indices.HYB], how='left')
-
         return new_data
+
+    @property
+    def tile_metadata(self) -> pd.DataFrame:
+        """return a table containing Tile metadata
+
+        Returns
+        -------
+        pd.DataFrame :
+            dataframe containing per-tile metadata information for each image. Guaranteed to include information on
+            channel, hybridization round, z_layer, and barcode index. Also contains any information stored in the
+            extras field for each tile in hybridization.json
+
+        """
+
+        data = defaultdict(list)
+        for tile in self.image._image_partition.tiles():
+            for k, v in tile.indices.items():
+                data[k].append(v)
+            for k, v in tile.extras.items():
+                data[k].append(v)
+
+        if 'barcode_index' not in data:
+            data['barcode_index'] = np.arange(self.image.num_hybs * self.image.num_chs * self.image.num_zlayers)
+
+        return pd.DataFrame(data)
 
     def un_squeeze(self, stack):
         if type(stack) is list:

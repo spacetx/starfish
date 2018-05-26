@@ -34,7 +34,7 @@ in_json = '<output directory>/org.json'
 s = Stack()
 s.read(in_json)
 
-tile(s.squeeze(),size=10);
+tile(s.squeeze(), size=10);
 # EPY: END code
 
 # EPY: START code

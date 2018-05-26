@@ -33,10 +33,10 @@ from starfish.io import Stack
 
 # load in current directory so we can also grab the benchmark results later
 s = Stack()
-s.read('MERFISH/fov_001/org.json')
+s.read('http://czi.starfish.data.public.s3-website-us-east-1.amazonaws.com/MERFISH/fov_001/experiment.json')
 
 # data from one FOV correspond to 16 single plane images as shown here (see below for details)
-tile(s.squeeze());  
+# tile(s.squeeze());  
 # EPY: END code
 
 # EPY: START markdown
@@ -63,7 +63,8 @@ pp.pprint(s.org)
 # EPY: END markdown
 
 # EPY: START code
-codebook = pd.read_csv('MERFISH/codebook.csv', dtype={'barcode': object})
+# TODO ambrosejcarr: update this to point at the s3 bucket
+codebook = pd.read_csv('https://s3.amazonaws.com/czi.starfish.data.public/MERFISH/codebook.csv', dtype={'barcode': object})
 codebook.head(20)
 # EPY: END code
 
@@ -110,24 +111,31 @@ glp.filter(s)
 # EPY: END code
 
 # EPY: START markdown
-# Use MERFISH-calculated size factors to scale the channels across the hybridization rounds and visualize the resulting filtered and scaled images
+# Use MERFISH-calculated size factors to scale the channels across the hybridization rounds and visualize the resulting filtered and scaled images. Right now we have to extract this information from the metadata and apply this transformation manually.
 # EPY: END markdown
 
 # EPY: START code
-stack_blurred = s.image.numpy_array
-sc = s.org['metadata']['scale']
-sc_df = pd.DataFrame([(int(k), v) for k,v in sc.items()], columns = ['bit', 'scale'])
-mp = pd.merge(s.squeeze_map, sc_df, on='bit', how='left')
-scale_dict = dict(zip(mp.ind.values, mp.scale.values))
-
-for k, v in scale_dict.items():
-    stack_blurred[k] = stack_blurred[k]/v
-    
-s.set_stack(s.un_squeeze(stack_blurred))
+scale_factors = {(t['h'], t['c']): t['scale_factor'] for index, t in s.tile_metadata.iterrows()}
 # EPY: END code
 
 # EPY: START code
-tile_lims(stack_blurred, 2, size=10);
+# this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to 
+# at least we can do it with get_slice and set_slice right now.
+
+for indices in s.image._iter_indices():
+    data = s.image.get_slice(indices)[0]
+    scaled = data / scale_factors[indices['h'], indices['c']]
+    s.image.set_slice(indices, scaled)
+# EPY: END code
+
+# EPY: START code
+from scipy.stats import scoreatpercentile
+# EPY: END code
+
+# EPY: START code
+mp = s.max_proj('h', 'c', 'z')
+clim = scoreatpercentile(mp, [0.5, 99.5])
+image(mp, clim=clim)
 # EPY: END code
 
 # EPY: START markdown
@@ -143,7 +151,7 @@ from starfish.spots.pixel import PixelSpotDetector
 
 # create 'encoder table' standard (tidy) file format. each pixel is a 'spot'
 p = PixelSpotDetector(s)
-encoded = p.detect(bit_map_flag=True)
+encoded = p.detect()
 ind = np.random.randint(low=0,high=2048*2048)
 encoded[encoded.spot_id==ind].head(16)
 # EPY: END code
@@ -171,6 +179,10 @@ encoded[encoded.spot_id==ind].head(16)
 # 
 # Given these three thresholds, for each pixel vector, the decoder picks the closest code (minimum distance) that satisfies each of the above thresholds, where the distance is calculated between the code and a normalized intensity vector and throws away subsequent spots that are too small.
 # EPY: END markdown
+
+# EPY: START code
+encoded.head()
+# EPY: END code
 
 # EPY: START code
 from starfish.decoders.merfish import MerfishDecoder

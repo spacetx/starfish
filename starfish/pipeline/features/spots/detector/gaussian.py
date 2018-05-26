@@ -58,9 +58,9 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
     def encode(self, stack, spot_attributes):
         # create stack squeeze map
-        squeezed = stack.squeeze(bit_map_flag=False)  # this is side-effecting :( :(
-        mapping: pd.DataFrame = stack.squeeze_map
-        inds = range(len(stack.squeeze_map))
+        squeezed = stack.squeeze()
+        mapping: pd.DataFrame = stack.tile_metadata
+        inds = range(mapping.shape[0])
         intensities = [
             self.measure_blob_intensity(image, spot_attributes, self.measurement_function)
             for image in squeezed

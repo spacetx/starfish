@@ -58,9 +58,9 @@ class MerfishDecoder:
 
     def _parse_pixel_traces(self, encoded):
         # parse spots into pixel traces, normalize and filter
-        df = encoded.loc[:, ['spot_id', 'bit', 'val']]
+        df = encoded.loc[:, ['spot_id', 'barcode_index', 'intensity']]
         # TODO this assumes that bits are sorted
-        pixel_traces = df.pivot(index='spot_id', columns='bit', values='val')
+        pixel_traces = df.pivot(index='spot_id', columns='barcode_index', values='intensity')
         pixel_traces = pixel_traces.values
         pixel_traces_l2_norm = np.linalg.norm(pixel_traces, axis=1, ord=2)
         ind = pixel_traces_l2_norm > 0

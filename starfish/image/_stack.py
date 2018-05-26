@@ -4,6 +4,8 @@ from functools import partial
 from typing import Any, Iterable, Iterator, Mapping, MutableSequence, Sequence, Tuple, Union
 
 import numpy
+from scipy.stats import scoreatpercentile
+from skimage import exposure
 from slicedimage import Reader, Writer
 
 from starfish.constants import Coordinates, Indices
@@ -130,6 +132,82 @@ class ImageStack(ImageBase):
 
         self._data[slice_list] = data
         self._data_needs_writeback = True
+
+    def show_stack(
+            self, indices: Mapping[Indices, Union[int, slice]], cmap: str='gray', rescale: bool=False,
+            figsize: Tuple[int, int]=(10, 10)):
+        """Create an interactive visualization of an image stack
+
+        Produces a slider that flips through the selected volume tile-by-tile
+
+        Parameters
+        ----------
+        indices : Mapping[Indices, Union[int, slice]],
+            Indices to select a volume to visualize. Passed to `Image.get_slice()`.
+            See `Image.get_slice()` for examples.
+        cmap : str (default = 'gray')
+            string id of a matplotlib colormap
+        rescale : bool (default = True)
+            if True, rescale the data to exclude high and low-value outliers (see skimage.exposure.rescale_intensity)
+        figsize : Tuple[int, int] (default = (10, 10))
+            size of the figure in inches
+
+        Notes
+        -----
+        For this widget to function interactively in the notebook, after ipywidgets has been installed, the user must
+        register the widget with jupyter by typing the following command into the terminal:
+        jupyter nbextension enable --py widgetsnbextension
+
+        """
+
+        from ipywidgets import interact
+        import matplotlib.pyplot as plt
+
+        if not indices:
+            raise ValueError('indices may not be an empty dict or None')
+
+        # get the requested chunk, linearize the remaining data into a sequence of tiles
+        data, remaining_inds = self.get_slice(indices)
+
+        # identify the dimensionality of data with all dimensions other than x, y linearized
+        n = numpy.dot(*data.shape[:-2])
+
+        # linearize the array
+        linear_view = data.reshape((n,) + data.shape[-2:])
+
+        # set the labels for the linearized tiles
+        from itertools import product
+        labels = []
+        for index, size in zip(remaining_inds, data.shape[:-2]):
+            labels.append([f'{index}{n}' for n in range(size)])
+        labels = list(product(*labels))
+
+        n = linear_view.shape[0]
+
+        if rescale:
+            print("Rescaling ...")
+            vmin, vmax = scoreatpercentile(data, (0.5, 99.5))
+            linear_view = exposure.rescale_intensity(
+                linear_view,
+                in_range=(vmin, vmax),
+                out_range=numpy.float32
+            ).astype(numpy.float32)
+
+        def show_plane(ax, plane, cmap="gray", title=None):
+            ax.imshow(plane, cmap=cmap)
+            ax.set_xticks([])
+            ax.set_yticks([])
+
+            if title:
+                ax.set_title(title)
+
+        @interact(plane=(0, n - 1))
+        def display_slice(plane=34):
+            fig, ax = plt.subplots(figsize=figsize)
+            show_plane(ax, linear_view[plane], title=f'{labels[plane]}', cmap=cmap)
+            plt.show()
+
+        return display_slice
 
     def _build_slice_list(
             self,

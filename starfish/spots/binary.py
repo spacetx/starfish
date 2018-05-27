@@ -4,7 +4,7 @@ import pandas as pd
 import scipy.ndimage.measurements as spm
 from showit import image
 
-from starfish.munge import gather
+from starfish.munge import melt
 from starfish.pipeline.filter.util import bin_thresh
 from starfish.stats import label_to_regions, measure_stack
 
@@ -61,7 +61,12 @@ class BinarySpotDetector:
         res = pd.DataFrame(d)
 
         if tidy_flag:
-            res = gather(res, 'hybs', 'vals', cols)
+            res = melt(
+                df=res,
+                new_index_name='hybs',
+                new_value_name='vals',
+                melt_columns=cols
+            )
 
         self.spots_df = res
 

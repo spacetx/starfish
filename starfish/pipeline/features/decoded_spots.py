@@ -7,7 +7,7 @@ class DecodedSpots(ValidatedTable):
     required_fields = {
         # TODO ambrosejcarr change barcode -> codeword, gene -> gene_name (requires rewrite of codebook)
         'barcode',  # the code word that corresponds to this gene
-        'quality',  # spot y-coordinate
+        'quality',  # spot quality
         'spot_id',  # integer spot id
         'gene'  # string gene name
     }

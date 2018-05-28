@@ -5,9 +5,9 @@ import pandas as pd
 from skimage.feature import blob_log
 
 from starfish.constants import Indices
-from starfish.munge import melt
 from starfish.pipeline.features.encoded_spots import EncodedSpots
 from starfish.pipeline.features.spot_attributes import SpotAttributes
+from starfish.pipeline.features.intensity_table import IntensityTable
 from ._base import SpotFinderAlgorithmBase
 
 
@@ -62,7 +62,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
                 f'not found.')
 
     @staticmethod
-    def measure_blob_intensity(image, spots, measurement_function) -> pd.Series:
+    def _measure_blob_intensity(image, spots, measurement_function) -> pd.Series:
         def fn(row):
             x_min = int(round(row.x_min))
             x_max = int(round(row.x_max))
@@ -74,30 +74,18 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             axis=1
         )
 
-    def encode(self, stack, spot_attributes):
-        # create stack squeeze map
-        squeezed = stack.squeeze()
-        mapping: pd.DataFrame = stack.image.tile_metadata
-        inds = range(mapping.shape[0])
+    def _measure_spot_intensities(self, stack, spot_attributes):
+
         intensities = [
-            self.measure_blob_intensity(image, spot_attributes, self.measurement_function)
-            for image in squeezed
+            self._measure_blob_intensity(image, spot_attributes, self.measurement_function)
+            for image in stack.squeeze()
         ]
-        d = dict(zip(inds, intensities))
-        d['spot_id'] = range(spot_attributes.shape[0])
 
-        res = pd.DataFrame(d)
+        intensity_data = pd.DataFrame(dict(zip(range(len(intensities)), intensities))).T
+        tile_data = pd.DataFrame(stack.image.tile_metadata)
+        return IntensityTable.from_spot_data(intensity_data, tile_data, spot_attributes)
 
-        res: pd.DataFrame = melt(
-            df=res,
-            new_index_name='barcode_index',
-            new_value_name='intensity',
-            melt_columns=inds
-        )
-        res = pd.merge(res, mapping, on='barcode_index', how='left')
-        return EncodedSpots(res)
-
-    def fit(self, blobs_image):
+    def _find_spot_locations(self, blobs_image):
         fitted_blobs = pd.DataFrame(
             data=blob_log(blobs_image, self.min_sigma, self.max_sigma, self.num_sigma, self.threshold, self.overlap),
             columns=['x', 'y', 'r'],
@@ -116,13 +104,13 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         fitted_blobs['intensity'] = self.measure_blob_intensity(blobs_image, fitted_blobs, self.measurement_function)
         fitted_blobs['spot_id'] = np.arange(fitted_blobs.shape[0])
 
-        return SpotAttributes(fitted_blobs)
+        return fitted_blobs
 
     def find(self, image_stack) -> Tuple[SpotAttributes, EncodedSpots]:
         blobs = image_stack.auxiliary_images[self.blobs].max_proj(Indices.HYB, Indices.CH, Indices.Z)
-        spot_attributes = self.fit(blobs)
-        encoded_spots = self.encode(image_stack, spot_attributes.data)
-        return spot_attributes, encoded_spots
+        spot_attributes = self._find_spot_locations(blobs)
+        intensity_table = self._measure_spot_intensities(image_stack, spot_attributes)
+        return intensity_table
 
     @classmethod
     def get_algorithm_name(cls):
@@ -135,7 +123,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
         group_parser.add_argument(
             "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)")
-        group_parser.add_argument("--num-sigma", default=20, type=int, help="Number of scales to try")
+        group_parser.add_argument("--num-sigma", default=20, type=int, help="Number of sigmas to try")
         group_parser.add_argument("--threshold", default=.01, type=float, help="Dots threshold")
         group_parser.add_argument(
             "--overlap", default=0.5, type=float, help="dots with overlap of greater than this fraction are combined")

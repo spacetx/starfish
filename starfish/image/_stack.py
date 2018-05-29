@@ -134,8 +134,8 @@ class ImageStack(ImageBase):
         self._data_needs_writeback = True
 
     def show_stack(
-            self, indices: Mapping[Indices, Union[int, slice]], cmap: str='gray', rescale: bool=False,
-            figsize: Tuple[int, int]=(10, 10)):
+            self, indices: Mapping[Indices, Union[int, slice]],
+            color_map: str= 'gray', rescale: bool=False, figure_size: Tuple[int, int]=(10, 10)):
         """Create an interactive visualization of an image stack
 
         Produces a slider that flips through the selected volume tile-by-tile
@@ -145,11 +145,11 @@ class ImageStack(ImageBase):
         indices : Mapping[Indices, Union[int, slice]],
             Indices to select a volume to visualize. Passed to `Image.get_slice()`.
             See `Image.get_slice()` for examples.
-        cmap : str (default = 'gray')
+        color_map : str (default = 'gray')
             string id of a matplotlib colormap
         rescale : bool (default = True)
             if True, rescale the data to exclude high and low-value outliers (see skimage.exposure.rescale_intensity)
-        figsize : Tuple[int, int] (default = (10, 10))
+        figure_size : Tuple[int, int] (default = (10, 10))
             size of the figure in inches
 
         Notes
@@ -203,8 +203,8 @@ class ImageStack(ImageBase):
 
         @interact(plane=(0, n - 1))
         def display_slice(plane=34):
-            fig, ax = plt.subplots(figsize=figsize)
-            show_plane(ax, linear_view[plane], title=f'{labels[plane]}', cmap=cmap)
+            fig, ax = plt.subplots(figsize=figure_size)
+            show_plane(ax, linear_view[plane], title=f'{labels[plane]}', cmap=color_map)
             plt.show()
 
         return display_slice

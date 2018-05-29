@@ -18,7 +18,7 @@ class ValidatedTable:
 
     """
 
-    def __init__(self, table: pd.DataFrame, required_fields: set):
+    def __init__(self, table: pd.DataFrame, required_fields: set) -> None:
         """
 
         Parameters
@@ -64,4 +64,4 @@ class ValidatedTable:
             Table containing the loaded data
 
         """
-        return cls(pd.read_json(json_file))
+        return cls(pd.read_json(json_file))  # type: ignore # all the subclasses have this signature for constructor.

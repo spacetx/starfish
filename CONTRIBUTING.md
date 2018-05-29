@@ -6,15 +6,15 @@ If you're reading this section, you're probably interested in contributing to St
 Starfish is designed to specify pipeline recipes for image processing. To support this use, the library is composed as a series of `pipeline_component` modules.
 The objects that sub-class `pipeline_component` spawn a command-line interface that should identically track the API of the python library.
 
-A typical starfish run consists of running one or more image processing filter stages, identifying features through either a spot- or pixel-based approach.
-The identified features are then decoded into the genes that they correspond to by mapping the fluorescence channel (and optionally hybridization round) to a codebook object.
-The filtered data are also segmented, to identify which cell each feature belongs to.
+A typical starfish run consists of running one or more image processing filter stages, and identifying features through either a spot- or pixel-based approach.
+The identified features are then decoded into the genes that they correspond to by mapping the fluorescence channel (and optionally hybridization round) using a codebook.
+Finally, the filtered data are segmented, identifying which cell each feature belongs to.
 
 To implement a new module of an existing `pipeline_component`, for example, to add another image filtering step, the process is simple. For a new filter, one would:
 
-1. Create a new python file `new_filter.py` in the `starfish/pipeline/filter/` directory
+1. Create a new python file `new_filter.py` in the `starfish/pipeline/filter/` directory.
 
-2. Create a new python class `NewFilter(PipelineComponent)` in the `new_filter.py` class
+2. Create a new python class `NewFilter(PipelineComponent)` in the `new_filter.py` class.
 
 3. Implement all required methods from the base class.
 
@@ -39,13 +39,12 @@ starfish repository root.
 - All code must be reviewed by at least 1 other team member.
 
 - All code must have typed parameters, and when possible, typed return calls (see [PEP484](https://www.python.org/dev/peps/pep-0484)).
-We also encourage rational use of in-line variable annotation when the type of a newly defined object is not clear (see [PEP526](https://www.python.org/dev/peps/pep-0526/)
+We also encourage rational use of in-line variable annotation when the type of a newly defined object is not clear (see [PEP526](https://www.python.org/dev/peps/pep-0526/).
 
 - All code must be documented according to [numpydoc](https://numpydoc.readthedocs.io/en/latest/) style guidelines.
 
-- Numpy provides an excellent [development workflow](https://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html) that we encourage you to follow when developing features
+- Numpy provides an excellent [development workflow](https://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html) that we encourage you to follow when developing features for starfish!
 
 ## Notebook contributions
 - All `.ipynb` files should have a corresponding `.py` file.  Use [nbencdec](https://github.com/ttung/nbencdec) to generate the corresponding `.py` file.
-The `.py` files allow refactor commands in the codebase to find code in the `.py` files, which is an important to keep the notebooks working as
-starfish evolves.
+The `.py` files allow refactor commands in the codebase to find code in the `.py` files, which is an important to keep the notebooks working as starfish evolves.

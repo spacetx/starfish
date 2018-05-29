@@ -8,6 +8,6 @@ install:
 - pip freeze
 script:
 - set -eo pipefail
-- make test
+- make all
 after_success:
 - bash <(curl -s https://codecov.io/bash)

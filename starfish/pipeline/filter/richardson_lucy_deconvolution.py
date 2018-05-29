@@ -12,7 +12,7 @@ from .util import gaussian_kernel
 
 class DeconvolvePSF(FilterAlgorithmBase):
 
-    def __init__(self, num_iter: int=15, sigma: float=2, clip: bool=False, **kwargs):
+    def __init__(self, num_iter: int=15, sigma: float=2, clip: bool=False, **kwargs) -> None:
         """Deconvolve a point spread function
 
         Note that the default parameters are highly optimized for the MERFISH use case and that num_iter is a
@@ -72,7 +72,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
 
         # here be dragons. img_deconv is a float. this should not work, but the result looks nice
         # modulo boundary values? wtf indeed.
-        img_deconv: np.ndarray = img_deconv.astype(np.uint16)
+        img_deconv = img_deconv.astype(np.uint16)
         return img_deconv
 
     def filter(self, stack: Stack) -> None:

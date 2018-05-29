@@ -62,7 +62,7 @@ def gaussian_kernel(shape: Tuple[int, int]=(3, 3), sigma: float=0.5):
     np.ndarray :
         Gaussian kernel.
     """
-    m, n = [(ss - 1.) / 2. for ss in shape]
+    m, n = [int((ss - 1.) / 2.) for ss in shape]
     y, x = np.ogrid[-m:m + 1, -n:n + 1]
     kernel = np.exp(-(x * x + y * y) / (2. * sigma * sigma))
     kernel[kernel < np.finfo(kernel.dtype).eps * kernel.max()] = 0

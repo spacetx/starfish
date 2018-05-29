@@ -15,7 +15,7 @@ class SpotAttributes(ValidatedTable):
         'spot_id'  # integer spot id
     }
 
-    def __init__(self, spot_attributes: pd.DataFrame):
+    def __init__(self, spot_attributes: pd.DataFrame) -> None:
         """Construct a SpotAttributes instance
 
         Parameters

@@ -11,7 +11,7 @@ from ._base import FilterAlgorithmBase
 
 class GaussianHighPass(FilterAlgorithmBase):
 
-    def __init__(self, sigma: int=1, **kwargs):
+    def __init__(self, sigma: int=1, **kwargs) -> None:
         """Gaussian high pass filter
 
         Parameters

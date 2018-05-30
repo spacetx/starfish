@@ -10,7 +10,7 @@ A typical starfish run consists of running one or more image processing filter s
 The identified features are then decoded into the genes that they correspond to by mapping the fluorescence channel (and optionally hybridization round) using a codebook.
 Finally, the filtered data are segmented, identifying which cell each feature belongs to.
 
-To implement a new module of an existing `pipeline_component`, for example, to add another image filtering step, the process is simple. For a new filter, one would:
+Implementing a new module of an existing `pipeline_component` is a simple process. For example, to add another image filtering step, one would:
 
 1. Create a new python file `new_filter.py` in the `starfish/pipeline/filter/` directory.
 

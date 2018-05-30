@@ -120,7 +120,7 @@ class Stack:
 
         """
 
-        data = defaultdict(list)
+        data: defaultdict = defaultdict(list)
         for tile in self.image._image_partition.tiles():
             for k, v in tile.indices.items():
                 data[k].append(v)

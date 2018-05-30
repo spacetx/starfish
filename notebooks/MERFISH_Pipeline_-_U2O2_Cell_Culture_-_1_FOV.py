@@ -30,13 +30,23 @@ import pprint
 # EPY: ESCAPE %matplotlib inline
 
 from starfish.io import Stack
+from starfish.constants import Indices
 
 # load in current directory so we can also grab the benchmark results later
 s = Stack()
-s.read('http://czi.starfish.data.public.s3-website-us-east-1.amazonaws.com/MERFISH/fov_001/experiment.json')
+s.read('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/fov_001/experiment.json')
 
 # data from one FOV correspond to 16 single plane images as shown here (see below for details)
-# tile(s.squeeze());  
+tile(s.squeeze());  
+# EPY: END code
+
+# EPY: START markdown
+# Individual hybridization rounds and channels can also be visualized
+# EPY: END markdown
+
+# EPY: START code
+# show all hybridization rounds of channel 0
+s.image.show_stack({Indices.CH: 0})
 # EPY: END code
 
 # EPY: START markdown
@@ -63,8 +73,7 @@ pp.pprint(s.org)
 # EPY: END markdown
 
 # EPY: START code
-# TODO ambrosejcarr: update this to point at the s3 bucket
-codebook = pd.read_csv('https://s3.amazonaws.com/czi.starfish.data.public/MERFISH/codebook.csv', dtype={'barcode': object})
+codebook = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/codebook.csv', dtype={'barcode': object})
 codebook.head(20)
 # EPY: END code
 
@@ -115,7 +124,7 @@ glp.filter(s)
 # EPY: END markdown
 
 # EPY: START code
-scale_factors = {(t['h'], t['c']): t['scale_factor'] for index, t in s.tile_metadata.iterrows()}
+scale_factors = {(t[Indices.HYB], t[Indices.CH]): t['scale_factor'] for index, t in s.tile_metadata.iterrows()}
 # EPY: END code
 
 # EPY: START code
@@ -124,7 +133,7 @@ scale_factors = {(t['h'], t['c']): t['scale_factor'] for index, t in s.tile_meta
 
 for indices in s.image._iter_indices():
     data = s.image.get_slice(indices)[0]
-    scaled = data / scale_factors[indices['h'], indices['c']]
+    scaled = data / scale_factors[indices[Indices.HYB], indices[Indices.CH]]
     s.image.set_slice(indices, scaled)
 # EPY: END code
 
@@ -133,7 +142,7 @@ from scipy.stats import scoreatpercentile
 # EPY: END code
 
 # EPY: START code
-mp = s.max_proj('h', 'c', 'z')
+mp = s.max_proj(Indices.HYB, Indices.CH, Indices.Z)
 clim = scoreatpercentile(mp, [0.5, 99.5])
 image(mp, clim=clim)
 # EPY: END code

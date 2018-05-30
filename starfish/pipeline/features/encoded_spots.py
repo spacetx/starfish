@@ -6,14 +6,6 @@ from ._validated_table import ValidatedTable
 
 class EncodedSpots(ValidatedTable):
 
-    required_fields = {
-        'spot_id',  # integer spot id
-        'barcode_index',  # position in barcode
-        'intensity',  # spot intensity
-        Indices.CH.value,  # channel
-        Indices.HYB.value,  # hybridization round
-    }
-
     def __init__(self, encoded_spots: pd.DataFrame) -> None:
         """
 
@@ -22,4 +14,14 @@ class EncodedSpots(ValidatedTable):
         encoded_spots : pd.DataFrame
 
         """
-        super().__init__(encoded_spots, EncodedSpots.required_fields)
+        super().__init__(encoded_spots, self.required_fields)
+
+    @property
+    def required_fields(self) -> set:
+        return {
+            'spot_id',  # integer spot id
+            'barcode_index',  # position in barcode
+            'intensity',  # spot intensity
+            Indices.CH.value,  # channel
+            Indices.HYB.value,  # hybridization round
+        }

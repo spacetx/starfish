@@ -8,14 +8,6 @@ from ._validated_table import ValidatedTable
 
 class SpotAttributes(ValidatedTable):
 
-    required_fields = {
-        'x',  # spot x-coordinate
-        'y',  # spot y-coordinate
-        'r',  # spot radius
-        'intensity',  # intensity of spot (commonly max or average)
-        'spot_id'  # integer spot id
-    }
-
     def __init__(self, spot_attributes: pd.DataFrame) -> None:
         """Construct a SpotAttributes instance
 
@@ -24,7 +16,17 @@ class SpotAttributes(ValidatedTable):
         spot_attributes : pd.DataFrame
 
         """
-        super().__init__(spot_attributes, SpotAttributes.required_fields)
+        super().__init__(spot_attributes, self.required_fields)
+
+    @property
+    def required_fields(self) -> set:
+        return {
+            'x',  # spot x-coordinate
+            'y',  # spot y-coordinate
+            'r',  # spot radius
+            'intensity',  # intensity of spot (commonly max or average)
+            'spot_id'  # integer spot id
+        }
 
     def save_geojson(self, output_file_name: str) -> None:
         """Save to geojson for web visualization

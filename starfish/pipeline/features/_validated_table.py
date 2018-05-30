@@ -2,9 +2,6 @@ import pandas as pd
 
 
 class ValidatedTable:
-
-    required_fields = NotImplemented
-
     """
     This base class defines common methods for the json outputs of the starfish package, each of which is stored
     internally as a pandas dataframe.
@@ -34,6 +31,10 @@ class ValidatedTable:
         """
         self._validate_table(table, required_fields)
         self.data = table
+
+    @property
+    def required_fields(self) -> set:
+        raise NotImplementedError
 
     @staticmethod
     def _validate_table(table: pd.DataFrame, required_fields: set):

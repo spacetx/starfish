@@ -23,7 +23,7 @@ For example, `--foo-bar` would convert to `foo_bar` and init must accept such an
 
 5. `NewFilter.__init__()` must have a `**kwargs` parameter to accept arbitrary CLI args.
 
-That's it! your pipeline component will automatically register and be available under `starfish filter` in the CLI.
+That's it! your `NewFilter` algoritm will automatically register and be available under `starfish filter` in the CLI.
 If at any point something gets confusing, it should be possible to look at existing pipeline components of the same category for guidance on implementation.
 
 ## Reporting bugs

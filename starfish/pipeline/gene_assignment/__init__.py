@@ -1,3 +1,4 @@
+import argparse
 import json
 
 from starfish.pipeline.pipelinecomponent import PipelineComponent
@@ -7,6 +8,9 @@ from . import point_in_poly
 
 
 class GeneAssignment(PipelineComponent):
+
+    gene_assignment_group: argparse.ArgumentParser
+
     @classmethod
     def implementing_algorithms(cls):
         return _base.GeneAssignmentAlgorithm.__subclasses__()

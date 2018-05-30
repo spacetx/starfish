@@ -1,4 +1,5 @@
 import json
+import argparse
 
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
@@ -7,6 +8,9 @@ from ._base import SegmentationAlgorithmBase
 
 
 class Segmentation(PipelineComponent):
+
+    segmentation_group: argparse.ArgumentParser
+
     @classmethod
     def implementing_algorithms(cls):
         return SegmentationAlgorithmBase.__subclasses__()
@@ -51,14 +55,12 @@ class Segmentation(PipelineComponent):
 
 
 def regions_to_geojson(r, use_hull=True):
-    '''
-    Convert region geometrical data to geojson format
-    '''
+    """Convert region geometrical data to geojson format"""
 
-    def make_dict(id, verts):
+    def make_dict(id_, verts):
         d = dict()
         c = list(map(lambda x: list(x), list(map(lambda v: [int(v[0]), int(v[1])], verts))))
-        d["properties"] = {"id": id}
+        d["properties"] = {"id": id_}
         d["geometry"] = {"type": "Polygon", "coordinates": c}
         return d
 
@@ -66,4 +68,4 @@ def regions_to_geojson(r, use_hull=True):
         coordinates = r.hull
     else:
         coordinates = r.coordinates
-    return [make_dict(id, verts) for id, verts in enumerate(coordinates)]
+    return [make_dict(id_, verts) for id_, verts in enumerate(coordinates)]

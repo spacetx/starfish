@@ -1,6 +1,5 @@
 import argparse
 import os
-from typing import Optional
 
 from starfish.io import Stack
 from starfish.pipeline.pipelinecomponent import PipelineComponent
@@ -11,7 +10,6 @@ from . import gaussian
 
 class SpotFinder(PipelineComponent):
 
-    spot_finder_algorithm_class = None
     spot_finder_group: argparse.ArgumentParser
 
     @classmethod
@@ -35,7 +33,7 @@ class SpotFinder(PipelineComponent):
         cls.spot_finder_group = spot_finder_group
 
     @classmethod
-    def _cli(cls, args: argparse.Namespace, print_help=False):
+    def _cli(cls, args, print_help=False):
         """Runs the spot finder component based on parsed arguments."""
 
         if args.spot_finder_algorithm_class is None or print_help:

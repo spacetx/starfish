@@ -1,3 +1,4 @@
+import argparse
 import collections
 from typing import Mapping, Optional, Type
 
@@ -29,6 +30,7 @@ class PipelineComponentType(type):
 
 
 class PipelineComponent(metaclass=PipelineComponentType):
+
     _algorithm_to_class_map: Optional[Mapping[str, Type]] = None
 
     @classmethod
@@ -50,3 +52,7 @@ class PipelineComponent(metaclass=PipelineComponentType):
         algorithm_cls = cls._algorithm_to_class_map[algorithm_name]
         instance = algorithm_cls(*args, **kwargs)
         return instance.register(stack)
+
+    @classmethod
+    def _cli(cls, args: argparse.Namespace):
+        raise NotImplementedError()

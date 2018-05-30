@@ -1,5 +1,6 @@
-import numpy
 from functools import partial
+
+import numpy
 
 from ._base import FilterAlgorithmBase
 
@@ -11,14 +12,14 @@ class Clip(FilterAlgorithmBase):
 
         Parameters
         ----------
-        p_min : float
+        p_min : int
             values below this percentile are set to p_min
-        p_max : float
+        p_max : int
             values above this percentile are set to p_max
         kwargs
         """
-        self.p_min: float = p_min
-        self.p_max: float = p_max
+        self.p_min: int = p_min
+        self.p_max: int = p_max
 
     @classmethod
     def get_algorithm_name(cls):
@@ -26,11 +27,11 @@ class Clip(FilterAlgorithmBase):
 
     @classmethod
     def add_arguments(cls, group_parser):
-        group_parser.add_argument("--p-min", default=0, type=float, help="clip intensities below this percentile")
-        group_parser.add_argument("--p-max", default=100, type=float, help="clip intensities above this percentile")
+        group_parser.add_argument("--p-min", default=0, type=int, help="clip intensities below this percentile")
+        group_parser.add_argument("--p-max", default=100, type=int, help="clip intensities above this percentile")
 
     @staticmethod
-    def clip(image, p_min, p_max):
+    def clip(image, p_min: int, p_max: int) -> numpy.ndarray:
         """Clip values of img below and above percentiles p_min and p_max
 
         Parameters

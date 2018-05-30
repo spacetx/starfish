@@ -1,3 +1,5 @@
+import argparse
+
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import _base
@@ -5,6 +7,9 @@ from . import iss
 
 
 class Decoder(PipelineComponent):
+
+    decoder_group: argparse.ArgumentParser
+
     @classmethod
     def implementing_algorithms(cls):
         return _base.DecoderAlgorithmBase.__subclasses__()

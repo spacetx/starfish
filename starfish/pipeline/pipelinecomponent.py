@@ -8,9 +8,6 @@ class PipelineComponentType(type):
     This is the metaclass for PipelineComponent.  As each subclass that is _not_ PipelineComponent is created, it sets
     up a map between the algorithm name and the class that implements it.
     """
-
-    _algorithm_to_class_map: Optional[Mapping[str, Type]] = None
-
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
         if len(bases) != 0:
@@ -34,7 +31,7 @@ class PipelineComponentType(type):
 
 class PipelineComponent(metaclass=PipelineComponentType):
 
-    _algorithm_to_class_map: Mapping[str, Type]
+    _algorithm_to_class_map: Optional[Mapping[str, Type]] = None
 
     @classmethod
     def implementing_algorithms(cls):

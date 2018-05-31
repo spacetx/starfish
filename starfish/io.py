@@ -18,7 +18,7 @@ class Stack:
         self.org = None
         self.image = None
 
-        # auxilary images
+        # auxiliary images
         self.aux_dict = dict()
 
         # readers and writers
@@ -46,6 +46,25 @@ class Stack:
             backend, name, _ = resolve_url(name_or_url, self.baseurl)
             with backend.read_file_handle(name) as fh:
                 self.aux_dict[aux_key] = img_format.reader_func(fh)
+
+    @classmethod
+    def from_experiment_json(cls, json_url: str):
+        """Construct a `Stack` from an experiment.json file format specifier
+
+        Parameters
+        ----------
+        json_url : str
+            file path or web link to an experiment.json file
+
+        Returns
+        -------
+        Stack :
+            Stack object serving the requested image data
+
+        """
+        stack: Stack = cls()
+        stack.read(json_url)
+        return stack
 
     # TODO should this thing write npy?
     def write(self, dir_name):

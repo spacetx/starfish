@@ -10,11 +10,14 @@ A typical starfish run consists of running one or more image processing filter s
 The identified features are then decoded into the genes that they correspond to by mapping the fluorescence channel (and optionally hybridization round) using a codebook.
 Finally, the filtered data are segmented, identifying which cell each feature belongs to.
 
-Implementing a new module of an existing `pipeline_component` is a simple process. For example, to add another image filtering step, one would:
+# Creating a new algorithm for an existing `pipeline_component`:
+
+For example, to add a new image filter, one would:
 
 1. Create a new python file `new_filter.py` in the `starfish/pipeline/filter/` directory.
 
-2. Create a new python class `NewFilter(PipelineComponent)` in the `new_filter.py` class.
+2. Find the corresponding `AlgorithmBase` for your component. For filters, this is `FilterAlgorithmBase`, which is found in `starfish/pipeline/filter/_base.py`. 
+Import that base into `new_filter.py`, and have your new algorithm subclass it, e.g. create `class NewFilter(FilterAlgorithmBase)`
 
 3. Implement all required methods from the base class.
 
@@ -22,6 +25,8 @@ Implementing a new module of an existing `pipeline_component` is a simple proces
 For example, `--foo-bar` would convert to `foo_bar` and init must accept such an argument: `NewFilter.__init__(foo_bar, ..., **kwargs)`
 
 5. `NewFilter.__init__()` must have a `**kwargs` parameter to accept arbitrary CLI args.
+
+6. Finally, add a line that imports your new filter in `starfish/pipeline/filter/__init__.py`. This will make your new algorithm available for registration
 
 That's it! your `NewFilter` algoritm will automatically register and be available under `starfish filter` in the CLI.
 If at any point something gets confusing, it should be possible to look at existing pipeline components of the same category for guidance on implementation.

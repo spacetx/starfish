@@ -2,7 +2,7 @@ import collections
 import os
 from functools import partial
 from itertools import product
-from typing import Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Iterable, Iterator, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
 
 import numpy
 from scipy.stats import scoreatpercentile
@@ -159,11 +159,13 @@ class ImageStack(ImageBase):
 
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],
-            color_map: str= 'gray', rescale: bool=False, figure_size: Tuple[int, int]=(10, 10),
-            show_spots: Optional[SpotAttributes]=None):
+            color_map: str= 'gray', figure_size: Tuple[int, int]=(10, 10),
+            show_spots: Optional[SpotAttributes]=None,
+            rescale: bool=False, p_min: Optional[float]=None, p_max: Optional[float]=None):
         """Create an interactive visualization of an image stack
 
-        Produces a slider that flips through the selected volume tile-by-tile
+        Produces a slider that flips through the selected volume tile-by-tile. Supports manual adjustment of dynamic
+        range.
 
         Parameters
         ----------
@@ -172,13 +174,17 @@ class ImageStack(ImageBase):
             See `Image.get_slice()` for examples.
         color_map : str (default = 'gray')
             string id of a matplotlib colormap
-        rescale : bool (default = True)
-            if True, rescale the data to exclude high and low-value outliers (see skimage.exposure.rescale_intensity)
         figure_size : Tuple[int, int] (default = (10, 10))
             size of the figure in inches
         show_spots : Optional[SpotAttributes]
             [Preliminary functionality] if provided, should be a SpotAttribute table that corresponds
             to the volume being displayed. This will be paired automatically in the future.
+        rescale : bool (default = True)
+            if True, rescale the data to exclude high and low-value outliers (see skimage.exposure.rescale_intensity).
+        p_min: float
+            clip values below this intensity percentile. If provided, overrides rescale, above. (default = None)
+        p_max: float
+            clip values above this intensity percentile. If provided, overrides rescale, above. (default = None)
 
         Notes
         -----
@@ -212,7 +218,7 @@ class ImageStack(ImageBase):
 
         n = linear_view.shape[0]
 
-        if rescale:
+        if rescale and p_min is None and p_max is None:
             print("Rescaling ...")
             vmin, vmax = scoreatpercentile(data, (0.5, 99.5))
             linear_view = exposure.rescale_intensity(
@@ -220,6 +226,11 @@ class ImageStack(ImageBase):
                 in_range=(vmin, vmax),
                 out_range=numpy.float32
             ).astype(numpy.float32)
+
+        if p_min or p_max:
+            print("Clipping ...")
+            a_min, a_max = scoreatpercentile(linear_view, (p_min if p_min else 0, p_max if p_max else 100))
+            linear_view = numpy.clip(linear_view, a_min=a_min, a_max=a_max)
 
         show_spot_function = self._show_spots
 

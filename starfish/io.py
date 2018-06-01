@@ -19,7 +19,7 @@ class Stack:
         self.image = None
 
         # auxiliary images
-        self.aux_dict = dict()
+        self.auxiliary_images = dict()
 
         # readers and writers
         self.write_fn = np.save  # asserted for now
@@ -41,7 +41,7 @@ class Stack:
 
     def _read_aux(self):
         for aux_key, aux_data in self.org['auxiliary_images'].items():
-            self.aux_dict[aux_key] = ImageStack.from_url(aux_data, self.baseurl)
+            self.auxiliary_images[aux_key] = ImageStack.from_url(aux_data, self.baseurl)
 
     @classmethod
     def from_experiment_json(cls, json_url: str):
@@ -79,7 +79,7 @@ class Stack:
 
     def _write_aux(self, dir_name):
         for aux_key, aux_data in self.org['auxiliary_images'].items():
-            self.aux_dict[aux_key].write(os.path.join(dir_name, aux_data))
+            self.auxiliary_images[aux_key].write(os.path.join(dir_name, aux_data))
 
     def set_stack(self, new_stack):
         if self.image.raw_shape != new_stack.shape:
@@ -89,13 +89,13 @@ class Stack:
         self.image.numpy_array = new_stack
 
     def set_aux(self, key, img):
-        if key in self.aux_dict:
-            old_img = self.aux_dict[key]
+        if key in self.auxiliary_images:
+            old_img = self.auxiliary_images[key]
             if old_img.shape != img.shape:
                 msg = "Shape mismatch. Current data shape: {}, new data shape: {}".format(
                     old_img.shape, img.shape)
                 raise AttributeError(msg)
-            self.aux_dict[key].numpy_array = img
+            self.auxiliary_images[key].numpy_array = img
         else:
             # TODO: (ttung) major hack alert.  we don't have a convenient mechanism to build an ImageStack from a single
             # numpy array, which we probably should.
@@ -128,7 +128,7 @@ class Stack:
             tile.numpy_array = img
             tileset.add_tile(tile)
 
-            self.aux_dict[key] = ImageStack(tileset)
+            self.auxiliary_images[key] = ImageStack(tileset)
             self.org['auxiliary_images'][key] = f"{key}.json"
 
     def max_proj(self, *dims):

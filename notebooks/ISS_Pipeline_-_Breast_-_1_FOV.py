@@ -56,7 +56,7 @@ s.image.numpy_array.shape
 # EPY: END markdown
 
 # EPY: START code
-image(s.aux_dict['dots'])
+image(s.auxiliary_images['dots'])
 # EPY: END code
 
 # EPY: START markdown
@@ -64,7 +64,7 @@ image(s.aux_dict['dots'])
 # EPY: END markdown
 
 # EPY: START code
-image(s.aux_dict['nuclei'])
+image(s.auxiliary_images['nuclei'])
 # EPY: END code
 
 # EPY: START markdown
@@ -97,7 +97,7 @@ stack_filt = [white_top_hat(im, disk_size) for im in s.squeeze()]
 
 # filter 'dots' auxiliary file
 print("filtering dots")
-dots_filt = white_top_hat(s.aux_dict['dots'], disk_size)
+dots_filt = white_top_hat(s.auxiliary_images['dots'], disk_size)
 
 # convert the unstacked data back into a tensor
 s.set_stack(s.un_squeeze(stack_filt))
@@ -249,7 +249,7 @@ stain = np.mean(s.max_proj(Indices.CH, Indices.Z), axis=0)
 stain = stain/stain.max()
 
 
-seg = WatershedSegmenter(s.aux_dict['nuclei'], stain)  # uses skimage watershed. 
+seg = WatershedSegmenter(s.auxiliary_images['nuclei'], stain)  # uses skimage watershed.
 cells_labels = seg.segment(dapi_thresh, stain_thresh, size_lim, disk_size_markers, disk_size_mask, min_dist)
 seg.show()
 # EPY: END code
@@ -268,8 +268,8 @@ from skimage.color import rgb2gray
 results = pd.merge(res, p.spots_df_viz, on='spot_id', how='left')
 
 rgb = np.zeros(s.image.tile_shape + (3,))
-rgb[:,:,0] = s.aux_dict['nuclei']
-rgb[:,:,1] = s.aux_dict['dots']
+rgb[:,:,0] = s.auxiliary_images['nuclei']
+rgb[:,:,1] = s.auxiliary_images['dots']
 do = rgb2gray(rgb)
 do = do/(do.max())
 

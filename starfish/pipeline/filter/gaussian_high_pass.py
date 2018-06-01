@@ -72,5 +72,5 @@ class GaussianHighPass(FilterAlgorithmBase):
         stack.image.apply(high_pass)
 
         # apply to aux dict too:
-        for k, val in stack.aux_dict.items():
-            stack.aux_dict[k].apply(high_pass)
+        for auxiliary_image in stack.auxiliary_images.values():
+            auxiliary_image.apply(high_pass)

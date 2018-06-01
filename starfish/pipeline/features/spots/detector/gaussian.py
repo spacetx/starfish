@@ -32,7 +32,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             than thresh are ignored. Reduce this to detect blobs with less
             intensities.
         blobs_image_name : str
-            name of the image containing blobs. Must be present in the aux_dict of the Stack passed to `find`
+            name of the image containing blobs. Must be present in the auxiliary_images of the Stack passed to `find`
         measurement_type : str ['max', 'mean']
             name of the function used to calculate the intensity for each identified spot area
 
@@ -97,7 +97,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         return SpotAttributes(fitted_blobs)
 
     def find(self, image_stack) -> Tuple[SpotAttributes, EncodedSpots]:
-        blobs = image_stack.aux_dict[self.blobs].max_proj(Indices.HYB, Indices.CH, Indices.Z)
+        blobs = image_stack.auxiliary_images[self.blobs].max_proj(Indices.HYB, Indices.CH, Indices.Z)
         spot_attributes = self.fit(blobs)
         encoded_spots = self.encode(image_stack, spot_attributes.data)
         return spot_attributes, encoded_spots

@@ -53,5 +53,5 @@ class WhiteTophat(FilterAlgorithmBase):
         stack.image.apply(white_tophat)
 
         # apply to aux dict too.
-        for aux_img in stack.aux_dict.values():
-            aux_img.apply(white_tophat)
+        for auxiliary_image in stack.auxiliary_images.values():
+            auxiliary_image.apply(white_tophat)

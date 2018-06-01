@@ -67,5 +67,5 @@ class Bandpass(FilterAlgorithmBase):
         stack.image.apply(bandpass_)
 
         # apply to aux dict too:
-        for k, val in stack.aux_dict.items():
-            stack.aux_dict[k].apply(bandpass_)
+        for auxiliary_image in stack.auxiliary_images.values():
+            auxiliary_image.apply(bandpass_)

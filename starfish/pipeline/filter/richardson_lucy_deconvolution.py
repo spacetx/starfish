@@ -87,5 +87,5 @@ class DeconvolvePSF(FilterAlgorithmBase):
         func: Callable = partial(self.richardson_lucy_deconv, num_iter=self.num_iter, psf=self.psf, clip=self.clip)
         stack.image.apply(func)
 
-        for k, val in stack.aux_dict.items():
-            stack.aux_dict[k].apply(func)
+        for auxiliary_image in stack.auxiliary_images.values():
+            auxiliary_image.apply(func)

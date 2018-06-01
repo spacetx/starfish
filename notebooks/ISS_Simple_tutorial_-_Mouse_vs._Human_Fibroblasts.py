@@ -38,7 +38,7 @@ tile(s.squeeze(),size=10);
 # EPY: END code
 
 # EPY: START code
-image(s.aux_dict['dots'], size=10)
+image(s.auxiliary_images['dots'], size=10)
 # EPY: END code
 
 # EPY: START markdown
@@ -68,7 +68,7 @@ stack_filt = [white_top_hat(im, disk_dize) for im in s.squeeze()]
 stack_filt = s.un_squeeze(stack_filt)
 
 # filter dots
-dots_filt = white_top_hat(s.aux_dict['dots'], disk_dize)
+dots_filt = white_top_hat(s.auxiliary_images['dots'], disk_dize)
 
 # create a 'stain' for segmentation
 stain = np.mean(s.max_proj('ch'), axis=0)
@@ -81,8 +81,8 @@ s.set_aux('stain', stain)
 
 # visualize
 tile(s.squeeze(), bar=False, size=10);
-image(s.aux_dict['dots'])
-image(s.aux_dict['stain'])
+image(s.auxiliary_images['dots'])
+image(s.auxiliary_images['stain'])
 # EPY: END code
 
 # EPY: START markdown
@@ -126,7 +126,7 @@ disk_size_markers = None
 disk_size_mask = None
 min_dist = 57
 
-seg = WatershedSegmenter(s.aux_dict['dapi'], s.aux_dict['stain'])
+seg = WatershedSegmenter(s.auxiliary_images['dapi'], s.auxiliary_images['stain'])
 cells_labels = seg.segment(dapi_thresh, stain_thresh, size_lim, disk_size_markers, disk_size_mask, min_dist)
 seg.show()
 # EPY: END code
@@ -174,11 +174,11 @@ from starfish.stats import label_to_regions
 dec_filt = pd.merge(dec, spots_viz, on='spot_id',how='left')
 dec_filt = dec_filt[dec_filt.qual>.25]
 
-assert s.aux_dict['dapi'].shape == s.aux_dict['dots'].shape
+assert s.auxiliary_images['dapi'].shape == s.auxiliary_images['dots'].shape
 
-rgb = np.zeros(s.aux_dict['dapi'].shape + (3,))
-rgb[:,:,0] = s.aux_dict['dapi']
-rgb[:,:,1] = s.aux_dict['dots']
+rgb = np.zeros(s.auxiliary_images['dapi'].shape + (3,))
+rgb[:,:,0] = s.auxiliary_images['dapi']
+rgb[:,:,1] = s.auxiliary_images['dots']
 do = rgb2gray(rgb)
 do = do/(do.max())
 
@@ -193,7 +193,7 @@ plt.plot(dec_filt[dec_filt.barcode==top_barcode.index[1]].y, dec_filt[dec_filt.b
 v = pd.merge(spots_viz, ass, on='spot_id')
 
 r = label_to_regions(cells_labels)
-im = r.mask(background=[0.9, 0.9, 0.9], dims=s.aux_dict['dots'].shape, stroke=None, cmap='rainbow')
+im = r.mask(background=[0.9, 0.9, 0.9], dims=s.auxiliary_images['dots'].shape, stroke=None, cmap='rainbow')
 image(im,size=10)
 
 v_ass = v[~v.cell_id.isnull()]

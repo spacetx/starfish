@@ -14,7 +14,7 @@ class GaussianLowPass(FilterAlgorithmBase):
 
         Parameters
         ----------
-        sigma : float
+        sigma : Union[float, Tuple[float]]
             Standard deviation for Gaussian kernel.
         is_volume : bool
             If True, 3d (z, y, x) volumes will be passed to self.low_pass. Otherwise, 2d tiles will be passed
@@ -22,7 +22,9 @@ class GaussianLowPass(FilterAlgorithmBase):
             If True, report on the percentage completed (default = False) during processing
 
         """
-        self.sigma = sigma
+        if isinstance(sigma, float):
+            sigma = (sigma,)
+        self.sigma: Tuple[float] = sigma
         self.is_volume = is_volume
         self.verbose = verbose
 
@@ -36,14 +38,14 @@ class GaussianLowPass(FilterAlgorithmBase):
             "--sigma", default=1, type=int, help="standard deviation of gaussian kernel")
 
     @staticmethod
-    def low_pass(image, sigma: Union[float, Tuple[float]]) -> numpy.ndarray:
+    def low_pass(image, sigma: Tuple[float]) -> numpy.ndarray:
         """Apply a Gaussian blur operation over a multi-dimensional image.
 
         Parameters
         ----------
         image : np.ndarray
             Image data
-        sigma : Union[float, Tuple[float]]
+        sigma : Tuple[float]
             Standard deviation of the Gaussian kernel that will be applied. If a float, an isotropic kernel will be
             assumed, otherwise the dimensions of the kernel give (z, x, y)
 

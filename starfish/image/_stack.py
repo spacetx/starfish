@@ -2,7 +2,7 @@ import collections
 import os
 from functools import partial
 from itertools import product
-from typing import Any, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
 
 import numpy
 from scipy.stats import scoreatpercentile
@@ -349,7 +349,7 @@ class ImageStack(ImageBase):
             array, axes = self.get_slice(inds)
             yield array
 
-    def apply(self, func, is_volume=False, in_place=True, verbose: bool=False, **kwargs) -> Optional[List]:
+    def apply(self, func, is_volume=False, in_place=True, verbose: bool=False, **kwargs):
         """Apply func over all tiles or volumes in self
 
         Parameters
@@ -373,7 +373,7 @@ class ImageStack(ImageBase):
         Optional[List]
             If inplace is False, return the results of applying func to stored image data
         """
-        mapfunc = map  # TODO: ambrosejcarr posix-compliant multiprocessing
+        mapfunc: Callable = map  # TODO: ambrosejcarr posix-compliant multiprocessing
         indices = list(self._iter_indices(is_volume=is_volume))
 
         if verbose:
@@ -381,7 +381,7 @@ class ImageStack(ImageBase):
         else:
             tiles = self._iter_tiles(indices)
 
-        applyfunc = partial(func, **kwargs)
+        applyfunc: Callable = partial(func, **kwargs)
         results = mapfunc(applyfunc, tiles)
 
         if not in_place:
@@ -389,6 +389,8 @@ class ImageStack(ImageBase):
 
         for r, inds in zip(results, indices):
             self.set_slice(inds, r)
+
+        return None
 
     @property
     def raw_shape(self) -> Tuple[int]:
@@ -490,7 +492,7 @@ class ImageStack(ImageBase):
             pretty=True,
             tile_opener=tile_opener)
 
-    def max_proj(self, *dims: Tuple[Indices]) -> numpy.ndarray:
+    def max_proj(self, *dims: Indices) -> numpy.ndarray:
         """return a max projection over one or more axis of the image tensor
 
         Parameters

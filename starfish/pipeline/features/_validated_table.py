@@ -72,4 +72,4 @@ class ValidatedTable:
 
         """
 
-        return cls(pd.read_json(json_file), required_fields=cls.required_fields)
+        return cls(pd.read_json(json_file))

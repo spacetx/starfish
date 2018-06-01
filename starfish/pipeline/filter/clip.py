@@ -7,7 +7,7 @@ from ._base import FilterAlgorithmBase
 
 class Clip(FilterAlgorithmBase):
 
-    def __init__(self, p_min, p_max, **kwargs):
+    def __init__(self, p_min, p_max, is_volume: bool=False, verbose: bool=False, **kwargs):
         """Image clipping filter
 
         Parameters
@@ -16,10 +16,16 @@ class Clip(FilterAlgorithmBase):
             values below this percentile are set to p_min
         p_max : int
             values above this percentile are set to p_max
+        is_volume : bool
+            If True, 3d (z, y, x) volumes will be passed to self.low_pass. By default, 2d tiles will be passed
+        verbose : bool
+            If True, report on the percentage completed (default = False) during processing
         kwargs
         """
         self.p_min: int = p_min
         self.p_max: int = p_max
+        self.is_volume = is_volume
+        self.verbose = verbose
 
     @classmethod
     def get_algorithm_name(cls):
@@ -49,7 +55,7 @@ class Clip(FilterAlgorithmBase):
 
         Returns
         -------
-        np.ndarray
+        np.ndarra
           Numpy array of same shape as img
 
         """
@@ -71,7 +77,7 @@ class Clip(FilterAlgorithmBase):
 
         """
         clip = partial(self.clip, p_min=self.p_min, p_max=self.p_max)
-        stack.image.apply(clip)
+        stack.image.apply(clip, is_volume=self.is_volume, verbose=self.verbose)
 
         # apply to aux dict too:
         for k, val in stack.aux_dict.items():

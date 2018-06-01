@@ -73,4 +73,4 @@ class GaussianHighPass(FilterAlgorithmBase):
 
         # apply to aux dict too:
         for k, val in stack.aux_dict.items():
-            stack.aux_dict[k] = high_pass(val)
+            stack.aux_dict[k].apply(high_pass)

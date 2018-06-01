@@ -88,4 +88,4 @@ class DeconvolvePSF(FilterAlgorithmBase):
         stack.image.apply(func)
 
         for k, val in stack.aux_dict.items():
-            stack.aux_dict[k] = func(val)
+            stack.aux_dict[k].apply(func)

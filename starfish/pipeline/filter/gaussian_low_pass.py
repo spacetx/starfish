@@ -70,4 +70,4 @@ class GaussianLowPass(FilterAlgorithmBase):
 
         # apply to aux dict too:
         for k, val in stack.aux_dict.items():
-            stack.aux_dict[k] = self.low_pass(val, self.sigma)
+            stack.aux_dict[k].apply(low_pass)

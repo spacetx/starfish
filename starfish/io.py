@@ -3,10 +3,10 @@ import os
 
 import numpy as np
 import pandas as pd
-from slicedimage import ImageFormat
-from slicedimage.io import resolve_url, resolve_path_or_url
+from slicedimage import ImageFormat, TileSet, Tile
+from slicedimage.io import resolve_path_or_url, Writer
 
-from starfish.constants import Indices
+from starfish.constants import Coordinates, Indices
 from .image import ImageStack
 from .munge import list_to_stack
 
@@ -41,11 +41,7 @@ class Stack:
 
     def _read_aux(self):
         for aux_key, aux_data in self.org['auxiliary_images'].items():
-            name_or_url = aux_data['file']
-            img_format = ImageFormat[aux_data['tile_format']]
-            backend, name, _ = resolve_url(name_or_url, self.baseurl)
-            with backend.read_file_handle(name) as fh:
-                self.aux_dict[aux_key] = img_format.reader_func(fh)
+            self.aux_dict[aux_key] = ImageStack.from_url(aux_data, self.baseurl)
 
     @classmethod
     def from_experiment_json(cls, json_url: str):
@@ -83,10 +79,7 @@ class Stack:
 
     def _write_aux(self, dir_name):
         for aux_key, aux_data in self.org['auxiliary_images'].items():
-            fname = os.path.splitext(aux_data['file'])[0]
-            aux_data['file'] = "{}.{}".format(fname, ImageFormat.NUMPY.file_ext)
-            aux_data['tile_format'] = ImageFormat.NUMPY.name
-            self.write_fn(os.path.join(dir_name, fname), self.aux_dict[aux_key])
+            self.aux_dict[aux_key].write(os.path.join(dir_name, aux_data))
 
     def set_stack(self, new_stack):
         if self.image.raw_shape != new_stack.shape:
@@ -102,13 +95,41 @@ class Stack:
                 msg = "Shape mismatch. Current data shape: {}, new data shape: {}".format(
                     old_img.shape, img.shape)
                 raise AttributeError(msg)
+            self.aux_dict[key].numpy_array = img
         else:
-            self.org['auxiliary_images'][key] = {
-                'file': key,
-                'tile_format': ImageFormat.NUMPY.name,
-                'tile_shape': img.shape,
-            }
-        self.aux_dict[key] = img
+            # TODO: (ttung) major hack alert.  we don't have a convenient mechanism to build an ImageStack from a single
+            # numpy array, which we probably should.
+            tileset = TileSet(
+                {
+                    Indices.HYB,
+                    Indices.CH,
+                    Indices.Z,
+                    Coordinates.X,
+                    Coordinates.Y,
+                },
+                {
+                    Indices.HYB: 1,
+                    Indices.CH: 1,
+                    Indices.Z: 1,
+                }
+            )
+            tile = Tile(
+                {
+                    Coordinates.X: (0.000, 0.001),
+                    Coordinates.Y: (0.000, 0.001),
+                },
+                {
+                    Indices.HYB: 0,
+                    Indices.CH: 0,
+                    Indices.Z: 0,
+                },
+                img.shape,
+            )
+            tile.numpy_array = img
+            tileset.add_tile(tile)
+
+            self.aux_dict[key] = ImageStack(tileset)
+            self.org['auxiliary_images'][key] = f"{key}.json"
 
     def max_proj(self, *dims):
         return self.image.max_proj(*dims)

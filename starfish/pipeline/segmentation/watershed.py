@@ -36,7 +36,8 @@ class Watershed(SegmentationAlgorithmBase):
         disk_size_markers = None
         disk_size_mask = None
 
-        seg = WatershedSegmenter(stack.aux_dict['nuclei'], stain)
+        nuclei = stack.aux_dict['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
+        seg = WatershedSegmenter(nuclei, stain)
         cells_labels = seg.segment(
             self.dapi_threshold, self.input_threshold, size_lim, disk_size_markers, disk_size_mask, self.min_distance)
 

@@ -52,7 +52,6 @@ class WhiteTophat(FilterAlgorithmBase):
 
         stack.image.apply(white_tophat)
 
-        # TODO ambrosejcarr: port aux functionality into apply, I think we always want this
-        # apply to aux dict too:
-        for k, val in stack.aux_dict.items():
-            stack.aux_dict[k] = white_tophat(val)
+        # apply to aux dict too.
+        for aux_img in stack.aux_dict.values():
+            aux_img.apply(white_tophat)

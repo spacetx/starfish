@@ -75,4 +75,4 @@ class Clip(FilterAlgorithmBase):
 
         # apply to aux dict too:
         for k, val in stack.aux_dict.items():
-            stack.aux_dict[k] = self.clip(val, self.p_min, self.p_max)
+            stack.aux_dict[k].apply(clip)

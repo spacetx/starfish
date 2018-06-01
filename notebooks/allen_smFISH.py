@@ -16,42 +16,34 @@
 # EPY: END markdown
 
 # EPY: START code
-# for development, reload modules if they change on disk and starfish is installed with `pip3 install -e .`
-# EPY: ESCAPE %load_ext autoreload
-# EPY: ESCAPE %autoreload 2
-# EPY: END code
-
-# EPY: START code
+from copy import deepcopy
+from glob import glob
 import json
 import os
-from glob import glob
-from starfish.io import Stack
-from copy import deepcopy
-import numpy as np
-import pandas as pd
-# EPY: END code
 
-# EPY: START code
 # EPY: ESCAPE %matplotlib inline
 import matplotlib.pyplot as plt
-
+import numpy as np
+import pandas as pd
 from scipy import ndimage as ndi
 from scipy import stats
-
 from skimage import (exposure, feature, filters, io, measure,
                       morphology, restoration, segmentation, transform,
                       util, img_as_float)
+
+from starfish.io import Stack
 # EPY: END code
 
 # EPY: START code
-experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/allen_smFISH/fov_001/experiment.json'
-# EPY: END code
-
-# EPY: START code
-# # developer note: for rapid iteration, it may be better to run this cell to download the data once and load 
+# # developer note: for rapid iteration, it may be better to run this cell, download the data once, and load 
 # # the data from the local disk. If so, uncomment this cell and run this instead of the above. 
 # !aws s3 sync s3://czi.starfish.data.public/allen_smFISH ./allen_smFISH
 # experiment_json = os.path.abspath("./allen_smFISH/fov_001/experiment.json")
+# EPY: END code
+
+# EPY: START code
+# this is a large (1.1GB) FOV, so the download may take some time
+experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/allen_smFISH/fov_001/experiment.json'
 # EPY: END code
 
 # EPY: START markdown
@@ -63,11 +55,6 @@ experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/allen_smFISH/fov_001/exp
 # EPY: START code
 codebook = pd.read_json('https://dmf0bdeheu4zf.cloudfront.net/allen_smFISH/fov_001/codebook.json')
 codebook
-# EPY: END code
-
-# EPY: START code
-# TODO ambrosejcarr: removeme
-experiment_json = os.path.expanduser('/Users/ajc/google_drive/starfish/data/allen_smFISH/experiment.json')
 # EPY: END code
 
 # EPY: START markdown

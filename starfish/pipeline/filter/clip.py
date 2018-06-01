@@ -7,7 +7,7 @@ from ._base import FilterAlgorithmBase
 
 class Clip(FilterAlgorithmBase):
 
-    def __init__(self, p_min, p_max, is_volume: bool=False, verbose: bool=False, **kwargs):
+    def __init__(self, p_min, p_max, is_volume: bool=False, verbose: bool=False, **kwargs) -> None:
         """Image clipping filter
 
         Parameters

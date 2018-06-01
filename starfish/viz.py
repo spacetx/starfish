@@ -17,6 +17,3 @@ def image_lims(im, num_std, bar=True, size=20):
     stats = im_describe(im)
     lim = stats['mean'] + num_std * stats['std']
     image(im, bar=bar, size=size, clim=[0, lim])
-
-
-

@@ -72,4 +72,4 @@ class ValidatedTable:
 
         """
 
-        return cls(pd.read_json(json_file))
+        return cls(pd.read_json(json_file))  # type: ignore # all the subclasses have this signature for constructor.

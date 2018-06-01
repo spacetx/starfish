@@ -2,6 +2,7 @@ import collections
 import os
 from functools import partial
 from typing import Any, Iterable, Iterator, Mapping, MutableSequence, Sequence, Tuple, Union
+from warnings import warn
 
 import numpy
 from scipy.stats import scoreatpercentile
@@ -9,6 +10,7 @@ from skimage import exposure
 from slicedimage import Reader, Writer
 
 from starfish.constants import Coordinates, Indices
+from starfish.errors import DataFormatWarning
 from ._base import ImageBase
 
 
@@ -30,14 +32,57 @@ class ImageStack(ImageBase):
             self._num_zlayers = 1
         self._tile_shape = tuple(image_partition.default_tile_shape)
 
-        self._data = numpy.zeros((self._num_hybs, self._num_chs, self._num_zlayers) + self._tile_shape)
-        self._data_needs_writeback = False
+        # Examine the tiles to figure out the right kind (int, float, etc.) and size.  We require that all the tiles
+        # have the same kind of data type, but we do not require that they all have the same size of data type.  The
+        # allocated array is the highest size we encounter.
+        kind = None
+        max_size = 0
+        for tile in self._image_partition.tiles():
+            dtype = tile.numpy_array.dtype
+            if kind is None:
+                kind = dtype.kind
+            else:
+                if kind != dtype.kind:
+                    raise TypeError("All tiles should have the same kind of dtype")
+            if dtype.itemsize > max_size:
+                max_size = dtype.itemsize
 
-        for tile in image_partition.tiles():
+        # now that we know the tile data type (kind and size), we can allocate the data array.
+        self._data = numpy.zeros(
+            shape=(self._num_hybs, self._num_chs, self._num_zlayers) + self._tile_shape,
+            dtype=numpy.dtype(f"{kind}{max_size}")
+        )
+
+        # iterate through the tiles and set the data.
+        for tile in self._image_partition.tiles():
             h = tile.indices[Indices.HYB]
             c = tile.indices[Indices.CH]
             zlayer = tile.indices.get(Indices.Z, 0)
-            self.set_slice(indices={Indices.HYB: h, Indices.CH: c, Indices.Z: zlayer}, data=tile.numpy_array)
+            data = tile.numpy_array
+            if max_size != data.dtype.itemsize:
+                # this source tile has a smaller data size than the other ones, though the same kind.  need to scale the
+                # data.
+                if data.dtype.kind == "f":
+                    # floating point can be done with numpy.interp.
+                    src_finfo = numpy.finfo(data.dtype)
+                    dst_finfo = numpy.finfo(self._data.dtype)
+                    data = numpy.interp(
+                        data,
+                        (src_finfo.min, src_finfo.max),
+                        (dst_finfo.min, dst_finfo.max))
+                else:
+                    # fixed point can be done with a simple multiply.
+                    src_max = numpy.iinfo(data.dtype).max
+                    dst_max = numpy.iinfo(self._data.dtype).max
+                    data = data * (dst_max / src_max)
+                warn(
+                    f"Tile "
+                    f"(H: {tile.indices[Indices.HYB]} C: {tile.indices[Indices.CH]} Z: {tile.indices[Indices.Z]}) has "
+                    f"dtype {data.dtype}.  One or more tiles is of a larger dtype {self._data.dtype}.",
+                    DataFormatWarning)
+            self.set_slice(indices={Indices.HYB: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
+        # set_slice will mark the data as needing writeback, so we need to unset that.
+        self._data_needs_writeback = False
 
     @classmethod
     def from_url(cls, relativeurl, baseurl):

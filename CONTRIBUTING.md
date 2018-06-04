@@ -16,7 +16,7 @@ For example, to add a new image filter, one would:
 
 1. Create a new python file `new_filter.py` in the `starfish/pipeline/filter/` directory.
 
-2. Find the corresponding `AlgorithmBase` for your component. For filters, this is `FilterAlgorithmBase`, which is found in `starfish/pipeline/filter/_base.py`. 
+2. Find the corresponding `AlgorithmBase` for your component. For filters, this is `FilterAlgorithmBase`, which is found in `starfish/pipeline/filter/_base.py`.
 Import that base into `new_filter.py`, and have your new algorithm subclass it, e.g. create `class NewFilter(FilterAlgorithmBase)`
 
 3. Implement all required methods from the base class.
@@ -34,6 +34,8 @@ If at any point something gets confusing, it should be possible to look at exist
 ## Reporting bugs
 - Bugs can be contributed as issues in the starfish repository. Please check to make sure there is no existing issue that describes the problem you
 have identified before adding your bug.
+
+- When reporting issues please include as much detail as possible about your operating system, starfish version, slicedimage version, and python version. Whenever possible, please also include a brief, self-contained code example that demonstrates the problem, including a full traceback.
 
 ## Code contributions
 - Don't break the build: pull requests are expected to pass all automated CI checks. You can run those checks locally by running `make all` in

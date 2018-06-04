@@ -3,6 +3,17 @@
 import os
 import setuptools
 
+CLASSIFIERS = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Natural Language :: English",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS :: MacOS X",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.6",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
 install_requires = [line.rstrip() for line in open(os.path.join(os.path.dirname(__file__), "REQUIREMENTS.txt"))]
 
 setuptools.setup(
@@ -16,5 +27,6 @@ setuptools.setup(
     install_requires=install_requires,
     entry_points={
         'console_scripts': "starfish=starfish.starfish:starfish"
-    }
+    },
+    classifiers=CLASSIFIERS
 )

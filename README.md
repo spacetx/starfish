@@ -1,21 +1,36 @@
 <img src="https://github.com/chanzuckerberg/starfish/raw/master/design/logo.png" width="250">
 
-The goal of *starfish* is to **prototype** a reference pipeline for the analysis of image-based transcriptomics data that works across technologies. This is a **work in progress** and will be developed in the open. 
+The goal of *starfish* is to **prototype** a reference pipeline for the analysis of image-based transcriptomics data that works across technologies. This is a **work in progress** and will be developed in the open.
 
 ## concept
 See this [document](https://docs.google.com/document/d/1IHIngoMKr-Tnft2xOI3Q-5rL3GSX2E3PnJrpsOX5ZWs/edit?usp=sharing) for details. The diagram below describes the core pipeline components and associated file manifests that this package plans to standardize and implement.
 
 ![alt text](https://github.com/chanzuckerberg/starfish/raw/master/design/pipeline-diagram.png "candidate pipeline")
 
-## usage
-Install the starfish package:
+## installation
+Starfish supports python 3.6 and above. To Install the starfish package, first verify that your python version is compatible. You can check this with pip, which may be called `pip` or `pip3` depending on how you installed python.
+
+The output should look similar to this:
 ```
-% pip install starfish
+% pip3 --version
+pip 10.0.1 from /usr/local/lib/python3.6/site-packages/pip (python 3.6)
 ```
 
+While not required, you may wish to set up a [virtualenv](https://virtualenv.pypa.io/en/stable/). To do this, execute:
+```
+% python -m venv .venv
+```
+
+Install the starfish module in edit-mode and all the dependencies for starfish:
+```
+% git clone https://github.com/spacetx/starfish.git
+% pip install -e starfish
+```
+
+## usage
 See the [notebook](notebooks/ISS_Simple_tutorial_-_Mouse_vs._Human_Fibroblasts.ipynb) for a fully worked example.
 
-You can also re-produce the notebook results with the command line tool. For usage, run ```starfish --help```
+You can also re-produce the notebook results with the command line tool. For usage, run `starfish --help`
 
 Running the commands below will re-produce notebook results.
 ```
@@ -46,37 +61,16 @@ starfish decode -i /tmp/starfish/results/encoder_table.json --codebook /tmp/star
 To see an interactive web-visualization of the final decoded result, run the following commands
 
 1. [Install nvm](https://github.com/creationix/nvm) if you don't have it
-2. Install node ```nvm install node```
-3. Install budo ```npm install budo```
-4. From starfish/viz run ```npm install```
-5. From starfish/viz run ```npm start```
+2. Install node `nvm install node`
+3. Install budo `npm install budo`
+4. From starfish/viz run `npm install`
+5. From starfish/viz run `npm start`
 
 ## Development
 
-Clone the repo.
+Clone the repo and look through (CONTRIBUTING.md)[CONTRIBUTING.md]
 ```
-% git clone git@github.com:chanzuckerberg/starfish.git
+% git clone https://github.com/spacetx/starfish.git
 % cd starfish
 ```
 
-### Virtualenv
-While not required, you may wish to set up a [virtualenv](https://virtualenv.pypa.io/en/stable/).  If you are using python < 3.3, you should run:
-
-```
-% virtualenv .venv
-```
-
-If you are using python >= 3.3, you should run:
-
-```
-% python -m venv .venv
-```
-
-### Installing
-
-Install the starfish module in edit-mode and all the dependencies for starfish:
-
-```
-% pip install -e .
-% pip install -r REQUIREMENTS.txt
-```

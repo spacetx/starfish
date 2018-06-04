@@ -45,7 +45,7 @@ class GaussianLowPass(FilterAlgorithmBase):
         ----------
         image : np.ndarray
             Image data
-        sigma : Tuple[float]
+        sigma : Union[float, int, Tuple]
             Standard deviation of the Gaussian kernel that will be applied. If a float, an isotropic kernel will be
             assumed, otherwise the dimensions of the kernel give (z, x, y)
 

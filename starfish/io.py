@@ -161,11 +161,14 @@ class Stack:
         """
 
         data: defaultdict = defaultdict(list)
+        specification_indices: set = set()
         for tile in self.image._image_partition.tiles():
             for k, v in tile.indices.items():
                 data[k].append(v)
+                specification_indices.add(k)
+
             for k, v in tile.extras.items():
-                if k in data:
+                if k in specification_indices:
                     raise ValueError(
                         f'{k} was found in both the Tile specification and extras field. Tile specification keys may '
                         f'not be duplicated in the extras field.')

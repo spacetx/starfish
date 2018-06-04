@@ -1,5 +1,7 @@
 coverage
 flake8
+pytest-cov>=2.5.1
+pytest-xdist
 mypy
 nbencdec
 -r REQUIREMENTS.txt

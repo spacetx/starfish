@@ -11,7 +11,7 @@ from ._base import FilterAlgorithmBase
 
 class GaussianHighPass(FilterAlgorithmBase):
 
-    def __init__(self, sigma: int=1, **kwargs) -> None:
+    def __init__(self, sigma, **kwargs) -> None:
         """Gaussian high pass filter
 
         Parameters
@@ -32,7 +32,7 @@ class GaussianHighPass(FilterAlgorithmBase):
             "--sigma", default=1, type=int, help="standard deviation of gaussian kernel")
 
     @staticmethod
-    def gaussian_high_pass(img: np.ndarray, sigma: Tuple[float]) -> np.ndarray:
+    def gaussian_high_pass(img: np.ndarray, sigma) -> np.ndarray:
         """
         Applies a gaussian high pass filter to an image
 
@@ -40,7 +40,7 @@ class GaussianHighPass(FilterAlgorithmBase):
         ----------
         img : numpy.ndarray
             Image to filter
-        sigma : int
+        sigma : Union[float, int]
             Standard deviation of gaussian kernel
 
         Returns

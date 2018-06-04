@@ -23,8 +23,8 @@ While not required, you may wish to set up a [virtualenv](https://virtualenv.pyp
 
 Install the starfish module in edit-mode and all the dependencies for starfish:
 ```
-% pip install -e .
-% pip install -r REQUIREMENTS.txt
+% git clone https://github.com/spacetx/starfish.git
+% pip install -e starfish
 ```
 
 ## usage
@@ -70,7 +70,7 @@ To see an interactive web-visualization of the final decoded result, run the fol
 
 Clone the repo and look through (CONTRIBUTING.md)[CONTRIBUTING.md]
 ```
-% git clone git@github.com:chanzuckerberg/starfish.git
+% git clone https://github.com/spacetx/starfish.git
 % cd starfish
 ```
 

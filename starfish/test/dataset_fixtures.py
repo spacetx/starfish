@@ -1,4 +1,5 @@
 from typing import Any, Callable
+from copy import deepcopy
 
 import numpy as np
 import pytest
@@ -7,8 +8,10 @@ from slicedimage import Tile, TileSet
 from starfish.constants import Indices, Coordinates
 from starfish.image import ImageStack
 from starfish.io import Stack
+from starfish.util.synthesize import synthesize
 
 
+# TODO ambrosejcarr: all fixtures should emit a stack and a codebook
 @pytest.fixture(scope='session')
 def merfish_stack() -> Stack:
     """retrieve MERFISH testing data from cloudfront and expose it at the module level
@@ -16,8 +19,6 @@ def merfish_stack() -> Stack:
     Notes
     -----
     Because download takes time, this fixture runs once per session -- that is, the download is run only once.
-    Therefore, methods consuming this fixture should COPY the data using deepcopy before executing code that changes
-    the data, as otherwise this can affect other tests and cause failure cascades.
 
     Returns
     -------
@@ -26,7 +27,7 @@ def merfish_stack() -> Stack:
     """
     s = Stack()
     s.read('https://s3.amazonaws.com/czi.starfish.data.public/20180607/test/MERFISH/fov_001/experiment_new.json')
-    return s
+    return deepcopy(s)
 
 
 def default_tile_data_provider(hyb: int, ch: int, z: int, height: int, width: int) -> np.ndarray:
@@ -97,4 +98,9 @@ def synthetic_stack(
                 img.add_tile(tile)
 
     stack = ImageStack(img)
+    return stack
+
+
+def labeled_synthetic_dataset() -> Stack:
+    stack, codebook = synthesize()
     return stack

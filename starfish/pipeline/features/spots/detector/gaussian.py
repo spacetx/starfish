@@ -13,7 +13,9 @@ from ._base import SpotFinderAlgorithmBase
 
 class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
-    def __init__(self, min_sigma, max_sigma, num_sigma, threshold, blobs_image_name, measurement_type='max', **kwargs):
+    def __init__(
+            self, min_sigma, max_sigma, num_sigma, threshold,
+            blobs_image_name, overlap=0.5, measurement_type='max', **kwargs):
         """Multi-dimensional gaussian spot detector
 
         Parameters
@@ -31,16 +33,25 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             The absolute lower bound for scale space maxima. Local maxima smaller
             than thresh are ignored. Reduce this to detect blobs with less
             intensities.
+        overlap : float [0, 1]
+            If two spots have more than this fraction of overlap, the spots are combined (default = 0.5)
         blobs_image_name : str
             name of the image containing blobs. Must be present in the auxiliary_images of the Stack passed to `find`
         measurement_type : str ['max', 'mean']
             name of the function used to calculate the intensity for each identified spot area
+
+        Notes
+        -----
+        This spot detector is very sensitive to the threshold that is selected, and the threshold is defined as an
+        absolute value -- therefore it must be adjusted depending on the datatype of the passed image.
+
 
         """
         self.min_sigma = min_sigma
         self.max_sigma = max_sigma
         self.num_sigma = num_sigma
         self.threshold = threshold
+        self.overlap = overlap
         self.blobs = blobs_image_name
 
         try:
@@ -88,9 +99,10 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
     def fit(self, blobs_image):
         fitted_blobs = pd.DataFrame(
-            data=blob_log(blobs_image, self.min_sigma, self.max_sigma, self.num_sigma, self.threshold),
+            data=blob_log(blobs_image, self.min_sigma, self.max_sigma, self.num_sigma, self.threshold, self.overlap),
             columns=['x', 'y', 'r'],
         )
+
         # TODO ambrosejcarr: why is this necessary? (check docs)
         fitted_blobs['r'] *= np.sqrt(2)
         fitted_blobs[['x', 'y']] = fitted_blobs[['x', 'y']].astype(int)
@@ -125,5 +137,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)")
         group_parser.add_argument("--num-sigma", default=20, type=int, help="Number of scales to try")
         group_parser.add_argument("--threshold", default=.01, type=float, help="Dots threshold")
+        group_parser.add_argument(
+            "--overlap", default=0.5, type=float, help="dots with overlap of greater than this fraction are combined")
         group_parser.add_argument(
             "--show", default=False, action='store_true', help="display results visually")

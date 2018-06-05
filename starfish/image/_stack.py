@@ -229,7 +229,7 @@ class ImageStack:
             self, indices: Mapping[Indices, Union[int, slice]],
             color_map: str= 'gray', figure_size: Tuple[int, int]=(10, 10),
             show_spots: Optional[SpotAttributes]=None,
-            rescale: bool=False, p_min: Optional[float]=None, p_max: Optional[float]=None):
+            rescale: bool=False, p_min: Optional[float]=None, p_max: Optional[float]=None, **kwargs):
         """Create an interactive visualization of an image stack
 
         Produces a slider that flips through the selected volume tile-by-tile. Supports manual adjustment of dynamic
@@ -319,7 +319,7 @@ class ImageStack:
             if show_spots:
                 # this is slow. This link might have something to help:
                 # https://bastibe.de/2013-05-30-speeding-up-matplotlib.html
-                show_spot_function(show_spots.data, ax=ax, z=plane_index)
+                show_spot_function(show_spots.data, ax=ax, z=plane_index, **kwargs)
             ax.set_xticks([])
             ax.set_yticks([])
 
@@ -360,7 +360,7 @@ class ImageStack:
         """
         import matplotlib.pyplot as plt
 
-        if z is not None:
+        if z is not None and z in result_df.columns:
             inds = numpy.abs(result_df['z'] - z) < z_dist
         else:
             inds = numpy.ones(result_df.shape[0]).astype(bool)

@@ -3,12 +3,13 @@ from typing import Any, Callable
 import numpy as np
 import pytest
 from slicedimage import Tile, TileSet
-
 from starfish.constants import Indices, Coordinates
 from starfish.image import ImageStack
 from starfish.io import Stack
+from starfish.util.synthesize import synthesize
 
 
+# TODO ambrosejcarr: all fixtures should emit a stack and a codebook
 @pytest.fixture(scope='session')
 def merfish_stack() -> Stack:
     """retrieve MERFISH testing data from cloudfront and expose it at the module level
@@ -105,3 +106,9 @@ def synthetic_stack_factory():
         return stack
 
     return synthetic_stack
+
+
+@pytest.fixture(scope='session')
+def gold_standard_dataset() -> Stack:
+    stack, codebook = synthesize()
+    return stack

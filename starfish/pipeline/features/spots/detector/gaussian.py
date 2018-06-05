@@ -13,7 +13,9 @@ from ._base import SpotFinderAlgorithmBase
 
 class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
-    def __init__(self, min_sigma, max_sigma, num_sigma, threshold, blobs_image_name, measurement_type='max', **kwargs):
+    def __init__(
+            self, min_sigma, max_sigma, num_sigma, threshold,
+            blobs_image_name, overlap=0.5, measurement_type='max', **kwargs):
         """Multi-dimensional gaussian spot detector
 
         Parameters
@@ -31,16 +33,25 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             The absolute lower bound for scale space maxima. Local maxima smaller
             than thresh are ignored. Reduce this to detect blobs with less
             intensities.
+        overlap : float [0, 1]
+            If two spots have more than this fraction of overlap, the spots are combined (default = 0.5)
         blobs_image_name : str
             name of the image containing blobs. Must be present in the auxiliary_images of the Stack passed to `find`
         measurement_type : str ['max', 'mean']
             name of the function used to calculate the intensity for each identified spot area
+
+        Notes
+        -----
+        - This spot detector will not detect images with low dynamic range -- you will want to make sure that your
+        images span most of the range of the dtype that you've chosen. See skimage.exposure.rescale_intensity for
+        a simple way to accomplish this.
 
         """
         self.min_sigma = min_sigma
         self.max_sigma = max_sigma
         self.num_sigma = num_sigma
         self.threshold = threshold
+        self.overlap = overlap
         self.blobs = blobs_image_name
 
         try:
@@ -88,9 +99,10 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
     def fit(self, blobs_image):
         fitted_blobs = pd.DataFrame(
-            data=blob_log(blobs_image, self.min_sigma, self.max_sigma, self.num_sigma, self.threshold),
+            data=blob_log(blobs_image, self.min_sigma, self.max_sigma, self.num_sigma, self.threshold, self.overlap),
             columns=['x', 'y', 'r'],
         )
+
         # TODO ambrosejcarr: why is this necessary? (check docs)
         fitted_blobs['r'] *= np.sqrt(2)
         fitted_blobs[['x', 'y']] = fitted_blobs[['x', 'y']].astype(int)
@@ -99,6 +111,9 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         fitted_blobs['x_max'] = np.clip(np.ceil(fitted_blobs.x + fitted_blobs.r), None, blobs_image.shape[0])
         fitted_blobs['y_min'] = np.clip(np.floor(fitted_blobs.y - fitted_blobs.r), 0, None)
         fitted_blobs['y_max'] = np.clip(np.ceil(fitted_blobs.y + fitted_blobs.r), None, blobs_image.shape[1])
+
+        # location values must be >= 0
+        fitted_blobs[fitted_blobs < 0] = 0
 
         # TODO ambrosejcarr this should be barcode intensity or position intensity
         fitted_blobs['intensity'] = self.measure_blob_intensity(blobs_image, fitted_blobs, self.measurement_function)
@@ -125,5 +140,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)")
         group_parser.add_argument("--num-sigma", default=20, type=int, help="Number of scales to try")
         group_parser.add_argument("--threshold", default=.01, type=float, help="Dots threshold")
+        group_parser.add_argument(
+            "--overlap", default=0.5, type=float, help="dots with overlap of greater than this fraction are combined")
         group_parser.add_argument(
             "--show", default=False, action='store_true', help="display results visually")

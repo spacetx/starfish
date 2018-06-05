@@ -11,16 +11,16 @@ class PixelSpotDetector:
         self.num_objs = None
         self.spots_df = None
 
-    def detect(self, bit_map_flag=False):
+    def detect(self):
 
-        sq = self.stack.squeeze(bit_map_flag=bit_map_flag)
-        num_bits = self.stack.squeeze_map.bit.max() + 1
+        sq = self.stack.squeeze()
+        num_bits = self.stack.tile_metadata['barcode_index'].max() + 1
 
         mat = np.reshape(sq.copy(), (sq.shape[0], sq.shape[1] * sq.shape[2]))
 
         res = pd.DataFrame(mat.T)
         res['spot_id'] = range(len(res))
-        res = gather(res, 'ind', 'val', range(num_bits))
-        spots_df_tidy = pd.merge(res, self.stack.squeeze_map, on='ind', how='left')
+        res = gather(res, 'barcode_index', 'intensity', range(num_bits.astype(int)))
+        spots_df_tidy = pd.merge(res, self.stack.tile_metadata, on='barcode_index', how='left')
 
         return spots_df_tidy

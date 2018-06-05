@@ -6,37 +6,46 @@
 # EPY: START markdown
 # ## Reproduce Published results with Starfish
 # 
-# The MERFISH.zip file needed to run this notebook is downloadable [here](https://drive.google.com/open?id=1YQ3QcOBIoL6Yz3SStC0vigbVaH0C7DkW)
-# 
-# This notebook walks through a workflow that reproduces a MERFISH result for one field of view using the starfish package. It assumes you have unzipped MERFISH.zip in the same directory. Thus, you should see: 
-# 
-# ```
-# MERFISH/
-# Starfish MERFISH Pipeline - U2O2 Cell Culture - 1 FOV.ipynb
-# ```
-# 
-# ## Load tiff stack and visualize one field of view
+# This notebook walks through a workflow that reproduces a MERFISH result for one field of view using the starfish package.
 # EPY: END markdown
 
 # EPY: START code
+import os
+import pprint
+import time
+
 import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
-import os
+import seaborn as sns
+from scipy.stats import scoreatpercentile
+
 from showit import image, tile
-import time
-import pprint
+from starfish.constants import Indices
+from starfish.io import Stack
+from starfish.viz import tile_lims
 
 # EPY: ESCAPE %matplotlib inline
+# EPY: END code
 
-from starfish.io import Stack
-
-# load in current directory so we can also grab the benchmark results later
+# EPY: START code
+# load the data from cloudfront
 s = Stack()
-s.read('MERFISH/fov_001/org.json')
+s.read('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/fov_001/experiment.json')
+# EPY: END code
 
+# EPY: START code
 # data from one FOV correspond to 16 single plane images as shown here (see below for details)
 tile(s.squeeze());  
+# EPY: END code
+
+# EPY: START markdown
+# Individual hybridization rounds and channels can also be visualized
+# EPY: END markdown
+
+# EPY: START code
+# show all hybridization rounds of channel 0
+s.image.show_stack({Indices.CH: 0})
 # EPY: END code
 
 # EPY: START markdown
@@ -63,7 +72,7 @@ pp.pprint(s.org)
 # EPY: END markdown
 
 # EPY: START code
-codebook = pd.read_csv('MERFISH/codebook.csv', dtype={'barcode': object})
+codebook = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/codebook.csv', dtype={'barcode': object})
 codebook.head(20)
 # EPY: END code
 
@@ -71,20 +80,12 @@ codebook.head(20)
 # ## Filter and scale raw data before decoding
 # EPY: END markdown
 
-# EPY: START code
-from starfish.pipeline.filter.gaussian_high_pass import GaussianHighPass
-from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
-from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
-from starfish.viz import tile_lims
-# EPY: END code
-
 # EPY: START markdown
 # Begin filtering with a high pass filter to remove background signal.
 # EPY: END markdown
 
 # EPY: START code
-# bit_map_flag = True orders the list of single-plane images by bit
-# TODO ambrosejcarr: why is this important? This got dropped in the conversion to pipeline components
+from starfish.pipeline.filter.gaussian_high_pass import GaussianHighPass
 ghp = GaussianHighPass(sigma=3)
 ghp.filter(s)
 # EPY: END code
@@ -94,6 +95,7 @@ ghp.filter(s)
 # EPY: END markdown
 
 # EPY: START code
+from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
 dpsf = DeconvolvePSF(num_iter=15, sigma=2)
 dpsf.filter(s)
 # EPY: END code
@@ -105,29 +107,33 @@ dpsf.filter(s)
 # EPY: END markdown
 
 # EPY: START code
+from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
 glp = GaussianLowPass(sigma=1)
 glp.filter(s)
 # EPY: END code
 
 # EPY: START markdown
-# Use MERFISH-calculated size factors to scale the channels across the hybridization rounds and visualize the resulting filtered and scaled images
+# Use MERFISH-calculated size factors to scale the channels across the hybridization rounds and visualize the resulting filtered and scaled images. Right now we have to extract this information from the metadata and apply this transformation manually.
 # EPY: END markdown
 
 # EPY: START code
-stack_blurred = s.image.numpy_array
-sc = s.org['metadata']['scale']
-sc_df = pd.DataFrame([(int(k), v) for k,v in sc.items()], columns = ['bit', 'scale'])
-mp = pd.merge(s.squeeze_map, sc_df, on='bit', how='left')
-scale_dict = dict(zip(mp.ind.values, mp.scale.values))
-
-for k, v in scale_dict.items():
-    stack_blurred[k] = stack_blurred[k]/v
-    
-s.set_stack(s.un_squeeze(stack_blurred))
+scale_factors = {(t[Indices.HYB], t[Indices.CH]): t['scale_factor'] for index, t in s.tile_metadata.iterrows()}
 # EPY: END code
 
 # EPY: START code
-tile_lims(stack_blurred, 2, size=10);
+# this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to 
+# at least we can do it with get_slice and set_slice right now.
+
+for indices in s.image._iter_indices():
+    data = s.image.get_slice(indices)[0]
+    scaled = data / scale_factors[indices[Indices.HYB], indices[Indices.CH]]
+    s.image.set_slice(indices, scaled)
+# EPY: END code
+
+# EPY: START code
+mp = s.max_proj(Indices.HYB, Indices.CH, Indices.Z)
+clim = scoreatpercentile(mp, [0.5, 99.5])
+image(mp, clim=clim)
 # EPY: END code
 
 # EPY: START markdown
@@ -143,7 +149,7 @@ from starfish.spots.pixel import PixelSpotDetector
 
 # create 'encoder table' standard (tidy) file format. each pixel is a 'spot'
 p = PixelSpotDetector(s)
-encoded = p.detect(bit_map_flag=True)
+encoded = p.detect()
 ind = np.random.randint(low=0,high=2048*2048)
 encoded[encoded.spot_id==ind].head(16)
 # EPY: END code
@@ -171,6 +177,10 @@ encoded[encoded.spot_id==ind].head(16)
 # 
 # Given these three thresholds, for each pixel vector, the decoder picks the closest code (minimum distance) that satisfies each of the above thresholds, where the distance is calculated between the code and a normalized intensity vector and throws away subsequent spots that are too small.
 # EPY: END markdown
+
+# EPY: START code
+encoded.head()
+# EPY: END code
 
 # EPY: START code
 from starfish.decoders.merfish import MerfishDecoder
@@ -216,11 +226,11 @@ decoded.spot_props[:3]
 # EPY: END markdown
 
 # EPY: START code
-import seaborn as sns
 sns.set_context('talk')
 sns.set_style('ticks')
 
-bench = pd.read_csv(os.path.join('MERFISH', 'benchmark_results.csv'), dtype = {'barcode':object})
+bench = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/benchmark_results.csv', 
+                    dtype = {'barcode':object})
 x_cnts = res.groupby('gene').count()['area']
 y_cnts = bench.groupby('gene').count()['area']
 tmp = pd.concat([x_cnts, y_cnts], axis=1, join='inner').values

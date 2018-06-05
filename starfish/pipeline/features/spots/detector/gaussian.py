@@ -5,7 +5,7 @@ import pandas as pd
 from skimage.feature import blob_log
 
 from starfish.constants import Indices
-from starfish.munge import gather
+from starfish.munge import melt
 from starfish.pipeline.features.encoded_spots import EncodedSpots
 from starfish.pipeline.features.spot_attributes import SpotAttributes
 from ._base import SpotFinderAlgorithmBase
@@ -77,8 +77,12 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         res = pd.DataFrame(d)
 
-        res = gather(res, 'barcode_index', 'intensity', inds)  # TODO ambrosejcarr this produces an object
-        res = res.infer_objects()
+        res: pd.DataFrame = melt(
+            df=res,
+            new_index_name='barcode_index',
+            new_value_name='intensity',
+            melt_columns=inds
+        )
         res = pd.merge(res, mapping, on='barcode_index', how='left')
         return EncodedSpots(res)
 

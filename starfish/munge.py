@@ -1,3 +1,5 @@
+from typing import Any, Iterable
+
 import numpy as np
 import pandas as pd
 import regional
@@ -30,12 +32,64 @@ def scale(stack, metric, clip=False):
     return list_to_stack(res)
 
 
-def gather(df, key, value, cols):
-    id_vars = [col for col in df.columns if col not in cols]
-    id_values = cols
-    var_name = key
-    value_name = value
-    return pd.melt(df, id_vars, id_values, var_name, value_name)
+def melt(df: pd.DataFrame, new_index_name: Any, new_value_name: Any, melt_columns: Iterable) -> pd.DataFrame:
+    """Melt all columns in `melt_columns` into tidy format, tiling all unspecified columns as identifiers
+
+    Columns in `melt_columns` are aggregated into a new column. Their identifiers are stored together in a column
+    whose index is `new_index_name`, and their values are stored together in a column whose name is `new_value_name`
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to melt
+    new_index_name : Any
+        The name of the index column that will be created (typically a str)
+    new_value_name : Any
+        The name of the column storing the melted values (typically a str)
+    melt_columns : Iterable
+        Names of columns to be melted into tidy format.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> test = pd.DataFrame(
+    ...     data = [
+    ...         ['x', '1', '4'],
+    ...         ['y', '2', '5'],
+    ...         ['z', '3', '6']
+    ...     ],
+    ...     columns = ['id', 'target_1', 'target_2']
+    ... )
+    >>> melt(test, 'orig_col', 'melted_values', ['target_1', 'target_2'])
+        id  orig_col    melted_values
+    0   x   target_1    a
+    1   y   target_1    b
+    2   z   target_1    c
+    3   x   target_2    d
+    4   y   target_2    e
+    5   z   target_2    f
+
+    Returns
+    -------
+    pd.DataFrame :
+        Melted (tidy) DataFrame
+
+    """
+    # any value not passed in melt_columns is retained as an id_var
+    id_vars = [col for col in df.columns if col not in melt_columns]
+
+    melted = pd.melt(
+        df,
+        id_vars=id_vars,
+        value_vars=melt_columns,
+        var_name=new_index_name,
+        value_name=new_value_name
+    )
+
+    # melt does not know the dtypes of the new columns, but pandas can normally guess them
+    melted = melted.infer_objects()
+
+    return melted
 
 
 def spots_to_geojson(spots_viz):

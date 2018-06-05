@@ -103,7 +103,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             preprocess=self.preprocess
         )
 
-        new_colnames = ['y', 'x', 'intensity', 'r', 'eccentricity', 'signal', 'raw_mass', 'ep']
+        new_colnames = ['x', 'y', 'intensity', 'r', 'eccentricity', 'signal', 'raw_mass', 'ep']
         if len(image.shape) == 3:
             attributes.columns = ['z'] + new_colnames
         else:

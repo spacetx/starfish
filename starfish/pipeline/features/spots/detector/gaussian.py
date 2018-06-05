@@ -52,8 +52,14 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
     @staticmethod
     def measure_blob_intensity(image, spots, measurement_function) -> pd.Series:
+        def fn(row):
+            x_min = int(round(row.x_min))
+            x_max = int(round(row.x_max))
+            y_min = int(round(row.y_min))
+            y_max = int(round(row.y_max))
+            return measurement_function(image[x_min:x_max, y_min:y_max])
         return spots.apply(
-            lambda row: measurement_function(image[int(row.x_min):int(row.x_max), int(row.y_min):int(row.y_max)]),
+            fn,
             axis=1
         )
 
@@ -85,10 +91,10 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         fitted_blobs['r'] *= np.sqrt(2)
         fitted_blobs[['x', 'y']] = fitted_blobs[['x', 'y']].astype(int)
 
-        fitted_blobs['x_min'] = np.floor(fitted_blobs.x - fitted_blobs.r).astype(int)
-        fitted_blobs['x_max'] = np.ceil(fitted_blobs.x + fitted_blobs.r).astype(int)
-        fitted_blobs['y_min'] = np.floor(fitted_blobs.y - fitted_blobs.r).astype(int)
-        fitted_blobs['y_max'] = np.ceil(fitted_blobs.y + fitted_blobs.r).astype(int)
+        fitted_blobs['x_min'] = np.clip(np.floor(fitted_blobs.x - fitted_blobs.r), 0, None)
+        fitted_blobs['x_max'] = np.clip(np.ceil(fitted_blobs.x + fitted_blobs.r), None, blobs_image.shape[0])
+        fitted_blobs['y_min'] = np.clip(np.floor(fitted_blobs.y - fitted_blobs.r), 0, None)
+        fitted_blobs['y_max'] = np.clip(np.ceil(fitted_blobs.y + fitted_blobs.r), None, blobs_image.shape[1])
 
         # TODO ambrosejcarr this should be barcode intensity or position intensity
         fitted_blobs['intensity'] = self.measure_blob_intensity(blobs_image, fitted_blobs, self.measurement_function)

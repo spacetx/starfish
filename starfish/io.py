@@ -171,8 +171,13 @@ class Stack:
                         f'not be duplicated in the extras field.')
                 data[k].append(v)
 
-        if 'barcode_index' not in data:
-            data['barcode_index'] = np.arange(self.image.num_hybs * self.image.num_chs * self.image.num_zlayers)
+            if 'barcode_index' not in tile.extras:
+                hyb = tile.indices[Indices.HYB]
+                ch = tile.indices[Indices.CH]
+                z = tile.indices.get(Indices.Z, 0)
+                barcode_index = (((z * self.image.num_hybs) + hyb) * self.image.num_chs) + ch
+
+                data['barcode_index'].append(barcode_index)
 
         return pd.DataFrame(data)
 

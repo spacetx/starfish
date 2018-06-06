@@ -7,5 +7,5 @@ requests
 scikit-image
 scipy
 showit
-slicedimage == 0.0.0-dev17
+slicedimage == 0.0.0-dev21
 trackpy

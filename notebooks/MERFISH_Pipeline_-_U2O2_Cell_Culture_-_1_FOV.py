@@ -80,6 +80,13 @@ codebook.head(20)
 # ## Filter and scale raw data before decoding
 # EPY: END markdown
 
+# EPY: START code
+from starfish.pipeline.filter.gaussian_high_pass import GaussianHighPass
+from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
+from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
+from starfish.viz import tile_lims
+# EPY: END code
+
 # EPY: START markdown
 # Begin filtering with a high pass filter to remove background signal.
 # EPY: END markdown
@@ -131,6 +138,10 @@ for indices in s.image._iter_indices():
 # EPY: END code
 
 # EPY: START code
+from scipy.stats import scoreatpercentile
+# EPY: END code
+
+# EPY: START code
 mp = s.max_proj(Indices.HYB, Indices.CH, Indices.Z)
 clim = scoreatpercentile(mp, [0.5, 99.5])
 image(mp, clim=clim)
@@ -141,18 +152,10 @@ image(mp, clim=clim)
 # 
 # Each pipeline exposes a spot detector, and this spot detector translates the filtered image into an encoded table by detecting spots. The table contains the spot_id, the corresponding intensity (val) and the channel (ch), hybridization round (hyb), and bit position (bit) of each spot. 
 # 
-# The Encoder table is the hypothesized standardized file format for the output of a spot detector, and is the first format that is not an image stack. Below we show how this data representation looks for a single spot_id.
+# The MERFISH pipeline merges these two steps together by finding pixel-based features, and then later collapsing these into spots and filtering out undesirable (non-spot) features. 
+# 
+# Therefore, no encoder table is generated, but a robust SpotAttribute and DecodedTable are both produced:
 # EPY: END markdown
-
-# EPY: START code
-from starfish.spots.pixel import PixelSpotDetector
-
-# create 'encoder table' standard (tidy) file format. each pixel is a 'spot'
-p = PixelSpotDetector(s)
-encoded = p.detect()
-ind = np.random.randint(low=0,high=2048*2048)
-encoded[encoded.spot_id==ind].head(16)
-# EPY: END code
 
 # EPY: START markdown
 # ## Decode
@@ -179,22 +182,23 @@ encoded[encoded.spot_id==ind].head(16)
 # EPY: END markdown
 
 # EPY: START code
-encoded.head()
+from starfish.pipeline.features.pixels.pixel_spot_detector import PixelSpotDetector
+psd = PixelSpotDetector(
+    codebook='https://s3.amazonaws.com/czi.starfish.data.public/MERFISH/codebook.csv',
+    distance_threshold=0.5176,
+    magnitude_threshold=1,
+    area_threshold=2,
+    crop_size=40
+)
+
+spot_attributes, decoded = psd.find(s)
 # EPY: END code
 
 # EPY: START code
-from starfish.decoders.merfish import MerfishDecoder
+spot_attributes.head()
+# EPY: END code
 
-decoder = MerfishDecoder(codebook)
-
-decoded = decoder._decode(encoded,
-                    img_size=(2048, 2048),
-                    distance_threshold=0.5176,
-                    magnitude_threshold=1,
-                    area_threshold=2,
-                    crop_size=40
-                   )
-
+# EPY: START code
 res = decoded.result  # this should be consistent across assays; 
 # this one doesn't have a quality, but it should eventually converge to a shared type
 res.head()

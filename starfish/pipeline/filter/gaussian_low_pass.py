@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Union, Tuple
+from typing import Tuple
 
 import numpy
 from skimage.filters import gaussian
@@ -7,9 +7,11 @@ from skimage.filters import gaussian
 from ._base import FilterAlgorithmBase
 
 
+# TODO ambrosejcarr: need a better solution for 2d/3d support for image analysis algorithms
+
 class GaussianLowPass(FilterAlgorithmBase):
 
-    def __init__(self, sigma: Union[float, Tuple[float]], is_volume: bool=False, verbose=False, **kwargs) -> None:
+    def __init__(self, sigma, is_volume: bool=False, verbose=False, **kwargs) -> None:
         """Multi-dimensional low-pass gaussian filter.
 
         Parameters
@@ -17,14 +19,12 @@ class GaussianLowPass(FilterAlgorithmBase):
         sigma : Union[float, Tuple[float]]
             Standard deviation for Gaussian kernel.
         is_volume : bool
-            If True, 3d (z, y, x) volumes will be passed to self.low_pass. Otherwise, 2d tiles will be passed
+            If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles independently.
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
 
         """
-        if isinstance(sigma, float):
-            sigma = (sigma,)
-        self.sigma: Tuple[float] = sigma
+        self.sigma = sigma
         self.is_volume = is_volume
         self.verbose = verbose
 
@@ -38,7 +38,7 @@ class GaussianLowPass(FilterAlgorithmBase):
             "--sigma", default=1, type=int, help="standard deviation of gaussian kernel")
 
     @staticmethod
-    def low_pass(image, sigma: Tuple[float]) -> numpy.ndarray:
+    def low_pass(image, sigma) -> numpy.ndarray:
         """Apply a Gaussian blur operation over a multi-dimensional image.
 
         Parameters
@@ -76,4 +76,4 @@ class GaussianLowPass(FilterAlgorithmBase):
 
         # apply to aux dict too:
         for auxiliary_image in stack.auxiliary_images.values():
-            auxiliary_image.apply(low_pass)
+            auxiliary_image.apply(low_pass, is_volume=self.is_volume)

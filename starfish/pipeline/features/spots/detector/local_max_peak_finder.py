@@ -76,7 +76,20 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
     #     spot_table = spot_attributes.data
     #     spot_table['barcode_index'] = np.ones(spot_table.shape[0])
 
-    def find_attributes(self, image):
+    def find_attributes(self, image: np.ndarray) -> SpotAttributes:
+        """
+
+        Parameters
+        ----------
+        image : np.ndarray
+            two- or three-dimensional numpy array containing spots to detect
+
+        Returns
+        -------
+        SpotAttributes :
+            spot attributes table for all detected spots
+
+        """
         attributes = locate(
             image,
             diameter=self.diameter,
@@ -89,7 +102,13 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             percentile=self.percentile,
             preprocess=self.preprocess
         )
-        attributes.columns = ['z', 'y', 'x', 'intensity', 'r', 'eccentricity', 'signal', 'raw_mass', 'ep']
+
+        new_colnames = ['y', 'x', 'intensity', 'r', 'eccentricity', 'signal', 'raw_mass', 'ep']
+        if len(image.shape) == 3:
+            attributes.columns = ['z'] + new_colnames
+        else:
+            attributes.columns = new_colnames
+
         attributes['spot_id'] = np.arange(attributes.shape[0])
         return SpotAttributes(attributes)
 

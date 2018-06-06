@@ -1,3 +1,5 @@
+import numpy as np
+
 from ._base import FilterAlgorithmBase
 
 
@@ -44,10 +46,12 @@ class WhiteTophat(FilterAlgorithmBase):
         from skimage.morphology import disk
 
         def white_tophat(image):
+            if image.dtype.kind != "u":
+                raise TypeError("images should be stored in an unsigned integer array")
             structuring_element = disk(self.disk_size)
             min_filtered = minimum_filter(image, footprint=structuring_element)
             max_filtered = maximum_filter(min_filtered, footprint=structuring_element)
-            filtered_image = image - max_filtered
+            filtered_image = image - np.minimum(image, max_filtered)
             return filtered_image
 
         stack.image.apply(white_tophat)

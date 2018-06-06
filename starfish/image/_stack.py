@@ -228,12 +228,18 @@ class ImageStack(ImageBase):
         show_spots : Optional[SpotAttributes]
             [Preliminary functionality] if provided, should be a SpotAttribute table that corresponds
             to the volume being displayed. This will be paired automatically in the future.
-        rescale : bool (default = True)
+        rescale : bool (default = False)
             if True, rescale the data to exclude high and low-value outliers (see skimage.exposure.rescale_intensity).
         p_min: float
             clip values below this intensity percentile. If provided, overrides rescale, above. (default = None)
         p_max: float
             clip values above this intensity percentile. If provided, overrides rescale, above. (default = None)
+
+        Raises
+        ------
+        ValueError :
+            User must select one of rescale or p_min/p_max to adjust the image dynamic range. If both are selected, a
+            ValueError is raised.
 
         Notes
         -----
@@ -267,7 +273,10 @@ class ImageStack(ImageBase):
 
         n = linear_view.shape[0]
 
-        if rescale and p_min is None and p_max is None:
+        if rescale and any((p_min, p_max)):
+            raise ValueError('select one of rescale and p_min/p_max to rescale image, not both.')
+
+        elif rescale is not None:
             print("Rescaling ...")
             vmin, vmax = scoreatpercentile(data, (0.5, 99.5))
             linear_view = exposure.rescale_intensity(
@@ -276,9 +285,12 @@ class ImageStack(ImageBase):
                 out_range=numpy.float32
             ).astype(numpy.float32)
 
-        if p_min or p_max:
+        elif p_min or p_max:
             print("Clipping ...")
-            a_min, a_max = scoreatpercentile(linear_view, (p_min if p_min else 0, p_max if p_max else 100))
+            a_min, a_max = scoreatpercentile(
+                linear_view,
+                (p_min if p_min else 0, p_max if p_max else 100)
+            )
             linear_view = numpy.clip(linear_view, a_min=a_min, a_max=a_max)
 
         show_spot_function = self._show_spots
@@ -311,8 +323,8 @@ class ImageStack(ImageBase):
 
         Parameters:
         -----------
-        img : np.ndarray
-            2-d image
+        img : np.ndarray[Any]
+            2-d image of any dtype
         result_df : pd.Dataframe
             result dataframe containing spot calls that correspond to the image channel
         z : Optional[int]
@@ -430,7 +442,7 @@ class ImageStack(ImageBase):
 
         Returns
         -------
-        Optional[List]
+        Optional[List[Tuple[np.ndarray, Mapping[Indices: Union[int, slice]]]]
             If inplace is False, return the results of applying func to stored image data
         """
         mapfunc: Callable = map  # TODO: ambrosejcarr posix-compliant multiprocessing
@@ -444,13 +456,12 @@ class ImageStack(ImageBase):
         applyfunc: Callable = partial(func, **kwargs)
         results = mapfunc(applyfunc, tiles)
 
+        # TODO ttung: this should return an ImageStack, not a bunch of indices.
         if not in_place:
-            return list(results)
+            return list(zip(results, indices))
 
         for r, inds in zip(results, indices):
             self.set_slice(inds, r)
-
-        return None
 
     @property
     def raw_shape(self) -> Tuple[int]:
@@ -557,8 +568,8 @@ class ImageStack(ImageBase):
 
         Parameters
         ----------
-        dims : Tuple[Indices]
-            a tuple of the axes to project over
+        dims : Indices
+            one or more axes to project over
 
         Returns
         -------

@@ -6,13 +6,7 @@
 # EPY: START markdown
 # # Reproduce Allen smFISH results with Starfish
 # 
-# The `allen_smFISH.zip` file needed to follow along with this notebook can be downloaded [here]()
-# 
 # This notebook walks through a work flow that reproduces the smFISH result for one field of view using the starfish package. 
-# It assumes that you have unzipped `allen_smFISH.zip` in the same directory as this notebook. Thus, you should see:
-# 
-# raw/
-# allen_smFISH.ipynb
 # EPY: END markdown
 
 # EPY: START code
@@ -32,18 +26,19 @@ from skimage import (exposure, feature, filters, io, measure,
                       util, img_as_float)
 
 from starfish.io import Stack
+from starfish.constants import Indices
 # EPY: END code
 
 # EPY: START code
 # # developer note: for rapid iteration, it may be better to run this cell, download the data once, and load 
 # # the data from the local disk. If so, uncomment this cell and run this instead of the above. 
-# !aws s3 sync s3://czi.starfish.data.public/allen_smFISH ./allen_smFISH
+# !aws s3 sync s3://czi.starfish.data.public/20180606/allen_smFISH ./allen_smFISH
 # experiment_json = os.path.abspath("./allen_smFISH/fov_001/experiment.json")
 # EPY: END code
 
 # EPY: START code
 # this is a large (1.1GB) FOV, so the download may take some time
-experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/allen_smFISH/fov_001/experiment.json'
+experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180606/allen_smFISH/fov_001/experiment.json'
 # EPY: END code
 
 # EPY: START markdown
@@ -53,7 +48,7 @@ experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/allen_smFISH/fov_001/exp
 # EPY: END markdown
 
 # EPY: START code
-codebook = pd.read_json('https://dmf0bdeheu4zf.cloudfront.net/allen_smFISH/fov_001/codebook.json')
+codebook = pd.read_json('https://dmf0bdeheu4zf.cloudfront.net/20180606/allen_smFISH/fov_001/codebook.json')
 codebook
 # EPY: END code
 
@@ -64,10 +59,6 @@ codebook
 # EPY: START code
 s = Stack()
 s.read(experiment_json)
-
-# The allen's data is uint, but starfish loads it as floats. Cast it directly to uint16, which does
-# not cause any loss of precision. 
-s.image._data = s.image._data.astype(np.uint16)
 # EPY: END code
 
 # EPY: START markdown
@@ -97,7 +88,7 @@ s_clip.filter(s)
 # EPY: END markdown
 
 # EPY: START code
-s.image.show_stack({'c': 0});
+s.image.show_stack({Indices.CH: 0});
 # EPY: END code
 
 # EPY: START code
@@ -134,7 +125,7 @@ from showit import image
 from trackpy import locate
 
 # grab a section from the tensor. 
-ch1 = s.max_proj(('z'))[0, 1]
+ch1 = s.max_proj(Indices.Z)[0, 1]
 
 results = locate(ch1, diameter=3, minmass=250, maxsize=3, separation=5, preprocess=False, percentile=10) 
 results.columns = ['y', 'x', 'intensity', 'r', 'eccentricity', 'signal', 'raw_mass', 'ep']
@@ -192,5 +183,5 @@ for ch, attrs in enumerate(spot_attributes):
 
 # Note that in places where spots are "missed" it is often because they've been localized to nearby z-planes
 
-s.image.show_stack({'c': 0}, show_spots=spot_attributes[0], figure_size=(20, 20), p_min=60, p_max=99.9);
+s.image.show_stack({Indices.CH: 0}, show_spots=spot_attributes[0], figure_size=(20, 20), p_min=60, p_max=99.9);
 # EPY: END code

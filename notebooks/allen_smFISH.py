@@ -58,7 +58,7 @@ codebook
 # EPY: END code
 
 # EPY: START markdown
-# We're ready now to load the experiment into starfish:
+# We're ready now to load the experiment into starfish (This experiment is big, it takes a few minutes):
 # EPY: END markdown
 
 # EPY: START code
@@ -145,11 +145,12 @@ results.columns = ['y', 'x', 'intensity', 'r', 'eccentricity', 'signal', 'raw_ma
 image(ch1, size=20, clim=(15, 52))
 
 # draw called spots on top as red circles
-s.image._show_spots(results, ax=plt.gca())
+# scale radius plots the red circle at scale_radius * spot radius
+s.image._show_spots(results, ax=plt.gca(), scale_radius=7)
 # EPY: END code
 
 # EPY: START markdown
-# Here we run the spot finding on the _volumes_ for each channel. This will take about 10 minutes.
+# Below spot finding is on the _volumes_ for each channel. This will take about `11m30s`
 # EPY: END markdown
 
 # EPY: START code
@@ -189,7 +190,7 @@ for ch, attrs in enumerate(spot_attributes):
 # this is not a very performant function because of how matplotlib renders circles as individual artists, 
 # but I think it's useful for debugging the spot detection.
 
-# TODO ambrosejcarr: this makes it very obvious that we need adaptive image thresholding, as this is 
-# blowing out the image making the background noise look like the spots. will fix. 
-s.image.show_stack({'c': 0}, show_spots=spot_attributes[0], figure_size=(20, 20), rescale=True)
+# Note that in places where spots are "missed" it is often because they've been localized to nearby z-planes
+
+s.image.show_stack({'c': 0}, show_spots=spot_attributes[0], figure_size=(20, 20), p_min=60, p_max=99.9);
 # EPY: END code

@@ -161,15 +161,26 @@ class Stack:
         """
 
         data: defaultdict = defaultdict(list)
+        index_keys = set(
+            key
+            for tile in self.image._image_partition.tiles()
+            for key in tile.indices.keys())
+        extras_keys = set(
+            key
+            for tile in self.image._image_partition.tiles()
+            for key in tile.extras.keys())
+        duplicate_keys = index_keys.intersection(extras_keys)
+        if len(duplicate_keys) > 0:
+            duplicate_keys_str = ", ".join(duplicate_keys)
+            raise ValueError(
+                f"keys ({duplicate_keys_str}) was found in both the Tile specification and extras field. Tile "
+                f"specification keys may not be duplicated in the extras field.")
+
         for tile in self.image._image_partition.tiles():
-            for k, v in tile.indices.items():
-                data[k].append(v)
-            for k, v in tile.extras.items():
-                if k in data:
-                    raise ValueError(
-                        f'{k} was found in both the Tile specification and extras field. Tile specification keys may '
-                        f'not be duplicated in the extras field.')
-                data[k].append(v)
+            for k in index_keys:
+                data[k].append(tile.indices.get(k, None))
+            for k in extras_keys:
+                data[k].append(tile.extras.get(k, None))
 
             if 'barcode_index' not in tile.extras:
                 hyb = tile.indices[Indices.HYB]

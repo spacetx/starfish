@@ -23,7 +23,7 @@ def merfish_stack() -> Stack:
         starfish.io.Stack object containing MERFISH data
     """
     s = Stack()
-    s.read('https://s3.amazonaws.com/czi.starfish.data.public/test/MERFISH/fov_001/experiment_new.json')
+    s.read('https://s3.amazonaws.com/czi.starfish.data.public/20180607/test/MERFISH/fov_001/experiment_new.json')
     return s
 
 

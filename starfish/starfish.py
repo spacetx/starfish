@@ -2,8 +2,6 @@
 
 import argparse
 import cProfile
-import os
-import sys
 from pstats import Stats
 
 from .pipeline.features.spots.detector import SpotFinder
@@ -22,10 +20,6 @@ def build_parser():
     parser.add_argument("--noop", help=argparse.SUPPRESS, dest="starfish_command", action="store_const", const=noop)
 
     subparsers = parser.add_subparsers(dest="starfish_command")
-
-    if sys.version_info < (3, 0) and PROFILER_NOOP_ENVVAR in os.environ:
-        noop_group = subparsers.add_parser("noop", add_help=False)
-        noop_group.set_defaults(starfish_command=noop)
 
     Registration.add_to_parser(subparsers)
     Filter.add_to_parser(subparsers)
@@ -46,8 +40,6 @@ PROFILER_KEY = "profiler"
 """This is the dictionary key we use to attach the profiler to pass to the resultcallback."""
 PROFILER_LINES = 15
 """This is the number of profiling rows to dump when --profile is enabled."""
-PROFILER_NOOP_ENVVAR = 'PROFILE_TEST'
-"""If this environment variable is present, we create a no-op command for the purposes of testing the profiler."""
 
 
 def starfish():

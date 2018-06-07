@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 #
-# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
+# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.4"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
 # ## Reproduce In-situ Sequencing results with Starfish
@@ -13,18 +13,19 @@
 
 # EPY: START code
 import numpy as np
-import pandas as pd 
+import pandas as pd
 import matplotlib.pyplot as plt
 from showit import image, tile
 import pprint
 # EPY: ESCAPE %matplotlib inline
 
 from starfish.io import Stack
+from starfish.constants import Indices
 
 s = Stack()
-s.read('https://dmf0bdeheu4zf.cloudfront.net/ISS/fov_001/experiment.json')
+s.read('https://dmf0bdeheu4zf.cloudfront.net/20180606/ISS/fov_001/experiment.json')
 # s.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
-tile(s.squeeze());  
+tile(s.squeeze());
 # EPY: END code
 
 # EPY: START markdown
@@ -39,7 +40,7 @@ pp.pprint(s.org)
 # EPY: END code
 
 # EPY: START markdown
-# The flat TIFF files are loaded into a 4-d tensor with dimensions corresponding to hybridization round, channel, x, and y. For other volumetric approaches that image the z-plane, this would be a 5-d tensor. 
+# The flat TIFF files are loaded into a 4-d tensor with dimensions corresponding to hybridization round, channel, x, and y. For other volumetric approaches that image the z-plane, this would be a 5-d tensor.
 # EPY: END markdown
 
 # EPY: START code
@@ -56,7 +57,7 @@ s.image.numpy_array.shape
 # EPY: END markdown
 
 # EPY: START code
-image(s.auxiliary_images['dots'])
+image(s.auxiliary_images['dots'].max_proj(Indices.HYB, Indices.CH, Indices.Z))
 # EPY: END code
 
 # EPY: START markdown
@@ -64,7 +65,7 @@ image(s.auxiliary_images['dots'])
 # EPY: END markdown
 
 # EPY: START code
-image(s.auxiliary_images['nuclei'])
+image(s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z))
 # EPY: END code
 
 # EPY: START markdown
@@ -76,36 +77,28 @@ image(s.auxiliary_images['nuclei'])
 # EPY: END markdown
 
 # EPY: START code
-codebook = pd.read_csv('http://czi.starfish.data.public.s3-website-us-east-1.amazonaws.com/ISS/codebook.csv', dtype={'barcode': object})
+codebook = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180606/ISS/codebook.csv', dtype={'barcode': object})
 codebook.head(20)
 # EPY: END code
 
 # EPY: START markdown
-# ## Filter and scale raw data 
+# ## Filter and scale raw data
 # 
-# Now apply the white top hat filter to both the spots image and the individual channels. White top had enhances white spots on a black background. 
+# Now apply the white top hat filter to both the spots image and the individual channels. White top had enhances white spots on a black background.
 # EPY: END markdown
 
 # EPY: START code
-from starfish.filters import white_top_hat 
+from starfish.pipeline.filter import Filter
 from starfish.viz import tile_lims
 
 # filter raw data
 disk_size = 15  # disk as in circle
-print("filtering tensor")
-stack_filt = [white_top_hat(im, disk_size) for im in s.squeeze()]
+filt = Filter.white_tophat(disk_size)
+filt.filter(s)
+# EPY: END code
 
-# filter 'dots' auxiliary file
-print("filtering dots")
-dots_filt = white_top_hat(s.auxiliary_images['dots'], disk_size)
-
-# convert the unstacked data back into a tensor
-s.set_stack(s.un_squeeze(stack_filt))
-s.set_aux('dots', dots_filt)
-
-# visualization approach which sets dynamic range to n=2 standard deviations 
-# for an image with total size 10
-tile_lims(stack_filt, 2, size=10);
+# EPY: START code
+s.image.show_stack({Indices.Z: 0})
 # EPY: END code
 
 # EPY: START markdown
@@ -113,12 +106,12 @@ tile_lims(stack_filt, 2, size=10);
 # EPY: END markdown
 
 # EPY: START markdown
-# For each hybridization round, the max projection across color channels should look like the dots stain. 
-# Below, this computes the max projection across the color channels of a hybridization round and learns the linear transformation to maps the resulting image onto the dots image. 
+# For each hybridization round, the max projection across color channels should look like the dots stain.
+# Below, this computes the max projection across the color channels of a hybridization round and learns the linear transformation to maps the resulting image onto the dots image.
 # 
-# The Fourier shift registration approach can be thought of as maximizing the cross-correlation of two images. 
+# The Fourier shift registration approach can be thought of as maximizing the cross-correlation of two images.
 # 
-# In the below table, Error is the minimum mean-squared error, and shift reports changes in x and y dimension. 
+# In the below table, Error is the minimum mean-squared error, and shift reports changes in x and y dimension.
 # EPY: END markdown
 
 # EPY: START code
@@ -133,17 +126,12 @@ registration.register(s)
 # EPY: END markdown
 
 # EPY: START markdown
-# Each pipeline exposes an encoder that translates an image into spots with intensities.  This approach uses a Gaussian spot detector. 
+# Each pipeline exposes an encoder that translates an image into spots with intensities.  This approach uses a Gaussian spot detector.
 # EPY: END markdown
 
 # EPY: START code
-from starfish.spots.gaussian import GaussianSpotDetector
+from starfish.pipeline.features.spots.detector import SpotFinder
 import warnings
-
-    
-# create 'encoder table' standard (tidy) file format. 
-# takes a stack and exposes a detect method
-p = GaussianSpotDetector(s)  
 
 # parameters to define the allowable gaussian sizes (parameter space)
 min_sigma = 1
@@ -151,30 +139,35 @@ max_sigma = 10
 num_sigma = 30
 threshold = 0.01
 
+p = SpotFinder.gaussian_spot_detector(
+    min_sigma=min_sigma,
+    max_sigma=max_sigma,
+    num_sigma=num_sigma,
+    threshold=threshold,
+    blobs_image_name='dots',
+    measurement_type='mean',
+)
+
 # detect triggers some numpy warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
 
-    # blobs = dots; define the spots in the dots image, but then find them again in the stack. 
-    encoded = p.detect(
-        min_sigma = min_sigma,
-        max_sigma = max_sigma, 
-        num_sigma = num_sigma,
-        threshold = threshold,
-        blobs = 'dots',
-        measurement_type='mean',
-        bit_map_flag=False
-    )
-                   
-encoded.head()
+    # blobs = dots; define the spots in the dots image, but then find them again in the stack.
+    attributes, encoded = p.find(s)
+
+encoded.data.head()
+# EPY: END code
+
+# EPY: START code
+s.image.show_stack({Indices.Z: 0})
 # EPY: END code
 
 # EPY: START markdown
-# This visualizes a single spot (#100) across all hybridization rounds and channels. It contains the intensity and bit index, which allow it to be mapped onto the correct barcode. 
+# This visualizes a single spot (#100) across all hybridization rounds and channels. It contains the intensity and bit index, which allow it to be mapped onto the correct barcode.
 # EPY: END markdown
 
 # EPY: START code
-encoded[encoded.spot_id == 100]
+encoded.data[encoded.data.spot_id == 100]
 # EPY: END code
 
 # EPY: START markdown
@@ -182,13 +175,13 @@ encoded[encoded.spot_id == 100]
 # EPY: END markdown
 
 # EPY: START markdown
-# `spots_df_viz` is produced by the encoder and contains all the information necessary to map the encoded spots back to the original image
+# `attributes` is produced by the encoder and contains all the information necessary to map the encoded spots back to the original image
 # 
-# `x, y` describe the position, while `x_min` through `y_max` describe the bounding box for the spot, which is refined by a radius `r`. This table also stores the intensity and spot_id. 
+# `x, y` describe the position, while `x_min` through `y_max` describe the bounding box for the spot, which is refined by a radius `r`. This table also stores the intensity and spot_id.
 # EPY: END markdown
 
 # EPY: START code
-p.spots_df_viz.head()
+attributes.data.head()
 # EPY: END code
 
 # EPY: START markdown
@@ -196,34 +189,34 @@ p.spots_df_viz.head()
 # EPY: END markdown
 
 # EPY: START markdown
-# Each assay type also exposes a decoder. A decoder translates each spot (spot_id) in the Encoder table into a gene (that matches a barcode) and associates this information with the stored position. The goal is to decode and output a quality score that describes the confidence in the decoding. 
+# Each assay type also exposes a decoder. A decoder translates each spot (spot_id) in the Encoder table into a gene (that matches a barcode) and associates this information with the stored position. The goal is to decode and output a quality score that describes the confidence in the decoding.
 # EPY: END markdown
 
 # EPY: START markdown
-# There are hard and soft decodings -- hard decoding is just looking for the max value in the code book. Soft decoding, by contrast, finds the closest code by distance (in intensity). Because different assays each have their own intensities and error modes, we leave decoders as user-defined functions. 
+# There are hard and soft decodings -- hard decoding is just looking for the max value in the code book. Soft decoding, by contrast, finds the closest code by distance (in intensity). Because different assays each have their own intensities and error modes, we leave decoders as user-defined functions.
 # EPY: END markdown
 
 # EPY: START code
 from starfish.pipeline.features.spots.decoder.iss import IssDecoder
 
 decoder = IssDecoder()
-res = decoder.decode(encoded, codebook, letters=['T', 'G', 'C', 'A'])  # letters = channels
-res.head()
+res = decoder.decode(encoded.data, codebook, letters=('T', 'G', 'C', 'A'))  # letters = channels
+res.data.head()
 
-# below, 2, 3 are NaN because not defined in codebook. 
+# below, 2, 3 are NaN because not defined in codebook.
 # note 2, 3 have higher quality than 0, 1 (which ARE defined)
 # EPY: END code
 
 # EPY: START markdown
-# ## Compare to results from paper 
+# ## Compare to results from paper
 # EPY: END markdown
 
 # EPY: START markdown
-# Besides house keeping genes, VIM and HER2 should be most highly expessed, which is consistent here. 
+# Besides house keeping genes, VIM and HER2 should be most highly expessed, which is consistent here.
 # EPY: END markdown
 
 # EPY: START code
-res.gene.value_counts().sort_index(ascending=False).sort_values(kind='mergesort', ascending=False)
+res.data.gene.value_counts().sort_index(ascending=False).sort_values(kind='mergesort', ascending=False)
 # EPY: END code
 
 # EPY: START markdown
@@ -231,7 +224,7 @@ res.gene.value_counts().sort_index(ascending=False).sort_values(kind='mergesort'
 # EPY: END markdown
 
 # EPY: START markdown
-# After calling spots and decoding their gene information, cells must be segmented to assign genes to cells. This paper used a seeded watershed approach. 
+# After calling spots and decoding their gene information, cells must be segmented to assign genes to cells. This paper used a seeded watershed approach.
 # EPY: END markdown
 
 # EPY: START code
@@ -247,9 +240,10 @@ min_dist = 57
 
 stain = np.mean(s.max_proj(Indices.CH, Indices.Z), axis=0)
 stain = stain/stain.max()
+nuclei = s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
 
 
-seg = WatershedSegmenter(s.auxiliary_images['nuclei'], stain)  # uses skimage watershed.
+seg = WatershedSegmenter(nuclei, stain)  # uses skimage watershed.
 cells_labels = seg.segment(dapi_thresh, stain_thresh, size_lim, disk_size_markers, disk_size_mask, min_dist)
 seg.show()
 # EPY: END code
@@ -263,13 +257,13 @@ seg.show()
 # EPY: START code
 from skimage.color import rgb2gray
 
-# looking at decoded results with spatial information. 
-# "results" is the output of the pipeline -- x, y, gene, cell. 
-results = pd.merge(res, p.spots_df_viz, on='spot_id', how='left')
+# looking at decoded results with spatial information.
+# "results" is the output of the pipeline -- x, y, gene, cell.
+results = pd.merge(res.data, attributes.data, on='spot_id', how='left')
 
 rgb = np.zeros(s.image.tile_shape + (3,))
-rgb[:,:,0] = s.auxiliary_images['nuclei']
-rgb[:,:,1] = s.auxiliary_images['dots']
+rgb[:,:,0] = s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
+rgb[:,:,1] = s.auxiliary_images['dots'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
 do = rgb2gray(rgb)
 do = do/(do.max())
 

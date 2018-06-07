@@ -159,6 +159,13 @@ encoded.data.head()
 # EPY: END code
 
 # EPY: START code
+# Verify the spot count is reasonable.
+spot_count = len(encoded.data.spot_id.unique())
+assert 1000 < spot_count < 5000
+spot_count
+# EPY: END code
+
+# EPY: START code
 s.image.show_stack({Indices.Z: 0})
 # EPY: END code
 
@@ -216,7 +223,10 @@ res.data.head()
 # EPY: END markdown
 
 # EPY: START code
-res.data.gene.value_counts().sort_index(ascending=False).sort_values(kind='mergesort', ascending=False)
+table = res.data.gene.value_counts().sort_index(ascending=False).sort_values(kind='mergesort', ascending=False)
+assert table.index.get_loc('HER2') < 10
+assert table.index.get_loc('VIM') < 10
+table
 # EPY: END code
 
 # EPY: START markdown

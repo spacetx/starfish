@@ -5,6 +5,7 @@ pandas
 regional
 requests
 scikit-image
+scikit-learn
 scipy
 showit
 slicedimage == 0.0.0-dev17

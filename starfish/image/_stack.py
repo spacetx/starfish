@@ -30,7 +30,7 @@ class ImageStack(ImageBase):
             self._num_zlayers = image_partition.get_dimension_shape(Indices.Z)
         else:
             self._num_zlayers = 1
-        self._tile_shape = tuple(image_partition.default_tile_shape)
+        self._tile_shape = image_partition.default_tile_shape
 
         # Examine the tiles to figure out the right kind (int, float, etc.) and size.  We require that all the tiles
         # have the same kind of data type, but we do not require that they all have the same size of data type.  The
@@ -46,6 +46,10 @@ class ImageStack(ImageBase):
                     raise TypeError("All tiles should have the same kind of dtype")
             if dtype.itemsize > max_size:
                 max_size = dtype.itemsize
+            if self._tile_shape is None:
+                self._tile_shape = tile.tile_shape
+            elif tile.tile_shape is not None and self._tile_shape != tile.tile_shape:
+                raise ValueError("Starfish does not support tiles that are not identical in shape")
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
         self._data = numpy.zeros(

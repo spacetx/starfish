@@ -5,6 +5,7 @@ from starfish.io import Stack
 from starfish.pipeline.features.pixels import _base
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
+from . import pixel_spot_detector
 
 
 class PixelSpotDetector(PipelineComponent):

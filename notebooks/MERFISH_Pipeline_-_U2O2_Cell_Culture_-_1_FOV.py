@@ -124,7 +124,7 @@ glp.filter(s)
 # EPY: END markdown
 
 # EPY: START code
-scale_factors = {(t[Indices.HYB], t[Indices.CH]): t['scale_factor'] for index, t in s.tile_metadata.iterrows()}
+scale_factors = {(t[Indices.HYB], t[Indices.CH]): t['scale_factor'] for index, t in s.image.tile_metadata.iterrows()}
 # EPY: END code
 
 # EPY: START code

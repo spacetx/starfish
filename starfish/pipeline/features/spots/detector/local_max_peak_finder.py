@@ -149,9 +149,6 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             "--smoothing-size", default=None, type=int,
             help="odd integer. Size of boxcar (moving average) filter in pixels. Default is the Diameter")
         group_parser.add_argument(
-            "--percentile", default=64., type=float,
-            help="peaks must have brightness greater than this percentage of pixels")
-        group_parser.add_argument(
             "--preprocess", action="store_true", help="if passed, gaussian and boxcar filtering are applied")
         group_parser.add_argument(
             "--show", default=False, action='store_true', help="display results visually")

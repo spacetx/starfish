@@ -146,7 +146,7 @@ def relabel(image):
     '''
 
     # I've set this as a separate function, rather than binding it to the
-    # WatershedSegmenter object for now
+    # _WatershedSegmenter object for now
 
     unique_labels = set(image[image != 0])
     n_labels = len(unique_labels)

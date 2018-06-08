@@ -239,7 +239,7 @@ table
 
 # EPY: START code
 from starfish.constants import Indices
-from starfish.watershedsegmenter import WatershedSegmenter
+from starfish.pipeline.segmentation.watershed import _WatershedSegmenter
 
 dapi_thresh = .16  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
@@ -253,7 +253,7 @@ stain = stain/stain.max()
 nuclei = s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
 
 
-seg = WatershedSegmenter(nuclei, stain)  # uses skimage watershed.
+seg = _WatershedSegmenter(nuclei, stain)  # uses skimage watershed.
 cells_labels = seg.segment(dapi_thresh, stain_thresh, size_lim, disk_size_markers, disk_size_mask, min_dist)
 seg.show()
 # EPY: END code

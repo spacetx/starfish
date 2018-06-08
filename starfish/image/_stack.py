@@ -6,6 +6,7 @@ from typing import Any, Callable, Iterable, Iterator, Mapping, MutableSequence, 
 from warnings import warn
 
 import numpy
+import pandas as pd
 from scipy.stats import scoreatpercentile
 from skimage import exposure
 from slicedimage import Reader, Writer
@@ -462,6 +463,51 @@ class ImageStack(ImageBase):
 
         for r, inds in zip(results, indices):
             self.set_slice(inds, r)
+
+    @property
+    def tile_metadata(self) -> pd.DataFrame:
+        """return a table containing Tile metadata
+
+        Returns
+        -------
+        pd.DataFrame :
+            dataframe containing per-tile metadata information for each image. Guaranteed to include information on
+            channel, hybridization round, z_layer, and barcode index. Also contains any information stored in the
+            extras field for each tile in hybridization.json
+
+        """
+
+        data: collections.defaultdict = collections.defaultdict(list)
+        index_keys = set(
+            key
+            for tile in self._image_partition.tiles()
+            for key in tile.indices.keys())
+        extras_keys = set(
+            key
+            for tile in self._image_partition.tiles()
+            for key in tile.extras.keys())
+        duplicate_keys = index_keys.intersection(extras_keys)
+        if len(duplicate_keys) > 0:
+            duplicate_keys_str = ", ".join(duplicate_keys)
+            raise ValueError(
+                f"keys ({duplicate_keys_str}) was found in both the Tile specification and extras field. Tile "
+                f"specification keys may not be duplicated in the extras field.")
+
+        for tile in self._image_partition.tiles():
+            for k in index_keys:
+                data[k].append(tile.indices.get(k, None))
+            for k in extras_keys:
+                data[k].append(tile.extras.get(k, None))
+
+            if 'barcode_index' not in tile.extras:
+                hyb = tile.indices[Indices.HYB]
+                ch = tile.indices[Indices.CH]
+                z = tile.indices.get(Indices.Z, 0)
+                barcode_index = (((z * self.num_hybs) + hyb) * self.num_chs) + ch
+
+                data['barcode_index'].append(barcode_index)
+
+        return pd.DataFrame(data)
 
     @property
     def raw_shape(self) -> Tuple[int]:

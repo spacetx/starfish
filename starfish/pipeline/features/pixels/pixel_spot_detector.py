@@ -52,7 +52,8 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
     def encode(stack: Stack) -> pd.DataFrame:
 
         sq = stack.squeeze()
-        num_bits = int(stack.tile_metadata['barcode_index'].max() + 1)
+        tile_metadata = stack.image.tile_metadata
+        num_bits = int(tile_metadata['barcode_index'].max() + 1)
 
         # linearize the pixels, mat.shape = (n_hybs * n_channels * n_z_slice, x * y)
         mat = np.reshape(sq.copy(), (sq.shape[0], sq.shape[1] * sq.shape[2]))
@@ -66,7 +67,7 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
             melt_columns=range(num_bits)
         )
         # TODO this will be missing spot attributes 'r', because that comes later..., so this can't be attributes, yet
-        spots_df_tidy = pd.merge(res, stack.tile_metadata, on='barcode_index', how='left')
+        spots_df_tidy = pd.merge(res, tile_metadata, on='barcode_index', how='left')
 
         return spots_df_tidy
 

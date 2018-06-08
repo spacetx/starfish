@@ -6,6 +6,7 @@ from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import _base
 from . import gaussian
+from . import local_max_peak_finder
 
 
 class SpotFinder(PipelineComponent):

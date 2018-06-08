@@ -43,7 +43,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
         group_parser.add_argument('--num-iter', default=15, type=int, help='number of iterations to run')
         group_parser.add_argument('--sigma', default=2, type=float, help='standard deviation of gaussian kernel')
         group_parser.add_argument(
-            '--clip', action='set_true', help='(default False) if True, clip values below -1 and above 1')
+            '--clip', action='store_true', help='(default False) if True, clip values below -1 and above 1')
 
     @staticmethod
     def richardson_lucy_deconv(img: np.ndarray, num_iter: int, psf: np.ndarray, clip: bool=False) -> np.ndarray:

@@ -129,9 +129,6 @@ class Stack:
             self.auxiliary_images[key] = ImageStack(tileset)
             self.org['auxiliary_images'][key] = f"{key}.json"
 
-    def max_proj(self, *dims):
-        return self.image.max_proj(*dims)
-
     def squeeze(self) -> np.ndarray:
         """return an array that is linear over categorical dimensions and z
 

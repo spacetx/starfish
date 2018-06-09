@@ -34,7 +34,7 @@ class Watershed(SegmentationAlgorithmBase):
     def segment(self, stack):
 
         # create a 'stain' for segmentation
-        stain = np.mean(stack.max_proj(Indices.CH, Indices.Z), axis=0)
+        stain = np.mean(stack.image.max_proj(Indices.CH, Indices.Z), axis=0)
         stain = stain / stain.max()
 
         # TODO make these parameterizable or determine whether they are useful or not

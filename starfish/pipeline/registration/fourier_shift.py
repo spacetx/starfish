@@ -25,7 +25,7 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
 
     def register(self, stack):
         # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in registration?
-        mp = stack.max_proj(Indices.CH, Indices.Z)
+        mp = stack.image.max_proj(Indices.CH, Indices.Z)
         dots = stack.auxiliary_images['dots'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
 
         for h in range(stack.image.num_hybs):

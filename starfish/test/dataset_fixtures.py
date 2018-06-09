@@ -1,3 +1,5 @@
+from typing import Any, Callable
+
 import numpy as np
 import pytest
 from slicedimage import Tile, TileSet
@@ -28,49 +30,54 @@ def merfish_stack() -> Stack:
 
 
 @pytest.fixture(scope='session')
-def synthetic_stack() -> ImageStack:
-    """generate a synthetic ImageStack
-
-    Returns
-    -------
-    ImageStack :
-        imagestack containing a tensor of (2, 3, 4, 30, 20) whose values are all 1.
-
+def synthetic_stack_factory():
     """
-    NUM_HYB = 2
-    NUM_CH = 3
-    NUM_Z = 4
-    Y = 30
-    X = 20
+    Inject this factory, which is a method to produce image stacks.
+    """
+    def synthetic_stack() -> ImageStack:
+        """generate a synthetic ImageStack
 
-    img = TileSet(
-        {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
-        {
-            Indices.HYB: NUM_HYB,
-            Indices.CH: NUM_CH,
-            Indices.Z: NUM_Z,
-        },
-        default_tile_shape=(Y, X),
-    )
-    for hyb in range(NUM_HYB):
-        for ch in range(NUM_CH):
-            for z in range(NUM_Z):
-                tile = Tile(
-                    {
-                        Coordinates.X: (0.0, 0.001),
-                        Coordinates.Y: (0.0, 0.001),
-                        Coordinates.Z: (0.0, 0.001),
-                    },
-                    {
-                        Indices.HYB: hyb,
-                        Indices.CH: ch,
-                        Indices.Z: z,
-                    }
-                )
-                tile.numpy_array = np.ones(
-                    (Y, X))
+        Returns
+        -------
+        ImageStack :
+            imagestack containing a tensor of (2, 3, 4, 30, 20) whose values are all 1.
 
-                img.add_tile(tile)
+        """
+        NUM_HYB = 2
+        NUM_CH = 3
+        NUM_Z = 4
+        Y = 30
+        X = 20
 
-    stack = ImageStack(img)
-    return stack
+        img = TileSet(
+            {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
+            {
+                Indices.HYB: NUM_HYB,
+                Indices.CH: NUM_CH,
+                Indices.Z: NUM_Z,
+            },
+            default_tile_shape=(Y, X),
+        )
+        for hyb in range(NUM_HYB):
+            for ch in range(NUM_CH):
+                for z in range(NUM_Z):
+                    tile = Tile(
+                        {
+                            Coordinates.X: (0.0, 0.001),
+                            Coordinates.Y: (0.0, 0.001),
+                            Coordinates.Z: (0.0, 0.001),
+                        },
+                        {
+                            Indices.HYB: hyb,
+                            Indices.CH: ch,
+                            Indices.Z: z,
+                        },
+                    )
+                    tile.numpy_array = np.ones((Y, X))
+
+                    img.add_tile(tile)
+
+        stack = ImageStack(img)
+        return stack
+
+    return synthetic_stack

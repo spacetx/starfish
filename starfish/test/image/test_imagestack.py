@@ -3,14 +3,15 @@ from copy import deepcopy
 import numpy as np
 
 from starfish.constants import Indices
-from starfish.test.dataset_fixtures import synthetic_stack
+from starfish.test.dataset_fixtures import synthetic_stack_factory
 
 
-def test_get_slice_simple_index(synthetic_stack):
+def test_get_slice_simple_index(synthetic_stack_factory):
     """
     Retrieve a slice across one of the indices at the end.  For instance, if the dimensions are
     (P, Q0,..., Qn-1, R), slice across either P or R.
     """
+    synthetic_stack = synthetic_stack_factory()
     hyb = 1
     imageslice, axes = synthetic_stack.get_slice(
         {Indices.HYB: hyb}
@@ -27,11 +28,12 @@ def test_get_slice_simple_index(synthetic_stack):
             assert data.all() == imageslice[ch, z].all()
 
 
-def test_get_slice_middle_index(synthetic_stack):
+def test_get_slice_middle_index(synthetic_stack_factory):
     """
     Retrieve a slice across one of the indices in the middle.  For instance, if the dimensions are
     (P, Q0,..., Qn-1, R), slice across one of the Q axes.
     """
+    synthetic_stack = synthetic_stack_factory()
     ch = 1
     imageslice, axes = synthetic_stack.get_slice(
         {Indices.CH: ch}
@@ -48,10 +50,11 @@ def test_get_slice_middle_index(synthetic_stack):
             assert data.all() == imageslice[hyb, z].all()
 
 
-def test_get_slice_range(synthetic_stack):
+def test_get_slice_range(synthetic_stack_factory):
     """
     Retrieve a slice across a range of one of the dimensions.
     """
+    synthetic_stack = synthetic_stack_factory()
     zrange = slice(1, 3)
     imageslice, axes = synthetic_stack.get_slice(
         {Indices.Z: zrange}
@@ -69,11 +72,12 @@ def test_get_slice_range(synthetic_stack):
                 assert data.all() == imageslice[hyb, ch, z].all()
 
 
-def test_set_slice_simple_index(synthetic_stack):
+def test_set_slice_simple_index(synthetic_stack_factory):
     """
     Sets a slice across one of the indices at the end.  For instance, if the dimensions are
     (P, Q0,..., Qn-1, R), sets a slice across either P or R.
     """
+    synthetic_stack = synthetic_stack_factory()
     synthetic_stack = deepcopy(synthetic_stack)
     hyb = 1
     Y, X = synthetic_stack.tile_shape
@@ -86,11 +90,12 @@ def test_set_slice_simple_index(synthetic_stack):
     assert np.array_equal(synthetic_stack.get_slice(index)[0], expected)
 
 
-def test_set_slice_middle_index(synthetic_stack):
+def test_set_slice_middle_index(synthetic_stack_factory):
     """
     Sets a slice across one of the indices in the middle.  For instance, if the dimensions are
     (P, Q0,..., Qn-1, R), slice across one of the Q axes.
     """
+    synthetic_stack = synthetic_stack_factory()
     synthetic_stack = deepcopy(synthetic_stack)
     ch = 1
     Y, X = synthetic_stack.tile_shape
@@ -103,10 +108,11 @@ def test_set_slice_middle_index(synthetic_stack):
     assert np.array_equal(synthetic_stack.get_slice(index)[0], expected)
 
 
-def test_set_slice_range(synthetic_stack):
+def test_set_slice_range(synthetic_stack_factory):
     """
     Sets a slice across a range of one of the dimensions.
     """
+    synthetic_stack = synthetic_stack_factory()
     synthetic_stack = deepcopy(synthetic_stack)
     zrange = slice(1, 3)
     Y, X = synthetic_stack.tile_shape

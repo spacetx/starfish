@@ -125,7 +125,7 @@ from showit import image
 from trackpy import locate
 
 # grab a section from the tensor. 
-ch1 = s.max_proj(Indices.Z)[0, 1]
+ch1 = s.image.max_proj(Indices.Z)[0, 1]
 
 results = locate(ch1, diameter=3, minmass=250, maxsize=3, separation=5, preprocess=False, percentile=10) 
 results.columns = ['y', 'x', 'intensity', 'r', 'eccentricity', 'signal', 'raw_mass', 'ep']

@@ -142,7 +142,7 @@ from scipy.stats import scoreatpercentile
 # EPY: END code
 
 # EPY: START code
-mp = s.max_proj(Indices.HYB, Indices.CH, Indices.Z)
+mp = s.image.max_proj(Indices.HYB, Indices.CH, Indices.Z)
 clim = scoreatpercentile(mp, [0.5, 99.5])
 image(mp, clim=clim)
 # EPY: END code

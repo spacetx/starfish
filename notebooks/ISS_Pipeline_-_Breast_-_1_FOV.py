@@ -248,7 +248,7 @@ disk_size_markers = None
 disk_size_mask = None
 min_dist = 57
 
-stain = np.mean(s.max_proj(Indices.CH, Indices.Z), axis=0)
+stain = np.mean(s.image.max_proj(Indices.CH, Indices.Z), axis=0)
 stain = stain/stain.max()
 nuclei = s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
 

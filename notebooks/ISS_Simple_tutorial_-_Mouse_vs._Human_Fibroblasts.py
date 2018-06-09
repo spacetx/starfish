@@ -71,7 +71,7 @@ stack_filt = s.un_squeeze(stack_filt)
 dots_filt = white_top_hat(s.auxiliary_images['dots'], disk_dize)
 
 # create a 'stain' for segmentation
-stain = np.mean(s.max_proj('ch'), axis=0)
+stain = np.mean(s.image.max_proj('ch'), axis=0)
 stain = stain/stain.max()
 
 # update stack

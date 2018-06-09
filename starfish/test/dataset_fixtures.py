@@ -29,12 +29,23 @@ def merfish_stack() -> Stack:
     return s
 
 
+def default_tile_data_provider(hyb: int, ch: int, z: int, height: int, width: int) -> np.ndarray:
+    return np.ones((height, width))
+
+
+def default_tile_extras_provider(hyb: int, ch: int, z: int) -> Any:
+    return None
+
+
 @pytest.fixture(scope='session')
 def synthetic_stack_factory():
     """
     Inject this factory, which is a method to produce image stacks.
     """
-    def synthetic_stack() -> ImageStack:
+    def synthetic_stack(
+            tile_data_provider: Callable[[int, int, int, int, int], np.ndarray]=default_tile_data_provider,
+            tile_extras_provider: Callable[[int, int, int], Any]=default_tile_extras_provider
+    ) -> ImageStack:
         """generate a synthetic ImageStack
 
         Returns
@@ -72,8 +83,9 @@ def synthetic_stack_factory():
                             Indices.CH: ch,
                             Indices.Z: z,
                         },
+                        extras=tile_extras_provider(hyb, ch, z),
                     )
-                    tile.numpy_array = np.ones((Y, X))
+                    tile.numpy_array = tile_data_provider(hyb, ch, z, Y, X)
 
                     img.add_tile(tile)
 

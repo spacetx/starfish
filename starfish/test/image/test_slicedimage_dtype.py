@@ -47,14 +47,20 @@ def test_multiple_tiles_of_different_kind(synthetic_stack_factory):
 
 def test_multiple_tiles_of_same_dtype(synthetic_stack_factory):
     stack = synthetic_stack_factory(
-        tile_data_provider=create_tile_data_provider(numpy.uint32, numpy.uint32))
+        NUM_HYB, NUM_CH, NUM_Z,
+        HEIGHT, WIDTH,
+        tile_data_provider=create_tile_data_provider(numpy.uint32, numpy.uint32),
+    )
     assert stack.numpy_array.all() == 1
 
 
 def test_int_type_promotion(synthetic_stack_factory):
     with warnings.catch_warnings(record=True) as w:
         stack = synthetic_stack_factory(
-            tile_data_provider=create_tile_data_provider(numpy.int32, numpy.int8))
+            NUM_HYB, NUM_CH, NUM_Z,
+            HEIGHT, WIDTH,
+            tile_data_provider=create_tile_data_provider(numpy.int32, numpy.int8),
+        )
         assert len(w) == 1
         assert issubclass(w[0].category, DataFormatWarning)
     expected = numpy.empty(
@@ -74,7 +80,10 @@ def test_int_type_promotion(synthetic_stack_factory):
 def test_float_type_promotion(synthetic_stack_factory):
     with warnings.catch_warnings(record=True) as w:
         stack = synthetic_stack_factory(
-            tile_data_provider=create_tile_data_provider(numpy.float64, numpy.float32))
+            NUM_HYB, NUM_CH, NUM_Z,
+            HEIGHT, WIDTH,
+            tile_data_provider=create_tile_data_provider(numpy.float64, numpy.float32),
+        )
         assert len(w) == 1
         assert issubclass(w[0].category, DataFormatWarning)
     expected = numpy.empty(

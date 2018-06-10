@@ -43,12 +43,24 @@ def default_tile_extras_provider(hyb: int, ch: int, z: int) -> Any:
     return None
 
 
+DEFAULT_NUM_HYB = 2
+DEFAULT_NUM_CH = 3
+DEFAULT_NUM_Z = 4
+DEFAULT_HEIGHT = 30
+DEFAULT_WIDTH = 20
+
+
 @pytest.fixture(scope='session')
 def synthetic_stack_factory():
     """
     Inject this factory, which is a method to produce image stacks.
     """
     def synthetic_stack(
+            num_hyb: int=DEFAULT_NUM_HYB,
+            num_ch: int=DEFAULT_NUM_CH,
+            num_z: int=DEFAULT_NUM_Z,
+            tile_height: int=DEFAULT_HEIGHT,
+            tile_width: int=DEFAULT_WIDTH,
             tile_data_provider: Callable[[int, int, int, int, int], np.ndarray]=default_tile_data_provider,
             tile_extras_provider: Callable[[int, int, int], Any]=default_tile_extras_provider
     ) -> ImageStack:
@@ -60,24 +72,18 @@ def synthetic_stack_factory():
             imagestack containing a tensor of (2, 3, 4, 30, 20) whose values are all 1.
 
         """
-        NUM_HYB = 2
-        NUM_CH = 3
-        NUM_Z = 4
-        Y = 30
-        X = 20
-
         img = TileSet(
             {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
             {
-                Indices.HYB: NUM_HYB,
-                Indices.CH: NUM_CH,
-                Indices.Z: NUM_Z,
+                Indices.HYB: num_hyb,
+                Indices.CH: num_ch,
+                Indices.Z: num_z,
             },
-            default_tile_shape=(Y, X),
+            default_tile_shape=(tile_height, tile_width),
         )
-        for hyb in range(NUM_HYB):
-            for ch in range(NUM_CH):
-                for z in range(NUM_Z):
+        for hyb in range(num_hyb):
+            for ch in range(num_ch):
+                for z in range(num_z):
                     tile = Tile(
                         {
                             Coordinates.X: (0.0, 0.001),
@@ -91,7 +97,7 @@ def synthetic_stack_factory():
                         },
                         extras=tile_extras_provider(hyb, ch, z),
                     )
-                    tile.numpy_array = tile_data_provider(hyb, ch, z, Y, X)
+                    tile.numpy_array = tile_data_provider(hyb, ch, z, tile_height, tile_width)
 
                     img.add_tile(tile)
 

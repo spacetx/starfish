@@ -71,7 +71,7 @@ class Stack:
     def _write_stack(self, dir_name):
         stack_path = os.path.join(dir_name, "hybridization.json")
         self.image.write(stack_path)
-        self.org['hybridization_images'] = stack_path
+        self.org['hybridization_images'] = "hybridization.json"
 
     def _write_aux(self, dir_name):
         for aux_key, aux_data in self.org['auxiliary_images'].items():

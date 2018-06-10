@@ -15,10 +15,9 @@ from tqdm import tqdm
 from starfish.constants import Coordinates, Indices
 from starfish.errors import DataFormatWarning
 from starfish.pipeline.features.spot_attributes import SpotAttributes
-from ._base import ImageBase
 
 
-class ImageStack(ImageBase):
+class ImageStack:
     """Container for a TileSet (field of view)
 
     Methods
@@ -114,19 +113,38 @@ class ImageStack(ImageBase):
         self._data_needs_writeback = False
 
     @classmethod
-    def from_url(cls, relativeurl, baseurl):
-        image_partition = Reader.parse_doc(relativeurl, baseurl)
+    def from_url(cls, url: str, baseurl: Optional[str]):
+        """
+        Constructs an ImageStack object from a URL and a base URL.
+
+        The following examples will all load from the same location:
+          1. url: https://www.example.com/images/hybridization.json  baseurl: None
+          2. url: https://www.example.com/images/hybridization.json  baseurl: I_am_ignored
+          3. url: hybridization.json  baseurl: https://www.example.com/images
+          4. url: images/hybridization.json  baseurl: https://www.example.com
+
+        Parameters:
+        -----------
+        url : str
+            Either an absolute URL or a relative URL referring to the image to be read.
+        baseurl : Optional[str]
+            If url is a relative URL, then this must be provided.  If url is an absolute URL, then this parameter is
+            ignored.
+        """
+        image_partition = Reader.parse_doc(url, baseurl)
 
         return cls(image_partition)
 
     @property
     def numpy_array(self):
+        """Retrieves a view of the image data as a numpy array."""
         result = self._data.view()
         result.setflags(write=False)
         return result
 
     @numpy_array.setter
     def numpy_array(self, data):
+        """Sets the image's data from a numpy array.  The numpy array is advised to be immutable afterwards."""
         self._data = data.view()
         self._data_needs_writeback = True
         data.setflags(write=False)
@@ -511,10 +529,29 @@ class ImageStack(ImageBase):
 
     @property
     def raw_shape(self) -> Tuple[int]:
+        """
+        Returns the shape of the space that this image inhabits.  It does not include the dimensions of the image
+        itself.  For instance, if this is an X-Y image in a C-H-Y-X space, then the shape would include the dimensions C
+        and H.
+
+        Returns
+        -------
+        Tuple[int] :
+            The sizes of the indices.
+        """
         return self._data.shape
 
     @property
     def shape(self) -> collections.OrderedDict:
+        """
+        Returns the shape of the space that this image inhabits.  It does not include the dimensions of the image
+        itself.  For instance, if this is an X-Y image in a C-H-Y-X space, then the shape would include the dimensions C
+        and H.
+
+        Returns
+        -------
+        An ordered mapping between index names to the size of the index.
+        """
         # TODO: (ttung) Note that the return type should be ..OrderedDict[Any, str], but python3.6 has a bug where this
         # breaks horribly.  Can't find a bug id to link to, but see
         # https://stackoverflow.com/questions/41207128/how-do-i-specify-ordereddict-k-v-types-for-mypy-type-annotation

@@ -101,6 +101,6 @@ def synthetic_stack(
     return stack
 
 
-def labeled_synthetic_dataset() -> Stack:
+def labeled_synthetic_dataset():
     stack, codebook = synthesize()
-    return stack
+    return stack, codebook

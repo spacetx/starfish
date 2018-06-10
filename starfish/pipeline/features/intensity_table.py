@@ -1,16 +1,18 @@
-from typing import Union, Tuple, Dict, Mapping
+from typing import Union, Tuple, Dict
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
 from starfish.munge import dataframe_to_multiindex
+from starfish.constants import Indices, IntensityIndices
 
 
 class IntensityTable(xr.DataArray):
 
-    def __init__(self, intensities, coords: Mapping=None, dims: Tuple[str]=None,
-                 name: Union[str, Tuple[str]]=None, attrs: Dict=None, encoding: Dict=None) -> None:
+    # todo coords accepts super complicated types
+    def __init__(self, intensities, coords=None, dims: Tuple[str, ...]=None,
+                 name: Union[str, Tuple[str]]=None, attrs: Dict=None, encoding: Dict=None, fastpath=False) -> None:
         """Table to store feature (spot, pixel) intensities and associated metadata across image tiles
 
         Parameters
@@ -43,24 +45,25 @@ class IntensityTable(xr.DataArray):
         """
 
         # TODO ambrosejcarr: make some checks here on the data
-        super().__init__(data=intensities, coords=coords, dims=dims, name=name, attrs=attrs, encoding=encoding)
+        super().__init__(
+            data=intensities, coords=coords, dims=dims, name=name, attrs=attrs, encoding=encoding, fastpath=fastpath)
 
     @classmethod
     def from_spot_data(cls, intensity_data: pd.DataFrame, tile_data: pd.DataFrame, feature_attributes: pd.DataFrame):
+
         coords = (
-            dataframe_to_multiindex(tile_data),
+            dataframe_to_multiindex(tile_data[[Indices.CH, Indices.HYB]]),
             dataframe_to_multiindex(feature_attributes)
         )
 
-        return cls(
+        intensity_table = cls(
             intensities=intensity_data.values,
             coords=coords,
-            dims=('tiles', 'features')
+            dims=(IntensityIndices.TILES.value, IntensityIndices.FEATURES.value)
         )
+
+        return intensity_table.unstack(IntensityIndices.TILES.value)
 
     def show(self, background_image: np.ndarray) -> None:
         """show spots on a background image"""
-        raise NotImplementedError
-
-    def decode(self):
         raise NotImplementedError

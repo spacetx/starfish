@@ -109,6 +109,7 @@ def synthetic_stack_factory():
 
 
 @pytest.fixture(scope='session')
-def gold_standard_dataset() -> Stack:
+def gold_standard_dataset():
+    # TODO return codebook here also
     stack, codebook = synthesize()
-    return stack
+    return stack, codebook

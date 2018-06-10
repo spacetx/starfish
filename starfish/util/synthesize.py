@@ -15,7 +15,9 @@ from starfish.io import Stack
 
 
 # TODO sofroniewn: doc me!
-def synthesize() -> Tuple[Stack, list]:
+def synthesize(
+        num_hyb: int=4, num_ch: int=2, num_z: int=1, y_resolution: int=100, x_resolution: int=100
+    ) -> Tuple[Stack, list]:
     """Synthesize synthetic spatial image-based transcriptomics data
 
     Returns
@@ -31,13 +33,7 @@ def synthesize() -> Tuple[Stack, list]:
     random.seed(2)
     np.random.seed(2)
 
-    NUM_HYB = 4
-    NUM_CH = 2
-    NUM_Z = 1
-    Y = 100
-    X = 100
-
-    assert X == Y  # for compatibility with the parameterization of the code
+    assert x_resolution == y_resolution  # for compatibility with the parameterization of the code
 
     def choose(n, k):
         if n == k:
@@ -47,18 +43,18 @@ def synthesize() -> Tuple[Stack, list]:
             subsets += [[1] + a for a in choose(n - 1, k - 1)]
         return subsets
 
-    def graham_sloane_codes(n):
+    def graham_sloane_codes(n, bits_on: int=4):
         # n is length of codeword
         # number of on bits is 4
         def code_sum(codeword):
             return sum([i * c for i, c in enumerate(codeword)]) % n
-        return [c for c in choose(n, 4) if code_sum(c) == 0]
+        return [c for c in choose(n, bits_on) if code_sum(c) == 0]
 
     p = {
         # number of on bits (not used with current codebook)
         'N_high': 4,
         # length of barcode
-        'N_barcode': NUM_CH * NUM_HYB,
+        'N_barcode': num_ch * num_hyb,
         # mean number of flourophores per transcripts - depends on amplification strategy (e.g HCR, bDNA)
         'N_flour': 200,
         # mean number of photons per flourophore - depends on exposure time, bleaching rate of dye
@@ -72,7 +68,7 @@ def synthesize() -> Tuple[Stack, list]:
         # number of RNA puncta; keep this low to reduce overlap probability
         'N_spots': 20,
         # height and width of image in pixel units
-        'N_size': X,
+        'N_size': x_resolution,
         # standard devitation of gaussian in pixel units
         'psf': 2,
         # dynamic range of camera sensor 37,000 assuming a 16-bit AD converter
@@ -118,15 +114,15 @@ def synthesize() -> Tuple[Stack, list]:
     image_data = TileSet(
         {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
         {
-            Indices.HYB: NUM_HYB,
-            Indices.CH: NUM_CH,
-            Indices.Z: NUM_Z,
+            Indices.HYB: num_hyb,
+            Indices.CH: num_ch,
+            Indices.Z: num_z,
         },
-        default_tile_shape=(Y, X),
+        default_tile_shape=(y_resolution, x_resolution),
     )
 
     # fill the TileSet
-    experiment_indices = list(product(range(NUM_HYB), range(NUM_CH), range(NUM_Z)))
+    experiment_indices = list(product(range(num_hyb), range(num_ch), range(num_z)))
     for i, (hyb, ch, z) in enumerate(experiment_indices):
 
         tile = Tile(
@@ -155,7 +151,7 @@ def synthesize() -> Tuple[Stack, list]:
             Indices.CH: 1,
             Indices.Z: 1,
         },
-        default_tile_shape=(Y, X),
+        default_tile_shape=(y_resolution, x_resolution),
     )
     tile = Tile(
         {
@@ -184,12 +180,11 @@ def synthesize() -> Tuple[Stack, list]:
     codebook = []
     for _, code_record in spots.iterrows():
         codeword = []
-        for code_value, (hyb, ch, z) in zip(code_record['barcode'], experiment_indices):
+        for code_value, (hyb, ch, _) in zip(code_record['barcode'], experiment_indices):
             if code_value == 1:
                 codeword.append({
                     Indices.HYB: hyb,
                     Indices.CH: ch,
-                    Indices.Z: z,
                     "v": 1
                 })
         codebook.append(

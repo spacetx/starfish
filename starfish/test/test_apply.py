@@ -31,3 +31,4 @@ def test_apply_labeled_dataset():
     image = deepcopy(original.image)
     image.apply(multiply, value=2)
     assert np.all(image.numpy_array == original.image.numpy_array * 2)
+

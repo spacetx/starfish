@@ -10,6 +10,7 @@ import pandas as pd
 from scipy.stats import scoreatpercentile
 from skimage import exposure
 from slicedimage import Reader, Writer
+from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
 from starfish.constants import Coordinates, Indices
@@ -124,6 +125,23 @@ class ImageStack:
         image_partition = Reader.parse_doc(url, baseurl)
 
         return cls(image_partition)
+
+    @classmethod
+    def from_path_or_url(cls, url_or_path: str) -> "ImageStack":
+        """
+        Constructs an ImageStack object from an absolute URL or a filesystem path.
+
+        The following examples will all load from the same location:
+          1. url_or_path: file:///Users/starfish-user/images/hybridization.json
+          2. url_or_path: /Users/starfish-user/images/hybridization.json
+
+        Parameters:
+        -----------
+        url_or_path : str
+            Either an absolute URL or a filesystem path to an imagestack.
+        """
+        _, relativeurl, baseurl = resolve_path_or_url(url_or_path)
+        return cls.from_url(relativeurl, baseurl)
 
     @property
     def numpy_array(self):

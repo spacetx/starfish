@@ -88,21 +88,11 @@ class ImageStack:
             zlayer = tile.indices.get(Indices.Z, 0)
             data = tile.numpy_array
             if max_size != data.dtype.itemsize:
-                # this source tile has a smaller data size than the other ones, though the same kind.  need to scale the
-                # data.
-                if data.dtype.kind == "f":
-                    # floating point can be done with numpy.interp.
-                    src_finfo = numpy.finfo(data.dtype)
-                    dst_finfo = numpy.finfo(self._data.dtype)
-                    data = numpy.interp(
-                        data,
-                        (src_finfo.min, src_finfo.max),
-                        (dst_finfo.min, dst_finfo.max))
-                else:
+                if data.dtype.kind == "i" or data.dtype.kind == "u":
                     # fixed point can be done with a simple multiply.
-                    src_max = numpy.iinfo(data.dtype).max
-                    dst_max = numpy.iinfo(self._data.dtype).max
-                    data = data * (dst_max / src_max)
+                    src_range = numpy.iinfo(data.dtype).max - numpy.iinfo(data.dtype).min + 1
+                    dst_range = numpy.iinfo(self._data.dtype).max - numpy.iinfo(self._data.dtype).min + 1
+                    data = data * (dst_range / src_range)
                 warn(
                     f"Tile "
                     f"(H: {tile.indices[Indices.HYB]} C: {tile.indices[Indices.CH]} Z: {tile.indices[Indices.Z]}) has "

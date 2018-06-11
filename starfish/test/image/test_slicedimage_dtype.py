@@ -42,7 +42,10 @@ def create_tile_data_provider(dtype: numpy.number, corner_dtype: numpy.number):
 def test_multiple_tiles_of_different_kind(synthetic_stack_factory):
     with pytest.raises(TypeError):
         synthetic_stack_factory(
-            tile_data_provider=create_tile_data_provider(numpy.uint32, numpy.float32))
+            NUM_HYB, NUM_CH, NUM_Z,
+            HEIGHT, WIDTH,
+            tile_data_provider=create_tile_data_provider(numpy.uint32, numpy.float32),
+        )
 
 
 def test_multiple_tiles_of_same_dtype(synthetic_stack_factory):
@@ -51,7 +54,13 @@ def test_multiple_tiles_of_same_dtype(synthetic_stack_factory):
         HEIGHT, WIDTH,
         tile_data_provider=create_tile_data_provider(numpy.uint32, numpy.uint32),
     )
-    assert stack.numpy_array.all() == 1
+    expected = numpy.ones(
+        (NUM_HYB,
+         NUM_CH,
+         NUM_Z,
+         HEIGHT,
+         WIDTH), dtype=numpy.uint32)
+    assert numpy.array_equal(stack.numpy_array, expected)
 
 
 def test_int_type_promotion(synthetic_stack_factory):
@@ -63,18 +72,41 @@ def test_int_type_promotion(synthetic_stack_factory):
         )
         assert len(w) == 1
         assert issubclass(w[0].category, DataFormatWarning)
-    expected = numpy.empty(
+    expected = numpy.ones(
         (NUM_HYB,
          NUM_CH,
          NUM_Z,
          HEIGHT,
          WIDTH), dtype=numpy.int32)
-    expected.fill(16777216)
-    corner = numpy.ones(
+    corner = numpy.empty(
         (HEIGHT,
          WIDTH), dtype=numpy.int32)
+    corner.fill(16777216)
     expected[0, 0, 0] = corner
-    assert stack.numpy_array.all() == expected.all()
+    assert numpy.array_equal(stack.numpy_array, expected)
+
+
+def test_uint_type_promotion(synthetic_stack_factory):
+    with warnings.catch_warnings(record=True) as w:
+        stack = synthetic_stack_factory(
+            NUM_HYB, NUM_CH, NUM_Z,
+            HEIGHT, WIDTH,
+            tile_data_provider=create_tile_data_provider(numpy.uint32, numpy.uint8),
+        )
+        assert len(w) == 1
+        assert issubclass(w[0].category, DataFormatWarning)
+    expected = numpy.ones(
+        (NUM_HYB,
+         NUM_CH,
+         NUM_Z,
+         HEIGHT,
+         WIDTH), dtype=numpy.uint32)
+    corner = numpy.empty(
+        (HEIGHT,
+         WIDTH), dtype=numpy.uint32)
+    corner.fill(16777216)
+    expected[0, 0, 0] = corner
+    assert numpy.array_equal(stack.numpy_array, expected)
 
 
 def test_float_type_promotion(synthetic_stack_factory):
@@ -86,15 +118,10 @@ def test_float_type_promotion(synthetic_stack_factory):
         )
         assert len(w) == 1
         assert issubclass(w[0].category, DataFormatWarning)
-    expected = numpy.empty(
+    expected = numpy.ones(
         (NUM_HYB,
          NUM_CH,
          NUM_Z,
          HEIGHT,
-         WIDTH), dtype=numpy.int64)
-    expected.fill(2.0)
-    corner = numpy.ones(
-        (HEIGHT,
-         WIDTH), dtype=numpy.int64)
-    expected[0, 0, 0] = corner
-    assert stack.numpy_array.all() == expected.all()
+         WIDTH), dtype=numpy.float64)
+    assert numpy.array_equal(stack.numpy_array, expected)

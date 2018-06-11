@@ -48,7 +48,7 @@ def test_apply_gold_standard(gold_standard_dataset):
         synthetic data pytest fixture that passes a Stack object
 
     """
-    stack = gold_standard_dataset
+    stack, _ = gold_standard_dataset
     synthetic_stack = deepcopy(stack)
     synthetic_stack = synthetic_stack.image
     synthetic_stack.apply(multiply, value=2)

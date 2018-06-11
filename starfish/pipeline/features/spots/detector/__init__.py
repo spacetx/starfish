@@ -45,19 +45,21 @@ class SpotFinder(PipelineComponent):
         s = Stack()
         s.read(args.input)
         instance = args.spot_finder_algorithm_class(**vars(args))
-        spot_attributes, encoded_spots = instance.find(s)
+        intensities = instance.find(s)
 
-        if args.show:
-            encoded_spots.show(figsize=(10, 10))
+        intensities.save(os.path.join(args.output, 'spots.nc'))
 
-        path = os.path.join(args.output, 'spots.geojson')
-        print(f"Writing | spots geojson to: {path}")
-        spot_attributes.save_geojson(path)
+        # if args.show:
+        #     encoded_spots.show(figsize=(10, 10))
 
-        path = os.path.join(args.output, 'spots.json')
-        print(f"Writing | spot_id | x | y | z | to: {path}")
-        spot_attributes.save(path)
-
-        path = os.path.join(args.output, 'encoder_table.json')
-        print(f"Writing | spot_id | hyb | ch | val | to: {path}")
-        encoded_spots.save(path)
+        # path = os.path.join(args.output, 'spots.geojson')
+        # print(f"Writing | spots geojson to: {path}")
+        # spot_attributes.save_geojson(path)
+        #
+        # path = os.path.join(args.output, 'spots.json')
+        # print(f"Writing | spot_id | x | y | z | to: {path}")
+        # spot_attributes.save(path)
+        #
+        # path = os.path.join(args.output, 'encoder_table.json')
+        # print(f"Writing | spot_id | hyb | ch | val | to: {path}")
+        # encoded_spots.save(path)

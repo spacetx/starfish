@@ -64,6 +64,37 @@ class IntensityTable(xr.DataArray):
 
         return intensity_table.unstack(IntensityIndices.TILES.value)
 
+    def save(self, filename) -> None:
+        """Save an IntensityTable as a Netcdf File
+
+        Parameters
+        ----------
+        filename : str
+            Name of Netcdf file
+
+        """
+        # TODO when https://github.com/pydata/xarray/issues/1077 (support for multiindex serliazation) is merged, remove
+        # this reset_index() call and simplify load, below
+        self.reset_index('features').to_netcdf(filename)
+
+    @classmethod
+    def load(cls, filename):
+        """load an IntensityTable from Netcdf
+
+        Parameters
+        ----------
+        filename : str
+            File to load
+
+        """
+        loaded = xr.open_dataarray(filename)
+        intensity_table = cls(
+            loaded.data,
+            loaded.coords,
+            loaded.dims
+        )
+        return intensity_table.set_index(features=list(intensity_table['features'].coords.keys()))
+
     def show(self, background_image: np.ndarray) -> None:
         """show spots on a background image"""
         raise NotImplementedError

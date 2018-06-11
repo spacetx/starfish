@@ -3,6 +3,7 @@ import json
 
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
+from starfish.pipeline.features.intensity_table import IntensityTable
 from . import _base
 from . import point_in_poly
 
@@ -35,7 +36,6 @@ class GeneAssignment(PipelineComponent):
     @classmethod
     def _cli(cls, args, print_help=False):
         """Runs the gene_assignment component based on parsed arguments."""
-        import pandas
         from starfish import munge
 
         if args.gene_assignment_algorithm_class is None or print_help:
@@ -46,11 +46,13 @@ class GeneAssignment(PipelineComponent):
             coordinates = json.load(fh)
         regions = munge.geojson_to_region(coordinates)
 
-        spots = pandas.read_json(args.spots_json, orient="records")
+        # spots = pandas.read_json(args.spots_json, orient="records")
+        # TODO ambrosejcarr: rename spots_json
+        intensity_table = IntensityTable.load(args.spots_json)
 
         instance = args.gene_assignment_algorithm_class(**vars(args))
 
-        result = instance.assign_genes(spots, regions)
+        result = instance.assign_genes(intensity_table, regions)
 
         print("Writing | cell_id | spot_id to: {}".format(args.output))
         result.to_json(args.output, orient="records")

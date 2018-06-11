@@ -506,7 +506,7 @@ class ImageStack:
             for key in tile.extras.keys())
         duplicate_keys = index_keys.intersection(extras_keys)
         if len(duplicate_keys) > 0:
-            duplicate_keys_str = ", ".join(duplicate_keys)
+            duplicate_keys_str = ", ".join([str(key) for key in duplicate_keys])
             raise ValueError(
                 f"keys ({duplicate_keys_str}) was found in both the Tile specification and extras field. Tile "
                 f"specification keys may not be duplicated in the extras field.")

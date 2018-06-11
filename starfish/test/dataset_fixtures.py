@@ -50,58 +50,51 @@ DEFAULT_HEIGHT = 30
 DEFAULT_WIDTH = 20
 
 
-@pytest.fixture(scope='session')
-def synthetic_stack_factory():
+def synthetic_stack(
+        num_hyb: int=DEFAULT_NUM_HYB,
+        num_ch: int=DEFAULT_NUM_CH,
+        num_z: int=DEFAULT_NUM_Z,
+        tile_height: int=DEFAULT_HEIGHT,
+        tile_width: int=DEFAULT_WIDTH,
+        tile_data_provider: Callable[[int, int, int, int, int], np.ndarray]=default_tile_data_provider,
+        tile_extras_provider: Callable[[int, int, int], Any]=default_tile_extras_provider
+) -> ImageStack:
+    """generate a synthetic ImageStack
+
+    Returns
+    -------
+    ImageStack :
+        imagestack containing a tensor of (2, 3, 4, 30, 20) whose values are all 1.
+
     """
-    Inject this factory, which is a method to produce image stacks.
-    """
-    def synthetic_stack(
-            num_hyb: int=DEFAULT_NUM_HYB,
-            num_ch: int=DEFAULT_NUM_CH,
-            num_z: int=DEFAULT_NUM_Z,
-            tile_height: int=DEFAULT_HEIGHT,
-            tile_width: int=DEFAULT_WIDTH,
-            tile_data_provider: Callable[[int, int, int, int, int], np.ndarray]=default_tile_data_provider,
-            tile_extras_provider: Callable[[int, int, int], Any]=default_tile_extras_provider
-    ) -> ImageStack:
-        """generate a synthetic ImageStack
+    img = TileSet(
+        {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
+        {
+            Indices.HYB: num_hyb,
+            Indices.CH: num_ch,
+            Indices.Z: num_z,
+        },
+        default_tile_shape=(tile_height, tile_width),
+    )
+    for hyb in range(num_hyb):
+        for ch in range(num_ch):
+            for z in range(num_z):
+                tile = Tile(
+                    {
+                        Coordinates.X: (0.0, 0.001),
+                        Coordinates.Y: (0.0, 0.001),
+                        Coordinates.Z: (0.0, 0.001),
+                    },
+                    {
+                        Indices.HYB: hyb,
+                        Indices.CH: ch,
+                        Indices.Z: z,
+                    },
+                    extras=tile_extras_provider(hyb, ch, z),
+                )
+                tile.numpy_array = tile_data_provider(hyb, ch, z, tile_height, tile_width)
 
-        Returns
-        -------
-        ImageStack :
-            imagestack containing a tensor of (2, 3, 4, 30, 20) whose values are all 1.
+                img.add_tile(tile)
 
-        """
-        img = TileSet(
-            {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
-            {
-                Indices.HYB: num_hyb,
-                Indices.CH: num_ch,
-                Indices.Z: num_z,
-            },
-            default_tile_shape=(tile_height, tile_width),
-        )
-        for hyb in range(num_hyb):
-            for ch in range(num_ch):
-                for z in range(num_z):
-                    tile = Tile(
-                        {
-                            Coordinates.X: (0.0, 0.001),
-                            Coordinates.Y: (0.0, 0.001),
-                            Coordinates.Z: (0.0, 0.001),
-                        },
-                        {
-                            Indices.HYB: hyb,
-                            Indices.CH: ch,
-                            Indices.Z: z,
-                        },
-                        extras=tile_extras_provider(hyb, ch, z),
-                    )
-                    tile.numpy_array = tile_data_provider(hyb, ch, z, tile_height, tile_width)
-
-                    img.add_tile(tile)
-
-        stack = ImageStack(img)
-        return stack
-
-    return synthetic_stack
+    stack = ImageStack(img)
+    return stack

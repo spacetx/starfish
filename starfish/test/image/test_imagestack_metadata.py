@@ -3,10 +3,10 @@ from typing import Any
 import pytest
 
 from starfish.constants import Indices
-from starfish.test.dataset_fixtures import DEFAULT_NUM_HYB, DEFAULT_NUM_CH, DEFAULT_NUM_Z, synthetic_stack_factory
+from starfish.test.dataset_fixtures import DEFAULT_NUM_HYB, DEFAULT_NUM_CH, DEFAULT_NUM_Z, synthetic_stack
 
 
-def test_metadata(synthetic_stack_factory):
+def test_metadata():
     """
     Normal situation where all the tiles have uniform keys for both indices and extras.
     """
@@ -19,14 +19,14 @@ def test_metadata(synthetic_stack_factory):
             }
         }
 
-    stack = synthetic_stack_factory(
+    stack = synthetic_stack(
         tile_extras_provider=tile_extras_provider,
     )
     table = stack.tile_metadata
     assert len(table) == DEFAULT_NUM_HYB * DEFAULT_NUM_CH * DEFAULT_NUM_Z
 
 
-def test_missing_extras(synthetic_stack_factory):
+def test_missing_extras():
     """
     If the extras are not present on some of the tiles, it should still work.
     """
@@ -42,14 +42,14 @@ def test_missing_extras(synthetic_stack_factory):
         else:
             return None
 
-    stack = synthetic_stack_factory(
+    stack = synthetic_stack(
         tile_extras_provider=tile_extras_provider,
     )
     table = stack.tile_metadata
     assert len(table) == DEFAULT_NUM_HYB * DEFAULT_NUM_CH * DEFAULT_NUM_Z
 
 
-def test_conflict(synthetic_stack_factory):
+def test_conflict():
     """
     Tiles that have extras that conflict with indices should produce an error.
     """
@@ -60,7 +60,7 @@ def test_conflict(synthetic_stack_factory):
             Indices.Z: z,
         }
 
-    stack = synthetic_stack_factory(
+    stack = synthetic_stack(
         tile_extras_provider=tile_extras_provider,
     )
     with pytest.raises(ValueError):

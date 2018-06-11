@@ -24,6 +24,12 @@ def max_proj(stack):
     return im
 
 
+def dataframe_to_multiindex(dataframe: pd.DataFrame) -> pd.MultiIndex:
+    """Convert data in a DataFrame to a MultiIndex"""
+    names, arrays = zip(*(dataframe.items()))
+    return pd.MultiIndex.from_arrays(arrays=arrays, names=names)
+
+
 def scale(stack, metric, clip=False):
     from starfish.stats import stack_describe
     stats = stack_describe(stack)

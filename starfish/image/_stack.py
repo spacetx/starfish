@@ -432,7 +432,7 @@ class ImageStack:
     def _iter_tiles(
             self, indices: Iterable[Mapping[Indices, Union[int, slice]]]
     ) -> Iterable[numpy.ndarray]:
-        """Given an iterable of indices, return a generator of numpy arrays from self.image
+        """Given an iterable of indices, return a generator of numpy arrays from self
 
         Parameters
         ----------
@@ -677,3 +677,26 @@ class ImageStack:
                     "Dimension: {} not supported. Expecting one of: {}".format(dim, ImageStack.AXES_MAP.keys()))
 
         return numpy.max(self._data, axis=tuple(axes))
+
+    def squeeze(self) -> numpy.ndarray:
+        """return an array that is linear over categorical dimensions and z
+
+        Returns
+        -------
+        np.ndarray :
+            array of shape (num_hybs + num_channels + num_z_layers, x, y).
+
+        """
+        first_dim = self.num_hybs * self.num_chs * self.num_zlayers
+        new_shape = (first_dim,) + self.tile_shape
+        new_data = self.numpy_array.reshape(new_shape)
+
+        return new_data
+
+    def un_squeeze(self, stack):
+        if type(stack) is list:
+            stack = numpy.array(stack)
+
+        new_shape = (self.num_hybs, self.num_chs, self.num_zlayers) + self.tile_shape
+        res = stack.reshape(new_shape)
+        return res

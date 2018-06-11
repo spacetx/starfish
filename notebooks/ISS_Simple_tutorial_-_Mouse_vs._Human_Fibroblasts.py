@@ -34,7 +34,7 @@ in_json = '<output directory>/org.json'
 s = Stack()
 s.read(in_json)
 
-tile(s.squeeze(), size=10);
+tile(s.image.squeeze(), size=10);
 # EPY: END code
 
 # EPY: START code
@@ -51,7 +51,7 @@ from starfish.pipeline.registration import Registration
 registration = Registration.fourier_shift(upsampling=1000)
 registration.register(s)
 
-tile(s.squeeze(), size=10);
+tile(s.image.squeeze(), size=10);
 # EPY: END code
 
 # EPY: START markdown
@@ -64,8 +64,8 @@ from starfish.filters import white_top_hat
 disk_dize = 10
 
 # filter raw images, for all hybs and channels
-stack_filt = [white_top_hat(im, disk_dize) for im in s.squeeze()]
-stack_filt = s.un_squeeze(stack_filt)
+stack_filt = [white_top_hat(im, disk_dize) for im in s.image.squeeze()]
+stack_filt = s.image.un_squeeze(stack_filt)
 
 # filter dots
 dots_filt = white_top_hat(s.auxiliary_images['dots'], disk_dize)
@@ -80,7 +80,7 @@ s.set_aux('dots', dots_filt)
 s.set_aux('stain', stain)
 
 # visualize
-tile(s.squeeze(), bar=False, size=10);
+tile(s.image.squeeze(), bar=False, size=10);
 image(s.auxiliary_images['dots'])
 image(s.auxiliary_images['stain'])
 # EPY: END code

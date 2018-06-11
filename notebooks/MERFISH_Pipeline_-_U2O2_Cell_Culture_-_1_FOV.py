@@ -36,7 +36,7 @@ s.read('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/fov_001/experiment.json')
 
 # EPY: START code
 # data from one FOV correspond to 16 single plane images as shown here (see below for details)
-tile(s.squeeze());  
+tile(s.image.squeeze());
 # EPY: END code
 
 # EPY: START markdown

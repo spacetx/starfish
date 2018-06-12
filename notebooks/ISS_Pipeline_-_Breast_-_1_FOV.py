@@ -24,8 +24,8 @@ from starfish.constants import Indices
 
 s = Stack()
 s.read('https://dmf0bdeheu4zf.cloudfront.net/20180606/ISS/fov_001/experiment.json')
-# s.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
-tile(s.squeeze());
+# s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
+tile(s.image.squeeze());
 # EPY: END code
 
 # EPY: START markdown

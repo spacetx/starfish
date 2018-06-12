@@ -51,7 +51,7 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
     @staticmethod
     def encode(stack: Stack) -> pd.DataFrame:
 
-        sq = stack.squeeze()
+        sq = stack.image.squeeze()
         tile_metadata = stack.image.tile_metadata
         num_bits = int(tile_metadata['barcode_index'].max() + 1)
 

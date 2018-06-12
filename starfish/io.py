@@ -8,7 +8,6 @@ from slicedimage.io import resolve_path_or_url
 
 from starfish.constants import Coordinates, Indices
 from .image import ImageStack
-from .munge import list_to_stack
 
 
 class Stack:
@@ -149,26 +148,3 @@ class Stack:
 
             self.auxiliary_images[key] = ImageStack(tileset)
             self.org['auxiliary_images'][key] = f"{key}.json"
-
-    def squeeze(self) -> np.ndarray:
-        """return an array that is linear over categorical dimensions and z
-
-        Returns
-        -------
-        np.ndarray :
-            array of shape (num_hybs + num_channels + num_z_layers, x, y).
-
-        """
-        first_dim = self.image.num_hybs * self.image.num_chs * self.image.num_zlayers
-        new_shape = (first_dim,) + self.image.tile_shape
-        new_data = self.image.numpy_array.reshape(new_shape)
-
-        return new_data
-
-    def un_squeeze(self, stack):
-        if type(stack) is list:
-            stack = list_to_stack(stack)
-
-        new_shape = (self.image.num_hybs, self.image.num_chs, self.image.num_zlayers) + self.image.tile_shape
-        res = stack.reshape(new_shape)
-        return res

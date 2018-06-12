@@ -78,7 +78,7 @@ def show(args, print_help=False):
 
     s = Stack()
     s.read(args.in_json)
-    tile(s.squeeze(), size=args.sz, bar=True)
+    tile(s.image.squeeze(), size=args.sz, bar=True)
     plt.show()
 
 

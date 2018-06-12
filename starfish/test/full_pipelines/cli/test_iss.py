@@ -123,4 +123,5 @@ class TestWithIssData(unittest.TestCase):
             self.assertEqual("AAGC", tuples[0][1])
             self.assertEqual("AGGC", tuples[1][1])
         finally:
-            shutil.rmtree(tempdir)
+            if os.getenv("TEST_ISS_KEEP_DATA") is None:
+                shutil.rmtree(tempdir)

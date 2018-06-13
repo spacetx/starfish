@@ -44,6 +44,6 @@ class Decoder(PipelineComponent):
         # encoded = pandas.read_json(args.input, orient="records")
         # codebook = pandas.read_json(args.codebook, orient="records")
 
-        results = instance.decode(encoded, codebook)
+        results = instance.euclidean_decode(encoded, codebook)
         print("Writing | spot_id | gene_id to: {}".format(args.output))
         results.save(args.output)

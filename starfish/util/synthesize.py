@@ -1,6 +1,6 @@
 import random
 from itertools import product
-from typing import Tuple
+from typing import List, Dict, Optional
 
 import numpy as np
 from numpy import zeros, array
@@ -11,15 +11,79 @@ from skimage.filters import gaussian
 from slicedimage import Tile, TileSet
 
 from starfish.constants import Indices, Coordinates
+from starfish.pipeline.features.codebook import Codebook
 from starfish.image import ImageStack
 from starfish.io import Stack
 
 
+def graham_sloane_codes(n, bits_on: int=4):
+
+    def choose(n, k):
+        if n == k:
+            return [[1] * k]
+        subsets = [[0] + a for a in choose(n - 1, k)]
+        if k > 0:
+            subsets += [[1] + a for a in choose(n - 1, k - 1)]
+        return subsets
+
+    # n is length of codeword
+    # number of on bits is 4
+    def code_sum(codeword):
+        return sum([i * c for i, c in enumerate(codeword)]) % n
+    return [c for c in choose(n, bits_on) if code_sum(c) == 0]
+
+
+def one_hot_code(n_hyb: int, n_channel: int, n_codes: int, gene_names: Optional[List[str]]=None) -> List[Dict]:
+    """Generate codes where one channel is "on" in each hybridization round
+
+    Parameters
+    ----------
+    n_hyb : int
+        number of hybridization rounds per code
+    n_channel : int
+        number of channels per code
+    n_codes : int
+        number of codes to generate
+    gene_names : Optional[List[str]]
+        if provided, names for genes in codebook
+
+    Returns
+    -------
+    List[Dict] :
+        list of codewords
+
+    """
+    codes = set()
+    while len(codes) < n_codes:
+        codes.add(tuple([np.random.randint(0, n_channel) for _ in np.arange(n_hyb)]))
+
+    codewords = [
+        [
+            {Indices.HYB.value: h, Indices.CH.value: c, 'v': 1} for h, c in enumerate(code)
+        ] for code in codes
+    ]
+
+    if gene_names is None:
+        gene_names = np.arange(n_codes)
+    assert n_codes == len(gene_names)
+
+    codebook = [{"codeword": w, "gene_name": g} for w, g in zip(codewords, gene_names)]
+
+    return codebook
+
+
 # TODO sofroniewn: doc me!
 def synthesize(
-        num_hyb: int=4, num_ch: int=2, num_z: int=1, y_resolution: int=100, x_resolution: int=100
-    ) -> Tuple[Stack, list]:
-    """Synthesize synthetic spatial image-based transcriptomics data
+        num_hyb: int=4, num_ch: int=2, num_z: int=1, resolution: int=100,
+    ):  # -> Tuple[Stack, list]:
+    """
+
+    Parameters
+    ----------
+    num_hyb
+    num_ch
+    num_z
+    resolution
 
     Returns
     -------
@@ -33,29 +97,6 @@ def synthesize(
     # set random seed so that data is consistent across tests
     random.seed(2)
     np.random.seed(2)
-
-    NUM_HYB = 4
-    NUM_CH = 2
-    NUM_Z = 1
-    HEIGHT = 100
-    WIDTH = 100
-
-    assert WIDTH == HEIGHT  # for compatibility with the parameterization of the code
-
-    def choose(n, k):
-        if n == k:
-            return [[1] * k]
-        subsets = [[0] + a for a in choose(n - 1, k)]
-        if k > 0:
-            subsets += [[1] + a for a in choose(n - 1, k - 1)]
-        return subsets
-
-    def graham_sloane_codes(n, bits_on: int=4):
-        # n is length of codeword
-        # number of on bits is 4
-        def code_sum(codeword):
-            return sum([i * c for i, c in enumerate(codeword)]) % n
-        return [c for c in choose(n, bits_on) if code_sum(c) == 0]
 
     p = {
         # number of on bits (not used with current codebook)
@@ -75,7 +116,7 @@ def synthesize(
         # number of RNA puncta; keep this low to reduce overlap probability
         'N_spots': 20,
         # height and width of image in pixel units
-        'N_size': WIDTH,
+        'N_size': resolution,
 
         # standard devitation of gaussian in pixel units
         'psf': 2,
@@ -126,7 +167,7 @@ def synthesize(
             Indices.CH: num_ch,
             Indices.Z: num_z,
         },
-        default_tile_shape=(HEIGHT, WIDTH),
+        default_tile_shape=(resolution, resolution),
     )
 
     # fill the TileSet
@@ -159,7 +200,7 @@ def synthesize(
             Indices.CH: 1,
             Indices.Z: 1,
         },
-        default_tile_shape=(HEIGHT, WIDTH),
+        default_tile_shape=(resolution, resolution),
     )
     tile = Tile(
         {
@@ -184,7 +225,7 @@ def synthesize(
     # put the data together into a top-level Stack
     results = Stack.from_data(data_stack, aux_dict={'dots': dots_stack})
 
-    # make the codebook(s)
+    # make the codebook
     codebook = []
     for _, code_record in spots.iterrows():
         codeword = []
@@ -202,5 +243,6 @@ def synthesize(
                 'gene_name': code_record['gene']
             }
         )
+    codebook = Codebook.from_code_array(codebook, n_ch=num_ch, n_hyb=num_hyb)
 
-    return results, codebook
+    return results, codebook, spots

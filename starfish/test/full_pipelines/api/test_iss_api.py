@@ -5,7 +5,7 @@ from starfish.test.dataset_fixtures import labeled_synthetic_dataset
 from starfish.pipeline.features.codebook import Codebook
 
 
-def test_merfish_pipeline():
+def test_iss_pipeline():
     stack, code_array = labeled_synthetic_dataset()
 
     fsr = FourierShiftRegistration(upsampling=1000)
@@ -17,7 +17,7 @@ def test_merfish_pipeline():
     gsd = GaussianSpotDetector(blobs_image_name='dots', min_sigma=2, max_sigma=10, num_sigma=10, threshold=0.1)
 
     intesities = gsd.find(stack)
-    codebook = Codebook.from_code_array(code_array, num_chs=4, num_hybs=4)
-    intesities = codebook.decode(intesities)
+    codebook = Codebook.from_code_array(code_array, n_ch=4, n_hyb=4)
+    intesities = codebook.euclidean_decode(intesities)
 
     assert intesities.shape[0] == 19

@@ -15,13 +15,13 @@ class Codebook(xr.DataArray):
         super().__init__(data, coords, *args, **kwargs)
 
     @classmethod
-    def from_json(cls, json_codebook, num_hybs, num_chs):
+    def from_json(cls, json_codebook, n_hyb, n_ch):
         with open(json_codebook, 'r') as f:
             code_array = json.load(f)
-        return cls.from_code_array(code_array, num_hybs, num_chs)
+        return cls.from_code_array(code_array, n_hyb, n_ch)
 
     @classmethod
-    def from_code_array(cls, code_array, num_hybs, num_chs):
+    def from_code_array(cls, code_array, n_hyb, n_ch):
 
         for code in code_array:
 
@@ -37,14 +37,14 @@ class Codebook(xr.DataArray):
 
         # empty codebook
         code_data = cls(
-            data=np.zeros((len(code_array), num_chs, num_hybs), dtype=np.uint8),
+            data=np.zeros((len(code_array), n_ch, n_hyb), dtype=np.uint8),
             coords=(
                 pd.Index(
                     [d[CodebookIndices.GENE_NAME.value] for d in code_array],
                     name=CodebookIndices.GENE_NAME.value
                 ),
-                pd.Index(np.arange(4), name=Indices.CH.value),
-                pd.Index(np.arange(4), name=Indices.HYB.value),
+                pd.Index(np.arange(n_ch), name=Indices.CH.value),
+                pd.Index(np.arange(n_hyb), name=Indices.HYB.value),
             )
         )
 
@@ -52,8 +52,8 @@ class Codebook(xr.DataArray):
         for code_dict in code_array:
             codeword = code_dict[CodebookIndices.CODEWORD.value]
             gene = code_dict[CodebookIndices.GENE_NAME.value]
-            for letter in codeword:
-                code_data.loc[gene, letter[Indices.CH.value], letter[Indices.HYB.value]] = letter[
+            for entry in codeword:
+                code_data.loc[gene, entry[Indices.CH.value], entry[Indices.HYB.value]] = entry[
                     CodebookIndices.VALUE.value]
 
         return code_data
@@ -73,7 +73,7 @@ class Codebook(xr.DataArray):
         frame.set_index(name, append=True, inplace=True)
         return frame.index
 
-    def decode(self, intensities):
+    def euclidean_decode(self, intensities):
         norm_intensities = intensities.groupby(IntensityIndices.FEATURES.value).apply(lambda x: x / x.sum())
         norm_codes = self.groupby(CodebookIndices.GENE_NAME.value).apply(lambda x: x / x.sum())
 
@@ -96,3 +96,38 @@ class Codebook(xr.DataArray):
             )
         )
         return result
+
+    def per_channel_max_decode(self, intensities):
+
+        def view_row_as_element(array):
+            nrows, ncols = array.shape
+            dtype = {'names': ['f{}'.format(i) for i in range(ncols)],
+                     'formats': ncols * [array.dtype]}
+            return array.view(dtype)
+
+        max_channels = intensities.argmax(Indices.CH.value)
+        codes = self.argmax(Indices.CH.value)
+
+        a = view_row_as_element(codes.values.reshape(self.shape[0], -1))
+        b = view_row_as_element(max_channels.values.reshape(intensities.shape[0], -1))
+
+        genes = np.empty(intensities.shape[0], dtype=object)
+        genes.fill('None')
+
+        for i in np.arange(a.shape[0]):
+            genes[np.where(a[i] == b)[0]] = codes['gene_name'][i]
+        with_genes = self.append_multiindex_level(
+            intensities.indexes[IntensityIndices.FEATURES.value],
+            genes.astype('U'),
+            'gene')
+        # with_qualities = self.append_multiindex_level(with_genes, qualities, 'quality')
+
+        return IntensityTable(
+            intensities=intensities,
+            dims=(IntensityIndices.FEATURES.value, Indices.CH.value, Indices.HYB.value),
+            coords=(
+                with_genes,
+                intensities.indexes[Indices.CH.value],
+                intensities.indexes[Indices.HYB.value]
+            )
+        )

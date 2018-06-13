@@ -101,7 +101,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         fitted_blobs['y_max'] = np.clip(np.ceil(fitted_blobs.y + fitted_blobs.r), None, blobs_image.shape[1])
 
         # TODO ambrosejcarr this should be barcode intensity or position intensity
-        fitted_blobs['intensity'] = self.measure_blob_intensity(blobs_image, fitted_blobs, self.measurement_function)
+        fitted_blobs['intensity'] = self._measure_blob_intensity(blobs_image, fitted_blobs, self.measurement_function)
         fitted_blobs['spot_id'] = np.arange(fitted_blobs.shape[0])
 
         return fitted_blobs

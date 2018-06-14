@@ -44,33 +44,47 @@ p = {'N_high':4, #number of on bits (not used with current codebook)
 'N_size':100,  #height and width of image in pixel units
 'psf':2,  #standard devitation of gaussian in pixel units
 'graylevel' : 37000.0/2**16, #dynamic range of camera sensor 37,000 assuming a 16-bit AD converter
-'bits': 16 #16-bit AD converter
+'bits': 16, #16-bit AD converter
+'dimension': 2, # dimension of data, 2 for planar, 3 for volume
+'N_planes': 20, # number of z planes, only used if dimension greater than 3
+'psf_z':4  #standard devitation of gaussian in pixel units for z dim
 }
 
 codebook = graham_sloane_codes(p['N_barcode'])
 
 def generate_spot(p):
-    position = rand(2)
+    position = rand(p['dimension'])
     gene = random.choice(range(len(codebook)))
     barcode = array(codebook[gene])
     photons = [poisson(p['N_photons_per_flour'])*poisson(p['N_flour'])*b for b in barcode]
     return DataFrame({'position': [position], 'barcode': [barcode], 'photons': [photons], 'gene':gene})
 
-# right now there is no jitter on x-y positions of the spots, we might want to make it a vector
+# right now there is no jitter on positions of the spots, we might want to make it a vector
 # EPY: END code
 
 # EPY: START code
 spots = concat([generate_spot(p) for i in range(p['N_spots'])])
 
-image = zeros((p['N_barcode'], p['N_size'], p['N_size'],))
+if p['dimension'] == 2:
+    image = zeros((p['N_barcode'], p['N_size'], p['N_size'],))
 
-for s in spots.itertuples():
-    image[:, int(p['N_size']*s.position[0]), int(p['N_size']*s.position[1])] = s.photons
+    for s in spots.itertuples():
+        image[:, int(p['N_size']*s.position[0]), int(p['N_size']*s.position[1])] = s.photons
 
-image_with_background = image + poisson(p['N_photon_background'], size = image.shape)
-filtered = array([gaussian(im, p['psf']) for im in image_with_background])
+    image_with_background = image + poisson(p['N_photon_background'], size = image.shape)
+    filtered = array([gaussian(im, p['psf']) for im in image_with_background])
+else:
+    image = zeros((p['N_barcode'], p['N_planes'], p['N_size'], p['N_size'],))
+
+    for s in spots.itertuples():
+        image[:, int(p['N_planes']*s.position[0]), int(p['N_size']*s.position[1]), int(p['N_size']*s.position[2])] = s.photons
+
+    image_with_background = image + poisson(p['N_photon_background'], size = image.shape)
+    filtered = array([gaussian(im, (p['psf_z'], p['psf'], p['psf'])) for im in image_with_background])
+
+
 filtered = filtered*p['detection_efficiency'] + normal(scale=p['N_background_electrons'], size=filtered.shape)
-signal = [(x/p['graylevel']).astype(int).clip(0, 2**p['bits']) for x in filtered]
+signal = array([(x/p['graylevel']).astype(int).clip(0, 2**p['bits']) for x in filtered])
 # EPY: END code
 
 # EPY: START code

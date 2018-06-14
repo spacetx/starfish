@@ -6,10 +6,6 @@ class PointInPoly(GeneAssignmentAlgorithm):
         pass
 
     @classmethod
-    def get_algorithm_name(cls):
-        return "point_in_poly"
-
-    @classmethod
     def add_arguments(cls, parser):
         pass
 

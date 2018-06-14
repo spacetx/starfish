@@ -4,12 +4,12 @@ import argparse
 import cProfile
 from pstats import Stats
 
+from .pipeline.features.spots.decoder import Decoder
 from .pipeline.features.spots.detector import SpotFinder
-from .pipeline.registration import Registration
-from starfish.pipeline.features.spots.decoder import Decoder
-from .pipeline.gene_assignment import GeneAssignment
-from .pipeline.segmentation import Segmentation
 from .pipeline.filter import Filter
+from .pipeline.gene_assignment import GeneAssignment
+from .pipeline.registration import Registration
+from .pipeline.segmentation import Segmentation
 from .util.argparse import FsExistsType
 
 

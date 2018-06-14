@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 #
-# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.4"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
+# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
 # ## Reproduce In-situ Sequencing results with Starfish
@@ -93,7 +93,7 @@ from starfish.viz import tile_lims
 
 # filter raw data
 disk_size = 15  # disk as in circle
-filt = Filter.white_tophat(disk_size)
+filt = Filter.WhiteTophat(disk_size)
 filt.filter(s)
 # EPY: END code
 
@@ -117,7 +117,7 @@ s.image.show_stack({Indices.Z: 0})
 # EPY: START code
 from starfish.pipeline.registration import Registration
 
-registration = Registration.fourier_shift(upsampling=1000)
+registration = Registration.FourierShiftRegistration(upsampling=1000)
 registration.register(s)
 # EPY: END code
 
@@ -139,7 +139,7 @@ max_sigma = 10
 num_sigma = 30
 threshold = 0.01
 
-p = SpotFinder.gaussian_spot_detector(
+p = SpotFinder.GaussianSpotDetector(
     min_sigma=min_sigma,
     max_sigma=max_sigma,
     num_sigma=num_sigma,
@@ -204,9 +204,9 @@ attributes.data.head()
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.features.spots.decoder.iss import IssDecoder
+from starfish.pipeline.features.spots.decoder import Decoder
 
-decoder = IssDecoder()
+decoder = Decoder.IssDecoder()
 res = decoder.decode(encoded.data, codebook, letters=('T', 'G', 'C', 'A'))  # letters = channels
 res.data.head()
 

@@ -31,10 +31,6 @@ class Bandpass(FilterAlgorithmBase):
         self.verbose = verbose
 
     @classmethod
-    def get_algorithm_name(cls):
-        return "bandpass"
-
-    @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument("--lshort", default=0.5, type=float, help="filter signals below this frequency")
         group_parser.add_argument("--llong", default=7, type=int, help="filter signals above this frequency")

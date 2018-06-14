@@ -68,8 +68,8 @@ s.read(experiment_json)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.filter.clip import Clip
-s_clip = Clip(p_min=10, p_max=100, verbose=True)
+from starfish.pipeline.filter import Filter
+s_clip = Filter.Clip(p_min=10, p_max=100, verbose=True)
 s_clip.filter(s)
 # EPY: END code
 
@@ -92,8 +92,7 @@ s.image.show_stack({Indices.CH: 0});
 # EPY: END code
 
 # EPY: START code
-from starfish.pipeline.filter.bandpass import Bandpass
-s_bandpass = Bandpass(lshort=0.5, llong=7, threshold=None, truncate=4, verbose=True)
+s_bandpass = Filter.Bandpass(lshort=0.5, llong=7, threshold=None, truncate=4, verbose=True)
 s_bandpass.filter(s)
 # EPY: END code
 
@@ -104,15 +103,13 @@ s_bandpass.filter(s)
 # EPY: START code
 # I wasn't sure if this clipping was supposed to be by volume or tile. I've done tile here, but it can be easily
 # switched to volume. 
-s_clip = Clip(p_min=10, p_max=100, is_volume=False, verbose=True)
+s_clip = Filter.Clip(p_min=10, p_max=100, is_volume=False, verbose=True)
 s_clip.filter(s)
 # EPY: END code
 
 # EPY: START code
-from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
-
 sigma=(1, 0, 0)  # filter only in z, do nothing in x, y
-glp = GaussianLowPass(sigma=sigma, is_volume=True, verbose=True)
+glp = Filter.GaussianLowPass(sigma=sigma, is_volume=True, verbose=True)
 glp.filter(s)
 # EPY: END code
 
@@ -145,7 +142,7 @@ s.image._show_spots(results, ax=plt.gca(), scale_radius=7)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.features.spots.detector.local_max_peak_finder import LocalMaxPeakFinder
+from starfish.pipeline.features.spots.detector import SpotFinder
 
 # I've guessed at these parameters from the allen_smFISH code, but you might want to tweak these a bit. 
 # as you can see, this function takes a while. It will be great to parallelize this. That's also coming, 
@@ -161,7 +158,7 @@ kwargs = dict(
     verbose=True,
     is_volume=True,
 )
-lmpf = LocalMaxPeakFinder(**kwargs)
+lmpf = SpotFinder.LocalMaxPeakFinder(**kwargs)
 spot_attributes = lmpf.find(s)
 # EPY: END code
 

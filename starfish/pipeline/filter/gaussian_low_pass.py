@@ -29,10 +29,6 @@ class GaussianLowPass(FilterAlgorithmBase):
         self.verbose = verbose
 
     @classmethod
-    def get_algorithm_name(cls):
-        return "gaussian_low_pass"
-
-    @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument(
             "--sigma", default=1, type=int, help="standard deviation of gaussian kernel")

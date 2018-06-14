@@ -134,10 +134,6 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         return spot_attributes
 
     @classmethod
-    def get_algorithm_name(cls):
-        return 'local_max_peak_finder'
-
-    @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument("--spot-diameter", type=str, help='expected spot size')
         group_parser.add_argument("--min-mass", default=4, type=int, help="minimum integrated spot intensity")

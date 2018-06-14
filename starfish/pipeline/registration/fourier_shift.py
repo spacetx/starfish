@@ -16,10 +16,6 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
         self.upsampling = upsampling
 
     @classmethod
-    def get_algorithm_name(cls):
-        return "fourier_shift"
-
-    @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument("--upsampling", default=1, type=int, help="Amount of up-sampling")
 

@@ -35,10 +35,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
         self.psf: np.ndarray = gaussian_kernel(shape=(self.kernel_size, self.kernel_size), sigma=sigma)
 
     @classmethod
-    def get_algorithm_name(cls) -> str:
-        return "deconvolve_psf"
-
-    @classmethod
     def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument('--num-iter', default=15, type=int, help='number of iterations to run')
         group_parser.add_argument('--sigma', default=2, type=float, help='standard deviation of gaussian kernel')

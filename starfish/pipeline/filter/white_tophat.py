@@ -25,10 +25,6 @@ class WhiteTophat(FilterAlgorithmBase):
         self.disk_size = disk_size
 
     @classmethod
-    def get_algorithm_name(cls):
-        return "white_tophat"
-
-    @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument(
             "--disk-size", default=15, type=int, help="diameter of morphological masking disk in pixels")

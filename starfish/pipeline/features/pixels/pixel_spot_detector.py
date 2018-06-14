@@ -162,10 +162,6 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
         return props, label_image, spots_df
 
     @classmethod
-    def get_algorithm_name(cls):
-        return 'pixel_spot_detector'
-
-    @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument("--codebook", help="csv file containing a codebook")
         group_parser.add_argument(

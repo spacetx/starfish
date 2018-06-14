@@ -125,10 +125,6 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         return spot_attributes, encoded_spots
 
     @classmethod
-    def get_algorithm_name(cls):
-        return 'gaussian_spot_detector'
-
-    @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument("--blobs-image-name", type=str, help='aux image key')
         group_parser.add_argument(

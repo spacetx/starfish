@@ -8,10 +8,6 @@ class IssDecoder(DecoderAlgorithmBase):
         pass
 
     @classmethod
-    def get_algorithm_name(cls):
-        return "iss"
-
-    @classmethod
     def add_arguments(cls, group_parser):
         pass
 

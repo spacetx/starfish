@@ -22,10 +22,6 @@ class Watershed(SegmentationAlgorithmBase):
         self.min_distance = min_distance
 
     @classmethod
-    def get_algorithm_name(cls):
-        return "watershed"
-
-    @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument("--dapi-threshold", default=.16, type=float, help="DAPI threshold")
         group_parser.add_argument("--input-threshold", default=.22, type=float, help="Input threshold")

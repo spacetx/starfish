@@ -28,10 +28,6 @@ class Clip(FilterAlgorithmBase):
         self.verbose = verbose
 
     @classmethod
-    def get_algorithm_name(cls):
-        return "clip"
-
-    @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument("--p-min", default=0, type=int, help="clip intensities below this percentile")
         group_parser.add_argument("--p-max", default=100, type=int, help="clip intensities above this percentile")

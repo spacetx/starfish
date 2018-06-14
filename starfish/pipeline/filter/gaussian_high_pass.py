@@ -23,10 +23,6 @@ class GaussianHighPass(FilterAlgorithmBase):
         self.sigma = sigma
 
     @classmethod
-    def get_algorithm_name(cls) -> str:
-        return "gaussian_high_pass"
-
-    @classmethod
     def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             "--sigma", default=1, type=int, help="standard deviation of gaussian kernel")

@@ -3,7 +3,8 @@ from typing import Any
 import pytest
 
 from starfish.constants import Indices
-from starfish.test.dataset_fixtures import DEFAULT_NUM_HYB, DEFAULT_NUM_CH, DEFAULT_NUM_Z, synthetic_stack
+from starfish.util.synthesize import DEFAULT_NUM_HYB, DEFAULT_NUM_CH, DEFAULT_NUM_Z
+from starfish.image import ImageStack
 
 
 def test_metadata():
@@ -19,7 +20,7 @@ def test_metadata():
             }
         }
 
-    stack = synthetic_stack(
+    stack = ImageStack.synthetic_stack(
         tile_extras_provider=tile_extras_provider,
     )
     table = stack.tile_metadata
@@ -42,7 +43,7 @@ def test_missing_extras():
         else:
             return None
 
-    stack = synthetic_stack(
+    stack = ImageStack.synthetic_stack(
         tile_extras_provider=tile_extras_provider,
     )
     table = stack.tile_metadata
@@ -60,7 +61,7 @@ def test_conflict():
             Indices.Z: z,
         }
 
-    stack = synthetic_stack(
+    stack = ImageStack.synthetic_stack(
         tile_extras_provider=tile_extras_provider,
     )
     with pytest.raises(ValueError):

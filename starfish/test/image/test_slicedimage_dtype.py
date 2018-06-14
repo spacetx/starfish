@@ -4,8 +4,7 @@ import numpy
 import pytest
 
 from starfish.errors import DataFormatWarning
-from starfish.test.dataset_fixtures import synthetic_stack
-
+from starfish.image import ImageStack
 
 NUM_HYB = 2
 NUM_CH = 2
@@ -41,7 +40,7 @@ def create_tile_data_provider(dtype: numpy.number, corner_dtype: numpy.number):
 
 def test_multiple_tiles_of_different_kind():
     with pytest.raises(TypeError):
-        synthetic_stack(
+        ImageStack.synthetic_stack(
             NUM_HYB, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_data_provider=create_tile_data_provider(numpy.uint32, numpy.float32),
@@ -49,7 +48,7 @@ def test_multiple_tiles_of_different_kind():
 
 
 def test_multiple_tiles_of_same_dtype():
-    stack = synthetic_stack(
+    stack = ImageStack.synthetic_stack(
         NUM_HYB, NUM_CH, NUM_Z,
         HEIGHT, WIDTH,
         tile_data_provider=create_tile_data_provider(numpy.uint32, numpy.uint32),
@@ -65,7 +64,7 @@ def test_multiple_tiles_of_same_dtype():
 
 def test_int_type_promotion():
     with warnings.catch_warnings(record=True) as w:
-        stack = synthetic_stack(
+        stack = ImageStack.synthetic_stack(
             NUM_HYB, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_data_provider=create_tile_data_provider(numpy.int32, numpy.int8),
@@ -88,7 +87,7 @@ def test_int_type_promotion():
 
 def test_uint_type_promotion():
     with warnings.catch_warnings(record=True) as w:
-        stack = synthetic_stack(
+        stack = ImageStack.synthetic_stack(
             NUM_HYB, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_data_provider=create_tile_data_provider(numpy.uint32, numpy.uint8),
@@ -111,7 +110,7 @@ def test_uint_type_promotion():
 
 def test_float_type_promotion():
     with warnings.catch_warnings(record=True) as w:
-        stack = synthetic_stack(
+        stack = ImageStack.synthetic_stack(
             NUM_HYB, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_data_provider=create_tile_data_provider(numpy.float64, numpy.float32),

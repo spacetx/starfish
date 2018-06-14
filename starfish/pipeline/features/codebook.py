@@ -7,6 +7,7 @@ import xarray as xr
 
 from starfish.constants import Indices, CodebookIndices, IntensityIndices
 from starfish.pipeline.features.intensity_table import IntensityTable
+from typing import Optional, Sequence
 
 
 class Codebook(xr.DataArray):
@@ -131,3 +132,47 @@ class Codebook(xr.DataArray):
                 intensities.indexes[Indices.HYB.value]
             )
         )
+
+    @classmethod
+    def synthetic_one_hot_codes(cls, n_hyb: int, n_channel: int, n_codes: int, gene_names: Optional[Sequence]=None) -> "Codebook":
+        """Generate codes where one channel is "on" in each hybridization round
+
+        Parameters
+        ----------
+        n_hyb : int
+            number of hybridization rounds per code
+        n_channel : int
+            number of channels per code
+        n_codes : int
+            number of codes to generate
+        gene_names : Optional[List[str]]
+            if provided, names for genes in codebook
+
+        Returns
+        -------
+        List[Dict] :
+            list of codewords
+
+        """
+        # todo this could infinite loop if someone's dumb.
+        # construct codes
+        codes = set()
+        while len(codes) < n_codes:
+            codes.add(tuple([np.random.randint(0, n_channel) for _ in np.arange(n_hyb)]))
+
+        # construct codewords from code
+        codewords = [
+            [
+                {Indices.HYB.value: h, Indices.CH.value: c, 'v': 1} for h, c in enumerate(code)
+            ] for code in codes
+        ]
+
+        # make a codebook from codewords
+        if gene_names is None:
+            gene_names = np.arange(n_codes)
+        assert n_codes == len(gene_names)
+
+        codebook = [{"codeword": w, "gene_name": g} for w, g in zip(codewords, gene_names)]
+
+        return cls.from_code_array(codebook, n_hyb=n_hyb, n_ch=n_channel)
+

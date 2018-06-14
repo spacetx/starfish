@@ -1,248 +1,164 @@
-import random
-from itertools import product
-from typing import List, Dict, Optional
+from typing import Callable, Tuple
 
 import numpy as np
-from numpy import zeros, array
-from numpy.random import rand, normal, poisson
-from pandas import DataFrame, concat
+import xarray as xr
+import pandas as pd
 from skimage.exposure import rescale_intensity
-from skimage.filters import gaussian
-from slicedimage import Tile, TileSet
+from scipy.ndimage.filters import gaussian_filter
 
 from starfish.constants import Indices, Coordinates
 from starfish.pipeline.features.codebook import Codebook
-from starfish.image import ImageStack
-from starfish.io import Stack
 
 
-def graham_sloane_codes(n, bits_on: int=4):
+# defaults for stack size
+DEFAULT_NUM_HYB = 4
+DEFAULT_NUM_CH = 4
+DEFAULT_NUM_Z = 10
+DEFAULT_HEIGHT = 50
+DEFAULT_WIDTH = 45
 
-    def choose(n, k):
-        if n == k:
-            return [[1] * k]
-        subsets = [[0] + a for a in choose(n - 1, k)]
-        if k > 0:
-            subsets += [[1] + a for a in choose(n - 1, k - 1)]
-        return subsets
+# defaults for codebook
+N_CODES = 16
 
-    # n is length of codeword
-    # number of on bits is 4
-    def code_sum(codeword):
-        return sum([i * c for i, c in enumerate(codeword)]) % n
-    return [c for c in choose(n, bits_on) if code_sum(c) == 0]
-
-
-def one_hot_code(n_hyb: int, n_channel: int, n_codes: int, gene_names: Optional[List[str]]=None) -> List[Dict]:
-    """Generate codes where one channel is "on" in each hybridization round
-
-    Parameters
-    ----------
-    n_hyb : int
-        number of hybridization rounds per code
-    n_channel : int
-        number of channels per code
-    n_codes : int
-        number of codes to generate
-    gene_names : Optional[List[str]]
-        if provided, names for genes in codebook
-
-    Returns
-    -------
-    List[Dict] :
-        list of codewords
-
-    """
-    codes = set()
-    while len(codes) < n_codes:
-        codes.add(tuple([np.random.randint(0, n_channel) for _ in np.arange(n_hyb)]))
-
-    codewords = [
-        [
-            {Indices.HYB.value: h, Indices.CH.value: c, 'v': 1} for h, c in enumerate(code)
-        ] for code in codes
-    ]
-
-    if gene_names is None:
-        gene_names = np.arange(n_codes)
-    assert n_codes == len(gene_names)
-
-    codebook = [{"codeword": w, "gene_name": g} for w, g in zip(codewords, gene_names)]
-
-    return codebook
+# constants for spot generation
+N_SPOTS = 5                         # Number of spots to generate
+N_PHOTONS_BACKGROUND = 1000         # Number of photons per pixel of background noise
+BACKGROUND_ELECTRONS = 1            # camera read noise per pixel in units electrons
+POINT_SPREAD_FUNCTION = (4, 2, 2)   # standard devitation of gaussian point spread function in pixel units
+CAMERA_DETECTION_EFFICIENCY = 0.25  # quantum efficiency of the camera detector units number of electrons per photon
+GRAYLEVEL = 37000.0 / 2 ** 16       # dynamic range of camera sensor 37,000 assuming a 16-bit AD converter
+AD_CONVERSION_BITS = 16             # bit-size of analog to digital converter
+MEAN_FLUOR_PER_SPOT = 200           # mean flours per transcripts - depends on amplification strategy (e.g HCR, bDNA)
+MEAN_PHOTONS_PER_FLUOR = 50         # mean photons per flourophore - depends on exposure time, bleaching rate of dye
 
 
-# TODO sofroniewn: doc me!
-def synthesize(
-        num_hyb: int=4, num_ch: int=2, num_z: int=1, resolution: int=100,
-    ):  # -> Tuple[Stack, list]:
-    """
+def select_uint_dtype(array):
+    """choose appropriate dtype based on values of an array"""
+    max_val = np.max(array)
+    for dtype in [np.uint8, np.uint16, np.uint32, np.uint64]:
+        if max_val <= dtype(-1):
+            return array.astype(dtype)
+    raise ValueError('value exceeds dynamic range of largest numpy type')
 
-    Parameters
-    ----------
-    num_hyb
-    num_ch
-    num_z
-    resolution
 
-    Returns
-    -------
-    Stack :
-        starfish Stack containing synthetic spots
-    list :
-        codebook matching the synthetic data
+# TODO not sure what to do with this xarray thing
+def blank_imagestack(
+        n_hyb: int=DEFAULT_NUM_HYB,
+        n_ch: int=DEFAULT_NUM_CH,
+        num_z: int=DEFAULT_NUM_Z,
+        height: int=DEFAULT_HEIGHT,
+        width: int=DEFAULT_WIDTH,
+):
+    data = np.zeros((n_hyb, n_ch, num_z, height, width))
+    coords = [np.arange(s) for s in data.shape]
+    dims = (Indices.HYB.value, Indices.CH.value, Indices.Z.value, Coordinates.Y.value, Coordinates.X.value)
+    return xr.DataArray(data=data, coords=coords, dims=dims)
 
-    """
 
-    # set random seed so that data is consistent across tests
-    random.seed(2)
-    np.random.seed(2)
+# TODO these are synthetic SpotAttributes
+def create_spots(
+        codebook: Codebook,
+        n_hyb: int=DEFAULT_NUM_HYB,
+        n_ch: int=DEFAULT_NUM_CH,
+        num_z: int=DEFAULT_NUM_Z,
+        height: int=DEFAULT_HEIGHT,
+        width: int=DEFAULT_WIDTH,
+        n_spots=N_SPOTS,
+        mean_fluor_per_spot=MEAN_FLUOR_PER_SPOT,
+        mean_photons_per_fluor=MEAN_PHOTONS_PER_FLUOR):
 
-    p = {
-        # number of on bits (not used with current codebook)
-        'N_high': 4,
-        # length of barcode
-        'N_barcode': num_ch * num_hyb,
-        # mean number of flourophores per transcripts - depends on amplification strategy (e.g HCR, bDNA)
-        'N_flour': 200,
-        # mean number of photons per flourophore - depends on exposure time, bleaching rate of dye
-        'N_photons_per_flour': 50,
-        # mean number of background photons per pixel - depends on tissue clearing and autoflourescence
-        'N_photon_background': 1000,
-        # quantum efficiency of the camera detector units number of electrons per photon
-        'detection_efficiency': .25,
-        # camera read noise per pixel in units electrons
-        'N_background_electrons': 1,
-        # number of RNA puncta; keep this low to reduce overlap probability
-        'N_spots': 20,
-        # height and width of image in pixel units
-        'N_size': resolution,
-
-        # standard devitation of gaussian in pixel units
-        'psf': 2,
-        # dynamic range of camera sensor 37,000 assuming a 16-bit AD converter
-        'graylevel': 37000.0 / 2 ** 16,
-        # 16-bit AD converter
-        'bits': 16
-    }
-
-    codebook = graham_sloane_codes(p['N_barcode'])
-
-    def generate_spot(p):
-        position = rand(2)
-        gene = random.choice(range(len(codebook)))
-        barcode = array(codebook[gene])
-        photons = [poisson(p['N_photons_per_flour']) * poisson(p['N_flour']) * b for b in barcode]
-        return DataFrame({'position': [position], 'barcode': [barcode], 'photons': [photons], 'gene': gene})
+    image = blank_imagestack(n_hyb, n_ch, num_z, height, width)
+    genes = np.random.choice(codebook.coords['gene_name'], size=n_spots, replace=True)
+    _, hyb_indices, ch_indices = np.where(codebook[genes])
 
     # right now there is no jitter on x-y positions of the spots, we might want to make it a vector
-    spots = concat([generate_spot(p) for _ in range(p['N_spots'])])  # type: ignore
+    z = np.random.randint(0, num_z, size=n_spots)
+    y = np.random.randint(0, height, size=n_spots)
+    x = np.random.randint(0, width, size=n_spots)
 
-    image = zeros((p['N_barcode'], p['N_size'], p['N_size'],))
+    intensities = np.ones(shape=(len(hyb_indices), len(ch_indices), len(z), len(y), len(x)))
+    intensities *= np.random.poisson(mean_photons_per_fluor, size=intensities.shape)
+    intensities *= np.random.poisson(mean_fluor_per_spot, size=intensities.shape)
 
-    for s in spots.itertuples():
-        image[:, int(p['N_size'] * s.position[0]), int(p['N_size'] * s.position[1])] = s.photons
+    image[hyb_indices, ch_indices, z, y, x] = intensities
 
-    image_with_background = image + poisson(p['N_photon_background'], size=image.shape)
-    filtered = array([gaussian(im, p['psf']) for im in image_with_background])
-    filtered = filtered * p['detection_efficiency'] + normal(scale=p['N_background_electrons'], size=filtered.shape)
-    signal = np.array([(x / p['graylevel']).astype(int).clip(0, 2 ** p['bits']) for x in filtered])
+    spot_attributes = pd.DataFrame({'gene': genes, 'z': z, 'y': y, 'x': x})
 
-    def select_uint_dtype(array):
-        """choose appropriate dtype based on values of an array"""
-        max_val = np.max(array)
-        for dtype in [np.uint8, np.uint16, np.uint32, np.uint64]:
-            if max_val <= dtype(-1):
-                return array.astype(dtype)
-        raise ValueError('value exceeds dynamic range of largest numpy type')
+    return image, spot_attributes
 
-    corrected_signal = select_uint_dtype(signal)
-    rescaled_signal: np.ndarray = rescale_intensity(corrected_signal)
 
-    # set up the tile set
-    image_data = TileSet(
-        {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
-        {
-            Indices.HYB: num_hyb,
-            Indices.CH: num_ch,
-            Indices.Z: num_z,
-        },
-        default_tile_shape=(resolution, resolution),
-    )
+# todo this is a synthetic ImageStack
+def _synthetic_spots(
+        n_hyb: int=DEFAULT_NUM_HYB,
+        n_ch: int=DEFAULT_NUM_CH,
+        num_z: int=DEFAULT_NUM_Z,
+        height: int=DEFAULT_HEIGHT,
+        width: int=DEFAULT_WIDTH,
+        code_generator: Callable=Codebook.synthetic_one_hot_codes,
+        n_photons_background=N_PHOTONS_BACKGROUND,
+        point_spread_function=POINT_SPREAD_FUNCTION,
+        camera_detection_efficiency=CAMERA_DETECTION_EFFICIENCY,
+        background_electrons=BACKGROUND_ELECTRONS,
+        graylevel=GRAYLEVEL,
+        ad_conversion_bits=AD_CONVERSION_BITS
+) -> Tuple[xr.DataArray, pd.DataFrame]:
+    """
 
-    # fill the TileSet
-    experiment_indices = list(product(range(num_hyb), range(num_ch), range(num_z)))
-    for i, (hyb, ch, z) in enumerate(experiment_indices):
+    Parameters
+    ----------
+    code_generator
+    n_photons_background
+    point_spread_function
+    camera_detection_efficiency
+    background_electrons
+    graylevel
+    ad_conversion_bits
 
-        tile = Tile(
-            {
-                Coordinates.X: (0.0, 0.001),
-                Coordinates.Y: (0.0, 0.001),
-                Coordinates.Z: (0.0, 0.001),
-            },
-            {
-                Indices.HYB: hyb,
-                Indices.CH: ch,
-                Indices.Z: z,
-            }
-        )
-        tile.numpy_array = rescaled_signal[i]
+    Returns
+    -------
+    np.ndarray[uint] :
+        5-d tensor with uint kind data. The type of uint depends on the maximum intensity of the array, the dtype will
+        be shrunk so that this funciton generates the smallest dtype that contains the data without clipping or
+        wrapping.
 
-        image_data.add_tile(tile)
+    """
+    codebook = code_generator(n_hyb, n_ch, n_codes=12)
 
-    data_stack = ImageStack(image_data)
+    image, spot_attributes = create_spots(codebook, n_hyb, n_ch, num_z, height, width)
 
-    # make a max projection and pretend that's the dots image, which we'll create another ImageStack for this
-    dots_data = TileSet(
-        {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
-        {
-            Indices.HYB: 1,
-            Indices.CH: 1,
-            Indices.Z: 1,
-        },
-        default_tile_shape=(resolution, resolution),
-    )
-    tile = Tile(
-        {
-            Coordinates.X: (0.0, 0.001),
-            Coordinates.Y: (0.0, 0.001),
-            Coordinates.Z: (0.0, 0.001),
-        },
-        {
-            Indices.HYB: 0,
-            Indices.CH: 0,
-            Indices.Z: 0,
-        }
-    )
+    # add background noise
+    image += np.random.poisson(n_photons_background, size=image.shape)
 
-    tile.numpy_array = np.max(rescaled_signal, 0)
+    # blur image over coordinates, but not over hyb/channels (dim 0, 1)
+    sigma = (0, 0) + point_spread_function
+    image.values = gaussian_filter(image, sigma=sigma)
 
-    dots_data.add_tile(tile)
-    dots_stack = ImageStack(dots_data)
+    # correct for camera efficiency
+    image *= camera_detection_efficiency + np.random.normal(scale=background_electrons, size=image.shape)
 
-    # TODO can we mock up a nuclei image somehow?
+    # mimic analog to digital conversion
+    image = (image / graylevel).astype(int).clip(0, 2 ** ad_conversion_bits)
 
-    # put the data together into a top-level Stack
-    results = Stack.from_data(data_stack, aux_dict={'dots': dots_stack})
+    # find the right dtype for the synthetic intensities
+    # TODO remove the intensities
+    corrected_signal = select_uint_dtype(image)
+    corrected_signal.values = rescale_intensity(corrected_signal.values)
+    corrected_signal.values = np.clip(corrected_signal, 0, np.inf)
 
-    # make the codebook
-    codebook = []
-    for _, code_record in spots.iterrows():
-        codeword = []
-        for code_value, (hyb, ch, z) in zip(code_record['barcode'], experiment_indices):
-            if code_value != 0:
-                codeword.append({
-                    Indices.HYB: hyb,
-                    Indices.CH: ch,
-                    Indices.Z: z,
-                    "v": code_value
-                })
-        codebook.append(
-            {
-                'codeword': codeword,
-                'gene_name': code_record['gene']
-            }
-        )
-    codebook = Codebook.from_code_array(codebook, n_ch=num_ch, n_hyb=num_hyb)
+    return corrected_signal, spot_attributes
 
-    return results, codebook, spots
+
+# TODO this is also imagestack related
+class SyntheticSpotTileProvider:
+
+    def __init__(self,
+                 hyb=DEFAULT_NUM_HYB,
+                 ch=DEFAULT_NUM_CH,
+                 z=DEFAULT_NUM_Z,
+                 height=DEFAULT_HEIGHT,
+                 width=DEFAULT_WIDTH):
+        data, spot_attributes = _synthetic_spots(hyb, ch, z, height, width)
+        self.data = data
+
+    def tile(self, hyb: int, ch: int, z: int, *args, **kwargs):
+        return self.data.sel(h=hyb, c=ch, z=z)

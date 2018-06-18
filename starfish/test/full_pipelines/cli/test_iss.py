@@ -73,7 +73,14 @@ class TestWithIssData(unittest.TestCase):
         ],
         [
             "starfish", "segment",
-            "-i", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "experiment.json"),
+            "--hybridization-stack", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
+                [tempdir, "filtered", "experiment.json"],
+                "$['hybridization_images']",
+            ),
+            "--nuclei-stack", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
+                [tempdir, "filtered", "experiment.json"],
+                "$['auxiliary_images']['nuclei']",
+            ),
             "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.geojson"),
             "Watershed",
             "--dapi-threshold", ".16",

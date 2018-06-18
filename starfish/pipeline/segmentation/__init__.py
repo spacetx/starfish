@@ -1,6 +1,7 @@
 import json
 import argparse
 
+from starfish.image import ImageStack
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import watershed
@@ -19,7 +20,8 @@ class Segmentation(PipelineComponent):
     def add_to_parser(cls, subparsers):
         """Adds the segmentation component to the CLI argument parser."""
         segmentation_group = subparsers.add_parser("segment")
-        segmentation_group.add_argument("-i", "--input", type=FsExistsType(), required=True)
+        segmentation_group.add_argument("--hybridization-stack", type=FsExistsType(), required=True)
+        segmentation_group.add_argument("--nuclei-stack", type=FsExistsType(), required=True)
         segmentation_group.add_argument("-o", "--output", required=True)
         segmentation_group.set_defaults(starfish_command=Segmentation._cli)
         segmentation_subparsers = segmentation_group.add_subparsers(dest="segmentation_algorithm_class")
@@ -40,13 +42,10 @@ class Segmentation(PipelineComponent):
 
         instance = args.segmentation_algorithm_class(**vars(args))
 
-        from starfish.io import Stack
-
         print('Segmenting ...')
-        s = Stack()
-        s.read(args.input)
-
-        regions = instance.segment(s)
+        hybridization_stack = ImageStack.from_path_or_url(args.hybridization_stack)
+        nuclei_stack = ImageStack.from_path_or_url(args.nuclei_stack)
+        regions = instance.segment(hybridization_stack, nuclei_stack)
         geojson = regions_to_geojson(regions, use_hull=False)
 
         print("Writing | regions geojson to: {}".format(args.output))

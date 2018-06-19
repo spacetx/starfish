@@ -27,10 +27,12 @@ class Watershed(SegmentationAlgorithmBase):
         group_parser.add_argument("--input-threshold", default=.22, type=float, help="Input threshold")
         group_parser.add_argument("--min-distance", default=57, type=int, help="Minimum distance between cells")
 
-    def segment(self, stack):
+    def segment(self, hybridization_stack, nuclei_stack):
+        import numpy as np
+        from starfish.stats import label_to_regions
 
         # create a 'stain' for segmentation
-        stain = np.mean(stack.image.max_proj(Indices.CH, Indices.Z), axis=0)
+        stain = np.mean(hybridization_stack.max_proj(Indices.CH, Indices.Z), axis=0)
         stain = stain / stain.max()
 
         # TODO make these parameterizable or determine whether they are useful or not
@@ -38,7 +40,7 @@ class Watershed(SegmentationAlgorithmBase):
         disk_size_markers = None
         disk_size_mask = None
 
-        nuclei = stack.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
+        nuclei = nuclei_stack.max_proj(Indices.HYB, Indices.CH, Indices.Z)
         seg = _WatershedSegmenter(nuclei, stain)
         cells_labels = seg.segment(
             self.dapi_threshold, self.input_threshold, size_lim, disk_size_markers, disk_size_mask, self.min_distance)

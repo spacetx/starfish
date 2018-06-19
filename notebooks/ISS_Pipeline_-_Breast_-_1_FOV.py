@@ -144,7 +144,7 @@ p = SpotFinder.GaussianSpotDetector(
     max_sigma=max_sigma,
     num_sigma=num_sigma,
     threshold=threshold,
-    blobs_image_name='dots',
+    blobs_stack=s.auxiliary_images['dots'],
     measurement_type='mean',
 )
 
@@ -153,7 +153,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
 
     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    attributes, encoded = p.find(s)
+    attributes, encoded = p.find(s.image)
 
 encoded.data.head()
 # EPY: END code

@@ -5,7 +5,7 @@ from typing import Callable
 import numpy as np
 from skimage import restoration
 
-from starfish.io import Stack
+from starfish.image import ImageStack
 from ._base import FilterAlgorithmBase
 from .util import gaussian_kernel
 
@@ -76,17 +76,14 @@ class DeconvolvePSF(FilterAlgorithmBase):
         img_deconv = img_deconv.astype(np.uint16)
         return img_deconv
 
-    def filter(self, stack: Stack) -> None:
+    def filter(self, stack: ImageStack) -> None:
         """Perform in-place filtering of an image stack and all contained aux images.
 
         Parameters
         ----------
-        stack : starfish.Stack
+        stack : ImageStack
             Stack to be filtered.
 
         """
         func: Callable = partial(self.richardson_lucy_deconv, num_iter=self.num_iter, psf=self.psf, clip=self.clip)
-        stack.image.apply(func)
-
-        for auxiliary_image in stack.auxiliary_images.values():
-            auxiliary_image.apply(func)
+        stack.apply(func)

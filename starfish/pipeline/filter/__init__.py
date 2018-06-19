@@ -1,6 +1,6 @@
 import argparse
 
-from starfish.io import Stack
+from starfish.image import ImageStack
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import _base
@@ -45,9 +45,8 @@ class Filter(PipelineComponent):
             cls.filter_group.exit(status=2)
 
         print('Filtering images ...')
-        s = Stack()
-        s.read(args.input)
+        stack = ImageStack.from_path_or_url(args.input)
         instance = args.filter_algorithm_class(**vars(args))
-        instance.filter(s)
+        instance.filter(stack)
 
-        s.write(args.output)
+        stack.write(args.output)

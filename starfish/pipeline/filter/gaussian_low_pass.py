@@ -1,9 +1,9 @@
 from functools import partial
-from typing import Tuple
 
 import numpy
 from skimage.filters import gaussian
 
+from starfish.image import ImageStack
 from ._base import FilterAlgorithmBase
 
 
@@ -58,18 +58,14 @@ class GaussianLowPass(FilterAlgorithmBase):
 
         return blurred
 
-    def filter(self, stack) -> None:
+    def filter(self, stack: ImageStack) -> None:
         """Perform in-place filtering of an image stack and all contained aux images.
 
         Parameters
         ----------
-        stack : starfish.Stack
+        stack : ImageStack
             Stack to be filtered.
 
         """
         low_pass = partial(self.low_pass, sigma=self.sigma)
-        stack.image.apply(low_pass, is_volume=self.is_volume, verbose=self.verbose)
-
-        # apply to aux dict too:
-        for auxiliary_image in stack.auxiliary_images.values():
-            auxiliary_image.apply(low_pass, is_volume=self.is_volume)
+        stack.apply(low_pass, is_volume=self.is_volume, verbose=self.verbose)

@@ -2,6 +2,7 @@ from functools import partial
 
 import numpy
 
+from starfish.image import ImageStack
 from ._base import FilterAlgorithmBase
 
 
@@ -63,18 +64,14 @@ class Clip(FilterAlgorithmBase):
         image = image.clip(min=v_min, max=v_max)
         return image.astype(dtype)
 
-    def filter(self, stack) -> None:
+    def filter(self, stack: ImageStack) -> None:
         """Perform in-place filtering of an image stack and all contained aux images.
 
         Parameters
         ----------
-        stack : starfish.Stack
+        stack : ImageStack
             Stack to be filtered.
 
         """
         clip = partial(self.clip, p_min=self.p_min, p_max=self.p_max)
-        stack.image.apply(clip, is_volume=self.is_volume, verbose=self.verbose)
-
-        # apply to aux dict too:
-        for auxiliary_image in stack.auxiliary_images.values():
-            auxiliary_image.apply(clip)
+        stack.apply(clip, is_volume=self.is_volume, verbose=self.verbose)

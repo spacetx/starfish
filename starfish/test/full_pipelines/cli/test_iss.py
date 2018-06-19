@@ -55,23 +55,40 @@ class TestWithIssData(unittest.TestCase):
         ],
         [
             "starfish", "filter",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered", "experiment.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered"),
+            "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
+                [tempdir, "registered", "experiment.json"],
+                "$['hybridization_images']",
+            ),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "hybridization.json"),
+            "WhiteTophat",
+            "--disk-size", "15",
+        ],
+        [
+            "starfish", "filter",
+            "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
+                [tempdir, "formatted", "experiment.json"],
+                "$['auxiliary_images']['nuclei']",
+            ),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "nuclei.json"),
+            "WhiteTophat",
+            "--disk-size", "15",
+        ],
+        [
+            "starfish", "filter",
+            "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
+                [tempdir, "formatted", "experiment.json"],
+                "$['auxiliary_images']['dots']",
+            ),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "dots.json"),
             "WhiteTophat",
             "--disk-size", "15",
         ],
         [
             "starfish", "detect_spots",
-            "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "filtered", "experiment.json"],
-                "$['hybridization_images']",
-            ),
+            "--input", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "hybridization.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
             "GaussianSpotDetector",
-            "--blobs-stack", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "filtered", "experiment.json"],
-                "$['auxiliary_images']['dots']",
-            ),
+            "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "dots.json"),
             "--min-sigma", "4",
             "--max-sigma", "6",
             "--num-sigma", "20",
@@ -79,14 +96,9 @@ class TestWithIssData(unittest.TestCase):
         ],
         [
             "starfish", "segment",
-            "--hybridization-stack", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "filtered", "experiment.json"],
-                "$['hybridization_images']",
-            ),
-            "--nuclei-stack", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "filtered", "experiment.json"],
-                "$['auxiliary_images']['nuclei']",
-            ),
+            "--hybridization-stack", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "filtered", "hybridization.json"),
+            "--nuclei-stack", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "nuclei.json"),
             "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.geojson"),
             "Watershed",
             "--dapi-threshold", ".16",

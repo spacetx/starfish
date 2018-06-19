@@ -2,6 +2,7 @@ from functools import partial
 
 from trackpy import bandpass
 
+from starfish.image import ImageStack
 from ._base import FilterAlgorithmBase
 
 
@@ -65,20 +66,16 @@ class Bandpass(FilterAlgorithmBase):
         )
         return bandpassed
 
-    def filter(self, stack) -> None:
+    def filter(self, stack: ImageStack) -> None:
         """Perform in-place filtering of an image stack and all contained aux images.
 
         Parameters
         ----------
-        stack : starfish.Stack
+        stack : ImageStack
             Stack to be filtered.
 
         """
         bandpass_ = partial(
             self.bandpass, lshort=self.lshort, llong=self.llong, threshold=self.threshold, truncate=self.truncate
         )
-        stack.image.apply(bandpass_, verbose=self.verbose)
-
-        # apply to aux dict too:
-        for auxiliary_image in stack.auxiliary_images.values():
-            auxiliary_image.apply(bandpass_)
+        stack.apply(bandpass_, verbose=self.verbose)

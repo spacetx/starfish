@@ -5,9 +5,11 @@ import pandas as pd
 from skimage.feature import blob_log
 
 from starfish.constants import Indices
+from starfish.image import ImageStack
 from starfish.munge import melt
 from starfish.pipeline.features.encoded_spots import EncodedSpots
 from starfish.pipeline.features.spot_attributes import SpotAttributes
+from starfish.util.argparse import FsExistsType
 from ._base import SpotFinderAlgorithmBase
 
 
@@ -15,7 +17,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
     def __init__(
             self, min_sigma, max_sigma, num_sigma, threshold,
-            blobs_image_name, overlap=0.5, measurement_type='max', **kwargs):
+            blobs_stack, overlap=0.5, measurement_type='max', **kwargs):
         """Multi-dimensional gaussian spot detector
 
         Parameters
@@ -35,8 +37,8 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             intensities.
         overlap : float [0, 1]
             If two spots have more than this fraction of overlap, the spots are combined (default = 0.5)
-        blobs_image_name : str
-            name of the image containing blobs. Must be present in the auxiliary_images of the Stack passed to `find`
+        blobs_stack : Union[ImageStack, str]
+            ImageStack or the path or URL that references the ImageStack that contains the blobs.
         measurement_type : str ['max', 'mean']
             name of the function used to calculate the intensity for each identified spot area
 
@@ -52,7 +54,10 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         self.num_sigma = num_sigma
         self.threshold = threshold
         self.overlap = overlap
-        self.blobs = blobs_image_name
+        if isinstance(blobs_stack, ImageStack):
+            self.blobs_stack = blobs_stack
+        else:
+            self.blobs_stack = ImageStack.from_path_or_url(blobs_stack)
 
         try:
             self.measurement_function = getattr(np, measurement_type)
@@ -76,8 +81,8 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
     def encode(self, stack, spot_attributes):
         # create stack squeeze map
-        squeezed = stack.image.squeeze()
-        mapping: pd.DataFrame = stack.image.tile_metadata
+        squeezed = stack.squeeze()
+        mapping: pd.DataFrame = stack.tile_metadata
         inds = range(mapping.shape[0])
         intensities = [
             self.measure_blob_intensity(image, spot_attributes, self.measurement_function)
@@ -118,15 +123,15 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         return SpotAttributes(fitted_blobs)
 
-    def find(self, image_stack) -> Tuple[SpotAttributes, EncodedSpots]:
-        blobs = image_stack.auxiliary_images[self.blobs].max_proj(Indices.HYB, Indices.CH, Indices.Z)
+    def find(self, hybridization_image) -> Tuple[SpotAttributes, EncodedSpots]:
+        blobs = self.blobs_stack.max_proj(Indices.HYB, Indices.CH, Indices.Z)
         spot_attributes = self.fit(blobs)
-        encoded_spots = self.encode(image_stack, spot_attributes.data)
+        encoded_spots = self.encode(hybridization_image, spot_attributes.data)
         return spot_attributes, encoded_spots
 
     @classmethod
     def add_arguments(cls, group_parser):
-        group_parser.add_argument("--blobs-image-name", type=str, help='aux image key')
+        group_parser.add_argument("--blobs-stack", type=FsExistsType(), required=True)
         group_parser.add_argument(
             "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
         group_parser.add_argument(

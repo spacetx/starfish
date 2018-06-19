@@ -62,10 +62,16 @@ class TestWithIssData(unittest.TestCase):
         ],
         [
             "starfish", "detect_spots",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "experiment.json"),
+            "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
+                [tempdir, "filtered", "experiment.json"],
+                "$['hybridization_images']",
+            ),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
             "GaussianSpotDetector",
-            "--blobs-image-name", "dots",
+            "--blobs-stack", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
+                [tempdir, "filtered", "experiment.json"],
+                "$['auxiliary_images']['dots']",
+            ),
             "--min-sigma", "4",
             "--max-sigma", "6",
             "--num-sigma", "20",

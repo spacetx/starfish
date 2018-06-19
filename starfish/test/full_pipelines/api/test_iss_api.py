@@ -13,7 +13,8 @@ def test_merfish_pipeline():
     wth = WhiteTophat(disk_size=15)
     wth.filter(stack)
 
-    gsd = GaussianSpotDetector(blobs_image_name='dots', min_sigma=2, max_sigma=10, num_sigma=10, threshold=0.1)
-    spot_attributes, encoded_spots = gsd.find(stack)
+    gsd = GaussianSpotDetector(
+        blobs_stack=stack.auxiliary_images['dots'], min_sigma=2, max_sigma=10, num_sigma=10, threshold=0.1)
+    spot_attributes, encoded_spots = gsd.find(stack.image)
 
     assert spot_attributes.data.shape[0] == 19

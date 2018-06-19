@@ -65,7 +65,7 @@ disk_dize = 10
 
 # filter raw images, for all hybs and channels
 stack_filt = [white_top_hat(im, disk_dize) for im in s.image.squeeze()]
-stack_filt = s.image.un_squeeze(stack_filt)
+stack_filt = s.un_squeeze(stack_filt)
 
 # filter dots
 dots_filt = white_top_hat(s.auxiliary_images['dots'], disk_dize)

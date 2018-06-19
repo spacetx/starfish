@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from starfish.io import Stack
+from starfish.image import ImageStack
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import _base
@@ -42,10 +42,9 @@ class SpotFinder(PipelineComponent):
             cls.spot_finder_group.exit(status=2)
 
         print('Detecting Spots ...')
-        s = Stack()
-        s.read(args.input)
+        hybridization_stack = ImageStack.from_path_or_url(args.input)
         instance = args.spot_finder_algorithm_class(**vars(args))
-        spot_attributes, encoded_spots = instance.find(s)
+        spot_attributes, encoded_spots = instance.find(hybridization_stack)
 
         if args.show:
             encoded_spots.show(figsize=(10, 10))

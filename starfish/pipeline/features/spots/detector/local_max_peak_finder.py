@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 from trackpy import locate
 
-from starfish.io import Stack
+from starfish.image import ImageStack
 from starfish.pipeline.features.spot_attributes import SpotAttributes
 from ._base import SpotFinderAlgorithmBase
 
@@ -112,16 +112,16 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         attributes['spot_id'] = np.arange(attributes.shape[0])
         return SpotAttributes(attributes)
 
-    def find(self, stack: Stack):
-        """Perform in-place filtering of an image stack and all contained aux images.
+    def find(self, stack: ImageStack):
+        """
+        Find spots.
 
         Parameters
         ----------
-        stack : starfish.Stack
-            Stack to be filtered.
-
+        stack : ImageStack
+            Stack where we find the spots in.
         """
-        spot_attributes: List[SpotAttributes] = stack.image.apply(
+        spot_attributes: List[SpotAttributes] = stack.apply(
             self.find_attributes, in_place=False, is_volume=self.is_volume, verbose=self.verbose)
 
         # TODO ambrosejcarr: do we need to find spots in the aux_dict too?

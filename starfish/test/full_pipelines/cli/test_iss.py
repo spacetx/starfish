@@ -48,17 +48,21 @@ class TestWithIssData(unittest.TestCase):
         ],
         [
             "starfish", "register",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted", "experiment.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered"),
+            "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
+                [tempdir, "formatted", "experiment.json"],
+                "$['hybridization_images']",
+            ),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered", "hybridization.json"),
             "FourierShiftRegistration",
+            "--reference-stack", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
+                [tempdir, "formatted", "experiment.json"],
+                "$['auxiliary_images']['dots']",
+            ),
             "--upsampling", "1000",
         ],
         [
             "starfish", "filter",
-            "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "registered", "experiment.json"],
-                "$['hybridization_images']",
-            ),
+            "--input", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered", "hybridization.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "hybridization.json"),
             "WhiteTophat",
             "--disk-size", "15",

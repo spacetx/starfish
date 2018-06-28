@@ -1,4 +1,8 @@
+from typing import Union
+
 from starfish.constants import Indices
+from starfish.image import ImageStack
+from starfish.util.argparse import FsExistsType
 from ._base import RegistrationAlgorithmBase
 
 
@@ -12,34 +16,41 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
     --------
     https://en.wikipedia.org/wiki/Phase_correlation
     """
-    def __init__(self, upsampling, **kwargs):
+    def __init__(self, upsampling: int, reference_stack: Union[str, ImageStack], **kwargs) -> None:
         self.upsampling = upsampling
+        if isinstance(reference_stack, ImageStack):
+            self.reference_stack = reference_stack
+        else:
+            self.reference_stack = ImageStack.from_path_or_url(reference_stack)
 
     @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument("--upsampling", default=1, type=int, help="Amount of up-sampling")
+        group_parser.add_argument(
+            "--reference-stack", type=FsExistsType(), required=True,
+            help="The image stack to align the input image stack to.")
 
-    def register(self, stack):
+    def register(self, image: ImageStack):
         # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in registration?
-        mp = stack.image.max_proj(Indices.CH, Indices.Z)
-        dots = stack.auxiliary_images['dots'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
+        mp = image.max_proj(Indices.CH, Indices.Z)
+        reference_image = self.reference_stack.max_proj(Indices.HYB, Indices.CH, Indices.Z)
 
-        for h in range(stack.image.num_hybs):
+        for h in range(image.num_hybs):
             # compute shift between maximum projection (across channels) and dots, for each hyb round
             # TODO: make the max projection array ignorant of axes ordering.
-            shift, error = compute_shift(mp[h, :, :], dots, self.upsampling)
+            shift, error = compute_shift(mp[h, :, :], reference_image, self.upsampling)
             print("For hyb: {}, Shift: {}, Error: {}".format(h, shift, error))
 
-            for c in range(stack.image.num_chs):
-                for z in range(stack.image.num_zlayers):
+            for c in range(image.num_chs):
+                for z in range(image.num_zlayers):
                     # apply shift to all zlayers, channels, and hyb rounds
                     indices = {Indices.HYB: h, Indices.CH: c, Indices.Z: z}
-                    data, axes = stack.image.get_slice(indices=indices)
+                    data, axes = image.get_slice(indices=indices)
                     assert len(axes) == 0
                     result = shift_im(data, shift)
-                    stack.image.set_slice(indices=indices, data=result)
+                    image.set_slice(indices=indices, data=result)
 
-        return stack
+        return image
 
 
 def compute_shift(im, ref, upsample_factor=1):

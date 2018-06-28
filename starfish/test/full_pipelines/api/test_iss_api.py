@@ -7,8 +7,8 @@ from starfish.test.dataset_fixtures import labeled_synthetic_dataset
 def test_merfish_pipeline():
     stack = labeled_synthetic_dataset()
 
-    fsr = FourierShiftRegistration(upsampling=1000)
-    fsr.register(stack)
+    fsr = FourierShiftRegistration(upsampling=1000, reference_stack=stack.auxiliary_images['dots'])
+    fsr.register(stack.image)
 
     wth = WhiteTophat(disk_size=15)
     wth.filter(stack.image)

@@ -1,10 +1,10 @@
 import argparse
 from functools import partial
-from typing import Callable, Tuple
+from typing import Callable
 
 import numpy as np
 
-from starfish.io import Stack
+from starfish.image import ImageStack
 from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
 from ._base import FilterAlgorithmBase
 
@@ -53,20 +53,16 @@ class GaussianHighPass(FilterAlgorithmBase):
 
         return res
 
-    def filter(self, stack: Stack) -> None:
+    def filter(self, stack: ImageStack) -> None:
         """
         Perform in-place filtering of an image stack and all contained aux images.
 
         Parameters
         ----------
-        stack : starfish.Stack
+        stack : ImageStack
             Stack to be filtered.
 
         """
 
         high_pass: Callable = partial(self.gaussian_high_pass, sigma=self.sigma)
-        stack.image.apply(high_pass)
-
-        # apply to aux dict too:
-        for auxiliary_image in stack.auxiliary_images.values():
-            auxiliary_image.apply(high_pass)
+        stack.apply(high_pass)

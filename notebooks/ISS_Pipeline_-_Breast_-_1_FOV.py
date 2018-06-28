@@ -94,7 +94,9 @@ from starfish.viz import tile_lims
 # filter raw data
 disk_size = 15  # disk as in circle
 filt = Filter.WhiteTophat(disk_size)
-filt.filter(s)
+filt.filter(s.image)
+for img in s.auxiliary_images.values():
+    filt.filter(img)
 # EPY: END code
 
 # EPY: START code

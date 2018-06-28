@@ -1,5 +1,6 @@
 import numpy as np
 
+from starfish.image import ImageStack
 from ._base import FilterAlgorithmBase
 
 
@@ -29,12 +30,12 @@ class WhiteTophat(FilterAlgorithmBase):
         group_parser.add_argument(
             "--disk-size", default=15, type=int, help="diameter of morphological masking disk in pixels")
 
-    def filter(self, stack) -> None:
+    def filter(self, stack: ImageStack) -> None:
         """Perform in-place filtering of an image stack and all contained aux images
 
         Parameters
         ----------
-        stack : starfish.Stack
+        stack : ImageStack
             Stack to be filtered
 
         """
@@ -50,8 +51,4 @@ class WhiteTophat(FilterAlgorithmBase):
             filtered_image = image - np.minimum(image, max_filtered)
             return filtered_image
 
-        stack.image.apply(white_tophat)
-
-        # apply to aux dict too.
-        for auxiliary_image in stack.auxiliary_images.values():
-            auxiliary_image.apply(white_tophat)
+        stack.apply(white_tophat)

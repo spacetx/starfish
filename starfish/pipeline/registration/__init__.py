@@ -1,5 +1,6 @@
 import argparse
 
+from starfish.image import ImageStack
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import fourier_shift
@@ -19,7 +20,7 @@ class Registration(PipelineComponent):
         """Adds the registration component to the CLI argument parser."""
         register_group = subparsers.add_parser("register")
         register_group.add_argument("-i", "--input", type=FsExistsType(), required=True)
-        register_group.add_argument("-o", "--output", type=FsExistsType(), required=True)
+        register_group.add_argument("-o", "--output", required=True)
         register_group.set_defaults(starfish_command=Registration._cli)
         registration_subparsers = register_group.add_subparsers(dest="registration_algorithm_class")
 
@@ -37,14 +38,9 @@ class Registration(PipelineComponent):
             cls.register_group.print_help()
             cls.register_group.exit(status=2)
 
-        instance = args.registration_algorithm_class(**vars(args))
-
-        from starfish.io import Stack
-
         print('Registering ...')
-        s = Stack()
-        s.read(args.input)
+        stack = ImageStack.from_path_or_url(args.input)
+        instance = args.registration_algorithm_class(**vars(args))
+        instance.register(stack)
 
-        instance.register(s)
-
-        s.write(args.output)
+        stack.write(args.output)

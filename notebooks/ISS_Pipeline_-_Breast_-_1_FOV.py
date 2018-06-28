@@ -119,8 +119,8 @@ s.image.show_stack({Indices.Z: 0})
 # EPY: START code
 from starfish.pipeline.registration import Registration
 
-registration = Registration.FourierShiftRegistration(upsampling=1000)
-registration.register(s)
+registration = Registration.FourierShiftRegistration(upsampling=1000, reference_stack=s.auxiliary_images['dots'])
+registration.register(s.image)
 # EPY: END code
 
 # EPY: START markdown

@@ -1,4 +1,7 @@
 language: python
+sudo: required
+services:
+- docker
 python:
 - 3.6
 dist: trusty
@@ -6,6 +9,7 @@ install:
 - pip install -r REQUIREMENTS-DEV.txt -r REQUIREMENTS-NOTEBOOK.txt
 - pip install -e .
 - pip freeze
+- docker build -t spacetx/starfish .
 script:
 - export MPLBACKEND=Agg
 - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)

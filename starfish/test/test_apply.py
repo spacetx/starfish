@@ -31,3 +31,10 @@ def test_apply_labeled_dataset():
     image = deepcopy(original.image)
     image.apply(multiply, value=2)
     assert np.all(image.numpy_array == original.image.numpy_array * 2)
+
+
+def test_apply_not_in_place():
+    """test that apply correctly applies a simple function across a starfish stack without modifying original data"""
+    image = labeled_synthetic_dataset().image
+    new = image.apply(multiply, value=2, in_place=False)
+    assert np.all(new.numpy_array == image.numpy_array * 2)

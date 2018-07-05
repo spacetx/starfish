@@ -121,8 +121,8 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         stack : ImageStack
             Stack where we find the spots in.
         """
-        spot_attributes: List[SpotAttributes] = stack.apply(
-            self.find_attributes, in_place=False, is_volume=self.is_volume, verbose=self.verbose)
+        spot_attributes: List[SpotAttributes] = stack.transform(
+            self.find_attributes, is_volume=self.is_volume, verbose=self.verbose)
 
         # TODO ambrosejcarr: do we need to find spots in the aux_dict too?
 

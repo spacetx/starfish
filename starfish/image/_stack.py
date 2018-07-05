@@ -2,8 +2,9 @@ import collections
 import os
 from functools import partial
 from itertools import product
-from typing import Any, Callable, Iterable, Iterator, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
 from warnings import warn
+from copy import deepcopy
 
 import numpy
 import pandas as pd
@@ -448,7 +449,7 @@ class ImageStack:
             array, axes = self.get_slice(inds)
             yield array
 
-    def apply(self, func, is_volume=False, in_place=True, verbose: bool=False, **kwargs):
+    def apply(self, func, is_volume=False, in_place=True, verbose: bool=False, **kwargs) -> "ImageStack":
         """Apply func over all tiles or volumes in self
 
         Parameters
@@ -460,8 +461,7 @@ class ImageStack:
             (default False) If True, pass 3d volumes (x, y, z) to func
         in_place : bool
             (default True) If True, function is executed in place. If n_proc is not 1, the tile or
-            volume will be copied once during execution. If false, the outputs of the function executed on individual
-            tiles or volumes will be output as a list
+            volume will be copied once during execution. If false, a new ImageStack object will be produced.
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
         kwargs : dict
@@ -469,9 +469,14 @@ class ImageStack:
 
         Returns
         -------
-        Optional[List[Tuple[np.ndarray, Mapping[Indices: Union[int, slice]]]]
-            If inplace is False, return the results of applying func to stored image data
+        ImageStack :
+            If inplace is False, return a new ImageStack, otherwise return a reference to the original stack with
+            data modified by application of func
         """
+        if not in_place:
+            image_stack = deepcopy(self)
+            return image_stack.apply(func, is_volume=is_volume, in_place=True, verbose=verbose, **kwargs)
+
         mapfunc: Callable = map  # TODO: ambrosejcarr posix-compliant multiprocessing
         indices = list(self._iter_indices(is_volume=is_volume))
 
@@ -483,12 +488,43 @@ class ImageStack:
         applyfunc: Callable = partial(func, **kwargs)
         results = mapfunc(applyfunc, tiles)
 
-        # TODO ttung: this should return an ImageStack, not a bunch of indices.
-        if not in_place:
-            return list(zip(results, indices))
-
         for r, inds in zip(results, indices):
             self.set_slice(inds, r)
+
+        return self
+
+    def transform(self, func, is_volume=False, verbose=False, **kwargs) -> List[Any]:
+        """Apply func over all tiles or volumes in self
+
+        Parameters
+        ----------
+        func : Callable
+            Function to apply. must expect a first argument which is a 2d or 3d numpy array (see is_volume) but
+            may return any object type
+        is_volume : bool
+            (default False) If True, pass 3d volumes (x, y, z) to func
+        verbose : bool
+            If True, report on the percentage completed (default = False) during processing
+        kwargs : dict
+            Additional arguments to pass to func being applied
+
+        Returns
+        -------
+        List[Any] :
+            The results of applying func to stored image data
+        """
+        mapfunc: Callable = map
+        indices = list(self._iter_indices(is_volume=is_volume))
+
+        if verbose:
+            tiles = tqdm(self._iter_tiles(indices))
+        else:
+            tiles = self._iter_tiles(indices)
+
+        applyfunc: Callable = partial(func, **kwargs)
+        results = mapfunc(applyfunc, tiles)
+
+        return list(zip(results, indices))
 
     @property
     def tile_metadata(self) -> pd.DataFrame:

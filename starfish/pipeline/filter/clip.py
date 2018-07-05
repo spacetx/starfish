@@ -1,4 +1,5 @@
 from functools import partial
+from typing import Optional
 
 import numpy
 
@@ -64,14 +65,24 @@ class Clip(FilterAlgorithmBase):
         image = image.clip(min=v_min, max=v_max)
         return image.astype(dtype)
 
-    def filter(self, stack: ImageStack) -> None:
-        """Perform in-place filtering of an image stack and all contained aux images.
+    def filter(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
+        """Perform filtering of an image stack
 
         Parameters
         ----------
         stack : ImageStack
             Stack to be filtered.
+        in_place : bool
+            if True, process ImageStack in-place, otherwise return a new stack
+
+        Returns
+        -------
+        Optional[ImageStack] :
+            if in-place is False, return the results of filter as a new stack
 
         """
         clip = partial(self.clip, p_min=self.p_min, p_max=self.p_max)
-        stack.apply(clip, is_volume=self.is_volume, verbose=self.verbose)
+        result = stack.apply(clip, is_volume=self.is_volume, verbose=self.verbose, in_place=in_place)
+        if not in_place:
+            return result
+        return None

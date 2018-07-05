@@ -1,6 +1,6 @@
 import argparse
 from functools import partial
-from typing import Callable
+from typing import Callable, Optional
 
 import numpy as np
 
@@ -53,16 +53,24 @@ class GaussianHighPass(FilterAlgorithmBase):
 
         return res
 
-    def filter(self, stack: ImageStack) -> None:
-        """
-        Perform in-place filtering of an image stack and all contained aux images.
+    def filter(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
+        """Perform filtering of an image stack
 
         Parameters
         ----------
         stack : ImageStack
             Stack to be filtered.
+        in_place : bool
+            if True, process ImageStack in-place, otherwise return a new stack
+
+        Returns
+        -------
+        Optional[ImageStack] :
+            if in-place is False, return the results of filter as a new stack
 
         """
-
         high_pass: Callable = partial(self.gaussian_high_pass, sigma=self.sigma)
-        stack.apply(high_pass)
+        result = stack.apply(high_pass, in_place=in_place)
+        if not in_place:
+            return result
+        return None

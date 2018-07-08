@@ -234,6 +234,7 @@ class ImageStack:
         self._data[slice_list] = data
         self._data_needs_writeback = True
 
+    # TODO ambrosejcarr: update to use IntensityTable instead of SpotAttributes
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],
             color_map: str= 'gray', figure_size: Tuple[int, int]=(10, 10),
@@ -287,7 +288,12 @@ class ImageStack:
         data, remaining_inds = self.get_slice(indices)
 
         # identify the dimensionality of data with all dimensions other than x, y linearized
-        n = np.dot(*data.shape[:-2])
+        if len(data.shape) >= 3:
+            n = np.product(data.shape[:-2])
+        else:
+            raise ValueError(
+                f'a stack with dimensionality >= 3 is required, the provided indexer produced a '
+                f'stack with shape {data.shape}')
 
         # linearize the array
         linear_view: np.ndarray = data.reshape((n,) + data.shape[-2:])
@@ -369,7 +375,7 @@ class ImageStack:
         """
         import matplotlib.pyplot as plt
 
-        if z is not None and z in result_df.columns:
+        if z is not None and 'z' in result_df.columns:
             inds = np.abs(result_df['z'] - z) < z_dist
         else:
             inds = np.ones(result_df.shape[0]).astype(bool)
@@ -379,7 +385,7 @@ class ImageStack:
 
         for i in np.arange(selected.shape[0]):
             r, x, y = selected.iloc[i, :]  # radius is a duplicate, and is present twice
-            c = plt.Circle((x, y), r * scale_radius, color='r', linewidth=size, fill=False)
+            c = plt.Circle((y, x), r * scale_radius, color='r', linewidth=size, fill=False)
             ax.add_patch(c)
 
     def _build_slice_list(

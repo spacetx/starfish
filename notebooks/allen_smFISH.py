@@ -70,11 +70,11 @@ s.read(experiment_json)
 # EPY: START code
 from starfish.pipeline.filter import Filter
 s_clip = Filter.Clip(p_min=10, p_max=100, verbose=True)
-s_clip.filter(s)
+s_clip.filter(s.image)
 # EPY: END code
 
 # EPY: START markdown
-# We're still working through the backing of the Stack.image object with the on-disk or on-cloud Tile spec. As a result, most of our methods work in-place. For now, we can hack around this by deepcopying the data before administering the operation. I'm doing this on a workstation, so be aware of the memory usage!
+# We're still working through the backing of the Stack.image object with the on-disk or on-cloud Tile spec. As a result, most of our methods work in-place. For now, we can hack around this by deepcopying the data before administering the operation. This notebook was developed on a 64gb workstation, so be aware of the memory usage when copying!
 # EPY: END markdown
 
 # EPY: START code
@@ -93,7 +93,7 @@ s.image.show_stack({Indices.CH: 0});
 
 # EPY: START code
 s_bandpass = Filter.Bandpass(lshort=0.5, llong=7, threshold=None, truncate=4, verbose=True)
-s_bandpass.filter(s)
+s_bandpass.filter(s.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -104,13 +104,13 @@ s_bandpass.filter(s)
 # I wasn't sure if this clipping was supposed to be by volume or tile. I've done tile here, but it can be easily
 # switched to volume. 
 s_clip = Filter.Clip(p_min=10, p_max=100, is_volume=False, verbose=True)
-s_clip.filter(s)
+s_clip.filter(s.image)
 # EPY: END code
 
 # EPY: START code
 sigma=(1, 0, 0)  # filter only in z, do nothing in x, y
 glp = Filter.GaussianLowPass(sigma=sigma, is_volume=True, verbose=True)
-glp.filter(s)
+glp.filter(s.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -125,12 +125,13 @@ from trackpy import locate
 ch1 = s.image.max_proj(Indices.Z)[0, 1]
 
 results = locate(ch1, diameter=3, minmass=250, maxsize=3, separation=5, preprocess=False, percentile=10) 
-results.columns = ['y', 'x', 'intensity', 'r', 'eccentricity', 'signal', 'raw_mass', 'ep']
+results.columns = ['x', 'y', 'intensity', 'r', 'eccentricity', 'signal', 'raw_mass', 'ep']
 # EPY: END code
 
 # EPY: START code
 # plot the z-projection
-image(ch1, size=20, clim=(15, 52))
+f, ax = plt.subplots(figsize=(20, 20))
+ax.imshow(ch1, vmin=15, vmax=52, cmap=plt.cm.gray)
 
 # draw called spots on top as red circles
 # scale radius plots the red circle at scale_radius * spot radius
@@ -159,13 +160,13 @@ kwargs = dict(
     is_volume=True,
 )
 lmpf = SpotFinder.LocalMaxPeakFinder(**kwargs)
-spot_attributes = lmpf.find(s)
+spot_attributes = lmpf.find(s.image)
 # EPY: END code
 
 # EPY: START code
 # save the results to disk as json
-for ch, attrs in enumerate(spot_attributes):
-    attrs.save(f'spot_attributes_c{ch}.json')
+for attrs, (hyb, ch) in spot_attributes:
+    attrs.save(f'spot_attributes_c{ch.value}.json')
 # EPY: END code
 
 # EPY: START code
@@ -178,7 +179,8 @@ for ch, attrs in enumerate(spot_attributes):
 # this is not a very performant function because of how matplotlib renders circles as individual artists, 
 # but I think it's useful for debugging the spot detection.
 
-# Note that in places where spots are "missed" it is often because they've been localized to nearby z-planes
+# Note that in places where spots are "missed" it is often because they've been localized to individual 
+# nearby z-planes, whereas most spots exist across several layers of z.
 
-s.image.show_stack({Indices.CH: 0}, show_spots=spot_attributes[0], figure_size=(20, 20), p_min=60, p_max=99.9);
+s.image.show_stack({Indices.CH: 1, Indices.HYB: 0}, show_spots=spot_attributes[1][0], figure_size=(20, 20), p_min=60, p_max=99.9);
 # EPY: END code

@@ -15,6 +15,14 @@ script:
 - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
 - set -eo pipefail
 - make all
-- if [ "$BRANCH" == "master" ]; then make run_notebooks; fi
+- if [ "$BRANCH" == "master" ]; then
+    make run_notebooks;
+  fi
+- if [ "$BRANCH" == "master" ]; then
+    virtualenv -p python .venv;
+    .venv/bin/pip install -r REQUIREMENTS-NOTEBOOK.txt;
+    .venv/bin/pip install starfish;
+    make PYTHON=.venv/bin/python run_notebooks;
+  fi
 after_success:
 - bash <(curl -s https://codecov.io/bash)

@@ -1,10 +1,12 @@
 import functools
 import json
+import urllib.request
 import uuid
 from typing import Any, Dict, List, Optional, Sequence, Set
 
 import numpy as np
 import pandas as pd
+import validators
 import xarray as xr
 
 from starfish.constants import Indices, AugmentedEnum
@@ -207,8 +209,8 @@ class Codebook(xr.DataArray):
 
         for code in code_array:
             for entry in code[Codebook.Constants.CODEWORD.value]:
-                max_hyb = max(max_hyb, entry[Indices.HYB])
-                max_ch = max(max_ch, entry[Indices.CH])
+                max_hyb = max(max_hyb, entry[Indices.HYB.value])
+                max_ch = max(max_ch, entry[Indices.CH.value])
 
         # set n_ch and n_hyb if either were not provided
         n_hyb = n_hyb if n_hyb is not None else max_hyb + 1
@@ -255,12 +257,12 @@ class Codebook(xr.DataArray):
     def from_json(
             cls, json_codebook: str, n_hyb: Optional[int]=None, n_ch: Optional[int]=None
     ) -> "Codebook":
-        """Load a codebook from a spaceTx spec-compliant json file
+        """Load a codebook from a spaceTx spec-compliant json file or a url pointing to such a file
 
         Parameters
         ----------
         json_codebook : str
-            path to json file containing a spaceTx codebook
+            path or url to json file containing a spaceTx codebook
         n_hyb : Optional[int]
             The number of hybridization rounds used in the codes. Will be inferred if not provided
         n_ch : Optional[int]
@@ -310,8 +312,12 @@ class Codebook(xr.DataArray):
             Codebook with shape (genes, channels, hybridization_rounds)
 
         """
-        with open(json_codebook, 'r') as f:
-            code_array = json.load(f)
+        if validators.url(json_codebook):
+            with urllib.request.urlopen(json_codebook) as response:
+                code_array = json.loads(response.read().decode('utf-8'))
+        else:
+            with open(json_codebook, 'r') as f:
+                code_array = json.load(f)
         return cls.from_code_array(code_array, n_hyb, n_ch)
 
     def to_json(self, filename: str) -> None:

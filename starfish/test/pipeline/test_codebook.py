@@ -1,8 +1,10 @@
 import warnings
 import tempfile
+import json
 import os
 import numpy as np
 import pytest
+from unittest.mock import patch, MagicMock
 
 from starfish.constants import Indices
 from starfish.codebook import Codebook
@@ -15,9 +17,37 @@ from starfish.test.dataset_fixtures import (
     per_channel_max_decoded_intensities, loaded_codebook, small_intensity_table)
 
 
-def test_loading_codebook_from_json(simple_codebook_json):
+def test_loading_codebook_from_json_local_file(simple_codebook_json):
     cb = Codebook.from_json(simple_codebook_json, n_ch=2, n_hyb=2)
     assert isinstance(cb, Codebook)
+
+
+@patch('starfish.pipeline.features.codebook.urllib.request.urlopen')
+def test_loading_codebook_from_json_https_file(mock_urlopen):
+
+    # codebook data to pass to the mock
+    _return_value = json.dumps(
+        [
+            {
+                Codebook.Constants.CODEWORD.value: [
+                    {Indices.HYB.value: 0, Indices.CH.value: 0, Codebook.Constants.VALUE.value: 1},
+                    {Indices.HYB.value: 1, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1}
+                ],
+                Codebook.Constants.GENE.value: "SCUBE2"
+            }
+        ]
+    ).encode()
+
+    # mock urlopen.read() to return data corresponding to a codebook
+    a = MagicMock()
+    a.read.side_effect = [_return_value]
+    a.__enter__.return_value = a
+    mock_urlopen.return_value = a
+
+    # test that the function loads the codebook from the link when called
+    cb = Codebook.from_json('https://www.alink.com/file.json', n_ch=2, n_hyb=2)
+    assert isinstance(cb, Codebook)
+    assert mock_urlopen.call_count == 1
 
 
 def test_loading_codebook_from_list(simple_codebook_array):

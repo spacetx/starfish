@@ -12,7 +12,9 @@ from .util import gaussian_kernel
 
 class DeconvolvePSF(FilterAlgorithmBase):
 
-    def __init__(self, num_iter: int=15, sigma: float=2, clip: bool=False, **kwargs) -> None:
+    def __init__(
+            self, num_iter: int=15, sigma: float=2, clip: bool=False, verbose=False, **kwargs
+    ) -> None:
         """Deconvolve a point spread function
 
         Note that the default parameters are highly optimized for the MERFISH use case and that num_iter is a
@@ -26,6 +28,8 @@ class DeconvolvePSF(FilterAlgorithmBase):
             standard deviation of the gaussian kernel used to construct the point spread function
         clip : bool (default = False)
             if True, pixel values below -1 and above 1 are clipped for skimage pipeline compatibility
+        verbose : bool
+            if True, report on the percentage completed during processing (default = False)
 
         """
         self.num_iter = num_iter
@@ -33,6 +37,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
         self.clip = clip
         self.kernel_size: int = int(2 * np.ceil(2 * sigma) + 1)
         self.psf: np.ndarray = gaussian_kernel(shape=(self.kernel_size, self.kernel_size), sigma=sigma)
+        self.verbose = verbose
 
     @classmethod
     def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
@@ -93,7 +98,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
 
         """
         func: Callable = partial(self.richardson_lucy_deconv, num_iter=self.num_iter, psf=self.psf, clip=self.clip)
-        result = stack.apply(func, in_place=in_place)
+        result = stack.apply(func, in_place=in_place, verbose=self.verbose)
         if not in_place:
             return result
         return None

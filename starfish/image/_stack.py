@@ -304,7 +304,7 @@ class ImageStack:
         if rescale and any((p_min, p_max)):
             raise ValueError('select one of rescale and p_min/p_max to rescale image, not both.')
 
-        elif rescale is not None:
+        elif rescale:
             print("Rescaling ...")
             vmin, vmax = scoreatpercentile(data, (0.5, 99.5))
             linear_view = exposure.rescale_intensity(

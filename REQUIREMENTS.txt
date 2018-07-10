@@ -13,4 +13,5 @@ slicedimage == 0.0.0-dev21
 scikit-learn
 tqdm
 trackpy
+validators
 xarray

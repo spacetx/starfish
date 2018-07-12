@@ -1,7 +1,7 @@
 from functools import partial
 from typing import Optional
 
-import numpy
+import numpy as np
 
 from starfish.image import ImageStack
 from ._base import FilterAlgorithmBase
@@ -35,7 +35,7 @@ class Clip(FilterAlgorithmBase):
         group_parser.add_argument("--p-max", default=100, type=int, help="clip intensities above this percentile")
 
     @staticmethod
-    def clip(image, p_min: int, p_max: int) -> numpy.ndarray:
+    def clip(image, p_min: int, p_max: int) -> np.ndarray:
         """Clip values of img below and above percentiles p_min and p_max
 
         Parameters
@@ -57,7 +57,7 @@ class Clip(FilterAlgorithmBase):
           Numpy array of same shape as img
 
         """
-        v_min, v_max = numpy.percentile(image, [p_min, p_max])
+        v_min, v_max = np.percentile(image, [p_min, p_max])
 
         # asking for a float percentile clipping value from an integer image will
         # convert to float, so store the dtype so it can be restored

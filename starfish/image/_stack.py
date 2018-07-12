@@ -6,7 +6,7 @@ from typing import Any, Callable, Iterable, Iterator, List, Mapping, MutableSequ
 from warnings import warn
 from copy import deepcopy
 
-import numpy
+import numpy as np
 import pandas as pd
 from scipy.stats import scoreatpercentile
 from skimage import exposure
@@ -78,9 +78,9 @@ class ImageStack:
                 raise ValueError("Starfish does not support tiles that are not identical in shape")
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
-        self._data = numpy.zeros(
+        self._data = np.zeros(
             shape=(self._num_hybs, self._num_chs, self._num_zlayers) + self._tile_shape,
-            dtype=numpy.dtype(f"{kind}{max_size}")
+            dtype=np.dtype(f"{kind}{max_size}")
         )
 
         # iterate through the tiles and set the data.
@@ -92,8 +92,8 @@ class ImageStack:
             if max_size != data.dtype.itemsize:
                 if data.dtype.kind == "i" or data.dtype.kind == "u":
                     # fixed point can be done with a simple multiply.
-                    src_range = numpy.iinfo(data.dtype).max - numpy.iinfo(data.dtype).min + 1
-                    dst_range = numpy.iinfo(self._data.dtype).max - numpy.iinfo(self._data.dtype).min + 1
+                    src_range = np.iinfo(data.dtype).max - np.iinfo(data.dtype).min + 1
+                    dst_range = np.iinfo(self._data.dtype).max - np.iinfo(self._data.dtype).min + 1
                     data = data * (dst_range / src_range)
                 warn(
                     f"Tile "
@@ -161,7 +161,7 @@ class ImageStack:
     def get_slice(
             self,
             indices: Mapping[Indices, Union[int, slice]]
-    ) -> Tuple[numpy.ndarray, Sequence[Indices]]:
+    ) -> Tuple[np.ndarray, Sequence[Indices]]:
         """
         Given a dictionary mapping the index name to either a value or a slice range, return a numpy array representing
         the slice, and a list of the remaining axes beyond the normal x-y tile.
@@ -186,7 +186,7 @@ class ImageStack:
     def set_slice(
             self,
             indices: Mapping[Indices, Union[int, slice]],
-            data: numpy.ndarray,
+            data: np.ndarray,
             axes: Sequence[Indices]=None):
         """
         Given a dictionary mapping the index name to either a value or a slice range and a source numpy array, set the
@@ -225,7 +225,7 @@ class ImageStack:
 
             if len(move_src) != 0:
                 data = data.view()
-                numpy.moveaxis(data, move_src, move_dst)
+                np.moveaxis(data, move_src, move_dst)
 
         if self._data[slice_list].shape != data.shape:
             raise ValueError("source shape {} mismatches destination shape {}".format(
@@ -287,10 +287,10 @@ class ImageStack:
         data, remaining_inds = self.get_slice(indices)
 
         # identify the dimensionality of data with all dimensions other than x, y linearized
-        n = numpy.dot(*data.shape[:-2])
+        n = np.dot(*data.shape[:-2])
 
         # linearize the array
-        linear_view: numpy.ndarray = data.reshape((n,) + data.shape[-2:])
+        linear_view: np.ndarray = data.reshape((n,) + data.shape[-2:])
 
         # set the labels for the linearized tiles
 
@@ -310,8 +310,8 @@ class ImageStack:
             linear_view = exposure.rescale_intensity(
                 linear_view,
                 in_range=(vmin, vmax),
-                out_range=numpy.float32
-            ).astype(numpy.float32)
+                out_range=np.float32
+            ).astype(np.float32)
 
         elif p_min or p_max:
             print("Clipping ...")
@@ -319,7 +319,7 @@ class ImageStack:
                 linear_view,
                 (p_min if p_min else 0, p_max if p_max else 100)
             )
-            linear_view = numpy.clip(linear_view, a_min=a_min, a_max=a_max)
+            linear_view = np.clip(linear_view, a_min=a_min, a_max=a_max)
 
         show_spot_function = self._show_spots
 
@@ -370,14 +370,14 @@ class ImageStack:
         import matplotlib.pyplot as plt
 
         if z is not None and z in result_df.columns:
-            inds = numpy.abs(result_df['z'] - z) < z_dist
+            inds = np.abs(result_df['z'] - z) < z_dist
         else:
-            inds = numpy.ones(result_df.shape[0]).astype(bool)
+            inds = np.ones(result_df.shape[0]).astype(bool)
 
         # get the data needed to plot
         selected = result_df.loc[inds, ['r', 'x', 'y']]
 
-        for i in numpy.arange(selected.shape[0]):
+        for i in np.arange(selected.shape[0]):
             r, x, y = selected.iloc[i, :]  # radius is a duplicate, and is present twice
             c = plt.Circle((x, y), r * scale_radius, color='r', linewidth=size, fill=False)
             ax.add_patch(c)
@@ -422,17 +422,17 @@ class ImageStack:
             Mapping of dimension name to index
 
         """
-        for hyb in numpy.arange(self.shape[Indices.HYB]):
-            for ch in numpy.arange(self.shape[Indices.CH]):
+        for hyb in np.arange(self.shape[Indices.HYB]):
+            for ch in np.arange(self.shape[Indices.CH]):
                 if is_volume:
                     yield {Indices.HYB: hyb, Indices.CH: ch}
                 else:
-                    for z in numpy.arange(self.shape[Indices.Z]):
+                    for z in np.arange(self.shape[Indices.Z]):
                         yield {Indices.HYB: hyb, Indices.CH: ch, Indices.Z: z}
 
     def _iter_tiles(
             self, indices: Iterable[Mapping[Indices, Union[int, slice]]]
-    ) -> Iterable[numpy.ndarray]:
+    ) -> Iterable[np.ndarray]:
         """Given an iterable of indices, return a generator of numpy arrays from self
 
         Parameters
@@ -442,7 +442,7 @@ class ImageStack:
 
         Yields
         ------
-        numpy.ndarray
+        np.ndarray
             Numpy array that corresponds to provided indices
         """
         for inds in indices:
@@ -456,7 +456,7 @@ class ImageStack:
         ----------
         func : Callable
             Function to apply. must expect a first argument which is a 2d or 3d numpy array (see is_volume) and return a
-            numpy.ndarray. If inplace is True, must return an array of the same shape.
+            np.ndarray. If inplace is True, must return an array of the same shape.
         is_volume : bool
             (default False) If True, pass 3d volumes (x, y, z) to func
         in_place : bool
@@ -690,7 +690,7 @@ class ImageStack:
             pretty=True,
             tile_opener=tile_opener)
 
-    def max_proj(self, *dims: Indices) -> numpy.ndarray:
+    def max_proj(self, *dims: Indices) -> np.ndarray:
         """return a max projection over one or more axis of the image tensor
 
         Parameters
@@ -700,7 +700,7 @@ class ImageStack:
 
         Returns
         -------
-        numpy.ndarray :
+        np.ndarray :
             max projection
 
         """
@@ -712,9 +712,9 @@ class ImageStack:
                 raise ValueError(
                     "Dimension: {} not supported. Expecting one of: {}".format(dim, ImageStack.AXES_MAP.keys()))
 
-        return numpy.max(self._data, axis=tuple(axes))
+        return np.max(self._data, axis=tuple(axes))
 
-    def squeeze(self) -> numpy.ndarray:
+    def squeeze(self) -> np.ndarray:
         """return an array that is linear over categorical dimensions and z
 
         Returns
@@ -731,7 +731,7 @@ class ImageStack:
 
     def un_squeeze(self, stack):
         if type(stack) is list:
-            stack = numpy.array(stack)
+            stack = np.array(stack)
 
         new_shape = (self.num_hybs, self.num_chs, self.num_zlayers) + self.tile_shape
         res = stack.reshape(new_shape)

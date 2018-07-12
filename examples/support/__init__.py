@@ -4,7 +4,7 @@ from typing import IO, Tuple
 
 from io import BytesIO
 
-import numpy
+import numpy as np
 from skimage.io import imsave
 from slicedimage import (
     Collection,
@@ -91,7 +91,7 @@ class RandomNoiseImage(FetchedImage):
         return ImageFormat.TIFF
 
     def image_data_handle(self) -> IO:
-        arr = numpy.random.randint(0, 256, size=self.shape, dtype=numpy.uint8)
+        arr = np.random.randint(0, 256, size=self.shape, dtype=np.uint8)
         output = BytesIO()
         imsave(output, arr, plugin="tifffile")
         output.seek(0)

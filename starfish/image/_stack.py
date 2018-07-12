@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import scoreatpercentile
 from skimage import exposure
-from slicedimage import Reader, Writer
+from slicedimage import Reader, Writer, TileSet, Tile
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
@@ -713,6 +713,76 @@ class ImageStack:
                     "Dimension: {} not supported. Expecting one of: {}".format(dim, ImageStack.AXES_MAP.keys()))
 
         return np.max(self._data, axis=tuple(axes))
+
+    @staticmethod
+    def _default_tile_data_provider(hyb: int, ch: int, z: int, height: int, width: int) -> np.ndarray:
+        """
+        Returns a tile of just ones for any given hyb/ch/z.
+        """
+        return np.ones((height, width))
+
+    @staticmethod
+    def _default_tile_extras_provider(hyb: int, ch: int, z: int) -> Any:
+        """
+        Returns None for extras for any given hyb/ch/z.
+        """
+        return None
+
+    @classmethod
+    def synthetic_stack(
+            cls,
+            num_hyb: int = 2,
+            num_ch: int = 3,
+            num_z: int = 4,
+            tile_height: int = 30,
+            tile_width: int = 20,
+            tile_data_provider: Callable[[int, int, int, int, int], np.ndarray] = None,
+            tile_extras_provider: Callable[[int, int, int], Any] = None,
+    ) -> "ImageStack":
+        """generate a synthetic ImageStack
+
+        Returns
+        -------
+        ImageStack :
+            imagestack containing a tensor of (2, 3, 4, 30, 20) whose values are all 1.
+
+        """
+        if tile_data_provider is None:
+            tile_data_provider = cls._default_tile_data_provider
+        if tile_extras_provider is None:
+            tile_extras_provider = cls._default_tile_extras_provider
+
+        img = TileSet(
+            {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
+            {
+                Indices.HYB: num_hyb,
+                Indices.CH: num_ch,
+                Indices.Z: num_z,
+            },
+            default_tile_shape=(tile_height, tile_width),
+        )
+        for hyb in range(num_hyb):
+            for ch in range(num_ch):
+                for z in range(num_z):
+                    tile = Tile(
+                        {
+                            Coordinates.X: (0.0, 0.001),
+                            Coordinates.Y: (0.0, 0.001),
+                            Coordinates.Z: (0.0, 0.001),
+                        },
+                        {
+                            Indices.HYB: hyb,
+                            Indices.CH: ch,
+                            Indices.Z: z,
+                        },
+                        extras=tile_extras_provider(hyb, ch, z),
+                    )
+                    tile.numpy_array = tile_data_provider(hyb, ch, z, tile_height, tile_width)
+
+                    img.add_tile(tile)
+
+        stack = ImageStack(img)
+        return stack
 
     def squeeze(self) -> np.ndarray:
         """return an array that is linear over categorical dimensions and z

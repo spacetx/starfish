@@ -3,6 +3,7 @@ import json
 
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
+from starfish.intensity_table import IntensityTable
 from . import _base
 from . import point_in_poly
 
@@ -20,7 +21,7 @@ class GeneAssignment(PipelineComponent):
         """Adds the gene_assignment component to the CLI argument parser."""
         gene_assignment_group = subparsers.add_parser("gene_assignment")
         gene_assignment_group.add_argument("--coordinates-geojson", type=FsExistsType(), required=True)
-        gene_assignment_group.add_argument("--spots-json", type=FsExistsType(), required=True)
+        gene_assignment_group.add_argument("--intensities", type=FsExistsType(), required=True)
         gene_assignment_group.add_argument("-o", "--output", required=True)
         gene_assignment_group.set_defaults(starfish_command=GeneAssignment._cli)
         gene_assignment_subparsers = gene_assignment_group.add_subparsers(dest="gene_assignment_algorithm_class")
@@ -35,7 +36,6 @@ class GeneAssignment(PipelineComponent):
     @classmethod
     def _cli(cls, args, print_help=False):
         """Runs the gene_assignment component based on parsed arguments."""
-        import pandas
         from starfish import munge
 
         if args.gene_assignment_algorithm_class is None or print_help:
@@ -46,11 +46,12 @@ class GeneAssignment(PipelineComponent):
             coordinates = json.load(fh)
         regions = munge.geojson_to_region(coordinates)
 
-        spots = pandas.read_json(args.spots_json, orient="records")
+        print('Assigning genes to cells...')
+        intensity_table = IntensityTable.load(args.intensities)
 
         instance = args.gene_assignment_algorithm_class(**vars(args))
 
-        result = instance.assign_genes(spots, regions)
+        result = instance.assign_genes(intensity_table, regions)
 
         print("Writing | cell_id | spot_id to: {}".format(args.output))
         result.to_json(args.output, orient="records")

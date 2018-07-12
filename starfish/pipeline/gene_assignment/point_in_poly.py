@@ -1,22 +1,17 @@
 import numpy as np
-import pandas as pd
 from skimage.measure import points_in_poly
+import pandas as pd
 
 from ._base import GeneAssignmentAlgorithm
 
 
 class PointInPoly(GeneAssignmentAlgorithm):
-    def __init__(self, **kwargs):
-        pass
+    def __init__(self, verbose=False, **kwargs):
+        self.verbose = verbose
 
     @classmethod
     def add_arguments(cls, parser):
         pass
-
-    def assign_genes(self, spots, regions):
-        # TODO only works in 3D
-        points = spots.loc[:, ['x', 'y']].values
-        return self._assign(regions, points, use_hull=True)
 
     @staticmethod
     def _assign(cells_region, spots, use_hull=True, verbose=False):
@@ -36,3 +31,10 @@ class PointInPoly(GeneAssignmentAlgorithm):
                 print(cell_id, cnt)
 
         return res
+
+    def assign_genes(self, intensity_table, regions):
+
+        x = intensity_table.coords['features'].x.values
+        y = intensity_table.coords['features'].y.values
+        points = pd.DataFrame(dict(x=x, y=y))
+        return self._assign(regions, points, use_hull=True, verbose=self.verbose)

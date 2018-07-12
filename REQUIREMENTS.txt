@@ -5,7 +5,7 @@ pandas
 pytest
 regional
 requests
-scikit-image
+scikit-image>=0.14.0
 scikit-learn
 scipy
 showit
@@ -13,3 +13,4 @@ slicedimage == 0.0.0-dev21
 scikit-learn
 tqdm
 trackpy
+xarray

@@ -1,18 +1,17 @@
 import argparse
-from typing import IO, Tuple
-
+import json
 import io
 import os
-import json
 import zipfile
+from typing import IO, Tuple
 
 import requests
 from slicedimage import ImageFormat
 
+from examples.support import FetchedImage, ImageFetcher, write_experiment_json
+from starfish.codebook import Codebook
 from starfish.constants import Indices
 from starfish.util.argparse import FsExistsType
-from examples.support import FetchedImage, ImageFetcher, write_experiment_json
-
 
 SHAPE = (980, 1330)
 
@@ -121,8 +120,24 @@ def format_data(input_dir, output_dir, d):
     )
 
     codebook = [
-        {'barcode': "AAGC", 'gene': "ACTB_human"},
-        {'barcode': "AGGC", 'gene': "ACTB_mouse"},
+        {
+            Codebook.Constants.CODEWORD.value: [
+                {Indices.HYB.value: 0, Indices.CH.value: 3, Codebook.Constants.VALUE.value: 1},
+                {Indices.HYB.value: 1, Indices.CH.value: 3, Codebook.Constants.VALUE.value: 1},
+                {Indices.HYB.value: 2, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1},
+                {Indices.HYB.value: 3, Indices.CH.value: 2, Codebook.Constants.VALUE.value: 1}
+            ],
+            Codebook.Constants.GENE.value: "ACTB_human"
+        },
+        {
+            Codebook.Constants.CODEWORD.value: [
+                {Indices.HYB.value: 0, Indices.CH.value: 3, Codebook.Constants.VALUE.value: 1},
+                {Indices.HYB.value: 1, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1},
+                {Indices.HYB.value: 2, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1},
+                {Indices.HYB.value: 3, Indices.CH.value: 2, Codebook.Constants.VALUE.value: 1}
+            ],
+            Codebook.Constants.GENE.value: "ACTB_mouse"
+        },
     ]
     codebook_json_filename = "codebook.json"
     write_json(codebook, os.path.join(output_dir, codebook_json_filename))

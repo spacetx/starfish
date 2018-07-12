@@ -1,203 +1,112 @@
-import random
-from itertools import product
 from typing import Tuple
 
-import numpy as np
-from numpy import zeros, array
-from numpy.random import rand, normal, poisson
-from pandas import DataFrame, concat
-from skimage.exposure import rescale_intensity
-from skimage.filters import gaussian
-from slicedimage import Tile, TileSet
-
-from starfish.constants import Indices, Coordinates
+from starfish.codebook import Codebook
+from starfish.intensity_table import IntensityTable
 from starfish.image import ImageStack
-from starfish.io import Stack
 
 
-# TODO sofroniewn: doc me!
-def synthesize() -> Tuple[Stack, list]:
-    """Synthesize synthetic spatial image-based transcriptomics data
+class SyntheticData:
+    """Synthetic generator for spot data and container objects
 
-    Returns
-    -------
-    Stack :
-        starfish Stack containing synthetic spots
-    list :
-        codebook matching the synthetic data
+    Currently, this generator only generates codebooks with single channels "on" in each
+    hybridization round. Therefore, it can generate ISS and smFISH type experiments, but not
+    more complex codes.
+
+    Examples
+    --------
+    >>> from starfish.util.synthesize import SyntheticData
+
+    >>> sd = SyntheticData(n_ch=3, n_hyb=4, n_codes=2)
+    >>> codes = sd.codebook()
+    >>> codes
+    <xarray.Codebook (gene_name: 2, c: 3, h: 4)>
+    array([[[0, 0, 0, 0],
+            [0, 0, 1, 1],
+            [1, 1, 0, 0]],
+
+           [[1, 0, 0, 0],
+            [0, 0, 1, 0],
+            [0, 1, 0, 1]]], dtype=uint8)
+    Coordinates:
+      * gene_name  (gene_name) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
+      * c          (c) int64 0 1 2
+      * h          (h) int64 0 1 2 3
+
+    >>> # note that the features are drawn from the codebook
+    >>> intensities = sd.intensities(codebook=codes)
+    >>> intensities
+    <xarray.IntensityTable (features: 2, c: 3, h: 4)>
+    array([[[    0.,     0.,     0.,     0.],
+            [    0.,     0.,  8022., 12412.],
+            [11160.,  9546.,     0.,     0.]],
+
+           [[    0.,     0.,     0.,     0.],
+            [    0.,     0., 10506., 10830.],
+            [11172., 12331.,     0.,     0.]]])
+    Coordinates:
+      * features   (features) MultiIndex
+      - z          (features) int64 7 3
+      - y          (features) int64 14 32
+      - x          (features) int64 32 15
+      - r          (features) float64 nan nan
+      * c          (c) int64 0 1 2
+      * h          (h) int64 0 1 2 3
+        gene_name  (features) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
+
+    >>> sd.spots(intensities=intensities)
+    <starfish.image._stack.ImageStack at 0x10a60c5f8>
 
     """
 
-    # set random seed so that data is consistent across tests
-    random.seed(2)
-    np.random.seed(2)
+    def __init__(
+            self,
+            n_hyb: int=4,
+            n_ch: int=4,
+            n_z: int=10,
+            height: int=50,
+            width: int=45,
+            n_codes: int=16,
+            n_spots: int=20,
+            n_photons_background: int=1000,
+            background_electrons: int=1,
+            point_spread_function: Tuple[int, ...]=(4, 2, 2),
+            camera_detection_efficiency: float=0.25,
+            gray_level: float=37000.0 / 2 ** 16,
+            ad_conversion_bits: int=16,
+            mean_fluor_per_spot: int=200,
+            mean_photons_per_fluor: int=50,
 
-    NUM_HYB = 4
-    NUM_CH = 2
-    NUM_Z = 1
-    HEIGHT = 100
-    WIDTH = 100
+    ) -> None:
+        self.n_hyb = n_hyb
+        self.n_ch = n_ch
+        self.n_z = n_z
+        self.height = height
+        self.width = width
+        self.n_codes = n_codes
+        self.n_spots = n_spots
+        self.n_photons_background = n_photons_background
+        self.background_electrons = background_electrons
+        self.point_spread_function = point_spread_function
+        self.camera_detection_efficiency = camera_detection_efficiency
+        self.gray_level = gray_level
+        self.ad_coversion_bits = ad_conversion_bits
+        self.mean_fluor_per_spot = mean_fluor_per_spot
+        self.mean_photons_per_fluor = mean_photons_per_fluor
 
-    assert WIDTH == HEIGHT  # for compatibility with the parameterization of the code
+    def codebook(self) -> Codebook:
+        return Codebook.synthetic_one_hot_codebook(self.n_hyb, self.n_ch, self.n_codes)
 
-    def choose(n, k):
-        if n == k:
-            return [[1] * k]
-        subsets = [[0] + a for a in choose(n - 1, k)]
-        if k > 0:
-            subsets += [[1] + a for a in choose(n - 1, k - 1)]
-        return subsets
+    def intensities(self, codebook=None) -> IntensityTable:
+        if codebook is None:
+            codebook = self.codebook()
+        return IntensityTable.synthetic_intensities(
+            codebook, self.n_z, self.height, self.width, self.n_spots,
+            self.mean_fluor_per_spot, self.mean_photons_per_fluor)
 
-    def graham_sloane_codes(n):
-        # n is length of codeword
-        # number of on bits is 4
-        def code_sum(codeword):
-            return sum([i * c for i, c in enumerate(codeword)]) % n
-        return [c for c in choose(n, 4) if code_sum(c) == 0]
-
-    p = {
-        # number of on bits (not used with current codebook)
-        'N_high': 4,
-        # length of barcode
-        'N_barcode': NUM_CH * NUM_HYB,
-        # mean number of flourophores per transcripts - depends on amplification strategy (e.g HCR, bDNA)
-        'N_flour': 200,
-        # mean number of photons per flourophore - depends on exposure time, bleaching rate of dye
-        'N_photons_per_flour': 50,
-        # mean number of background photons per pixel - depends on tissue clearing and autoflourescence
-        'N_photon_background': 1000,
-        # quantum efficiency of the camera detector units number of electrons per photon
-        'detection_efficiency': .25,
-        # camera read noise per pixel in units electrons
-        'N_background_electrons': 1,
-        # number of RNA puncta; keep this low to reduce overlap probability
-        'N_spots': 20,
-        # height and width of image in pixel units
-        'N_size': WIDTH,
-        # standard devitation of gaussian in pixel units
-        'psf': 2,
-        # dynamic range of camera sensor 37,000 assuming a 16-bit AD converter
-        'graylevel': 37000.0 / 2 ** 16,
-        # 16-bit AD converter
-        'bits': 16
-    }
-
-    codebook = graham_sloane_codes(p['N_barcode'])
-
-    def generate_spot(p):
-        position = rand(2)
-        gene = random.choice(range(len(codebook)))
-        barcode = array(codebook[gene])
-        photons = [poisson(p['N_photons_per_flour']) * poisson(p['N_flour']) * b for b in barcode]
-        return DataFrame({'position': [position], 'barcode': [barcode], 'photons': [photons], 'gene': gene})
-
-    # right now there is no jitter on x-y positions of the spots, we might want to make it a vector
-    spots = concat([generate_spot(p) for _ in range(p['N_spots'])])  # type: ignore
-
-    image = zeros((p['N_barcode'], p['N_size'], p['N_size'],))
-
-    for s in spots.itertuples():
-        image[:, int(p['N_size'] * s.position[0]), int(p['N_size'] * s.position[1])] = s.photons
-
-    image_with_background = image + poisson(p['N_photon_background'], size=image.shape)
-    filtered = array([gaussian(im, p['psf']) for im in image_with_background])
-    filtered = filtered * p['detection_efficiency'] + normal(scale=p['N_background_electrons'], size=filtered.shape)
-    signal = np.array([(x / p['graylevel']).astype(int).clip(0, 2 ** p['bits']) for x in filtered])
-
-    def select_uint_dtype(array):
-        """choose appropriate dtype based on values of an array"""
-        max_val = np.max(array)
-        for dtype in [np.uint8, np.uint16, np.uint32, np.uint64]:
-            if max_val <= dtype(-1):
-                return array.astype(dtype)
-        raise ValueError('value exceeds dynamic range of largest numpy type')
-
-    corrected_signal = select_uint_dtype(signal)
-    rescaled_signal: np.ndarray = rescale_intensity(corrected_signal)
-
-    # set up the tile set
-    image_data = TileSet(
-        {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
-        {
-            Indices.HYB: NUM_HYB,
-            Indices.CH: NUM_CH,
-            Indices.Z: NUM_Z,
-        },
-        default_tile_shape=(HEIGHT, WIDTH),
-    )
-
-    # fill the TileSet
-    experiment_indices = list(product(range(NUM_HYB), range(NUM_CH), range(NUM_Z)))
-    for i, (hyb, ch, z) in enumerate(experiment_indices):
-
-        tile = Tile(
-            {
-                Coordinates.X: (0.0, 0.001),
-                Coordinates.Y: (0.0, 0.001),
-                Coordinates.Z: (0.0, 0.001),
-            },
-            {
-                Indices.HYB: hyb,
-                Indices.CH: ch,
-                Indices.Z: z,
-            }
-        )
-        tile.numpy_array = rescaled_signal[i]
-
-        image_data.add_tile(tile)
-
-    data_stack = ImageStack(image_data)
-
-    # make a max projection and pretend that's the dots image, which we'll create another ImageStack for this
-    dots_data = TileSet(
-        {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
-        {
-            Indices.HYB: 1,
-            Indices.CH: 1,
-            Indices.Z: 1,
-        },
-        default_tile_shape=(HEIGHT, WIDTH),
-    )
-    tile = Tile(
-        {
-            Coordinates.X: (0.0, 0.001),
-            Coordinates.Y: (0.0, 0.001),
-            Coordinates.Z: (0.0, 0.001),
-        },
-        {
-            Indices.HYB: 0,
-            Indices.CH: 0,
-            Indices.Z: 0,
-        }
-    )
-
-    tile.numpy_array = np.max(rescaled_signal, 0)
-
-    dots_data.add_tile(tile)
-    dots_stack = ImageStack(dots_data)
-
-    # TODO can we mock up a nuclei image somehow?
-
-    # put the data together into a top-level Stack
-    results = Stack.from_data(data_stack, aux_dict={'dots': dots_stack})
-
-    # make the codebook(s)
-    codebook = []
-    for _, code_record in spots.iterrows():
-        codeword = []
-        for code_value, (hyb, ch, z) in zip(code_record['barcode'], experiment_indices):
-            if code_value != 0:
-                codeword.append({
-                    Indices.HYB: hyb,
-                    Indices.CH: ch,
-                    Indices.Z: z,
-                    "v": code_value
-                })
-        codebook.append(
-            {
-                'codeword': codeword,
-                'gene_name': code_record['gene']
-            }
-        )
-
-    return results, codebook
+    def spots(self, intensities=None) -> ImageStack:
+        if intensities is None:
+            intensities = self.intensities()
+        return ImageStack.synthetic_spots(
+            intensities, self.n_z, self.height, self.width, self.n_photons_background,
+            self.point_spread_function, self.camera_detection_efficiency,
+            self.background_electrons, self.gray_level, self.ad_coversion_bits)

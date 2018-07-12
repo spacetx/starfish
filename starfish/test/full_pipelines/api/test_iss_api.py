@@ -1,22 +1,43 @@
 from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
 from starfish.pipeline.filter.white_tophat import WhiteTophat
 from starfish.pipeline.registration.fourier_shift import FourierShiftRegistration
-from starfish.test.dataset_fixtures import labeled_synthetic_dataset
+from starfish.util.synthesize import SyntheticData
+import numpy as np
+from starfish.constants import Indices
+from starfish.image import ImageStack
 
 
-def test_merfish_pipeline():
-    stack = labeled_synthetic_dataset()
+def test_iss_pipeline():
+    np.random.seed(2)
+    synthesizer = SyntheticData(n_spots=5)
+    codebook = synthesizer.codebook()
+    true_intensities = synthesizer.intensities(codebook=codebook)
+    image = synthesizer.spots(intensities=true_intensities)
 
-    fsr = FourierShiftRegistration(upsampling=1000, reference_stack=stack.auxiliary_images['dots'])
-    fsr.register(stack.image)
+    dots_data = image.max_proj(Indices.HYB, Indices.CH, Indices.Z)
+    dots = ImageStack.from_numpy_array(dots_data.reshape((1, 1, 1, *dots_data.shape)))
 
     wth = WhiteTophat(disk_size=15)
-    wth.filter(stack.image)
-    for image in stack.auxiliary_images.values():
-        wth.filter(image)
+    wth.filter(image)
+    wth.filter(dots)
 
+    fsr = FourierShiftRegistration(upsampling=1000, reference_stack=dots)
+    fsr.register(image)
+
+    min_sigma = 1.5
+    max_sigma = 5
+    num_sigma = 10
+    threshold = 1e-4
     gsd = GaussianSpotDetector(
-        blobs_stack=stack.auxiliary_images['dots'], min_sigma=2, max_sigma=10, num_sigma=10, threshold=0.1)
-    spot_attributes, encoded_spots = gsd.find(stack.image)
+        min_sigma=min_sigma,
+        max_sigma=max_sigma,
+        num_sigma=num_sigma,
+        threshold=threshold,
+        blobs_stack=dots,
+        measurement_type='max',
+    )
 
-    assert spot_attributes.data.shape[0] == 19
+    intensities = gsd.find(hybridization_image=image)
+    assert intensities.shape[0] == 5
+
+    codebook.decode_euclidean(intensities)

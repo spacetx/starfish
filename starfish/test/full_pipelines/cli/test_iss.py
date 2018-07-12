@@ -1,4 +1,3 @@
-import collections
 import json
 import os
 import shutil
@@ -9,7 +8,11 @@ import unittest
 from typing import Sequence
 
 import jsonpath_rw
+import numpy as np
+import pandas as pd
 
+from starfish.codebook import Codebook
+from starfish.intensity_table import IntensityTable
 from starfish.util import clock
 
 
@@ -113,18 +116,18 @@ class TestWithIssData(unittest.TestCase):
             "starfish", "gene_assignment",
             "--coordinates-geojson",
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.geojson"),
-            "--spots-json", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.json"),
+            "--intensities", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.json"),
             "PointInPoly",
         ],
         [
             "starfish", "decode",
-            "-i", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "encoder_table.json"),
+            "-i", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
             "--codebook", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
                 [tempdir, "formatted", "experiment.json"],
                 "$['codebook']",
             ),
-            "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "decoded_table.json"),
+            "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
             "IssDecoder",
         ],
     )
@@ -156,16 +159,13 @@ class TestWithIssData(unittest.TestCase):
                     cmdline = coverage_cmdline
                 with clock.timeit(callback):
                     subprocess.check_call(cmdline)
-            with open(os.path.join(tempdir, "results", "decoded_table.json")) as fh:
-                results = json.load(fh)
 
-            counts = collections.defaultdict(lambda: 0)
-            for record in results:
-                counts[record["barcode"]] += 1
-            tuples = [(count, barcode) for barcode, count in counts.items()]
-            tuples.sort(reverse=True)
-            self.assertEqual("AAGC", tuples[0][1])
-            self.assertEqual("AGGC", tuples[1][1])
+            intensities = IntensityTable.load(os.path.join(tempdir, "results", "spots.nc"))
+            genes, counts = np.unique(
+                intensities.coords[Codebook.Constants.GENE.value], return_counts=True)
+            gene_counts = pd.Series(counts, genes)
+            assert gene_counts['ACTB_human'] > gene_counts['ACTB_mouse']
+
         finally:
             if os.getenv("TEST_ISS_KEEP_DATA") is None:
                 shutil.rmtree(tempdir)

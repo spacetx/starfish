@@ -22,7 +22,7 @@ def test_loading_codebook_from_json_local_file(simple_codebook_json):
     assert isinstance(cb, Codebook)
 
 
-@patch('starfish.pipeline.features.codebook.urllib.request.urlopen')
+@patch('starfish.codebook.urllib.request.urlopen')
 def test_loading_codebook_from_json_https_file(mock_urlopen):
 
     # codebook data to pass to the mock

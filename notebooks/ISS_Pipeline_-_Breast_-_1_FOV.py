@@ -21,9 +21,12 @@ import pprint
 
 from starfish.io import Stack
 from starfish.constants import Indices
+from starfish.codebook import Codebook
+# EPY: END code
 
+# EPY: START code
 s = Stack()
-s.read('https://dmf0bdeheu4zf.cloudfront.net/20180611/ISS/fov_001/experiment.json')
+s.read('https://dmf0bdeheu4zf.cloudfront.net/20180716/ISS/fov_001/experiment.json')
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 tile(s.image.squeeze());
 # EPY: END code
@@ -77,37 +80,7 @@ image(s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z))
 # EPY: END markdown
 
 # EPY: START code
-codebook = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180606/ISS/codebook.csv', dtype={'barcode': object})
-codebook.head(4)
-# EPY: END code
-
-# EPY: START markdown
-# We need to translate the codebook to the new version. This is temporary, and will be fixed in #313, wherein they'll be downloaded directly.
-# EPY: END markdown
-
-# EPY: START code
-from starfish.codebook import Codebook
-
-n_ch = 4
-n_hyb = 4
-modern_codebook = Codebook._empty_codebook(codebook['gene'], n_ch, n_hyb)
-
-dna_map = {
-    'A': 3,
-    'C': 2,
-    'G': 1,
-    'T': 0
-}
-
-for _, (gene, barcode) in codebook.iterrows():
-    for hyb, nucleotide in enumerate(barcode):
-        ch = dna_map[nucleotide]
-        modern_codebook.loc[gene, ch, hyb] = 1
-        
-codebook = modern_codebook
-# EPY: END code
-
-# EPY: START code
+codebook = Codebook.from_json('https://s3.amazonaws.com/czi.starfish.data.public/20180716/ISS/codebook.json')
 codebook
 # EPY: END code
 
@@ -122,7 +95,7 @@ from starfish.pipeline.filter import Filter
 
 # filter raw data
 disk_size = 15  # disk as in circle
-filt = Filter.WhiteTophat(disk_size)
+filt = Filter.WhiteTophat(disk_size, verbose=True)
 filt.filter(s.image)
 for img in s.auxiliary_images.values():
     filt.filter(img)
@@ -144,7 +117,7 @@ for img in s.auxiliary_images.values():
 # EPY: START code
 from starfish.pipeline.registration import Registration
 
-registration = Registration.FourierShiftRegistration(upsampling=1000, reference_stack=s.auxiliary_images['dots'])
+registration = Registration.FourierShiftRegistration(upsampling=1000, reference_stack=s.auxiliary_images['dots'], verbose=True)
 registration.register(s.image)
 # EPY: END code
 
@@ -244,6 +217,7 @@ table.head()
 # EPY: START code
 assert table.index.get_loc('HER2') < 10
 assert table.index.get_loc('VIM') < 10
+table.head()
 # EPY: END code
 
 # EPY: START markdown

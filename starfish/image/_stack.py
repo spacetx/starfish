@@ -301,11 +301,13 @@ class ImageStack:
         linear_view: np.ndarray = data.reshape((n,) + data.shape[-2:])
 
         # set the labels for the linearized tiles
-
-        labels = []
+        labels: List[List[str]] = []
         for index, size in zip(remaining_inds, data.shape[:-2]):
             labels.append([f'{index}{n}' for n in range(size)])
-        labels = list(product(*labels))
+
+        # mypy thinks this has an incompatible type "Iterator[Tuple[Any, ...]]";
+        # it expects "Iterable[List[str]]"
+        labels = list(product(*labels))  # type: ignore
 
         n = linear_view.shape[0]
 

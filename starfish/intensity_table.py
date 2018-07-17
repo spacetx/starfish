@@ -29,7 +29,7 @@ class IntensityTable(xr.DataArray):
     Attributes
     ----------
     Constants.FEATURES     name of the first axis of the IntensityTable
-    Constants.GENE :       name of the field that stores the decoded gene identity for each feature
+    Constants.GENE         name of the field that stores the decoded gene identity for each feature
     Constants.QUALITY      name of the field that stores the decoded gene quality for each feature
     SpotAttributes.X       name of the pixelwise spot x-coordinate
     SpotAttributes.Y       name of the pixelwise spot y-coordinate

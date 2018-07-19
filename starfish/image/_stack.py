@@ -1,10 +1,10 @@
 import collections
 import os
+import warnings
+from copy import deepcopy
 from functools import partial
 from itertools import product
 from typing import Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
-import warnings
-from copy import deepcopy
 
 import numpy as np
 import pandas as pd
@@ -19,6 +19,9 @@ from starfish.constants import Coordinates, Indices
 from starfish.errors import DataFormatWarning
 from starfish.pipeline.features.spot_attributes import SpotAttributes
 from starfish.intensity_table import IntensityTable
+
+
+_DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
 
 class ImageStack:
@@ -43,12 +46,12 @@ class ImageStack:
     shape        the shape of the image tensor by categorical index (channels, hybridization rounds, z-layers)
     """
 
-    AXES_MAP = {
-        Indices.HYB: 0,
-        Indices.CH: 1,
-        Indices.Z: 2,
+    AXES_DATA: Mapping[Indices, _DimensionMetadata] = {
+        Indices.HYB: _DimensionMetadata(0, True),
+        Indices.CH: _DimensionMetadata(1, True),
+        Indices.Z: _DimensionMetadata(2, False),
     }
-    N_AXES = max(AXES_MAP.values()) + 1
+    N_AXES = max(data.order for data in AXES_DATA.values()) + 1
 
     def __init__(self, image_partition):
         self._image_partition = image_partition
@@ -403,14 +406,14 @@ class ImageStack:
         axes = []
         removed_axes = set()
         for name, value in indices.items():
-            idx = ImageStack.AXES_MAP[name]
+            idx = ImageStack.AXES_DATA[name].order
             if not isinstance(value, slice):
                 removed_axes.add(name)
             slice_list[idx] = value
 
         for dimension_value, dimension_name in sorted([
-            (dimension_value, dimension_name)
-            for dimension_name, dimension_value in ImageStack.AXES_MAP.items()
+            (dimension_value.order, dimension_name)
+            for dimension_name, dimension_value in ImageStack.AXES_DATA.items()
         ]):
             if dimension_name not in removed_axes:
                 axes.append(dimension_name)
@@ -610,8 +613,8 @@ class ImageStack:
         # breaks horribly.  Can't find a bug id to link to, but see
         # https://stackoverflow.com/questions/41207128/how-do-i-specify-ordereddict-k-v-types-for-mypy-type-annotation
         result: collections.OrderedDict[Any, str] = collections.OrderedDict()
-        for name, idx in ImageStack.AXES_MAP.items():
-            result[name] = self._data.shape[idx]
+        for name, data in ImageStack.AXES_DATA.items():
+            result[name] = self._data.shape[data.order]
         result['y'] = self._data.shape[-2]
         result['x'] = self._data.shape[-1]
 
@@ -721,10 +724,10 @@ class ImageStack:
 
         for dim in dims:
             try:
-                axes.append(ImageStack.AXES_MAP[dim])
+                axes.append(ImageStack.AXES_DATA[dim].order)
             except KeyError:
                 raise ValueError(
-                    "Dimension: {} not supported. Expecting one of: {}".format(dim, ImageStack.AXES_MAP.keys()))
+                    "Dimension: {} not supported. Expecting one of: {}".format(dim, ImageStack.AXES_DATA.keys()))
 
         max_projection = np.max(self._data, axis=tuple(axes)).astype(dtype)
         return max_projection

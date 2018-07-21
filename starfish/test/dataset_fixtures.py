@@ -238,3 +238,14 @@ def synthetic_spot_pass_through_stack(synthetic_dataset_with_truth_values):
         point_spread_function=(0, 0, 0), camera_detection_efficiency=1.0,
         background_electrons=0, graylevel=1)
     return codebook, true_intensities, img_stack
+
+
+@pytest.fixture()
+def single_synthetic_spot():
+    sd = synthesize.SyntheticData(
+        n_hyb=2, n_ch=2, n_z=2, height=20, width=30, n_codes=1, n_spots=1
+    )
+    codebook = sd.codebook()
+    intensities = sd.intensities(codebook)
+    image = sd.spots(intensities)
+    return codebook, intensities, image

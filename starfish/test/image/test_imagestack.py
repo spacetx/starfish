@@ -221,7 +221,7 @@ def test_imagestack_to_intensity_table(single_synthetic_spot):
     codebook, intensity_table, image = single_synthetic_spot
     pixel_intensities = IntensityTable.from_image_stack(image)
     pixel_intensities = codebook.metric_decode(
-        pixel_intensities, max_distance=0, min_intensity=1000, norm=2)
+        pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2)
     assert isinstance(pixel_intensities, IntensityTable)
 
 
@@ -229,5 +229,5 @@ def test_imagestack_to_intensity_table_no_noise(synthetic_spot_pass_through_stac
     codebook, intensity_table, image = synthetic_spot_pass_through_stack
     pixel_intensities = IntensityTable.from_image_stack(image)
     pixel_intensities = codebook.metric_decode(
-        pixel_intensities, max_distance=0, min_intensity=1000, norm=2)
+        pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2)
     assert isinstance(pixel_intensities, IntensityTable)

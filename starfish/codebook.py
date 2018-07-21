@@ -430,7 +430,7 @@ class Codebook(xr.DataArray):
 
     def metric_decode(
             self, intensities: IntensityTable, max_distance: Number, min_intensity: Number,
-            norm: int, metric: str='euclidean'
+            norm_order: int, metric: str= 'euclidean'
     ) -> IntensityTable:
         """Assign the closest gene by euclidean distance to each feature in an intensity table
 
@@ -446,7 +446,7 @@ class Codebook(xr.DataArray):
             be assigned.
         min_intensity : Number
             minimum intensity for a feature to receive a gene id
-        norm : int
+        norm_order : int
             the scipy.linalg norm to apply to normalize codes and intensities
         metric : str
             the sklearn metric string to pass to NearestNeighbors
@@ -464,8 +464,8 @@ class Codebook(xr.DataArray):
 
         """
         # normalize both the intensities and the codebook
-        norm_intensities, norms = self._normalize_features(intensities, norm_order=norm)
-        norm_codes, _ = self._normalize_features(self, norm_order=norm)
+        norm_intensities, norms = self._normalize_features(intensities, norm_order=norm_order)
+        norm_codes, _ = self._normalize_features(self, norm_order=norm_order)
 
         # mask low intensity features
         intensity_mask = np.where(norms < min_intensity)[0]

@@ -32,7 +32,7 @@ class IntensityTable(xr.DataArray):
     ----------
     Constants.FEATURES     name of the first axis of the IntensityTable
     Constants.GENE         name of the field that stores the decoded gene identity for each feature
-    Constants.QUALITY      name of the field that stores the decoded gene quality for each feature
+    Constants.DISTANCE     name of the field that stores the decoded gene quality for each feature
     SpotAttributes.X       name of the pixelwise spot x-coordinate
     SpotAttributes.Y       name of the pixelwise spot y-coordinate
     SpotAttributes.Z       name of the pixelwise spot z-coordinate
@@ -67,7 +67,7 @@ class IntensityTable(xr.DataArray):
     class Constants(AugmentedEnum):
         FEATURES = 'features'
         GENE = 'gene_name'
-        QUALITY = 'quality'
+        DISTANCE = 'distance'
 
     class SpotAttributes(AugmentedEnum):
         X = 'x'
@@ -333,3 +333,15 @@ class IntensityTable(xr.DataArray):
         image_size = cropped_data.shape[:3]
 
         return IntensityTable.from_spot_data(intensity_data, spot_attributes, image_size)
+
+    def mask_low_intensity_features(self, intensity_threshold):
+        """return the indices of features that have average intensity below intensity_threshold"""
+        mask = np.where(
+            self.mean([Indices.CH.value, Indices.HYB.value]).values < intensity_threshold)[0]
+        return mask
+
+    def mask_small_features(self, min_size: int, max_size: int):
+        """return the indices of features whose radii are smaller than size_threshold"""
+        mask = np.where(self.coords.features[self.SpotAttributes.RADIUS.value] < min_size)[0]
+        mask |= np.where(self.coords.features[self.SpotAttributes.RADIUS.value] > max_size)[0]
+        return mask

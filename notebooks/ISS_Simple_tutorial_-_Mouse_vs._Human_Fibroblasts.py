@@ -158,7 +158,7 @@ from starfish.decoders.iss import IssDecoder
 
 decoder = IssDecoder(pd.DataFrame({'barcode': ['AAGC', 'AGGC'], 'gene': ['ACTB_human', 'ACTB_mouse']}), 
                      letters=['T', 'G', 'C', 'A'])
-dec = decoder.decode_euclidean(spots_df_tidy)
+dec = decoder.metric_decode(spots_df_tidy)
 dec.qual.hist(bins=20)
 top_barcode = dec.barcode.value_counts()[0:10]
 top_barcode

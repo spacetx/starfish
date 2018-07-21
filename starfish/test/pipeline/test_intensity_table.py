@@ -106,7 +106,7 @@ def test_combine_adjacent_features():
         new_intensities,
         max_distance=0.5,
         min_intensity=0.5,
-        norm=2
+        norm_order=2
     )
 
     # this is "working", with the caveat that the z-coord is a bit weird and potentially wrong.

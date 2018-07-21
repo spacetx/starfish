@@ -128,7 +128,7 @@ def loaded_codebook(simple_codebook_json):
 @pytest.fixture(scope='function')
 def euclidean_decoded_intensities(small_intensity_table, loaded_codebook):
     decoded_intensities = loaded_codebook.metric_decode(
-        small_intensity_table, max_distance=0, norm=2, min_intensity=0)
+        small_intensity_table, max_distance=0, norm_order=2, min_intensity=0)
     assert decoded_intensities.shape == (5, 2, 2)
     return decoded_intensities
 
@@ -183,7 +183,7 @@ def synthetic_dataset_with_truth_values_and_called_spots(
     intensities = gsd.find(hybridization_image=filtered)
     assert intensities.shape[0] == 5
 
-    codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm=2)
+    codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm_order=2)
 
     return codebook, true_intensities, image, intensities
 

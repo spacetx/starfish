@@ -40,4 +40,4 @@ def test_iss_pipeline():
     intensities = gsd.find(hybridization_image=image)
     assert intensities.shape[0] == 5
 
-    codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm=2)
+    codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm_order=2)

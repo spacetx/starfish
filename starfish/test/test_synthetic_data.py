@@ -26,7 +26,7 @@ def test_round_trip_synthetic_data():
     gsd = GaussianSpotDetector(
         min_sigma=1, max_sigma=4, num_sigma=5, threshold=0, blobs_stack=spots)
     calculated_intensities = gsd.find(spots)
-    codebook.metric_decode(calculated_intensities, max_distance=1, min_intensity=0, norm=2)
+    codebook.metric_decode(calculated_intensities, max_distance=1, min_intensity=0, norm_order=2)
 
     # applying the gaussian blur to the intensities causes them to be reduced in magnitude, so
     # they won't be the same size, but they should be in the same place, and decode the same
@@ -83,7 +83,7 @@ def test_medium_synthetic_stack():
 
     gsd = GaussianSpotDetector(min_sigma=1, max_sigma=4, num_sigma=5, threshold=1e-4, blobs_stack=spots)
     calculated_intensities = gsd.find(spots)
-    codebook.metric_decode(calculated_intensities, max_distance=1, min_intensity=0, norm=2)
+    codebook.metric_decode(calculated_intensities, max_distance=1, min_intensity=0, norm_order=2)
 
     # spots are detected in a different order that they're generated; sorting makes comparison easy
     sorted_intensities = intensities.sortby('features')

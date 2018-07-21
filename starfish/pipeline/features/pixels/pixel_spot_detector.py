@@ -1,21 +1,18 @@
-from typing import List, Tuple
-
-import numpy as np
-
+from typing import Tuple
 
 from starfish.codebook import Codebook
 from starfish.image import ImageStack
 from starfish.intensity_table import IntensityTable
 from starfish.pipeline.features.pixels.combine_adjacent_features import \
-    ConnectedComponentDecodingResult
+    ConnectedComponentDecodingResult, combine_adjacent_features
 from ._base import PixelFinderAlgorithmBase
 
 
 class PixelSpotDetector(PixelFinderAlgorithmBase):
 
     def __init__(
-            self, codebook: Codebook, distance_threshold: float=0.5176,
-            magnitude_threshold: int=1, area_threshold: int=2,
+            self, codebook: Codebook, distance_threshold: float,
+            magnitude_threshold: int, min_area: int, max_area: int, norm_order: int=2,
             crop_x: int=0, crop_y: int=0, crop_z: int=0, **kwargs) -> None:
         """Decode an image by first coding each pixel, then combining the results into spots
 
@@ -25,11 +22,15 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
             Codebook object mapping codewords to the genes they represent
         distance_threshold : float
             spots whose codewords are more than this distance from an expected code are filtered
-            (default = 0.5176)
         magnitude_threshold : int
-            spots with intensity less than this value are filtered (default 1)
-        area_threshold : int
+            spots with intensity less than this value are filtered
+        min_area : int
             spots with total area less than this value are filtered
+        max_area : int
+            spots with total area greater than this value are filtered
+        norm_order : int
+            order of L_p norm to apply to intensities and codes when using metric_decode to pair
+            each intensities to its closest target (default = 2)
         crop_x, crop_y, crop_z : int
             number of pixels to crop from the top and bottom of each of the x, y, and z axes of
             an ImageStack (default = 0)
@@ -38,7 +39,9 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
         self.codebook = codebook
         self.distance_threshold = distance_threshold
         self.magnitude_threshold = magnitude_threshold
-        self.area_threshold = area_threshold
+        self.min_area = min_area
+        self.max_area = max_area
+        self.norm_order = norm_order
         self.crop_x = crop_x
         self.crop_y = crop_y
         self.crop_z = crop_z
@@ -62,14 +65,16 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
         """
         pixel_intensities = IntensityTable.from_image_stack(
             stack, crop_x=self.crop_x, crop_y=self.crop_y, crop_z=self.crop_z)
-        decoded_intensities = self.codebook.decode_euclidean(
+        decoded_intensities = self.codebook.metric_decode(
             pixel_intensities,
             max_distance=self.distance_threshold,
-            min_intensity=self.magnitude_threshold
+            min_intensity=self.magnitude_threshold,
+            norm_order=self.norm_order
         )
-        decoded_spots, image_decoding_results = decoded_intensities.combine_adjacent_features(
-            area_threshold=self.area_threshold,
-            assume_contiguous=True
+        decoded_spots, image_decoding_results = combine_adjacent_features(
+            decoded_intensities,
+            min_area=self.min_area,
+            max_area=self.max_area
         )
 
         return decoded_spots, image_decoding_results

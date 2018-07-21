@@ -5,6 +5,7 @@ import os
 import numpy as np
 import pytest
 from unittest.mock import patch, MagicMock
+import xarray as xr
 
 from starfish.constants import Indices
 from starfish.codebook import Codebook
@@ -69,10 +70,14 @@ def test_loading_codebook_with_too_few_dims_raises_value_error(simple_codebook_j
 
 
 def test_euclidean_decode_yields_correct_output(euclidean_decoded_intensities):
-    expected_gene_annotation = np.array(["ACTB", "SCUBE2", "BRCA"])
+    expected_gene_annotation = np.array(["ACTB", "SCUBE2", "BRCA", "None", "SCUBE2"])
     observed_gene_annotation = euclidean_decoded_intensities[
         IntensityTable.Constants.GENE.value].values
+    expected_distances = np.array([0, 0, 0, 0.76536686, 0])
+    observed_distances = euclidean_decoded_intensities[
+        IntensityTable.Constants.DISTANCE.value].values
     assert np.array_equal(expected_gene_annotation, observed_gene_annotation)
+    assert np.allclose(expected_distances, observed_distances)
 
 
 def test_indexing_on_set_genes(euclidean_decoded_intensities):
@@ -88,15 +93,8 @@ def test_indexing_on_set_genes(euclidean_decoded_intensities):
     assert result.shape == (1, 2, 2)
 
 
-def test_synthetic_codes_are_on_only_once_per_channel(euclidean_decoded_intensities):
-    expected_gene_annotation = np.array(["ACTB", "SCUBE2", "BRCA"])
-    observed_gene_annotation = euclidean_decoded_intensities[
-        IntensityTable.Constants.GENE.value].values
-    assert np.array_equal(expected_gene_annotation, observed_gene_annotation)
-
-
 def test_per_channel_max_decode_yields_expected_results(per_channel_max_decoded_intensities):
-    expected_gene_annotation = np.array(["ACTB", "SCUBE2", "BRCA"])
+    expected_gene_annotation = np.array(["ACTB", "SCUBE2", "BRCA", "None", "SCUBE2"])
     observed_gene_annotation = per_channel_max_decoded_intensities[
         IntensityTable.Constants.GENE.value].values
     assert np.array_equal(expected_gene_annotation, observed_gene_annotation)
@@ -132,3 +130,22 @@ def test_code_length(n_ch, n_hyb):
     gene_names = np.arange(10)
     cb = Codebook._empty_codebook(gene_names, n_ch, n_hyb)
     assert cb.code_length == n_ch * n_hyb
+
+
+def test_unit_normalize():
+    simple_data = np.array(
+        [[[0, 1],
+          [2, 1]],
+         [[0, 0],
+          [0, 0]],
+         [[9, 0],
+          [0, 1]]]
+    )
+    simple_codebook = Codebook(
+        data=simple_data,
+        dims=(['features', 'c', 'h']),
+        coords=(list('xyz'), list('vw'), list('tu'))
+    )
+
+    results, _ = Codebook._normalize_features(simple_codebook, norm_order=1)
+    assert np.array_equal(results.sum(['c', 'h']), np.ones(3))

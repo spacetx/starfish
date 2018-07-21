@@ -62,14 +62,18 @@ def small_intensity_table():
          [0, 1]],
         [[0, 0],
          [1, 1]],
+        [[0.5, 0.5],  # this one should fail decoding
+         [0.5, 0.5]],
+        [[0.1, 0],
+         [0, 0.1]],  # this one is a candidate for intensity filtering
     ])
 
     spot_attributes = dataframe_to_multiindex(pd.DataFrame(
         data={
-            IntensityTable.SpotAttributes.X: [0, 1, 2],
-            IntensityTable.SpotAttributes.Y: [3, 4, 5],
-            IntensityTable.SpotAttributes.Z: [0, 0, 0],
-            IntensityTable.SpotAttributes.RADIUS: [0.1, 0.2, 0.3]
+            IntensityTable.SpotAttributes.X: [0, 1, 2, 3, 4],
+            IntensityTable.SpotAttributes.Y: [3, 4, 5, 6, 7],
+            IntensityTable.SpotAttributes.Z: [0, 0, 0, 0, 0],
+            IntensityTable.SpotAttributes.RADIUS: [0.1, 2, 3, 2, 1]
         }
     ))
     image_shape = (3, 2, 2)
@@ -123,7 +127,9 @@ def loaded_codebook(simple_codebook_json):
 
 @pytest.fixture(scope='function')
 def euclidean_decoded_intensities(small_intensity_table, loaded_codebook):
-    decoded_intensities = loaded_codebook.decode_euclidean(small_intensity_table)
+    decoded_intensities = loaded_codebook.metric_decode(
+        small_intensity_table, max_distance=0, norm=2, min_intensity=0)
+    assert decoded_intensities.shape == (5, 2, 2)
     return decoded_intensities
 
 
@@ -177,7 +183,7 @@ def synthetic_dataset_with_truth_values_and_called_spots(
     intensities = gsd.find(hybridization_image=filtered)
     assert intensities.shape[0] == 5
 
-    codebook.decode_euclidean(intensities)
+    codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm=2)
 
     return codebook, true_intensities, image, intensities
 

@@ -1,16 +1,17 @@
-import functools
 import json
 import urllib.request
 import uuid
-from typing import Any, Dict, List, Optional, Sequence, Set, Union
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import validators
 import xarray as xr
+from sklearn.neighbors import NearestNeighbors
 
 from starfish.constants import Indices, AugmentedEnum
 from starfish.intensity_table import IntensityTable
+from starfish.typing import Number
 
 
 class Codebook(xr.DataArray):
@@ -356,67 +357,134 @@ class Codebook(xr.DataArray):
         with open(filename, 'w') as f:
             json.dump(code_array, f)
 
-    def decode_euclidean(self, intensities: IntensityTable) -> IntensityTable:
+    @staticmethod
+    def _normalize_features(array: Union["Codebook", IntensityTable], norm_order) \
+            -> Tuple[Union["Codebook", IntensityTable], np.ndarray]:
+        """unit normalize each feature of array
+
+        Parameters
+        ----------
+        array : Union[Codebook, IntensityTable]
+            codebook or intensity table containing (ch, r) features to normalize
+        norm_order : int
+            the norm to apply to each feature
+
+        See Also
+        --------
+        The available norms for this function can be found at the following link:
+        https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.linalg.norm.html
+
+        Returns
+        -------
+        Union[IntensityTable, Codebook] :
+            IntensityTable or Codebook containing normalized features
+        np.ndarray :
+            A 1 dimensional numpy array containing the feature norms
+
+        """
+        feature_traces = array.stack(traces=(Indices.CH.value, Indices.HYB.value))
+        norm = np.linalg.norm(feature_traces.values, ord=norm_order, axis=1)
+        array = array / norm[:, None, None]
+
+        # if a feature is all zero, the information should be spread across the channel
+        n = array.sizes[Indices.CH.value] * array.sizes[Indices.HYB.value]
+        partitioned_intensity = np.linalg.norm(np.full(n, fill_value=1 / n), ord=norm_order) / n
+        array = array.fillna(partitioned_intensity)
+
+        return array, norm
+
+    @staticmethod
+    def _approximate_nearest_code(
+            norm_codes: "Codebook", norm_intensities: xr.DataArray, metric: str,
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """find the nearest code for each feature using the ball_tree approximate NN algorithm
+
+        Parameters
+        ----------
+        norm_codes : Codebook
+            codebook with each code normalized to unit length (sum = 1)
+        norm_intensities : IntensityTable
+            intensity table with each feature normalized to unit length (sum = 1)
+        metric : str
+            the sklearn metric string to pass to NearestNeighbors
+
+        Returns
+        -------
+        np.ndarray : metric_output
+            the output of metric applied to each feature closest code
+        np.ndarray : gene_ids
+            the gene that corresponds to each matched code
+
+        """
+        # TODO ambrosejcarr: see if features can be pre-masked to reduce NN calculations
+        linear_codes = norm_codes.stack(traces=(Indices.CH.value, Indices.HYB.value)).values
+        linear_features = norm_intensities.stack(
+            traces=(Indices.CH.value, Indices.HYB.value)).values
+
+        # reshape into traces
+        nn = NearestNeighbors(n_neighbors=1, algorithm='ball_tree', metric=metric).fit(linear_codes)
+        metric_output, indices = nn.kneighbors(linear_features)
+        gene_ids = np.ravel(norm_codes.indexes[Codebook.Constants.GENE.value].values[indices])
+
+        return np.ravel(metric_output), gene_ids
+
+    def metric_decode(
+            self, intensities: IntensityTable, max_distance: Number, min_intensity: Number,
+            norm: int, metric: str='euclidean'
+    ) -> IntensityTable:
         """Assign the closest gene by euclidean distance to each feature in an intensity table
+
+        Normalizes both the codes and the features to be unit vectors and finds the closest code
+        for each feature
 
         Parameters
         ----------
         intensities : IntensityTable
             features to be decoded
+        max_distance : Number
+            maximum distance between a feature and its closest code for which the coded gene will
+            be assigned.
+        min_intensity : Number
+            minimum intensity for a feature to receive a gene id
+        norm : int
+            the scipy.linalg norm to apply to normalize codes and intensities
+        metric : str
+            the sklearn metric string to pass to NearestNeighbors
+
+        See Also
+        --------
+        The available norms for this function can be found at the following link:
+        https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.linalg.norm.html
 
         Returns
         -------
         IntensityTable :
-            intensity table containing additional data variables for gene assignments and feature
-            qualities
+            intensity table containing additional data variables for gene assignments and metric
+            outputs
 
         """
-
-        def _min_euclidean_distance(observation: xr.DataArray, codes: Codebook) -> np.ndarray:
-            """find the code with the closest euclidean distance to observation
-
-            Parameters
-            ----------
-            observation : xr.DataArray
-                2-dimensional DataArray of shape (n_ch, n_hyb)
-            codes :
-                Codebook containing codes to compare to observation
-
-            Returns
-            -------
-            np.ndarray :
-                1-d vector containing the distance of each code to observation
-
-            """
-            squared_diff = (codes - observation) ** 2
-            code_distances = np.sqrt(squared_diff.sum((Indices.CH, Indices.HYB)))
-            # order of codes changes here (automated sorting on the reshaping?)
-            return code_distances
-
         # normalize both the intensities and the codebook
-        norm_intensities = intensities.groupby(IntensityTable.Constants.FEATURES.value).apply(
-            lambda x: x / x.sum())
-        norm_codes = self.groupby(Codebook.Constants.GENE.value).apply(lambda x: x / x.sum())
+        norm_intensities, norms = self._normalize_features(intensities, norm_order=norm)
+        norm_codes, _ = self._normalize_features(self, norm_order=norm)
 
-        # calculate pairwise euclidean distance between codes and features
-        func = functools.partial(_min_euclidean_distance, codes=norm_codes)
-        distances = norm_intensities.groupby(IntensityTable.Constants.FEATURES.value).apply(func)
+        # mask low intensity features
+        intensity_mask = np.where(norms < min_intensity)[0]
 
-        # calculate quality of each decoded spot
-        qualities = 1 - distances.min(Codebook.Constants.GENE.value)
-        qualities_index = pd.Index(qualities)
+        metric_outputs, gene_ids = self._approximate_nearest_code(
+            norm_codes, norm_intensities, metric=metric)
 
-        # identify genes associated with closest codes
-        closest_code_index = distances.argmin(Codebook.Constants.GENE.value)
-        gene_ids = distances.indexes[
-            Codebook.Constants.GENE.value].values[closest_code_index.values]
+        exceeds_distance = np.where(metric_outputs > max_distance)[0]
         gene_index = pd.Index(gene_ids)
+
+        # remove genes associated with distant codes
+        gene_index.values[exceeds_distance] = 'None'
+        gene_index.values[intensity_mask] = 'None'
 
         # set new values on the intensity table in-place
         intensities[IntensityTable.Constants.GENE.value] = (
             IntensityTable.Constants.FEATURES.value, gene_index)
-        intensities[IntensityTable.Constants.QUALITY.value] = (
-            IntensityTable.Constants.FEATURES.value, qualities_index)
+        intensities[IntensityTable.Constants.DISTANCE.value] = (
+            IntensityTable.Constants.FEATURES.value, metric_outputs)
 
         return intensities
 
@@ -425,7 +493,7 @@ class Codebook(xr.DataArray):
 
         Notes
         -----
-        If no code matches the per-channel max of a feature, it will be assigned np.nan instead
+        If no code matches the per-channel max of a feature, it will be assigned 'None' instead
         of a gene value
 
         Parameters
@@ -470,8 +538,11 @@ class Codebook(xr.DataArray):
         a = _view_row_as_element(codes.values.reshape(self.shape[0], -1))
         b = _view_row_as_element(max_channels.values.reshape(intensities.shape[0], -1))
 
+        # TODO ambrosejcarr: the object makes working with the data awkward
+        # we could store a map between genes and ints as an `attr`, and use that to convert
+        # for the public API.
         genes = np.empty(intensities.shape[0], dtype=object)
-        genes.fill(np.nan)
+        genes.fill("None")
 
         for i in np.arange(a.shape[0]):
             genes[np.where(a[i] == b)[0]] = codes['gene_name'][i]

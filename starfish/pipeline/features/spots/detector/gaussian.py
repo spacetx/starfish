@@ -1,5 +1,6 @@
 from itertools import product
 from numbers import Number
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -95,7 +96,9 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         n_ch = stack.shape[Indices.CH]
         n_hyb = stack.shape[Indices.HYB]
         spot_attribute_index = dataframe_to_multiindex(spot_attributes)
-        intensity_table = IntensityTable.empty_intensity_table(spot_attribute_index, n_ch, n_hyb)
+        image_shape: Tuple[int, int, int] = stack.raw_shape[2:]
+        intensity_table = IntensityTable.empty_intensity_table(
+            spot_attribute_index, n_ch, n_hyb, image_shape)
 
         indices = product(range(n_ch), range(n_hyb))
         for c, h in indices:

@@ -61,7 +61,7 @@ def small_intensity_table():
         [[1, 0],
          [0, 1]],
         [[0, 0],
-         [1, 1]]
+         [1, 1]],
     ])
 
     spot_attributes = dataframe_to_multiindex(pd.DataFrame(
@@ -72,8 +72,9 @@ def small_intensity_table():
             IntensityTable.SpotAttributes.RADIUS: [0.1, 0.2, 0.3]
         }
     ))
+    image_shape = (3, 2, 2)
 
-    return IntensityTable.from_spot_data(intensities, spot_attributes)
+    return IntensityTable.from_spot_data(intensities, spot_attributes, image_shape)
 
 
 @pytest.fixture(scope='module')

@@ -15,7 +15,8 @@ def test_empty_intensity_table():
     z = [1, 1]
     r = [1, 1]
     spot_attributes = pd.MultiIndex.from_arrays([x, y, z, r], names=('x', 'y', 'z', 'r'))
-    empty = IntensityTable.empty_intensity_table(spot_attributes, 2, 2)
+    image_shape = (2, 4, 4)
+    empty = IntensityTable.empty_intensity_table(spot_attributes, 2, 2, image_shape)
     assert empty.shape == (2, 2, 2)
     assert np.sum(empty.values) == 0
 

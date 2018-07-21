@@ -584,16 +584,14 @@ class ImageStack:
         return pd.DataFrame(data)
 
     @property
-    def raw_shape(self) -> Tuple[int]:
+    def raw_shape(self) -> Tuple[int, int, int, int, int]:
         """
-        Returns the shape of the space that this image inhabits.  It does not include the dimensions of the image
-        itself.  For instance, if this is an X-Y image in a C-H-Y-X space, then the shape would include the dimensions C
-        and H.
+        Returns the shape of the 5-d image tensor stored as self.image
 
         Returns
         -------
-        Tuple[int] :
-            The sizes of the indices.
+        Tuple[int, int, int, int, int] :
+            The size of the image tensor
         """
         return self._data.shape
 

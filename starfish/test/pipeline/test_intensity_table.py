@@ -100,8 +100,17 @@ def feature_data() -> Tuple[Codebook, ImageStack]:
 def test_combine_adjacent_features():
     codebook, image = feature_data()
     new_intensities = IntensityTable.from_image_stack(image)
-    new_intensities = codebook.metric_decode(new_intensities, max_distance=0.5, min_intensity=0.5, norm=2)
-    combined_intensities = combine_adjacent_features(new_intensities, min_area=0, max_area=10)[0]
+
+    # TODO ambrosejcarr: this decoder is dropping pixels that don't decode. Desirable?
+    new_intensities = codebook.metric_decode(
+        new_intensities,
+        max_distance=0.5,
+        min_intensity=0.5,
+        norm=2
+    )
+
     # this is "working", with the caveat that the z-coord is a bit weird and potentially wrong.
+    combined_intensities, _ = combine_adjacent_features(new_intensities, min_area=0, max_area=10)
+
     assert np.array_equal(combined_intensities.shape, (2, 1, 2))
     assert np.array_equal(combined_intensities.gene_name, ['gene_2', 'gene_1'])

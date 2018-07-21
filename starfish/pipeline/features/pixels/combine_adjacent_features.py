@@ -1,19 +1,24 @@
-from typing import List, Tuple, Union
+from typing import List, NamedTuple, Tuple
 
 import numpy as np
 import pandas as pd
 from skimage.measure import regionprops, label
 
-from starfish.munge import dataframe_to_multiindex
 from starfish.constants import Indices
 from starfish.intensity_table import IntensityTable
+from starfish.munge import dataframe_to_multiindex
+from starfish.typing import Number
 
-Number = Union[int, float]
+
+class ConnectedComponentDecodingResult(NamedTuple):
+    region_properties: List
+    label_image: np.ndarray
+    decoded_image: np.ndarray
 
 
 def combine_adjacent_features(
         intensities: IntensityTable, min_area: Number, max_area: Number, connectivity: int=2,
-) -> Tuple[IntensityTable, List, np.ndarray, np.ndarray]:
+) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
     """
 
     Parameters
@@ -34,12 +39,9 @@ def combine_adjacent_features(
     -------
     IntensityTable :
         spot intensities
-    List[Object] :
+    ConnectedComponentDecodingResult :
         region properties for each spot (see skimage.measure.regionprops)
-    np.ndarray[int] :
-        label image wherein each connected component (spot) is coded with a different
-        integer
-    np.ndarray[int] :
+        label image wherein each connected component (spot) is coded with a different integer
         decoded image wherein each target is coded as a different integer. Intended for visualization
 
     """
@@ -126,4 +128,6 @@ def combine_adjacent_features(
         attrs=attrs
     )
 
-    return intensity_table, props, label_image, decoded_image
+    ccdr = ConnectedComponentDecodingResult(props, label_image, decoded_image)
+
+    return intensity_table, ccdr

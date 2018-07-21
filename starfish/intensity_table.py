@@ -1,12 +1,12 @@
-from typing import Union, Tuple
 from itertools import product
+from typing import Union, Tuple
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
-from starfish.munge import dataframe_to_multiindex
 from starfish.constants import Indices, AugmentedEnum
+from starfish.munge import dataframe_to_multiindex
 
 
 class IntensityTable(xr.DataArray):
@@ -345,3 +345,7 @@ class IntensityTable(xr.DataArray):
         mask = np.where(self.coords.features[self.SpotAttributes.RADIUS.value] < min_size)[0]
         mask |= np.where(self.coords.features[self.SpotAttributes.RADIUS.value] > max_size)[0]
         return mask
+
+    def _intensities_from_regions(self, props, reduce_op='max') -> "IntensityTable":
+        """turn regions back into intensities by reducing over the labeled area"""
+        raise NotImplementedError

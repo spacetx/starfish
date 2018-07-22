@@ -21,7 +21,7 @@ class Coordinates(AugmentedEnum):
 
 
 class Indices(AugmentedEnum):
-    ROUND = 'h'  # TODO ambrosejcarr: change this to 'r'
+    ROUND = 'r'
     CH = 'c'
     Z = 'z'
 

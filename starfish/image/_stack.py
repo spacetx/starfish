@@ -101,7 +101,8 @@ class ImageStack:
                     data = data * (dst_range / src_range)
                 warnings.warn(
                     f"Tile "
-                    f"(H: {tile.indices[Indices.ROUND]} C: {tile.indices[Indices.CH]} Z: {tile.indices[Indices.Z]}) has "
+                    f"(R: {tile.indices[Indices.ROUND]} C: {tile.indices[Indices.CH]} "
+                    f"Z: {tile.indices[Indices.Z]}) has "
                     f"dtype {data.dtype}.  One or more tiles is of a larger dtype {self._data.dtype}.",
                     DataFormatWarning)
             self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)

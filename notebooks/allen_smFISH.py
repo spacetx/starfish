@@ -38,7 +38,7 @@ from starfish.constants import Indices
 
 # EPY: START code
 # this is a large (1.1GB) FOV, so the download may take some time
-experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180606/allen_smFISH/fov_001/experiment.json'
+experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180722/allen_smFISH/fov_001/experiment.json'
 # EPY: END code
 
 # EPY: START markdown
@@ -48,7 +48,8 @@ experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180606/allen_smFISH/fo
 # EPY: END markdown
 
 # EPY: START code
-codebook = pd.read_json('https://dmf0bdeheu4zf.cloudfront.net/20180606/allen_smFISH/fov_001/codebook.json')
+from starfish.codebook import Codebook
+codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180722/allen_smFISH/fov_001/codebook.json')
 codebook
 # EPY: END code
 
@@ -57,8 +58,7 @@ codebook
 # EPY: END markdown
 
 # EPY: START code
-s = Stack()
-s.read(experiment_json)
+s = Stack.from_experiment_json(experiment_json)
 # EPY: END code
 
 # EPY: START markdown
@@ -88,7 +88,7 @@ s_clip.filter(s.image)
 # EPY: END markdown
 
 # EPY: START code
-s.image.show_stack({Indices.CH: 0});
+s.image.show_stack({Indices.CH.value: 0});
 # EPY: END code
 
 # EPY: START code
@@ -122,7 +122,7 @@ from showit import image
 from trackpy import locate
 
 # grab a section from the tensor. 
-ch1 = s.image.max_proj(Indices.Z)[0, 1]
+ch1 = s.image.max_proj(Indices.Z.value)[0, 1]
 
 results = locate(ch1, diameter=3, minmass=250, maxsize=3, separation=5, preprocess=False, percentile=10) 
 results.columns = ['x', 'y', 'intensity', 'r', 'eccentricity', 'signal', 'raw_mass', 'ep']
@@ -182,5 +182,5 @@ for attrs, (hyb, ch) in spot_attributes:
 # Note that in places where spots are "missed" it is often because they've been localized to individual 
 # nearby z-planes, whereas most spots exist across several layers of z.
 
-s.image.show_stack({Indices.CH: 1, Indices.ROUND: 0}, show_spots=spot_attributes[1][0], figure_size=(20, 20), p_min=60, p_max=99.9);
+s.image.show_stack({Indices.CH.value: 1, Indices.HYB.value: 0}, show_spots=spot_attributes[1][0], figure_size=(20, 20), p_min=60, p_max=99.9);
 # EPY: END code

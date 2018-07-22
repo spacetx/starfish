@@ -147,4 +147,4 @@ def test_unit_normalize():
     )
 
     results, _ = Codebook._normalize_features(simple_codebook, norm_order=1)
-    assert np.array_equal(results.sum(['c', 'h']), np.ones(3))
+    assert np.array_equal(results.sum([Indices.CH, Indices.ROUND]), np.ones(3))

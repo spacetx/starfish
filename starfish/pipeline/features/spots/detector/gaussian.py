@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from skimage.feature import blob_log
 
-from starfish.constants import Indices
+from starfish.constants import Indices, Features
 from starfish.image import ImageStack
 from starfish.munge import dataframe_to_multiindex
 from starfish.intensity_table import IntensityTable
@@ -117,17 +117,21 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         if fitted_blobs_array.shape[0] == 0:
             raise ValueError('No spots detected with provided parameters')
 
-        fitted_blobs = pd.DataFrame(data=fitted_blobs_array, columns=['z', 'y', 'x', 'r'])
+        columns = [Features.Z, Features.Y, Features.X, Features.SPOT_RADIUS]
+        fitted_blobs = pd.DataFrame(data=fitted_blobs_array, columns=columns)
 
         # convert standard deviation of gaussian kernel used to identify spot to radius of spot
-        fitted_blobs['r'] = np.round(fitted_blobs['r'] * np.sqrt(3))
+        converted_radius = np.round(fitted_blobs[Features.SPOT_RADIUS] * np.sqrt(3))
+        fitted_blobs[Features.SPOT_RADIUS] = converted_radius
 
         # convert the array to int so it can be used to index
         fitted_blobs = fitted_blobs.astype(int)
 
         for v, max_size in zip(['z', 'y', 'x'], self.blobs_image.shape):
-            fitted_blobs[f'{v}_min'] = np.clip(fitted_blobs[v] - fitted_blobs['r'], 0, None)
-            fitted_blobs[f'{v}_max'] = np.clip(fitted_blobs[v] + fitted_blobs['r'], None, max_size)
+            fitted_blobs[f'{v}_min'] = np.clip(
+                fitted_blobs[v] - fitted_blobs[Features.SPOT_RADIUS], 0, None)
+            fitted_blobs[f'{v}_max'] = np.clip(
+                fitted_blobs[v] + fitted_blobs[Features.SPOT_RADIUS], None, max_size)
 
         fitted_blobs['intensity'] = self._measure_blob_intensity(
             self.blobs_image, fitted_blobs, self.measurement_function)

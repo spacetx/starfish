@@ -14,7 +14,7 @@ def test_iss_pipeline():
     true_intensities = synthesizer.intensities(codebook=codebook)
     image = synthesizer.spots(intensities=true_intensities)
 
-    dots_data = image.max_proj(Indices.HYB, Indices.CH, Indices.Z)
+    dots_data = image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
     dots = ImageStack.from_numpy_array(dots_data.reshape((1, 1, 1, *dots_data.shape)))
 
     wth = WhiteTophat(disk_size=15)

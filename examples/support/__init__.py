@@ -29,7 +29,7 @@ def tile_opener(toc_path, tile, file_ext):
         "{}-Z{}-H{}-C{}.{}".format(
             tile_basename,
             tile.indices[Indices.Z],
-            tile.indices[Indices.HYB],
+            tile.indices[Indices.ROUND],
             tile.indices[Indices.CH],
             ImageFormat.TIFF.file_ext,
         ),
@@ -131,8 +131,8 @@ def build_image(fov_count, hyb_count, ch_count, z_count, image_fetcher: ImageFet
     collection = Collection()
     for fov_ix in range(fov_count):
         fov_images = TileSet(
-            [Coordinates.X, Coordinates.Y, Indices.Z, Indices.HYB, Indices.CH],
-            {Indices.HYB: hyb_count, Indices.CH: ch_count, Indices.Z: z_count},
+            [Coordinates.X, Coordinates.Y, Indices.Z, Indices.ROUND, Indices.CH],
+            {Indices.ROUND: hyb_count, Indices.CH: ch_count, Indices.Z: z_count},
             default_shape,
             ImageFormat.TIFF,
         )
@@ -149,7 +149,7 @@ def build_image(fov_count, hyb_count, ch_count, z_count, image_fetcher: ImageFet
                         },
                         {
                             Indices.Z: z_ix,
-                            Indices.HYB: hyb_ix,
+                            Indices.ROUND: hyb_ix,
                             Indices.CH: ch_ix,
                         },
                         image.shape,
@@ -211,7 +211,7 @@ def write_experiment_json(
     }
     hybridization_image = build_image(
         fov_count,
-        hyb_dimensions[Indices.HYB], hyb_dimensions[Indices.CH], hyb_dimensions[Indices.Z],
+        hyb_dimensions[Indices.ROUND], hyb_dimensions[Indices.CH], hyb_dimensions[Indices.Z],
         hyb_image_fetcher,
         default_shape=default_shape,
     )
@@ -230,7 +230,7 @@ def write_experiment_json(
             continue
         auxiliary_image = build_image(
             fov_count,
-            aux_dimensions[Indices.HYB], aux_dimensions[Indices.CH], aux_dimensions[Indices.Z],
+            aux_dimensions[Indices.ROUND], aux_dimensions[Indices.CH], aux_dimensions[Indices.Z],
             aux_image_fetcher.get(aux_name, RandomNoiseImageFetcher()),
             default_shape=default_shape,
         )

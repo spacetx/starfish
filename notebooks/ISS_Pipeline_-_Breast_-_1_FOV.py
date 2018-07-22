@@ -60,7 +60,7 @@ s.image.numpy_array.shape
 # EPY: END markdown
 
 # EPY: START code
-image(s.auxiliary_images['dots'].max_proj(Indices.HYB, Indices.CH, Indices.Z))
+image(s.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END code
 
 # EPY: START markdown
@@ -68,7 +68,7 @@ image(s.auxiliary_images['dots'].max_proj(Indices.HYB, Indices.CH, Indices.Z))
 # EPY: END markdown
 
 # EPY: START code
-image(s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z))
+image(s.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END code
 
 # EPY: START markdown
@@ -241,7 +241,7 @@ min_dist = 57
 
 stain = np.mean(s.image.max_proj(Indices.CH, Indices.Z), axis=0)
 stain = stain/stain.max()
-nuclei = s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
+nuclei = s.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 
 
 seg = _WatershedSegmenter(nuclei, stain)  # uses skimage watershed.
@@ -262,8 +262,8 @@ GENE1 = 'HER2'
 GENE2 = 'VIM'
 
 rgb = np.zeros(s.image.tile_shape + (3,))
-rgb[:,:,0] = s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
-rgb[:,:,1] = s.auxiliary_images['dots'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
+rgb[:,:,0] = s.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+rgb[:,:,1] = s.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 do = rgb2gray(rgb)
 do = do/(do.max())
 

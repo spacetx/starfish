@@ -15,12 +15,29 @@ class AugmentedEnum(Enum):
 
 
 class Coordinates(AugmentedEnum):
-    X = 'x'
-    Y = 'y'
     Z = 'z'
+    Y = 'y'
+    X = 'x'
 
 
 class Indices(AugmentedEnum):
-    HYB = 'h'
+    ROUND = 'h'  # TODO ambrosejcarr: change this to 'r'
     CH = 'c'
     Z = 'z'
+
+
+class Features:
+    """
+    contains constants relating to the codebook and feature (spot/pixel) representations of the
+    image data
+    """
+
+    AXIS = 'features'
+    TARGET = 'gene_name'
+    CODEWORD = 'codeword'
+    CODE_VALUE = 'v'
+    SPOT_RADIUS = 'radius'
+    DISTANCE = 'distance'
+    Z = 'z'
+    Y = 'y'
+    X = 'x'

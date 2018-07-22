@@ -1,7 +1,9 @@
-from skimage.feature import blob_log
-import pytest
-from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
 import numpy as np
+import pytest
+from skimage.feature import blob_log
+
+from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
+from starfish.constants import Features
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import (
@@ -18,10 +20,10 @@ def test_spots_match_coordinates_of_synthesized_spots(
     assert true_intensities.shape == intensities.shape
 
     # we do a bit of rounding, some of these may be off with 1-pixel error.
-    x_matches = np.all(np.abs(np.sort(true_intensities.coords['x'].values) -
-                              np.sort(intensities.coords['x'].values)) <= 1)
-    y_matches = np.all(np.abs(np.sort(true_intensities.coords['y'].values) -
-                              np.sort(intensities.coords['y'].values)) <= 1)
+    x_matches = np.all(np.abs(np.sort(true_intensities.coords[Features.X].values) -
+                              np.sort(intensities.coords[Features.X].values)) <= 1)
+    y_matches = np.all(np.abs(np.sort(true_intensities.coords[Features.Y].values) -
+                              np.sort(intensities.coords[Features.Y].values)) <= 1)
     assert x_matches
     assert y_matches
 
@@ -95,7 +97,8 @@ def test_find_spot_locations_2d(synthetic_single_spot_imagestack_2d):
     spot_attributes = gsd._find_spot_locations()
 
     assert spot_attributes.shape[0] == 1
-    assert np.array_equal(spot_attributes[['z', 'y', 'x']].values, np.array([[0, 10, 90]]))
+    assert np.array_equal(spot_attributes[[Features.Z, Features.Y, Features.X]].values,
+                          np.array([[0, 10, 90]]))
     # rounding incurs an error of up to one pixel
     tol = 1
     assert np.all(
@@ -110,7 +113,8 @@ def test_find_spot_locations_3d(synthetic_single_spot_imagestack_3d):
     spot_attributes = gsd._find_spot_locations()
 
     assert spot_attributes.shape[0] == 1
-    assert np.array_equal(spot_attributes[['z', 'y', 'x']].values, np.array([[5, 10, 90]]))
+    assert np.array_equal(spot_attributes[[Features.Z, Features.Y, Features.X]].values,
+                          np.array([[5, 10, 90]]))
     # rounding incurs an error of up to one pixel
     tol = 1
     assert np.all(

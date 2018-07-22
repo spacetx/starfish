@@ -61,7 +61,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             self.blobs_stack = blobs_stack
         else:
             self.blobs_stack = ImageStack.from_path_or_url(blobs_stack)
-        self.blobs_image: np.ndarray = self.blobs_stack.max_proj(Indices.HYB, Indices.CH)
+        self.blobs_image: np.ndarray = self.blobs_stack.max_proj(Indices.ROUND, Indices.CH)
 
         try:
             self.measurement_function = getattr(np, measurement_type)
@@ -94,7 +94,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
     ) -> IntensityTable:
 
         n_ch = stack.shape[Indices.CH]
-        n_hyb = stack.shape[Indices.HYB]
+        n_hyb = stack.shape[Indices.ROUND]
         spot_attribute_index = dataframe_to_multiindex(spot_attributes)
         image_shape: Tuple[int, int, int] = stack.raw_shape[2:]
         intensity_table = IntensityTable.empty_intensity_table(
@@ -102,7 +102,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         indices = product(range(n_ch), range(n_hyb))
         for c, h in indices:
-            image, _ = stack.get_slice({Indices.CH: c, Indices.HYB: h})
+            image, _ = stack.get_slice({Indices.CH: c, Indices.ROUND: h})
             blob_intensities: pd.Series = self._measure_blob_intensity(
                 image, spot_attributes, self.measurement_function)
             intensity_table[:, c, h] = blob_intensities

@@ -182,5 +182,5 @@ for attrs, (hyb, ch) in spot_attributes:
 # Note that in places where spots are "missed" it is often because they've been localized to individual 
 # nearby z-planes, whereas most spots exist across several layers of z.
 
-s.image.show_stack({Indices.CH: 1, Indices.HYB: 0}, show_spots=spot_attributes[1][0], figure_size=(20, 20), p_min=60, p_max=99.9);
+s.image.show_stack({Indices.CH: 1, Indices.ROUND: 0}, show_spots=spot_attributes[1][0], figure_size=(20, 20), p_min=60, p_max=99.9);
 # EPY: END code

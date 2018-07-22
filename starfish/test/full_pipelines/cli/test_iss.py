@@ -11,7 +11,7 @@ import jsonpath_rw
 import numpy as np
 import pandas as pd
 
-from starfish.codebook import Codebook
+from starfish.constants import Features
 from starfish.intensity_table import IntensityTable
 from starfish.util import clock
 
@@ -162,7 +162,7 @@ class TestWithIssData(unittest.TestCase):
 
             intensities = IntensityTable.load(os.path.join(tempdir, "results", "spots.nc"))
             genes, counts = np.unique(
-                intensities.coords[Codebook.Constants.GENE.value], return_counts=True)
+                intensities.coords[Features.TARGET], return_counts=True)
             gene_counts = pd.Series(counts, genes)
             assert gene_counts['ACTB_human'] > gene_counts['ACTB_mouse']
 

@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from starfish.constants import Indices
+from starfish.constants import Indices, Features
 from starfish.image import ImageStack
 from starfish.io import Stack
 from starfish.munge import dataframe_to_multiindex
@@ -43,7 +43,7 @@ def merfish_stack() -> Stack:
 def labeled_synthetic_dataset():
     stp = synthesize.SyntheticSpotTileProvider()
     image = ImageStack.synthetic_stack(tile_data_provider=stp.tile)
-    max_proj = image.max_proj(Indices.HYB, Indices.CH, Indices.Z)
+    max_proj = image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
     view = max_proj.reshape((1, 1, 1) + max_proj.shape)
     dots = ImageStack.from_numpy_array(view)
 
@@ -70,10 +70,10 @@ def small_intensity_table():
 
     spot_attributes = dataframe_to_multiindex(pd.DataFrame(
         data={
-            IntensityTable.SpotAttributes.X: [0, 1, 2, 3, 4],
-            IntensityTable.SpotAttributes.Y: [3, 4, 5, 6, 7],
-            IntensityTable.SpotAttributes.Z: [0, 0, 0, 0, 0],
-            IntensityTable.SpotAttributes.RADIUS: [0.1, 2, 3, 2, 1]
+            Features.X: [0, 1, 2, 3, 4],
+            Features.Y: [3, 4, 5, 6, 7],
+            Features.Z: [0, 0, 0, 0, 0],
+            Features.SPOT_RADIUS: [0.1, 2, 3, 2, 1]
         }
     ))
     image_shape = (3, 2, 2)
@@ -85,25 +85,25 @@ def small_intensity_table():
 def simple_codebook_array():
     return [
         {
-            Codebook.Constants.CODEWORD.value: [
-                {Indices.HYB.value: 0, Indices.CH.value: 0, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 1, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1}
+            Features.CODEWORD: [
+                {Indices.ROUND.value: 0, Indices.CH.value: 0, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
             ],
-            Codebook.Constants.GENE.value: "SCUBE2"
+            Features.TARGET: "SCUBE2"
         },
         {
-            Codebook.Constants.CODEWORD.value: [
-                {Indices.HYB.value: 0, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 1, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1}
+            Features.CODEWORD: [
+                {Indices.ROUND.value: 0, Indices.CH.value: 1, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
             ],
-            Codebook.Constants.GENE.value: "BRCA"
+            Features.TARGET: "BRCA"
         },
         {
-            Codebook.Constants.CODEWORD.value: [
-                {Indices.HYB.value: 0, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 1, Indices.CH.value: 0, Codebook.Constants.VALUE.value: 1}
+            Features.CODEWORD: [
+                {Indices.ROUND.value: 0, Indices.CH.value: 1, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 1, Indices.CH.value: 0, Features.CODE_VALUE: 1}
             ],
-            Codebook.Constants.GENE.value: "ACTB"
+            Features.TARGET: "ACTB"
         }
     ]
 

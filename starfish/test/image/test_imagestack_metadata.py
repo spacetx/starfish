@@ -17,7 +17,7 @@ def test_metadata():
     def tile_extras_provider(hyb: int, ch: int, z: int) -> Any:
         return {
             'random_key': {
-                Indices.HYB: hyb,
+                Indices.ROUND: hyb,
                 Indices.CH: ch,
                 Indices.Z: z,
             }
@@ -38,7 +38,7 @@ def test_missing_extras():
         if hyb == 0:
             return {
                 'random_key': {
-                    Indices.HYB: hyb,
+                    Indices.ROUND: hyb,
                     Indices.CH: ch,
                     Indices.Z: z,
                 }
@@ -59,7 +59,7 @@ def test_conflict():
     """
     def tile_extras_provider(hyb: int, ch: int, z: int) -> Any:
         return {
-            Indices.HYB: hyb,
+            Indices.ROUND: hyb,
             Indices.CH: ch,
             Indices.Z: z,
         }

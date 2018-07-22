@@ -7,9 +7,8 @@ import pytest
 from unittest.mock import patch, MagicMock
 import xarray as xr
 
-from starfish.constants import Indices
+from starfish.constants import Indices, Features
 from starfish.codebook import Codebook
-from starfish.intensity_table import IntensityTable
 
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
@@ -30,11 +29,11 @@ def test_loading_codebook_from_json_https_file(mock_urlopen):
     _return_value = json.dumps(
         [
             {
-                Codebook.Constants.CODEWORD.value: [
-                    {Indices.HYB.value: 0, Indices.CH.value: 0, Codebook.Constants.VALUE.value: 1},
-                    {Indices.HYB.value: 1, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1}
+                Features.CODEWORD: [
+                    {Indices.ROUND.value: 0, Indices.CH.value: 0, Features.CODE_VALUE: 1},
+                    {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
                 ],
-                Codebook.Constants.GENE.value: "SCUBE2"
+                Features.TARGET: "SCUBE2"
             }
         ]
     ).encode()
@@ -72,10 +71,10 @@ def test_loading_codebook_with_too_few_dims_raises_value_error(simple_codebook_j
 def test_euclidean_decode_yields_correct_output(euclidean_decoded_intensities):
     expected_gene_annotation = np.array(["ACTB", "SCUBE2", "BRCA", "None", "SCUBE2"])
     observed_gene_annotation = euclidean_decoded_intensities[
-        IntensityTable.Constants.GENE.value].values
+        Features.TARGET].values
     expected_distances = np.array([0, 0, 0, 0.76536686, 0])
     observed_distances = euclidean_decoded_intensities[
-        IntensityTable.Constants.DISTANCE.value].values
+        Features.DISTANCE].values
     assert np.array_equal(expected_gene_annotation, observed_gene_annotation)
     assert np.allclose(expected_distances, observed_distances)
 
@@ -83,7 +82,7 @@ def test_euclidean_decode_yields_correct_output(euclidean_decoded_intensities):
 def test_indexing_on_set_genes(euclidean_decoded_intensities):
     # note that this kind of indexing produces an xarray-internal FutureWarning about float
     # conversion that we can safely ignore here.
-    is_actin = euclidean_decoded_intensities[IntensityTable.Constants.GENE.value] == 'ACTB'
+    is_actin = euclidean_decoded_intensities[Features.TARGET] == 'ACTB'
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', FutureWarning)
 
@@ -96,7 +95,7 @@ def test_indexing_on_set_genes(euclidean_decoded_intensities):
 def test_per_channel_max_decode_yields_expected_results(per_channel_max_decoded_intensities):
     expected_gene_annotation = np.array(["ACTB", "SCUBE2", "BRCA", "None", "SCUBE2"])
     observed_gene_annotation = per_channel_max_decoded_intensities[
-        IntensityTable.Constants.GENE.value].values
+        Features.TARGET].values
     assert np.array_equal(expected_gene_annotation, observed_gene_annotation)
 
 
@@ -114,9 +113,9 @@ def test_codebook_save(loaded_codebook):
 
     assert np.array_equal(loaded_codebook, reloaded)
     assert np.array_equal(loaded_codebook[Indices.CH.value], reloaded[Indices.CH.value])
-    assert np.array_equal(loaded_codebook[Indices.HYB.value], reloaded[Indices.HYB.value])
-    assert np.array_equal(loaded_codebook[Codebook.Constants.GENE.value].values,
-                          reloaded[Codebook.Constants.GENE.value].values)
+    assert np.array_equal(loaded_codebook[Indices.ROUND.value], reloaded[Indices.ROUND.value])
+    assert np.array_equal(loaded_codebook[Features.TARGET].values,
+                          reloaded[Features.TARGET].values)
 
 
 @pytest.mark.parametrize('n_ch, n_hyb', ((2, 2), (5, 4)))
@@ -143,7 +142,7 @@ def test_unit_normalize():
     )
     simple_codebook = Codebook(
         data=simple_data,
-        dims=(['features', 'c', 'h']),
+        dims=([Features.AXIS, Indices.CH.value, Indices.ROUND.value]),
         coords=(list('xyz'), list('vw'), list('tu'))
     )
 

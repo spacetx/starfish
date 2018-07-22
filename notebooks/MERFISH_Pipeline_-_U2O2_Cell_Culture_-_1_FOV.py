@@ -130,7 +130,7 @@ glp.filter(s.image)
 # EPY: END markdown
 
 # EPY: START code
-scale_factors = {(t[Indices.HYB], t[Indices.CH]): t['scale_factor'] for index, t in s.image.tile_metadata.iterrows()}
+scale_factors = {(t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] for index, t in s.image.tile_metadata.iterrows()}
 # EPY: END code
 
 # EPY: START code
@@ -139,7 +139,7 @@ scale_factors = {(t[Indices.HYB], t[Indices.CH]): t['scale_factor'] for index, t
 
 for indices in s.image._iter_indices():
     data = s.image.get_slice(indices)[0]
-    scaled = data / scale_factors[indices[Indices.HYB.value], indices[Indices.CH.value]]
+    scaled = data / scale_factors[indices[Indices.ROUND.value], indices[Indices.CH.value]]
     s.image.set_slice(indices, scaled)
 # EPY: END code
 
@@ -148,7 +148,7 @@ from scipy.stats import scoreatpercentile
 # EPY: END code
 
 # EPY: START code
-mp = s.image.max_proj(Indices.HYB.value, Indices.CH.value, Indices.Z.value)
+mp = s.image.max_proj(Indices.ROUND.value, Indices.CH.value, Indices.Z.value)
 clim = scoreatpercentile(mp, [0.5, 99.5])
 image(mp, clim=clim)
 # EPY: END code

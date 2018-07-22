@@ -2,6 +2,7 @@ import numpy as np
 
 from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
 from starfish.util.synthesize import SyntheticData
+from starfish.constants import Features
 
 
 def test_round_trip_synthetic_data():
@@ -37,8 +38,8 @@ def test_round_trip_synthetic_data():
     assert np.array_equal(ch1, ch2)
     assert np.array_equal(hyb1, hyb2)
     assert np.array_equal(
-        intensities.coords[intensities.Constants.GENE],
-        calculated_intensities.coords[intensities.Constants.GENE]
+        intensities.coords[Features.TARGET],
+        calculated_intensities.coords[Features.TARGET]
     )
 
 
@@ -86,8 +87,8 @@ def test_medium_synthetic_stack():
     codebook.metric_decode(calculated_intensities, max_distance=1, min_intensity=0, norm_order=2)
 
     # spots are detected in a different order that they're generated; sorting makes comparison easy
-    sorted_intensities = intensities.sortby('features')
-    sorted_calculated_intensities = calculated_intensities.sortby('features')
+    sorted_intensities = intensities.sortby(Features.AXIS)
+    sorted_calculated_intensities = calculated_intensities.sortby(Features.AXIS)
 
     # verify that the spots are all detected, and decode to the correct genes
     assert np.array_equal(

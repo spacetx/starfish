@@ -14,7 +14,7 @@ class StarfishIndex:
             raise argparse.ArgumentTypeError("Could not parse {} into a valid index specification.".format(spec_json))
 
         return {
-            Indices.HYB: spec.get(Indices.HYB, 1),
+            Indices.ROUND: spec.get(Indices.ROUND, 1),
             Indices.CH: spec.get(Indices.CH, 1),
             Indices.Z: spec.get(Indices.Z, 1),
         }
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         help="Dimensions for the hybridization images.  Should be a json dict, with {}, {}, and {} as the possible "
              "keys.  The value should be the shape along that dimension.  If a key is not present, the value is "
              "assumed to be 0.".format(
-            Indices.HYB.value,
+            Indices.ROUND.value,
             Indices.CH.value,
             Indices.Z.value))
     name_arg_map = dict()
@@ -47,7 +47,7 @@ if __name__ == "__main__":
             type=StarfishIndex(),
             help="Dimensions for the {} images.  Should be a json dict, with {}, {}, and {} as the possible keys.  The "
                  "value should be the shape along that dimension.  If a key is not present, the value is assumed to be "
-                 "0.".format(aux_image_name, Indices.HYB, Indices.CH, Indices.Z))
+                 "0.".format(aux_image_name, Indices.ROUND, Indices.CH, Indices.Z))
         name_arg_map[aux_image_name] = arg.dest
 
     args = parser.parse_args()

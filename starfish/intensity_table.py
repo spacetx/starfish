@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from starfish.constants import Indices, AugmentedEnum
+from starfish.constants import Indices, Features
 from starfish.munge import dataframe_to_multiindex
 
 
@@ -30,7 +30,7 @@ class IntensityTable(xr.DataArray):
 
     Attributes
     ----------
-    Constants.FEATURES     name of the first axis of the IntensityTable
+    Constants.Features     name of the first axis of the IntensityTable
     Constants.GENE         name of the field that stores the decoded gene identity for each feature
     Constants.DISTANCE     name of the field that stores the decoded gene quality for each feature
     SpotAttributes.X       name of the pixelwise spot x-coordinate
@@ -53,7 +53,7 @@ class IntensityTable(xr.DataArray):
             [    0.,     0., 10506., 10830.],
             [11172., 12331.,     0.,     0.]]])
     Coordinates:
-      * features   (features) MultiIndex
+    * features   (features) MultiIndex
       - z          (features) int64 7 3
       - y          (features) int64 14 32
       - x          (features) int64 32 15
@@ -64,16 +64,8 @@ class IntensityTable(xr.DataArray):
 
     """
 
-    class Constants(AugmentedEnum):
-        FEATURES = 'features'
-        GENE = 'gene_name'
-        DISTANCE = 'distance'
-
-    class SpotAttributes(AugmentedEnum):
-        X = 'x'
-        Y = 'y'
-        Z = 'z'
-        RADIUS = 'r'
+    # constant that stores the attr key for the shape of ImageStack
+    IMAGE_SHAPE = 'image_shape'
 
     @classmethod
     def empty_intensity_table(
@@ -104,8 +96,8 @@ class IntensityTable(xr.DataArray):
         channel_index = np.arange(n_ch)
         hyb_index = np.arange(n_hyb)
         data = np.zeros((spot_attributes.shape[0], n_ch, n_hyb))
-        dims = (IntensityTable.Constants.FEATURES.value, Indices.CH.value, Indices.HYB.value)
-        attrs = {'image_shape': image_shape}
+        dims = (Features.AXIS, Indices.CH.value, Indices.ROUND.value)
+        attrs = {cls.IMAGE_SHAPE: image_shape}
 
         intensity_table = cls(
             data=data, coords=(spot_attributes, channel_index, hyb_index), dims=dims,
@@ -121,7 +113,7 @@ class IntensityTable(xr.DataArray):
             raise ValueError(
                 f'spot attributes must be a pandas MultiIndex, not {type(spot_attributes)}.')
 
-        required_attributes = set(a.value for a in IntensityTable.SpotAttributes)
+        required_attributes = {Features.Z, Features.Y, Features.X}
         missing_attributes = required_attributes.difference(spot_attributes.names)
         if missing_attributes:
             raise ValueError(
@@ -167,14 +159,14 @@ class IntensityTable(xr.DataArray):
         cls._verify_spot_attributes(spot_attributes)
 
         coords = (
-            (IntensityTable.Constants.FEATURES.value, spot_attributes),
+            (Features.AXIS, spot_attributes),
             (Indices.CH.value, np.arange(intensities.shape[1])),
-            (Indices.HYB.value, np.arange(intensities.shape[2]))
+            (Indices.ROUND.value, np.arange(intensities.shape[2]))
         )
 
-        dims = (IntensityTable.Constants.FEATURES.value, Indices.CH.value, Indices.HYB.value)
+        dims = (Features.AXIS, Indices.CH.value, Indices.ROUND.value)
 
-        attrs = {'image_shape': image_shape}
+        attrs = {cls.IMAGE_SHAPE: image_shape}
 
         return cls(intensities, coords, dims, attrs=attrs, *args, **kwargs)
 
@@ -211,7 +203,8 @@ class IntensityTable(xr.DataArray):
             loaded.coords,
             loaded.dims
         )
-        return intensity_table.set_index(features=list(intensity_table['features'].coords.keys()))
+        return intensity_table.set_index(
+            features=list(intensity_table[Features.AXIS].coords.keys()))
 
     def show(self, background_image: np.ndarray) -> None:
         """show spots on a background image"""
@@ -254,15 +247,14 @@ class IntensityTable(xr.DataArray):
         r = np.empty(n_spots)
         r.fill(np.nan)  # radius is a function of the point-spread gaussian size
 
-        names = [cls.SpotAttributes.Z.value, cls.SpotAttributes.Y.value,
-                 cls.SpotAttributes.X.value, cls.SpotAttributes.RADIUS.value]
+        names = [Features.Z, Features.Y, Features.X, Features.SPOT_RADIUS]
         spot_attributes = pd.MultiIndex.from_arrays([z, y, x, r], names=names)
 
         # empty data tensor
         data = np.zeros(shape=(n_spots, *codebook.shape[1:]))
 
         genes = np.random.choice(
-            codebook.coords[cls.Constants.GENE.value], size=n_spots, replace=True)
+            codebook.coords[Features.TARGET], size=n_spots, replace=True)
         expected_bright_locations = np.where(codebook.loc[genes])
 
         # create a binary matrix where "on" spots are 1
@@ -275,7 +267,7 @@ class IntensityTable(xr.DataArray):
         image_shape = (num_z, height, width)
 
         intensities = cls.from_spot_data(data, spot_attributes, image_shape=image_shape)
-        intensities[cls.Constants.GENE.value] = ('features', genes)
+        intensities[Features.TARGET] = (Features.AXIS, genes)
 
         return intensities
 
@@ -337,15 +329,16 @@ class IntensityTable(xr.DataArray):
     def mask_low_intensity_features(self, intensity_threshold):
         """return the indices of features that have average intensity below intensity_threshold"""
         mask = np.where(
-            self.mean([Indices.CH.value, Indices.HYB.value]).values < intensity_threshold)[0]
+            self.mean([Indices.CH.value, Indices.ROUND.value]).values < intensity_threshold)[0]
         return mask
 
     def mask_small_features(self, min_size: int, max_size: int):
         """return the indices of features whose radii are smaller than size_threshold"""
-        mask = np.where(self.coords.features[self.SpotAttributes.RADIUS.value] < min_size)[0]
-        mask |= np.where(self.coords.features[self.SpotAttributes.RADIUS.value] > max_size)[0]
+        mask = np.where(self.coords.features[Features.RADIUS] < min_size)[0]
+        mask |= np.where(self.coords.features[Features.RADIUS] > max_size)[0]
         return mask
 
     def _intensities_from_regions(self, props, reduce_op='max') -> "IntensityTable":
         """turn regions back into intensities by reducing over the labeled area"""
         raise NotImplementedError
+

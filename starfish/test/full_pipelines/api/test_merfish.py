@@ -25,10 +25,10 @@ def test_merfish_pipeline(merfish_stack):
     glp.filter(s)
 
     # scale the data by the scale factors
-    scale_factors = {(t[Indices.HYB], t[Indices.CH]): t['scale_factor'] for index, t in s.tile_metadata.iterrows()}
+    scale_factors = {(t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] for index, t in s.tile_metadata.iterrows()}
     for indices in s.image._iter_indices():
         data = s.image.get_slice(indices)[0]
-        scaled = data / scale_factors[indices[Indices.HYB], indices[Indices.CH]]
+        scaled = data / scale_factors[indices[Indices.ROUND], indices[Indices.CH]]
         s.image.set_slice(indices, scaled)
 
     # detect and decode spots

@@ -9,7 +9,7 @@ import validators
 import xarray as xr
 from sklearn.neighbors import NearestNeighbors
 
-from starfish.constants import Indices, AugmentedEnum
+from starfish.constants import Indices, Features
 from starfish.intensity_table import IntensityTable
 from starfish.typing import Number
 
@@ -80,11 +80,6 @@ class Codebook(xr.DataArray):
 
     """
 
-    class Constants(AugmentedEnum):
-        CODEWORD = 'codeword'
-        GENE = 'gene_name'
-        VALUE = 'v'
-
     @property
     def code_length(self) -> int:
         """return the length of codes in this codebook"""
@@ -126,19 +121,19 @@ class Codebook(xr.DataArray):
             codebook whose values are all zero
 
         """
-        codes_index = pd.Index(code_names, name=Codebook.Constants.GENE.value)
+        codes_index = pd.Index(code_names, name=Features.TARGET)
         return cls(
             data=np.zeros((codes_index.shape[0], n_ch, n_hyb), dtype=np.uint8),
             coords=(
                 codes_index,
                 pd.Index(np.arange(n_ch), name=Indices.CH.value),
-                pd.Index(np.arange(n_hyb), name=Indices.HYB.value),
+                pd.Index(np.arange(n_hyb), name=Indices.ROUND.value),
             )
         )
 
     @classmethod
     def from_code_array(
-            cls, code_array: List[Dict[Union[str, Constants], Any]],
+            cls, code_array: List[Dict[Union[str, Any]]],
             n_hyb: Optional[int]=None, n_ch: Optional[int]=None) -> "Codebook":
         """construct a codebook from a spaceTx-spec array of codewords
 
@@ -156,31 +151,23 @@ class Codebook(xr.DataArray):
 
         >>> from starfish.constants import Indices
         >>> from starfish.codebook import Codebook
-        >>> import tempfile
-        >>> import json
-        >>> import os
-        >>> dir_ = tempfile.mkdtemp()
-
         >>> codebook = [
         >>>     {
-        >>>         Codebook.Constants.CODEWORD.value: [
-        >>>             {Indices.HYB.value: 0, Indices.CH.value: 3, Codebook.Constants.VALUE.value: 1},
-        >>>             {Indices.HYB.value: 1, Indices.CH.value: 3, Codebook.Constants.VALUE.value: 1},
+        >>>         Features.CODEWORD: [
+        >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+        >>>             {Indices.ROUND.value: 1, Indices.CH.value: 3, Features.CODE_VALUE: 1},
         >>>         ],
-        >>>         Codebook.Constants.GENE.value: "ACTB_human"
+        >>>         Features.TARGET: "ACTB_human"
         >>>     },
         >>>     {
-        >>>         Codebook.Constants.CODEWORD.value: [
-        >>>             {Indices.HYB.value: 0, Indices.CH.value: 3, Codebook.Constants.VALUE.value: 1},
-        >>>             {Indices.HYB.value: 1, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1},
+        >>>         Features.CODEWORD: [
+        >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+        >>>             {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1},
         >>>         ],
-        >>>         Codebook.Constants.GENE.value: "ACTB_mouse"
+        >>>         Features.TARGET: "ACTB_mouse"
         >>>     },
         >>> ]
-
-        >>> json_codebook = os.path.join(dir_, 'codebook.json')
-        >>> with open(json_codebook, 'w') as f:
-        >>>     json.dump(codebook, f)
+        >>> Codebook.from_code_array(codebook)
         <xarray.Codebook (gene_name: 2, c: 4, h: 2)>
         array([[[0, 0],
                 [0, 0],
@@ -209,8 +196,8 @@ class Codebook(xr.DataArray):
         max_hyb, max_ch = 0, 0
 
         for code in code_array:
-            for entry in code[Codebook.Constants.CODEWORD]:
-                max_hyb = max(max_hyb, entry[Indices.HYB])
+            for entry in code[Features.CODEWORD]:
+                max_hyb = max(max_hyb, entry[Indices.ROUND])
                 max_ch = max(max_ch, entry[Indices.CH])
 
         # set n_ch and n_hyb if either were not provided
@@ -234,23 +221,23 @@ class Codebook(xr.DataArray):
                 raise ValueError(f'codebook must be an array of dictionary codes. Found: {code}.')
 
             # verify all necessary fields are present
-            required_fields = {Codebook.Constants.CODEWORD, Codebook.Constants.GENE}
+            required_fields = {Features.CODEWORD, Features.TARGET}
             missing_fields = required_fields.difference(code)
             if missing_fields:
                 raise ValueError(
                     f'Each entry of codebook must contain {required_fields}. Missing fields: '
                     f'{missing_fields}')
 
-        gene_names = [w[Codebook.Constants.GENE] for w in code_array]
+        gene_names = [w[Features.TARGET] for w in code_array]
         code_data = cls._empty_codebook(gene_names, n_ch, n_hyb)
 
         # fill the codebook
         for code_dict in code_array:
-            codeword = code_dict[Codebook.Constants.CODEWORD]
-            gene = code_dict[Codebook.Constants.GENE]
+            codeword = code_dict[Features.CODEWORD]
+            gene = code_dict[Features.TARGET]
             for entry in codeword:
-                code_data.loc[gene, entry[Indices.CH], entry[Indices.HYB]] = entry[
-                    Codebook.Constants.VALUE]
+                code_data.loc[gene, entry[Indices.CH], entry[Indices.ROUND]] = entry[
+                    Features.CODE_VALUE]
 
         return code_data
 
@@ -273,25 +260,33 @@ class Codebook(xr.DataArray):
         --------
         >>> from starfish.constants import Indices
         >>> from starfish.codebook import Codebook
+        >>> import tempfile
+        >>> import json
+        >>> import os
+        >>> dir_ = tempfile.mkdtemp()
 
         >>> codebook = [
         >>>     {
-        >>>         Codebook.Constants.CODEWORD.value: [
-        >>>             {Indices.HYB.value: 0, Indices.CH.value: 3, Codebook.Constants.VALUE.value: 1},
-        >>>             {Indices.HYB.value: 1, Indices.CH.value: 3, Codebook.Constants.VALUE.value: 1},
+        >>>         Features.CODEWORD: [
+        >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+        >>>             {Indices.ROUND.value: 1, Indices.CH.value: 3, Features.CODE_VALUE: 1},
         >>>         ],
-        >>>         Codebook.Constants.GENE.value: "ACTB_human"
+        >>>         Features.TARGET: "ACTB_human"
         >>>     },
         >>>     {
-        >>>         Codebook.Constants.CODEWORD.value: [
-        >>>             {Indices.HYB.value: 0, Indices.CH.value: 3, Codebook.Constants.VALUE.value: 1},
-        >>>             {Indices.HYB.value: 1, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1},
+        >>>         Features.CODEWORD: [
+        >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+        >>>             {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1},
         >>>         ],
-        >>>         Codebook.Constants.GENE.value: "ACTB_mouse"
+        >>>         Features.TARGET: "ACTB_mouse"
         >>>     },
         >>> ]
-
-        >>> Codebook.from_json(codebook)
+        >>> # make a fake file
+        >>> json_codebook = os.path.join(dir_, 'codebook.json')
+        >>> with open(json_codebook, 'w') as f:
+        >>>     json.dump(codebook, f)
+        >>> # read codebook from file
+        >>> Codebook.from_json(json_codebook)
        <xarray.Codebook (gene_name: 2, c: 4, h: 2)>
         array([[[0, 0],
                 [0, 0],
@@ -338,20 +333,20 @@ class Codebook(xr.DataArray):
 
         """
         code_array = []
-        for gene in self[self.Constants.GENE.value]:
+        for gene in self[Features.TARGET]:
             codeword = []
             for ch in self[Indices.CH.value]:
-                for hyb in self[Indices.HYB.value]:
+                for hyb in self[Indices.ROUND.value]:
                     if self.loc[gene, ch, hyb]:
                         codeword.append(
                             {
                                 Indices.CH.value: int(ch),
-                                Indices.HYB.value: int(hyb),
-                                self.Constants.VALUE.value: float(self.loc[gene, ch, hyb])
+                                Indices.ROUND.value: int(hyb),
+                                Features.CODE_VALUE: float(self.loc[gene, ch, hyb])
                             })
             code_array.append({
-                self.Constants.CODEWORD.value: codeword,
-                self.Constants.GENE.value: str(gene.values)
+                Features.CODEWORD: codeword,
+                Features.TARGET: str(gene.values)
             })
 
         with open(filename, 'w') as f:
@@ -481,10 +476,8 @@ class Codebook(xr.DataArray):
         gene_index.values[intensity_mask] = 'None'
 
         # set new values on the intensity table in-place
-        intensities[IntensityTable.Constants.GENE.value] = (
-            IntensityTable.Constants.FEATURES.value, gene_index)
-        intensities[IntensityTable.Constants.DISTANCE.value] = (
-            IntensityTable.Constants.FEATURES.value, metric_outputs)
+        intensities[Features.TARGET] = (Features.AXIS, gene_index)
+        intensities[Features.DISTANCE] = (Features.AXIS, metric_outputs)
 
         return intensities
 
@@ -548,8 +541,8 @@ class Codebook(xr.DataArray):
             genes[np.where(a[i] == b)[0]] = codes['gene_name'][i]
         gene_index = pd.Index(genes.astype('U'))
 
-        intensities[IntensityTable.Constants.GENE.value] = (
-            IntensityTable.Constants.FEATURES.value, gene_index)
+        intensities[Features.TARGET] = (
+            Features.AXIS, gene_index)
 
         return intensities
 
@@ -605,7 +598,7 @@ class Codebook(xr.DataArray):
         codewords = [
             [
                 {
-                    Indices.HYB.value: h, Indices.CH.value: c, 'v': 1
+                    Indices.ROUND.value: h, Indices.CH.value: c, 'v': 1
                 } for h, c in enumerate(code)
             ] for code in codes
         ]
@@ -616,7 +609,7 @@ class Codebook(xr.DataArray):
             gene_names = [uuid.uuid4() for _ in range(n_codes)]
         assert n_codes == len(gene_names)
 
-        codebook = [{Codebook.Constants.CODEWORD.value: w, Codebook.Constants.GENE.value: g}
+        codebook = [{Features.CODEWORD: w, Features.TARGET: g}
                     for w, g in zip(codewords, gene_names)]
 
         return cls.from_code_array(codebook, n_hyb=n_hyb, n_ch=n_channel)

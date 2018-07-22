@@ -92,6 +92,6 @@ def test_medium_synthetic_stack():
 
     # verify that the spots are all detected, and decode to the correct genes
     assert np.array_equal(
-        sorted_intensities.features.gene_name.values,
-        sorted_calculated_intensities.features.gene_name.values
+        sorted_intensities[Features.AXIS][Features.TARGET].values,
+        sorted_calculated_intensities[Features.AXIS][Features.TARGET].values
     )

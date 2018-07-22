@@ -116,4 +116,7 @@ def test_combine_adjacent_features():
     combined_intensities, _ = combine_adjacent_features(new_intensities, min_area=0, max_area=10)
 
     assert np.array_equal(combined_intensities.shape, (2, 1, 2))
-    assert np.array_equal(combined_intensities.gene_name, ['gene_2', 'gene_1'])
+    assert np.array_equal(
+        combined_intensities[Features.AXIS][Features.TARGET],
+        ['gene_2', 'gene_1']
+    )

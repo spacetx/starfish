@@ -33,7 +33,7 @@ class Features:
     """
 
     AXIS = 'features'
-    TARGET = 'gene_name'
+    TARGET = 'target'
     CODEWORD = 'codeword'
     CODE_VALUE = 'v'
     SPOT_RADIUS = 'radius'

@@ -538,7 +538,7 @@ class Codebook(xr.DataArray):
         genes.fill("None")
 
         for i in np.arange(a.shape[0]):
-            genes[np.where(a[i] == b)[0]] = codes['gene_name'][i]
+            genes[np.where(a[i] == b)[0]] = codes[Features.TARGET][i]
         gene_index = pd.Index(genes.astype('U'))
 
         intensities[Features.TARGET] = (

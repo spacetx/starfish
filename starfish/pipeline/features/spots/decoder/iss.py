@@ -10,4 +10,4 @@ class IssDecoder(DecoderAlgorithmBase):
         pass
 
     def decode(self, intensities, codebook):
-        return codebook.decode_per_hyb_max(intensities)
+        return codebook.decode_per_round_max(intensities)

@@ -9,17 +9,17 @@ class SyntheticData:
     """Synthetic generator for spot data and container objects
 
     Currently, this generator only generates codebooks with single channels "on" in each
-    hybridization round. Therefore, it can generate ISS and smFISH type experiments, but not
+    imaging round. Therefore, it can generate ISS and smFISH type experiments, but not
     more complex codes.
 
     Examples
     --------
     >>> from starfish.util.synthesize import SyntheticData
 
-    >>> sd = SyntheticData(n_ch=3, n_hyb=4, n_codes=2)
+    >>> sd = SyntheticData(n_ch=3, n_round=4, n_codes=2)
     >>> codes = sd.codebook()
     >>> codes
-    <xarray.Codebook (gene_name: 2, c: 3, h: 4)>
+    <xarray.Codebook (target: 2, c: 3, h: 4)>
     array([[[0, 0, 0, 0],
             [0, 0, 1, 1],
             [1, 1, 0, 0]],
@@ -28,7 +28,7 @@ class SyntheticData:
             [0, 0, 1, 0],
             [0, 1, 0, 1]]], dtype=uint8)
     Coordinates:
-      * gene_name  (gene_name) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
+      * target     (target) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
       * c          (c) int64 0 1 2
       * h          (h) int64 0 1 2 3
 
@@ -51,7 +51,7 @@ class SyntheticData:
       - r          (features) float64 nan nan
       * c          (c) int64 0 1 2
       * h          (h) int64 0 1 2 3
-        gene_name  (features) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
+        target     (features) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
 
     >>> sd.spots(intensities=intensities)
     <starfish.image._stack.ImageStack at 0x10a60c5f8>
@@ -60,7 +60,7 @@ class SyntheticData:
 
     def __init__(
             self,
-            n_hyb: int=4,
+            n_round: int=4,
             n_ch: int=4,
             n_z: int=10,
             height: int=50,
@@ -77,7 +77,7 @@ class SyntheticData:
             mean_photons_per_fluor: int=50,
 
     ) -> None:
-        self.n_hyb = n_hyb
+        self.n_round = n_round
         self.n_ch = n_ch
         self.n_z = n_z
         self.height = height
@@ -94,7 +94,7 @@ class SyntheticData:
         self.mean_photons_per_fluor = mean_photons_per_fluor
 
     def codebook(self) -> Codebook:
-        return Codebook.synthetic_one_hot_codebook(self.n_hyb, self.n_ch, self.n_codes)
+        return Codebook.synthetic_one_hot_codebook(self.n_round, self.n_ch, self.n_codes)
 
     def intensities(self, codebook=None) -> IntensityTable:
         if codebook is None:

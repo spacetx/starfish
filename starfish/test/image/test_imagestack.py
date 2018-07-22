@@ -23,9 +23,9 @@ def test_get_slice_simple_index():
     (P, Q0,..., Qn-1, R), slice across either P or R.
     """
     stack = ImageStack.synthetic_stack()
-    hyb = 1
+    round_ = 1
     imageslice, axes = stack.get_slice(
-        {Indices.ROUND: hyb}
+        {Indices.ROUND: round_}
     )
     assert axes == [Indices.CH, Indices.Z]
 
@@ -34,7 +34,7 @@ def test_get_slice_simple_index():
     for ch in range(stack.shape[Indices.CH]):
         for z in range(stack.shape[Indices.Z]):
             data = np.empty((y, x))
-            data.fill((hyb * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] + z)
+            data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] + z)
 
             assert data.all() == imageslice[ch, z].all()
 
@@ -53,12 +53,12 @@ def test_get_slice_middle_index():
 
     y, x = stack.tile_shape
 
-    for hyb in range(stack.shape[Indices.ROUND]):
+    for round_ in range(stack.shape[Indices.ROUND]):
         for z in range(stack.shape[Indices.Z]):
             data = np.empty((y, x))
-            data.fill((hyb * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] + z)
+            data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] + z)
 
-            assert data.all() == imageslice[hyb, z].all()
+            assert data.all() == imageslice[round_, z].all()
 
 
 def test_get_slice_range():
@@ -73,14 +73,14 @@ def test_get_slice_range():
     y, x = stack.tile_shape
     assert axes == [Indices.ROUND, Indices.CH, Indices.Z]
 
-    for hyb in range(stack.shape[Indices.ROUND]):
+    for round_ in range(stack.shape[Indices.ROUND]):
         for ch in range(stack.shape[Indices.CH]):
             for z in range(zrange.stop - zrange.start):
                 data = np.empty((y, x))
-                data.fill((hyb * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] +
+                data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] +
                           (z + zrange.start))
 
-                assert data.all() == imageslice[hyb, ch, z].all()
+                assert data.all() == imageslice[round_, ch, z].all()
 
 
 def test_set_slice_simple_index():
@@ -89,11 +89,11 @@ def test_set_slice_simple_index():
     (P, Q0,..., Qn-1, R), sets a slice across either P or R.
     """
     stack = ImageStack.synthetic_stack()
-    hyb = 1
+    round_ = 1
     y, x = stack.tile_shape
 
     expected = np.ones((stack.shape[Indices.CH], stack.shape[Indices.Z], y, x)) * 2
-    index = {Indices.ROUND: hyb}
+    index = {Indices.ROUND: round_}
 
     stack.set_slice(index, expected)
 

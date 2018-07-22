@@ -26,7 +26,7 @@ import seaborn as sns
 from scipy.stats import scoreatpercentile
 
 from showit import image, tile
-from starfish.constants import Indices
+from starfish.constants import Indices, Features
 from starfish.io import Stack
 from starfish.viz import tile_lims
 
@@ -45,18 +45,18 @@ tile(s.image.squeeze());
 # EPY: END code
 
 # EPY: START markdown
-# Individual hybridization rounds and channels can also be visualized
+# Individual imaging rounds and channels can also be visualized
 # EPY: END markdown
 
 # EPY: START code
-# show all hybridization rounds of channel 0
+# show all imaging rounds of channel 0
 s.image.show_stack({Indices.CH: 0}, rescale=False)
 # EPY: END code
 
 # EPY: START markdown
 # ## Show input file format that specifies how the tiff stack is organized
 # 
-# The stack contains multiple images corresponding to the channel and hybridization round. MERFISH builds a 16 bit barcode from 8 hybridization rounds, each of which measures two channels that correspond to contiguous (but not necessarily consistently ordered) bits of the barcode. 
+# The stack contains multiple images corresponding to the channel and imaging rounds. MERFISH builds a 16 bit barcode from 8 imaging rounds, each of which measures two channels that correspond to contiguous (but not necessarily consistently ordered) bits of the barcode. 
 # 
 # The MERFISH computational pipeline also constructs a scalar that corrects for intensity differences across each of the 16 images, e.g., one scale factor per bit position.
 # 
@@ -114,9 +114,9 @@ dpsf.filter(s.image)
 # EPY: END code
 
 # EPY: START markdown
-# Recall that the image is pre-registered, as stated above. Despite this, individual RNA molecules may still not be perfectly aligned across hybridization rounds. This is crucial in order to read out a measure of the itended barcode (across hybridization rounds) in order to map it to the codebook. To solve for potential mis-alignment, the images can be blurred with a 1-pixel Gaussian kernel. The risk here is that this will obfuscate signals from nearby molecules. 
+# Recall that the image is pre-registered, as stated above. Despite this, individual RNA molecules may still not be perfectly aligned across imaging rounds. This is crucial in order to read out a measure of the itended barcode (across imaging rounds) in order to map it to the codebook. To solve for potential mis-alignment, the images can be blurred with a 1-pixel Gaussian kernel. The risk here is that this will obfuscate signals from nearby molecules. 
 # 
-# A local search in pixel space across hybridization rounds can also solve this. 
+# A local search in pixel space across imaging rounds can also solve this. 
 # EPY: END markdown
 
 # EPY: START code
@@ -126,11 +126,11 @@ glp.filter(s.image)
 # EPY: END code
 
 # EPY: START markdown
-# Use MERFISH-calculated size factors to scale the channels across the hybridization rounds and visualize the resulting filtered and scaled images. Right now we have to extract this information from the metadata and apply this transformation manually.
+# Use MERFISH-calculated size factors to scale the channels across the imaging rounds and visualize the resulting filtered and scaled images. Right now we have to extract this information from the metadata and apply this transformation manually.
 # EPY: END markdown
 
 # EPY: START code
-scale_factors = {(t[Indices.HYB], t[Indices.CH]): t['scale_factor'] for index, t in s.image.tile_metadata.iterrows()}
+scale_factors = {(t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] for index, t in s.image.tile_metadata.iterrows()}
 # EPY: END code
 
 # EPY: START code
@@ -139,7 +139,7 @@ scale_factors = {(t[Indices.HYB], t[Indices.CH]): t['scale_factor'] for index, t
 
 for indices in s.image._iter_indices():
     data = s.image.get_slice(indices)[0]
-    scaled = data / scale_factors[indices[Indices.HYB.value], indices[Indices.CH.value]]
+    scaled = data / scale_factors[indices[Indices.ROUND.value], indices[Indices.CH.value]]
     s.image.set_slice(indices, scaled)
 # EPY: END code
 
@@ -148,7 +148,7 @@ from scipy.stats import scoreatpercentile
 # EPY: END code
 
 # EPY: START code
-mp = s.image.max_proj(Indices.HYB.value, Indices.CH.value, Indices.Z.value)
+mp = s.image.max_proj(Indices.ROUND.value, Indices.CH.value, Indices.Z.value)
 clim = scoreatpercentile(mp, [0.5, 99.5])
 image(mp, clim=clim)
 # EPY: END code
@@ -156,7 +156,7 @@ image(mp, clim=clim)
 # EPY: START markdown
 # ## Use spot-detector to create 'encoder' table  for standardized input  to decoder
 # 
-# Each pipeline exposes a spot detector, and this spot detector translates the filtered image into an encoded table by detecting spots. The table contains the spot_id, the corresponding intensity (val) and the channel (ch), hybridization round (hyb), and bit position (bit) of each spot. 
+# Each pipeline exposes a spot detector, and this spot detector translates the filtered image into an encoded table by detecting spots. The table contains the spot_id, the corresponding intensity (v) and the channel (c), imaging round (r) of each spot. 
 # 
 # The MERFISH pipeline merges these two steps together by finding pixel-based features, and then later collapsing these into spots and filtering out undesirable (non-spot) features. 
 # 
@@ -216,7 +216,7 @@ bench = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/benchmark_resu
                     dtype = {'barcode':object})
 
 benchmark_counts = bench.groupby('gene')['gene'].count()
-genes, counts = np.unique(spot_intensities.gene_name, return_counts=True)
+genes, counts = np.unique(spot_intensities[Features.AXIS][Features.TARGET], return_counts=True)
 result_counts = pd.Series(counts, index=genes)
 
 tmp = pd.concat([result_counts, benchmark_counts], join='inner', axis=1).values

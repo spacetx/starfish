@@ -12,10 +12,10 @@ from starfish.munge import dataframe_to_multiindex
 class IntensityTable(xr.DataArray):
     """3 dimensional container for spot/pixel features extracted from image data
 
-    An IntensityTable is comprised of each feature's intensity across channels and hybridization
-    rounds, where features are typically spots or pixels. This forms an (n_feature, n_channel, n_hybridization_round)
-    tensor implemented as an xarray.DataArray object. In addition to the basic xarray methods,
-    IntensityTable implements:
+    An IntensityTable is comprised of each feature's intensity across channels and imaging
+    rounds, where features are typically spots or pixels. This forms an
+    (n_feature, n_channel, n_round) tensor implemented as an xarray.DataArray object.
+    In addition to the basic xarray methods, IntensityTable implements:
 
     Constructors
     -------
@@ -28,20 +28,10 @@ class IntensityTable(xr.DataArray):
     save                   save the IntensityTable to netCDF
     load                   load an IntensityTable from netCDF
 
-    Attributes
-    ----------
-    Constants.Features     name of the first axis of the IntensityTable
-    Constants.GENE         name of the field that stores the decoded gene identity for each feature
-    Constants.DISTANCE     name of the field that stores the decoded gene quality for each feature
-    SpotAttributes.X       name of the pixelwise spot x-coordinate
-    SpotAttributes.Y       name of the pixelwise spot y-coordinate
-    SpotAttributes.Z       name of the pixelwise spot z-coordinate
-    SpotAttributes.RADIUS  name of the spot radius index
-
     Examples
     --------
     >>> from starfish.util.synthesize import SyntheticData
-    >>> sd = SyntheticData(n_ch=3, n_hyb=4, n_codes=2)
+    >>> sd = SyntheticData(n_ch=3, n_round=4, n_codes=2)
     >>> codes = sd.codebook()
     >>> sd.intensities(codebook=codes)
     <xarray.IntensityTable (features: 2, c: 3, h: 4)>
@@ -54,13 +44,13 @@ class IntensityTable(xr.DataArray):
             [11172., 12331.,     0.,     0.]]])
     Coordinates:
     * features   (features) MultiIndex
-      - z          (features) int64 7 3
-      - y          (features) int64 14 32
-      - x          (features) int64 32 15
-      - r          (features) float64 nan nan
-      * c          (c) int64 0 1 2
-      * h          (h) int64 0 1 2 3
-        gene_name  (features) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
+    - z          (features) int64 7 3
+    - y          (features) int64 14 32
+    - x          (features) int64 32 15
+    - r          (features) float64 nan nan
+    * c          (c) int64 0 1 2
+    * h          (h) int64 0 1 2 3
+      target     (features) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
 
     """
 
@@ -69,7 +59,7 @@ class IntensityTable(xr.DataArray):
 
     @classmethod
     def empty_intensity_table(
-            cls, spot_attributes: pd.MultiIndex, n_ch: int, n_hyb: int,
+            cls, spot_attributes: pd.MultiIndex, n_ch: int, n_round: int,
             image_shape: Tuple[int, int, int]
     ) -> "IntensityTable":
         """Create an empty intensity table with pre-set axis whose values are zero
@@ -81,8 +71,8 @@ class IntensityTable(xr.DataArray):
             Y, Z, and RADIUS.
         n_ch : int
             number of channels measured in the imaging experiment
-        n_hyb : int
-            number of hybridization rounds measured in the imaging experiment
+        n_round : int
+            number of imaging rounds measured in the imaging experiment
         image_shape : Tuple[int, int, int]
             the shape (z, y, x) of the image from which features will be extracted
 
@@ -94,13 +84,13 @@ class IntensityTable(xr.DataArray):
         """
         cls._verify_spot_attributes(spot_attributes)
         channel_index = np.arange(n_ch)
-        hyb_index = np.arange(n_hyb)
-        data = np.zeros((spot_attributes.shape[0], n_ch, n_hyb))
+        round_index = np.arange(n_round)
+        data = np.zeros((spot_attributes.shape[0], n_ch, n_round))
         dims = (Features.AXIS, Indices.CH.value, Indices.ROUND.value)
         attrs = {cls.IMAGE_SHAPE: image_shape}
 
         intensity_table = cls(
-            data=data, coords=(spot_attributes, channel_index, hyb_index), dims=dims,
+            data=data, coords=(spot_attributes, channel_index, round_index), dims=dims,
             attrs=attrs
         )
 
@@ -153,7 +143,7 @@ class IntensityTable(xr.DataArray):
 
         if len(intensities.shape) != 3:
             raise ValueError(
-                f'intensities must be a (features * ch * hyb) 3-d tensor. Provided intensities '
+                f'intensities must be a (features * ch * round) 3-d tensor. Provided intensities '
                 f'shape ({intensities.shape}) is invalid.')
 
         cls._verify_spot_attributes(spot_attributes)
@@ -253,9 +243,9 @@ class IntensityTable(xr.DataArray):
         # empty data tensor
         data = np.zeros(shape=(n_spots, *codebook.shape[1:]))
 
-        genes = np.random.choice(
+        targets = np.random.choice(
             codebook.coords[Features.TARGET], size=n_spots, replace=True)
-        expected_bright_locations = np.where(codebook.loc[genes])
+        expected_bright_locations = np.where(codebook.loc[targets])
 
         # create a binary matrix where "on" spots are 1
         data[expected_bright_locations] = 1
@@ -267,7 +257,7 @@ class IntensityTable(xr.DataArray):
         image_shape = (num_z, height, width)
 
         intensities = cls.from_spot_data(data, spot_attributes, image_shape=image_shape)
-        intensities[Features.TARGET] = (Features.AXIS, genes)
+        intensities[Features.TARGET] = (Features.AXIS, targets)
 
         return intensities
 
@@ -334,8 +324,8 @@ class IntensityTable(xr.DataArray):
 
     def mask_small_features(self, min_size: int, max_size: int):
         """return the indices of features whose radii are smaller than size_threshold"""
-        mask = np.where(self.coords.features[Features.RADIUS] < min_size)[0]
-        mask |= np.where(self.coords.features[Features.RADIUS] > max_size)[0]
+        mask = np.where(self.coords.features[Features.SPOT_RADIUS] < min_size)[0]
+        mask |= np.where(self.coords.features[Features.SPOT_RADIUS] > max_size)[0]
         return mask
 
     def _intensities_from_regions(self, props, reduce_op='max') -> "IntensityTable":

@@ -113,7 +113,7 @@ class TestWithIssData(unittest.TestCase):
             "--min-distance", "57",
         ],
         [
-            "starfish", "gene_assignment",
+            "starfish", "target_assignment",
             "--coordinates-geojson",
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.geojson"),
             "--intensities", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),

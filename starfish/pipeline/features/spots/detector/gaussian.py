@@ -94,13 +94,13 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
     ) -> IntensityTable:
 
         n_ch = stack.shape[Indices.CH]
-        n_hyb = stack.shape[Indices.ROUND]
+        n_round = stack.shape[Indices.ROUND]
         spot_attribute_index = dataframe_to_multiindex(spot_attributes)
         image_shape: Tuple[int, int, int] = stack.raw_shape[2:]
         intensity_table = IntensityTable.empty_intensity_table(
-            spot_attribute_index, n_ch, n_hyb, image_shape)
+            spot_attribute_index, n_ch, n_round, image_shape)
 
-        indices = product(range(n_ch), range(n_hyb))
+        indices = product(range(n_ch), range(n_round))
         for c, h in indices:
             image, _ = stack.get_slice({Indices.CH: c, Indices.ROUND: h})
             blob_intensities: pd.Series = self._measure_blob_intensity(
@@ -139,22 +139,22 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         return fitted_blobs
 
-    def find(self, hybridization_image: ImageStack) -> IntensityTable:
+    def find(self, image_stack: ImageStack) -> IntensityTable:
         """find spots
 
         Parameters
         ----------
-        hybridization_image : ImageStack
+        image_stack : ImageStack
             stack containing spots to find
 
         Returns
         -------
         IntensityTable :
-            3d tensor containing the intensity of spots across channels and hybridization rounds
+            3d tensor containing the intensity of spots across channels and imaging rounds
 
         """
         spot_attributes = self._find_spot_locations()
-        intensity_table = self._measure_spot_intensities(hybridization_image, spot_attributes)
+        intensity_table = self._measure_spot_intensities(image_stack, spot_attributes)
         return intensity_table
 
     @classmethod

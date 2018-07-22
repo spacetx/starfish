@@ -20,7 +20,7 @@ import pprint
 # EPY: ESCAPE %matplotlib inline
 
 from starfish.io import Stack
-from starfish.constants import Indices
+from starfish.constants import Indices, Features
 from starfish.codebook import Codebook
 # EPY: END code
 
@@ -34,7 +34,7 @@ tile(s.image.squeeze());
 # EPY: START markdown
 # ## Show input file format that specifies how the tiff stack is organized
 # 
-# The stack contains multiple single plane images, one for each color channel, 'ch', (columns in above image) and hybridization round, 'hyb', (rows in above image). This protocol assumes that genes are encoded with a length 4 quatenary barcode that can be read out from the images. Each hybridization encodes a position in the codeword. The maximum signal in each color channel (columns in the above image) corresponds to a letter in the codeword. The channels, in order, correspond to the letters: 'T', 'G', 'C', 'A'. The goal is now to process these image data into spatially organized barcodes, e.g., ACTG, which can then be mapped back to a codebook that specifies what gene this codeword corresponds to.
+# The stack contains multiple single plane images, one for each color channel, 'c', (columns in above image) and imaging round, 'r', (rows in above image). This protocol assumes that genes are encoded with a length 4 quatenary barcode that can be read out from the images. Each round encodes a position in the codeword. The maximum signal in each color channel (columns in the above image) corresponds to a letter in the codeword. The channels, in order, correspond to the letters: 'T', 'G', 'C', 'A'. The goal is now to process these image data into spatially organized barcodes, e.g., ACTG, which can then be mapped back to a codebook that specifies what gene this codeword corresponds to.
 # EPY: END markdown
 
 # EPY: START code
@@ -43,11 +43,11 @@ pp.pprint(s.org)
 # EPY: END code
 
 # EPY: START markdown
-# The flat TIFF files are loaded into a 4-d tensor with dimensions corresponding to hybridization round, channel, x, and y. For other volumetric approaches that image the z-plane, this would be a 5-d tensor.
+# The flat TIFF files are loaded into a 4-d tensor with dimensions corresponding to imaging round, channel, x, and y. For other volumetric approaches that image the z-plane, this would be a 5-d tensor.
 # EPY: END markdown
 
 # EPY: START code
-# hyb, channel, x, y, z
+# round, channel, x, y, z
 s.image.numpy_array.shape
 # EPY: END code
 
@@ -56,11 +56,11 @@ s.image.numpy_array.shape
 # EPY: END markdown
 
 # EPY: START markdown
-# 'dots' is a general stain for all possible transcripts. This image should correspond to the maximum projcection of all color channels within a single hybridization round. This auxiliary image is useful for registering images from multiple hybridization rounds to this reference image. We'll see an example of this further on in the notebook
+# 'dots' is a general stain for all possible transcripts. This image should correspond to the maximum projcection of all color channels within a single imaging round. This auxiliary image is useful for registering images from multiple imaging rounds to this reference image. We'll see an example of this further on in the notebook
 # EPY: END markdown
 
 # EPY: START code
-image(s.auxiliary_images['dots'].max_proj(Indices.HYB, Indices.CH, Indices.Z))
+image(s.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END code
 
 # EPY: START markdown
@@ -68,7 +68,7 @@ image(s.auxiliary_images['dots'].max_proj(Indices.HYB, Indices.CH, Indices.Z))
 # EPY: END markdown
 
 # EPY: START code
-image(s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z))
+image(s.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END code
 
 # EPY: START markdown
@@ -76,7 +76,7 @@ image(s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z))
 # EPY: END markdown
 
 # EPY: START markdown
-# Each 4 letter quatenary code (as read out from the 4 hybridization rounds and 4 color channels) represents a gene. This relationship is stored in a codebook
+# Each 4 letter quatenary code (as read out from the 4 imaging rounds and 4 color channels) represents a gene. This relationship is stored in a codebook
 # EPY: END markdown
 
 # EPY: START code
@@ -106,8 +106,8 @@ for img in s.auxiliary_images.values():
 # EPY: END markdown
 
 # EPY: START markdown
-# For each hybridization round, the max projection across color channels should look like the dots stain.
-# Below, this computes the max projection across the color channels of a hybridization round and learns the linear transformation to maps the resulting image onto the dots image.
+# For each imaging round, the max projection across color channels should look like the dots stain.
+# Below, this computes the max projection across the color channels of an imaging round and learns the linear transformation to maps the resulting image onto the dots image.
 # 
 # The Fourier shift registration approach can be thought of as maximizing the cross-correlation of two images.
 # 
@@ -164,7 +164,7 @@ spot_count
 # EPY: END code
 
 # EPY: START markdown
-# This visualizes a single spot (#100) across all hybridization rounds and channels. It contains the intensity and bit index, which allow it to be mapped onto the correct barcode.
+# This visualizes a single spot (#100) across all imaging rounds and channels. It contains the intensity and bit index, which allow it to be mapped onto the correct barcode.
 # EPY: END markdown
 
 # EPY: START code
@@ -194,7 +194,7 @@ intensities[100]
 # EPY: END markdown
 
 # EPY: START code
-decoded = codebook.decode_per_hyb_max(intensities)
+decoded = codebook.decode_per_round_max(intensities)
 # EPY: END code
 
 # EPY: START markdown
@@ -206,7 +206,7 @@ decoded = codebook.decode_per_hyb_max(intensities)
 # EPY: END markdown
 
 # EPY: START code
-genes, counts = np.unique(decoded['gene_name'], return_counts=True)
+genes, counts = np.unique(decoded[Features.TARGET], return_counts=True)
 table = pd.Series(counts, index=genes).sort_values(ascending=False)
 # EPY: END code
 
@@ -241,7 +241,7 @@ min_dist = 57
 
 stain = np.mean(s.image.max_proj(Indices.CH, Indices.Z), axis=0)
 stain = stain/stain.max()
-nuclei = s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
+nuclei = s.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 
 
 seg = _WatershedSegmenter(nuclei, stain)  # uses skimage watershed.
@@ -262,16 +262,16 @@ GENE1 = 'HER2'
 GENE2 = 'VIM'
 
 rgb = np.zeros(s.image.tile_shape + (3,))
-rgb[:,:,0] = s.auxiliary_images['nuclei'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
-rgb[:,:,1] = s.auxiliary_images['dots'].max_proj(Indices.HYB, Indices.CH, Indices.Z)
+rgb[:,:,0] = s.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+rgb[:,:,1] = s.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 do = rgb2gray(rgb)
 do = do/(do.max())
 
 image(do,size=10)
 with warnings.catch_warnings():
     warnings.simplefilter('ignore', FutureWarning)
-    is_gene1 = decoded.where(decoded.gene_name == GENE1, drop=True)
-    is_gene2 = decoded.where(decoded.gene_name == GENE2, drop=True)
+    is_gene1 = decoded.where(decoded[Features.AXIS][Features.TARGET] == GENE1, drop=True)
+    is_gene2 = decoded.where(decoded[Features.AXIS][Features.TARGET] == GENE2, drop=True)
 
 plt.plot(is_gene1.x, is_gene1.y, 'or')
 plt.plot(is_gene2.x, is_gene2.y, 'ob')

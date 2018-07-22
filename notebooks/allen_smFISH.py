@@ -82,7 +82,7 @@ s_clip.filter(s.image)
 # EPY: END code
 
 # EPY: START markdown
-# If you ever want to visualize the image in the notebook, we've added a widget to do that. The first parameter is an indices dict that specifies which hybridization round, channel, z-slice you want to view. The result is a pageable visualization across that arbitrary set of slices. Below I'm visualizing the first channel, which your codebook tells me is Nmnt. 
+# If you ever want to visualize the image in the notebook, we've added a widget to do that. The first parameter is an indices dict that specifies which imaging round, channel, z-slice you want to view. The result is a pageable visualization across that arbitrary set of slices. Below I'm visualizing the first channel, which your codebook tells me is Nmnt. 
 # 
 # [N.B. once you click on the slider, you can page with the arrow keys on the keyboard.]
 # EPY: END markdown
@@ -165,7 +165,7 @@ spot_attributes = lmpf.find(s.image)
 
 # EPY: START code
 # save the results to disk as json
-for attrs, (hyb, ch) in spot_attributes:
+for attrs, (round, ch) in spot_attributes:
     attrs.save(f'spot_attributes_c{ch}.json')
 # EPY: END code
 
@@ -182,5 +182,5 @@ for attrs, (hyb, ch) in spot_attributes:
 # Note that in places where spots are "missed" it is often because they've been localized to individual 
 # nearby z-planes, whereas most spots exist across several layers of z.
 
-s.image.show_stack({Indices.CH.value: 1, Indices.HYB.value: 0}, show_spots=spot_attributes[1][0], figure_size=(20, 20), p_min=60, p_max=99.9);
+s.image.show_stack({Indices.CH.value: 1, Indices.ROUND.value: 0}, show_spots=spot_attributes[1][0], figure_size=(20, 20), p_min=60, p_max=99.9);
 # EPY: END code

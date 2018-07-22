@@ -122,7 +122,7 @@ def simple_codebook_json(simple_codebook_array) -> Generator[str, None, None]:
 
 @pytest.fixture(scope='module')
 def loaded_codebook(simple_codebook_json):
-    return Codebook.from_json(simple_codebook_json, n_ch=2, n_hyb=2)
+    return Codebook.from_json(simple_codebook_json, n_ch=2, n_round=2)
 
 
 @pytest.fixture(scope='function')
@@ -135,7 +135,7 @@ def euclidean_decoded_intensities(small_intensity_table, loaded_codebook):
 
 @pytest.fixture(scope='function')
 def per_channel_max_decoded_intensities(small_intensity_table, loaded_codebook):
-    decoded_intensities = loaded_codebook.decode_per_hyb_max(small_intensity_table)
+    decoded_intensities = loaded_codebook.decode_per_round_max(small_intensity_table)
     return decoded_intensities
 
 
@@ -180,7 +180,7 @@ def synthetic_dataset_with_truth_values_and_called_spots(
         measurement_type='max',
     )
 
-    intensities = gsd.find(hybridization_image=filtered)
+    intensities = gsd.find(image_stack=filtered)
     assert intensities.shape[0] == 5
 
     codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm_order=2)
@@ -249,7 +249,7 @@ def synthetic_spot_pass_through_stack(synthetic_dataset_with_truth_values):
 @pytest.fixture()
 def single_synthetic_spot():
     sd = synthesize.SyntheticData(
-        n_hyb=2, n_ch=2, n_z=2, height=20, width=30, n_codes=1, n_spots=1
+        n_round=2, n_ch=2, n_z=2, height=20, width=30, n_codes=1, n_spots=1
     )
     codebook = sd.codebook()
     intensities = sd.intensities(codebook)

@@ -55,7 +55,7 @@ def test_create_intensity_table_raises_value_error_when_no_spots_detected(
         measurement_type='max',
     )
     with pytest.raises(ValueError):
-        gsd.find(hybridization_image=image)
+        gsd.find(image_stack=image)
 
 
 def test_blob_log_2d(synthetic_single_spot_2d):

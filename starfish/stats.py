@@ -8,8 +8,8 @@ from scipy.sparse import coo_matrix
 
 
 def stack_describe(stack):
-    num_hybs = stack.shape[0]
-    stats = [im_describe(stack[k, :]) for k in range(num_hybs)]
+    num_rounds = stack.shape[0]
+    stats = [im_describe(stack[k, :]) for k in range(num_rounds)]
     return stats
 
 

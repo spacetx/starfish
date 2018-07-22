@@ -4,6 +4,12 @@
 # EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
+# # User note: This notebook is currently broken
+# 
+# For a working ISS demonstration, please see the ISS_Pipeline notebook in the same directory
+# EPY: END markdown
+
+# EPY: START markdown
 # # Starfish re-creation of an in-situ sequencing pipeline 
 # 
 # Here, we reproduce the results of a pipeline run on data collected using the gap filling and padlock probe litigation method described in [Ke, Mignardi, et. al, 2013](http://www.nature.com/nmeth/journal/v10/n9/full/nmeth.2563.html). These data represent 5 co-cultured mouse and human cells -- the main idea is to detect a single nucleotide polymorphism (SNP) in the Beta-Actin (ACTB) gene across species. The Python code below correctly re-produces the same results from the original cell profiler - matlab - imagej [pipeline](http://cellprofiler.org/examples/#InSitu) that is publicly accessible. 
@@ -17,6 +23,8 @@ from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 # EPY: ESCAPE %matplotlib inline
 from showit import image, tile
+
+from starfish.constants import Indices, Features
 # EPY: END code
 
 # EPY: START markdown
@@ -63,7 +71,7 @@ from starfish.filters import white_top_hat
 
 disk_dize = 10
 
-# filter raw images, for all hybs and channels
+# filter raw images, for all rounds and channels
 stack_filt = [white_top_hat(im, disk_dize) for im in s.image.squeeze()]
 stack_filt = s.un_squeeze(stack_filt)
 
@@ -71,7 +79,7 @@ stack_filt = s.un_squeeze(stack_filt)
 dots_filt = white_top_hat(s.auxiliary_images['dots'], disk_dize)
 
 # create a 'stain' for segmentation
-stain = np.mean(s.image.max_proj('ch'), axis=0)
+stain = np.mean(s.image.max_proj(Indices.CH), axis=0)
 stain = stain/stain.max()
 
 # update stack
@@ -139,7 +147,7 @@ seg.show()
 from starfish.assign import assign
 from starfish.stats import label_to_regions
 
-points = spots_viz.loc[:, ['x', 'y']].values
+points = spots_viz.loc[:, [Features.X, Features.Y]].values
 regions = label_to_regions(cells_labels)
 ass = assign(regions, points, use_hull=True)
 ass.groupby('cell_id',as_index=False).count().rename(columns={'spot_id':'num spots'})

@@ -54,7 +54,7 @@ class PixelSpotDetector(PipelineComponent):
         instance = args.pixel_finder_algorithm_class(codebook, **vars(args))
         intensities, decoded_props = instance.find(s)
 
-        # TODO ambrosejcarr: this still needs to be added back.
+        # TODO ambrosejcarr: this needs to be added back.
         # if args.show:
         #     encoded_pixels.show(figsize=(10, 10))
 

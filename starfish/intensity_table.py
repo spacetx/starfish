@@ -1,9 +1,11 @@
 from typing import Union, Tuple
+from itertools import product
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
+from starfish.munge import dataframe_to_multiindex
 from starfish.constants import Indices, AugmentedEnum
 
 
@@ -276,3 +278,54 @@ class IntensityTable(xr.DataArray):
         intensities[cls.Constants.GENE.value] = ('features', genes)
 
         return intensities
+
+    @classmethod
+    def from_image_stack(cls, image_stack, crop: Tuple[int, int, int]=(0, 0, 0)) -> "IntensityTable":
+        """Generate an IntensityTable from all the pixels in the ImageStack
+
+        Parameters
+        ----------
+        image_stack : ImageStack
+
+        crop : Tuple[int, int, int]
+            number of pixels from the image borders (z, y, x) to ignore
+
+        Returns
+        -------
+
+        """
+        crop_z, crop_y, crop_x = crop
+
+        # verify the image is large enough to crop
+        assert crop_z * 2 < image_stack.shape['z']
+        assert crop_y * 2 < image_stack.shape['y']
+        assert crop_x * 2 < image_stack.shape['x']
+
+        zmin = crop_z
+        ymin = crop_y
+        xmin = crop_x
+        zmax = image_stack.shape['z'] - crop_z
+        ymax = image_stack.shape['y'] - crop_y
+        xmax = image_stack.shape['x'] - crop_x
+        data = image_stack.numpy_array.transpose(2, 3, 4, 1, 0)  # (z, y, x, ch, hyb)
+
+        # crop and reshape imagestack to create IntensityTable data
+        cropped_data = data[zmin:zmax, ymin:ymax, xmin:xmax, :, :]
+        intensity_data = cropped_data.reshape(-1, image_stack.num_chs, image_stack.num_hybs)  # (pixels, ch, hyb)
+
+        # IntensityTable pixel coordinates
+        z = np.arange(zmin, zmax)
+        y = np.arange(ymin, ymax)
+        x = np.arange(xmin, xmax)
+
+        pixel_coordinates = pd.DataFrame(
+            data=np.array(list(product(z, y, x))),
+            columns=['z', 'y', 'x']
+        )
+        pixel_coordinates['r'] = np.full(pixel_coordinates.shape[0], fill_value=np.nan)
+
+        spot_attributes = dataframe_to_multiindex(pixel_coordinates)
+        image_size = cropped_data.shape[:3]
+
+        return IntensityTable.from_spot_data(intensity_data, spot_attributes, image_size)
+

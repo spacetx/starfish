@@ -1,25 +1,24 @@
 import collections
 import os
+import warnings
+from copy import deepcopy
 from functools import partial
 from itertools import product
 from typing import Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
-import warnings
-from copy import deepcopy
 
 import numpy as np
 import pandas as pd
+from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import scoreatpercentile
 from skimage import exposure
-from scipy.ndimage.filters import gaussian_filter
 from slicedimage import Reader, Writer, TileSet, Tile
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
 from starfish.constants import Coordinates, Indices
 from starfish.errors import DataFormatWarning
-from starfish.pipeline.features.spot_attributes import SpotAttributes
 from starfish.intensity_table import IntensityTable
-from starfish.munge import dataframe_to_multiindex
+from starfish.pipeline.features.spot_attributes import SpotAttributes
 
 
 class ImageStack:
@@ -961,91 +960,3 @@ class ImageStack:
                     empty.set_slice({Indices.HYB: h, Indices.CH: c, Indices.Z: z}, view)
 
         return empty
-
-    def to_pixel_intensities(self, crop: Tuple[int, int, int]=(0, 0, 0)) -> IntensityTable:
-        """Generate an IntensityTable from all the pixels in the ImageStack
-
-        Parameters
-        ----------
-        crop : Tuple[int, int, int]
-            number of pixels from the image borders (z, y, x) to ignore
-
-        Returns
-        -------
-
-        """
-        zmin, ymin, xmin = crop
-        zmax = self.shape['z'] - zmin
-        ymax = self.shape['y'] - ymin
-        xmax = self.shape['x'] - xmin
-        data = self.numpy_array.transpose(2, 3, 4, 1, 0)  # (z, y, x, ch, hyb)
-        cropped_data = data[zmin:zmax, ymin:ymax, xmin:xmax, :, :]
-        intensity_data = cropped_data.reshape(-1, self.num_chs, self.num_hybs)  # (pixels, ch, hyb)
-        z = np.arange(zmin, zmax)
-        y = np.arange(ymin, ymax)
-        x = np.arange(xmin, xmax)
-
-        pixel_coordinates = pd.DataFrame(
-            data=np.array(list(product(z, y, x))),
-            columns=['z', 'y', 'x']
-        )
-        pixel_coordinates['r'] = np.full(pixel_coordinates.shape[0], fill_value=np.nan)
-
-        spot_attributes = dataframe_to_multiindex(pixel_coordinates)
-        image_size = cropped_data.shape[:3]
-
-        return IntensityTable.from_spot_data(intensity_data, spot_attributes, image_size)
-
-    @classmethod
-    def from_pixel_intensities(
-            cls, intensities: IntensityTable, assume_contiguous: bool=True
-    ) -> "ImageStack":
-        """
-
-        Parameters
-        ----------
-        intensities : IntensityTable
-            intensities to transform into an ImageStack
-        assume_contiguous : bool
-            if True, indicates that every pixel is present in the intensity_table. In this case,
-            the IntensityTable can simply be reshaped back into an ImageStack reversing
-            ImageStack.to_intensities()
-
-        Notes
-        -----
-        assume_contiguous == False is not implemented
-
-        Returns
-        -------
-        ImageStack :
-            ImageStack containing Intensity information
-
-
-        """
-        # if assume_contiguous is True, we can just reshape the original array
-        if assume_contiguous:
-
-            # reverses the process used to produce the intensity table in to_pixel_intensities
-            data = intensities.values.reshape([
-                *intensities.attrs['image_shape'],
-                intensities.sizes[Indices.CH],
-                intensities.sizes[Indices.HYB]])
-            data = data.transpose(4, 3, 0, 1, 2)
-            return ImageStack.from_numpy_array(data)
-
-        else:
-
-            raise NotImplementedError
-
-            # not implementing this right now, not clear it makes sense to.
-
-            # # construct an empty (z, y, x) image
-            # decoded_image = np.zeros(self.attrs['image_shape'], dtype=int)
-            #
-            # # fill it with features
-            # coordinates = self.indexes['features'].to_frame()[['z', 'y', 'x']]
-            # genes = self.gene_name.values
-            #
-            # for i in np.arange(self.sizes[self.Constants.FEATURES.value]):
-            #     z, y, x = coordinates.iloc[i]
-            #     decoded_image[z, y, x] = self._gene_to_int[genes[i]]

@@ -55,12 +55,6 @@ class ImageStack:
 
     def __init__(self, image_partition):
         self._image_partition = image_partition
-        self._num_hybs = image_partition.get_dimension_shape(Indices.HYB)
-        self._num_chs = image_partition.get_dimension_shape(Indices.CH)
-        if Indices.Z in image_partition.dimensions:
-            self._num_zlayers = image_partition.get_dimension_shape(Indices.Z)
-        else:
-            self._num_zlayers = 1
         self._tile_shape = image_partition.default_tile_shape
 
         # Examine the tiles to figure out the right kind (int, float, etc.) and size.  We require that all the tiles
@@ -82,11 +76,16 @@ class ImageStack:
             elif tile.tile_shape is not None and self._tile_shape != tile.tile_shape:
                 raise ValueError("Starfish does not support tiles that are not identical in shape")
 
+        shape = [
+            self._get_dimension_size(axis_name)
+            for axis_name, axis_data in ImageStack.AXES_DATA.items()
+            for ix in range(ImageStack.N_AXES)
+            if ix == axis_data.order
+        ]
+        shape.extend(self._tile_shape)
+
         # now that we know the tile data type (kind and size), we can allocate the data array.
-        self._data = np.zeros(
-            shape=(self._num_hybs, self._num_chs, self._num_zlayers) + self._tile_shape,
-            dtype=np.dtype(f"{kind}{max_size}")
-        )
+        self._data = np.zeros(shape=shape, dtype=np.dtype(f"{kind}{max_size}"))
 
         # iterate through the tiles and set the data.
         for tile in self._image_partition.tiles():
@@ -620,17 +619,23 @@ class ImageStack:
 
         return result
 
+    def _get_dimension_size(self, dimension: Indices):
+        axis_data = ImageStack.AXES_DATA[dimension]
+        if dimension in self._image_partition.dimensions or axis_data.required:
+            return self._image_partition.get_dimension_shape(dimension)
+        return 1
+
     @property
     def num_hybs(self):
-        return self._num_hybs
+        return self._get_dimension_size(Indices.HYB)
 
     @property
     def num_chs(self):
-        return self._num_chs
+        return self._get_dimension_size(Indices.CH)
 
     @property
     def num_zlayers(self):
-        return self._num_zlayers
+        return self._get_dimension_size(Indices.Z)
 
     @property
     def tile_shape(self):

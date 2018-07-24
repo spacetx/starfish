@@ -10,6 +10,9 @@ class AugmentedEnum(Enum):
             return self.value == other
         return False
 
+    def __str__(self) -> str:
+        return self.value
+
 
 class Coordinates(AugmentedEnum):
     X = 'x'

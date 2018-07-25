@@ -15,13 +15,15 @@ def test_reshaping_between_stack_and_intensities(single_synthetic_spot):
     the created Imagestack is the same as the original
     """
     codebook, intensities, image = single_synthetic_spot
-    pixel_intensities = IntensityTable.from_image_stack(image, crop=(0, 0, 0))
+    pixel_intensities = IntensityTable.from_image_stack(image, 0, 0, 0)
     image_shape = (image.shape['z'], image.shape['y'], image.shape['x'])
-    image_from_pixels = from_pixel_intensities(pixel_intensities, image_shape)
+    image_from_pixels = pixel_intensities_to_imagestack(pixel_intensities, image_shape)
     assert np.array_equal(image.numpy_array, image_from_pixels.numpy_array)
 
 
-def from_pixel_intensities(intensities: IntensityTable, image_shape: Tuple[int, int, int]) -> "ImageStack":
+def pixel_intensities_to_imagestack(
+        intensities: IntensityTable, image_shape: Tuple[int, int, int]
+) -> ImageStack:
     """Re-create the pixel intensities from an IntensityTable
 
     Parameters
@@ -29,12 +31,13 @@ def from_pixel_intensities(intensities: IntensityTable, image_shape: Tuple[int, 
     intensities : IntensityTable
         intensities to transform into an ImageStack
     image_shape : Tuple[int, int, int]
+        the dimensions of z, y, and x for the original image that the intensity table was generated
+        from
 
     Returns
     -------
     ImageStack :
         ImageStack containing Intensity information
-
 
     """
     # reverses the process used to produce the intensity table in to_pixel_intensities

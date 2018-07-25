@@ -7,8 +7,12 @@ from starfish.intensity_table import IntensityTable
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import (
-    synthetic_intensity_table, synthetic_spot_pass_through_stack, loaded_codebook,
-    synthetic_dataset_with_truth_values, simple_codebook_json, simple_codebook_array,
+    synthetic_intensity_table,
+    synthetic_spot_pass_through_stack,
+    loaded_codebook,
+    synthetic_dataset_with_truth_values,
+    simple_codebook_json,
+    simple_codebook_array,
     single_synthetic_spot
 )
 
@@ -215,7 +219,7 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
 # TODO ambrosejcarr: improve the tests here.
 def test_imagestack_to_intensity_table(single_synthetic_spot):
     codebook, intensity_table, image = single_synthetic_spot
-    pixel_intensities = image.to_pixel_intensities()
+    pixel_intensities = IntensityTable.from_image_stack(image)
     pixel_intensities = codebook.decode_euclidean(
         pixel_intensities)
     assert isinstance(pixel_intensities, IntensityTable)
@@ -223,7 +227,7 @@ def test_imagestack_to_intensity_table(single_synthetic_spot):
 
 def test_imagestack_to_intensity_table_no_noise(synthetic_spot_pass_through_stack):
     codebook, intensity_table, image = synthetic_spot_pass_through_stack
-    pixel_intensities = image.to_pixel_intensities()
+    pixel_intensities = IntensityTable.from_image_stack(image)
     pixel_intensities = codebook.decode_euclidean(
         pixel_intensities)
     assert isinstance(pixel_intensities, IntensityTable)

@@ -10,6 +10,7 @@ from . import gaussian_high_pass
 from . import gaussian_low_pass
 from . import richardson_lucy_deconvolution
 from . import white_tophat
+from . import mean_high_pass
 
 
 class Filter(PipelineComponent):

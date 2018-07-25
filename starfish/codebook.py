@@ -2,7 +2,7 @@ import functools
 import json
 import urllib.request
 import uuid
-from typing import Any, Dict, List, Optional, Sequence, Set
+from typing import Any, Dict, List, Optional, Sequence, Set, Union
 
 import numpy as np
 import pandas as pd
@@ -137,7 +137,7 @@ class Codebook(xr.DataArray):
 
     @classmethod
     def from_code_array(
-            cls, code_array: List[Dict[str, Any]],
+            cls, code_array: List[Dict[Union[str, Constants], Any]],
             n_hyb: Optional[int]=None, n_ch: Optional[int]=None) -> "Codebook":
         """construct a codebook from a spaceTx-spec array of codewords
 
@@ -208,9 +208,9 @@ class Codebook(xr.DataArray):
         max_hyb, max_ch = 0, 0
 
         for code in code_array:
-            for entry in code[Codebook.Constants.CODEWORD.value]:
-                max_hyb = max(max_hyb, entry[Indices.HYB.value])
-                max_ch = max(max_ch, entry[Indices.CH.value])
+            for entry in code[Codebook.Constants.CODEWORD]:
+                max_hyb = max(max_hyb, entry[Indices.HYB])
+                max_ch = max(max_ch, entry[Indices.CH])
 
         # set n_ch and n_hyb if either were not provided
         n_hyb = n_hyb if n_hyb is not None else max_hyb + 1
@@ -233,23 +233,23 @@ class Codebook(xr.DataArray):
                 raise ValueError(f'codebook must be an array of dictionary codes. Found: {code}.')
 
             # verify all necessary fields are present
-            required_fields = {Codebook.Constants.CODEWORD.value, Codebook.Constants.GENE.value}
+            required_fields = {Codebook.Constants.CODEWORD, Codebook.Constants.GENE}
             missing_fields = required_fields.difference(code)
             if missing_fields:
                 raise ValueError(
                     f'Each entry of codebook must contain {required_fields}. Missing fields: '
                     f'{missing_fields}')
 
-        gene_names = [w[Codebook.Constants.GENE.value] for w in code_array]
+        gene_names = [w[Codebook.Constants.GENE] for w in code_array]
         code_data = cls._empty_codebook(gene_names, n_ch, n_hyb)
 
         # fill the codebook
         for code_dict in code_array:
-            codeword = code_dict[Codebook.Constants.CODEWORD.value]
-            gene = code_dict[Codebook.Constants.GENE.value]
+            codeword = code_dict[Codebook.Constants.CODEWORD]
+            gene = code_dict[Codebook.Constants.GENE]
             for entry in codeword:
-                code_data.loc[gene, entry[Indices.CH.value], entry[Indices.HYB.value]] = entry[
-                    Codebook.Constants.VALUE.value]
+                code_data.loc[gene, entry[Indices.CH], entry[Indices.HYB]] = entry[
+                    Codebook.Constants.VALUE]
 
         return code_data
 

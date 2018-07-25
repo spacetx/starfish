@@ -47,7 +47,7 @@ if __name__ == "__main__":
             type=StarfishIndex(),
             help="Dimensions for the {} images.  Should be a json dict, with {}, {}, and {} as the possible keys.  The "
                  "value should be the shape along that dimension.  If a key is not present, the value is assumed to be "
-                 "0.".format(aux_image_name, Indices.HYB.value, Indices.CH.value, Indices.Z.value))
+                 "0.".format(aux_image_name, Indices.HYB, Indices.CH, Indices.Z))
         name_arg_map[aux_image_name] = arg.dest
 
     args = parser.parse_args()

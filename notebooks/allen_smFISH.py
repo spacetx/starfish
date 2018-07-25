@@ -166,7 +166,7 @@ spot_attributes = lmpf.find(s.image)
 # EPY: START code
 # save the results to disk as json
 for attrs, (hyb, ch) in spot_attributes:
-    attrs.save(f'spot_attributes_c{ch.value}.json')
+    attrs.save(f'spot_attributes_c{ch}.json')
 # EPY: END code
 
 # EPY: START code

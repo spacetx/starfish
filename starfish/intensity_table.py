@@ -280,21 +280,26 @@ class IntensityTable(xr.DataArray):
         return intensities
 
     @classmethod
-    def from_image_stack(cls, image_stack, crop: Tuple[int, int, int]=(0, 0, 0)) -> "IntensityTable":
+    def from_image_stack(cls, image_stack, crop_x: int=0, crop_y: int=0, crop_z: int=0) -> "IntensityTable":
         """Generate an IntensityTable from all the pixels in the ImageStack
 
         Parameters
         ----------
+        crop_x : int
+            number of pixels to crop from both top and bottom of x
+        crop_y : int
+            number of pixels to crop from both top and bottom of y
+        crop_z : int
+            number of pixels to crop from both top and bottom of z
         image_stack : ImageStack
-
-        crop : Tuple[int, int, int]
-            number of pixels from the image borders (z, y, x) to ignore
+            ImageStack containing pixels to be treated as intensities
 
         Returns
         -------
+        IntensityTable
+            IntensityTable containing one intensity per pixel (across channels and rounds)
 
         """
-        crop_z, crop_y, crop_x = crop
 
         # verify the image is large enough to crop
         assert crop_z * 2 < image_stack.shape['z']
@@ -328,4 +333,3 @@ class IntensityTable(xr.DataArray):
         image_size = cropped_data.shape[:3]
 
         return IntensityTable.from_spot_data(intensity_data, spot_attributes, image_size)
-

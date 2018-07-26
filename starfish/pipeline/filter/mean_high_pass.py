@@ -17,15 +17,15 @@ class MeanHighPass(FilterAlgorithmBase):
     def __init__(
             self, size: Union[Number, Tuple[Number]], is_volume: bool=False, verbose: bool=False, **kwargs
     ) -> None:
-        """Mean high pass filter. 
+        """Mean high pass filter.
 
-        The mean high pass filter reduces low spatial frequency features by subtracting a 
-        mean filtered image from the original image. The mean filter smooths an image by replacing 
-        each pixel's value with an average of the pixel values of the surrounding neighborhood. 
+        The mean high pass filter reduces low spatial frequency features by subtracting a
+        mean filtered image from the original image. The mean filter smooths an image by replacing
+        each pixel's value with an average of the pixel values of the surrounding neighborhood.
 
         The mean filter is also known as a uniform or box filter.
 
-        This is a pass through for the scipy.ndimage.filters.uniform_filter: 
+        This is a pass through for the scipy.ndimage.filters.uniform_filter:
         https://docs.scipy.org/doc/scipy-0.19.0/reference/generated/scipy.ndimage.uniform_filter.html
 
         Parameters

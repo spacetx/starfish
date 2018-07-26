@@ -55,7 +55,7 @@ class GaussianHighPass(FilterAlgorithmBase):
 
         Parameters
         ----------
-        image : numpy.ndarray[np.uint32]
+        image : numpy.ndarray[np.uint16]
             2-d or 3-d image data
         sigma : Union[Number, Tuple[Number]]
             Standard deviation of gaussian kernel
@@ -63,8 +63,7 @@ class GaussianHighPass(FilterAlgorithmBase):
         Returns
         -------
         np.ndarray :
-            Standard deviation of the Gaussian kernel that will be applied. If a float, an isotropic kernel will be
-            assumed, otherwise the dimensions of the kernel give (z, y, x)
+            filtered image of the same shape as the input image
 
         """
         if image.dtype != np.uint16:

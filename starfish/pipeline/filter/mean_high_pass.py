@@ -1,27 +1,27 @@
 import argparse
 from functools import partial
 from numbers import Number
-from typing import Callable, Union, Tuple, Optional
+from typing import Callable, Optional, Union, Tuple
 
 import numpy as np
+from scipy.ndimage.filters import uniform_filter
 from skimage import img_as_uint
 
 from starfish.errors import DataFormatWarning
 from starfish.image import ImageStack
-from scipy.ndimage.filters import uniform_filter
 from ._base import FilterAlgorithmBase
 
 
 class MeanHighPass(FilterAlgorithmBase):
 
     def __init__(
-            self, size: Number, is_volume: bool=False, verbose: bool=False, **kwargs
+            self, size: Union[Number, Tuple[Number]], is_volume: bool=False, verbose: bool=False, **kwargs
     ) -> None:
         """Mean high pass filter
 
         Parameters
         ----------
-        size : Number
+        size : Union[Number, Tuple[Number]]
             width of the kernel
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles independently.
@@ -29,6 +29,14 @@ class MeanHighPass(FilterAlgorithmBase):
             if True, report on filtering progress (default = False)
 
         """
+
+        if isinstance(size, tuple):
+            message = ("if passing an anisotropic kernel, the dimensionality must match the data shape ({shape}), not "
+                       "{passed_shape}")
+            if is_volume and len(sigma) != 3:
+                raise ValueError(message.format(shape=3, passed_shape=len(sigma)))
+            if not is_volume and len(sigma) != 2:
+                raise ValueError(message.format(shape=2, passed_shape=len(sigma)))
 
         self.size = size
         self.is_volume = is_volume

@@ -42,10 +42,10 @@ class MeanHighPass(FilterAlgorithmBase):
         if isinstance(size, tuple):
             message = ("if passing an anisotropic kernel, the dimensionality must match the data shape ({shape}), not "
                        "{passed_shape}")
-            if is_volume and len(sigma) != 3:
-                raise ValueError(message.format(shape=3, passed_shape=len(sigma)))
-            if not is_volume and len(sigma) != 2:
-                raise ValueError(message.format(shape=2, passed_shape=len(sigma)))
+            if is_volume and len(size) != 3:
+                raise ValueError(message.format(shape=3, passed_shape=len(size)))
+            if not is_volume and len(size) != 2:
+                raise ValueError(message.format(shape=2, passed_shape=len(size)))
 
         self.size = size
         self.is_volume = is_volume

@@ -294,11 +294,12 @@ class IntensityTable(xr.DataArray):
         zmax = image_stack.shape['z'] - crop_z
         ymax = image_stack.shape['y'] - crop_y
         xmax = image_stack.shape['x'] - crop_x
-        data = image_stack.numpy_array.transpose(2, 3, 4, 1, 0)  # (z, y, x, ch, hyb)
+        data = image_stack.numpy_array.transpose(2, 3, 4, 1, 0)  # (z, y, x, ch, round)
 
         # crop and reshape imagestack to create IntensityTable data
         cropped_data = data[zmin:zmax, ymin:ymax, xmin:xmax, :, :]
-        intensity_data = cropped_data.reshape(-1, image_stack.num_chs, image_stack.num_hybs)  # (pixels, ch, hyb)
+        # (pixels, ch, round)
+        intensity_data = cropped_data.reshape(-1, image_stack.num_chs, image_stack.num_rounds)
 
         # IntensityTable pixel coordinates
         z = np.arange(zmin, zmax)
@@ -309,7 +310,8 @@ class IntensityTable(xr.DataArray):
             data=np.array(list(product(z, y, x))),
             columns=['z', 'y', 'x']
         )
-        pixel_coordinates['r'] = np.full(pixel_coordinates.shape[0], fill_value=np.nan)
+        pixel_coordinates[Features.SPOT_RADIUS] = np.full(
+            pixel_coordinates.shape[0], fill_value=np.nan)
 
         spot_attributes = dataframe_to_multiindex(pixel_coordinates)
         image_size = cropped_data.shape[:3]
@@ -331,4 +333,3 @@ class IntensityTable(xr.DataArray):
     def _intensities_from_regions(self, props, reduce_op='max') -> "IntensityTable":
         """turn regions back into intensities by reducing over the labeled area"""
         raise NotImplementedError
-

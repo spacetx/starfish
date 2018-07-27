@@ -124,7 +124,7 @@ class Codebook(xr.DataArray):
 
     @classmethod
     def from_code_array(
-            cls, code_array: List[Dict[Union[str, Any]]],
+            cls, code_array: List[Dict[Union[str, Any], Any]],
             n_round: Optional[int]=None, n_ch: Optional[int]=None) -> "Codebook":
         """construct a codebook from a spaceTx-spec array of codewords
 
@@ -368,12 +368,12 @@ class Codebook(xr.DataArray):
             A 1 dimensional numpy array containing the feature norms
 
         """
-        feature_traces = array.stack(traces=(Indices.CH.value, Indices.HYB.value))
+        feature_traces = array.stack(traces=(Indices.CH.value, Indices.ROUND.value))
         norm = np.linalg.norm(feature_traces.values, ord=norm_order, axis=1)
         array = array / norm[:, None, None]
 
         # if a feature is all zero, the information should be spread across the channel
-        n = array.sizes[Indices.CH.value] * array.sizes[Indices.HYB.value]
+        n = array.sizes[Indices.CH.value] * array.sizes[Indices.ROUND.value]
         partitioned_intensity = np.linalg.norm(np.full(n, fill_value=1 / n), ord=norm_order) / n
         array = array.fillna(partitioned_intensity)
 
@@ -403,9 +403,9 @@ class Codebook(xr.DataArray):
 
         """
         # TODO ambrosejcarr: see if features can be pre-masked to reduce NN calculations
-        linear_codes = norm_codes.stack(traces=(Indices.CH.value, Indices.HYB.value)).values
+        linear_codes = norm_codes.stack(traces=(Indices.CH.value, Indices.ROUND.value)).values
         linear_features = norm_intensities.stack(
-            traces=(Indices.CH.value, Indices.HYB.value)).values
+            traces=(Indices.CH.value, Indices.ROUND.value)).values
 
         # reshape into traces
         nn = NearestNeighbors(n_neighbors=1, algorithm='ball_tree', metric=metric).fit(linear_codes)

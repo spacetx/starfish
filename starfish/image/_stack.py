@@ -47,7 +47,7 @@ class ImageStack:
     """
 
     AXES_DATA: Mapping[Indices, _DimensionMetadata] = {
-        Indices.HYB: _DimensionMetadata(0, True),
+        Indices.ROUND: _DimensionMetadata(0, True),
         Indices.CH: _DimensionMetadata(1, True),
         Indices.Z: _DimensionMetadata(2, False),
     }

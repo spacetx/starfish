@@ -33,7 +33,7 @@ def test_synthetic_intensities_generates_correct_number_of_features(loaded_codeb
     intensities = IntensityTable.synthetic_intensities(loaded_codebook, n_spots=n_spots)
     assert isinstance(intensities, IntensityTable)
 
-    # shape should have n_spots and channels and hybridization rounds equal to the codebook's shape
+    # shape should have n_spots and channels and imaging rounds equal to the codebook's shape
     assert intensities.shape == (n_spots, *loaded_codebook.shape[1:])
 
 
@@ -71,7 +71,7 @@ def feature_data() -> Tuple[Codebook, ImageStack]:
     codebook = Codebook.from_code_array(code_array)
 
     data = np.array(
-        [[[[1, 1, 0, 1],  # hyb 0
+        [[[[1, 1, 0, 1],  # round 0
            [1, 1, 0, 1],
            [0, 0, 0, 0]],
 
@@ -83,7 +83,7 @@ def feature_data() -> Tuple[Codebook, ImageStack]:
            [0, 0, 0, 1],
            [0, 0, 0, 0]]],
 
-         [[[1, 1, 0, 0],  # hyb 1
+         [[[1, 1, 0, 0],  # round 1
            [1, 1, 0, 0],
            [0, 0, 0, 1]],
 

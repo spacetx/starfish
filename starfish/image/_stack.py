@@ -344,7 +344,8 @@ class ImageStack:
         if show_spots:
             # Generate fake spots
             r = 5
-            n_circles = 30
+            n_circles = show_spots[0]
+            n_spots_on = show_spots[1]
 
             x = np.random.randint(0, linear_view.shape[2], n_circles)
             y = np.random.randint(0, linear_view.shape[1], n_circles)
@@ -359,10 +360,9 @@ class ImageStack:
                 ax.add_patch(c)
 
             # Calculate masks
-            #circle_mask = []
             circle_mask = np.zeros((linear_view.shape[0], n_circles), dtype='bool')
             for i in range(linear_view.shape[0]):
-                on_circles = np.random.randint(0, n_circles, 5)
+                on_circles = np.random.randint(0, n_circles, n_spots_on)
 
                 circle_mask[i][on_circles] = True
 

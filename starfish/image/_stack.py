@@ -341,13 +341,42 @@ class ImageStack:
         ax.set_xticks([])
         ax.set_yticks([])
 
+        if show_spots:
+            # Generate fake spots
+            r = 5
+            n_circles = 30
+
+            x = np.random.randint(0, linear_view.shape[2], n_circles)
+            y = np.random.randint(0, linear_view.shape[1], n_circles)
+
+            coords = zip(x, y)
+
+            circs = []
+
+            for x, y in coords:
+                c = plt.Circle((y, x), r, color='r', linewidth=0.5, fill=False, visible=False)
+                circs.append(c)
+                ax.add_patch(c)
+
+            # Calculate masks
+            #circle_mask = []
+            circle_mask = np.zeros((linear_view.shape[0], n_circles), dtype='bool')
+            for i in range(linear_view.shape[0]):
+                on_circles = np.random.randint(0, n_circles, 5)
+
+                circle_mask[i][on_circles] = True
+
         def show_plane(ax, plane, plane_index, cmap="gray", title=None):
             im.set_data(plane)
 
             if show_spots:
                 # this is slow. This link might have something to help:
                 # https://bastibe.de/2013-05-30-speeding-up-matplotlib.html
-                show_spot_function(show_spots.data, ax=ax, z=plane_index, **kwargs)
+                #show_spot_function(show_spots.data, ax=ax, z=plane_index, **kwargs)
+
+                # TODO: vectorize/broadcast?
+                for i, state in enumerate(circle_mask[plane_index]):
+                    circs[i].set_visible(state)
 
             if title:
                 ax.set_title(title)

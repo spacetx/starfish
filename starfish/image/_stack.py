@@ -336,7 +336,7 @@ class ImageStack:
         show_spot_function = self._show_spots
 
         # Create the plot
-        fig, ax = plt.subplots(figsize=(5, 5))
+        fig, ax = plt.subplots(figsize=figure_size)
         im = ax.imshow(linear_view[0], cmap=color_map)
         ax.set_xticks([])
         ax.set_yticks([])

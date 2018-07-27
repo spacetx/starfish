@@ -349,19 +349,15 @@ class ImageStack:
                 # https://bastibe.de/2013-05-30-speeding-up-matplotlib.html
                 show_spot_function(show_spots.data, ax=ax, z=plane_index, **kwargs)
 
-
             if title:
                 ax.set_title(title)
 
-
         def display_slice(plane_index, ax):
-            
             show_plane(ax, linear_view[plane_index], plane_index, title=f'{labels[plane_index]}', cmap=color_map)
 
+        interact(display_slice, ax=fixed(ax), plane_index=(0, n - 1))
 
-        interact(display_slice, ax=fixed(ax), plane_index=(0, n-1))
-
-        return 
+        return
 
     @staticmethod
     def _show_spots(result_df, ax, z=None, size=1, z_dist=1.5, scale_radius=5) -> None:

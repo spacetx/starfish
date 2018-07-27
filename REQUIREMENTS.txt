@@ -2,7 +2,7 @@ click
 matplotlib
 numpy != 1.13.0
 pandas
-pytest
+pytest>=3.6.3
 regional
 requests
 scikit-image>=0.14.0

@@ -335,33 +335,29 @@ class ImageStack:
 
         show_spot_function = self._show_spots
 
-        fig, ax = plt.subplots(figsize=figure_size)
-        im = ax.imshow(linear_view[0])
-        fig.canvas.draw()
+        # Create the plot
+        fig, ax = plt.subplots(figsize=(5, 5))
+        im = ax.imshow(linear_view[0], cmap=color_map)
+        ax.set_xticks([])
+        ax.set_yticks([])
 
         def show_plane(ax, plane, plane_index, cmap="gray", title=None):
-            #ax.imshow(plane, cmap=cmap)
             im.set_data(plane)
 
             if show_spots:
                 # this is slow. This link might have something to help:
                 # https://bastibe.de/2013-05-30-speeding-up-matplotlib.html
                 show_spot_function(show_spots.data, ax=ax, z=plane_index, **kwargs)
-            #ax.set_xticks([])
-            #ax.set_yticks([])
 
 
             if title:
                 ax.set_title(title)
 
-            #ax.draw_artist(im)
-            fig.canvas.draw()
-            fig.canvas.flush_events()
-
 
         def display_slice(plane_index, ax):
             
             show_plane(ax, linear_view[plane_index], plane_index, title=f'{labels[plane_index]}', cmap=color_map)
+
 
         interact(display_slice, ax=fixed(ax), plane_index=(0, n-1))
 

@@ -282,7 +282,7 @@ class ImageStack:
 
         """
 
-        from ipywidgets import interact
+        from ipywidgets import interact, fixed
         import matplotlib.pyplot as plt
 
         if not indices:
@@ -335,25 +335,37 @@ class ImageStack:
 
         show_spot_function = self._show_spots
 
+        fig, ax = plt.subplots(figsize=figure_size)
+        im = ax.imshow(linear_view[0])
+        fig.canvas.draw()
+
         def show_plane(ax, plane, plane_index, cmap="gray", title=None):
-            ax.imshow(plane, cmap=cmap)
+            #ax.imshow(plane, cmap=cmap)
+            im.set_data(plane)
+
             if show_spots:
                 # this is slow. This link might have something to help:
                 # https://bastibe.de/2013-05-30-speeding-up-matplotlib.html
                 show_spot_function(show_spots.data, ax=ax, z=plane_index, **kwargs)
-            ax.set_xticks([])
-            ax.set_yticks([])
+            #ax.set_xticks([])
+            #ax.set_yticks([])
+
 
             if title:
                 ax.set_title(title)
 
-        @interact(plane_index=(0, n - 1))
-        def display_slice(plane_index=0):
-            fig, ax = plt.subplots(figsize=figure_size)
-            show_plane(ax, linear_view[plane_index], plane_index, title=f'{labels[plane_index]}', cmap=color_map)
-            plt.show()
+            #ax.draw_artist(im)
+            fig.canvas.draw()
+            fig.canvas.flush_events()
 
-        return display_slice
+
+        def display_slice(plane_index, ax):
+            
+            show_plane(ax, linear_view[plane_index], plane_index, title=f'{labels[plane_index]}', cmap=color_map)
+
+        interact(display_slice, ax=fixed(ax), plane_index=(0, n-1))
+
+        return 
 
     @staticmethod
     def _show_spots(result_df, ax, z=None, size=1, z_dist=1.5, scale_radius=5) -> None:

@@ -7,7 +7,7 @@ from pstats import Stats
 from .pipeline.features.spots.decoder import Decoder
 from .pipeline.features.spots.detector import SpotFinder
 from .pipeline.filter import Filter
-from .pipeline.gene_assignment import GeneAssignment
+from .pipeline.target_assignment import TargetAssignment
 from .pipeline.registration import Registration
 from .pipeline.segmentation import Segmentation
 from .util.argparse import FsExistsType
@@ -25,7 +25,7 @@ def build_parser():
     Filter.add_to_parser(subparsers)
     SpotFinder.add_to_parser(subparsers)
     Segmentation.add_to_parser(subparsers)
-    GeneAssignment.add_to_parser(subparsers)
+    TargetAssignment.add_to_parser(subparsers)
     Decoder.add_to_parser(subparsers)
 
     show_group = subparsers.add_parser("show")

@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from starfish.constants import Indices
+from starfish.constants import Indices, Features
 from starfish.image import ImageStack
 from starfish.io import Stack
 from starfish.munge import dataframe_to_multiindex
@@ -35,7 +35,7 @@ def merfish_stack() -> Stack:
         starfish.io.Stack object containing MERFISH data
     """
     s = Stack()
-    s.read('https://s3.amazonaws.com/czi.starfish.data.public/20180607/test/MERFISH/fov_001/experiment_new.json')
+    s.read('https://s3.amazonaws.com/czi.starfish.data.public/20180722/MERFISH/fov_001/experiment_new.json')
     return deepcopy(s)
 
 
@@ -43,7 +43,7 @@ def merfish_stack() -> Stack:
 def labeled_synthetic_dataset():
     stp = synthesize.SyntheticSpotTileProvider()
     image = ImageStack.synthetic_stack(tile_data_provider=stp.tile)
-    max_proj = image.max_proj(Indices.HYB, Indices.CH, Indices.Z)
+    max_proj = image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
     view = max_proj.reshape((1, 1, 1) + max_proj.shape)
     dots = ImageStack.from_numpy_array(view)
 
@@ -70,10 +70,10 @@ def small_intensity_table():
 
     spot_attributes = dataframe_to_multiindex(pd.DataFrame(
         data={
-            IntensityTable.SpotAttributes.X: [0, 1, 2, 3, 4],
-            IntensityTable.SpotAttributes.Y: [3, 4, 5, 6, 7],
-            IntensityTable.SpotAttributes.Z: [0, 0, 0, 0, 0],
-            IntensityTable.SpotAttributes.RADIUS: [0.1, 2, 3, 2, 1]
+            Features.X: [0, 1, 2, 3, 4],
+            Features.Y: [3, 4, 5, 6, 7],
+            Features.Z: [0, 0, 0, 0, 0],
+            Features.SPOT_RADIUS: [0.1, 2, 3, 2, 1]
         }
     ))
     image_shape = (3, 2, 2)
@@ -85,25 +85,25 @@ def small_intensity_table():
 def simple_codebook_array():
     return [
         {
-            Codebook.Constants.CODEWORD.value: [
-                {Indices.HYB.value: 0, Indices.CH.value: 0, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 1, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1}
+            Features.CODEWORD: [
+                {Indices.ROUND.value: 0, Indices.CH.value: 0, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
             ],
-            Codebook.Constants.GENE.value: "SCUBE2"
+            Features.TARGET: "SCUBE2"
         },
         {
-            Codebook.Constants.CODEWORD.value: [
-                {Indices.HYB.value: 0, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 1, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1}
+            Features.CODEWORD: [
+                {Indices.ROUND.value: 0, Indices.CH.value: 1, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
             ],
-            Codebook.Constants.GENE.value: "BRCA"
+            Features.TARGET: "BRCA"
         },
         {
-            Codebook.Constants.CODEWORD.value: [
-                {Indices.HYB.value: 0, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 1, Indices.CH.value: 0, Codebook.Constants.VALUE.value: 1}
+            Features.CODEWORD: [
+                {Indices.ROUND.value: 0, Indices.CH.value: 1, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 1, Indices.CH.value: 0, Features.CODE_VALUE: 1}
             ],
-            Codebook.Constants.GENE.value: "ACTB"
+            Features.TARGET: "ACTB"
         }
     ]
 
@@ -122,7 +122,7 @@ def simple_codebook_json(simple_codebook_array) -> Generator[str, None, None]:
 
 @pytest.fixture(scope='module')
 def loaded_codebook(simple_codebook_json):
-    return Codebook.from_json(simple_codebook_json, n_ch=2, n_hyb=2)
+    return Codebook.from_json(simple_codebook_json, n_ch=2, n_round=2)
 
 
 @pytest.fixture(scope='function')
@@ -135,7 +135,7 @@ def euclidean_decoded_intensities(small_intensity_table, loaded_codebook):
 
 @pytest.fixture(scope='function')
 def per_channel_max_decoded_intensities(small_intensity_table, loaded_codebook):
-    decoded_intensities = loaded_codebook.decode_per_hyb_max(small_intensity_table)
+    decoded_intensities = loaded_codebook.decode_per_round_max(small_intensity_table)
     return decoded_intensities
 
 
@@ -180,7 +180,7 @@ def synthetic_dataset_with_truth_values_and_called_spots(
         measurement_type='max',
     )
 
-    intensities = gsd.find(hybridization_image=filtered)
+    intensities = gsd.find(image_stack=filtered)
     assert intensities.shape[0] == 5
 
     codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm_order=2)
@@ -249,7 +249,7 @@ def synthetic_spot_pass_through_stack(synthetic_dataset_with_truth_values):
 @pytest.fixture()
 def single_synthetic_spot():
     sd = synthesize.SyntheticData(
-        n_hyb=2, n_ch=2, n_z=2, height=20, width=30, n_codes=1, n_spots=1
+        n_round=2, n_ch=2, n_z=2, height=20, width=30, n_codes=1, n_spots=1
     )
     codebook = sd.codebook()
     intensities = sd.intensities(codebook)

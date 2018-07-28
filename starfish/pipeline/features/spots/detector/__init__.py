@@ -42,7 +42,7 @@ class SpotFinder(PipelineComponent):
             cls.spot_finder_group.exit(status=2)
 
         print('Detecting Spots ...')
-        hybridization_stack = ImageStack.from_path_or_url(args.input)
+        image_stack = ImageStack.from_path_or_url(args.input)
         instance = args.spot_finder_algorithm_class(**vars(args))
-        intensities = instance.find(hybridization_stack)
+        intensities = instance.find(image_stack)
         intensities.save(os.path.join(args.output, 'spots.nc'))

@@ -6,7 +6,7 @@ import pytest
 from starfish.errors import DataFormatWarning
 from starfish.image import ImageStack
 
-NUM_HYB = 2
+NUM_ROUND = 2
 NUM_CH = 2
 NUM_Z = 2
 HEIGHT = 10
@@ -15,7 +15,7 @@ WIDTH = 10
 
 def create_tile_data_provider(dtype: np.number, corner_dtype: np.number):
     """
-    Makes a stack that's all of the same type, except the hyb=0,ch=0,z=0 corner, which is a different type.  All the
+    Makes a stack that's all of the same type, except the round=0,ch=0,z=0 corner, which is a different type.  All the
     tiles are initialized with ones.
 
     Parameters
@@ -30,8 +30,8 @@ def create_tile_data_provider(dtype: np.number, corner_dtype: np.number):
     ImageStack :
         The image stack with the tiles initialized as described.
     """
-    def tile_data_provider(hyb: int, ch: int, z: int, height: int, width: int) -> np.ndarray:
-        if hyb == 0 and ch == 0 and z == 0:
+    def tile_data_provider(round_: int, ch: int, z: int, height: int, width: int) -> np.ndarray:
+        if round_ == 0 and ch == 0 and z == 0:
             return np.ones((height, width), dtype=corner_dtype)
         else:
             return np.ones((height, width), dtype=dtype)
@@ -41,7 +41,7 @@ def create_tile_data_provider(dtype: np.number, corner_dtype: np.number):
 def test_multiple_tiles_of_different_kind():
     with pytest.raises(TypeError):
         ImageStack.synthetic_stack(
-            NUM_HYB, NUM_CH, NUM_Z,
+            NUM_ROUND, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_data_provider=create_tile_data_provider(np.uint32, np.float32),
         )
@@ -49,12 +49,12 @@ def test_multiple_tiles_of_different_kind():
 
 def test_multiple_tiles_of_same_dtype():
     stack = ImageStack.synthetic_stack(
-        NUM_HYB, NUM_CH, NUM_Z,
+        NUM_ROUND, NUM_CH, NUM_Z,
         HEIGHT, WIDTH,
         tile_data_provider=create_tile_data_provider(np.uint32, np.uint32),
     )
     expected = np.ones(
-        (NUM_HYB,
+        (NUM_ROUND,
          NUM_CH,
          NUM_Z,
          HEIGHT,
@@ -65,14 +65,14 @@ def test_multiple_tiles_of_same_dtype():
 def test_int_type_promotion():
     with warnings.catch_warnings(record=True) as w:
         stack = ImageStack.synthetic_stack(
-            NUM_HYB, NUM_CH, NUM_Z,
+            NUM_ROUND, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_data_provider=create_tile_data_provider(np.int32, np.int8),
         )
         assert len(w) == 1
         assert issubclass(w[0].category, DataFormatWarning)
     expected = np.ones(
-        (NUM_HYB,
+        (NUM_ROUND,
          NUM_CH,
          NUM_Z,
          HEIGHT,
@@ -88,14 +88,14 @@ def test_int_type_promotion():
 def test_uint_type_promotion():
     with warnings.catch_warnings(record=True) as w:
         stack = ImageStack.synthetic_stack(
-            NUM_HYB, NUM_CH, NUM_Z,
+            NUM_ROUND, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_data_provider=create_tile_data_provider(np.uint32, np.uint8),
         )
         assert len(w) == 1
         assert issubclass(w[0].category, DataFormatWarning)
     expected = np.ones(
-        (NUM_HYB,
+        (NUM_ROUND,
          NUM_CH,
          NUM_Z,
          HEIGHT,
@@ -111,14 +111,14 @@ def test_uint_type_promotion():
 def test_float_type_promotion():
     with warnings.catch_warnings(record=True) as w:
         stack = ImageStack.synthetic_stack(
-            NUM_HYB, NUM_CH, NUM_Z,
+            NUM_ROUND, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_data_provider=create_tile_data_provider(np.float64, np.float32),
         )
         assert len(w) == 1
         assert issubclass(w[0].category, DataFormatWarning)
     expected = np.ones(
-        (NUM_HYB,
+        (NUM_ROUND,
          NUM_CH,
          NUM_Z,
          HEIGHT,

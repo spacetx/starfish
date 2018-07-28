@@ -19,7 +19,7 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
         Parameters
         ----------
         codebook : Codebook
-            Codebook object mapping codewords to the genes they represent
+            Codebook object mapping codewords to the targets they are designed to detect
         distance_threshold : float
             spots whose codewords are more than this distance from an expected code are filtered
         magnitude_threshold : int

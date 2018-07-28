@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from skimage.feature import blob_log
 
-from starfish.constants import Indices
+from starfish.constants import Indices, Features
 from starfish.image import ImageStack
 from starfish.munge import dataframe_to_multiindex
 from starfish.intensity_table import IntensityTable
@@ -61,7 +61,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             self.blobs_stack = blobs_stack
         else:
             self.blobs_stack = ImageStack.from_path_or_url(blobs_stack)
-        self.blobs_image: np.ndarray = self.blobs_stack.max_proj(Indices.HYB, Indices.CH)
+        self.blobs_image: np.ndarray = self.blobs_stack.max_proj(Indices.ROUND, Indices.CH)
 
         try:
             self.measurement_function = getattr(np, measurement_type)
@@ -94,15 +94,15 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
     ) -> IntensityTable:
 
         n_ch = stack.shape[Indices.CH]
-        n_hyb = stack.shape[Indices.HYB]
+        n_round = stack.shape[Indices.ROUND]
         spot_attribute_index = dataframe_to_multiindex(spot_attributes)
         image_shape: Tuple[int, int, int] = stack.raw_shape[2:]
         intensity_table = IntensityTable.empty_intensity_table(
-            spot_attribute_index, n_ch, n_hyb, image_shape)
+            spot_attribute_index, n_ch, n_round, image_shape)
 
-        indices = product(range(n_ch), range(n_hyb))
+        indices = product(range(n_ch), range(n_round))
         for c, h in indices:
-            image, _ = stack.get_slice({Indices.CH: c, Indices.HYB: h})
+            image, _ = stack.get_slice({Indices.CH: c, Indices.ROUND: h})
             blob_intensities: pd.Series = self._measure_blob_intensity(
                 image, spot_attributes, self.measurement_function)
             intensity_table[:, c, h] = blob_intensities
@@ -117,17 +117,21 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         if fitted_blobs_array.shape[0] == 0:
             raise ValueError('No spots detected with provided parameters')
 
-        fitted_blobs = pd.DataFrame(data=fitted_blobs_array, columns=['z', 'y', 'x', 'r'])
+        columns = [Features.Z, Features.Y, Features.X, Features.SPOT_RADIUS]
+        fitted_blobs = pd.DataFrame(data=fitted_blobs_array, columns=columns)
 
         # convert standard deviation of gaussian kernel used to identify spot to radius of spot
-        fitted_blobs['r'] = np.round(fitted_blobs['r'] * np.sqrt(3))
+        converted_radius = np.round(fitted_blobs[Features.SPOT_RADIUS] * np.sqrt(3))
+        fitted_blobs[Features.SPOT_RADIUS] = converted_radius
 
         # convert the array to int so it can be used to index
         fitted_blobs = fitted_blobs.astype(int)
 
         for v, max_size in zip(['z', 'y', 'x'], self.blobs_image.shape):
-            fitted_blobs[f'{v}_min'] = np.clip(fitted_blobs[v] - fitted_blobs['r'], 0, None)
-            fitted_blobs[f'{v}_max'] = np.clip(fitted_blobs[v] + fitted_blobs['r'], None, max_size)
+            fitted_blobs[f'{v}_min'] = np.clip(
+                fitted_blobs[v] - fitted_blobs[Features.SPOT_RADIUS], 0, None)
+            fitted_blobs[f'{v}_max'] = np.clip(
+                fitted_blobs[v] + fitted_blobs[Features.SPOT_RADIUS], None, max_size)
 
         fitted_blobs['intensity'] = self._measure_blob_intensity(
             self.blobs_image, fitted_blobs, self.measurement_function)
@@ -135,22 +139,22 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         return fitted_blobs
 
-    def find(self, hybridization_image: ImageStack) -> IntensityTable:
+    def find(self, image_stack: ImageStack) -> IntensityTable:
         """find spots
 
         Parameters
         ----------
-        hybridization_image : ImageStack
+        image_stack : ImageStack
             stack containing spots to find
 
         Returns
         -------
         IntensityTable :
-            3d tensor containing the intensity of spots across channels and hybridization rounds
+            3d tensor containing the intensity of spots across channels and imaging rounds
 
         """
         spot_attributes = self._find_spot_locations()
-        intensity_table = self._measure_spot_intensities(hybridization_image, spot_attributes)
+        intensity_table = self._measure_spot_intensities(image_stack, spot_attributes)
         return intensity_table
 
     @classmethod

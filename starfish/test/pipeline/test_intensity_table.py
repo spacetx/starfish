@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 
-from starfish.constants import Indices
+from starfish.constants import Indices, Features
 from starfish.intensity_table import IntensityTable
 from starfish.codebook import Codebook
 from starfish.image import ImageStack
@@ -19,7 +19,9 @@ def test_empty_intensity_table():
     y = [2, 3]
     z = [1, 1]
     r = [1, 1]
-    spot_attributes = pd.MultiIndex.from_arrays([x, y, z, r], names=('x', 'y', 'z', 'r'))
+    spot_attributes = pd.MultiIndex.from_arrays(
+        [x, y, z, r],
+        names=(Features.X, Features.Y, Features.Z, Features.SPOT_RADIUS))
     image_shape = (2, 4, 3)
     empty = IntensityTable.empty_intensity_table(spot_attributes, 2, 2, image_shape)
     assert empty.shape == (2, 2, 2)
@@ -31,7 +33,7 @@ def test_synthetic_intensities_generates_correct_number_of_features(loaded_codeb
     intensities = IntensityTable.synthetic_intensities(loaded_codebook, n_spots=n_spots)
     assert isinstance(intensities, IntensityTable)
 
-    # shape should have n_spots and channels and hybridization rounds equal to the codebook's shape
+    # shape should have n_spots and channels and imaging rounds equal to the codebook's shape
     assert intensities.shape == (n_spots, *loaded_codebook.shape[1:])
 
 
@@ -41,7 +43,8 @@ def test_synthetic_intensities_have_correct_number_of_on_features(loaded_codeboo
     on_features = np.sum(intensities.values != 0)
     # this asserts that the number of features "on" in intensities should be equal to the
     # number of "on" features in the codewords, times the total number of spots in intensities.
-    assert on_features == loaded_codebook.sum((Indices.CH, Indices.HYB)).values.mean() * n_spots
+    num_on = loaded_codebook.sum((Indices.CH.value, Indices.ROUND.value)).values.mean() * n_spots
+    assert on_features == num_on
 
 
 def feature_data() -> Tuple[Codebook, ImageStack]:
@@ -51,24 +54,24 @@ def feature_data() -> Tuple[Codebook, ImageStack]:
     code_array = [
         {
             # on/off
-            Codebook.Constants.CODEWORD.value: [
-                {Indices.HYB.value: 0, Indices.CH.value: 0, Codebook.Constants.VALUE.value: 1},
+            Features.CODEWORD: [
+                {Indices.ROUND.value: 0, Indices.CH.value: 0, Features.CODE_VALUE: 1},
             ],
-            Codebook.Constants.GENE.value: "gene_1"
+            Features.TARGET: "gene_1"
         },
         {
             # on/on
-            Codebook.Constants.CODEWORD.value: [
-                {Indices.HYB.value: 0, Indices.CH.value: 0, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 1, Indices.CH.value: 0, Codebook.Constants.VALUE.value: 1},
+            Features.CODEWORD: [
+                {Indices.ROUND.value: 0, Indices.CH.value: 0, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 1, Indices.CH.value: 0, Features.CODE_VALUE: 1},
             ],
-            Codebook.Constants.GENE.value: "gene_2"
+            Features.TARGET: "gene_2"
         }
     ]
     codebook = Codebook.from_code_array(code_array)
 
     data = np.array(
-        [[[[1, 1, 0, 1],  # hyb 0
+        [[[[1, 1, 0, 1],  # round 0
            [1, 1, 0, 1],
            [0, 0, 0, 0]],
 
@@ -80,7 +83,7 @@ def feature_data() -> Tuple[Codebook, ImageStack]:
            [0, 0, 0, 1],
            [0, 0, 0, 0]]],
 
-         [[[1, 1, 0, 0],  # hyb 1
+         [[[1, 1, 0, 0],  # round 1
            [1, 1, 0, 0],
            [0, 0, 0, 1]],
 
@@ -113,4 +116,7 @@ def test_combine_adjacent_features():
     combined_intensities, _ = combine_adjacent_features(new_intensities, min_area=0, max_area=10)
 
     assert np.array_equal(combined_intensities.shape, (2, 1, 2))
-    assert np.array_equal(combined_intensities.gene_name, ['gene_2', 'gene_1'])
+    assert np.array_equal(
+        combined_intensities[Features.AXIS][Features.TARGET],
+        ['gene_2', 'gene_1']
+    )

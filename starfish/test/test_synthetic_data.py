@@ -2,6 +2,7 @@ import numpy as np
 
 from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
 from starfish.util.synthesize import SyntheticData
+from starfish.constants import Features
 
 
 def test_round_trip_synthetic_data():
@@ -9,7 +10,7 @@ def test_round_trip_synthetic_data():
 
     sd = SyntheticData(
         n_ch=2,
-        n_hyb=3,
+        n_round=3,
         n_spots=1,
         n_codes=4,
         n_photons_background=0,
@@ -31,14 +32,14 @@ def test_round_trip_synthetic_data():
     # applying the gaussian blur to the intensities causes them to be reduced in magnitude, so
     # they won't be the same size, but they should be in the same place, and decode the same
     # way
-    spot1, ch1, hyb1 = np.where(intensities.values)
-    spot2, ch2, hyb2 = np.where(calculated_intensities.values)
+    spot1, ch1, round1 = np.where(intensities.values)
+    spot2, ch2, round2 = np.where(calculated_intensities.values)
     assert np.array_equal(spot1, spot2)
     assert np.array_equal(ch1, ch2)
-    assert np.array_equal(hyb1, hyb2)
+    assert np.array_equal(round1, round2)
     assert np.array_equal(
-        intensities.coords[intensities.Constants.GENE],
-        calculated_intensities.coords[intensities.Constants.GENE]
+        intensities.coords[Features.TARGET],
+        calculated_intensities.coords[Features.TARGET]
     )
 
 
@@ -52,7 +53,7 @@ def test_medium_synthetic_stack():
     sigma = 2
 
     sd = SyntheticData(
-        n_hyb=4,
+        n_round=4,
         n_ch=4,
         n_z=n_z,
         height=height,
@@ -86,11 +87,11 @@ def test_medium_synthetic_stack():
     codebook.metric_decode(calculated_intensities, max_distance=1, min_intensity=0, norm_order=2)
 
     # spots are detected in a different order that they're generated; sorting makes comparison easy
-    sorted_intensities = intensities.sortby('features')
-    sorted_calculated_intensities = calculated_intensities.sortby('features')
+    sorted_intensities = intensities.sortby(Features.AXIS)
+    sorted_calculated_intensities = calculated_intensities.sortby(Features.AXIS)
 
-    # verify that the spots are all detected, and decode to the correct genes
+    # verify that the spots are all detected, and decode to the correct targets
     assert np.array_equal(
-        sorted_intensities.features.gene_name.values,
-        sorted_calculated_intensities.features.gene_name.values
+        sorted_intensities[Features.AXIS][Features.TARGET].values,
+        sorted_calculated_intensities[Features.AXIS][Features.TARGET].values
     )

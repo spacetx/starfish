@@ -15,7 +15,7 @@ from slicedimage import Reader, Writer, TileSet, Tile
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
-from starfish.constants import Coordinates, Indices
+from starfish.constants import Coordinates, Indices, Features
 from starfish.errors import DataFormatWarning
 from starfish.intensity_table import IntensityTable
 from starfish.pipeline.features.spot_attributes import SpotAttributes
@@ -39,15 +39,15 @@ class ImageStack:
     Properties
     ----------
     num_chs      the number of channels stored in the image tensor
-    num_hybs     the number of hybridization rounds stored in the image tensor
+    num_rounds   the number of imaging rounds stored in the image tensor
     num_zlayers  the number of z-layers stored in the image tensor
     numpy_array  the 5-d image tensor is stored in this array
     raw_shape    the shape of the image tensor (in integers)
-    shape        the shape of the image tensor by categorical index (channels, hybridization rounds, z-layers)
+    shape        the shape of the image tensor by categorical index (channels, imaging rounds, z-layers)
     """
 
     AXES_DATA: Mapping[Indices, _DimensionMetadata] = {
-        Indices.HYB: _DimensionMetadata(0, True),
+        Indices.ROUND: _DimensionMetadata(0, True),
         Indices.CH: _DimensionMetadata(1, True),
         Indices.Z: _DimensionMetadata(2, False),
     }
@@ -89,7 +89,7 @@ class ImageStack:
 
         # iterate through the tiles and set the data.
         for tile in self._image_partition.tiles():
-            h = tile.indices[Indices.HYB]
+            h = tile.indices[Indices.ROUND]
             c = tile.indices[Indices.CH]
             zlayer = tile.indices.get(Indices.Z, 0)
             data = tile.numpy_array
@@ -101,10 +101,11 @@ class ImageStack:
                     data = data * (dst_range / src_range)
                 warnings.warn(
                     f"Tile "
-                    f"(H: {tile.indices[Indices.HYB]} C: {tile.indices[Indices.CH]} Z: {tile.indices[Indices.Z]}) has "
+                    f"(R: {tile.indices[Indices.ROUND]} C: {tile.indices[Indices.CH]} "
+                    f"Z: {tile.indices[Indices.Z]}) has "
                     f"dtype {data.dtype}.  One or more tiles is of a larger dtype {self._data.dtype}.",
                     DataFormatWarning)
-            self.set_slice(indices={Indices.HYB: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
+            self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
         # set_slice will mark the data as needing writeback, so we need to unset that.
         self._data_needs_writeback = False
 
@@ -434,13 +435,13 @@ class ImageStack:
             Mapping of dimension name to index
 
         """
-        for hyb in np.arange(self.shape[Indices.HYB]):
+        for round_ in np.arange(self.shape[Indices.ROUND]):
             for ch in np.arange(self.shape[Indices.CH]):
                 if is_volume:
-                    yield {Indices.HYB: hyb, Indices.CH: ch}
+                    yield {Indices.ROUND: round_, Indices.CH: ch}
                 else:
                     for z in np.arange(self.shape[Indices.Z]):
-                        yield {Indices.HYB: hyb, Indices.CH: ch, Indices.Z: z}
+                        yield {Indices.ROUND: round_, Indices.CH: ch, Indices.Z: z}
 
     def _iter_tiles(
             self, indices: Iterable[Mapping[Indices, Union[int, slice]]]
@@ -546,7 +547,7 @@ class ImageStack:
         -------
         pd.DataFrame :
             dataframe containing per-tile metadata information for each image. Guaranteed to include information on
-            channel, hybridization round, z_layer, and barcode index. Also contains any information stored in the
+            channel, imaging round, z_layer, and barcode index. Also contains any information stored in the
             extras field for each tile in hybridization.json
 
         """
@@ -574,10 +575,10 @@ class ImageStack:
                 data[k].append(tile.extras.get(k, None))
 
             if 'barcode_index' not in tile.extras:
-                hyb = tile.indices[Indices.HYB]
+                round_ = tile.indices[Indices.ROUND]
                 ch = tile.indices[Indices.CH]
                 z = tile.indices.get(Indices.Z, 0)
-                barcode_index = (((z * self.num_hybs) + hyb) * self.num_chs) + ch
+                barcode_index = (((z * self.num_rounds) + round_) * self.num_chs) + ch
 
                 data['barcode_index'].append(barcode_index)
 
@@ -624,8 +625,8 @@ class ImageStack:
         return 1
 
     @property
-    def num_hybs(self):
-        return self._get_dimension_size(Indices.HYB)
+    def num_rounds(self):
+        return self._get_dimension_size(Indices.ROUND)
 
     @property
     def num_chs(self):
@@ -651,10 +652,10 @@ class ImageStack:
         """
         if self._data_needs_writeback:
             for tile in self._image_partition.tiles():
-                h = tile.indices[Indices.HYB]
+                h = tile.indices[Indices.ROUND]
                 c = tile.indices[Indices.CH]
                 zlayer = tile.indices.get(Indices.Z, 0)
-                tile.numpy_array, axes = self.get_slice(indices={Indices.HYB: h, Indices.CH: c, Indices.Z: zlayer})
+                tile.numpy_array, axes = self.get_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer})
                 assert len(axes) == 0
             self._data_needs_writeback = False
 
@@ -694,7 +695,7 @@ class ImageStack:
                         xval,
                         yval,
                         zstr,
-                        tile.indices[Indices.HYB],
+                        tile.indices[Indices.ROUND],
                         tile.indices[Indices.CH],
                         ext,
                     ),
@@ -736,23 +737,23 @@ class ImageStack:
         return max_projection
 
     @staticmethod
-    def _default_tile_extras_provider(hyb: int, ch: int, z: int) -> Any:
+    def _default_tile_extras_provider(round_: int, ch: int, z: int) -> Any:
         """
-        Returns None for extras for any given hyb/ch/z.
+        Returns None for extras for any given round/ch/z.
         """
         return None
 
     @staticmethod
-    def _default_tile_data_provider(hyb: int, ch: int, z: int, height: int, width: int) -> np.ndarray:
+    def _default_tile_data_provider(round_: int, ch: int, z: int, height: int, width: int) -> np.ndarray:
         """
-        Returns a tile of just ones for any given hyb/ch/z.
+        Returns a tile of just ones for any given round/ch/z.
         """
         return np.ones((height, width))
 
     @classmethod
     def synthetic_stack(
             cls,
-            num_hyb: int=4,
+            num_round: int=4,
             num_ch: int=4,
             num_z: int=12,
             tile_height: int=50,
@@ -775,15 +776,15 @@ class ImageStack:
             tile_extras_provider = cls._default_tile_extras_provider
 
         img = TileSet(
-            {Coordinates.X, Coordinates.Y, Indices.HYB, Indices.CH, Indices.Z},
+            {Coordinates.X, Coordinates.Y, Indices.ROUND, Indices.CH, Indices.Z},
             {
-                Indices.HYB: num_hyb,
+                Indices.ROUND: num_round,
                 Indices.CH: num_ch,
                 Indices.Z: num_z,
             },
             default_tile_shape=(tile_height, tile_width),
         )
-        for hyb in range(num_hyb):
+        for round_ in range(num_round):
             for ch in range(num_ch):
                 for z in range(num_z):
                     tile = Tile(
@@ -793,13 +794,13 @@ class ImageStack:
                             Coordinates.Z: (0.0, 0.001),
                         },
                         {
-                            Indices.HYB: hyb,
+                            Indices.ROUND: round_,
                             Indices.CH: ch,
                             Indices.Z: z,
                         },
-                        extras=tile_extras_provider(hyb, ch, z),
+                        extras=tile_extras_provider(round_, ch, z),
                     )
-                    tile.numpy_array = tile_data_provider(hyb, ch, z, tile_height, tile_width)
+                    tile.numpy_array = tile_data_provider(round_, ch, z, tile_height, tile_width)
 
                     img.add_tile(tile)
 
@@ -864,18 +865,18 @@ class ImageStack:
             raise ValueError('value exceeds dynamic range of largest skimage-supported type')
 
         # make sure requested dimensions are large enough to support intensity values
-        indices = zip((Indices.Z, Coordinates.Y, Coordinates.X), (num_z, height, width))
+        indices = zip((Features.Z, Features.Y, Features.X), (num_z, height, width))
         for index, requested_size in indices:
-            required_size = intensities.coords[index.value].values.max()
+            required_size = intensities.coords[index].values.max()
             if required_size > requested_size:
                 raise ValueError(
                     f'locations of intensities contained in table exceed the size of requested '
-                    f'dimension {index.value}. Required size {required_size} > {requested_size}.')
+                    f'dimension {index}. Required size {required_size} > {requested_size}.')
 
         # create an empty array of the correct size
         image = np.zeros(
             (
-                intensities.sizes[Indices.HYB.value],
+                intensities.sizes[Indices.ROUND.value],
                 intensities.sizes[Indices.CH.value],
                 num_z,
                 height,
@@ -883,20 +884,20 @@ class ImageStack:
             )
         )
 
-        for ch, hyb in product(*(range(s) for s in intensities.shape[1:])):
-            spots = intensities[:, ch, hyb]
+        for ch, round_ in product(*(range(s) for s in intensities.shape[1:])):
+            spots = intensities[:, ch, round_]
 
             # numpy deprecated casting a specific way of casting floats that is triggered in xarray
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore', FutureWarning)
                 values = spots.where(spots, drop=True)
 
-            image[hyb, ch, values.z, values.y, values.x] = values
+            image[round_, ch, values.z, values.y, values.x] = values
 
         # add imaging noise
         image += np.random.poisson(n_photons_background, size=image.shape)
 
-        # blur image over coordinates, but not over hyb/channels (dim 0, 1)
+        # blur image over coordinates, but not over round_/channels (dim 0, 1)
         sigma = (0, 0) + point_spread_function
         image = gaussian_filter(image, sigma=sigma, mode='nearest')
 
@@ -920,10 +921,10 @@ class ImageStack:
         Returns
         -------
         np.ndarray :
-            array of shape (num_hybs + num_channels + num_z_layers, x, y).
+            array of shape (num_rounds + num_channels + num_z_layers, x, y).
 
         """
-        first_dim = self.num_hybs * self.num_chs * self.num_zlayers
+        first_dim = self.num_rounds * self.num_chs * self.num_zlayers
         new_shape = (first_dim,) + self.tile_shape
         new_data = self.numpy_array.reshape(new_shape)
 
@@ -933,18 +934,18 @@ class ImageStack:
         if type(stack) is list:
             stack = np.array(stack)
 
-        new_shape = (self.num_hybs, self.num_chs, self.num_zlayers) + self.tile_shape
+        new_shape = (self.num_rounds, self.num_chs, self.num_zlayers) + self.tile_shape
         res = stack.reshape(new_shape)
         return res
 
     @classmethod
     def from_numpy_array(cls, array: np.ndarray) -> "ImageStack":
-        """Create an ImageStack from a 5d numpy array with shape (n_hyb, n_ch, n_z, y, x)
+        """Create an ImageStack from a 5d numpy array with shape (n_round, n_ch, n_z, y, x)
 
         Parameters
         ----------
         array : np.ndarray
-            5-d tensor of shape (n_hyb, n_ch, n_z, y, x)
+            5-d tensor of shape (n_round, n_ch, n_z, y, x)
 
         Returns
         -------
@@ -953,18 +954,18 @@ class ImageStack:
 
         """
         if len(array.shape) != 5:
-            raise ValueError('a 5-d tensor with shape (n_hyb, n_ch, n_z, y, x) must be provided.')
-        n_hyb, n_ch, n_z, height, width = array.shape
+            raise ValueError('a 5-d tensor with shape (n_round, n_ch, n_z, y, x) must be provided.')
+        n_round, n_ch, n_z, height, width = array.shape
         empty = cls.synthetic_stack(
-            num_hyb=n_hyb, num_ch=n_ch, num_z=n_z, tile_height=height, tile_width=width)
+            num_round=n_round, num_ch=n_ch, num_z=n_z, tile_height=height, tile_width=width)
 
         # preserve original dtype
         empty._data = empty._data.astype(array.dtype)
 
-        for h in np.arange(n_hyb):
+        for h in np.arange(n_round):
             for c in np.arange(n_ch):
                 for z in np.arange(n_z):
                     view = array[h, c, z]
-                    empty.set_slice({Indices.HYB: h, Indices.CH: c, Indices.Z: z}, view)
+                    empty.set_slice({Indices.ROUND: h, Indices.CH: c, Indices.Z: z}, view)
 
         return empty

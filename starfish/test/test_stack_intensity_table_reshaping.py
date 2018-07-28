@@ -44,6 +44,6 @@ def pixel_intensities_to_imagestack(
     data = intensities.values.reshape([
         *image_shape,
         intensities.sizes[Indices.CH],
-        intensities.sizes[Indices.HYB]])
+        intensities.sizes[Indices.ROUND]])
     data = data.transpose(4, 3, 0, 1, 2)
     return ImageStack.from_numpy_array(data)

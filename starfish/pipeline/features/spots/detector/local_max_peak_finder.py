@@ -5,6 +5,7 @@ from trackpy import locate
 
 from starfish.image import ImageStack
 from starfish.pipeline.features.spot_attributes import SpotAttributes
+from starfish.intensity_table import IntensityTable
 from ._base import SpotFinderAlgorithmBase
 
 

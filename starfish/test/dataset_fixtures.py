@@ -8,13 +8,14 @@ from typing import Generator
 import numpy as np
 import pandas as pd
 import pytest
+from scipy.ndimage.filters import gaussian_filter
 
+from starfish.codebook import Codebook
 from starfish.constants import Indices, Features
 from starfish.image import ImageStack
+from starfish.intensity_table import IntensityTable
 from starfish.io import Stack
 from starfish.munge import dataframe_to_multiindex
-from starfish.codebook import Codebook
-from starfish.intensity_table import IntensityTable
 from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
 from starfish.pipeline.filter.white_tophat import WhiteTophat
 from starfish.util import synthesize
@@ -190,7 +191,6 @@ def synthetic_dataset_with_truth_values_and_called_spots(
 
 @pytest.fixture()
 def synthetic_single_spot_2d():
-    from scipy.ndimage.filters import gaussian_filter
     data = np.zeros((100, 100), dtype=np.uint16)
     data[10, 90] = 1000
     data = gaussian_filter(data, sigma=2)
@@ -199,7 +199,6 @@ def synthetic_single_spot_2d():
 
 @pytest.fixture()
 def synthetic_single_spot_3d():
-    from scipy.ndimage.filters import gaussian_filter
     data = np.zeros((10, 100, 100), dtype=np.uint16)
     data[5, 10, 90] = 1000
     data = gaussian_filter(data, sigma=2)
@@ -208,12 +207,53 @@ def synthetic_single_spot_3d():
 
 @pytest.fixture()
 def synthetic_two_spot_3d():
-    from scipy.ndimage.filters import gaussian_filter
     data = np.zeros((10, 100, 100), dtype=np.uint16)
     data[4, 10, 90] = 1000
     data[6, 90, 10] = 1000
     data = gaussian_filter(data, sigma=2)
     return data
+
+
+@pytest.fixture()
+def synthetic_two_spot_3d_2round_2ch() -> ImageStack:
+    """produce a 2-channel 2-hyb ImageStack
+
+    Notes
+    -----
+    - After Gaussian filtering, all max intensities are 7
+    - Two spots are located at (4, 10, 90) and (6, 90, 10)
+    - Both spots are 1-hot, and decode to:
+        - spot 1: (round 0, ch 0), (round 1, ch 1)
+        - spot 2: (round 0, ch 1), (round 1, ch 0)
+
+    Returns
+    -------
+    ImageStack :
+        noiseless ImageStack containing two spots
+
+    """
+
+    # blank data_image
+    data = np.zeros((2, 2, 10, 100, 100), dtype=np.uint16)
+
+    # round 0 channel 0
+    data[0, 0, 4, 10, 90] = 1000
+    data[0, 0, 6, 90, 10] = 0
+
+    # round 0 channel 1
+    data[0, 1, 4, 10, 90] = 0
+    data[0, 1, 6, 90, 10] = 1000
+
+    # round 1 channel 0
+    data[1, 0, 4, 10, 90] = 0
+    data[1, 0, 6, 90, 10] = 1000
+
+    # round 1 channel 1
+    data[1, 1, 4, 10, 90] = 1000
+    data[1, 1, 6, 90, 10] = 0
+
+    data = gaussian_filter(data, sigma=(0, 0, 2, 2, 2))
+    return ImageStack.from_numpy_array(data)
 
 
 @pytest.fixture()

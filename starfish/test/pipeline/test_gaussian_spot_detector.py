@@ -2,14 +2,24 @@ import numpy as np
 import pytest
 from skimage.feature import blob_log
 
-from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
 from starfish.constants import Features
+from starfish.constants import Indices
+from starfish.pipeline.features.spots.detector.detect import (
+    detect_spots,
+    measure_spot_intensities,
+)
+from starfish.pipeline.features.spots.detector.gaussian import (
+    GaussianSpotDetector,
+    gaussian_spot_detector
+)
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import (
     synthetic_dataset_with_truth_values_and_called_spots, synthetic_single_spot_2d,
     synthetic_two_spot_3d, synthetic_single_spot_imagestack_2d, synthetic_single_spot_imagestack_3d,
-    synthetic_two_spot_imagestack_3d, synthetic_dataset_with_truth_values, synthetic_single_spot_3d)
+    synthetic_two_spot_imagestack_3d, synthetic_dataset_with_truth_values, synthetic_single_spot_3d,
+    synthetic_two_spot_3d_2round_2ch
+)
 
 
 def test_spots_match_coordinates_of_synthesized_spots(
@@ -90,73 +100,6 @@ def single_spot_detector(stack):
     return gsd
 
 
-def test_find_spot_locations_2d(synthetic_single_spot_imagestack_2d):
-
-    gsd = single_spot_detector(synthetic_single_spot_imagestack_2d)
-    # noinspection PyProtectedMember
-    spot_attributes = gsd._find_spot_locations()
-
-    assert spot_attributes.shape[0] == 1
-    assert np.array_equal(spot_attributes[[Features.Z, Features.Y, Features.X]].values,
-                          np.array([[0, 10, 90]]))
-    # rounding incurs an error of up to one pixel
-    tol = 1
-    assert np.all(
-        np.abs(spot_attributes[['z_min', 'z_max', 'y_min', 'y_max', 'x_min', 'x_max']].values -
-               np.array([[0, 1, 7, 13, 87, 93]])) <= tol
-    )
-
-
-# noinspection PyProtectedMember
-def test_find_spot_locations_3d(synthetic_single_spot_imagestack_3d):
-    gsd = single_spot_detector(synthetic_single_spot_imagestack_3d)
-    spot_attributes = gsd._find_spot_locations()
-
-    assert spot_attributes.shape[0] == 1
-    assert np.array_equal(spot_attributes[[Features.Z, Features.Y, Features.X]].values,
-                          np.array([[5, 10, 90]]))
-    # rounding incurs an error of up to one pixel
-    tol = 1
-    assert np.all(
-        np.abs(spot_attributes[['z_min', 'z_max', 'y_min', 'y_max', 'x_min', 'x_max']].values -
-               np.array([[2, 8, 7, 13, 87, 93]])) <= tol
-    )
-
-
-# noinspection PyProtectedMember
-def test_measure_spot_intensity_2d(synthetic_single_spot_imagestack_2d):
-    gsd = single_spot_detector(synthetic_single_spot_imagestack_2d)
-    spot_attributes = gsd._find_spot_locations()
-    intensity_table = gsd._measure_spot_intensities(
-        synthetic_single_spot_imagestack_2d, spot_attributes)
-
-    assert intensity_table.shape == (1, 1, 1)
-    assert np.array_equal(intensity_table.values, np.array([[[np.max(gsd.blobs_image)]]]))
-
-
-# noinspection PyProtectedMember
-def test_measure_spot_intensity_3d(synthetic_single_spot_imagestack_3d):
-    gsd = single_spot_detector(synthetic_single_spot_imagestack_3d)
-    spot_attributes = gsd._find_spot_locations()
-    intensity_table = gsd._measure_spot_intensities(
-        synthetic_single_spot_imagestack_3d, spot_attributes)
-
-    assert intensity_table.shape == (1, 1, 1)
-    assert np.array_equal(intensity_table.values, np.array([[[np.max(gsd.blobs_image)]]]))
-
-
-# noinspection PyProtectedMember
-def test_measure_two_spots_3d(synthetic_two_spot_imagestack_3d):
-    gsd = single_spot_detector(synthetic_two_spot_imagestack_3d)
-    spot_attributes = gsd._find_spot_locations()
-    intensity_table = gsd._measure_spot_intensities(
-        synthetic_two_spot_imagestack_3d, spot_attributes)
-
-    assert intensity_table.shape == (2, 1, 1)
-    expected = np.max(gsd.blobs_image).repeat(2).reshape(2, 1, 1)
-    assert np.array_equal(intensity_table.values, expected)
-
-
 def test_find_two_spots_3d(synthetic_two_spot_imagestack_3d):
     gsd = single_spot_detector(synthetic_two_spot_imagestack_3d)
     intensity_table = gsd.find(gsd.blobs_stack)
@@ -164,3 +107,85 @@ def test_find_two_spots_3d(synthetic_two_spot_imagestack_3d):
     assert intensity_table.shape == (2, 1, 1)
     expected = np.max(gsd.blobs_image).repeat(2).reshape(2, 1, 1)
     assert np.array_equal(intensity_table.values, expected)
+
+
+def test_refactored_gsd(synthetic_two_spot_3d_2round_2ch):
+    """
+    This testing method does not provide a reference image, and should therefore check for spots
+    in each (round, ch) combination in sequence. With the given input, it should detect 4 spots,
+    each with a max value of 7. Because each (round, ch) are measured sequentially, each spot only
+    measures a single channel. Thus the total intensity across all rounds and channels for each
+    spot should be 7.
+    """
+    spot_finding_kwargs = dict(
+        min_sigma=1,
+        max_sigma=4,
+        num_sigma=5,
+        threshold=0,
+        measurement_function=np.max
+    )
+    intensity_table = detect_spots(
+        data_image=synthetic_two_spot_3d_2round_2ch,
+        spot_finding_method=gaussian_spot_detector,
+        spot_finding_kwargs=spot_finding_kwargs,
+        measurement_function=np.max
+    )
+    assert intensity_table.shape == (4, 2, 2)
+    expected = [7, 7, 7, 7]
+    assert np.array_equal(intensity_table.sum((Indices.ROUND, Indices.CH)), expected)
+
+
+def test_refactored_gsd_with_reference_image(synthetic_two_spot_3d_2round_2ch):
+    """
+    This testing method uses a reference image to identify spot locations. Thus, it should detect
+    two spots, each with max intensity 7. Because the channels and rounds are aggregated, this
+    method should recognize the 1-hot code used in the testing data, and see one channel "on" per
+    round. Thus, the total intensity across all channels and round for each spot should be 14.
+
+    """
+    reference_image = synthetic_two_spot_3d_2round_2ch.max_proj(
+        Indices.CH, Indices.ROUND)
+    spot_finding_kwargs = dict(
+        min_sigma=1,
+        max_sigma=4,
+        num_sigma=5,
+        threshold=0,
+        measurement_function=np.max
+    )
+    intensity_table = detect_spots(
+        data_image=synthetic_two_spot_3d_2round_2ch,
+        spot_finding_method=gaussian_spot_detector,
+        spot_finding_kwargs=spot_finding_kwargs,
+        reference_image=reference_image,
+        measurement_function=np.max
+    )
+    assert intensity_table.shape == (2, 2, 2)
+    expected = [14, 14]
+    assert np.array_equal(intensity_table.sum((Indices.ROUND, Indices.CH)), expected)
+
+
+def test_refactored_gsd_with_reference_image_from_max_projection(synthetic_two_spot_3d_2round_2ch):
+    """
+    This testing method builds a reference image to identify spot locations. Thus, it should detect
+    two spots, each with max intensity 7. Because the channels and rounds are aggregated, this
+    method should recognize the 1-hot code used in the testing data, and see one channel "on" per
+    round. Thus, the total intensity across all channels and round for each spot should be 14.
+    """
+
+    spot_finding_kwargs = dict(
+        min_sigma=1,
+        max_sigma=4,
+        num_sigma=5,
+        threshold=0,
+        measurement_function=np.max
+    )
+    intensity_table = detect_spots(
+        data_image=synthetic_two_spot_3d_2round_2ch,
+        spot_finding_method=gaussian_spot_detector,
+        spot_finding_kwargs=spot_finding_kwargs,
+        reference_from_max_projection=True,
+        measurement_function=np.max
+    )
+    assert intensity_table.shape == (2, 2, 2)
+    expected = [14, 14]
+    assert np.array_equal(intensity_table.sum((Indices.ROUND, Indices.CH)), expected)

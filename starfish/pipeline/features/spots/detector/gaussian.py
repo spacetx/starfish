@@ -1,8 +1,9 @@
-from typing import Callable, Sequence
+from typing import Callable, Sequence, Union
 
 import numpy as np
 import pandas as pd
 from skimage.feature import blob_log
+import xarray as xr
 
 from starfish.constants import Indices, Features
 from starfish.image import ImageStack
@@ -129,15 +130,16 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
 # TODO ambrosejcarr: make this return IntensityTable instead of SpotAttributes
 def gaussian_spot_detector(
-        data_image: ImageStack, min_sigma: Number, max_sigma: Number, num_sigma: int,
-        threshold: Number, overlap=0.5, measurement_function: Callable[[Sequence], Number]=np.max) \
+        data_image: Union[np.ndarray, xr.DataArray], min_sigma: Number, max_sigma: Number,
+        num_sigma: int, threshold: Number, overlap=0.5,
+        measurement_function: Callable[[Sequence], Number]=np.max) \
         -> SpotAttributes:
     """
     Find gaussian blobs in an data image
 
     Parameters
     ----------
-    data_image : ImageStack
+    data_image : Union[np.ndarray, xr.DataArray]
         ImageStack containing blobs to be detected
     min_sigma : float
         The minimum standard deviation for Gaussian Kernel. Keep this low to

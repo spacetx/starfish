@@ -333,47 +333,21 @@ class ImageStack:
             )
             linear_view = np.clip(linear_view, a_min=a_min, a_max=a_max)
 
-        show_spot_function = self._show_spots
-
         # Create the plot
         fig, ax = plt.subplots(figsize=figure_size)
         im = ax.imshow(linear_view[0], cmap=color_map)
         ax.set_xticks([])
         ax.set_yticks([])
 
-        if show_spots:
-            # Generate fake spots
-            r = 5
-            n_circles = show_spots[0]
-            n_spots_on = show_spots[1]
-
-            x = np.random.randint(0, linear_view.shape[2], n_circles)
-            y = np.random.randint(0, linear_view.shape[1], n_circles)
-
-            coords = zip(x, y)
-
-            circs = []
-
-            for x, y in coords:
-                c = plt.Circle((y, x), r, color='r', linewidth=0.5, fill=False, visible=False)
-                circs.append(c)
-                ax.add_patch(c)
-
-            # Calculate masks
-            circle_mask = np.zeros((linear_view.shape[0], n_circles), dtype='bool')
-            for i in range(linear_view.shape[0]):
-                on_circles = np.random.randint(0, n_circles, n_spots_on)
-
-                circle_mask[i][on_circles] = True
+        if show_spots is not None:
+            circs, circle_mask = self._show_spots(result_df=show_spots, ax=ax, n_slices = linear_view.shape[0])
 
         def show_plane(ax, plane, plane_index, cmap="gray", title=None):
+            # Update the image in the current plane
             im.set_data(plane)
 
-            if show_spots:
-                # this is slow. This link might have something to help:
-                # https://bastibe.de/2013-05-30-speeding-up-matplotlib.html
-                #show_spot_function(show_spots.data, ax=ax, z=plane_index, **kwargs)
-
+            # Update the spots, if necessary
+            if show_spots is not None:
                 # TODO: vectorize/broadcast?
                 for i, state in enumerate(circle_mask[plane_index]):
                     circs[i].set_visible(state)
@@ -389,43 +363,52 @@ class ImageStack:
         return
 
     @staticmethod
-    def _show_spots(result_df, ax, z=None, size=1, z_dist=1.5, scale_radius=5) -> None:
+    def _show_spots(result_df, ax, size=1, n_slices=0, z_dist=1, scale_radius=5):
         """function to plot spot finding results on top of any image as hollow red circles
 
         called spots are colored by category
 
         Parameters:
         -----------
-        img : np.ndarray[Any]
-            2-d image of any dtype
         result_df : pd.Dataframe
             result dataframe containing spot calls that correspond to the image channel
-        z : Optional[int]
-            If provided, z-plane to plot spot calls for. Default (None): plot all provided spots.
-        size : int
-            width of line to plot around the identified spot
-        z_dist : float
-            plot spots if within this distance of the z-plane. Ignored if z is not passed.
-        vmin, vmax : int
-            clipping thresholds for the image plot
         ax, matplotlib.Axes.Axis
             axis to plot spots on
+        size : 
+            Line width for the displayed spots
+        n_slices : int
+            The number of z slices being displayed. Default: 0
+        z_dist : float
+            The max distance a spot can be from the displayed slice to be visible. Default (1.5)
+        scale_radius : float
+            The size of the displayed spots is the scale_radius multiplied by the fit radius. Default: 5
+
 
         """
-        import matplotlib.pyplot as plt
+        from matplotlib import pyplot as plt
 
-        if z is not None and 'z' in result_df.columns:
-            inds = np.abs(result_df['z'] - z) < z_dist
+        n_circles = result_df.shape[0]
+
+        # Create the mask
+        if n_slices != 0 and 'z' in result_df.columns:
+            circle_mask = np.zeros((n_slices, n_circles), dtype='bool')
+
+            for i in range(n_slices):
+                on_circles = np.abs(result_df['z'] - i) < z_dist
+                circle_mask[i] = on_circles
         else:
-            inds = np.ones(result_df.shape[0]).astype(bool)
+            circle_mask = np.ones((n_slices, n_circles), dtype='bool')
 
-        # get the data needed to plot
-        selected = result_df.loc[inds, ['r', 'x', 'y']]
-
-        for i in np.arange(selected.shape[0]):
-            r, x, y = selected.iloc[i, :]  # radius is a duplicate, and is present twice
+        # Plot the spots
+        circs = []
+        for i in range(n_circles):
+            r, x, y = result_df.loc[i, ['r', 'x', 'y']]  # radius is a duplicate, and is present twice
             c = plt.Circle((y, x), r * scale_radius, color='r', linewidth=size, fill=False)
+            circs.append(c)
             ax.add_patch(c)
+
+
+        return circs, circle_mask
 
     @staticmethod
     def _build_slice_list(

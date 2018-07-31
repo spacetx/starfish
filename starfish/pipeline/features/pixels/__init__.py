@@ -4,6 +4,7 @@ import os
 from starfish.io import Stack
 from starfish.pipeline.features.pixels import _base
 from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.codebook import Codebook
 from starfish.util.argparse import FsExistsType
 from . import pixel_spot_detector
 
@@ -24,7 +25,8 @@ class PixelSpotDetector(PipelineComponent):
         pixel_finder_group.add_argument("-i", "--input", type=FsExistsType(), required=True)
         pixel_finder_group.add_argument("-o", "--output", required=True)
         pixel_finder_group.set_defaults(starfish_command=PixelSpotDetector._cli)
-        pixel_finder_subparsers = pixel_finder_group.add_subparsers(dest="pixel_finder_algorithm_class")
+        pixel_finder_subparsers = pixel_finder_group.add_subparsers(
+            dest="pixel_finder_algorithm_class")
 
         for algorithm_cls in cls.algorithm_to_class_map().values():
             group_parser = pixel_finder_subparsers.add_parser(algorithm_cls.get_algorithm_name())
@@ -44,22 +46,23 @@ class PixelSpotDetector(PipelineComponent):
         print('Detecting Pixels...')
         s = Stack()
         s.read(args.input)
-        instance = args.pixel_finder_algorithm_class(**vars(args))
-        # TODO does this work?
-        pixel_attributes, encoded_pixels = instance.find(s)
 
-        # TODO ambrosejcarr: this still needs to be added back.
+        # load the codebook
+        codebook = Codebook.from_json(args.codebook_input)
+
+        # create the pixel finder
+        instance = args.pixel_finder_algorithm_class(codebook, **vars(args))
+        intensities, decoded_props = instance.find(s)
+
+        # TODO ambrosejcarr: this needs to be added back.
         # if args.show:
         #     encoded_pixels.show(figsize=(10, 10))
 
-        path = os.path.join(args.output, 'pixels.geojson')
-        print(f"Writing | pixels geojson to: {path}")
-        pixel_attributes.save_geojson(path)
+        # TODO emit for vis reasons after multiindex serialization is fixed
+        # path = os.path.join(args.output, 'pixels.geojson')
+        # print(f"Writing | pixels geojson to: {path}")
+        # intensities.save_geojson(path)
 
         path = os.path.join(args.output, 'pixels.json')
         print(f"Writing | spot_id | x | y | z | to: {path}")
-        pixel_attributes.save(path)
-
-        path = os.path.join(args.output, 'encoder_table.json')
-        print(f"Writing | spot_id | hyb | ch | val | to: {path}")
-        encoded_pixels.save(path)
+        intensities.save(path)

@@ -1,55 +1,65 @@
 import argparse
 from functools import partial
 from numbers import Number
-from typing import Callable, Union, Tuple, Optional
+from typing import Callable, Optional, Union, Tuple
 
 import numpy as np
+from scipy.ndimage.filters import uniform_filter
 from skimage import img_as_uint
 
 from starfish.errors import DataFormatWarning
 from starfish.image import ImageStack
-from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
 from ._base import FilterAlgorithmBase
 
 
-class GaussianHighPass(FilterAlgorithmBase):
+class MeanHighPass(FilterAlgorithmBase):
 
     def __init__(
-            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False, verbose: bool=False, **kwargs
+            self, size: Union[Number, Tuple[Number]], is_volume: bool=False, verbose: bool=False, **kwargs
     ) -> None:
-        """Gaussian high pass filter
+        """Mean high pass filter.
+
+        The mean high pass filter reduces low spatial frequency features by subtracting a
+        mean filtered image from the original image. The mean filter smooths an image by replacing
+        each pixel's value with an average of the pixel values of the surrounding neighborhood.
+
+        The mean filter is also known as a uniform or box filter.
+
+        This is a pass through for the scipy.ndimage.filters.uniform_filter:
+        https://docs.scipy.org/doc/scipy-0.19.0/reference/generated/scipy.ndimage.uniform_filter.html
 
         Parameters
         ----------
-        sigma : Union[Number, Tuple[Number]]
-            standard deviation of gaussian kernel
+        size : Union[Number, Tuple[Number]]
+            width of the kernel
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles independently.
         verbose : bool
             if True, report on filtering progress (default = False)
 
         """
-        if isinstance(sigma, tuple):
+
+        if isinstance(size, tuple):
             message = ("if passing an anisotropic kernel, the dimensionality must match the data shape ({shape}), not "
                        "{passed_shape}")
-            if is_volume and len(sigma) != 3:
-                raise ValueError(message.format(shape=3, passed_shape=len(sigma)))
-            if not is_volume and len(sigma) != 2:
-                raise ValueError(message.format(shape=2, passed_shape=len(sigma)))
+            if is_volume and len(size) != 3:
+                raise ValueError(message.format(shape=3, passed_shape=len(size)))
+            if not is_volume and len(size) != 2:
+                raise ValueError(message.format(shape=2, passed_shape=len(size)))
 
-        self.sigma = sigma
+        self.size = size
         self.is_volume = is_volume
         self.verbose = verbose
 
     @classmethod
     def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
-            "--sigma", type=float, help="standard deviation of gaussian kernel")
+            "--size", type=float, help="width of the kernel")
         group_parser.add_argument(
             "--is-volume", action="store_true", help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(image: np.ndarray, sigma: Union[Number, Tuple[Number]]) -> np.ndarray:
+    def high_pass(image: np.ndarray, size: Number) -> np.ndarray:
         """
         Applies a gaussian high pass filter to an image
 
@@ -57,20 +67,20 @@ class GaussianHighPass(FilterAlgorithmBase):
         ----------
         image : numpy.ndarray[np.uint16]
             2-d or 3-d image data
-        sigma : Union[Number, Tuple[Number]]
-            Standard deviation of gaussian kernel
+        size : Number
+            width of the kernel
 
         Returns
         -------
         np.ndarray :
-            filtered image of the same shape as the input image
+            Filtered image, same shape as input
 
         """
         if image.dtype != np.uint16:
-            DataFormatWarning('gaussian filters currently only support uint16 images. Image data will be converted.')
+            DataFormatWarning('mean filters currently only support uint16 images. Image data will be converted.')
             image = img_as_uint(image)
 
-        blurred: np.ndarray = GaussianLowPass.low_pass(image, sigma)
+        blurred: np.ndarray = uniform_filter(image, size)
 
         over_flow_ind: np.ndarray[bool] = image < blurred
         filtered: np.ndarray = image - blurred
@@ -91,10 +101,10 @@ class GaussianHighPass(FilterAlgorithmBase):
         Returns
         -------
         Optional[ImageStack] :
-            if in-place is False, return the results of filter as a new stack
+            if in_place is False, return the results of filter as a new stack
 
         """
-        high_pass: Callable = partial(self.high_pass, sigma=self.sigma)
+        high_pass: Callable = partial(self.high_pass, size=self.size)
         result = stack.apply(high_pass, is_volume=self.is_volume, verbose=self.verbose, in_place=in_place)
         if not in_place:
             return result

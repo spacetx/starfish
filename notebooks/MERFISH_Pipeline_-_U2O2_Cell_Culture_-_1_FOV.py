@@ -10,6 +10,11 @@
 # EPY: END markdown
 
 # EPY: START code
+# EPY: ESCAPE %load_ext autoreload
+# EPY: ESCAPE %autoreload 2
+# EPY: END code
+
+# EPY: START code
 import os
 import pprint
 import time
@@ -21,7 +26,7 @@ import seaborn as sns
 from scipy.stats import scoreatpercentile
 
 from showit import image, tile
-from starfish.constants import Indices
+from starfish.constants import Indices, Features
 from starfish.io import Stack
 from starfish.viz import tile_lims
 
@@ -31,7 +36,7 @@ from starfish.viz import tile_lims
 # EPY: START code
 # load the data from cloudfront
 s = Stack()
-s.read('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/fov_001/experiment.json')
+s.read('https://dmf0bdeheu4zf.cloudfront.net/20180722/MERFISH/fov_001/experiment.json')
 # EPY: END code
 
 # EPY: START code
@@ -40,18 +45,18 @@ tile(s.image.squeeze());
 # EPY: END code
 
 # EPY: START markdown
-# Individual hybridization rounds and channels can also be visualized
+# Individual imaging rounds and channels can also be visualized
 # EPY: END markdown
 
 # EPY: START code
-# show all hybridization rounds of channel 0
-s.image.show_stack({Indices.CH: 0})
+# show all imaging rounds of channel 0
+s.image.show_stack({Indices.CH: 0}, rescale=False)
 # EPY: END code
 
 # EPY: START markdown
 # ## Show input file format that specifies how the tiff stack is organized
 # 
-# The stack contains multiple images corresponding to the channel and hybridization round. MERFISH builds a 16 bit barcode from 8 hybridization rounds, each of which measures two channels that correspond to contiguous (but not necessarily consistently ordered) bits of the barcode. 
+# The stack contains multiple images corresponding to the channel and imaging rounds. MERFISH builds a 16 bit barcode from 8 imaging rounds, each of which measures two channels that correspond to contiguous (but not necessarily consistently ordered) bits of the barcode. 
 # 
 # The MERFISH computational pipeline also constructs a scalar that corrects for intensity differences across each of the 16 images, e.g., one scale factor per bit position.
 # 
@@ -72,8 +77,9 @@ pp.pprint(s.org)
 # EPY: END markdown
 
 # EPY: START code
-codebook = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/codebook.csv', dtype={'barcode': object})
-codebook.head(20)
+from starfish.codebook import Codebook
+codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180722/MERFISH/codebook.json')
+codebook
 # EPY: END code
 
 # EPY: START markdown
@@ -93,8 +99,8 @@ from starfish.viz import tile_lims
 
 # EPY: START code
 from starfish.pipeline.filter.gaussian_high_pass import GaussianHighPass
-ghp = GaussianHighPass(sigma=3)
-ghp.filter(s)
+ghp = GaussianHighPass(sigma=3, verbose=True)
+ghp.filter(s.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -103,28 +109,28 @@ ghp.filter(s)
 
 # EPY: START code
 from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
-dpsf = DeconvolvePSF(num_iter=15, sigma=2)
-dpsf.filter(s)
+dpsf = DeconvolvePSF(num_iter=15, sigma=2, verbose=True)
+dpsf.filter(s.image)
 # EPY: END code
 
 # EPY: START markdown
-# Recall that the image is pre-registered, as stated above. Despite this, individual RNA molecules may still not be perfectly aligned across hybridization rounds. This is crucial in order to read out a measure of the itended barcode (across hybridization rounds) in order to map it to the codebook. To solve for potential mis-alignment, the images can be blurred with a 1-pixel Gaussian kernel. The risk here is that this will obfuscate signals from nearby molecules. 
+# Recall that the image is pre-registered, as stated above. Despite this, individual RNA molecules may still not be perfectly aligned across imaging rounds. This is crucial in order to read out a measure of the itended barcode (across imaging rounds) in order to map it to the codebook. To solve for potential mis-alignment, the images can be blurred with a 1-pixel Gaussian kernel. The risk here is that this will obfuscate signals from nearby molecules. 
 # 
-# A local search in pixel space across hybridization rounds can also solve this. 
+# A local search in pixel space across imaging rounds can also solve this. 
 # EPY: END markdown
 
 # EPY: START code
 from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
-glp = GaussianLowPass(sigma=1)
-glp.filter(s)
+glp = GaussianLowPass(sigma=1, verbose=True)
+glp.filter(s.image)
 # EPY: END code
 
 # EPY: START markdown
-# Use MERFISH-calculated size factors to scale the channels across the hybridization rounds and visualize the resulting filtered and scaled images. Right now we have to extract this information from the metadata and apply this transformation manually.
+# Use MERFISH-calculated size factors to scale the channels across the imaging rounds and visualize the resulting filtered and scaled images. Right now we have to extract this information from the metadata and apply this transformation manually.
 # EPY: END markdown
 
 # EPY: START code
-scale_factors = {(t[Indices.HYB], t[Indices.CH]): t['scale_factor'] for index, t in s.image.tile_metadata.iterrows()}
+scale_factors = {(t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] for index, t in s.image.tile_metadata.iterrows()}
 # EPY: END code
 
 # EPY: START code
@@ -133,7 +139,7 @@ scale_factors = {(t[Indices.HYB], t[Indices.CH]): t['scale_factor'] for index, t
 
 for indices in s.image._iter_indices():
     data = s.image.get_slice(indices)[0]
-    scaled = data / scale_factors[indices[Indices.HYB], indices[Indices.CH]]
+    scaled = data / scale_factors[indices[Indices.ROUND.value], indices[Indices.CH.value]]
     s.image.set_slice(indices, scaled)
 # EPY: END code
 
@@ -142,7 +148,7 @@ from scipy.stats import scoreatpercentile
 # EPY: END code
 
 # EPY: START code
-mp = s.image.max_proj(Indices.HYB, Indices.CH, Indices.Z)
+mp = s.image.max_proj(Indices.ROUND.value, Indices.CH.value, Indices.Z.value)
 clim = scoreatpercentile(mp, [0.5, 99.5])
 image(mp, clim=clim)
 # EPY: END code
@@ -150,7 +156,7 @@ image(mp, clim=clim)
 # EPY: START markdown
 # ## Use spot-detector to create 'encoder' table  for standardized input  to decoder
 # 
-# Each pipeline exposes a spot detector, and this spot detector translates the filtered image into an encoded table by detecting spots. The table contains the spot_id, the corresponding intensity (val) and the channel (ch), hybridization round (hyb), and bit position (bit) of each spot. 
+# Each pipeline exposes a spot detector, and this spot detector translates the filtered image into an encoded table by detecting spots. The table contains the spot_id, the corresponding intensity (v) and the channel (c), imaging round (r) of each spot. 
 # 
 # The MERFISH pipeline merges these two steps together by finding pixel-based features, and then later collapsing these into spots and filtering out undesirable (non-spot) features. 
 # 
@@ -184,41 +190,17 @@ image(mp, clim=clim)
 # EPY: START code
 from starfish.pipeline.features.pixels.pixel_spot_detector import PixelSpotDetector
 psd = PixelSpotDetector(
-    codebook='https://s3.amazonaws.com/czi.starfish.data.public/MERFISH/codebook.csv',
+    codebook=codebook,
     distance_threshold=0.5176,
     magnitude_threshold=1,
-    area_threshold=2,
-    crop_size=40
+    min_area=2,
+    max_area=np.inf,
+    norm_order=2, 
+    crop_size=(0, 40, 40)
 )
 
-spot_attributes, decoded = psd.find(s)
-# EPY: END code
-
-# EPY: START code
-spot_attributes.head()
-# EPY: END code
-
-# EPY: START code
-res = decoded.result  # this should be consistent across assays; 
-# this one doesn't have a quality, but it should eventually converge to a shared type
-res.head()
-# EPY: END code
-
-# EPY: START markdown
-# In the above method, the private method of the decoder is used, which exposes additional metadata about the spots. 
-# EPY: END markdown
-
-# EPY: START code
-print('Additional metadata:')
-[f for f in dir(decoded) if not f.startswith('_')]
-# EPY: END code
-
-# EPY: START markdown
-# Spot attributes are stored as skimage RegionProperties attributes
-# EPY: END markdown
-
-# EPY: START code
-decoded.spot_props[:3]
+spot_intensities, prop_results = psd.find(s.image)
+spot_intensities
 # EPY: END code
 
 # EPY: START markdown
@@ -230,27 +212,26 @@ decoded.spot_props[:3]
 # EPY: END markdown
 
 # EPY: START code
-sns.set_context('talk')
-sns.set_style('ticks')
-
 bench = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/benchmark_results.csv', 
                     dtype = {'barcode':object})
-x_cnts = res.groupby('gene').count()['area']
-y_cnts = bench.groupby('gene').count()['area']
-tmp = pd.concat([x_cnts, y_cnts], axis=1, join='inner').values
-r = np.corrcoef(tmp[:,1], tmp[:,0])[0,1]
 
+benchmark_counts = bench.groupby('gene')['gene'].count()
+genes, counts = np.unique(spot_intensities[Features.AXIS][Features.TARGET], return_counts=True)
+result_counts = pd.Series(counts, index=genes)
+
+tmp = pd.concat([result_counts, benchmark_counts], join='inner', axis=1).values
+
+r = np.corrcoef(tmp[:, 1], tmp[:, 0])[0, 1]
 x = np.linspace(50, 2000)
-plt.scatter(tmp[:,1],tmp[:,0], 50,zorder=2)
-plt.plot(x,x,'-k',zorder=1)
+f, ax = plt.subplots(figsize=(6, 6))
+ax.scatter(tmp[:, 1], tmp[:, 0], 50, zorder=2)
+ax.plot(x, x, '-k', zorder=1)
 
 plt.xlabel('Gene copy number Benchmark')
 plt.ylabel('Gene copy number Starfish')
 plt.xscale('log')
 plt.yscale('log')
-plt.title('r = {}'.format(r))
-
-sns.despine(offset=2)
+plt.title(f'r = {r}');
 # EPY: END code
 
 # EPY: START markdown
@@ -260,9 +241,8 @@ sns.despine(offset=2)
 # EPY: END markdown
 
 # EPY: START code
-props = decoded.spot_props
-area_lookup = lambda x: 0 if x == 0 else props[x-1].area
+area_lookup = lambda x: 0 if x == 0 else prop_results.region_properties[x - 1].area
 vfunc = np.vectorize(area_lookup)
-mask = vfunc(decoded.label_img)
-image((decoded.decoded_img*(mask > 2))[200:500,200:500], cmap = 'nipy_spectral', size=10)
+mask = np.squeeze(vfunc(prop_results.label_image))
+image((np.squeeze(prop_results.decoded_image)*(mask > 2)), cmap = 'nipy_spectral', size=10)
 # EPY: END code

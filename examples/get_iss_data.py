@@ -9,8 +9,7 @@ import requests
 from slicedimage import ImageFormat
 
 from examples.support import FetchedImage, ImageFetcher, write_experiment_json
-from starfish.codebook import Codebook
-from starfish.constants import Indices
+from starfish.constants import Indices, Features
 from starfish.util.argparse import FsExistsType
 
 SHAPE = (980, 1330)
@@ -94,18 +93,18 @@ def format_data(input_dir, output_dir, d):
         output_dir,
         1,
         {
-            Indices.HYB: 4,
+            Indices.ROUND: 4,
             Indices.CH: 4,
             Indices.Z: 1,
         },
         {
             'nuclei': {
-                Indices.HYB: 1,
+                Indices.ROUND: 1,
                 Indices.CH: 1,
                 Indices.Z: 1,
             },
             'dots': {
-                Indices.HYB: 1,
+                Indices.ROUND: 1,
                 Indices.CH: 1,
                 Indices.Z: 1,
             }
@@ -121,22 +120,22 @@ def format_data(input_dir, output_dir, d):
 
     codebook = [
         {
-            Codebook.Constants.CODEWORD.value: [
-                {Indices.HYB.value: 0, Indices.CH.value: 3, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 1, Indices.CH.value: 3, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 2, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 3, Indices.CH.value: 2, Codebook.Constants.VALUE.value: 1}
+            Features.CODEWORD: [
+                {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 1, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 2, Indices.CH.value: 1, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 3, Indices.CH.value: 2, Features.CODE_VALUE: 1}
             ],
-            Codebook.Constants.GENE.value: "ACTB_human"
+            Features.TARGET: "ACTB_human"
         },
         {
-            Codebook.Constants.CODEWORD.value: [
-                {Indices.HYB.value: 0, Indices.CH.value: 3, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 1, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 2, Indices.CH.value: 1, Codebook.Constants.VALUE.value: 1},
-                {Indices.HYB.value: 3, Indices.CH.value: 2, Codebook.Constants.VALUE.value: 1}
+            Features.CODEWORD: [
+                {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 2, Indices.CH.value: 1, Features.CODE_VALUE: 1},
+                {Indices.ROUND.value: 3, Indices.CH.value: 2, Features.CODE_VALUE: 1}
             ],
-            Codebook.Constants.GENE.value: "ACTB_mouse"
+            Features.TARGET: "ACTB_mouse"
         },
     ]
     codebook_json_filename = "codebook.json"

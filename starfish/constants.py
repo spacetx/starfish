@@ -10,14 +10,34 @@ class AugmentedEnum(Enum):
             return self.value == other
         return False
 
+    def __str__(self) -> str:
+        return self.value
+
 
 class Coordinates(AugmentedEnum):
-    X = 'x'
-    Y = 'y'
     Z = 'z'
+    Y = 'y'
+    X = 'x'
 
 
 class Indices(AugmentedEnum):
-    HYB = 'h'
+    ROUND = 'r'
     CH = 'c'
     Z = 'z'
+
+
+class Features:
+    """
+    contains constants relating to the codebook and feature (spot/pixel) representations of the
+    image data
+    """
+
+    AXIS = 'features'
+    TARGET = 'target'
+    CODEWORD = 'codeword'
+    CODE_VALUE = 'v'
+    SPOT_RADIUS = 'radius'
+    DISTANCE = 'distance'
+    Z = 'z'
+    Y = 'y'
+    X = 'x'

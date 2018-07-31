@@ -2,10 +2,11 @@ import numpy as np
 from skimage.measure import points_in_poly
 import pandas as pd
 
-from ._base import GeneAssignmentAlgorithm
+from starfish.constants import Features
+from ._base import TargetAssignmentAlgorithm
 
 
-class PointInPoly(GeneAssignmentAlgorithm):
+class PointInPoly(TargetAssignmentAlgorithm):
     def __init__(self, verbose=False, **kwargs):
         self.verbose = verbose
 
@@ -32,9 +33,9 @@ class PointInPoly(GeneAssignmentAlgorithm):
 
         return res
 
-    def assign_genes(self, intensity_table, regions):
+    def assign_targets(self, intensity_table, regions):
 
-        x = intensity_table.coords['features'].x.values
-        y = intensity_table.coords['features'].y.values
+        x = intensity_table.coords[Features.AXIS][Features.X].values
+        y = intensity_table.coords[Features.AXIS][Features.Y].values
         points = pd.DataFrame(dict(x=x, y=y))
         return self._assign(regions, points, use_hull=True, verbose=self.verbose)

@@ -1,13 +1,20 @@
 import numpy as np
 import pytest
 
-from starfish.constants import Indices
+from starfish.constants import Indices, Features
 from starfish.image import ImageStack
+from starfish.intensity_table import IntensityTable
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import (
-    synthetic_intensity_table, synthetic_spot_pass_through_stack, loaded_codebook,
-    synthetic_dataset_with_truth_values, simple_codebook_json, simple_codebook_array)
+    synthetic_intensity_table,
+    synthetic_spot_pass_through_stack,
+    loaded_codebook,
+    synthetic_dataset_with_truth_values,
+    simple_codebook_json,
+    simple_codebook_array,
+    single_synthetic_spot
+)
 
 
 def test_get_slice_simple_index():
@@ -16,9 +23,9 @@ def test_get_slice_simple_index():
     (P, Q0,..., Qn-1, R), slice across either P or R.
     """
     stack = ImageStack.synthetic_stack()
-    hyb = 1
+    round_ = 1
     imageslice, axes = stack.get_slice(
-        {Indices.HYB: hyb}
+        {Indices.ROUND: round_}
     )
     assert axes == [Indices.CH, Indices.Z]
 
@@ -27,7 +34,7 @@ def test_get_slice_simple_index():
     for ch in range(stack.shape[Indices.CH]):
         for z in range(stack.shape[Indices.Z]):
             data = np.empty((y, x))
-            data.fill((hyb * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] + z)
+            data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] + z)
 
             assert data.all() == imageslice[ch, z].all()
 
@@ -42,16 +49,16 @@ def test_get_slice_middle_index():
     imageslice, axes = stack.get_slice(
         {Indices.CH: ch}
     )
-    assert axes == [Indices.HYB, Indices.Z]
+    assert axes == [Indices.ROUND, Indices.Z]
 
     y, x = stack.tile_shape
 
-    for hyb in range(stack.shape[Indices.HYB]):
+    for round_ in range(stack.shape[Indices.ROUND]):
         for z in range(stack.shape[Indices.Z]):
             data = np.empty((y, x))
-            data.fill((hyb * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] + z)
+            data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] + z)
 
-            assert data.all() == imageslice[hyb, z].all()
+            assert data.all() == imageslice[round_, z].all()
 
 
 def test_get_slice_range():
@@ -64,16 +71,16 @@ def test_get_slice_range():
         {Indices.Z: zrange}
     )
     y, x = stack.tile_shape
-    assert axes == [Indices.HYB, Indices.CH, Indices.Z]
+    assert axes == [Indices.ROUND, Indices.CH, Indices.Z]
 
-    for hyb in range(stack.shape[Indices.HYB]):
+    for round_ in range(stack.shape[Indices.ROUND]):
         for ch in range(stack.shape[Indices.CH]):
             for z in range(zrange.stop - zrange.start):
                 data = np.empty((y, x))
-                data.fill((hyb * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] +
+                data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] +
                           (z + zrange.start))
 
-                assert data.all() == imageslice[hyb, ch, z].all()
+                assert data.all() == imageslice[round_, ch, z].all()
 
 
 def test_set_slice_simple_index():
@@ -82,11 +89,11 @@ def test_set_slice_simple_index():
     (P, Q0,..., Qn-1, R), sets a slice across either P or R.
     """
     stack = ImageStack.synthetic_stack()
-    hyb = 1
+    round_ = 1
     y, x = stack.tile_shape
 
     expected = np.ones((stack.shape[Indices.CH], stack.shape[Indices.Z], y, x)) * 2
-    index = {Indices.HYB: hyb}
+    index = {Indices.ROUND: round_}
 
     stack.set_slice(index, expected)
 
@@ -102,7 +109,7 @@ def test_set_slice_middle_index():
     ch = 1
     y, x = stack.tile_shape
 
-    expected = np.ones((stack.shape[Indices.HYB], stack.shape[Indices.Z], y, x)) * 2
+    expected = np.ones((stack.shape[Indices.ROUND], stack.shape[Indices.Z], y, x)) * 2
     index = {Indices.CH: ch}
 
     stack.set_slice(index, expected)
@@ -119,7 +126,7 @@ def test_set_slice_range():
     y, x = stack.tile_shape
 
     expected = np.ones((
-        stack.shape[Indices.HYB],
+        stack.shape[Indices.ROUND],
         stack.shape[Indices.CH],
         zrange.stop - zrange.start,
         y, x)) * 10
@@ -161,7 +168,7 @@ def test_max_projection_preserves_dtype():
     array = np.ones((2, 2, 2), dtype=original_dtype)
     image = ImageStack.from_numpy_array(array.reshape((1, 1, 2, 2, 2)))
 
-    max_projection = image.max_proj(Indices.CH, Indices.HYB, Indices.Z)
+    max_projection = image.max_proj(Indices.CH, Indices.ROUND, Indices.Z)
     assert max_projection.dtype == original_dtype
 
 
@@ -197,9 +204,9 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
         np.array([g.shape[0]])
     ])
     for i in np.arange(len(breaks) - 1):
-        x[breaks[i]: breaks[i + 1]] = true_intensities.coords['x'][i]
-        y[breaks[i]: breaks[i + 1]] = true_intensities.coords['y'][i]
-        z[breaks[i]: breaks[i + 1]] = true_intensities.coords['z'][i]
+        x[breaks[i]: breaks[i + 1]] = true_intensities.coords[Features.X][i]
+        y[breaks[i]: breaks[i + 1]] = true_intensities.coords[Features.Y][i]
+        z[breaks[i]: breaks[i + 1]] = true_intensities.coords[Features.Z][i]
 
     # only 8 values should be set, since there are only 8 locations across the tensor
     assert np.sum(image.numpy_array != 0) == 8
@@ -207,3 +214,20 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
     assert np.array_equal(
         image.numpy_array[h, c, z, y, x],
         true_intensities.values[np.where(true_intensities)])
+
+
+# TODO ambrosejcarr: improve the tests here.
+def test_imagestack_to_intensity_table(single_synthetic_spot):
+    codebook, intensity_table, image = single_synthetic_spot
+    pixel_intensities = IntensityTable.from_image_stack(image)
+    pixel_intensities = codebook.metric_decode(
+        pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2)
+    assert isinstance(pixel_intensities, IntensityTable)
+
+
+def test_imagestack_to_intensity_table_no_noise(synthetic_spot_pass_through_stack):
+    codebook, intensity_table, image = synthetic_spot_pass_through_stack
+    pixel_intensities = IntensityTable.from_image_stack(image)
+    pixel_intensities = codebook.metric_decode(
+        pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2)
+    assert isinstance(pixel_intensities, IntensityTable)

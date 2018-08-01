@@ -2,7 +2,7 @@ import numpy as np
 
 from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
 from starfish.util.synthesize import SyntheticData
-from starfish.constants import Features
+from starfish.constants import Features, Indices
 
 
 def test_round_trip_synthetic_data():
@@ -24,9 +24,10 @@ def test_round_trip_synthetic_data():
     codebook = sd.codebook()
     intensities = sd.intensities(codebook=codebook)
     spots = sd.spots(intensities=intensities)
+    blobs_image = spots.max_proj(Indices.CH, Indices.ROUND)
     gsd = GaussianSpotDetector(
-        min_sigma=1, max_sigma=4, num_sigma=5, threshold=0, blobs_stack=spots)
-    calculated_intensities = gsd.find(spots)
+        min_sigma=1, max_sigma=4, num_sigma=5, threshold=0)
+    calculated_intensities = gsd.find(spots, blobs_image=blobs_image)
     codebook.metric_decode(calculated_intensities, max_distance=1, min_intensity=0, norm_order=2)
 
     # applying the gaussian blur to the intensities causes them to be reduced in magnitude, so
@@ -81,9 +82,10 @@ def test_medium_synthetic_stack():
     valid_locations = valid_z & valid_y & valid_x
     intensities = intensities[np.where(valid_locations)]
     spots = sd.spots(intensities=intensities)
-
-    gsd = GaussianSpotDetector(min_sigma=1, max_sigma=4, num_sigma=5, threshold=1e-4, blobs_stack=spots)
-    calculated_intensities = gsd.find(spots)
+    blobs_image = spots.max_proj(Indices.CH, Indices.ROUND)
+    gsd = GaussianSpotDetector(
+        min_sigma=1, max_sigma=4, num_sigma=5, threshold=1e-4)
+    calculated_intensities = gsd.find(spots, blobs_image=blobs_image)
     codebook.metric_decode(calculated_intensities, max_distance=1, min_intensity=0, norm_order=2)
 
     # spots are detected in a different order that they're generated; sorting makes comparison easy

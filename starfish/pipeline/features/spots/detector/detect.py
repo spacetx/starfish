@@ -1,12 +1,12 @@
 from functools import partial
 from itertools import product
-from typing import Callable, Dict, Tuple, Union, Sequence
+from typing import Callable, Dict, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
-from starfish.constants import Indices
+from starfish.constants import Indices, Features
 from starfish.image import ImageStack
 from starfish.intensity_table import IntensityTable
 from starfish.munge import dataframe_to_multiindex
@@ -38,17 +38,20 @@ def measure_spot_intensity(
     """
 
     def fn(row: pd.Series) -> Number:
-        int_row: pd.Series = row.astype(int)
-        result = measurement_function(
-            image[
-                int_row['z_min']:int_row['z_max'],
-                int_row['y_min']:int_row['y_max'],
-                int_row['x_min']:int_row['x_max']
-            ]
-        )
-        return result
+        data = image[
+            row['z_min']:row['z_max'],
+            row['y_min']:row['y_max'],
+            row['x_min']:row['x_max']
+        ]
+        return measurement_function(data)
 
-    return spots.apply(
+    # construct an inclusive bounding box for each spot before it is submitted to measure
+    inclusive_radius = (np.ceil(spots[Features.SPOT_RADIUS]) + 1).astype(int)
+    for v, max_size in zip(['z', 'y', 'x'], image.shape):
+        spots[f'{v}_min'] = np.clip(spots[v] - inclusive_radius, 0, None)
+        spots[f'{v}_max'] = np.clip(spots[v] + inclusive_radius, None, max_size)
+
+    return spots[['z_min', 'z_max', 'y_min', 'y_max', 'x_min', 'x_max']].astype(int).apply(
         fn,
         axis=1
     )
@@ -77,13 +80,21 @@ def measure_spot_intensities(
 
     """
 
+    # determine the shape of the intensity table
     n_ch = data_image.shape[Indices.CH]
     n_round = data_image.shape[Indices.ROUND]
     spot_attribute_index = dataframe_to_multiindex(spot_attributes)
     image_shape: Tuple[int, int, int] = data_image.raw_shape[2:]
-    intensity_table = IntensityTable.empty_intensity_table(
-        spot_attribute_index, n_ch, n_round, image_shape)
 
+    # construct the empty intensity table
+    intensity_table = IntensityTable.empty_intensity_table(
+        spot_attributes=spot_attribute_index,
+        n_ch=n_ch,
+        n_round=n_round,
+        image_shape=image_shape
+    )
+
+    # fill the intensity table
     indices = product(range(n_ch), range(n_round))
     for c, r in indices:
         image, _ = data_image.get_slice({Indices.CH: c, Indices.ROUND: r})
@@ -119,7 +130,7 @@ def concatenate_spot_attributes_to_intensities(
     all_spots = pd.concat([sa.data for sa, inds in spot_attributes])
     spot_attribute_index = dataframe_to_multiindex(all_spots.drop(['spot_id', 'intensity'], axis=1))
 
-    # TODO ambrosejcarr: remove image_shape
+    # TODO ambrosejcarr: remove image_shape from intensity_table
     z_max = max(max(sa.data['z']) for sa, inds in spot_attributes)
     y_max = max(max(sa.data['y']) for sa, inds in spot_attributes)
     x_max = max(max(sa.data['x']) for sa, inds in spot_attributes)
@@ -139,7 +150,7 @@ def concatenate_spot_attributes_to_intensities(
 
 
 def detect_spots(
-        data_image: ImageStack,
+        data_stack: ImageStack,
         spot_finding_method: Callable[..., SpotAttributes],
         spot_finding_kwargs: Dict=None,
         reference_image: Union[xr.DataArray, np.ndarray]=None,
@@ -150,7 +161,7 @@ def detect_spots(
 
     Parameters
     ----------
-    data_image : ImageStack
+    data_stack : ImageStack
         The ImageStack containing spots
     spot_finding_method : Callable[[Any], IntensityTable]
         The method to identify spots
@@ -191,18 +202,18 @@ def detect_spots(
         )
 
     if reference_from_max_projection:
-        reference_image = data_image.max_proj(Indices.CH, Indices.ROUND)
+        reference_image = data_stack.max_proj(Indices.CH, Indices.ROUND)
 
     if reference_image is not None:
         reference_spot_locations = spot_finding_method(reference_image, **spot_finding_kwargs)
         intensity_table = measure_spot_intensities(
-            data_image=data_image,
+            data_image=data_stack,
             spot_attributes=reference_spot_locations.data,
             measurement_function=measurement_function
         )
-    else:
+    else:  # don't use a reference image, measure each
         spot_finding_method = partial(spot_finding_method, **spot_finding_kwargs)
-        spot_attributes_list = data_image.transform(
+        spot_attributes_list = data_stack.transform(
             func=spot_finding_method,
             is_volume=True  # always use volumetric or pseudo-3d (1, n, m) data
         )

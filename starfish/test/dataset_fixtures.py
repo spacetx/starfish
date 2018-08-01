@@ -167,6 +167,7 @@ def synthetic_dataset_with_truth_values_and_called_spots(
 
     wth = WhiteTophat(masking_radius=15)
     filtered = wth.run(image, in_place=False)
+    blobs_image = filtered.max_proj(Indices.CH, Indices.ROUND)
 
     min_sigma = 1.5
     max_sigma = 4
@@ -177,11 +178,11 @@ def synthetic_dataset_with_truth_values_and_called_spots(
         max_sigma=max_sigma,
         num_sigma=num_sigma,
         threshold=threshold,
-        blobs_stack=filtered,
+        blobs_image=blobs_image,
         measurement_type='max',
     )
 
-    intensities = gsd.find(image_stack=filtered)
+    intensities = gsd.find(data_stack=filtered)
     assert intensities.shape[0] == 5
 
     codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm_order=2)
@@ -214,7 +215,6 @@ def synthetic_two_spot_3d():
     return data
 
 
-@pytest.fixture()
 def synthetic_two_spot_3d_2round_2ch() -> ImageStack:
     """produce a 2-channel 2-hyb ImageStack
 
@@ -238,19 +238,19 @@ def synthetic_two_spot_3d_2round_2ch() -> ImageStack:
 
     # round 0 channel 0
     data[0, 0, 4, 10, 90] = 1000
-    data[0, 0, 6, 90, 10] = 0
+    data[0, 0, 5, 90, 10] = 0
 
     # round 0 channel 1
     data[0, 1, 4, 10, 90] = 0
-    data[0, 1, 6, 90, 10] = 1000
+    data[0, 1, 5, 90, 10] = 1000
 
     # round 1 channel 0
     data[1, 0, 4, 10, 90] = 0
-    data[1, 0, 6, 90, 10] = 1000
+    data[1, 0, 5, 90, 10] = 1000
 
     # round 1 channel 1
     data[1, 1, 4, 10, 90] = 1000
-    data[1, 1, 6, 90, 10] = 0
+    data[1, 1, 5, 90, 10] = 0
 
     data = gaussian_filter(data, sigma=(0, 0, 2, 2, 2))
     return ImageStack.from_numpy_array(data)

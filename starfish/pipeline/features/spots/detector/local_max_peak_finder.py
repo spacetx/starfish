@@ -1,21 +1,24 @@
-from typing import List
+from typing import Union, Tuple
 
 import numpy as np
+import xarray as xr
 from trackpy import locate
 
 from starfish.image import ImageStack
-from starfish.pipeline.features.spot_attributes import SpotAttributes
 from starfish.intensity_table import IntensityTable
+from starfish.pipeline.features.spot_attributes import SpotAttributes
+from starfish.pipeline.features.spots.detector.detect import detect_spots
 from ._base import SpotFinderAlgorithmBase
 
 
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
     def __init__(
-            self, spot_diameter, min_mass, max_size, separation, percentile=0, noise_size=None, smoothing_size=None,
-            threshold=None, preprocess: bool=False, is_volume: bool=False, verbose=False, **kwargs
-    ) -> None:
-        """Local max peak finding algorithm
+            self, spot_diameter, min_mass, max_size, separation, percentile=0,
+            noise_size: Tuple[int, int, int]=(1, 1, 1), smoothing_size=None, threshold=None,
+            preprocess: bool=False, measurement_type: str='max', is_volume: bool=False,
+            verbose=False, **kwargs) -> None:
+        """Find spots using a local max peak finding algorithm
 
         This is a wrapper for `trackpy.locate`
 
@@ -44,6 +47,8 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         threshold : float
             Clip bandpass result below this value. Thresholding is done on the already background-subtracted image.
             By default, 1 for integer images and 1/255 for float images.
+        measurement_type : str ['max', 'mean']
+            name of the function used to calculate the intensity for each identified spot area
         preprocess : boolean
             Set to False to turn off bandpass preprocessing.
         max_iterations : integer
@@ -68,22 +73,18 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self.smoothing_size = smoothing_size
         self.percentile = percentile
         self.threshold = threshold
+        self.measurement_function = self._get_measurement_function(measurement_type)
         self.preprocess = preprocess
         self.is_volume = is_volume
         self.verbose = verbose
 
-    # # TODO ambrosejcarr: make this generalize to smFISH methods
-    # def encode(self, spot_attributes: SpotAttributes):
-    #     spot_table = spot_attributes.data
-    #     spot_table['barcode_index'] = np.ones(spot_table.shape[0])
-
-    def find_attributes(self, image: np.ndarray) -> SpotAttributes:
+    def image_to_spots(self, image: np.ndarray) -> SpotAttributes:
         """
 
         Parameters
         ----------
         image : np.ndarray
-            two- or three-dimensional numpy array containing spots to detect
+            three-dimensional numpy array containing spots to detect
 
         Returns
         -------
@@ -104,7 +105,12 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             preprocess=self.preprocess
         )
 
-        new_colnames = ['x', 'y', 'intensity', 'r', 'eccentricity', 'signal', 'raw_mass', 'ep']
+        # TODO ambrosejcarr: data should always be at least pseudo-3d, this may not be necessary
+        # TODO ambrosejcarr: this is where max vs. sum vs. mean would be parametrized.
+        # here, total_intensity = sum, intensity = max
+        new_colnames = [
+            'x', 'y', 'total_intensity', 'radius', 'eccentricity', 'intensity', 'raw_mass', 'ep'
+        ]
         if len(image.shape) == 3:
             attributes.columns = ['z'] + new_colnames
         else:
@@ -113,26 +119,29 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         attributes['spot_id'] = np.arange(attributes.shape[0])
         return SpotAttributes(attributes)
 
-    def find(self, stack: ImageStack):
+    def find(self, data_stack: ImageStack, blobs_image: Union[np.ndarray, xr.DataArray]=None) \
+            -> IntensityTable:
         """
         Find spots.
 
         Parameters
         ----------
-        stack : ImageStack
+        data_stack : ImageStack
             Stack where we find the spots in.
+        blobs_image : Union[np.ndarray, xr.DataArray]
+            If provided, spots will be found in the blobs image, and intensities will be measured
+            across hybs and channels. Otherwise, spots are measured independently for each channel
+            and round.
+
         """
-        spot_attributes: List[SpotAttributes] = stack.transform(
-            self.find_attributes, is_volume=self.is_volume, verbose=self.verbose)
+        intensity_table = detect_spots(
+            data_stack=data_stack,
+            spot_finding_method=self.image_to_spots,
+            reference_image=blobs_image,
+            measurement_function=self.measurement_function,
+        )
 
-        # TODO ambrosejcarr: do we need to find spots in the aux_dict too?
-
-        # TODO ambrosejcarr: this is where development stopped; spot_attributes is correct, but translating
-        # spot_attributes into an encoder_table is tricky without first implementing the new codebook. Do that first.
-        # create an encoded table
-        # encoded_spots = self.encode(spot_attributes.data)
-
-        return spot_attributes
+        return intensity_table
 
     @classmethod
     def add_arguments(cls, group_parser):
@@ -152,5 +161,4 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         group_parser.add_argument(
             "--percentile", default=None, type=float,
             help="clip bandpass below this value. Thresholding is done on already background-subtracted images. "
-                 "default 1 for integer images and 1/255 for float"
-        )
+                 "default 1 for integer images and 1/255 for float")

@@ -191,6 +191,7 @@ image(mp, clim=clim)
 from starfish.pipeline.features.pixels.pixel_spot_detector import PixelSpotDetector
 psd = PixelSpotDetector(
     codebook=codebook,
+    metric='euclidean',
     distance_threshold=0.5176,
     magnitude_threshold=1,
     min_area=2,

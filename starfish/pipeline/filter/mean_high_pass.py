@@ -1,6 +1,5 @@
 import argparse
 from functools import partial
-from numbers import Number
 from typing import Callable, Optional, Union, Tuple
 
 import numpy as np
@@ -10,13 +9,13 @@ from skimage import img_as_uint
 from starfish.errors import DataFormatWarning
 from starfish.image import ImageStack
 from ._base import FilterAlgorithmBase
+from starfish.typing import Number
 
 
 class MeanHighPass(FilterAlgorithmBase):
 
     def __init__(
-            self, size: Union[Number, Tuple[Number]], is_volume: bool=False, verbose: bool=False, **kwargs
-    ) -> None:
+            self, size: Union[Number, Tuple[Number]], is_volume: bool=False, **kwargs) -> None:
         """Mean high pass filter.
 
         The mean high pass filter reduces low spatial frequency features by subtracting a
@@ -33,15 +32,14 @@ class MeanHighPass(FilterAlgorithmBase):
         size : Union[Number, Tuple[Number]]
             width of the kernel
         is_volume : bool
-            If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles independently.
-        verbose : bool
-            if True, report on filtering progress (default = False)
+            If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
+            independently.
 
         """
 
         if isinstance(size, tuple):
-            message = ("if passing an anisotropic kernel, the dimensionality must match the data shape ({shape}), not "
-                       "{passed_shape}")
+            message = ("if passing an anisotropic kernel, the dimensionality must match the data "
+                       "shape ({shape}), not {passed_shape}")
             if is_volume and len(size) != 3:
                 raise ValueError(message.format(shape=3, passed_shape=len(size)))
             if not is_volume and len(size) != 2:
@@ -49,7 +47,6 @@ class MeanHighPass(FilterAlgorithmBase):
 
         self.size = size
         self.is_volume = is_volume
-        self.verbose = verbose
 
     @classmethod
     def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
@@ -77,7 +74,8 @@ class MeanHighPass(FilterAlgorithmBase):
 
         """
         if image.dtype != np.uint16:
-            DataFormatWarning('mean filters currently only support uint16 images. Image data will be converted.')
+            DataFormatWarning(
+                'Mean filters currently only support uint16 images. Image data will be converted.')
             image = img_as_uint(image)
 
         blurred: np.ndarray = uniform_filter(image, size)
@@ -88,7 +86,9 @@ class MeanHighPass(FilterAlgorithmBase):
 
         return filtered
 
-    def run(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
+    def run(
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=False) \
+            -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters
@@ -97,6 +97,8 @@ class MeanHighPass(FilterAlgorithmBase):
             Stack to be filtered.
         in_place : bool
             if True, process ImageStack in-place, otherwise return a new stack
+        verbose : bool
+            if True, report on filtering progress (default = False)
 
         Returns
         -------
@@ -105,7 +107,8 @@ class MeanHighPass(FilterAlgorithmBase):
 
         """
         high_pass: Callable = partial(self.high_pass, size=self.size)
-        result = stack.apply(high_pass, is_volume=self.is_volume, verbose=self.verbose, in_place=in_place)
+        result = stack.apply(
+            high_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place)
         if not in_place:
             return result
         return None

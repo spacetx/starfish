@@ -9,7 +9,7 @@ from .image import ImageStack
 
 
 class Stack:
-    MIN_SUPPORTED_VERSION = Version("0.0.0")
+    MIN_SUPPORTED_VERSION = Version("1.0.0")
     MAX_SUPPORTED_VERSION = Version("1.0.0")
 
     def __init__(self):

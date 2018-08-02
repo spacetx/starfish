@@ -36,7 +36,7 @@ from starfish.viz import tile_lims
 # EPY: START code
 # load the data from cloudfront
 s = Stack()
-s.read('https://dmf0bdeheu4zf.cloudfront.net/20180722/MERFISH/fov_001/experiment.json')
+s.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment.json')
 # EPY: END code
 
 # EPY: START code
@@ -78,7 +78,7 @@ pp.pprint(s.org)
 
 # EPY: START code
 from starfish.codebook import Codebook
-codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180722/MERFISH/codebook.json')
+codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/codebook.json')
 codebook
 # EPY: END code
 

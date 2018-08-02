@@ -27,7 +27,7 @@ from starfish.codebook import Codebook
 
 # EPY: START code
 s = Stack()
-s.read('https://dmf0bdeheu4zf.cloudfront.net/20180722/ISS/fov_001/experiment.json')
+s.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/ISS/fov_001/experiment.json')
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 tile(s.image.squeeze());
 # EPY: END code

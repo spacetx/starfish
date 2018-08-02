@@ -341,7 +341,7 @@ class ImageStack:
         ax.set_yticks([])
 
         if show_spots is not None:
-            circs, circle_mask = self._show_spots(result_df=show_spots, ax=ax, n_slices = linear_view.shape[0])
+            circs, circle_mask = self._show_spots(result_df=show_spots, ax=ax, n_slices=linear_view.shape[0])
 
         def show_plane(ax, plane, plane_index, cmap="gray", title=None):
             # Update the image in the current plane
@@ -375,7 +375,7 @@ class ImageStack:
             result dataframe containing spot calls that correspond to the image channel
         ax, matplotlib.Axes.Axis
             axis to plot spots on
-        size : 
+        size :
             Line width for the displayed spots
         n_slices : int
             The number of z slices being displayed. Default: 0
@@ -407,7 +407,6 @@ class ImageStack:
             c = plt.Circle((y, x), r * scale_radius, color='r', linewidth=size, fill=False)
             circs.append(c)
             ax.add_patch(c)
-
 
         return circs, circle_mask
 

@@ -65,7 +65,7 @@ class Clip(FilterAlgorithmBase):
         image = image.clip(min=v_min, max=v_max)
         return image.astype(dtype)
 
-    def filter(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
+    def run(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters

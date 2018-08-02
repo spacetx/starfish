@@ -18,8 +18,8 @@ def test_iss_pipeline():
     dots = ImageStack.from_numpy_array(dots_data.reshape((1, 1, 1, *dots_data.shape)))
 
     wth = WhiteTophat(disk_size=15)
-    wth.filter(image)
-    wth.filter(dots)
+    wth.run(image)
+    wth.run(dots)
 
     fsr = FourierShiftRegistration(upsampling=1000, reference_stack=dots)
     fsr.run(image)

@@ -100,7 +100,7 @@ from starfish.viz import tile_lims
 # EPY: START code
 from starfish.pipeline.filter.gaussian_high_pass import GaussianHighPass
 ghp = GaussianHighPass(sigma=3, verbose=True)
-ghp.filter(s.image)
+ghp.run(s.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -110,7 +110,7 @@ ghp.filter(s.image)
 # EPY: START code
 from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
 dpsf = DeconvolvePSF(num_iter=15, sigma=2, verbose=True)
-dpsf.filter(s.image)
+dpsf.run(s.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -122,7 +122,7 @@ dpsf.filter(s.image)
 # EPY: START code
 from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
 glp = GaussianLowPass(sigma=1, verbose=True)
-glp.filter(s.image)
+glp.run(s.image)
 # EPY: END code
 
 # EPY: START markdown

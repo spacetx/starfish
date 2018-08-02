@@ -97,9 +97,9 @@ from starfish.pipeline.filter import Filter
 # filter raw data
 disk_size = 15  # disk as in circle
 filt = Filter.WhiteTophat(disk_size, verbose=True)
-filt.filter(s.image)
+filt.run(s.image)
 for img in s.auxiliary_images.values():
-    filt.filter(img)
+    filt.run(img)
 # EPY: END code
 
 # EPY: START markdown

@@ -22,7 +22,7 @@ def test_gaussian_high_pass(merfish_stack: Stack, sigma: Union[Number, Tuple[Num
     """
     ghp = gaussian_high_pass.GaussianHighPass(sigma=sigma)
     sum_before = np.sum(merfish_stack.image.numpy_array)
-    ghp.filter(merfish_stack.image)
+    ghp.run(merfish_stack.image)
     assert np.sum(merfish_stack.image.numpy_array) < sum_before
 
 
@@ -31,7 +31,7 @@ def test_gaussian_high_pass_apply(merfish_stack: Stack, sigma: Union[Number, Tup
     """same as test_gaussian_high_pass, but tests apply loop functionality"""
     sum_before = np.sum(merfish_stack.image.numpy_array)
     ghp = gaussian_high_pass.GaussianHighPass(sigma=sigma)
-    ghp.filter(merfish_stack.image)
+    ghp.run(merfish_stack.image)
     assert np.sum(merfish_stack.image.numpy_array) < sum_before
 
 
@@ -40,5 +40,5 @@ def test_gaussian_high_pass_apply_3d(merfish_stack: Stack, sigma: Union[Number, 
     """same as test_gaussian_high_pass, but tests apply loop functionality"""
     sum_before = np.sum(merfish_stack.image.numpy_array)
     ghp = gaussian_high_pass.GaussianHighPass(sigma=sigma, is_volume=True)
-    ghp.filter(merfish_stack.image)
+    ghp.run(merfish_stack.image)
     assert np.sum(merfish_stack.image.numpy_array) < sum_before

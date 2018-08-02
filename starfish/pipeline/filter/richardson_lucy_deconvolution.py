@@ -81,7 +81,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
         img_deconv = img_deconv.astype(np.uint16)
         return img_deconv
 
-    def filter(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
+    def run(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters

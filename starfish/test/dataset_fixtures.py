@@ -165,7 +165,7 @@ def synthetic_dataset_with_truth_values_and_called_spots(
     codebook, true_intensities, image = synthetic_dataset_with_truth_values
 
     wth = WhiteTophat(disk_size=15)
-    filtered = wth.filter(image, in_place=False)
+    filtered = wth.run(image, in_place=False)
 
     min_sigma = 1.5
     max_sigma = 4

@@ -1,16 +1,19 @@
 from functools import partial
 from typing import Optional
 
-from trackpy import bandpass
 import numpy as np
+from trackpy import bandpass
 
 from starfish.image import ImageStack
+from starfish.types import Number
 from ._base import FilterAlgorithmBase
 
 
 class Bandpass(FilterAlgorithmBase):
 
-    def __init__(self, lshort, llong, threshold, truncate, verbose=False, **kwargs):
+    def __init__(
+            self, lshort: Number, llong: int, threshold: Number, truncate: Number=4,
+            is_volume: bool=False, **kwargs) -> None:
         """
 
         Parameters
@@ -22,26 +25,31 @@ class Bandpass(FilterAlgorithmBase):
         threshold : float
             zero any pixels below this intensity value
         truncate : float
-            # todo document
-        verbose : bool
-            If True, report on the percentage completed (default = False) during processing
+            # TODO dganguli: this is not documented by trackpy, can you help?
+        is_volume : bool
+            If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
         kwargs
         """
         self.lshort = lshort
         self.llong = llong
         self.threshold = threshold
         self.truncate = truncate
-        self.verbose = verbose
+        self.is_volume = is_volume
 
     @classmethod
-    def add_arguments(cls, group_parser):
-        group_parser.add_argument("--lshort", default=0.5, type=float, help="filter signals below this frequency")
-        group_parser.add_argument("--llong", default=7, type=int, help="filter signals above this frequency")
-        group_parser.add_argument("--threshold", default=1, type=int, help="clip pixels below this intensity value")
-        group_parser.add_argument("--truncate", default=4, type=int)
+    def add_arguments(cls, group_parser) -> None:
+        group_parser.add_argument(
+            "--lshort", type=float, help="filter signals below this frequency")
+        group_parser.add_argument(
+            "--llong", type=int, help="filter signals above this frequency")
+        group_parser.add_argument(
+            "--threshold", type=int, help="clip pixels below this intensity value")
+        group_parser.add_argument("--truncate", default=4, type=int)  # TODO dganguli doc this too
 
     @staticmethod
-    def bandpass(image, lshort, llong, threshold, truncate) -> np.ndarray:
+    def bandpass(
+            image: np.ndarray, lshort: Number, llong: int, threshold: Number, truncate: Number
+    ) -> np.ndarray:
         """Apply a bandpass filter to remove noise and background variation
 
         Parameters
@@ -54,7 +62,7 @@ class Bandpass(FilterAlgorithmBase):
         threshold : float
             zero any pixels below this intensity value
         truncate : float
-            # todo document
+             # TODO dganguli: this is not documented by trackpy, can you help?
 
         Returns
         -------
@@ -62,13 +70,15 @@ class Bandpass(FilterAlgorithmBase):
             bandpassed image
 
         """
-        bandpassed = bandpass(
+        bandpassed: np.ndarray = bandpass(
             image, lshort=lshort, llong=llong, threshold=threshold,
             truncate=truncate
         )
         return bandpassed
 
-    def filter(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
+    def run(
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=False
+    ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters
@@ -77,6 +87,8 @@ class Bandpass(FilterAlgorithmBase):
             Stack to be filtered.
         in_place : bool
             if True, process ImageStack in-place, otherwise return a new stack
+        verbose : bool
+            if True, report the filtering progress across the tiles or volumes of the ImageStack
 
         Returns
         -------
@@ -85,9 +97,12 @@ class Bandpass(FilterAlgorithmBase):
 
         """
         bandpass_ = partial(
-            self.bandpass, lshort=self.lshort, llong=self.llong, threshold=self.threshold, truncate=self.truncate
+            self.bandpass,
+            lshort=self.lshort, llong=self.llong, threshold=self.threshold, truncate=self.truncate
         )
-        result = stack.apply(bandpass_, verbose=self.verbose, in_place=in_place)
+        result = stack.apply(
+            bandpass_, verbose=verbose, in_place=in_place, is_volume=self.is_volume
+        )
         if not in_place:
             return result
         return None

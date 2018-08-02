@@ -32,7 +32,7 @@ class WhiteTophat(FilterAlgorithmBase):
         group_parser.add_argument(
             "--disk-size", default=15, type=int, help="diameter of morphological masking disk in pixels")
 
-    def filter(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
+    def run(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters

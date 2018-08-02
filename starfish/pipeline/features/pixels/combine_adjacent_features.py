@@ -7,7 +7,7 @@ from skimage.measure import regionprops, label
 from starfish.constants import Indices, Features
 from starfish.intensity_table import IntensityTable
 from starfish.munge import dataframe_to_multiindex
-from starfish.typing import Number
+from starfish.types import Number
 
 
 class ConnectedComponentDecodingResult(NamedTuple):

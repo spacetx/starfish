@@ -11,7 +11,7 @@ from sklearn.neighbors import NearestNeighbors
 
 from starfish.constants import Indices, Features
 from starfish.intensity_table import IntensityTable
-from starfish.typing import Number
+from starfish.types import Number
 
 
 class Codebook(xr.DataArray):

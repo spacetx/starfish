@@ -95,8 +95,8 @@ codebook
 from starfish.pipeline.filter import Filter
 
 # filter raw data
-disk_size = 15  # disk as in circle
-filt = Filter.WhiteTophat(disk_size, verbose=True)
+masking_radius = 15  # disk as in circle
+filt = Filter.WhiteTophat(masking_radius, verbose=True, is_volume=False)
 filt.run(s.image)
 for img in s.auxiliary_images.values():
     filt.run(img)

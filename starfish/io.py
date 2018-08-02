@@ -1,16 +1,16 @@
 import json
-import os
 from typing import Optional, Mapping
 
 import numpy as np
-from slicedimage import TileSet, Tile
+from semantic_version import Version
 from slicedimage.io import resolve_path_or_url
 
-from starfish.constants import Coordinates, Indices
 from .image import ImageStack
 
 
 class Stack:
+    MIN_SUPPORTED_VERSION = Version("0.0.0")
+    MAX_SUPPORTED_VERSION = Version("1.0.0")
 
     def __init__(self):
         # data organization
@@ -54,9 +54,19 @@ class Stack:
         with self.backend.read_file_handle(name) as fh:
             self.org = json.load(fh)
 
+        self.verify_version(self.org['version'])
         self.image = ImageStack.from_url(self.org['hybridization_images'], self.baseurl)
         for aux_key, aux_data in self.org['auxiliary_images'].items():
             self.auxiliary_images[aux_key] = ImageStack.from_url(aux_data, self.baseurl)
+
+    @classmethod
+    def verify_version(cls, semantic_version_str: str):
+        version = Version(semantic_version_str)
+        if not (Stack.MIN_SUPPORTED_VERSION <= version <= Stack.MAX_SUPPORTED_VERSION):
+            raise ValueError(
+                f"version {version} not supported.  This version of the starfish library only "
+                f"supports formats from {Stack.MIN_SUPPORTED_VERSION} to "
+                f"{Stack.MAX_SUPPORTED_VERSION}")
 
     @classmethod
     def from_experiment_json(cls, json_url: str) -> "Stack":

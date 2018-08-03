@@ -1,11 +1,12 @@
 import argparse
 import json
+from typing import List, Type
 
+from starfish.intensity_table import IntensityTable
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
-from starfish.intensity_table import IntensityTable
-from . import _base
 from . import point_in_poly
+from ._base import TargetAssignmentAlgorithm
 
 
 class TargetAssignment(PipelineComponent):
@@ -13,11 +14,11 @@ class TargetAssignment(PipelineComponent):
     target_assignment_group: argparse.ArgumentParser
 
     @classmethod
-    def implementing_algorithms(cls):
-        return _base.TargetAssignmentAlgorithm.__subclasses__()
+    def implementing_algorithms(cls) -> List[Type[TargetAssignmentAlgorithm]]:
+        return TargetAssignmentAlgorithm.__subclasses__()
 
     @classmethod
-    def add_to_parser(cls, subparsers):
+    def add_to_parser(cls, subparsers) -> None:
         """Adds the target_assignment component to the CLI argument parser."""
         target_assignment_group = subparsers.add_parser("target_assignment")
         target_assignment_group.add_argument(
@@ -36,7 +37,7 @@ class TargetAssignment(PipelineComponent):
         cls.target_assignment_group = target_assignment_group
 
     @classmethod
-    def _cli(cls, args, print_help=False):
+    def _cli(cls, args, print_help=False) -> None:
         """Runs the target_assignment component based on parsed arguments."""
         from starfish import munge
 
@@ -53,7 +54,7 @@ class TargetAssignment(PipelineComponent):
 
         instance = args.target_assignment_algorithm_class(**vars(args))
 
-        result = instance.assign_targets(intensity_table, regions)
+        result = instance.run(intensity_table, regions)
 
         print("Writing | cell_id | spot_id to: {}".format(args.output))
         result.to_json(args.output, orient="records")

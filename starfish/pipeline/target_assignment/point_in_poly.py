@@ -1,41 +1,73 @@
 import numpy as np
-from skimage.measure import points_in_poly
 import pandas as pd
+import regional
+from skimage.measure import points_in_poly
+from tqdm import tqdm
 
 from starfish.constants import Features
+from starfish.intensity_table import IntensityTable
 from ._base import TargetAssignmentAlgorithm
 
 
 class PointInPoly(TargetAssignmentAlgorithm):
-    def __init__(self, verbose=False, **kwargs):
-        self.verbose = verbose
+
+    def __init__(self, **kwargs):
+        """
+        PointInPoly accepts no parameters, but all pipeline components must accept arbitrary kwargs
+        """
 
     @classmethod
-    def add_arguments(cls, parser):
+    def add_arguments(cls, parser) -> None:
         pass
 
     @staticmethod
-    def _assign(cells_region, spots, use_hull=True, verbose=False):
-        res = pd.DataFrame({'spot_id': range(0, spots.shape[0])})
-        res['cell_id'] = None
+    def _assign(
+            cells_region: regional.many, spots: pd.DataFrame, use_hull=True, verbose=False) \
+            -> pd.DataFrame:
 
-        for cell_id in range(cells_region.count):
+        results = pd.DataFrame({'spot_id': range(0, spots.shape[0])})
+        results['cell_id'] = None
+
+        if verbose:
+            cell_iterator = tqdm(range(cells_region.count))
+        else:
+            cell_iterator = range(cells_region.count)
+
+        for cell_id in cell_iterator:
             if use_hull:
-                verts = cells_region[cell_id].hull
+                vertices = cells_region[cell_id].hull
             else:
-                verts = cells_region[cell_id].coordinates
-            verts = np.array(verts)
-            in_poly = points_in_poly(spots, verts)
-            res.loc[res.spot_id[in_poly], 'cell_id'] = cell_id
-            if verbose:
-                cnt = np.sum(in_poly)
-                print(cell_id, cnt)
+                vertices = cells_region[cell_id].coordinates
+            vertices = np.array(vertices)
+            in_poly = points_in_poly(spots, vertices)
+            results.loc[results.spot_id[in_poly], 'cell_id'] = cell_id
 
-        return res
+        return results
 
-    def assign_targets(self, intensity_table, regions):
+    def run(
+            self, intensity_table: IntensityTable, regions: regional.many, verbose: bool=False) \
+            -> pd.DataFrame:
+        """Assign spots with target assignments to cells
 
+        Parameters
+        ----------
+        intensity_table : IntensityTable
+        regions : regional.many
+            # TODO dganguli can you add an explanation? I'll fix during PR.
+        verbose : bool
+            (default False) report on the progress of gene assignment
+
+
+        Returns
+        -------
+        pd.DataFrame :
+            DataFrame mapping of spot ids to cell ids
+            # TODO should this be emitted as an extra column of IntensityTable, instead?
+
+        """
+        # TODO must support filtering on the passes filter column
+        # TODO does this support 3d assignment?
         x = intensity_table.coords[Features.AXIS][Features.X].values
         y = intensity_table.coords[Features.AXIS][Features.Y].values
         points = pd.DataFrame(dict(x=x, y=y))
-        return self._assign(regions, points, use_hull=True, verbose=self.verbose)
+        return self._assign(regions, points, use_hull=True, verbose=verbose)

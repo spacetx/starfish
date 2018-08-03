@@ -31,8 +31,16 @@ class SpotFinder(PipelineComponent):
                 'and channel to produce the blobs_image'
             )
         )
+        spot_finder_group.add_argument(
+            "--reference-image-from-max-projection", default=False, action='store_true',
+            help=(
+                'Construct a reference image by max projecting imaging rounds and channels. Spots '
+                'are found in this image and then measured across all images in the input stack.'
+            )
+        )
         spot_finder_group.set_defaults(starfish_command=SpotFinder._cli)
-        spot_finder_subparsers = spot_finder_group.add_subparsers(dest="spot_finder_algorithm_class")
+        spot_finder_subparsers = spot_finder_group.add_subparsers(
+            dest="spot_finder_algorithm_class")
 
         for algorithm_cls in cls.algorithm_to_class_map().values():
             group_parser = spot_finder_subparsers.add_parser(algorithm_cls.get_algorithm_name())

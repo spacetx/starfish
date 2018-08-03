@@ -1,4 +1,4 @@
-from typing import Union, Tuple
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -119,7 +119,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         attributes['spot_id'] = np.arange(attributes.shape[0])
         return SpotAttributes(attributes)
 
-    def find(self, data_stack: ImageStack, blobs_image: Union[np.ndarray, xr.DataArray]=None) \
+    def find(self, data_stack: ImageStack,
+             blobs_image: Optional[Union[np.ndarray, xr.DataArray]]=None,
+             reference_image_from_max_projection: bool=False) \
             -> IntensityTable:
         """
         Find spots.
@@ -132,6 +134,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             If provided, spots will be found in the blobs image, and intensities will be measured
             across hybs and channels. Otherwise, spots are measured independently for each channel
             and round.
+        reference_image_from_max_projection : bool
+            if True, compute a reference image from the maximum projection of the channels and
+            z-planes
 
         """
         intensity_table = detect_spots(

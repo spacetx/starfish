@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -26,6 +26,8 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             -> None:
         """Multi-dimensional gaussian spot detector
 
+        This method is a wrapper for skimage.feature.blob_log
+
         Parameters
         ----------
         min_sigma : float
@@ -49,10 +51,14 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         Notes
         -----
+        # TODO ambrosejcarr: revisit after changing dtype assumptions of library to float in [0, 1]
         This spot detector is very sensitive to the threshold that is selected, and the threshold
         is defined as an absolute value -- therefore it must be adjusted depending on the datatype
         of the passed image.
 
+        See Also
+        --------
+        http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.blob_log
 
         """
         self.min_sigma = min_sigma
@@ -105,7 +111,10 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         return SpotAttributes(rounded_blobs)
 
-    def find(self, data_stack: ImageStack, blobs_image: Union[np.ndarray, xr.DataArray]) \
+    def find(
+            self, data_stack: ImageStack,
+            blobs_image: Optional[Union[np.ndarray, xr.DataArray]]=None,
+            reference_image_from_max_projection: bool=False) \
             -> IntensityTable:
         """find spots in an ImageStack
 
@@ -114,6 +123,9 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         data_stack : ImageStack
             stack containing spots to find
         blobs_image : Union[np.ndarray, xr.DataArray]
+        reference_image_from_max_projection : bool
+            if True, compute a reference image from the maximum projection of the channels and
+            z-planes
 
         Returns
         -------
@@ -126,6 +138,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             data_stack=data_stack,
             spot_finding_method=self.image_to_spots,
             reference_image=blobs_image,
+            reference_image_from_max_projection=reference_image_from_max_projection,
             measurement_function=self.measurement_function
         )
 

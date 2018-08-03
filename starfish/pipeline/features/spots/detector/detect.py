@@ -154,7 +154,7 @@ def detect_spots(
         spot_finding_method: Callable[..., SpotAttributes],
         spot_finding_kwargs: Dict=None,
         reference_image: Union[xr.DataArray, np.ndarray]=None,
-        reference_from_max_projection: bool=False,
+        reference_image_from_max_projection: bool=False,
         measurement_function: Callable[[Sequence], Number]=np.max,
 ) -> IntensityTable:
     """Apply a spot_finding_method to a ImageStack
@@ -171,7 +171,7 @@ def detect_spots(
         (Optional) a reference image. If provided, spots will be found in this image, and then
         the locations that correspond to these spots will be measured across each channel and hyb,
         filling in the values in the IntensityTable
-    reference_from_max_projection : Tuple[Indices]
+    reference_image_from_max_projection : Tuple[Indices]
         (Optional) if True, create a reference image by max-projecting the channels and imaging
         rounds found in data_image.
     measurement_function : Callable
@@ -196,12 +196,12 @@ def detect_spots(
     if spot_finding_kwargs is None:
         spot_finding_kwargs = {}
 
-    if reference_image is not None and reference_from_max_projection:
+    if reference_image is not None and reference_image_from_max_projection:
         raise ValueError(
-            'Please pass only one of reference_image and reference_from_max_projection'
+            'Please pass only one of reference_image and reference_image_from_max_projection'
         )
 
-    if reference_from_max_projection:
+    if reference_image_from_max_projection:
         reference_image = data_stack.max_proj(Indices.CH, Indices.ROUND)
 
     if reference_image is not None:

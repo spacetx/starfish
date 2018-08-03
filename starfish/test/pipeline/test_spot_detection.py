@@ -114,7 +114,7 @@ def test_spot_detection_with_reference_image_from_max_projection(
     intensity_table = detect_spots(
         data_stack=data_stack,
         spot_finding_method=spot_detector.image_to_spots,
-        reference_from_max_projection=True,
+        reference_image_from_max_projection=True,
         measurement_function=np.max
     )
     assert intensity_table.shape == (2, 2, 2), "wrong number of spots detected"

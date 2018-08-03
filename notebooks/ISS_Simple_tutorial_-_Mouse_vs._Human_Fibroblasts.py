@@ -59,7 +59,7 @@ image(s.auxiliary_images['dots'], size=10)
 from starfish.pipeline.registration import Registration
 
 registration = Registration.fourier_shift(upsampling=1000)
-registration.register(s)
+registration.run(s)
 
 tile(s.image.squeeze(), size=10);
 # EPY: END code

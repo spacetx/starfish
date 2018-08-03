@@ -119,7 +119,7 @@ for img in s.auxiliary_images.values():
 from starfish.pipeline.registration import Registration
 
 registration = Registration.FourierShiftRegistration(upsampling=1000, reference_stack=s.auxiliary_images['dots'], verbose=True)
-registration.register(s.image)
+registration.run(s.image)
 # EPY: END code
 
 # EPY: START markdown

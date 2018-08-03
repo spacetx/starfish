@@ -1,4 +1,8 @@
-from typing import Union
+from typing import Tuple, Union
+
+import numpy as np
+from scipy.ndimage import fourier_shift
+from skimage.feature import register_translation
 
 from starfish.constants import Indices
 from starfish.image import ImageStack
@@ -24,27 +28,27 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
             self.reference_stack = ImageStack.from_path_or_url(reference_stack)
 
     @classmethod
-    def add_arguments(cls, group_parser):
+    def add_arguments(cls, group_parser) -> None:
         group_parser.add_argument("--upsampling", default=1, type=int, help="Amount of up-sampling")
         group_parser.add_argument(
             "--reference-stack", type=FsExistsType(), required=True,
             help="The image stack to align the input image stack to.")
 
-    def register(self, image: ImageStack):
+    def run(self, image: ImageStack):
         # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in registration?
         mp = image.max_proj(Indices.CH, Indices.Z)
         reference_image = self.reference_stack.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 
-        for h in range(image.num_rounds):
+        for r in range(image.num_rounds):
             # compute shift between maximum projection (across channels) and dots, for each round
             # TODO: make the max projection array ignorant of axes ordering.
-            shift, error = compute_shift(mp[h, :, :], reference_image, self.upsampling)
-            print("For round: {}, Shift: {}, Error: {}".format(h, shift, error))
+            shift, error = compute_shift(mp[r, :, :], reference_image, self.upsampling)
+            print(f"For round: {r}, Shift: {shift}, Error: {error}")
 
             for c in range(image.num_chs):
                 for z in range(image.num_zlayers):
                     # apply shift to all zlayers, channels, and imaging rounds
-                    indices = {Indices.ROUND: h, Indices.CH: c, Indices.Z: z}
+                    indices = {Indices.ROUND: r, Indices.CH: c, Indices.Z: z}
                     data, axes = image.get_slice(indices=indices)
                     assert len(axes) == 0
                     result = shift_im(data, shift)
@@ -53,17 +57,32 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
         return image
 
 
-def compute_shift(im, ref, upsample_factor=1):
-    from skimage.feature import register_translation
+def compute_shift(im: np.ndarray, ref: np.ndarray, upsample_factor: int=1) -> \
+        Tuple[np.ndarray, float]:
+    """calculate subpixel image translation through cross-correlation
 
-    shift, error, diffphase = register_translation(im, ref, upsample_factor)
+    Parameters
+    ----------
+    im : np.ndarray
+        reference image
+    ref : np.ndarray
+        target image
+    upsample_factor : int
+        images are registered to within 1 / upsample_factor of a pixel
+
+    Returns
+    -------
+    np.ndarray :
+        shift vector required to register ref
+    float :
+        translation invariant normalized RMS error
+    """
+    shift, error, _ = register_translation(im, ref, upsample_factor)
     return shift, error
 
 
-def shift_im(im, shift):
-    import numpy as np
-    from scipy.ndimage import fourier_shift
-
-    fim_shift = fourier_shift(np.fft.fftn(im), map(lambda x: -x, shift))
+def shift_im(im: np.ndarray, shift: np.ndarray) -> np.ndarray:
+    """register image according to the provided shift values"""
+    fim_shift = fourier_shift(np.fft.fftn(im), shift * -1)
     im_shift = np.fft.ifftn(fim_shift)
     return im_shift.real

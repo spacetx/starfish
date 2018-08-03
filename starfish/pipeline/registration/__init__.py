@@ -18,7 +18,7 @@ class Registration(PipelineComponent):
     @classmethod
     def add_to_parser(cls, subparsers):
         """Adds the registration component to the CLI argument parser."""
-        register_group = subparsers.add_parser("register")
+        register_group = subparsers.add_parser("registration")
         register_group.add_argument("-i", "--input", type=FsExistsType(), required=True)
         register_group.add_argument("-o", "--output", required=True)
         register_group.set_defaults(starfish_command=Registration._cli)
@@ -41,6 +41,6 @@ class Registration(PipelineComponent):
         print('Registering ...')
         stack = ImageStack.from_path_or_url(args.input)
         instance = args.registration_algorithm_class(**vars(args))
-        instance.register(stack)
+        instance.run(stack)
 
         stack.write(args.output)

@@ -27,6 +27,9 @@ class WhiteTophat(FilterAlgorithmBase):
         ----------
         masking_radius : int
             radius of the morphological masking structure in pixels
+        is_volume : int
+            If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
+            independently.
 
         """
         self.masking_radius = masking_radius

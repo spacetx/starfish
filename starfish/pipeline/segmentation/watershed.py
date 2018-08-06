@@ -1,11 +1,13 @@
 import numpy as np
 import scipy.ndimage.measurements as spm
+import regional
 from scipy.ndimage import distance_transform_edt
 from showit import image
 from skimage.feature import peak_local_max
 from skimage.morphology import watershed
 
 from starfish.constants import Indices
+from starfish.image import ImageStack
 from starfish.munge import relabel
 from starfish.pipeline.filter.util import bin_thresh, bin_open
 from starfish.stats import label_to_regions
@@ -16,20 +18,18 @@ class Watershed(SegmentationAlgorithmBase):
     """
     Implements watershed segmentation.  TODO: (dganguli) FILL IN DETAILS HERE PLS.
     """
-    def __init__(self, dapi_threshold, input_threshold, min_distance, **kwargs):
+    def __init__(self, dapi_threshold, input_threshold, min_distance, **kwargs) -> None:
         self.dapi_threshold = dapi_threshold
         self.input_threshold = input_threshold
         self.min_distance = min_distance
 
     @classmethod
-    def add_arguments(cls, group_parser):
+    def add_arguments(cls, group_parser) -> None:
         group_parser.add_argument("--dapi-threshold", default=.16, type=float, help="DAPI threshold")
         group_parser.add_argument("--input-threshold", default=.22, type=float, help="Input threshold")
         group_parser.add_argument("--min-distance", default=57, type=int, help="Minimum distance between cells")
 
-    def segment(self, hybridization_stack, nuclei_stack):
-        import numpy as np
-        from starfish.stats import label_to_regions
+    def run(self, hybridization_stack: ImageStack, nuclei_stack: ImageStack) -> regional.many:
 
         # create a 'stain' for segmentation
         stain = np.mean(hybridization_stack.max_proj(Indices.CH, Indices.Z), axis=0)
@@ -50,8 +50,9 @@ class Watershed(SegmentationAlgorithmBase):
         return regions
 
 
+# TODO dganguli: fill in these types & document
 class _WatershedSegmenter:
-    def __init__(self, dapi_img, stain_img):
+    def __init__(self, dapi_img, stain_img) -> None:
         self.dapi = dapi_img / dapi_img.max()
         self.stain = stain_img / stain_img.max()
 

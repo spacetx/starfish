@@ -137,7 +137,7 @@ disk_size_mask = None
 min_dist = 57
 
 seg = WatershedSegmenter(s.auxiliary_images['dapi'], s.auxiliary_images['stain'])
-cells_labels = seg.segment(dapi_thresh, stain_thresh, size_lim, disk_size_markers, disk_size_mask, min_dist)
+cells_labels = seg.run(dapi_thresh, stain_thresh, size_lim, disk_size_markers, disk_size_mask, min_dist)
 seg.show()
 # EPY: END code
 

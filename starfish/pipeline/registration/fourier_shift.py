@@ -34,7 +34,7 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
             "--reference-stack", type=FsExistsType(), required=True,
             help="The image stack to align the input image stack to.")
 
-    def run(self, image: ImageStack):
+    def run(self, image: ImageStack) -> ImageStack:
         # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in registration?
         mp = image.max_proj(Indices.CH, Indices.Z)
         reference_image = self.reference_stack.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
@@ -57,8 +57,9 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
         return image
 
 
-def compute_shift(im: np.ndarray, ref: np.ndarray, upsample_factor: int=1) -> \
-        Tuple[np.ndarray, float]:
+def compute_shift(
+        im: np.ndarray, ref: np.ndarray, upsample_factor: int=1
+) -> Tuple[np.ndarray, float]:
     """calculate subpixel image translation through cross-correlation
 
     Parameters

@@ -11,7 +11,7 @@ from starfish.image import ImageStack
 from starfish.types import Number
 
 
-def stack_describe(stack: ImageStack) -> List[Dict[str, Number]]:
+def stack_describe(stack: np.ndarray) -> List[Dict[str, Number]]:
     num_rounds = stack.shape[0]
     stats = [im_describe(stack[k, :]) for k in range(num_rounds)]
     return stats
@@ -58,7 +58,7 @@ def measure(
 
 
 def measure_stack(
-        stack: ImageStack, labels: Sequence[Number], num_objs: int, measurement_type='mean'
+        stack: np.ndarray, labels: Sequence[Number], num_objs: int, measurement_type='mean'
 ) -> List[List[float]]:
     from starfish.munge import stack_to_list
     ims = stack_to_list(stack)

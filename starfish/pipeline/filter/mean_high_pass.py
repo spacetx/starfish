@@ -88,7 +88,7 @@ class MeanHighPass(FilterAlgorithmBase):
 
         return filtered
 
-    def filter(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
+    def run(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters

@@ -71,7 +71,7 @@ s = Stack.from_experiment_json(experiment_json)
 # EPY: START code
 from starfish.pipeline.filter import Filter
 s_clip = Filter.Clip(p_min=10, p_max=100, verbose=True)
-s_clip.filter(s.image)
+s_clip.run(s.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -94,7 +94,7 @@ s.image.show_stack({Indices.CH.value: 0});
 
 # EPY: START code
 s_bandpass = Filter.Bandpass(lshort=0.5, llong=7, threshold=None, truncate=4, verbose=True)
-s_bandpass.filter(s.image)
+s_bandpass.run(s.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -105,13 +105,13 @@ s_bandpass.filter(s.image)
 # I wasn't sure if this clipping was supposed to be by volume or tile. I've done tile here, but it can be easily
 # switched to volume. 
 s_clip = Filter.Clip(p_min=10, p_max=100, is_volume=False, verbose=True)
-s_clip.filter(s.image)
+s_clip.run(s.image)
 # EPY: END code
 
 # EPY: START code
 sigma=(1, 0, 0)  # filter only in z, do nothing in x, y
 glp = Filter.GaussianLowPass(sigma=sigma, is_volume=True, verbose=True)
-glp.filter(s.image)
+glp.run(s.image)
 # EPY: END code
 
 # EPY: START markdown

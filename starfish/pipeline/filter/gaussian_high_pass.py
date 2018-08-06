@@ -8,7 +8,7 @@ from skimage import img_as_uint
 from starfish.errors import DataFormatWarning
 from starfish.image import ImageStack
 from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
-from starfish.typing import Number
+from starfish.types import Number
 from ._base import FilterAlgorithmBase
 
 
@@ -16,8 +16,8 @@ class GaussianHighPass(FilterAlgorithmBase):
 
     def __init__(
             self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False, verbose: bool=False,
-            **kwargs) \
-            -> None:
+            **kwargs
+    ) -> None:
         """Gaussian high pass filter
 
         Parameters
@@ -68,8 +68,8 @@ class GaussianHighPass(FilterAlgorithmBase):
 
         """
         if image.dtype != np.uint16:
-            DataFormatWarning('gaussian filters currently only support uint16 images. Image data '
-                              'will be converted.')
+            DataFormatWarning("gaussian filters currently only support uint16 images. Image data "
+                              "will be converted.")
             image = img_as_uint(image)
 
         blurred: np.ndarray = GaussianLowPass.low_pass(image, sigma)
@@ -81,8 +81,8 @@ class GaussianHighPass(FilterAlgorithmBase):
         return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=True) \
-            -> Optional[ImageStack]:
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=True
+    ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters

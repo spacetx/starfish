@@ -8,7 +8,7 @@ from skimage import restoration
 from starfish.image import ImageStack
 from ._base import FilterAlgorithmBase
 from .util import gaussian_kernel
-from starfish.typing import Number
+from starfish.types import Number
 
 
 class DeconvolvePSF(FilterAlgorithmBase):
@@ -33,8 +33,10 @@ class DeconvolvePSF(FilterAlgorithmBase):
         self.sigma = sigma
         self.clip = clip
         self.kernel_size: int = int(2 * np.ceil(2 * sigma) + 1)
-        self.psf: np.ndarray = gaussian_kernel(shape=(self.kernel_size, self.kernel_size),
-                                               sigma=sigma)
+        self.psf: np.ndarray = gaussian_kernel(
+            shape=(self.kernel_size, self.kernel_size),
+            sigma=sigma
+        )
 
     @classmethod
     def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:

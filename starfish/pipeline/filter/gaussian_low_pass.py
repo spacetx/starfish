@@ -8,7 +8,7 @@ from skimage.filters import gaussian
 
 from starfish.errors import DataFormatWarning
 from starfish.image import ImageStack
-from starfish.typing import Number
+from starfish.types import Number
 from ._base import FilterAlgorithmBase
 
 
@@ -71,12 +71,12 @@ class GaussianLowPass(FilterAlgorithmBase):
         """
         if image.dtype != np.uint16:
             DataFormatWarning(
-                'gaussian filters only support uint16 images. Image data will be converted')
+                "gaussian filters only support uint16 images. Image data will be converted")
             image = img_as_uint(image)
 
         blurred = gaussian(
-            image, sigma=sigma, output=None, cval=0, multichannel=True, preserve_range=True,
-            truncate=4.0
+            image,
+            sigma=sigma, output=None, cval=0, multichannel=True, preserve_range=True, truncate=4.0
         )
         blurred = blurred.clip(0).astype(np.uint16)
 

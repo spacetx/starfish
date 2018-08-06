@@ -9,7 +9,7 @@ from skimage import img_as_uint
 from starfish.errors import DataFormatWarning
 from starfish.image import ImageStack
 from ._base import FilterAlgorithmBase
-from starfish.typing import Number
+from starfish.types import Number
 
 
 class MeanHighPass(FilterAlgorithmBase):
@@ -75,7 +75,7 @@ class MeanHighPass(FilterAlgorithmBase):
         """
         if image.dtype != np.uint16:
             DataFormatWarning(
-                'Mean filters currently only support uint16 images. Image data will be converted.')
+                "Mean filters currently only support uint16 images. Image data will be converted.")
             image = img_as_uint(image)
 
         blurred: np.ndarray = uniform_filter(image, size)
@@ -87,8 +87,8 @@ class MeanHighPass(FilterAlgorithmBase):
         return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False) \
-            -> Optional[ImageStack]:
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=False
+    ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters

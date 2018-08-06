@@ -43,15 +43,14 @@ class Clip(FilterAlgorithmBase):
         image : np.ndarray
             image to be clipped
         p_min : int
-          values below this percentile are set to the value of this percentile (default 0)
-        p_max : int (default 100)
-          values above this percentile are set to the value of this percentile (default 100)
+          values below this percentile are set to the value of this percentile
+        p_max : int
+          values above this percentile are set to the value of this percentile
 
         Notes
         -----
         - Wrapper for np.clip
-        - No shifting or transformation to adjust dynamic range is done after
-          clipping
+        - No shifting or transformation to adjust dynamic range is done after clipping
 
         Returns
         -------
@@ -68,8 +67,8 @@ class Clip(FilterAlgorithmBase):
         return image.astype(dtype)
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False) \
-            -> Optional[ImageStack]:
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=False
+    ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters

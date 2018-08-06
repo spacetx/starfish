@@ -5,3 +5,5 @@ viz/node_modules
 starfish.egg-info/
 *.ipynb_checkpoints
 .coverage
+.mypy_cache/
+.pytest_cache/

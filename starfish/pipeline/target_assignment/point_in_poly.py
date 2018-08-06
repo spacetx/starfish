@@ -9,9 +9,9 @@ from starfish.intensity_table import IntensityTable
 from ._base import TargetAssignmentAlgorithm
 
 
-class PointInPoly(TargetAssignmentAlgorithm):
+class PointInPoly2D(TargetAssignmentAlgorithm):
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         """
         PointInPoly accepts no parameters, but all pipeline components must accept arbitrary kwargs
         """
@@ -22,8 +22,9 @@ class PointInPoly(TargetAssignmentAlgorithm):
 
     @staticmethod
     def _assign(
-            cells_region: regional.many, spots: pd.DataFrame, use_hull=True, verbose=False) \
-            -> pd.DataFrame:
+            cells_region: regional.many, spots: pd.DataFrame, use_hull: bool=True, verbose:
+            bool=False
+    ) -> pd.DataFrame:
 
         results = pd.DataFrame({'spot_id': range(0, spots.shape[0])})
         results['cell_id'] = None
@@ -45,8 +46,8 @@ class PointInPoly(TargetAssignmentAlgorithm):
         return results
 
     def run(
-            self, intensity_table: IntensityTable, regions: regional.many, verbose: bool=False) \
-            -> pd.DataFrame:
+            self, intensity_table: IntensityTable, regions: regional.many, verbose: bool=False
+    ) -> pd.DataFrame:
         """Assign spots with target assignments to cells
 
         Parameters
@@ -55,8 +56,7 @@ class PointInPoly(TargetAssignmentAlgorithm):
         regions : regional.many
             # TODO dganguli can you add an explanation? I'll fix during PR.
         verbose : bool
-            (default False) report on the progress of gene assignment
-
+            If True, report on the progress of gene assignment (default False)
 
         Returns
         -------

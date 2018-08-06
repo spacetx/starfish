@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.ndimage.measurements as spm
-from regional import many
+import regional
 from scipy.ndimage import distance_transform_edt
 from showit import image
 from skimage.feature import peak_local_max
@@ -29,7 +29,7 @@ class Watershed(SegmentationAlgorithmBase):
         group_parser.add_argument("--input-threshold", default=.22, type=float, help="Input threshold")
         group_parser.add_argument("--min-distance", default=57, type=int, help="Minimum distance between cells")
 
-    def run(self, hybridization_stack: ImageStack, nuclei_stack: ImageStack) -> many:
+    def run(self, hybridization_stack: ImageStack, nuclei_stack: ImageStack) -> regional.many:
 
         # create a 'stain' for segmentation
         stain = np.mean(hybridization_stack.max_proj(Indices.CH, Indices.Z), axis=0)

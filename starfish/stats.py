@@ -4,21 +4,20 @@ from typing import Dict, List, Sequence
 import numpy as np
 import pandas as pd
 import scipy.ndimage.measurements as spm
-from regional import many as Many
-from regional import one as One
+import regional
 from scipy.sparse import coo_matrix
 
 from starfish.image import ImageStack
 from starfish.types import Number
 
 
-def stack_describe(stack) -> List[Dict[str, Number]]:
+def stack_describe(stack: ImageStack) -> List[Dict[str, Number]]:
     num_rounds = stack.shape[0]
     stats = [im_describe(stack[k, :]) for k in range(num_rounds)]
     return stats
 
 
-def im_describe(im) -> Dict[str, Number]:
+def im_describe(im: np.ndarray) -> Dict[str, Number]:
     shape = im.shape
     flat_dims = reduce(lambda x, y: x * y, shape)
     flat_im = np.reshape(im, flat_dims)
@@ -26,7 +25,7 @@ def im_describe(im) -> Dict[str, Number]:
     return stats.to_dict()
 
 
-def label_to_regions(labels) -> Many:
+def label_to_regions(labels) -> regional.many:
     label_mat_coo = coo_matrix(labels)
 
     def region_for(label_mat_coo, label):
@@ -35,18 +34,18 @@ def label_to_regions(labels) -> Many:
         x = label_mat_coo.row[ind]
         y = label_mat_coo.col[ind]
 
-        re = One(list(zip(x, y)))
+        re = regional.one(list(zip(x, y)))
         return re
 
     unique_labels = sorted(set(label_mat_coo.data))
     regions = [region_for(label_mat_coo, label) for label in unique_labels]
 
-    return Many(regions)
+    return regional.many(regions)
 
 
 def measure(
-        im: np.ndarray, labels: Sequence[Number], num_objs: int, measurement_type: str='mean') \
-        -> List[float]:
+        im: np.ndarray, labels: Sequence[Number], num_objs: int, measurement_type: str='mean'
+) -> List[float]:
     if measurement_type == 'mean':
         res = spm.mean(im, labels, range(1, num_objs))
     elif measurement_type == 'max':
@@ -59,8 +58,8 @@ def measure(
 
 
 def measure_stack(
-        stack: ImageStack, labels: Sequence[Number], num_objs: int, measurement_type='mean') -> \
-        List[List[float]]:
+        stack: ImageStack, labels: Sequence[Number], num_objs: int, measurement_type='mean'
+) -> List[List[float]]:
     from starfish.munge import stack_to_list
     ims = stack_to_list(stack)
     res = [measure(im, labels, num_objs, measurement_type) for im in ims]

@@ -50,7 +50,7 @@ class TestWithIssData(unittest.TestCase):
             "--d", "1",
         ],
         [
-            "starfish", "register",
+            "starfish", "registration",
             "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
                 [tempdir, "formatted", "experiment.json"],
                 "$['hybridization_images']",

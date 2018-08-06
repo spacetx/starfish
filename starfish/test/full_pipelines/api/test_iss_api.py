@@ -22,7 +22,7 @@ def test_iss_pipeline():
     wth.filter(dots)
 
     fsr = FourierShiftRegistration(upsampling=1000, reference_stack=dots)
-    fsr.register(image)
+    fsr.run(image)
 
     min_sigma = 1.5
     max_sigma = 5

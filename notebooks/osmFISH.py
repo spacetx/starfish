@@ -19,7 +19,7 @@ import os
 # EPY: END markdown
 
 # EPY: START code
-s = Stack.from_experiment_json('https://dmf0bdeheu4zf.cloudfront.net/20180722/osmFISH/fov_001/experiment.json')
+s = Stack.from_experiment_json('https://dmf0bdeheu4zf.cloudfront.net/20180802/osmFISH/fov_001/experiment.json')
 # EPY: END code
 
 # EPY: START markdown
@@ -27,5 +27,5 @@ s = Stack.from_experiment_json('https://dmf0bdeheu4zf.cloudfront.net/20180722/os
 # EPY: END markdown
 
 # EPY: START code
-s.image.show_stack({Indices.CH: 0});
+s.image.show_stack({Indices.CH: 0})
 # EPY: END code

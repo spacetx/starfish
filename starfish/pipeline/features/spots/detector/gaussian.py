@@ -13,7 +13,7 @@ from starfish.pipeline.features.spots.detector.detect import (
     measure_spot_intensity,
     detect_spots,
 )
-from starfish.typing import Number
+from starfish.types import Number
 from starfish.util.argparse import FsExistsType
 from ._base import SpotFinderAlgorithmBase
 

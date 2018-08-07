@@ -11,7 +11,7 @@ from starfish.image import ImageStack
 from starfish.intensity_table import IntensityTable
 from starfish.munge import dataframe_to_multiindex
 from starfish.pipeline.features.spot_attributes import SpotAttributes
-from starfish.typing import Number
+from starfish.types import Number
 
 
 def measure_spot_intensity(
@@ -27,7 +27,7 @@ def measure_spot_intensity(
         3-d volume in which to measure intensities
     spots : pd.DataFrame
         SpotAttributes table containing coordinates and radii of spots
-    measurement_function : Callable[[Sequence], Number]) \
+    measurement_function : Callable[[Sequence], Number])
         Function to apply over the spot volumes to identify the intensity (e.g. max, mean, ...)
 
     Returns
@@ -70,7 +70,7 @@ def measure_spot_intensities(
         ImageStack containing multiple volumes for which spots' intensities must be calculated
     spot_attributes : pd.Dataframe
         Locations and radii of spots
-    measurement_function : Callable[[Sequence], Number]) \
+    measurement_function : Callable[[Sequence], Number])
         Function to apply over the spot volumes to identify the intensity (e.g. max, mean, ...)
 
     Returns

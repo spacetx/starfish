@@ -7,7 +7,7 @@ from starfish.image import ImageStack
 from starfish.intensity_table import IntensityTable
 from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.pipeline.features.spot_attributes import SpotAttributes
-from starfish.typing import Number
+from starfish.types import Number
 
 
 class SpotFinderAlgorithmBase(AlgorithmBase):

@@ -1,4 +1,3 @@
-from numbers import Number
 from typing import Tuple, Union
 
 import numpy as np
@@ -7,6 +6,7 @@ import pytest
 from starfish.io import Stack
 from starfish.test.dataset_fixtures import merfish_stack
 from starfish.pipeline.filter import gaussian_high_pass
+from starfish.types import Number
 
 
 @pytest.mark.parametrize('sigma', (1, (1, 1)))

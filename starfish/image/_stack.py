@@ -8,6 +8,7 @@ from typing import Any, Callable, Iterable, Iterator, List, Mapping, MutableSequ
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import scoreatpercentile
 from skimage import exposure
@@ -76,16 +77,35 @@ class ImageStack:
             elif tile.tile_shape is not None and self._tile_shape != tile.tile_shape:
                 raise ValueError("Starfish does not support tiles that are not identical in shape")
 
-        shape = [
-            self._get_dimension_size(axis_name)
-            for axis_name, axis_data in ImageStack.AXES_DATA.items()
-            for ix in range(ImageStack.N_AXES)
-            if ix == axis_data.order
-        ]
+        shape: MutableSequence[int] = []
+        dims: MutableSequence[str] = []
+        for ix in range(ImageStack.N_AXES):
+            size_for_axis: Optional[int] = None
+            dim_for_axis: Optional[Indices] = None
+
+            for axis_name, axis_data in ImageStack.AXES_DATA.items():
+                if ix == axis_data.order:
+                    size_for_axis = self._get_dimension_size(axis_name)
+                    dim_for_axis = axis_name
+
+            if size_for_axis is None or dim_for_axis is None:
+                raise ValueError(
+                    f"Could not find entry for the {ix}th axis in ImageStack.AXES_DATA")
+
+            shape.append(size_for_axis)
+            dims.append(dim_for_axis.value)
+
         shape.extend(self._tile_shape)
+        dims.extend([Coordinates.Y.value, Coordinates.X.value])
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
-        self._data = np.zeros(shape=shape, dtype=np.dtype(f"{kind}{max_size}"))
+        self._data = xr.DataArray(
+            np.zeros(
+                shape=shape,
+                dtype=np.dtype(f"{kind}{max_size}"),
+            ),
+            dims=dims,
+        )
 
         # iterate through the tiles and set the data.
         for tile in self._image_partition.tiles():
@@ -151,17 +171,15 @@ class ImageStack:
 
     @property
     def numpy_array(self):
-        """Retrieves a view of the image data as a numpy array."""
-        result = self._data.view()
-        result.setflags(write=False)
+        """Retrieves the image data as a numpy array."""
+        result = self._data.values
         return result
 
     @numpy_array.setter
     def numpy_array(self, data):
-        """Sets the image's data from a numpy array.  The numpy array is advised to be immutable afterwards."""
-        self._data = data.view()
+        """Sets the image's data from a numpy array."""
+        self._data.values = data.view()
         self._data_needs_writeback = True
-        data.setflags(write=False)
 
     def get_slice(
             self,
@@ -184,8 +202,7 @@ class ImageStack:
             Result: a 4-dimensional numpy array with shape (3, 2, 20, 10) and the remaining axes [H, C].
         """
         slice_list, axes = self._build_slice_list(indices)
-        result = self._data[slice_list]
-        result.setflags(write=False)
+        result = self._data.values[slice_list]
         return result, axes
 
     def set_slice(
@@ -236,7 +253,7 @@ class ImageStack:
             raise ValueError("source shape {} mismatches destination shape {}".format(
                 data.shape, self._data[slice_list].shape))
 
-        self._data[slice_list] = data
+        self._data.values[slice_list] = data
         self._data_needs_writeback = True
 
     # TODO ambrosejcarr: update to use IntensityTable instead of SpotAttributes
@@ -736,19 +753,7 @@ class ImageStack:
             max projection
 
         """
-        axes = list()
-
-        # preserve data's type
-        dtype = self.numpy_array.dtype
-
-        for dim in dims:
-            try:
-                axes.append(ImageStack.AXES_DATA[dim].order)
-            except KeyError:
-                raise ValueError(
-                    "Dimension: {} not supported. Expecting one of: {}".format(dim, ImageStack.AXES_DATA.keys()))
-
-        max_projection = np.max(self._data, axis=tuple(axes)).astype(dtype)
+        max_projection = self._data.max([dim.value for dim in dims]).values
         return max_projection
 
     @staticmethod

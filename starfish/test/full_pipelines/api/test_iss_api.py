@@ -17,7 +17,7 @@ def test_iss_pipeline():
     dots_data = image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
     dots = ImageStack.from_numpy_array(dots_data.reshape((1, 1, 1, *dots_data.shape)))
 
-    wth = WhiteTophat(disk_size=15)
+    wth = WhiteTophat(masking_radius=15)
     wth.run(image)
     wth.run(dots)
 

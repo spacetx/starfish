@@ -68,7 +68,7 @@ class TestWithIssData(unittest.TestCase):
             "--input", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered", "hybridization.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "hybridization.json"),
             "WhiteTophat",
-            "--disk-size", "15",
+            "--masking-radius", "15",
         ],
         [
             "starfish", "filter",
@@ -78,7 +78,7 @@ class TestWithIssData(unittest.TestCase):
             ),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "nuclei.json"),
             "WhiteTophat",
-            "--disk-size", "15",
+            "--masking-radius", "15",
         ],
         [
             "starfish", "filter",
@@ -88,7 +88,7 @@ class TestWithIssData(unittest.TestCase):
             ),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "dots.json"),
             "WhiteTophat",
-            "--disk-size", "15",
+            "--masking-radius", "15",
         ],
         [
             "starfish", "detect_spots",

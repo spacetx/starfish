@@ -1,17 +1,21 @@
-from typing import Union
+from typing import Callable, Sequence, Union
 
-import xarray as xr
 import numpy as np
+import xarray as xr
 
 from starfish.image import ImageStack
+from starfish.intensity_table import IntensityTable
 from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.pipeline.features.spot_attributes import SpotAttributes
-from starfish.intensity_table import IntensityTable
+from starfish.typing import Number
 
 
 class SpotFinderAlgorithmBase(AlgorithmBase):
-    def find(self, hybridization_image: ImageStack, blobs_image: Union[np.ndarray, xr.DataArray]) \
-            -> IntensityTable:
+    def find(
+            self,
+            hybridization_image: ImageStack,
+            blobs_image: Union[np.ndarray, xr.DataArray]
+    ) -> IntensityTable:
         """Finds spots in an ImageStack"""
         raise NotImplementedError()
 
@@ -20,7 +24,7 @@ class SpotFinderAlgorithmBase(AlgorithmBase):
         raise NotImplementedError()
 
     @staticmethod
-    def _get_measurement_function(measurement_type: str):
+    def _get_measurement_function(measurement_type: str) -> Callable[[Sequence], Number]:
         try:
             measurement_function = getattr(np, measurement_type)
         except AttributeError:

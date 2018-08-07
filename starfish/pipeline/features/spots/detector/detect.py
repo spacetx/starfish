@@ -17,8 +17,8 @@ from starfish.typing import Number
 def measure_spot_intensity(
         image: Union[np.ndarray, xr.DataArray],
         spots: pd.DataFrame,
-        measurement_function: Callable[[Sequence], Number]) \
-        -> pd.Series:
+        measurement_function: Callable[[Sequence], Number]
+) -> pd.Series:
     """measure the intensity of each spot in spots in the corresponding image
 
     Parameters
@@ -60,8 +60,8 @@ def measure_spot_intensity(
 def measure_spot_intensities(
         data_image: ImageStack,
         spot_attributes: pd.DataFrame,
-        measurement_function: Callable[[Sequence], Number], ) \
-        -> IntensityTable:
+        measurement_function: Callable[[Sequence], Number]
+) -> IntensityTable:
     """given spots found from a reference image, find those spots across a data_image
 
     Parameters
@@ -106,8 +106,8 @@ def measure_spot_intensities(
 
 
 def concatenate_spot_attributes_to_intensities(
-        spot_attributes: Sequence[Tuple[SpotAttributes, Dict[Indices, int]]]) \
-        -> IntensityTable:
+        spot_attributes: Sequence[Tuple[SpotAttributes, Dict[Indices, int]]]
+) -> IntensityTable:
     """
     Merge multiple spot attributes frames into a single IntensityTable without merging across
     channels and imaging rounds
@@ -163,7 +163,7 @@ def detect_spots(
     ----------
     data_stack : ImageStack
         The ImageStack containing spots
-    spot_finding_method : Callable[[Any], IntensityTable]
+    spot_finding_method : Callable[..., IntensityTable]
         The method to identify spots
     spot_finding_kwargs : Dict
         additional keyword arguments to pass to spot_finding_method
@@ -174,7 +174,7 @@ def detect_spots(
     reference_image_from_max_projection : Tuple[Indices]
         (Optional) if True, create a reference image by max-projecting the channels and imaging
         rounds found in data_image.
-    measurement_function : Callable
+    measurement_function : Callable[[Sequence], Number]
         the function to apply over the spot area to extract the intensity value (default 'np.max')
 
     Notes

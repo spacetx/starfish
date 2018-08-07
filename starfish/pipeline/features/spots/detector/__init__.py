@@ -65,5 +65,9 @@ class SpotFinder(PipelineComponent):
         else:
             blobs_image = None
         instance = args.spot_finder_algorithm_class(**vars(args))
-        intensities = instance.find(image_stack, blobs_image=blobs_image)
+        intensities = instance.find(
+            image_stack,
+            blobs_image=blobs_image,
+            reference_image_from_max_projection=args.reference_image_from_max_projection
+        )
         intensities.save(os.path.join(args.output, 'spots.nc'))

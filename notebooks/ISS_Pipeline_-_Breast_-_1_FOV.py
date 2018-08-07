@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 #
-# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.4"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
+# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
 # ## Reproduce In-situ Sequencing results with Starfish
@@ -29,7 +29,6 @@ from starfish.codebook import Codebook
 s = Stack()
 s.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/ISS/fov_001/experiment.json')
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
-tile(s.image.squeeze());
 # EPY: END code
 
 # EPY: START markdown
@@ -145,7 +144,6 @@ p = SpotFinder.GaussianSpotDetector(
     max_sigma=max_sigma,
     num_sigma=num_sigma,
     threshold=threshold,
-    blobs_stack=s.auxiliary_images['dots'],
     measurement_type='mean',
 )
 
@@ -154,7 +152,8 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
 
     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    intensities = p.find(s.image)
+    blobs_image = s.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.Z)
+    intensities = p.find(s.image, blobs_image=blobs_image)
 # EPY: END code
 
 # EPY: START code

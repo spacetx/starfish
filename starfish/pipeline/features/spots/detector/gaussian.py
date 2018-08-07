@@ -1,15 +1,19 @@
-from itertools import product
-from numbers import Number
-from typing import Tuple
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 from skimage.feature import blob_log
 
-from starfish.constants import Indices, Features
+from starfish.constants import Features
 from starfish.image import ImageStack
-from starfish.munge import dataframe_to_multiindex
 from starfish.intensity_table import IntensityTable
+from starfish.pipeline.features.spot_attributes import SpotAttributes
+from starfish.pipeline.features.spots.detector.detect import (
+    measure_spot_intensity,
+    detect_spots,
+)
+from starfish.types import Number
 from starfish.util.argparse import FsExistsType
 from ._base import SpotFinderAlgorithmBase
 
@@ -17,10 +21,12 @@ from ._base import SpotFinderAlgorithmBase
 class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
     def __init__(
-            self, min_sigma, max_sigma, num_sigma, threshold,
-            blobs_stack, overlap=0.5, measurement_type='max', is_volume: bool=True, **kwargs
-    ) -> None:
+            self, min_sigma: Number, max_sigma: Number, num_sigma: int, threshold: Number,
+            overlap=0.5, measurement_type='max', is_volume: bool=True, **kwargs) \
+            -> None:
         """Multi-dimensional gaussian spot detector
+
+        This method is a wrapper for skimage.feature.blob_log
 
         Parameters
         ----------
@@ -38,17 +44,21 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             than thresh are ignored. Reduce this to detect blobs with less
             intensities.
         overlap : float [0, 1]
-            If two spots have more than this fraction of overlap, the spots are combined (default = 0.5)
-        blobs_stack : Union[ImageStack, str]
-            ImageStack or the path or URL that references the ImageStack that contains the blobs.
+            If two spots have more than this fraction of overlap, the spots are combined
+            (default = 0.5)
         measurement_type : str ['max', 'mean']
             name of the function used to calculate the intensity for each identified spot area
 
         Notes
         -----
-        This spot detector is very sensitive to the threshold that is selected, and the threshold is defined as an
-        absolute value -- therefore it must be adjusted depending on the datatype of the passed image.
+        # TODO ambrosejcarr: revisit after changing dtype assumptions of library to float in [0, 1]
+        This spot detector is very sensitive to the threshold that is selected, and the threshold
+        is defined as an absolute value -- therefore it must be adjusted depending on the datatype
+        of the passed image.
 
+        See Also
+        --------
+        http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.blob_log
 
         """
         self.min_sigma = min_sigma
@@ -57,66 +67,34 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         self.threshold = threshold
         self.overlap = overlap
         self.is_volume = is_volume
-        if isinstance(blobs_stack, ImageStack):
-            self.blobs_stack = blobs_stack
-        else:
-            self.blobs_stack = ImageStack.from_path_or_url(blobs_stack)
-        self.blobs_image: np.ndarray = self.blobs_stack.max_proj(Indices.ROUND, Indices.CH)
+        self.measurement_function = self._get_measurement_function(measurement_type)
 
-        try:
-            self.measurement_function = getattr(np, measurement_type)
-        except AttributeError:
-            raise ValueError(
-                f'measurement_type must be a numpy reduce function such as "max" or "mean". {measurement_type} '
-                f'not found.')
+    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
+        """
+        Find spots using a gaussian blob finding algorithm
 
-    @staticmethod
-    def _measure_blob_intensity(image, blobs, measurement_function) -> pd.Series:
+        Parameters
+        ----------
+        data_image : Union[np.ndarray, xr.DataArray]
+            ImageStack containing blobs to be detected
 
-        def fn(row: pd.Series) -> Number:
-            row = row.astype(int)
-            result = measurement_function(
-                image[
-                    row['z_min']:row['z_max'],
-                    row['y_min']:row['y_max'],
-                    row['x_min']:row['x_max']
-                ]
-            )
-            return result
+        Returns
+        -------
+        SpotAttributes :
+            DataFrame of metadata containing the coordinates, intensity and radius of each spot
 
-        return blobs.apply(
-            fn,
-            axis=1
+        """
+
+        fitted_blobs_array: np.ndarray = blob_log(
+            data_image,
+            self.min_sigma,
+            self.max_sigma,
+            self.num_sigma,
+            self.threshold,
+            self.overlap
         )
 
-    def _measure_spot_intensities(
-            self, stack: ImageStack, spot_attributes: pd.DataFrame
-    ) -> IntensityTable:
-
-        n_ch = stack.shape[Indices.CH]
-        n_round = stack.shape[Indices.ROUND]
-        spot_attribute_index = dataframe_to_multiindex(spot_attributes)
-        image_shape: Tuple[int, int, int] = stack.raw_shape[2:]
-        intensity_table = IntensityTable.empty_intensity_table(
-            spot_attribute_index, n_ch, n_round, image_shape)
-
-        indices = product(range(n_ch), range(n_round))
-        for c, h in indices:
-            image, _ = stack.get_slice({Indices.CH: c, Indices.ROUND: h})
-            blob_intensities: pd.Series = self._measure_blob_intensity(
-                image, spot_attributes, self.measurement_function)
-            intensity_table[:, c, h] = blob_intensities
-
-        return intensity_table
-
-    def _find_spot_locations(self) -> pd.DataFrame:
-        fitted_blobs_array: np.ndarray = blob_log(
-            self.blobs_image, self.min_sigma, self.max_sigma, self.num_sigma, self.threshold,
-            self.overlap)
-
-        if fitted_blobs_array.shape[0] == 0:
-            raise ValueError('No spots detected with provided parameters')
-
+        # create the SpotAttributes Table
         columns = [Features.Z, Features.Y, Features.X, Features.SPOT_RADIUS]
         fitted_blobs = pd.DataFrame(data=fitted_blobs_array, columns=columns)
 
@@ -125,27 +103,29 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         fitted_blobs[Features.SPOT_RADIUS] = converted_radius
 
         # convert the array to int so it can be used to index
-        fitted_blobs = fitted_blobs.astype(int)
+        rounded_blobs: pd.DataFrame = fitted_blobs.astype(int)
 
-        for v, max_size in zip(['z', 'y', 'x'], self.blobs_image.shape):
-            fitted_blobs[f'{v}_min'] = np.clip(
-                fitted_blobs[v] - fitted_blobs[Features.SPOT_RADIUS], 0, None)
-            fitted_blobs[f'{v}_max'] = np.clip(
-                fitted_blobs[v] + fitted_blobs[Features.SPOT_RADIUS], None, max_size)
+        rounded_blobs['intensity'] = measure_spot_intensity(
+            data_image, rounded_blobs, self.measurement_function)
+        rounded_blobs['spot_id'] = np.arange(rounded_blobs.shape[0])
 
-        fitted_blobs['intensity'] = self._measure_blob_intensity(
-            self.blobs_image, fitted_blobs, self.measurement_function)
-        fitted_blobs['spot_id'] = np.arange(fitted_blobs.shape[0])
+        return SpotAttributes(rounded_blobs)
 
-        return fitted_blobs
-
-    def find(self, image_stack: ImageStack) -> IntensityTable:
-        """find spots
+    def find(
+            self, data_stack: ImageStack,
+            blobs_image: Optional[Union[np.ndarray, xr.DataArray]]=None,
+            reference_image_from_max_projection: bool=False) \
+            -> IntensityTable:
+        """find spots in an ImageStack
 
         Parameters
         ----------
-        image_stack : ImageStack
+        data_stack : ImageStack
             stack containing spots to find
+        blobs_image : Union[np.ndarray, xr.DataArray]
+        reference_image_from_max_projection : bool
+            if True, compute a reference image from the maximum projection of the channels and
+            z-planes
 
         Returns
         -------
@@ -153,8 +133,15 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             3d tensor containing the intensity of spots across channels and imaging rounds
 
         """
-        spot_attributes = self._find_spot_locations()
-        intensity_table = self._measure_spot_intensities(image_stack, spot_attributes)
+
+        intensity_table = detect_spots(
+            data_stack=data_stack,
+            spot_finding_method=self.image_to_spots,
+            reference_image=blobs_image,
+            reference_image_from_max_projection=reference_image_from_max_projection,
+            measurement_function=self.measurement_function
+        )
+
         return intensity_table
 
     @classmethod

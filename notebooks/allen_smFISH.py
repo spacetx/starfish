@@ -126,7 +126,7 @@ from trackpy import locate
 ch1 = s.image.max_proj(Indices.Z.value)[0, 1]
 
 results = locate(ch1, diameter=3, minmass=250, maxsize=3, separation=5, preprocess=False, percentile=10) 
-results.columns = ['x', 'y', 'intensity', 'r', 'eccentricity', 'signal', 'raw_mass', 'ep']
+results.columns = ['x', 'y', 'intensity', 'radius', 'eccentricity', 'signal', 'raw_mass', 'ep']
 # EPY: END code
 
 # EPY: START code

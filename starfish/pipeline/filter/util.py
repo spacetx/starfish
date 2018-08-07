@@ -31,7 +31,7 @@ def bin_open(img: np.ndarray, disk_size: int) -> np.ndarray:
 
     img : np.ndarray
         Image to filter.
-    disk_size : int
+    masking_radius : int
         Radius of the disk-shaped structuring element.
 
     Returns

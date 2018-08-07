@@ -8,13 +8,14 @@ from typing import Generator
 import numpy as np
 import pandas as pd
 import pytest
+from scipy.ndimage.filters import gaussian_filter
 
+from starfish.codebook import Codebook
 from starfish.constants import Indices, Features
 from starfish.image import ImageStack
+from starfish.intensity_table import IntensityTable
 from starfish.io import Stack
 from starfish.munge import dataframe_to_multiindex
-from starfish.codebook import Codebook
-from starfish.intensity_table import IntensityTable
 from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
 from starfish.pipeline.filter.white_tophat import WhiteTophat
 from starfish.util import synthesize
@@ -164,8 +165,9 @@ def synthetic_dataset_with_truth_values_and_called_spots(
 
     codebook, true_intensities, image = synthetic_dataset_with_truth_values
 
-    wth = WhiteTophat(disk_size=15)
-    filtered = wth.filter(image, in_place=False)
+    wth = WhiteTophat(masking_radius=15)
+    filtered = wth.run(image, in_place=False)
+    blobs_image = filtered.max_proj(Indices.CH, Indices.ROUND)
 
     min_sigma = 1.5
     max_sigma = 4
@@ -176,11 +178,11 @@ def synthetic_dataset_with_truth_values_and_called_spots(
         max_sigma=max_sigma,
         num_sigma=num_sigma,
         threshold=threshold,
-        blobs_stack=filtered,
+        blobs_image=blobs_image,
         measurement_type='max',
     )
 
-    intensities = gsd.find(image_stack=filtered)
+    intensities = gsd.find(data_stack=filtered)
     assert intensities.shape[0] == 5
 
     codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm_order=2)
@@ -190,7 +192,6 @@ def synthetic_dataset_with_truth_values_and_called_spots(
 
 @pytest.fixture()
 def synthetic_single_spot_2d():
-    from scipy.ndimage.filters import gaussian_filter
     data = np.zeros((100, 100), dtype=np.uint16)
     data[10, 90] = 1000
     data = gaussian_filter(data, sigma=2)
@@ -199,7 +200,6 @@ def synthetic_single_spot_2d():
 
 @pytest.fixture()
 def synthetic_single_spot_3d():
-    from scipy.ndimage.filters import gaussian_filter
     data = np.zeros((10, 100, 100), dtype=np.uint16)
     data[5, 10, 90] = 1000
     data = gaussian_filter(data, sigma=2)
@@ -208,12 +208,52 @@ def synthetic_single_spot_3d():
 
 @pytest.fixture()
 def synthetic_two_spot_3d():
-    from scipy.ndimage.filters import gaussian_filter
     data = np.zeros((10, 100, 100), dtype=np.uint16)
     data[4, 10, 90] = 1000
     data[6, 90, 10] = 1000
     data = gaussian_filter(data, sigma=2)
     return data
+
+
+def synthetic_two_spot_3d_2round_2ch() -> ImageStack:
+    """produce a 2-channel 2-hyb ImageStack
+
+    Notes
+    -----
+    - After Gaussian filtering, all max intensities are 7
+    - Two spots are located at (4, 10, 90) and (6, 90, 10)
+    - Both spots are 1-hot, and decode to:
+        - spot 1: (round 0, ch 0), (round 1, ch 1)
+        - spot 2: (round 0, ch 1), (round 1, ch 0)
+
+    Returns
+    -------
+    ImageStack :
+        noiseless ImageStack containing two spots
+
+    """
+
+    # blank data_image
+    data = np.zeros((2, 2, 10, 100, 100), dtype=np.uint16)
+
+    # round 0 channel 0
+    data[0, 0, 4, 10, 90] = 1000
+    data[0, 0, 5, 90, 10] = 0
+
+    # round 0 channel 1
+    data[0, 1, 4, 10, 90] = 0
+    data[0, 1, 5, 90, 10] = 1000
+
+    # round 1 channel 0
+    data[1, 0, 4, 10, 90] = 0
+    data[1, 0, 5, 90, 10] = 1000
+
+    # round 1 channel 1
+    data[1, 1, 4, 10, 90] = 1000
+    data[1, 1, 5, 90, 10] = 0
+
+    data = gaussian_filter(data, sigma=(0, 0, 2, 2, 2))
+    return ImageStack.from_numpy_array(data)
 
 
 @pytest.fixture()

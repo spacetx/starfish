@@ -50,7 +50,7 @@ class TestWithIssData(unittest.TestCase):
             "--d", "1",
         ],
         [
-            "starfish", "register",
+            "starfish", "registration",
             "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
                 [tempdir, "formatted", "experiment.json"],
                 "$['hybridization_images']",
@@ -68,7 +68,7 @@ class TestWithIssData(unittest.TestCase):
             "--input", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered", "hybridization.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "hybridization.json"),
             "WhiteTophat",
-            "--disk-size", "15",
+            "--masking-radius", "15",
         ],
         [
             "starfish", "filter",
@@ -78,7 +78,7 @@ class TestWithIssData(unittest.TestCase):
             ),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "nuclei.json"),
             "WhiteTophat",
-            "--disk-size", "15",
+            "--masking-radius", "15",
         ],
         [
             "starfish", "filter",
@@ -88,7 +88,7 @@ class TestWithIssData(unittest.TestCase):
             ),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "dots.json"),
             "WhiteTophat",
-            "--disk-size", "15",
+            "--masking-radius", "15",
         ],
         [
             "starfish", "detect_spots",
@@ -118,7 +118,7 @@ class TestWithIssData(unittest.TestCase):
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.geojson"),
             "--intensities", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.json"),
-            "PointInPoly",
+            "PointInPoly2D",
         ],
         [
             "starfish", "decode",

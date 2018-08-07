@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 import numpy as np
 import pandas as pd
 import regional
@@ -24,7 +26,7 @@ def spots_to_geojson(spots_viz):
     return [make_dict(row) for row in spots_viz.iterrows()]
 
 
-def geojson_to_region(geojson):
+def geojson_to_region(geojson: Dict[Any, Any]) -> regional.many:
     """
     Convert geojson data to region geometrical data.
     """

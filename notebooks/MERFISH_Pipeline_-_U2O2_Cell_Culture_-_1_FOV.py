@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 #
-# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.4"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
+# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.3"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
 # ## Reproduce Published results with Starfish
@@ -30,18 +30,12 @@ from scipy.stats import scoreatpercentile
 from showit import image, tile
 from starfish.constants import Indices, Features
 from starfish.io import Stack
-from starfish.viz import tile_lims
 # EPY: END code
 
 # EPY: START code
 # load the data from cloudfront
 s = Stack()
 s.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment.json')
-# EPY: END code
-
-# EPY: START code
-# data from one FOV correspond to 16 single plane images as shown here (see below for details)
-tile(s.image.squeeze());
 # EPY: END code
 
 # EPY: START markdown
@@ -90,7 +84,6 @@ codebook
 from starfish.pipeline.filter.gaussian_high_pass import GaussianHighPass
 from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
 from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
-from starfish.viz import tile_lims
 # EPY: END code
 
 # EPY: START markdown
@@ -100,7 +93,7 @@ from starfish.viz import tile_lims
 # EPY: START code
 from starfish.pipeline.filter.gaussian_high_pass import GaussianHighPass
 ghp = GaussianHighPass(sigma=3, verbose=True)
-ghp.filter(s.image)
+ghp.run(s.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -110,7 +103,7 @@ ghp.filter(s.image)
 # EPY: START code
 from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
 dpsf = DeconvolvePSF(num_iter=15, sigma=2, verbose=True)
-dpsf.filter(s.image)
+dpsf.run(s.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -122,7 +115,7 @@ dpsf.filter(s.image)
 # EPY: START code
 from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
 glp = GaussianLowPass(sigma=1, verbose=True)
-glp.filter(s.image)
+glp.run(s.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -191,6 +184,7 @@ image(mp, clim=clim)
 from starfish.pipeline.features.pixels.pixel_spot_detector import PixelSpotDetector
 psd = PixelSpotDetector(
     codebook=codebook,
+    metric='euclidean',
     distance_threshold=0.5176,
     magnitude_threshold=1,
     min_area=2,

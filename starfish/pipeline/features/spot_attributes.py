@@ -11,7 +11,7 @@ class SpotAttributes(ValidatedTable):
     required_fields = {
         'x',  # spot x-coordinate
         'y',  # spot y-coordinate
-        'r',  # spot radius
+        'radius',  # spot radius
         'intensity',  # intensity of spot (commonly max or average)
         'spot_id'  # integer spot id
     }

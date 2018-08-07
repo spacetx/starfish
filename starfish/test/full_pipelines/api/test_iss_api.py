@@ -17,12 +17,12 @@ def test_iss_pipeline():
     dots_data = image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
     dots = ImageStack.from_numpy_array(dots_data.reshape((1, 1, 1, *dots_data.shape)))
 
-    wth = WhiteTophat(disk_size=15)
-    wth.filter(image)
-    wth.filter(dots)
+    wth = WhiteTophat(masking_radius=15)
+    wth.run(image)
+    wth.run(dots)
 
     fsr = FourierShiftRegistration(upsampling=1000, reference_stack=dots)
-    fsr.register(image)
+    fsr.run(image)
 
     min_sigma = 1.5
     max_sigma = 5
@@ -33,11 +33,10 @@ def test_iss_pipeline():
         max_sigma=max_sigma,
         num_sigma=num_sigma,
         threshold=threshold,
-        blobs_stack=dots,
         measurement_type='max',
     )
-
-    intensities = gsd.find(image_stack=image)
+    blobs_image = dots.numpy_array.reshape(1, *dots_data.shape)
+    intensities = gsd.find(data_stack=image, blobs_image=blobs_image)
     assert intensities.shape[0] == 5
 
     codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm_order=2)

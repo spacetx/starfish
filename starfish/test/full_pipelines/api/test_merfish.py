@@ -14,15 +14,15 @@ def test_merfish_pipeline(merfish_stack):
 
     # high pass filter
     ghp = GaussianHighPass(sigma=3)
-    ghp.filter(s)
+    ghp.run(s)
 
     # deconvolve the point spread function
     dpsf = DeconvolvePSF(num_iter=15, sigma=2)
-    dpsf.filter(s)
+    dpsf.run(s)
 
     # low pass filter
     glp = GaussianLowPass(sigma=1)
-    glp.filter(s)
+    glp.run(s)
 
     # scale the data by the scale factors
     scale_factors = {(t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] for index, t in s.tile_metadata.iterrows()}
@@ -34,6 +34,7 @@ def test_merfish_pipeline(merfish_stack):
     # detect and decode spots
     psd = PixelSpotDetector(
         codebook='https://s3.amazonaws.com/czi.starfish.data.public/MERFISH/codebook.csv',
+        metric='euclidean',
         distance_threshold=0.5176,
         magnitude_threshold=1,
         area_threshold=2,

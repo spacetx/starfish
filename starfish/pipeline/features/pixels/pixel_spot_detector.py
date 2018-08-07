@@ -9,9 +9,8 @@ from ._base import PixelFinderAlgorithmBase
 
 
 class PixelSpotDetector(PixelFinderAlgorithmBase):
-
     def __init__(
-            self, codebook: Codebook, distance_threshold: float,
+            self, codebook: Codebook, metric: str, distance_threshold: float,
             magnitude_threshold: int, min_area: int, max_area: int, norm_order: int=2,
             crop_x: int=0, crop_y: int=0, crop_z: int=0, **kwargs) -> None:
         """Decode an image by first coding each pixel, then combining the results into spots
@@ -20,8 +19,10 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
         ----------
         codebook : Codebook
             Codebook object mapping codewords to the targets they are designed to detect
+        metric : str
+            the sklearn metric string to pass to NearestNeighbors
         distance_threshold : float
-            spots whose codewords are more than this distance from an expected code are filtered
+            spots whose codewords are more than this metric distance from an expected code are filtered
         magnitude_threshold : int
             spots with intensity less than this value are filtered
         min_area : int
@@ -37,6 +38,7 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
 
         """
         self.codebook = codebook
+        self.metric = metric
         self.distance_threshold = distance_threshold
         self.magnitude_threshold = magnitude_threshold
         self.min_area = min_area
@@ -69,7 +71,8 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
             pixel_intensities,
             max_distance=self.distance_threshold,
             min_intensity=self.magnitude_threshold,
-            norm_order=self.norm_order
+            norm_order=self.norm_order,
+            metric=self.metric
         )
         decoded_spots, image_decoding_results = combine_adjacent_features(
             decoded_intensities,
@@ -82,6 +85,7 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
     @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument("--codebook-input", help="csv file containing a codebook")
+        group_parser.add_argument("--metric", type='str', default='euclidean')
         group_parser.add_argument(
             "--distance-threshold", default=0.5176,
             help="maximum distance a pixel may be from a codeword before it is filtered")

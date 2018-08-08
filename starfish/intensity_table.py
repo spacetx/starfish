@@ -278,7 +278,7 @@ class IntensityTable(xr.DataArray):
 
         Returns
         -------
-        IntensityTable
+        IntensityTable :
             IntensityTable containing one intensity per pixel (across channels and rounds)
 
         """
@@ -333,3 +333,16 @@ class IntensityTable(xr.DataArray):
     def _intensities_from_regions(self, props, reduce_op='max') -> "IntensityTable":
         """turn regions back into intensities by reducing over the labeled area"""
         raise NotImplementedError
+
+    def to_dataframe(self) -> pd.DataFrame:
+        """Generates a dataframe of the underlying features multi-index.
+        This is guaranteed to contain the features x, y, z, and radius.
+
+        Returns
+        -------
+        pd.DataFrame
+
+
+        """
+        df = self.features.to_index().to_frame(index=False)
+        return df

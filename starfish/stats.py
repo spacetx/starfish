@@ -18,4 +18,3 @@ def label_to_regions(labels) -> regional.many:
     regions = [region_for(label_mat_coo, label) for label in unique_labels]
 
     return regional.many(regions)
-

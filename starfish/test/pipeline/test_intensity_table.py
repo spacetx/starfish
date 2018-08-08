@@ -132,12 +132,8 @@ def test_intensity_table_to_dataframe():
     table, _ = make_empty_intensity_table()
     table_df = table.to_dataframe()
     expected_columns = set([Features.X, Features.Y, Features.Z, Features.SPOT_RADIUS])
-    x = [1, 2]
-    y = [2, 3]
-    z = [1, 1]
-    r = [1, 1]
-    assert(set(table_df.x) == set(x))
-    assert(set(table_df.y) == set(y))
-    assert(set(table_df.z) == set(z))
-    assert(set(table_df[Features.SPOT_RADIUS]) == set(r))
+    assert(set(table_df[Features.X]) == set(table.coords[Features.X].values))
+    assert(set(table_df[Features.Y]) == set(table.coords[Features.Y].values))
+    assert(set(table_df[Features.Z]) == set(table.coords[Features.Z].values))
+    assert(set(table_df[Features.SPOT_RADIUS]) == set(table.coords[Features.SPOT_RADIUS].values))
     assert(set(table_df.columns) == expected_columns)

@@ -14,7 +14,7 @@ from starfish.test.dataset_fixtures import (
     loaded_codebook, simple_codebook_json, simple_codebook_array, single_synthetic_spot)
 
 
-def test_empty_intensity_table():
+def make_empty_intensity_table(image_shape=(2, 4, 3)):
     x = [1, 2]
     y = [2, 3]
     z = [1, 1]
@@ -22,7 +22,13 @@ def test_empty_intensity_table():
     spot_attributes = pd.MultiIndex.from_arrays(
         [x, y, z, r],
         names=(Features.X, Features.Y, Features.Z, Features.SPOT_RADIUS))
+    empty = IntensityTable.empty_intensity_table(spot_attributes, 2, 2, image_shape)
+    return empty, spot_attributes
+
+
+def test_empty_intensity_table():
     image_shape = (2, 4, 3)
+    empty, spot_attributes = make_empty_intensity_table(image_shape=image_shape)
     empty = IntensityTable.empty_intensity_table(spot_attributes, 2, 2, image_shape)
     assert empty.shape == (2, 2, 2)
     assert np.sum(empty.values) == 0
@@ -120,3 +126,18 @@ def test_combine_adjacent_features():
         combined_intensities[Features.AXIS][Features.TARGET],
         ['gene_2', 'gene_1']
     )
+
+
+def test_intensity_table_to_dataframe():
+    table, _ = make_empty_intensity_table()
+    table_df = table.to_dataframe()
+    expected_columns = set([Features.X, Features.Y, Features.Z, Features.SPOT_RADIUS])
+    x = [1, 2]
+    y = [2, 3]
+    z = [1, 1]
+    r = [1, 1]
+    assert(set(table_df.x) == set(x))
+    assert(set(table_df.y) == set(y))
+    assert(set(table_df.z) == set(z))
+    assert(set(table_df[Features.SPOT_RADIUS]) == set(r))
+    assert(set(table_df.columns) == expected_columns)

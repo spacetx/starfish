@@ -42,19 +42,19 @@ mkdir -p /tmp/starfish/results
 
 python examples/get_iss_data.py /tmp/starfish/raw /tmp/starfish/formatted --d 1
 
-starfish register -i /tmp/starfish/formatted/experiment.json -o /tmp/starfish/registered fourier_shift --u 1000
+starfish registration -i /tmp/starfish/formatted/hybridization-fov_000.json -o /tmp/starfish/registered/hybridization.json FourierShiftRegistration --reference-stack /tmp/starfish/formatted/nuclei-fov_000.json --upsampling 1000
 
-starfish filter -i /tmp/starfish/registered/experiment.json -o /tmp/starfish/filtered/ white_tophat --disk-size 15
+starfish filter -i /tmp/starfish/registered/hybridization.json -o /tmp/starfish/filtered/hybridization.json WhiteTophat --masking-radius 15
+starfish filter -i /tmp/starfish/formatted/nuclei-fov_000.json -o /tmp/starfish/filtered/nuclei.json WhiteTophat --masking-radius 15
+starfish filter -i /tmp/starfish/formatted/dots-fov_000.json -o /tmp/starfish/filtered/dots.json WhiteTophat --masking-radius 15
 
-starfish show /tmp/starfish/filtered/experiment.json
+starfish detect_spots --input /tmp/starfish/filtered/hybridization.json --output /tmp/starfish/results GaussianSpotDetector --blobs-stack /tmp/starfish/filtered/dots.json --min-sigma 4 --max-sigma 6 --num-sigma 20 --threshold 0.01
 
-starfish detect_spots /tmp/starfish/filtered/experiment.json /tmp/starfish/results dots --min_sigma 4 --max_sigma 6  --num_sigma 20 --t 0.01
+starfish segment --hybridization-stack /tmp/starfish/filtered/hybridization.json --nuclei-stack /tmp/starfish/filtered/nuclei.json -o /tmp/starfish/results/regions.geojson Watershed --dapi-threshold .16 --input-threshold .22 --min-distance 57
 
-starfish segment /tmp/starfish/filtered/experiment.json /tmp/starfish/results stain --dt .16 --st .22 --md 57
+starfish target_assignment --coordinates-geojson /tmp/starfish/results/regions.geojson --intensities /tmp/starfish/results/spots.nc --output /tmp/starfish/results/regions.json PointInPoly2D
 
-starfish gene_assignment --coordinates-geojson /tmp/starfish/results/regions.geojson --spots-json /tmp/starfish/results/spots.json --output /tmp/starfish/results/regions.json point_in_poly
-
-starfish decode -i /tmp/starfish/results/encoder_table.json --codebook /tmp/starfish/results/encoder_table.json -o /tmp/starfish/results/decoded_table.json iss
+starfish decode -i /tmp/starfish/results/spots.nc --codebook /tmp/starfish/formatted/codebook.json -o /tmp/starfish/results/spots.nc IssDecoder
 ```
 
 ## visualization quickstart

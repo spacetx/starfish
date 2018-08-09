@@ -32,8 +32,10 @@ def geojson_to_region(geojson: Dict[Any, Any]) -> regional.many:
     """
     def make_region(geometry):
         assert geometry['geometry']['type'] == "Polygon"
+        region = [(coordinates[0], coordinates[1])
+                  for coordinates in geometry['geometry']['coordinates']]
 
-        return regional.one([(coordinates[0], coordinates[1]) for coordinates in geometry['geometry']['coordinates']])
+        return regional.one(region)
 
     return regional.many([make_region(geometry) for geometry in geojson])
 

@@ -28,7 +28,11 @@ class Stack:
         self.baseurl = None
 
     @classmethod
-    def from_data(cls, image_stack: ImageStack, aux_dict: Optional[Mapping[str, ImageStack]]=None) -> "Stack":
+    def from_data(
+            cls,
+            image_stack: ImageStack,
+            aux_dict: Optional[Mapping[str, ImageStack]]=None
+    ) -> "Stack":
         """create a Stack from an already-loaded ImageStack
 
         Parameters

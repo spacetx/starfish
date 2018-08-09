@@ -15,8 +15,8 @@ WIDTH = 10
 
 def create_tile_data_provider(dtype: np.number, corner_dtype: np.number):
     """
-    Makes a stack that's all of the same type, except the round=0,ch=0,z=0 corner, which is a different type.  All the
-    tiles are initialized with ones.
+    Makes a stack that's all of the same type, except the round=0,ch=0,z=0 corner, which is a
+    different type.  All the tiles are initialized with ones.
 
     Parameters
     ----------

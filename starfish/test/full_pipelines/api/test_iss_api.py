@@ -1,4 +1,4 @@
-from starfish.pipeline.spots.detector.gaussian import GaussianSpotDetector
+from starfish.spots._detector.gaussian import GaussianSpotDetector
 from starfish.image._filter.white_tophat import WhiteTophat
 from starfish.image._registration.fourier_shift import FourierShiftRegistration
 from starfish.util.synthesize import SyntheticData

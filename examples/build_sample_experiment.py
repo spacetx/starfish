@@ -50,7 +50,6 @@ if __name__ == "__main__":
                  "possible keys.  The value should be the shape along that dimension.  If a key is "
                  "not present, the value is assumed to be 0.".format(
                 aux_image_name, Indices.ROUND, Indices.CH, Indices.Z))
-        # TODO ttung: parser.add_argument doesn't return anything, so this seems odd
         name_arg_map[aux_image_name] = arg.dest
 
     args = parser.parse_args()

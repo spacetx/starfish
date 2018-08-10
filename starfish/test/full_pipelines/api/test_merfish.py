@@ -8,7 +8,8 @@ from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
 from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
 
 
-@pytest.mark.skip("TODO ambrosejcarr: fix this test in a future PR. Currently no spots are generated, and this fails.")
+@pytest.mark.skip("TODO ambrosejcarr: fix this test in a future PR. Currently no spots are "
+                  "generated, and this fails.")
 def test_merfish_pipeline(merfish_stack):
     s = merfish_stack
 
@@ -25,7 +26,8 @@ def test_merfish_pipeline(merfish_stack):
     glp.run(s)
 
     # scale the data by the scale factors
-    scale_factors = {(t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] for index, t in s.tile_metadata.iterrows()}
+    scale_factors = {(t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
+                     for index, t in s.tile_metadata.iterrows()}
     for indices in s.image._iter_indices():
         data = s.image.get_slice(indices)[0]
         scaled = data / scale_factors[indices[Indices.ROUND], indices[Indices.CH]]

@@ -262,7 +262,11 @@ class IntensityTable(xr.DataArray):
         return intensities
 
     @classmethod
-    def from_image_stack(cls, image_stack, crop_x: int=0, crop_y: int=0, crop_z: int=0) -> "IntensityTable":
+    def from_image_stack(
+            cls,
+            image_stack,
+            crop_x: int=0, crop_y: int=0, crop_z: int=0
+    ) -> "IntensityTable":
         """Generate an IntensityTable from all the pixels in the ImageStack
 
         Parameters

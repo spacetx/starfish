@@ -11,7 +11,8 @@ class StarfishIndex:
         try:
             spec = json.loads(spec_json)
         except json.decoder.JSONDecodeError:
-            raise argparse.ArgumentTypeError("Could not parse {} into a valid index specification.".format(spec_json))
+            raise argparse.ArgumentTypeError(
+                "Could not parse {} into a valid index specification.".format(spec_json))
 
         return {
             Indices.ROUND: spec.get(Indices.ROUND, 1),
@@ -34,9 +35,9 @@ if __name__ == "__main__":
         "--hybridization-dimensions",
         type=StarfishIndex(),
         required=True,
-        help="Dimensions for the hybridization images.  Should be a json dict, with {}, {}, and {} as the possible "
-             "keys.  The value should be the shape along that dimension.  If a key is not present, the value is "
-             "assumed to be 0.".format(
+        help="Dimensions for the hybridization images.  Should be a json dict, with {}, {}, and {} "
+             "as the possible keys.  The value should be the shape along that dimension.  If a key "
+             "is not present, the value is assumed to be 0.".format(
             Indices.ROUND.value,
             Indices.CH.value,
             Indices.Z.value))
@@ -45,9 +46,10 @@ if __name__ == "__main__":
         arg = parser.add_argument(
             "--{}-dimensions".format(aux_image_name),
             type=StarfishIndex(),
-            help="Dimensions for the {} images.  Should be a json dict, with {}, {}, and {} as the possible keys.  The "
-                 "value should be the shape along that dimension.  If a key is not present, the value is assumed to be "
-                 "0.".format(aux_image_name, Indices.ROUND, Indices.CH, Indices.Z))
+            help="Dimensions for the {} images.  Should be a json dict, with {}, {}, and {} as the "
+                 "possible keys.  The value should be the shape along that dimension.  If a key is "
+                 "not present, the value is assumed to be 0.".format(
+                aux_image_name, Indices.ROUND, Indices.CH, Indices.Z))
         name_arg_map[aux_image_name] = arg.dest
 
     args = parser.parse_args()

@@ -26,27 +26,32 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         ----------
 
         spot_diameter : odd integer or tuple of odd integers.
-            This may be a single number or a tuple giving the feature’s extent in each dimension, useful when the
-            dimensions do not have equal resolution (e.g. confocal microscopy). The tuple order is the same as the
-            image shape, conventionally (z, y, x) or (y, x). The number(s) must be odd integers. When in doubt, round
-            up.
+            This may be a single number or a tuple giving the feature’s extent in each dimension,
+            useful when the dimensions do not have equal resolution (e.g. confocal microscopy).
+            The tuple order is the same as the image shape, conventionally (z, y, x) or (y, x).
+            The number(s) must be odd integers. When in doubt, round up.
         min_mass : float, optional
-            The minimum integrated brightness. This is a crucial parameter for eliminating spurious features.
-            Recommended minimum values are 100 for integer images and 1 for float images. Defaults to 0 (no filtering).
+            The minimum integrated brightness. This is a crucial parameter for eliminating spurious
+            features. Recommended minimum values are 100 for integer images and 1 for float images.
+            Defaults to 0 (no filtering).
         max_size : float
             maximum radius-of-gyration of brightness, default None
         separation : float or tuple
-            Minimum separtion between features. Default is diameter + 1. May be a tuple, see diameter for details.
+            Minimum separtion between features. Default is diameter + 1. May be a tuple, see
+            diameter for details.
         percentile : float
-            Features must have a peak brighter than pixels in this percentile. This helps eliminate spurious peaks.
+            Features must have a peak brighter than pixels in this percentile. This helps eliminate
+            spurious peaks.
         noise_size : float or tuple
-            Width of Gaussian blurring kernel, in pixels Default is 1. May be a tuple, see diameter for details.
+            Width of Gaussian blurring kernel, in pixels Default is 1. May be a tuple, see diameter
+            for details.
         smoothing_size : float or tuple
-            The size of the sides of the square kernel used in boxcar (rolling average) smoothing, in pixels Default
-            is diameter. May be a tuple, making the kernel rectangular.
+            The size of the sides of the square kernel used in boxcar (rolling average) smoothing,
+            in pixels Default is diameter. May be a tuple, making the kernel rectangular.
         threshold : float
-            Clip bandpass result below this value. Thresholding is done on the already background-subtracted image.
-            By default, 1 for integer images and 1/255 for float images.
+            Clip bandpass result below this value. Thresholding is done on the already
+            background-subtracted image. By default, 1 for integer images and 1/255 for float
+            images.
         measurement_type : str ['max', 'mean']
             name of the function used to calculate the intensity for each identified spot area
         preprocess : boolean
@@ -153,19 +158,26 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
     @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument("--spot-diameter", type=str, help='expected spot size')
-        group_parser.add_argument("--min-mass", default=4, type=int, help="minimum integrated spot intensity")
-        group_parser.add_argument("--max-size", default=6, type=int, help="maximum radius of gyration of brightness")
-        group_parser.add_argument("--separation", default=5, type=float, help="minimum distance between spots")
         group_parser.add_argument(
-            "--noise-size", default=None, type=int, help="width of gaussian blurring kernel, in pixels")
+            "--min-mass", default=4, type=int, help="minimum integrated spot intensity")
+        group_parser.add_argument(
+            "--max-size", default=6, type=int, help="maximum radius of gyration of brightness")
+        group_parser.add_argument(
+            "--separation", default=5, type=float, help="minimum distance between spots")
+        group_parser.add_argument(
+            "--noise-size", default=None, type=int,
+            help="width of gaussian blurring kernel, in pixels")
         group_parser.add_argument(
             "--smoothing-size", default=None, type=int,
-            help="odd integer. Size of boxcar (moving average) filter in pixels. Default is the Diameter")
+            help="odd integer. Size of boxcar (moving average) filter in pixels. Default is the "
+                 "Diameter"
+        )
         group_parser.add_argument(
-            "--preprocess", action="store_true", help="if passed, gaussian and boxcar filtering are applied")
+            "--preprocess", action="store_true",
+            help="if passed, gaussian and boxcar filtering are applied")
         group_parser.add_argument(
             "--show", default=False, action='store_true', help="display results visually")
         group_parser.add_argument(
             "--percentile", default=None, type=float,
-            help="clip bandpass below this value. Thresholding is done on already background-subtracted images. "
-                 "default 1 for integer images and 1/255 for float")
+            help="clip bandpass below this value. Thresholding is done on already background-"
+                 "subtracted images. Default 1 for integer images and 1/255 for float")

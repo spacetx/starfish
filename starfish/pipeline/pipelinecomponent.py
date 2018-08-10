@@ -5,8 +5,8 @@ from typing import Mapping, Optional, Type
 
 class PipelineComponentType(type):
     """
-    This is the metaclass for PipelineComponent.  As each subclass that is _not_ PipelineComponent is created, it sets
-    up a map between the algorithm name and the class that implements it.
+    This is the metaclass for PipelineComponent.  As each subclass that is _not_ PipelineComponent
+    is created, it sets up a map between the algorithm name and the class that implements it.
     """
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
@@ -36,8 +36,8 @@ class PipelineComponent(metaclass=PipelineComponentType):
     @classmethod
     def implementing_algorithms(cls):
         """
-        Get a list of classes that implement an algorithm relevant to this pipeline stage.  Pipeline components must
-        provide this method.
+        Get a list of classes that implement an algorithm relevant to this pipeline stage.
+        Pipeline components must provide this method.
         """
         raise NotImplementedError()
 
@@ -48,7 +48,10 @@ class PipelineComponent(metaclass=PipelineComponentType):
 
     @classmethod
     def run(cls, algorithm_name, stack, *args, **kwargs):
-        """Runs the registration component using the algorithm name, stack, and arguments for the specific algorithm."""
+        """
+        Runs the registration component using the algorithm name, stack, and arguments for the
+        specific algorithm.
+        """
         algorithm_cls = cls._algorithm_to_class_map[algorithm_name]
         instance = algorithm_cls(*args, **kwargs)
         return instance.register(stack)

@@ -17,7 +17,13 @@ def build_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--profile", action="store_true", help="enable profiling")
-    parser.add_argument("--noop", help=argparse.SUPPRESS, dest="starfish_command", action="store_const", const=noop)
+    parser.add_argument(
+        "--noop",
+        help=argparse.SUPPRESS,
+        dest="starfish_command",
+        action="store_const",
+        const=noop
+    )
 
     subparsers = parser.add_subparsers(dest="starfish_command")
 

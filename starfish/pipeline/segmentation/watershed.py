@@ -25,9 +25,12 @@ class Watershed(SegmentationAlgorithmBase):
 
     @classmethod
     def add_arguments(cls, group_parser) -> None:
-        group_parser.add_argument("--dapi-threshold", default=.16, type=float, help="DAPI threshold")
-        group_parser.add_argument("--input-threshold", default=.22, type=float, help="Input threshold")
-        group_parser.add_argument("--min-distance", default=57, type=int, help="Minimum distance between cells")
+        group_parser.add_argument(
+            "--dapi-threshold", default=.16, type=float, help="DAPI threshold")
+        group_parser.add_argument(
+            "--input-threshold", default=.22, type=float, help="Input threshold")
+        group_parser.add_argument(
+            "--min-distance", default=57, type=int, help="Minimum distance between cells")
 
     def run(self, hybridization_stack: ImageStack, nuclei_stack: ImageStack) -> regional.many:
 
@@ -43,7 +46,9 @@ class Watershed(SegmentationAlgorithmBase):
         nuclei = nuclei_stack.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
         seg = _WatershedSegmenter(nuclei, stain)
         cells_labels = seg.segment(
-            self.dapi_threshold, self.input_threshold, size_lim, disk_size_markers, disk_size_mask, self.min_distance)
+            self.dapi_threshold, self.input_threshold, size_lim, disk_size_markers, disk_size_mask,
+            self.min_distance
+        )
 
         regions = label_to_regions(cells_labels)
 
@@ -62,10 +67,15 @@ class _WatershedSegmenter:
         self.mask = None
         self.segmented = None
 
-    def segment(self, dapi_thresh, stain_thresh, size_lim, disk_size_markers=None, disk_size_mask=None, min_dist=None):
+    def segment(
+            self, dapi_thresh, stain_thresh, size_lim, disk_size_markers=None, disk_size_mask=None,
+            min_dist=None
+    ):
         min_allowed_size, max_allowed_size = size_lim
         self.dapi_thresholded = self.filter_dapi(dapi_thresh, disk_size_markers)
-        self.markers, self.num_cells = self.label_nuclei(min_allowed_size, max_allowed_size, min_dist)
+        self.markers, self.num_cells = self.label_nuclei(
+            min_allowed_size, max_allowed_size, min_dist
+        )
         self.mask = self.watershed_mask(stain_thresh, self.markers, disk_size_mask)
         self.segmented = self.watershed(self.markers, self.mask)
         return self.segmented
@@ -151,13 +161,23 @@ class _WatershedSegmenter:
 
         plt.subplot(325)
         marker_regions = label_to_regions(self.markers)
-        im = marker_regions.mask(background=[0.9, 0.9, 0.9], dims=self.markers.shape, stroke=None, cmap='rainbow')
+        im = marker_regions.mask(
+            background=[0.9, 0.9, 0.9],
+            dims=self.markers.shape,
+            stroke=None,
+            cmap='rainbow'
+        )
         image(im, size=20, ax=plt.gca())
         plt.title('Found: {} cells'.format(self.num_cells))
 
         plt.subplot(326)
         segmented_regions = label_to_regions(self.segmented)
-        im = segmented_regions.mask(background=[0.9, 0.9, 0.9], dims=self.segmented.shape, stroke=None, cmap='rainbow')
+        im = segmented_regions.mask(
+            background=[0.9, 0.9, 0.9],
+            dims=self.segmented.shape,
+            stroke=None,
+            cmap='rainbow'
+        )
         image(im, size=20, ax=plt.gca())
         plt.title('Segmented Cells')
 

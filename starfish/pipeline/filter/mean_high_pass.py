@@ -53,7 +53,8 @@ class MeanHighPass(FilterAlgorithmBase):
         group_parser.add_argument(
             "--size", type=float, help="width of the kernel")
         group_parser.add_argument(
-            "--is-volume", action="store_true", help="indicates that the image stack should be filtered in 3d")
+            "--is-volume", action="store_true",
+            help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
     def high_pass(image: np.ndarray, size: Number) -> np.ndarray:

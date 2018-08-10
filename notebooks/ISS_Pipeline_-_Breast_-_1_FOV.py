@@ -211,10 +211,6 @@ table = pd.Series(counts, index=genes).sort_values(ascending=False)
 # EPY: END code
 
 # EPY: START code
-table.head()
-# EPY: END code
-
-# EPY: START code
 assert table.index.get_loc('HER2') < 10
 assert table.index.get_loc('VIM') < 10
 table.head()

@@ -57,14 +57,7 @@ starfish target_assignment --coordinates-geojson /tmp/starfish/results/regions.g
 starfish decode -i /tmp/starfish/results/spots.nc --codebook /tmp/starfish/formatted/codebook.json -o /tmp/starfish/results/spots.nc IssDecoder
 ```
 
-## visualization quickstart
-To see an interactive web-visualization of the final decoded result, run the following commands
-
-1. [Install nvm](https://github.com/creationix/nvm) if you don't have it
-2. Install node `nvm install node`
-3. Install budo `npm install budo`
-4. From starfish/viz run `npm install`
-5. From starfish/viz run `npm start`
+## interactive visualization in Jupyter notebooks
 
 To use the interactive notebook widgets, run the following commands. Please note that the widget currently 
 supports Jupyter notebooks, but not Jupyter Lab. 

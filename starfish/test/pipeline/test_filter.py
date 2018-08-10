@@ -36,7 +36,9 @@ def test_gaussian_high_pass_apply(merfish_stack: Experiment, sigma: Union[Number
 
 
 @pytest.mark.parametrize('sigma', (1, (1, 0, 1)))
-def test_gaussian_high_pass_apply_3d(merfish_stack: Experiment, sigma: Union[Number, Tuple[Number]]):
+def test_gaussian_high_pass_apply_3d(
+        merfish_stack: Experiment, sigma: Union[Number, Tuple[Number]]
+):
     """same as test_gaussian_high_pass, but tests apply loop functionality"""
     sum_before = np.sum(merfish_stack.image.numpy_array)
     ghp = gaussian_high_pass.GaussianHighPass(sigma=sigma, is_volume=True)

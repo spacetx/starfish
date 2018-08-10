@@ -3,7 +3,7 @@ from copy import deepcopy
 import numpy as np
 
 from starfish.util.synthesize import SyntheticData
-from starfish.image import ImageStack
+from starfish._stack import ImageStack
 
 
 def multiply(array, value):

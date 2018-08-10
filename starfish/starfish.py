@@ -6,10 +6,10 @@ from pstats import Stats
 
 from .pipeline.features.spots.decoder import Decoder
 from .pipeline.features.spots.detector import SpotFinder
-from .pipeline.filter import Filter
+from starfish.image._filter import Filter
 from .pipeline.target_assignment import TargetAssignment
-from .pipeline.registration import Registration
-from .pipeline.segmentation import Segmentation
+from starfish.image._registration import Registration
+from starfish.image._segmentation import Segmentation
 from .util.argparse import FsExistsType
 
 

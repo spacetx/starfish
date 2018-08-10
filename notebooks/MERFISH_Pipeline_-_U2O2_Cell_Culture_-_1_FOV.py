@@ -17,17 +17,13 @@
 # EPY: START code
 # EPY: ESCAPE %matplotlib notebook
 
-import os
 import pprint
-import time
 
 import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy.stats import scoreatpercentile
 
-from showit import image, tile
+from showit import image
 from starfish.constants import Indices, Features
 from starfish.experiment import Experiment
 # EPY: END code
@@ -81,9 +77,6 @@ codebook
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.filter.gaussian_high_pass import GaussianHighPass
-from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
-from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
 # EPY: END code
 
 # EPY: START markdown
@@ -91,7 +84,7 @@ from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.filter.gaussian_high_pass import GaussianHighPass
+from starfish.image._filter.gaussian_high_pass import GaussianHighPass
 ghp = GaussianHighPass(sigma=3, verbose=True)
 ghp.run(experiment.image)
 # EPY: END code
@@ -101,7 +94,7 @@ ghp.run(experiment.image)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
+from starfish.image._filter import DeconvolvePSF
 dpsf = DeconvolvePSF(num_iter=15, sigma=2, verbose=True)
 dpsf.run(experiment.image)
 # EPY: END code
@@ -113,7 +106,7 @@ dpsf.run(experiment.image)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
+from starfish.image._filter.gaussian_low_pass import GaussianLowPass
 glp = GaussianLowPass(sigma=1, verbose=True)
 glp.run(experiment.image)
 # EPY: END code

@@ -2,7 +2,7 @@ import json
 import argparse
 from typing import Any, Dict, List
 
-from starfish.image import ImageStack
+from starfish._stack import ImageStack
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import watershed

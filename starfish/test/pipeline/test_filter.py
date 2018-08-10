@@ -4,9 +4,9 @@ import numpy as np
 import pytest
 
 from starfish.experiment import Experiment
-from starfish.test.dataset_fixtures import merfish_stack
-from starfish.pipeline.filter import gaussian_high_pass
+from starfish.image._filter import gaussian_high_pass
 from starfish.types import Number
+from starfish.test.dataset_fixtures import merfish_stack
 
 
 @pytest.mark.parametrize('sigma', (1, (1, 1)))

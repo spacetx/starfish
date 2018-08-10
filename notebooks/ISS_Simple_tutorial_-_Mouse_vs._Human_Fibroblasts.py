@@ -56,7 +56,7 @@ image(experiment.auxiliary_images['dots'], size=10)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.registration import Registration
+from starfish.image._registration import Registration
 
 registration = Registration.fourier_shift(upsampling=1000)
 registration.run(experiment)

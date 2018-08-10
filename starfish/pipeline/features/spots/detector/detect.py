@@ -7,7 +7,7 @@ import pandas as pd
 import xarray as xr
 
 from starfish.constants import Indices, Features
-from starfish.image import ImageStack
+from starfish._stack import ImageStack
 from starfish.intensity_table import IntensityTable
 from starfish.munge import dataframe_to_multiindex
 from starfish.pipeline.features.spot_attributes import SpotAttributes

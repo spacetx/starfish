@@ -1,4 +1,4 @@
-from starfish.image import ImageStack
+from starfish._stack import ImageStack
 from starfish.pipeline.algorithmbase import AlgorithmBase
 
 

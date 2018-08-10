@@ -1,11 +1,10 @@
 import pytest
 
 from starfish.constants import Indices
-from starfish.test.dataset_fixtures import merfish_stack
 from starfish.pipeline.features.pixels.pixel_spot_detector import PixelSpotDetector
-from starfish.pipeline.filter.gaussian_high_pass import GaussianHighPass
-from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
-from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
+from starfish.image._filter.gaussian_high_pass import GaussianHighPass
+from starfish.image._filter.gaussian_low_pass import GaussianLowPass
+from starfish.image._filter.richardson_lucy_deconvolution import DeconvolvePSF
 
 
 @pytest.mark.skip("TODO ambrosejcarr: fix this test in a future PR. Currently no spots are "

@@ -17,7 +17,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from showit import image, tile
+from showit import image
 import pprint
 
 from starfish.experiment import Experiment
@@ -91,7 +91,7 @@ codebook
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.filter import Filter
+from starfish.image._filter import Filter
 
 # filter raw data
 masking_radius = 15
@@ -115,7 +115,7 @@ for img in experiment.auxiliary_images.values():
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.registration import Registration
+from starfish.image._registration import Registration
 
 registration = Registration.FourierShiftRegistration(upsampling=1000, reference_stack=experiment.auxiliary_images['dots'], verbose=True)
 registration.run(experiment.image)
@@ -226,7 +226,7 @@ table.head()
 
 # EPY: START code
 from starfish.constants import Indices
-from starfish.pipeline.segmentation.watershed import _WatershedSegmenter
+from starfish.image._segmentation import _WatershedSegmenter
 
 dapi_thresh = .16  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain

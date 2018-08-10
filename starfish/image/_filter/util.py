@@ -1,7 +1,9 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 from skimage.morphology import disk, binary_opening
+
+from starfish.types import Number
 
 
 def bin_thresh(img: np.ndarray, thresh: int) -> np.ndarray:
@@ -70,3 +72,41 @@ def gaussian_kernel(shape: Tuple[int, int]=(3, 3), sigma: float=0.5):
     if sumh != 0:
         kernel /= sumh
     return kernel
+
+
+def validate_and_broadcast_kernel_size(
+        sigma: Union[Number, Tuple[Number, ...]],
+        is_volume: bool
+) -> Tuple[Number, ...]:
+    """
+    Check that the provided sigma is of the right dimensionality, and if necessary, broadcast it
+    to full dimensionality.
+
+    Parameters
+    ----------
+    sigma : Union[Number, Tuple[Number]]
+    is_volume : bool
+
+    Returns
+    -------
+    Tuple[Number] :
+        2-d or 3-d kernel size.
+
+    """
+    if isinstance(sigma, tuple):
+        message = ("if passing an anisotropic kernel, the dimensionality must match the data "
+                   "shape ({shape}), not {passed_shape}")
+        if is_volume and len(sigma) != 3:
+            raise ValueError(message.format(shape=3, passed_shape=len(sigma)))
+        if not is_volume and len(sigma) != 2:
+            raise ValueError(message.format(shape=2, passed_shape=len(sigma)))
+        valid_sigma = sigma
+    else:
+        # TODO skimage is does not broadcast the tuple as declared in their docs. See:
+        # http://scikit-image.org/docs/dev/api/skimage.filters.html#skimage.filters.gaussian
+        if is_volume:
+            valid_sigma = (sigma,) * 3
+        else:
+            valid_sigma = (sigma,) * 2
+
+    return valid_sigma

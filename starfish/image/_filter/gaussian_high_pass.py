@@ -10,6 +10,7 @@ from starfish._stack import ImageStack
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
+from .util import validate_and_broadcast_kernel_size
 
 
 class GaussianHighPass(FilterAlgorithmBase):
@@ -29,15 +30,7 @@ class GaussianHighPass(FilterAlgorithmBase):
             independently.
 
         """
-        if isinstance(sigma, tuple):
-            message = ("if passing an anisotropic kernel, the dimensionality must match the data "
-                       "shape ({shape}), not {passed_shape}")
-            if is_volume and len(sigma) != 3:
-                raise ValueError(message.format(shape=3, passed_shape=len(sigma)))
-            if not is_volume and len(sigma) != 2:
-                raise ValueError(message.format(shape=2, passed_shape=len(sigma)))
-
-        self.sigma = sigma
+        self.sigma = validate_and_broadcast_kernel_size(sigma, is_volume)
         self.is_volume = is_volume
         self.verbose = verbose
 

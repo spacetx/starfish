@@ -8,8 +8,8 @@ from skimage.feature import blob_log
 from starfish.constants import Features
 from starfish._stack import ImageStack
 from starfish.intensity_table import IntensityTable
-from starfish.pipeline.features.spot_attributes import SpotAttributes
-from starfish.pipeline.features.spots.detector.detect import (
+from starfish.pipeline.spots.spot_attributes import SpotAttributes
+from starfish.pipeline.spots.detector.detect import (
     measure_spot_intensity,
     detect_spots,
 )

@@ -8,6 +8,7 @@ from starfish.constants import Indices
 from . import _base
 from . import gaussian
 from . import local_max_peak_finder
+from . import pixel_spot_detector
 
 
 class SpotFinder(PipelineComponent):

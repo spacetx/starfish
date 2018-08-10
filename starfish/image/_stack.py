@@ -256,7 +256,6 @@ class ImageStack:
         self._data.values[slice_list] = data
         self._data_needs_writeback = True
 
-    # TODO ambrosejcarr: update to use IntensityTable instead of SpotAttributes
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],
             color_map: str= 'gray', figure_size: Tuple[int, int]=(10, 10),
@@ -300,25 +299,36 @@ class ImageStack:
 
         """
 
-        from ipywidgets import interact, fixed
-        import matplotlib.pyplot as plt
+        # infer if %matplotlib inline or notebook
+        import matplotlib
+        mpl_is_notebook = 'nbAgg' in matplotlib.get_backend()
 
         if not indices:
             raise ValueError('indices may not be an empty dict or None')
+
+        # get linearized scaled and clipped tiles, along with title names, for plotting
+        linear_view, labels, n_tiles = self._get_scaled_clipped_linear_view(indices, rescale, p_min, p_max)
+
+        if mpl_is_notebook:
+            self._show_matplotlib_notebook(linear_view, labels, n_tiles, show_spots, figure_size, color_map)
+        else:
+            return self._show_matplotlib_inline(linear_view, labels, n_tiles, show_spots, figure_size, color_map)
+
+    def _get_scaled_clipped_linear_view(self, indices, rescale, p_min, p_max):
 
         # get the requested chunk, linearize the remaining data into a sequence of tiles
         data, remaining_inds = self.get_slice(indices)
 
         # identify the dimensionality of data with all dimensions other than x, y linearized
         if len(data.shape) >= 3:
-            n = np.product(data.shape[:-2])
+            n_tiles = np.product(data.shape[:-2])
         else:
             raise ValueError(
                 f'a stack with dimensionality >= 3 is required, the provided indexer produced a '
                 f'stack with shape {data.shape}')
 
         # linearize the array
-        linear_view: np.ndarray = data.reshape((n,) + data.shape[-2:])
+        linear_view: np.ndarray = data.reshape((n_tiles,) + data.shape[-2:])
 
         # set the labels for the linearized tiles
         labels: List[List[str]] = []
@@ -329,7 +339,7 @@ class ImageStack:
         # it expects "Iterable[List[str]]"
         labels = list(product(*labels))  # type: ignore
 
-        n = linear_view.shape[0]
+        n_tiles = linear_view.shape[0]
 
         if rescale and any((p_min, p_max)):
             raise ValueError('select one of rescale and p_min/p_max to rescale image, not both.')
@@ -351,14 +361,19 @@ class ImageStack:
             )
             linear_view = np.clip(linear_view, a_min=a_min, a_max=a_max)
 
-        # Create the plot
+        return linear_view, labels, n_tiles
+
+    def _show_matplotlib_notebook(self, linear_view, labels, n_tiles, show_spots, figure_size, color_map):
+        import matplotlib.pyplot as plt
+        from ipywidgets import interact, fixed
+
         fig, ax = plt.subplots(figsize=figure_size)
         im = ax.imshow(linear_view[0], cmap=color_map)
         ax.set_xticks([])
         ax.set_yticks([])
 
         if show_spots is not None:
-            circs, circle_mask = self._show_spots(result_df=show_spots, ax=ax, n_slices=linear_view.shape[0])
+            circs, circle_mask = self._show_spots(result_df=show_spots.data, ax=ax, n_slices=linear_view.shape[0])
 
         def show_plane(ax, plane, plane_index, cmap="gray", title=None):
             # Update the image in the current plane
@@ -366,7 +381,7 @@ class ImageStack:
 
             # Update the spots, if necessary
             if show_spots is not None:
-                # TODO: vectorize/broadcast?
+                # TODO: kevinyamauchi vectorize/broadcast?
                 for i, state in enumerate(circle_mask[plane_index]):
                     circs[i].set_visible(state)
 
@@ -374,12 +389,40 @@ class ImageStack:
                 ax.set_title(title)
 
         def display_slice(plane_index, ax):
-            show_plane(ax, linear_view[plane_index], plane_index, title=f'{labels[plane_index]}', cmap=color_map)
+            title_str = " ".join(str(lab).upper() for lab in labels[plane_index])
+            show_plane(ax, linear_view[plane_index], plane_index, title=title_str, cmap=color_map)
 
-        interact(display_slice, ax=fixed(ax), plane_index=(0, n - 1))
+        interact(display_slice, ax=fixed(ax), plane_index=(0, n_tiles - 1))
 
-        return
+    def _show_matplotlib_inline(self, linear_view, labels, n_tiles, show_spots, figure_size, color_map):
+        import matplotlib.pyplot as plt
+        from ipywidgets import interact
 
+        def show_plane(ax, plane, plane_index, cmap="gray", title=None):
+            ax.imshow(plane, cmap=cmap)
+
+            if show_spots:
+                # this is slow. This link might have something to help:
+                # https://bastibe.de/2013-05-30-speeding-up-matplotlib.html
+                self._show_spots(show_spots.data, ax=ax, z_dist=plane_index)
+
+            if title:
+                ax.set_title(title, fontsize=16)
+            ax.set_xticks([])
+            ax.set_yticks([])
+
+        @interact(plane_index=(0, n_tiles - 1))
+        def display_slice(plane_index=0):
+            fig, ax = plt.subplots(figsize=figure_size)
+            title_str = " ".join(str(lab).upper() for lab in labels[plane_index])
+            show_plane(ax, linear_view[plane_index], plane_index, title=title_str, cmap=color_map)
+            plt.show()
+
+        return display_slice
+
+    # TODO ambrosejcarr: update to use IntensityTable instead of SpotAttributes
+    # TODO ambrosejcarr: also, show_spots is probably definitely broken
+    # TODO ambrosejcarr: it's probably also broken differently for each matplotlib backend
     @staticmethod
     def _show_spots(result_df, ax, size=1, n_slices=0, z_dist=1, scale_radius=5):
         """function to plot spot finding results on top of any image as hollow red circles

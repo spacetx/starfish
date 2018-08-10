@@ -139,7 +139,8 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             spot_finding_method=self.image_to_spots,
             reference_image=blobs_image,
             reference_image_from_max_projection=reference_image_from_max_projection,
-            measurement_function=self.measurement_function
+            measurement_function=self.measurement_function,
+            radius_is_gyration=False,
         )
 
         return intensity_table
@@ -151,9 +152,11 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
         group_parser.add_argument(
             "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)")
-        group_parser.add_argument("--num-sigma", default=20, type=int, help="Number of sigmas to try")
+        group_parser.add_argument(
+            "--num-sigma", default=20, type=int, help="Number of sigmas to try")
         group_parser.add_argument("--threshold", default=.01, type=float, help="Dots threshold")
         group_parser.add_argument(
-            "--overlap", default=0.5, type=float, help="dots with overlap of greater than this fraction are combined")
+            "--overlap", default=0.5, type=float,
+            help="dots with overlap of greater than this fraction are combined")
         group_parser.add_argument(
             "--show", default=False, action='store_true', help="display results visually")

@@ -18,12 +18,14 @@ from starfish.util import clock
 
 def get_jsonpath_from_file(json_filepath_components: Sequence[str], jsonpath: str):
     """
-    Given a series of filepath components, join them to find a file <FILE>.  Open that file, and locate a specific value
-    in the json structure <PATH>.  Join the directory path of <FILE> and <PATH> and return that.
+    Given a series of filepath components, join them to find a file <FILE>.  Open that file, and
+    locate a specific value in the json structure <PATH>.  Join the directory path of <FILE> and
+    <PATH> and return that.
 
-    For example, if json_filepath_components is ["/tmp", "formatted", "experiment.json"] and jsonpath is
-    "$['hybridization']", this method will open /tmp/formatted/experiment.json, decode that as a json document, and
-    locate the value of the key 'hybridization'.  It will return /tmp/formatted/XXX, where XXX is the value of the key.
+    For example, if json_filepath_components is ["/tmp", "formatted", "experiment.json"] and
+    jsonpath is "$['hybridization']", this method will open /tmp/formatted/experiment.json, decode
+    that as a json document, and locate the value of the key 'hybridization'.  It will return
+    /tmp/formatted/XXX, where XXX is the value of the key.
     """
     json_filepath = os.path.join(*json_filepath_components)
     dirname = os.path.dirname(json_filepath)
@@ -55,7 +57,8 @@ class TestWithIssData(unittest.TestCase):
                 [tempdir, "formatted", "experiment.json"],
                 "$['hybridization_images']",
             ),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered", "hybridization.json"),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "registered", "hybridization.json"),
             "FourierShiftRegistration",
             "--reference-stack", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
                 [tempdir, "formatted", "experiment.json"],
@@ -65,8 +68,10 @@ class TestWithIssData(unittest.TestCase):
         ],
         [
             "starfish", "filter",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered", "hybridization.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "hybridization.json"),
+            "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "registered", "hybridization.json"),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "filtered", "hybridization.json"),
             "WhiteTophat",
             "--masking-radius", "15",
         ],
@@ -76,7 +81,8 @@ class TestWithIssData(unittest.TestCase):
                 [tempdir, "formatted", "experiment.json"],
                 "$['auxiliary_images']['nuclei']",
             ),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "nuclei.json"),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "filtered", "nuclei.json"),
             "WhiteTophat",
             "--masking-radius", "15",
         ],
@@ -86,16 +92,19 @@ class TestWithIssData(unittest.TestCase):
                 [tempdir, "formatted", "experiment.json"],
                 "$['auxiliary_images']['dots']",
             ),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "dots.json"),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "filtered", "dots.json"),
             "WhiteTophat",
             "--masking-radius", "15",
         ],
         [
             "starfish", "detect_spots",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "hybridization.json"),
+            "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "filtered", "hybridization.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
             "GaussianSpotDetector",
-            "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "dots.json"),
+            "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "filtered", "dots.json"),
             "--min-sigma", "4",
             "--max-sigma", "6",
             "--num-sigma", "20",
@@ -105,8 +114,10 @@ class TestWithIssData(unittest.TestCase):
             "starfish", "segment",
             "--hybridization-stack", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "hybridization.json"),
-            "--nuclei-stack", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "nuclei.json"),
-            "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.geojson"),
+            "--nuclei-stack", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "filtered", "nuclei.json"),
+            "-o", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "results", "regions.geojson"),
             "Watershed",
             "--dapi-threshold", ".16",
             "--input-threshold", ".22",
@@ -115,9 +126,12 @@ class TestWithIssData(unittest.TestCase):
         [
             "starfish", "target_assignment",
             "--coordinates-geojson",
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.geojson"),
-            "--intensities", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "regions.json"),
+            lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "results", "regions.geojson"),
+            "--intensities", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "results", "spots.nc"),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "results", "regions.json"),
             "PointInPoly2D",
         ],
         [

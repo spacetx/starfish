@@ -22,7 +22,8 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
         metric : str
             the sklearn metric string to pass to NearestNeighbors
         distance_threshold : float
-            spots whose codewords are more than this metric distance from an expected code are filtered
+            spots whose codewords are more than this metric distance from an expected code are
+            filtered
         magnitude_threshold : int
             spots with intensity less than this value are filtered
         min_area : int
@@ -88,9 +89,14 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
         group_parser.add_argument("--metric", type='str', default='euclidean')
         group_parser.add_argument(
             "--distance-threshold", default=0.5176,
-            help="maximum distance a pixel may be from a codeword before it is filtered")
-        group_parser.add_argument("--magnitude-threshold", type=float, default=1, help="minimum magnitude of a feature")
-        group_parser.add_argument("--area-threshold", type=float, default=2, help="minimum area of a feature")
+            help="maximum distance a pixel may be from a codeword before it is filtered"
+        )
+        group_parser.add_argument(
+            "--magnitude-threshold", type=float, default=1, help="minimum magnitude of a feature"
+        )
+        group_parser.add_argument(
+            "--area-threshold", type=float, default=2, help="minimum area of a feature"
+        )
         group_parser.add_argument('--crop-x', type=int, default=0)
         group_parser.add_argument('--crop-y', type=int, default=0)
         group_parser.add_argument('--crop-z', type=int, default=0)

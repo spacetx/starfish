@@ -135,4 +135,7 @@ def test_intensity_table_to_dataframe():
     assert np.array_equal(table_df[Features.Y], table.coords[Features.Y].values)
     assert np.array_equal(table_df[Features.Z], table.coords[Features.Z].values)
     assert np.array_equal(table_df[Features.SPOT_RADIUS], table.coords[Features.SPOT_RADIUS].values)
-    assert np.array_equal(table_df.columns, [Features.X, Features.Y, Features.Z, Features.SPOT_RADIUS])
+    assert np.array_equal(
+        table_df.columns,
+        [Features.X, Features.Y, Features.Z, Features.SPOT_RADIUS]
+    )

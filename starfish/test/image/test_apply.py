@@ -27,7 +27,9 @@ def test_apply_3d():
 
 
 def test_apply_labeled_dataset():
-    """test that apply correctly applies a simple function across starfish-generated synthetic data"""
+    """
+    test that apply correctly applies a simple function across starfish-generated synthetic data
+    """
     original = SyntheticData().spots()
     image = deepcopy(original)
     image.apply(multiply, value=2)
@@ -35,7 +37,10 @@ def test_apply_labeled_dataset():
 
 
 def test_apply_not_in_place():
-    """test that apply correctly applies a simple function across a starfish stack without modifying original data"""
+    """
+    test that apply correctly applies a simple function across a starfish stack without modifying
+    original data
+    """
     image = SyntheticData().spots()
     new = image.apply(multiply, value=2, in_place=False)
     assert np.all(new.numpy_array == image.numpy_array * 2)

@@ -28,7 +28,8 @@ def merfish_stack() -> Stack:
 
     Notes
     -----
-    Because download takes time, this fixture runs once per session -- that is, the download is run only once.
+    Because download takes time, this fixture runs once per session -- that is, the download is run
+    only once.
 
     Returns
     -------
@@ -36,7 +37,9 @@ def merfish_stack() -> Stack:
         starfish.io.Stack object containing MERFISH data
     """
     s = Stack()
-    s.read('https://s3.amazonaws.com/czi.starfish.data.public/20180802/MERFISH/fov_001/experiment.json')
+    s.read(
+        'https://s3.amazonaws.com/czi.starfish.data.public/20180802/MERFISH/fov_001/experiment.json'
+    )
     return deepcopy(s)
 
 

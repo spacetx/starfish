@@ -4,7 +4,10 @@ import warnings
 from copy import deepcopy
 from functools import partial
 from itertools import product
-from typing import Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
+from typing import (
+    Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple,
+    Union
+)
 
 import numpy as np
 import pandas as pd
@@ -34,7 +37,8 @@ class ImageStack:
     set_slice    set a slice of the image tensor
     apply        apply a 2d or 3d function across all Tiles in the image tensor
     max_proj     return a max projection over one or more axis of the image tensor
-    show_stack   show an interactive, pageable view of the image tensor, or a slice of the image tensor
+    show_stack   show an interactive, pageable view of the image tensor, or a slice of the image
+                 tensor
     write        save the (potentially modified) image tensor to disk
 
     Properties
@@ -44,7 +48,8 @@ class ImageStack:
     num_zlayers  the number of z-layers stored in the image tensor
     numpy_array  the 5-d image tensor is stored in this array
     raw_shape    the shape of the image tensor (in integers)
-    shape        the shape of the image tensor by categorical index (channels, imaging rounds, z-layers)
+    shape        the shape of the image tensor by categorical index (channels, imaging rounds,
+                 z-layers)
     """
 
     AXES_DATA: Mapping[Indices, _DimensionMetadata] = {
@@ -58,9 +63,9 @@ class ImageStack:
         self._image_partition = image_partition
         self._tile_shape = image_partition.default_tile_shape
 
-        # Examine the tiles to figure out the right kind (int, float, etc.) and size.  We require that all the tiles
-        # have the same kind of data type, but we do not require that they all have the same size of data type.  The
-        # allocated array is the highest size we encounter.
+        # Examine the tiles to figure out the right kind (int, float, etc.) and size.  We require
+        # that all the tiles have the same kind of data type, but we do not require that they all
+        # have the same size of data type. The # allocated array is the highest size we encounter.
         kind = None
         max_size = 0
         for tile in self._image_partition.tiles():
@@ -123,7 +128,8 @@ class ImageStack:
                     f"Tile "
                     f"(R: {tile.indices[Indices.ROUND]} C: {tile.indices[Indices.CH]} "
                     f"Z: {tile.indices[Indices.Z]}) has "
-                    f"dtype {data.dtype}.  One or more tiles is of a larger dtype {self._data.dtype}.",
+                    f"dtype {data.dtype}.  One or more tiles is of a larger dtype "
+                    f"{self._data.dtype}.",
                     DataFormatWarning)
             self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
         # set_slice will mark the data as needing writeback, so we need to unset that.
@@ -145,8 +151,8 @@ class ImageStack:
         url : str
             Either an absolute URL or a relative URL referring to the image to be read.
         baseurl : Optional[str]
-            If url is a relative URL, then this must be provided.  If url is an absolute URL, then this parameter is
-            ignored.
+            If url is a relative URL, then this must be provided.  If url is an absolute URL, then
+            this parameter is ignored.
         """
         image_partition = Reader.parse_doc(url, baseurl)
 
@@ -186,20 +192,23 @@ class ImageStack:
             indices: Mapping[Indices, Union[int, slice]]
     ) -> Tuple[np.ndarray, Sequence[Indices]]:
         """
-        Given a dictionary mapping the index name to either a value or a slice range, return a numpy array representing
-        the slice, and a list of the remaining axes beyond the normal x-y tile.
+        Given a dictionary mapping the index name to either a value or a slice range, return a
+        numpy array representing the slice, and a list of the remaining axes beyond the normal x-y
+        tile.
 
         Example:
             ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
             ImageStack Implicit axes: X, Y with shape 10, 20, respectively.
             Called to slice with indices {Z: 5}.
-            Result: a 4-dimensional numpy array with shape (3, 4, 20, 10) and the remaining axes [H, C].
+            Result: a 4-dimensional numpy array with shape (3, 4, 20, 10) and the remaining axes
+                    [H, C].
 
         Example:
             Original axes: H, C, and Z.
             Implicit axes: X, Y.
             Called to slice with indices {Z: 5, C: slice(2, 4)}.
-            Result: a 4-dimensional numpy array with shape (3, 2, 20, 10) and the remaining axes [H, C].
+            Result: a 4-dimensional numpy array with shape (3, 2, 20, 10) and the remaining axes
+                    [H, C].
         """
         slice_list, axes = self._build_slice_list(indices)
         result = self._data.values[slice_list]
@@ -211,9 +220,10 @@ class ImageStack:
             data: np.ndarray,
             axes: Sequence[Indices]=None):
         """
-        Given a dictionary mapping the index name to either a value or a slice range and a source numpy array, set the
-        slice of the array of this ImageStack to the values in the source numpy array.  If the optional parameter axes
-        is provided, that represents the axes of the numpy array beyond the x-y tile.
+        Given a dictionary mapping the index name to either a value or a slice range and a source
+        numpy array, set the slice of the array of this ImageStack to the values in the source
+        numpy array. If the optional parameter axes is provided, that represents the axes of the
+        numpy array beyond the x-y tile.
 
         Example:
             ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
@@ -233,14 +243,16 @@ class ImageStack:
 
         if axes is not None:
             if len(axes) != len(data.shape) - 2:
-                raise ValueError("data shape ({}) should be the axes ({}) and (x,y).".format(data.shape, axes))
+                raise ValueError(
+                    "data shape ({}) should be the axes ({}) and (x,y).".format(data.shape, axes))
             move_src = list()
             move_dst = list()
             for src_idx, axis in enumerate(axes):
                 try:
                     dst_idx = expected_axes.index(axis)
                 except ValueError:
-                    raise ValueError("Unexpected axis {}.  Expecting only {}.".format(axis, expected_axes))
+                    raise ValueError(
+                        "Unexpected axis {}.  Expecting only {}.".format(axis, expected_axes))
                 if src_idx != dst_idx:
                     move_src.append(src_idx)
                     move_dst.append(dst_idx)
@@ -260,11 +272,12 @@ class ImageStack:
             self, indices: Mapping[Indices, Union[int, slice]],
             color_map: str= 'gray', figure_size: Tuple[int, int]=(10, 10),
             show_spots: Optional[SpotAttributes]=None,
-            rescale: bool=False, p_min: Optional[float]=None, p_max: Optional[float]=None, **kwargs):
+            rescale: bool=False, p_min: Optional[float]=None, p_max: Optional[float]=None, **kwargs
+    ):
         """Create an interactive visualization of an image stack
 
-        Produces a slider that flips through the selected volume tile-by-tile. Supports manual adjustment of dynamic
-        range.
+        Produces a slider that flips through the selected volume tile-by-tile. Supports manual
+        adjustment of dynamic range.
 
         Parameters
         ----------
@@ -276,26 +289,30 @@ class ImageStack:
         figure_size : Tuple[int, int] (default = (10, 10))
             size of the figure in inches
         show_spots : Optional[SpotAttributes]
-            [Preliminary functionality] if provided, should be a SpotAttribute table that corresponds
-            to the volume being displayed. This will be paired automatically in the future.
+            [Preliminary functionality] if provided, should be a SpotAttribute table that
+            corresponds to the volume being displayed. This will be paired automatically in the
+            future.
         rescale : bool (default = False)
-            if True, rescale the data to exclude high and low-value outliers (see skimage.exposure.rescale_intensity).
+            if True, rescale the data to exclude high and low-value outliers
+            (see skimage.exposure.rescale_intensity).
         p_min: float
-            clip values below this intensity percentile. If provided, overrides rescale, above. (default = None)
+            clip values below this intensity percentile. If provided, overrides rescale, above.
+            (default = None)
         p_max: float
-            clip values above this intensity percentile. If provided, overrides rescale, above. (default = None)
+            clip values above this intensity percentile. If provided, overrides rescale, above.
+            (default = None)
 
         Raises
         ------
         ValueError :
-            User must select one of rescale or p_min/p_max to adjust the image dynamic range. If both are selected, a
-            ValueError is raised.
+            User must select one of rescale or p_min/p_max to adjust the image dynamic range.
+            If both are selected, a ValueError is raised.
 
         Notes
         -----
-        For this widget to function interactively in the notebook, after ipywidgets has been installed, the user must
-        register the widget with jupyter by typing the following command into the terminal:
-        jupyter nbextension enable --py widgetsnbextension
+        For this widget to function interactively in the notebook, after ipywidgets has been
+        installed, the user must register the widget with jupyter by typing the following command
+        into the terminal: jupyter nbextension enable --py widgetsnbextension
 
         """
 
@@ -442,7 +459,8 @@ class ImageStack:
         z_dist : float
             The max distance a spot can be from the displayed slice to be visible. Default (1.5)
         scale_radius : float
-            The size of the displayed spots is the scale_radius multiplied by the fit radius. Default: 5
+            The size of the displayed spots is the scale_radius multiplied by the fit radius.
+            Default: 5
 
 
         """
@@ -463,7 +481,7 @@ class ImageStack:
         # Plot the spots
         circs = []
         for i in range(n_circles):
-            r, x, y = result_df.loc[i, ['r', 'x', 'y']]  # radius is a duplicate, and is present twice
+            r, x, y = result_df.loc[i, ['r', 'x', 'y']]  # radius is duplicated
             c = plt.Circle((y, x), r * scale_radius, color='r', linewidth=size, fill=False)
             circs.append(c)
             ax.add_patch(c)
@@ -537,19 +555,23 @@ class ImageStack:
             array, axes = self.get_slice(inds)
             yield array
 
-    def apply(self, func, is_volume=False, in_place=True, verbose: bool=False, **kwargs) -> "ImageStack":
+    def apply(
+            self, func, is_volume=False, in_place=True, verbose: bool=False, **kwargs
+    ) -> "ImageStack":
         """Apply func over all tiles or volumes in self
 
         Parameters
         ----------
         func : Callable
-            Function to apply. must expect a first argument which is a 2d or 3d numpy array (see is_volume) and return a
+            Function to apply. must expect a first argument which is a 2d or 3d numpy array
+            (see is_volume) and return a
             np.ndarray. If inplace is True, must return an array of the same shape.
         is_volume : bool
             (default False) If True, pass 3d volumes (x, y, z) to func
         in_place : bool
             (default True) If True, function is executed in place. If n_proc is not 1, the tile or
-            volume will be copied once during execution. If false, a new ImageStack object will be produced.
+            volume will be copied once during execution. If false, a new ImageStack object will be
+            produced.
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
         kwargs : dict
@@ -558,12 +580,14 @@ class ImageStack:
         Returns
         -------
         ImageStack :
-            If inplace is False, return a new ImageStack, otherwise return a reference to the original stack with
-            data modified by application of func
+            If inplace is False, return a new ImageStack, otherwise return a reference to the
+            original stack with data modified by application of func
         """
         if not in_place:
             image_stack = deepcopy(self)
-            return image_stack.apply(func, is_volume=is_volume, in_place=True, verbose=verbose, **kwargs)
+            return image_stack.apply(
+                func, is_volume=is_volume, in_place=True, verbose=verbose, **kwargs
+            )
 
         mapfunc: Callable = map  # TODO: ambrosejcarr posix-compliant multiprocessing
         indices = list(self._iter_indices(is_volume=is_volume))
@@ -587,8 +611,8 @@ class ImageStack:
         Parameters
         ----------
         func : Callable
-            Function to apply. must expect a first argument which is a 2d or 3d numpy array (see is_volume) but
-            may return any object type
+            Function to apply. must expect a first argument which is a 2d or 3d numpy array
+            (see is_volume) but may return any object type
         is_volume : bool
             (default False) If True, pass 3d volumes (x, y, z) to func
         verbose : bool
@@ -621,9 +645,9 @@ class ImageStack:
         Returns
         -------
         pd.DataFrame :
-            dataframe containing per-tile metadata information for each image. Guaranteed to include information on
-            channel, imaging round, z_layer, and barcode index. Also contains any information stored in the
-            extras field for each tile in hybridization.json
+            dataframe containing per-tile metadata information for each image. Guaranteed to
+            include information on channel, imaging round, z_layer, and barcode index. Also
+            contains any information stored in the extras field for each tile in hybridization.json
 
         """
 
@@ -640,8 +664,8 @@ class ImageStack:
         if len(duplicate_keys) > 0:
             duplicate_keys_str = ", ".join([str(key) for key in duplicate_keys])
             raise ValueError(
-                f"keys ({duplicate_keys_str}) was found in both the Tile specification and extras field. Tile "
-                f"specification keys may not be duplicated in the extras field.")
+                f"keys ({duplicate_keys_str}) was found in both the Tile specification and extras "
+                f"field. Tile specification keys may not be duplicated in the extras field.")
 
         for tile in self._image_partition.tiles():
             for k in index_keys:
@@ -674,17 +698,18 @@ class ImageStack:
     @property
     def shape(self) -> collections.OrderedDict:
         """
-        Returns the shape of the space that this image inhabits.  It does not include the dimensions of the image
-        itself.  For instance, if this is an X-Y image in a C-H-Y-X space, then the shape would include the dimensions C
-        and H.
+        Returns the shape of the space that this image inhabits.  It does not include the
+        dimensions of the image itself.  For instance, if this is an X-Y image in a C-H-Y-X space,
+        then the shape would include the dimensions C and H.
 
         Returns
         -------
         An ordered mapping between index names to the size of the index.
         """
-        # TODO: (ttung) Note that the return type should be ..OrderedDict[Any, str], but python3.6 has a bug where this
-        # breaks horribly.  Can't find a bug id to link to, but see
-        # https://stackoverflow.com/questions/41207128/how-do-i-specify-ordereddict-k-v-types-for-mypy-type-annotation
+        # TODO: (ttung) Note that the return type should be ..OrderedDict[Any, str], but python3.6
+        # has a bug where this # breaks horribly.  Can't find a bug id to link to, but see
+        # https://stackoverflow.com/questions/41207128/how-do-i-specify-ordereddict-k-v-types-for-\
+        # mypy-type-annotation
         result: collections.OrderedDict[Any, str] = collections.OrderedDict()
         for name, data in ImageStack.AXES_DATA.items():
             result[name] = self._data.shape[data.order]
@@ -730,7 +755,9 @@ class ImageStack:
                 h = tile.indices[Indices.ROUND]
                 c = tile.indices[Indices.CH]
                 zlayer = tile.indices.get(Indices.Z, 0)
-                tile.numpy_array, axes = self.get_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer})
+                tile.numpy_array, axes = self.get_slice(
+                    indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}
+                )
                 assert len(axes) == 0
             self._data_needs_writeback = False
 
@@ -807,7 +834,9 @@ class ImageStack:
         return None
 
     @staticmethod
-    def _default_tile_data_provider(round_: int, ch: int, z: int, height: int, width: int) -> np.ndarray:
+    def _default_tile_data_provider(
+            round_: int, ch: int, z: int, height: int, width: int
+    ) -> np.ndarray:
         """
         Returns a tile of just ones for any given round/ch/z.
         """

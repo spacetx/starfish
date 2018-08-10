@@ -68,19 +68,21 @@ class FetchedImage:
 
 class ImageFetcher:
     """
-    This is the contract for providing the image data for constructing a :class:`slicedimage.Collection`.
+    This is the contract for providing the image data for constructing a
+    :class:`slicedimage.Collection`.
     """
     def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
         """
-        Given fov, hyb, ch, and z, return an instance of a :class:`.FetchedImage` that can be queried for the image
-        data.
+        Given fov, hyb, ch, and z, return an instance of a :class:`.FetchedImage` that can be
+        queried for the image data.
         """
         raise NotImplementedError()
 
 
 class RandomNoiseImage(FetchedImage):
     """
-    This is a simple implementation of :class:`.FetchedImage` that simply regenerates random data for the image.
+    This is a simple implementation of :class:`.FetchedImage` that simply regenerates random data
+    for the image.
     """
     @property
     def shape(self) -> Tuple[int, ...]:
@@ -100,14 +102,18 @@ class RandomNoiseImage(FetchedImage):
 
 class RandomNoiseImageFetcher(ImageFetcher):
     """
-    This is a simple implementation of :class:`.ImageFetcher` that simply returns a :class:`.RandomNoiseImage` for every
-    fov, hyb, ch, z combination.
+    This is a simple implementation of :class:`.ImageFetcher` that simply returns a
+    :class:`.RandomNoiseImage` for every fov, hyb, ch, z combination.
     """
     def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
         return RandomNoiseImage()
 
 
-def build_image(fov_count, hyb_count, ch_count, z_count, image_fetcher: ImageFetcher, default_shape: Tuple[int, int]):
+def build_image(
+        fov_count, hyb_count, ch_count, z_count,
+        image_fetcher: ImageFetcher,
+        default_shape: Tuple[int, int]
+):
     """
     Build and returns an image set with the following characteristics:
 
@@ -182,18 +188,20 @@ def write_experiment_json(
     hyb_dimensions : Mapping[str, int]
         Dictionary mapping dimension name to dimension size for the hybridization image.
     aux_name_to_dimensions : Mapping[str, Mapping[str, int]]
-        Dictionary mapping the auxiliary image type to dictionaries, which map from dimension name to dimension size.
+        Dictionary mapping the auxiliary image type to dictionaries, which map from dimension name
+        to dimension size.
     hyb_image_fetcher : Optional[ImageFetcher]
-        ImageFetcher for hybridization images.  Set this if you want specific image data to be set for the hybridization
-        images.  If not provided, the image data is set to random noise via :class:`RandomNoiseImageFetcher`.
-    aux_image_fetcher : Optional[Mapping[str, ImageFetcher]]
-        ImageFetchers for auxiliary images.  Set this if you want specific image data to be set for one or more aux
-        image types.  If not provided for any given aux image, the image data is set to random noise via
+        ImageFetcher for hybridization images.  Set this if you want specific image data to be set
+        for the hybridization images.  If not provided, the image data is set to random noise via
         :class:`RandomNoiseImageFetcher`.
+    aux_image_fetcher : Optional[Mapping[str, ImageFetcher]]
+        ImageFetchers for auxiliary images.  Set this if you want specific image data to be set for
+        one or more aux image types.  If not provided for any given aux image, the image data is
+        set to random noise via :class:`RandomNoiseImageFetcher`.
     postprocess_func : Optional[Callable[[dict], dict]]
-        If provided, this is called with the experiment document for any postprocessing.  An example of this would be to
-        add something to one of the top-level extras field.  The callable should return what is to be written as the
-        experiment document.
+        If provided, this is called with the experiment document for any postprocessing.
+        An example of this would be to add something to one of the top-level extras field.
+        The callable should return what is to be written as the experiment document.
     default_shape : Tuple[int, int] (default = (1536, 1024))
         Default shape for the tiles in this experiment.
     """

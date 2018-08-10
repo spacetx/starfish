@@ -36,19 +36,19 @@ from starfish.constants import Indices, Features
 # EPY: END markdown
 
 # EPY: START code
-from starfish.io import Stack
+from starfish.experiment import Experiment
 
 # replace <output directory> with where you saved the formatted data to with the above script
 in_json = '<output directory>/org.json'
 
-s = Stack()
-s.read(in_json)
+experiment = Experiment()
+experiment.read(in_json)
 
-tile(s.image.squeeze(), size=10);
+tile(experiment.image.squeeze(), size=10);
 # EPY: END code
 
 # EPY: START code
-image(s.auxiliary_images['dots'], size=10)
+image(experiment.auxiliary_images['dots'], size=10)
 # EPY: END code
 
 # EPY: START markdown
@@ -59,9 +59,9 @@ image(s.auxiliary_images['dots'], size=10)
 from starfish.pipeline.registration import Registration
 
 registration = Registration.fourier_shift(upsampling=1000)
-registration.run(s)
+registration.run(experiment)
 
-tile(s.image.squeeze(), size=10);
+tile(experiment.image.squeeze(), size=10);
 # EPY: END code
 
 # EPY: START markdown
@@ -74,25 +74,25 @@ from starfish.filters import white_top_hat
 disk_dize = 10
 
 # filter raw images, for all rounds and channels
-stack_filt = [white_top_hat(im, disk_dize) for im in s.image.squeeze()]
-stack_filt = s.un_squeeze(stack_filt)
+stack_filt = [white_top_hat(im, disk_dize) for im in experiment.image.squeeze()]
+stack_filt = experiment.un_squeeze(stack_filt)
 
 # filter dots
-dots_filt = white_top_hat(s.auxiliary_images['dots'], disk_dize)
+dots_filt = white_top_hat(experiment.auxiliary_images['dots'], disk_dize)
 
 # create a 'stain' for segmentation
-stain = np.mean(s.image.max_proj(Indices.CH), axis=0)
+stain = np.mean(experiment.image.max_proj(Indices.CH), axis=0)
 stain = stain/stain.max()
 
 # update stack
-s.set_stack(stack_filt)
-s.set_aux('dots', dots_filt)
-s.set_aux('stain', stain)
+experiment.set_stack(stack_filt)
+experiment.set_aux('dots', dots_filt)
+experiment.set_aux('stain', stain)
 
 # visualize
-tile(s.image.squeeze(), bar=False, size=10);
-image(s.auxiliary_images['dots'])
-image(s.auxiliary_images['stain'])
+tile(experiment.image.squeeze(), bar=False, size=10);
+image(experiment.auxiliary_images['dots'])
+image(experiment.auxiliary_images['stain'])
 # EPY: END code
 
 # EPY: START markdown
@@ -102,7 +102,7 @@ image(s.auxiliary_images['stain'])
 # EPY: START code
 from starfish.spots.gaussian import GaussianSpotDetector
 
-gsp = GaussianSpotDetector(s)
+gsp = GaussianSpotDetector(experiment)
 min_sigma = 4
 max_sigma = 6
 num_sigma=20
@@ -136,7 +136,7 @@ disk_size_markers = None
 disk_size_mask = None
 min_dist = 57
 
-seg = WatershedSegmenter(s.auxiliary_images['dapi'], s.auxiliary_images['stain'])
+seg = WatershedSegmenter(experiment.auxiliary_images['dapi'], experiment.auxiliary_images['stain'])
 cells_labels = seg.run(dapi_thresh, stain_thresh, size_lim, disk_size_markers, disk_size_mask, min_dist)
 seg.show()
 # EPY: END code
@@ -184,11 +184,11 @@ from starfish.stats import label_to_regions
 dec_filt = pd.merge(dec, spots_viz, on='spot_id',how='left')
 dec_filt = dec_filt[dec_filt.qual>.25]
 
-assert s.auxiliary_images['dapi'].shape == s.auxiliary_images['dots'].shape
+assert experiment.auxiliary_images['dapi'].shape == experiment.auxiliary_images['dots'].shape
 
-rgb = np.zeros(s.auxiliary_images['dapi'].shape + (3,))
-rgb[:,:,0] = s.auxiliary_images['dapi']
-rgb[:,:,1] = s.auxiliary_images['dots']
+rgb = np.zeros(experiment.auxiliary_images['dapi'].shape + (3,))
+rgb[:,:,0] = experiment.auxiliary_images['dapi']
+rgb[:,:,1] = experiment.auxiliary_images['dots']
 do = rgb2gray(rgb)
 do = do/(do.max())
 
@@ -203,7 +203,7 @@ plt.plot(dec_filt[dec_filt.barcode==top_barcode.index[1]].y, dec_filt[dec_filt.b
 v = pd.merge(spots_viz, ass, on='spot_id')
 
 r = label_to_regions(cells_labels)
-im = r.mask(background=[0.9, 0.9, 0.9], dims=s.auxiliary_images['dots'].shape, stroke=None, cmap='rainbow')
+im = r.mask(background=[0.9, 0.9, 0.9], dims=experiment.auxiliary_images['dots'].shape, stroke=None, cmap='rainbow')
 image(im,size=10)
 
 v_ass = v[~v.cell_id.isnull()]

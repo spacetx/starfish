@@ -26,7 +26,7 @@ from skimage import (exposure, feature, filters, io, measure,
                       morphology, restoration, segmentation, transform,
                       util, img_as_float)
 
-from starfish.io import Stack
+from starfish.experiment import Experiment
 from starfish.constants import Indices
 # EPY: END code
 
@@ -59,7 +59,7 @@ codebook
 # EPY: END markdown
 
 # EPY: START code
-s = Stack.from_experiment_json(experiment_json)
+experiment = Experiment.from_json(experiment_json)
 # EPY: END code
 
 # EPY: START markdown
@@ -71,7 +71,7 @@ s = Stack.from_experiment_json(experiment_json)
 # EPY: START code
 from starfish.pipeline.filter import Filter
 s_clip = Filter.Clip(p_min=10, p_max=100, verbose=True)
-s_clip.run(s.image)
+s_clip.run(experiment.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -89,12 +89,12 @@ s_clip.run(s.image)
 # EPY: END markdown
 
 # EPY: START code
-s.image.show_stack({Indices.CH.value: 0});
+experiment.image.show_stack({Indices.CH.value: 0});
 # EPY: END code
 
 # EPY: START code
 s_bandpass = Filter.Bandpass(lshort=0.5, llong=7, threshold=None, truncate=4, verbose=True)
-s_bandpass.run(s.image)
+s_bandpass.run(experiment.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -105,13 +105,13 @@ s_bandpass.run(s.image)
 # I wasn't sure if this clipping was supposed to be by volume or tile. I've done tile here, but it can be easily
 # switched to volume. 
 s_clip = Filter.Clip(p_min=10, p_max=100, is_volume=False, verbose=True)
-s_clip.run(s.image)
+s_clip.run(experiment.image)
 # EPY: END code
 
 # EPY: START code
 sigma=(1, 0, 0)  # filter only in z, do nothing in x, y
 glp = Filter.GaussianLowPass(sigma=sigma, is_volume=True, verbose=True)
-glp.run(s.image)
+glp.run(experiment.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -123,7 +123,7 @@ from showit import image
 from trackpy import locate
 
 # grab a section from the tensor. 
-ch1 = s.image.max_proj(Indices.Z)[0, 1]
+ch1 = experiment.image.max_proj(Indices.Z)[0, 1]
 
 results = locate(ch1, diameter=3, minmass=250, maxsize=3, separation=5, preprocess=False, percentile=10) 
 results.columns = ['x', 'y', 'intensity', 'radius', 'eccentricity', 'signal', 'raw_mass', 'ep']
@@ -136,7 +136,7 @@ ax.imshow(ch1, vmin=15, vmax=52, cmap=plt.cm.gray)
 
 # draw called spots on top as red circles
 # scale radius plots the red circle at scale_radius * spot radius
-s.image._show_spots(results, ax=plt.gca(), scale_radius=7)
+experiment.image._show_spots(results, ax=plt.gca(), scale_radius=7)
 # EPY: END code
 
 # EPY: START markdown
@@ -161,7 +161,7 @@ kwargs = dict(
     is_volume=True,
 )
 lmpf = SpotFinder.LocalMaxPeakFinder(**kwargs)
-spot_attributes = lmpf.find(s.image)
+spot_attributes = lmpf.find(experiment.image)
 # EPY: END code
 
 # EPY: START code
@@ -183,5 +183,5 @@ for attrs, (round, ch) in spot_attributes:
 # Note that in places where spots are "missed" it is often because they've been localized to individual 
 # nearby z-planes, whereas most spots exist across several layers of z.
 
-s.image.show_stack({Indices.CH.value: 1, Indices.ROUND.value: 0}, show_spots=spot_attributes[1][0], figure_size=(20, 20), p_min=60, p_max=99.9);
+experiment.image.show_stack({Indices.CH.value: 1, Indices.ROUND.value: 0}, show_spots=spot_attributes[1][0], figure_size=(20, 20), p_min=60, p_max=99.9);
 # EPY: END code

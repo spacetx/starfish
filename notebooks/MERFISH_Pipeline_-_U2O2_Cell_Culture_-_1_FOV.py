@@ -29,13 +29,13 @@ from scipy.stats import scoreatpercentile
 
 from showit import image, tile
 from starfish.constants import Indices, Features
-from starfish.io import Stack
+from starfish.experiment import Experiment
 # EPY: END code
 
 # EPY: START code
 # load the data from cloudfront
-s = Stack()
-s.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment.json')
+experiment = Experiment()
+experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment.json')
 # EPY: END code
 
 # EPY: START markdown
@@ -44,7 +44,7 @@ s.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment
 
 # EPY: START code
 # show all imaging rounds of channel 0
-s.image.show_stack({Indices.CH: 0})
+experiment.image.show_stack({Indices.CH: 0})
 # EPY: END code
 
 # EPY: START markdown
@@ -59,7 +59,7 @@ s.image.show_stack({Indices.CH: 0})
 
 # EPY: START code
 pp = pprint.PrettyPrinter(indent=2)
-pp.pprint(s.org)
+pp.pprint(experiment.org)
 # EPY: END code
 
 # EPY: START markdown
@@ -93,7 +93,7 @@ from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
 # EPY: START code
 from starfish.pipeline.filter.gaussian_high_pass import GaussianHighPass
 ghp = GaussianHighPass(sigma=3, verbose=True)
-ghp.run(s.image)
+ghp.run(experiment.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -103,7 +103,7 @@ ghp.run(s.image)
 # EPY: START code
 from starfish.pipeline.filter.richardson_lucy_deconvolution import DeconvolvePSF
 dpsf = DeconvolvePSF(num_iter=15, sigma=2, verbose=True)
-dpsf.run(s.image)
+dpsf.run(experiment.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -115,7 +115,7 @@ dpsf.run(s.image)
 # EPY: START code
 from starfish.pipeline.filter.gaussian_low_pass import GaussianLowPass
 glp = GaussianLowPass(sigma=1, verbose=True)
-glp.run(s.image)
+glp.run(experiment.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -123,17 +123,17 @@ glp.run(s.image)
 # EPY: END markdown
 
 # EPY: START code
-scale_factors = {(t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] for index, t in s.image.tile_metadata.iterrows()}
+scale_factors = {(t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] for index, t in experiment.image.tile_metadata.iterrows()}
 # EPY: END code
 
 # EPY: START code
 # this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to 
 # at least we can do it with get_slice and set_slice right now.
 
-for indices in s.image._iter_indices():
-    data = s.image.get_slice(indices)[0]
+for indices in experiment.image._iter_indices():
+    data = experiment.image.get_slice(indices)[0]
     scaled = data / scale_factors[indices[Indices.ROUND.value], indices[Indices.CH.value]]
-    s.image.set_slice(indices, scaled)
+    experiment.image.set_slice(indices, scaled)
 # EPY: END code
 
 # EPY: START code
@@ -141,7 +141,7 @@ from scipy.stats import scoreatpercentile
 # EPY: END code
 
 # EPY: START code
-mp = s.image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+mp = experiment.image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 clim = scoreatpercentile(mp, [0.5, 99.5])
 image(mp, clim=clim)
 # EPY: END code
@@ -193,7 +193,7 @@ psd = PixelSpotDetector(
     crop_size=(0, 40, 40)
 )
 
-spot_intensities, prop_results = psd.find(s.image)
+spot_intensities, prop_results = psd.find(experiment.image)
 spot_intensities
 # EPY: END code
 

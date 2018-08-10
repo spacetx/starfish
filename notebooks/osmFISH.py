@@ -8,7 +8,7 @@
 # EPY: END markdown
 
 # EPY: START code
-from starfish.io import Stack
+from starfish.experiment import Experiment
 from starfish.image import ImageStack
 from starfish.constants import Indices
 import os
@@ -19,7 +19,7 @@ import os
 # EPY: END markdown
 
 # EPY: START code
-s = Stack.from_experiment_json('https://dmf0bdeheu4zf.cloudfront.net/20180802/osmFISH/fov_001/experiment.json')
+experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180802/osmFISH/fov_001/experiment.json')
 # EPY: END code
 
 # EPY: START markdown
@@ -27,5 +27,5 @@ s = Stack.from_experiment_json('https://dmf0bdeheu4zf.cloudfront.net/20180802/os
 # EPY: END markdown
 
 # EPY: START code
-s.image.show_stack({Indices.CH: 0})
+experiment.image.show_stack({Indices.CH: 0})
 # EPY: END code

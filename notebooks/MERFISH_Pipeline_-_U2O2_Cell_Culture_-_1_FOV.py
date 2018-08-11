@@ -67,7 +67,7 @@ pp.pprint(experiment.org)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.codebook import Codebook
+from starfish import Codebook
 codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/codebook.json')
 codebook
 # EPY: END code
@@ -81,8 +81,8 @@ codebook
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image._filter.gaussian_high_pass import GaussianHighPass
-ghp = GaussianHighPass(sigma=3, verbose=True)
+from starfish.image import Filter
+ghp = Filter.GaussianHighPass(sigma=3, verbose=True)
 ghp.run(experiment.image)
 # EPY: END code
 
@@ -91,8 +91,7 @@ ghp.run(experiment.image)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image._filter.richardson_lucy_deconvolution import DeconvolvePSF
-dpsf = DeconvolvePSF(num_iter=15, sigma=2, verbose=True)
+dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2, verbose=True)
 dpsf.run(experiment.image)
 # EPY: END code
 
@@ -103,8 +102,7 @@ dpsf.run(experiment.image)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image._filter.gaussian_low_pass import GaussianLowPass
-glp = GaussianLowPass(sigma=1, verbose=True)
+glp = Filter.GaussianLowPass(sigma=1, verbose=True)
 glp.run(experiment.image)
 # EPY: END code
 
@@ -117,6 +115,10 @@ scale_factors = {(t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] for index,
 # EPY: END code
 
 # EPY: START code
+# it's important to convert the data to float here to retain the correct precision for the scaling. Later, starfish
+# will operate entirely on float data and this cast can be removed
+experiment.image._data = experiment.image._data.astype(np.float64)
+
 # this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to 
 # at least we can do it with get_slice and set_slice right now.
 
@@ -171,8 +173,8 @@ image(mp, clim=clim)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.spots.detector import PixelSpotDetector
-psd = PixelSpotDetector(
+from starfish.spots import SpotFinder
+psd = SpotFinder.PixelSpotDetector(
     codebook=codebook,
     metric='euclidean',
     distance_threshold=0.5176,

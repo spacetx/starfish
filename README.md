@@ -66,7 +66,10 @@ pip3 install -r REQUIREMENTS-NOTEBOOK.txt
 jupyter nbextension enable --py widgetsnbextension
 ```
 
-## Development
+## web-based visualization in the browser
+This is a work in progess -- based on our output file formats (e.g., geo_json) we have been able to put together a simple prototype in the [starfish-viz](https://github.com/spacetx/starfish-viz) repo.
+
+## development
 
 Clone the repo and look through (CONTRIBUTING.md)[CONTRIBUTING.md]
 ```

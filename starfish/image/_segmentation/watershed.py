@@ -7,7 +7,7 @@ from skimage.feature import peak_local_max
 from skimage.morphology import watershed
 
 from starfish.constants import Indices
-from starfish._stack import ImageStack
+from starfish.stack import ImageStack
 from starfish.munge import relabel
 from starfish.image._filter.util import bin_thresh, bin_open
 from starfish.stats import label_to_regions

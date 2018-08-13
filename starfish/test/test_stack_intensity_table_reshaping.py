@@ -2,7 +2,7 @@ import numpy as np
 from typing import Tuple
 
 from starfish.constants import Indices
-from starfish._stack import ImageStack
+from starfish.stack import ImageStack
 from starfish.intensity_table import IntensityTable
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences

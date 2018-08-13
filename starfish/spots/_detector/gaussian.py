@@ -6,7 +6,7 @@ import xarray as xr
 from skimage.feature import blob_log
 
 from starfish.constants import Features
-from starfish._stack import ImageStack
+from starfish.stack import ImageStack
 from starfish.intensity_table import IntensityTable
 from starfish.spots._spot_attributes import SpotAttributes
 from starfish.spots._detector.detect import (

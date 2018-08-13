@@ -3,7 +3,7 @@ from typing import Optional
 
 import numpy as np
 
-from starfish._stack import ImageStack
+from starfish.stack import ImageStack
 from ._base import FilterAlgorithmBase
 
 

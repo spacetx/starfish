@@ -3,7 +3,7 @@ import pytest
 from skimage.feature import blob_log
 
 from starfish.constants import Indices
-from starfish._stack import ImageStack
+from starfish.stack import ImageStack
 from starfish.spots._detector._base import SpotFinderAlgorithmBase
 from starfish.spots._detector.detect import detect_spots
 from starfish.spots._detector.gaussian import GaussianSpotDetector

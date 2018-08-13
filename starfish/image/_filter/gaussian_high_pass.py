@@ -6,7 +6,7 @@ import numpy as np
 from skimage import img_as_uint
 
 from starfish.errors import DataFormatWarning
-from starfish._stack import ImageStack
+from starfish.stack import ImageStack
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
 from starfish.types import Number
 from ._base import FilterAlgorithmBase

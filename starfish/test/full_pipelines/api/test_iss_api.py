@@ -4,7 +4,7 @@ from starfish.image._registration.fourier_shift import FourierShiftRegistration
 from starfish.util.synthesize import SyntheticData
 import numpy as np
 from starfish.constants import Indices
-from starfish._stack import ImageStack
+from starfish.stack import ImageStack
 
 
 def test_iss_pipeline():

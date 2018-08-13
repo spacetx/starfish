@@ -9,7 +9,7 @@ semantic_version
 scikit-image>=0.14.0
 scikit-learn
 scipy
-showit
+showit >= 1.1.4
 slicedimage == 0.0.0-dev21
 scikit-learn
 tqdm

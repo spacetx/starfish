@@ -39,7 +39,7 @@ experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/ISS/fov_001/exper
 
 # EPY: START code
 pp = pprint.PrettyPrinter(indent=2)
-pp.pprint(experiment.org)
+pp.pprint(experiment.format_metadata)
 # EPY: END code
 
 # EPY: START markdown

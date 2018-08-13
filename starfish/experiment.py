@@ -14,7 +14,7 @@ class Experiment:
 
     def __init__(self):
         # data organization
-        self.org = None
+        self.format_metadata = None
         self.image = None
 
         # auxiliary images
@@ -56,11 +56,11 @@ class Experiment:
     def read(self, in_json_path_or_url):
         self.backend, name, self.baseurl = resolve_path_or_url(in_json_path_or_url)
         with self.backend.read_file_handle(name) as fh:
-            self.org = json.load(fh)
+            self.format_metadata = json.load(fh)
 
-        self.verify_version(self.org['version'])
-        self.image = ImageStack.from_url(self.org['hybridization_images'], self.baseurl)
-        for aux_key, aux_data in self.org['auxiliary_images'].items():
+        self.verify_version(self.format_metadata['version'])
+        self.image = ImageStack.from_url(self.format_metadata['hybridization_images'], self.baseurl)
+        for aux_key, aux_data in self.format_metadata['auxiliary_images'].items():
             self.auxiliary_images[aux_key] = ImageStack.from_url(aux_data, self.baseurl)
 
     @classmethod

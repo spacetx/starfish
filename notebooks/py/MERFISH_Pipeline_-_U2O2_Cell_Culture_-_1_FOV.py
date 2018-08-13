@@ -15,6 +15,10 @@
 # EPY: END code
 
 # EPY: START code
+import slicedimage
+# EPY: END code
+
+# EPY: START code
 # EPY: ESCAPE %matplotlib notebook
 
 import pprint
@@ -23,7 +27,7 @@ import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
 
-from showit import image
+from showit import image as show_image
 from starfish.constants import Indices, Features
 from starfish.experiment import Experiment
 # EPY: END code
@@ -31,7 +35,7 @@ from starfish.experiment import Experiment
 # EPY: START code
 # load the data from cloudfront
 experiment = Experiment()
-experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment.json')
+experiment.read('http://czi.starfish.data.public.s3.amazonaws.com/20180802/MERFISH/fov_001/experiment_new.json')
 # EPY: END code
 
 # EPY: START markdown
@@ -81,9 +85,13 @@ codebook
 # EPY: END markdown
 
 # EPY: START code
+image = experiment.image
+# EPY: END code
+
+# EPY: START code
 from starfish.image import Filter
-ghp = Filter.GaussianHighPass(sigma=3, verbose=True)
-ghp.run(experiment.image)
+ghp = Filter.GaussianHighPass(sigma=3)
+ghp.run(image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -91,8 +99,8 @@ ghp.run(experiment.image)
 # EPY: END markdown
 
 # EPY: START code
-dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2, verbose=True)
-dpsf.run(experiment.image)
+dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2)
+dpsf.run(image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -103,7 +111,7 @@ dpsf.run(experiment.image)
 
 # EPY: START code
 glp = Filter.GaussianLowPass(sigma=1, verbose=True)
-glp.run(experiment.image)
+glp.run(image)
 # EPY: END code
 
 # EPY: START markdown
@@ -135,7 +143,7 @@ from scipy.stats import scoreatpercentile
 # EPY: START code
 mp = experiment.image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 clim = scoreatpercentile(mp, [0.5, 99.5])
-image(mp, clim=clim)
+show_image(mp, clim=clim)
 # EPY: END code
 
 # EPY: START markdown
@@ -230,5 +238,5 @@ plt.title(f'r = {r}');
 area_lookup = lambda x: 0 if x == 0 else prop_results.region_properties[x - 1].area
 vfunc = np.vectorize(area_lookup)
 mask = np.squeeze(vfunc(prop_results.label_image))
-image((np.squeeze(prop_results.decoded_image)*(mask > 2)), cmap = 'nipy_spectral', size=10)
+show_image(np.squeeze(prop_results.decoded_image)*(mask > 2), cmap = 'nipy_spectral')
 # EPY: END code

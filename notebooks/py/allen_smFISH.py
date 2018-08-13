@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 #
-# EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.4"}}, "nbformat": 4, "nbformat_minor": 2}
+# EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
 # # Reproduce Allen smFISH results with Starfish
@@ -27,7 +27,7 @@ from starfish.constants import Indices
 
 # EPY: START code
 # this is a large (1.1GB) FOV, so the download may take some time
-experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180802/allen_smFISH/fov_001/experiment.json'
+experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180813/allen_smFISH/fov_001/experiment.json'
 # EPY: END code
 
 # EPY: START markdown
@@ -38,7 +38,7 @@ experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180802/allen_smFISH/fo
 
 # EPY: START code
 from starfish.codebook import Codebook
-codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180802/allen_smFISH/fov_001/codebook.json')
+codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180813/allen_smFISH/fov_001/codebook.json')
 codebook
 # EPY: END code
 
@@ -48,6 +48,7 @@ codebook
 
 # EPY: START code
 experiment = Experiment.from_json(experiment_json)
+image = experiment.image
 # EPY: END code
 
 # EPY: START markdown
@@ -57,17 +58,9 @@ experiment = Experiment.from_json(experiment_json)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image._filter import Filter
-s_clip = Filter.Clip(p_min=10, p_max=100, verbose=True)
-s_clip.run(experiment.image)
-# EPY: END code
-
-# EPY: START markdown
-# We're still working through the backing of the Stack.image object with the on-disk or on-cloud Tile spec. As a result, most of our methods work in-place. For now, we can hack around this by deepcopying the data before administering the operation. This notebook was developed on a 64gb workstation, so be aware of the memory usage when copying!
-# EPY: END markdown
-
-# EPY: START code
-# filtered_backup = deepcopy(s)
+from starfish.image import Filter
+s_clip = Filter.Clip(p_min=10, p_max=100)
+s_clip.run(image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -81,8 +74,8 @@ experiment.image.show_stack({Indices.CH.value: 0});
 # EPY: END code
 
 # EPY: START code
-s_bandpass = Filter.Bandpass(lshort=0.5, llong=7, threshold=None, truncate=4, verbose=True)
-s_bandpass.run(experiment.image)
+s_bandpass = Filter.Bandpass(lshort=0.5, llong=7, threshold=None, truncate=4)
+s_bandpass.run(image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -92,14 +85,14 @@ s_bandpass.run(experiment.image)
 # EPY: START code
 # I wasn't sure if this clipping was supposed to be by volume or tile. I've done tile here, but it can be easily
 # switched to volume. 
-s_clip = Filter.Clip(p_min=10, p_max=100, is_volume=False, verbose=True)
-s_clip.run(experiment.image)
+s_clip = Filter.Clip(p_min=10, p_max=100, is_volume=False)
+s_clip.run(image, verbose=True)
 # EPY: END code
 
 # EPY: START code
 sigma=(1, 0, 0)  # filter only in z, do nothing in x, y
 glp = Filter.GaussianLowPass(sigma=sigma, is_volume=True, verbose=True)
-glp.run(experiment.image)
+glp.run(image)
 # EPY: END code
 
 # EPY: START markdown
@@ -117,13 +110,21 @@ results.columns = ['x', 'y', 'intensity', 'radius', 'eccentricity', 'signal', 'r
 # EPY: END code
 
 # EPY: START code
+results
+# EPY: END code
+
+# EPY: START code
+#TODO ambrosejcarr: Showing spots is broken right now. 
+# EPY: END code
+
+# EPY: START code
 # plot the z-projection
 f, ax = plt.subplots(figsize=(20, 20))
 ax.imshow(ch1, vmin=15, vmax=52, cmap=plt.cm.gray)
 
 # draw called spots on top as red circles
 # scale radius plots the red circle at scale_radius * spot radius
-experiment.image._show_spots(results, ax=plt.gca(), scale_radius=7)
+# image._show_spots(results, ax=plt.gca(), scale_radius=7);
 # EPY: END code
 
 # EPY: START markdown
@@ -131,7 +132,7 @@ experiment.image._show_spots(results, ax=plt.gca(), scale_radius=7)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.spots.detector import SpotFinder
+from starfish.spots import SpotFinder
 
 # I've guessed at these parameters from the allen_smFISH code, but you might want to tweak these a bit. 
 # as you can see, this function takes a while. It will be great to parallelize this. That's also coming, 

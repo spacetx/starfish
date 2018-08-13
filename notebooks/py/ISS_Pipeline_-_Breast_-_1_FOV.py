@@ -27,7 +27,7 @@ from starfish.codebook import Codebook
 
 # EPY: START code
 experiment = Experiment()
-experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/ISS/fov_001/experiment.json')
+experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180813/ISS/fov_001/experiment.json')
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 # EPY: END code
 
@@ -91,14 +91,20 @@ codebook
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image._filter import Filter
+primary_image = experiment.image
+dots = experiment.auxiliary_images['dots']
+nuclei = experiment.auxiliary_images['nuclei']
+images = [primary_image, nuclei, image]
+# EPY: END code
+
+# EPY: START code
+from starfish.image import Filter
 
 # filter raw data
 masking_radius = 15
-filt = Filter.WhiteTophat(masking_radius, verbose=True, is_volume=False)
-filt.run(experiment.image)
-for img in experiment.auxiliary_images.values():
-    filt.run(img)
+filt = Filter.WhiteTophat(masking_radius, is_volume=False)
+for img in images:
+    filt.run(img, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -117,8 +123,11 @@ for img in experiment.auxiliary_images.values():
 # EPY: START code
 from starfish.image._registration import Registration
 
-registration = Registration.FourierShiftRegistration(upsampling=1000, reference_stack=experiment.auxiliary_images['dots'], verbose=True)
-registration.run(experiment.image)
+registration = Registration.FourierShiftRegistration(
+    upsampling=1000, 
+    reference_stack=dots,
+    verbose=True)
+registration.run(primary_image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown

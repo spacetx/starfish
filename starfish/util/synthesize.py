@@ -2,7 +2,7 @@ from typing import Tuple
 
 from starfish.codebook import Codebook
 from starfish.intensity_table import IntensityTable
-from starfish.image import ImageStack
+from starfish._stack import ImageStack
 
 
 class SyntheticData:

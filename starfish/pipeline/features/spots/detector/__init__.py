@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from starfish.image import ImageStack
+from starfish._stack import ImageStack
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
 from starfish.constants import Indices

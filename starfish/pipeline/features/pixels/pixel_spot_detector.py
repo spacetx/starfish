@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from starfish.codebook import Codebook
-from starfish.image import ImageStack
+from starfish._stack import ImageStack
 from starfish.intensity_table import IntensityTable
 from starfish.pipeline.features.pixels.combine_adjacent_features import \
     ConnectedComponentDecodingResult, combine_adjacent_features

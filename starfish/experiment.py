@@ -5,7 +5,7 @@ import numpy as np
 from semantic_version import Version
 from slicedimage.io import resolve_path_or_url
 
-from .image import ImageStack
+from ._stack import ImageStack
 
 
 class Experiment:

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from starfish.errors import DataFormatWarning
-from starfish.image import ImageStack
+from starfish._stack import ImageStack
 
 NUM_ROUND = 2
 NUM_CH = 2

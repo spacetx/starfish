@@ -4,7 +4,7 @@ import numpy as np
 from scipy.ndimage.filters import maximum_filter, minimum_filter
 from skimage.morphology import disk, ball
 
-from starfish.image import ImageStack
+from starfish._stack import ImageStack
 from ._base import FilterAlgorithmBase
 
 

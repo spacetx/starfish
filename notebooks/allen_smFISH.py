@@ -12,19 +12,7 @@
 # EPY: START code
 # EPY: ESCAPE %matplotlib notebook
 
-from copy import deepcopy
-from glob import glob
-import json
-import os
-
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-from scipy import ndimage as ndi
-from scipy import stats
-from skimage import (exposure, feature, filters, io, measure,
-                      morphology, restoration, segmentation, transform,
-                      util, img_as_float)
 
 from starfish.experiment import Experiment
 from starfish.constants import Indices
@@ -69,7 +57,7 @@ experiment = Experiment.from_json(experiment_json)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.filter import Filter
+from starfish.image._filter import Filter
 s_clip = Filter.Clip(p_min=10, p_max=100, verbose=True)
 s_clip.run(experiment.image)
 # EPY: END code
@@ -119,7 +107,6 @@ glp.run(experiment.image)
 # EPY: END markdown
 
 # EPY: START code
-from showit import image
 from trackpy import locate
 
 # grab a section from the tensor. 

@@ -7,7 +7,7 @@ from skimage import img_as_uint
 from skimage.filters import gaussian
 
 from starfish.errors import DataFormatWarning
-from starfish.image import ImageStack
+from starfish._stack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
 

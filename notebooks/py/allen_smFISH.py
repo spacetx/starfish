@@ -48,7 +48,7 @@ codebook
 
 # EPY: START code
 experiment = Experiment.from_json(experiment_json)
-image = experiment.image
+primary_image = experiment.image
 # EPY: END code
 
 # EPY: START markdown
@@ -59,8 +59,8 @@ image = experiment.image
 
 # EPY: START code
 from starfish.image import Filter
-s_clip = Filter.Clip(p_min=10, p_max=100)
-s_clip.run(image, verbose=True)
+clip = Filter.Clip(p_min=10, p_max=100)
+clip.run(primary_image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -70,12 +70,12 @@ s_clip.run(image, verbose=True)
 # EPY: END markdown
 
 # EPY: START code
-experiment.image.show_stack({Indices.CH.value: 0});
+primary_image.show_stack({Indices.CH.value: 0});
 # EPY: END code
 
 # EPY: START code
-s_bandpass = Filter.Bandpass(lshort=0.5, llong=7, threshold=None, truncate=4)
-s_bandpass.run(image, verbose=True)
+bandpass = Filter.Bandpass(lshort=0.5, llong=7, threshold=None, truncate=4)
+bandpass.run(primary_image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -85,14 +85,14 @@ s_bandpass.run(image, verbose=True)
 # EPY: START code
 # I wasn't sure if this clipping was supposed to be by volume or tile. I've done tile here, but it can be easily
 # switched to volume. 
-s_clip = Filter.Clip(p_min=10, p_max=100, is_volume=False)
-s_clip.run(image, verbose=True)
+clip = Filter.Clip(p_min=10, p_max=100, is_volume=False)
+clip.run(primary_image, verbose=True)
 # EPY: END code
 
 # EPY: START code
 sigma=(1, 0, 0)  # filter only in z, do nothing in x, y
 glp = Filter.GaussianLowPass(sigma=sigma, is_volume=True, verbose=True)
-glp.run(image)
+glp.run(primary_image)
 # EPY: END code
 
 # EPY: START markdown
@@ -103,14 +103,14 @@ glp.run(image)
 from trackpy import locate
 
 # grab a section from the tensor. 
-ch1 = experiment.image.max_proj(Indices.Z)[0, 1]
+ch1 = primary_image.max_proj(Indices.Z)[0, 1]
 
 results = locate(ch1, diameter=3, minmass=250, maxsize=3, separation=5, preprocess=False, percentile=10) 
 results.columns = ['x', 'y', 'intensity', 'radius', 'eccentricity', 'signal', 'raw_mass', 'ep']
 # EPY: END code
 
 # EPY: START code
-results
+results.head()
 # EPY: END code
 
 # EPY: START code
@@ -149,7 +149,7 @@ kwargs = dict(
     is_volume=True,
 )
 lmpf = SpotFinder.LocalMaxPeakFinder(**kwargs)
-spot_attributes = lmpf.find(experiment.image)
+spot_attributes = lmpf.find(primary_image)
 # EPY: END code
 
 # EPY: START code
@@ -171,5 +171,9 @@ for attrs, (round, ch) in spot_attributes:
 # Note that in places where spots are "missed" it is often because they've been localized to individual 
 # nearby z-planes, whereas most spots exist across several layers of z.
 
-experiment.image.show_stack({Indices.CH.value: 1, Indices.ROUND.value: 0}, show_spots=spot_attributes[1][0], figure_size=(20, 20), p_min=60, p_max=99.9);
+fig = primary_image.show_stack(
+    {Indices.CH.value: 1, Indices.ROUND.value: 0}, 
+    show_spots=spot_attributes[1][0], 
+    figure_size=(20, 20), p_min=60, p_max=99.9
+)
 # EPY: END code

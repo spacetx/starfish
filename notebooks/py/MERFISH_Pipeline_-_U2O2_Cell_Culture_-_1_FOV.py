@@ -43,8 +43,12 @@ experiment.read('http://czi.starfish.data.public.s3.amazonaws.com/20180802/MERFI
 # EPY: END markdown
 
 # EPY: START code
+primary_image = experiment.image
+# EPY: END code
+
+# EPY: START code
 # show all imaging rounds of channel 0
-experiment.image.show_stack({Indices.CH: 0})
+primary_image.show_stack({Indices.CH: 0})
 # EPY: END code
 
 # EPY: START markdown
@@ -85,13 +89,9 @@ codebook
 # EPY: END markdown
 
 # EPY: START code
-image = experiment.image
-# EPY: END code
-
-# EPY: START code
 from starfish.image import Filter
 ghp = Filter.GaussianHighPass(sigma=3)
-ghp.run(image, verbose=True)
+ghp.run(primary_image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -100,7 +100,7 @@ ghp.run(image, verbose=True)
 
 # EPY: START code
 dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2)
-dpsf.run(image, verbose=True)
+dpsf.run(primary_image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -111,7 +111,7 @@ dpsf.run(image, verbose=True)
 
 # EPY: START code
 glp = Filter.GaussianLowPass(sigma=1, verbose=True)
-glp.run(image)
+glp.run(primary_image)
 # EPY: END code
 
 # EPY: START markdown
@@ -119,21 +119,24 @@ glp.run(image)
 # EPY: END markdown
 
 # EPY: START code
-scale_factors = {(t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] for index, t in experiment.image.tile_metadata.iterrows()}
+scale_factors = {
+    (t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] 
+    for index, t in primary_image.tile_metadata.iterrows()
+}
 # EPY: END code
 
 # EPY: START code
 # it's important to convert the data to float here to retain the correct precision for the scaling. Later, starfish
 # will operate entirely on float data and this cast can be removed
-experiment.image._data = experiment.image._data.astype(np.float64)
+primary_image._data = primary_image._data.astype(np.float64)
 
 # this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to 
 # at least we can do it with get_slice and set_slice right now.
 
-for indices in experiment.image._iter_indices():
-    data = experiment.image.get_slice(indices)[0]
+for indices in primary_image._iter_indices():
+    data = primary_image.get_slice(indices)[0]
     scaled = data / scale_factors[indices[Indices.ROUND.value], indices[Indices.CH.value]]
-    experiment.image.set_slice(indices, scaled)
+    primary_image.set_slice(indices, scaled)
 # EPY: END code
 
 # EPY: START code
@@ -141,7 +144,7 @@ from scipy.stats import scoreatpercentile
 # EPY: END code
 
 # EPY: START code
-mp = experiment.image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+mp = primary_image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 clim = scoreatpercentile(mp, [0.5, 99.5])
 show_image(mp, clim=clim)
 # EPY: END code
@@ -193,7 +196,7 @@ psd = SpotFinder.PixelSpotDetector(
     crop_size=(0, 40, 40)
 )
 
-spot_intensities, prop_results = psd.find(experiment.image)
+spot_intensities, prop_results = psd.find(primary_image)
 spot_intensities
 # EPY: END code
 

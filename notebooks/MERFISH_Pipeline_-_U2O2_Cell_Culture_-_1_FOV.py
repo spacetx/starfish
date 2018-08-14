@@ -55,7 +55,7 @@ experiment.image.show_stack({Indices.CH: 0})
 
 # EPY: START code
 pp = pprint.PrettyPrinter(indent=2)
-pp.pprint(experiment.org)
+pp.pprint(experiment.format_metadata)
 # EPY: END code
 
 # EPY: START markdown

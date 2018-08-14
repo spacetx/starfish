@@ -5,7 +5,7 @@ from typing import Callable, Optional
 import numpy as np
 from skimage import restoration
 
-from starfish._stack import ImageStack
+from starfish.stack import ImageStack
 from ._base import FilterAlgorithmBase
 from .util import gaussian_kernel
 from starfish.types import Number

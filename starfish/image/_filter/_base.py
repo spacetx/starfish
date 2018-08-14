@@ -1,6 +1,6 @@
 from typing import Optional
 
-from starfish._stack import ImageStack
+from starfish.stack import ImageStack
 from starfish.pipeline.algorithmbase import AlgorithmBase
 
 

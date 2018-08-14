@@ -1,5 +1,5 @@
 from starfish.pipeline.algorithmbase import AlgorithmBase
-from starfish._stack import ImageStack
+from starfish.stack import ImageStack
 
 
 class SegmentationAlgorithmBase(AlgorithmBase):

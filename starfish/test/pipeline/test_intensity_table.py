@@ -6,7 +6,7 @@ import pandas as pd
 from starfish.constants import Indices, Features
 from starfish.intensity_table import IntensityTable
 from starfish.codebook import Codebook
-from starfish._stack import ImageStack
+from starfish.stack import ImageStack
 from starfish.spots._detector.combine_adjacent_features import combine_adjacent_features
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences

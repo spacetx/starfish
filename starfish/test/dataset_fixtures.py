@@ -12,7 +12,7 @@ from scipy.ndimage.filters import gaussian_filter
 
 from starfish.codebook import Codebook
 from starfish.constants import Indices, Features
-from starfish._stack import ImageStack
+from starfish.stack import ImageStack
 from starfish.intensity_table import IntensityTable
 from starfish.experiment import Experiment
 from starfish.munge import dataframe_to_multiindex

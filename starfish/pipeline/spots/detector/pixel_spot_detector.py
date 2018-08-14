@@ -3,12 +3,13 @@ from typing import Tuple
 from starfish.codebook import Codebook
 from starfish._stack import ImageStack
 from starfish.intensity_table import IntensityTable
-from starfish.pipeline.features.pixels.combine_adjacent_features import \
+from starfish.pipeline.spots.detector.combine_adjacent_features import (
     ConnectedComponentDecodingResult, combine_adjacent_features
-from ._base import PixelFinderAlgorithmBase
+)
+from ._base import SpotFinderAlgorithmBase
 
 
-class PixelSpotDetector(PixelFinderAlgorithmBase):
+class PixelSpotDetector(SpotFinderAlgorithmBase):
     def __init__(
             self, codebook: Codebook, metric: str, distance_threshold: float,
             magnitude_threshold: int, min_area: int, max_area: int, norm_order: int=2,
@@ -49,8 +50,7 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
         self.crop_y = crop_y
         self.crop_z = crop_z
 
-    def find(self, stack: ImageStack) \
-            -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
+    def find(self, stack: ImageStack) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """decode pixels and combine them into spots using connected component labeling
 
         Parameters
@@ -86,7 +86,7 @@ class PixelSpotDetector(PixelFinderAlgorithmBase):
     @classmethod
     def add_arguments(cls, group_parser):
         group_parser.add_argument("--codebook-input", help="csv file containing a codebook")
-        group_parser.add_argument("--metric", type='str', default='euclidean')
+        group_parser.add_argument("--metric", type=str, default='euclidean')
         group_parser.add_argument(
             "--distance-threshold", default=0.5176,
             help="maximum distance a pixel may be from a codeword before it is filtered"

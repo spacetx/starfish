@@ -22,7 +22,7 @@ from tqdm import tqdm
 from starfish.constants import Coordinates, Indices, Features
 from starfish.errors import DataFormatWarning
 from starfish.intensity_table import IntensityTable
-from starfish.pipeline.features.spot_attributes import SpotAttributes
+from starfish.pipeline.spots.spot_attributes import SpotAttributes
 
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])

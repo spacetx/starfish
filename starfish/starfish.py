@@ -4,8 +4,8 @@ import argparse
 import cProfile
 from pstats import Stats
 
-from .pipeline.features.spots.decoder import Decoder
-from .pipeline.features.spots.detector import SpotFinder
+from starfish.pipeline.spots.decoder import Decoder
+from starfish.pipeline.spots.detector import SpotFinder
 from starfish.image._filter import Filter
 from .pipeline.target_assignment import TargetAssignment
 from starfish.image._registration import Registration

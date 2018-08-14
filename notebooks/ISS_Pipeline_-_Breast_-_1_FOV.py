@@ -130,7 +130,7 @@ registration.run(experiment.image)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.features.spots.detector import SpotFinder
+from starfish.pipeline.spots.detector import SpotFinder
 import warnings
 
 # parameters to define the allowable gaussian sizes (parameter space)

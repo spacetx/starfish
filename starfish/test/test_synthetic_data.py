@@ -1,6 +1,6 @@
 import numpy as np
 
-from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
+from starfish.pipeline.spots.detector.gaussian import GaussianSpotDetector
 from starfish.util.synthesize import SyntheticData
 from starfish.constants import Features, Indices
 

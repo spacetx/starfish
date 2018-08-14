@@ -7,7 +7,7 @@ from starfish.constants import Indices, Features
 from starfish.intensity_table import IntensityTable
 from starfish.codebook import Codebook
 from starfish._stack import ImageStack
-from starfish.pipeline.features.pixels.combine_adjacent_features import combine_adjacent_features
+from starfish.pipeline.spots.detector.combine_adjacent_features import combine_adjacent_features
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import (

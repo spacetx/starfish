@@ -131,7 +131,7 @@ experiment.image._show_spots(results, ax=plt.gca(), scale_radius=7)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.features.spots.detector import SpotFinder
+from starfish.pipeline.spots.detector import SpotFinder
 
 # I've guessed at these parameters from the allen_smFISH code, but you might want to tweak these a bit. 
 # as you can see, this function takes a while. It will be great to parallelize this. That's also coming, 

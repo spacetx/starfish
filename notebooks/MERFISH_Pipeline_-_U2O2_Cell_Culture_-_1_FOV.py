@@ -91,7 +91,7 @@ ghp.run(experiment.image)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image._filter import DeconvolvePSF
+from starfish.image._filter.richardson_lucy_deconvolution import DeconvolvePSF
 dpsf = DeconvolvePSF(num_iter=15, sigma=2, verbose=True)
 dpsf.run(experiment.image)
 # EPY: END code
@@ -171,7 +171,7 @@ image(mp, clim=clim)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.features.pixels.pixel_spot_detector import PixelSpotDetector
+from starfish.pipeline.spots.detector import PixelSpotDetector
 psd = PixelSpotDetector(
     codebook=codebook,
     metric='euclidean',

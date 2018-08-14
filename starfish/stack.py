@@ -641,19 +641,30 @@ class ImageStack:
                 func, is_volume=is_volume, in_place=True, verbose=verbose, **kwargs
             )
 
-        mapfunc: Callable = map  # TODO: ambrosejcarr posix-compliant multiprocessing
-        indices = list(self._iter_indices(is_volume=is_volume))
+        if is_volume:
+            self._data = self._data.stack(tiles=[Indices.ROUND.value,
+                                                 Indices.CH.value])
+        else:
+            self._data = self._data.stack(tiles=[Indices.ROUND.value,
+                                                 Indices.CH.value,
+                                                 Indices.Z.value])
 
         if verbose:
-            tiles = tqdm(self._iter_tiles(indices))
+            tiles = tqdm(self._data.tiles)
         else:
-            tiles = self._iter_tiles(indices)
+            tiles = self._data.tiles
 
         applyfunc: Callable = partial(func, **kwargs)
-        results = mapfunc(applyfunc, tiles)
 
-        for r, inds in zip(results, indices):
-            self.set_slice(inds, r)
+        for t in tiles:
+            tile = self._data.sel(tiles=t)
+            self._data.loc[{'tiles': t}] = applyfunc(tile, 100)
+
+        self._data.unstack('tiles').transpose(Indices.ROUND.value,
+                                              Indices.CH.value,
+                                              Indices.Z.value,
+                                              'y',
+                                              'x')
 
         return self
 

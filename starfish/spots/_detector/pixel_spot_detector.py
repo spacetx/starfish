@@ -3,10 +3,10 @@ from typing import Tuple
 from starfish.codebook import Codebook
 from starfish.stack import ImageStack
 from starfish.intensity_table import IntensityTable
-from starfish.spots._detector.combine_adjacent_features import (
+from ._base import SpotFinderAlgorithmBase
+from .combine_adjacent_features import (
     ConnectedComponentDecodingResult, combine_adjacent_features
 )
-from ._base import SpotFinderAlgorithmBase
 
 
 class PixelSpotDetector(SpotFinderAlgorithmBase):

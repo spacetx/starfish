@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from starfish.io import Stack
+from starfish.experiment import Experiment
 from starfish.pipeline.features.pixels import _base
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.codebook import Codebook
@@ -44,7 +44,7 @@ class PixelSpotDetector(PipelineComponent):
             cls.pixel_finder_group.exit(status=2)
 
         print('Detecting Pixels...')
-        s = Stack()
+        s = Experiment()
         s.read(args.input)
 
         # load the codebook

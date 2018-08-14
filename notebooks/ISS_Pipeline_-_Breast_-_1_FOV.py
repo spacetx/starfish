@@ -20,14 +20,14 @@ import matplotlib.pyplot as plt
 from showit import image, tile
 import pprint
 
-from starfish.io import Stack
+from starfish.experiment import Experiment
 from starfish.constants import Indices, Features
 from starfish.codebook import Codebook
 # EPY: END code
 
 # EPY: START code
-s = Stack()
-s.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/ISS/fov_001/experiment.json')
+experiment = Experiment()
+experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/ISS/fov_001/experiment.json')
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 # EPY: END code
 
@@ -39,7 +39,7 @@ s.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/ISS/fov_001/experiment.jso
 
 # EPY: START code
 pp = pprint.PrettyPrinter(indent=2)
-pp.pprint(s.org)
+pp.pprint(experiment.org)
 # EPY: END code
 
 # EPY: START markdown
@@ -48,7 +48,7 @@ pp.pprint(s.org)
 
 # EPY: START code
 # round, channel, x, y, z
-s.image.numpy_array.shape
+experiment.image.numpy_array.shape
 # EPY: END code
 
 # EPY: START markdown
@@ -60,7 +60,7 @@ s.image.numpy_array.shape
 # EPY: END markdown
 
 # EPY: START code
-image(s.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.CH, Indices.Z))
+image(experiment.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END code
 
 # EPY: START markdown
@@ -68,7 +68,7 @@ image(s.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END markdown
 
 # EPY: START code
-image(s.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z))
+image(experiment.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END code
 
 # EPY: START markdown
@@ -96,8 +96,8 @@ from starfish.pipeline.filter import Filter
 # filter raw data
 masking_radius = 15
 filt = Filter.WhiteTophat(masking_radius, verbose=True, is_volume=False)
-filt.run(s.image)
-for img in s.auxiliary_images.values():
+filt.run(experiment.image)
+for img in experiment.auxiliary_images.values():
     filt.run(img)
 # EPY: END code
 
@@ -117,8 +117,8 @@ for img in s.auxiliary_images.values():
 # EPY: START code
 from starfish.pipeline.registration import Registration
 
-registration = Registration.FourierShiftRegistration(upsampling=1000, reference_stack=s.auxiliary_images['dots'], verbose=True)
-registration.run(s.image)
+registration = Registration.FourierShiftRegistration(upsampling=1000, reference_stack=experiment.auxiliary_images['dots'], verbose=True)
+registration.run(experiment.image)
 # EPY: END code
 
 # EPY: START markdown
@@ -152,8 +152,8 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
 
     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    blobs_image = s.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.Z)
-    intensities = p.find(s.image, blobs_image=blobs_image)
+    blobs_image = experiment.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.Z)
+    intensities = p.find(experiment.image, blobs_image=blobs_image)
 # EPY: END code
 
 # EPY: START code
@@ -235,9 +235,9 @@ disk_size_markers = None
 disk_size_mask = None
 min_dist = 57
 
-stain = np.mean(s.image.max_proj(Indices.CH, Indices.Z), axis=0)
+stain = np.mean(experiment.image.max_proj(Indices.CH, Indices.Z), axis=0)
 stain = stain/stain.max()
-nuclei = s.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+nuclei = experiment.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 
 
 seg = _WatershedSegmenter(nuclei, stain)  # uses skimage watershed.
@@ -257,9 +257,9 @@ from skimage.color import rgb2gray
 GENE1 = 'HER2'
 GENE2 = 'VIM'
 
-rgb = np.zeros(s.image.tile_shape + (3,))
-rgb[:,:,0] = s.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-rgb[:,:,1] = s.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+rgb = np.zeros(experiment.image.tile_shape + (3,))
+rgb[:,:,0] = experiment.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+rgb[:,:,1] = experiment.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 do = rgb2gray(rgb)
 do = do/(do.max())
 

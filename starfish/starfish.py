@@ -80,9 +80,9 @@ def show(args, print_help=False):
     import matplotlib.pyplot as plt
     from showit import tile
 
-    from .io import Stack
+    from .experiment import Experiment
 
-    s = Stack()
+    s = Experiment()
     s.read(args.in_json)
     tile(s.image.squeeze(), size=args.sz, bar=True)
     plt.show()

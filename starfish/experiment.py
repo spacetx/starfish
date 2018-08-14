@@ -8,7 +8,7 @@ from slicedimage.io import resolve_path_or_url
 from .image import ImageStack
 
 
-class Stack:
+class Experiment:
     MIN_SUPPORTED_VERSION = Version("1.0.0")
     MAX_SUPPORTED_VERSION = Version("1.0.0")
 
@@ -32,7 +32,7 @@ class Stack:
             cls,
             image_stack: ImageStack,
             aux_dict: Optional[Mapping[str, ImageStack]]=None
-    ) -> "Stack":
+    ) -> "Experiment":
         """create a Stack from an already-loaded ImageStack
 
         Parameters
@@ -66,15 +66,15 @@ class Stack:
     @classmethod
     def verify_version(cls, semantic_version_str: str):
         version = Version(semantic_version_str)
-        if not (Stack.MIN_SUPPORTED_VERSION <= version <= Stack.MAX_SUPPORTED_VERSION):
+        if not (Experiment.MIN_SUPPORTED_VERSION <= version <= Experiment.MAX_SUPPORTED_VERSION):
             raise ValueError(
                 f"version {version} not supported.  This version of the starfish library only "
-                f"supports formats from {Stack.MIN_SUPPORTED_VERSION} to "
-                f"{Stack.MAX_SUPPORTED_VERSION}")
+                f"supports formats from {Experiment.MIN_SUPPORTED_VERSION} to "
+                f"{Experiment.MAX_SUPPORTED_VERSION}")
 
     @classmethod
-    def from_experiment_json(cls, json_url: str) -> "Stack":
-        """Construct a `Stack` from an experiment.json file format specifier
+    def from_json(cls, json_url: str) -> "Experiment":
+        """Construct an `Experiment` from an experiment.json file format specifier
 
         Parameters
         ----------
@@ -87,6 +87,6 @@ class Stack:
             Stack object serving the requested image data
 
         """
-        stack: Stack = cls()
+        stack: Experiment = cls()
         stack.read(json_url)
         return stack

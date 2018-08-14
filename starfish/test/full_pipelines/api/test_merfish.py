@@ -35,7 +35,7 @@ def test_merfish_pipeline(merfish_stack):
 
     # detect and decode spots
     psd = PixelSpotDetector(
-        codebook='https://s3.amazonaws.com/czi.starfish.data.public/MERFISH/codebook.csv',
+        codebook='https://dmf0bdeheu4zf.cloudfront.net/MERFISH/codebook.csv',
         metric='euclidean',
         distance_threshold=0.5176,
         magnitude_threshold=1,

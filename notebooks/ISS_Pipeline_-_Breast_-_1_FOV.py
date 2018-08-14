@@ -80,7 +80,7 @@ image(s.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z
 # EPY: END markdown
 
 # EPY: START code
-codebook = Codebook.from_json('https://s3.amazonaws.com/czi.starfish.data.public/20180722/ISS/codebook.json')
+codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180722/ISS/codebook.json')
 codebook
 # EPY: END code
 

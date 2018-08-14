@@ -38,7 +38,7 @@ def merfish_stack() -> Stack:
     """
     s = Stack()
     s.read(
-        'https://s3.amazonaws.com/czi.starfish.data.public/20180802/MERFISH/fov_001/experiment.json'
+        'https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment.json'
     )
     return deepcopy(s)
 

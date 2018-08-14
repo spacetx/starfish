@@ -10,7 +10,7 @@ from starfish.constants import Indices, Features
 from starfish._stack import ImageStack
 from starfish.intensity_table import IntensityTable
 from starfish.munge import dataframe_to_multiindex
-from starfish.pipeline.spots.spot_attributes import SpotAttributes
+from starfish.spots._spot_attributes import SpotAttributes
 from starfish.types import Number
 
 

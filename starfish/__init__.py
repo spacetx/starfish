@@ -7,3 +7,6 @@ from ._stack import ImageStack
 
 # image processing methods and objects
 from . import image
+
+# spot detection and manipulation
+from . import spots

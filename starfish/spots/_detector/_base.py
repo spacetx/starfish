@@ -6,10 +6,8 @@ import xarray as xr
 from starfish._stack import ImageStack
 from starfish.intensity_table import IntensityTable
 from starfish.pipeline.algorithmbase import AlgorithmBase
-from starfish.pipeline.spots.spot_attributes import SpotAttributes
-from starfish.pipeline.spots.detector.combine_adjacent_features import (
-    ConnectedComponentDecodingResult
-)
+from starfish.spots._spot_attributes import SpotAttributes
+from starfish.spots._detector.combine_adjacent_features import ConnectedComponentDecodingResult
 from starfish.types import Number
 
 

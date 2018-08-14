@@ -4,10 +4,10 @@ from skimage.feature import blob_log
 
 from starfish.constants import Indices
 from starfish._stack import ImageStack
-from starfish.pipeline.spots.detector._base import SpotFinderAlgorithmBase
-from starfish.pipeline.spots.detector.detect import detect_spots
-from starfish.pipeline.spots.detector.gaussian import GaussianSpotDetector
-from starfish.pipeline.spots.detector.local_max_peak_finder import LocalMaxPeakFinder
+from starfish.spots._detector._base import SpotFinderAlgorithmBase
+from starfish.spots._detector.detect import detect_spots
+from starfish.spots._detector.gaussian import GaussianSpotDetector
+from starfish.spots._detector.local_max_peak_finder import LocalMaxPeakFinder
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import (

@@ -16,7 +16,7 @@ from starfish._stack import ImageStack
 from starfish.intensity_table import IntensityTable
 from starfish.experiment import Experiment
 from starfish.munge import dataframe_to_multiindex
-from starfish.pipeline.spots.detector.gaussian import GaussianSpotDetector
+from starfish.spots._detector.gaussian import GaussianSpotDetector
 from starfish.image._filter.white_tophat import WhiteTophat
 from starfish.util import synthesize
 

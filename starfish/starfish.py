@@ -4,10 +4,10 @@ import argparse
 import cProfile
 from pstats import Stats
 
-from starfish.pipeline.spots.decoder import Decoder
-from starfish.pipeline.spots.detector import SpotFinder
+from starfish.spots._decoder import Decoder
+from starfish.spots._detector import SpotFinder
 from starfish.image._filter import Filter
-from starfish.pipeline.spots.target_assignment import TargetAssignment
+from starfish.spots._target_assignment import TargetAssignment
 from starfish.image._registration import Registration
 from starfish.image._segmentation import Segmentation
 from .util.argparse import FsExistsType

@@ -67,7 +67,7 @@ class GaussianHighPass(FilterAlgorithmBase):
 
         over_flow_ind: np.ndarray[bool] = image < blurred
         filtered: np.ndarray = image - blurred
-        filtered[over_flow_ind] = 0
+        filtered.values[over_flow_ind.values] = 0
 
         return filtered
 

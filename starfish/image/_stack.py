@@ -9,6 +9,7 @@ from typing import (
     Union
 )
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -23,7 +24,6 @@ from starfish.constants import Coordinates, Indices, Features
 from starfish.errors import DataFormatWarning
 from starfish.intensity_table import IntensityTable
 from starfish.pipeline.features.spot_attributes import SpotAttributes
-
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
@@ -381,7 +381,6 @@ class ImageStack:
         return linear_view, labels, n_tiles
 
     def _show_matplotlib_notebook(self, linear_view, labels, n_tiles, show_spots, figure_size, color_map):
-        import matplotlib.pyplot as plt
         from ipywidgets import interact, fixed
 
         fig, ax = plt.subplots(figsize=figure_size)
@@ -412,7 +411,6 @@ class ImageStack:
         interact(display_slice, ax=fixed(ax), plane_index=(0, n_tiles - 1))
 
     def _show_matplotlib_inline(self, linear_view, labels, n_tiles, show_spots, figure_size, color_map):
-        import matplotlib.pyplot as plt
         from ipywidgets import interact
 
         def show_plane(ax, plane, plane_index, cmap="gray", title=None):

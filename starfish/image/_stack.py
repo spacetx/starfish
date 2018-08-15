@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
+from matplotlib import get_backend as get_matplotlib_backend
 from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import scoreatpercentile
 from skimage import exposure
@@ -317,8 +318,7 @@ class ImageStack:
         """
 
         # infer if %matplotlib inline or notebook
-        import matplotlib
-        mpl_is_notebook = 'nbAgg' in matplotlib.get_backend()
+        mpl_is_notebook = 'nbAgg' in get_matplotlib_backend()
 
         if not indices:
             raise ValueError('indices may not be an empty dict or None')

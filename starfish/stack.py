@@ -658,13 +658,15 @@ class ImageStack:
 
         for t in tiles:
             tile = self._data.sel(tiles=t)
-            self._data.loc[{'tiles': t}] = applyfunc(tile, 100)
+            self._data.loc[{'tiles': t}] = applyfunc(tile)
 
-        self._data.unstack('tiles').transpose(Indices.ROUND.value,
-                                              Indices.CH.value,
-                                              Indices.Z.value,
-                                              'y',
-                                              'x')
+        self._data = self._data.unstack('tiles').transpose(
+            Indices.ROUND.value,
+            Indices.CH.value,
+            Indices.Z.value,
+            'y',
+            'x'
+        )
 
         return self
 

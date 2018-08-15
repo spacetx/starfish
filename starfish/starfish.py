@@ -4,12 +4,12 @@ import argparse
 import cProfile
 from pstats import Stats
 
-from .pipeline.features.spots.decoder import Decoder
-from .pipeline.features.spots.detector import SpotFinder
-from .pipeline.filter import Filter
-from .pipeline.target_assignment import TargetAssignment
-from .pipeline.registration import Registration
-from .pipeline.segmentation import Segmentation
+from starfish.spots._decoder import Decoder
+from starfish.spots._detector import SpotFinder
+from starfish.image._filter import Filter
+from starfish.spots._target_assignment import TargetAssignment
+from starfish.image._registration import Registration
+from starfish.image._segmentation import Segmentation
 from .util.argparse import FsExistsType
 
 
@@ -80,9 +80,9 @@ def show(args, print_help=False):
     import matplotlib.pyplot as plt
     from showit import tile
 
-    from .io import Stack
+    from .experiment import Experiment
 
-    s = Stack()
+    s = Experiment()
     s.read(args.in_json)
     tile(s.image.squeeze(), size=args.sz, bar=True)
     plt.show()

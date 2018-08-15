@@ -12,18 +12,18 @@ from scipy.ndimage.filters import gaussian_filter
 
 from starfish.codebook import Codebook
 from starfish.constants import Indices, Features
-from starfish.image import ImageStack
+from starfish.stack import ImageStack
 from starfish.intensity_table import IntensityTable
-from starfish.io import Stack
+from starfish.experiment import Experiment
 from starfish.munge import dataframe_to_multiindex
-from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
-from starfish.pipeline.filter.white_tophat import WhiteTophat
+from starfish.spots._detector.gaussian import GaussianSpotDetector
+from starfish.image._filter.white_tophat import WhiteTophat
 from starfish.util import synthesize
 
 
 # TODO ambrosejcarr: all fixtures should emit a stack and a codebook
 @pytest.fixture(scope='session')
-def merfish_stack() -> Stack:
+def merfish_stack() -> Experiment:
     """retrieve MERFISH testing data from cloudfront and expose it at the module level
 
     Notes
@@ -36,9 +36,9 @@ def merfish_stack() -> Stack:
     Stack :
         starfish.io.Stack object containing MERFISH data
     """
-    s = Stack()
+    s = Experiment()
     s.read(
-        'https://s3.amazonaws.com/czi.starfish.data.public/20180802/MERFISH/fov_001/experiment.json'
+        'https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment.json'
     )
     return deepcopy(s)
 

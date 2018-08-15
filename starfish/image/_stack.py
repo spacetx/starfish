@@ -324,12 +324,28 @@ class ImageStack:
             raise ValueError('indices may not be an empty dict or None')
 
         # get linearized scaled and clipped tiles, along with title names, for plotting
-        linear_view, labels, n_tiles = self._get_scaled_clipped_linear_view(indices, rescale, p_min, p_max)
+        linear_view, labels, n_tiles = self._get_scaled_clipped_linear_view(indices,
+                                                                            rescale,
+                                                                            p_min,
+                                                                            p_max
+                                                                            )
 
         if mpl_is_notebook:
-            self._show_matplotlib_notebook(linear_view, labels, n_tiles, show_spots, figure_size, color_map)
+            self._show_matplotlib_notebook(linear_view,
+                                           labels,
+                                           n_tiles,
+                                           show_spots,
+                                           figure_size,
+                                           color_map
+                                           )
         else:
-            return self._show_matplotlib_inline(linear_view, labels, n_tiles, show_spots, figure_size, color_map)
+            return self._show_matplotlib_inline(linear_view,
+                                                labels,
+                                                n_tiles,
+                                                show_spots,
+                                                figure_size,
+                                                color_map
+                                                )
 
     def _get_scaled_clipped_linear_view(self, indices, rescale, p_min, p_max):
 
@@ -380,7 +396,9 @@ class ImageStack:
 
         return linear_view, labels, n_tiles
 
-    def _show_matplotlib_notebook(self, linear_view, labels, n_tiles, show_spots, figure_size, color_map):
+    def _show_matplotlib_notebook(self, linear_view, labels, n_tiles,
+                                  show_spots, figure_size, color_map
+                                  ):
         from ipywidgets import interact, fixed
 
         fig, ax = plt.subplots(figsize=figure_size)
@@ -389,7 +407,10 @@ class ImageStack:
         ax.set_yticks([])
 
         if show_spots is not None:
-            circs, circle_mask = self._show_spots(result_df=show_spots.data, ax=ax, n_slices=linear_view.shape[0])
+            circs, circle_mask = self._show_spots(result_df=show_spots.data,
+                                                  ax=ax,
+                                                  n_slices=linear_view.shape[0]
+                                                  )
 
         def show_plane(ax, plane, plane_index, cmap="gray", title=None):
             # Update the image in the current plane
@@ -410,7 +431,9 @@ class ImageStack:
 
         interact(display_slice, ax=fixed(ax), plane_index=(0, n_tiles - 1))
 
-    def _show_matplotlib_inline(self, linear_view, labels, n_tiles, show_spots, figure_size, color_map):
+    def _show_matplotlib_inline(self, linear_view, labels, n_tiles,
+                                show_spots, figure_size, color_map
+                                ):
         from ipywidgets import interact
 
         def show_plane(ax, plane, plane_index, cmap="gray", title=None):

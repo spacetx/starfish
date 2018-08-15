@@ -12,6 +12,7 @@ from . import mean_high_pass
 from . import richardson_lucy_deconvolution
 from . import scale_by_percentile
 from . import white_tophat
+from . import zero_by_channel_magnitude
 
 
 class Filter(PipelineComponent):

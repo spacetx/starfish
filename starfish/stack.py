@@ -370,17 +370,29 @@ class ImageStack:
 
         # Create the plot
         fig, ax = plt.subplots(figsize=figure_size)
-        im = ax.imshow(linear_view[0], cmap=color_map)
+        #im = ax.imshow(linear_view[0], cmap=color_map)
         ax.set_xticks([])
         ax.set_yticks([])
+
+        im_handles = []
+
+        for im in linear_view:
+            h = ax.imshow(im, cmap=color_map, visible=False)
+            im_handles.append(h)
+
+        curr_frame = len(im_handles)
 
         if show_spots is not None:
             circs, circle_mask = self._show_spots(
                 result_df=show_spots, ax=ax, n_slices=linear_view.shape[0])
 
-        def show_plane(ax, plane, plane_index, cmap="gray", title=None):
+        def show_plane(ax, plane_index, cmap="gray", title=None):
             # Update the image in the current plane
-            im.set_data(plane)
+            for i, h in enumerate(im_handles):
+                if i == plane_index:
+                    h.set_visible(True)
+                else:
+                    h.set_visible(False)
 
             # Update the spots, if necessary
             if show_spots is not None:
@@ -394,7 +406,6 @@ class ImageStack:
         def display_slice(plane_index, ax):
             show_plane(
                 ax,
-                linear_view[plane_index],
                 plane_index,
                 title=f'{labels[plane_index]}',
                 cmap=color_map

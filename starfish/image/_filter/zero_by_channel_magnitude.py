@@ -5,7 +5,7 @@ from typing import Optional
 import numpy as np
 from tqdm import tqdm
 
-from starfish.constants import Indices
+from starfish.constants import Indices, Coordinates
 from starfish.stack import ImageStack
 from ._base import FilterAlgorithmBase
 
@@ -56,17 +56,17 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
 
         if not in_place:
             new_stack = deepcopy(stack)
-            return self.run(new_stack)
+            return self.run(new_stack, in_place=True)
 
         # compute mask
         for r, dat in channels_per_round:
             # nervous about how xarray orders dimensions so i put this here explicitly ....
             dat = dat.transpose(Indices.CH.value,
                                 Indices.Z.value,
-                                Indices.Y.value,
-                                Indices.X.value
+                                Coordinates.Y.value,
+                                Coordinates.X.value
                                 )
-            # ... to account for this line explicitly taking the norm across axis 0, or the channel axis
+            # ... to account for this line taking the norm across axis 0, or the channel axis
             ch_magnitude = np.linalg.norm(dat, ord=2, axis=0)
             magnitude_mask = ch_magnitude >= self.thresh
             for c in range(stack.num_chs):

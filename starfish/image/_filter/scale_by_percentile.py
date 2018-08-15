@@ -37,10 +37,10 @@ class ScaleByPercentile(FilterAlgorithmBase):
         ----------
         image : np.ndarray
             image to be scaled
-        
+
         p : int
             each image in the stack is scaled by this percentile. must be in [0, 100]
-        
+
         Notes
         -----
         - Setting p to 100 scales the image by it's maximum value
@@ -57,7 +57,7 @@ class ScaleByPercentile(FilterAlgorithmBase):
         # asking for a float percentile clipping value from an integer image will
         # convert to float, so store the dtype so it can be restored
         dtype = image.dtype
-        image = image/v
+        image = image / v
         return image.astype(dtype)
 
     def run(

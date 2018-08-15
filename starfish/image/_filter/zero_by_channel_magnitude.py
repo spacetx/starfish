@@ -11,22 +11,20 @@ from ._base import FilterAlgorithmBase
 
 
 class ZeroByChannelMagnitude(FilterAlgorithmBase):
-
     def __init__(self, thresh: int, normalize: bool, **kwargs) -> None:
         """For assays in which we expect codewords to have explicit zero values,
         e.g., DARTFISH, SEQFISH, etc., this filter allows for the explicit zeroing
-        out of pixels, for each round, where there is insufficient signal magnitude across 
-        channels.
-    
+        out of pixels, for each round, where there is insufficient signal magnitude across channels.
+
 
         Parameters
         ----------
         thresh : int
-            pixels in each round that have a L2 norm across channels below this threshold are set to 0
-        
+            pixels in each round that have a L2 norm across channels below this threshold
+            are set to 0
+
         normalize : bool
             if True, this scales all rounds to have unit L2 norm across channels
-                                
         """
         self.thresh = thresh
         self.normalize = normalize
@@ -36,7 +34,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         group_parser.add_argument(
             '--thresh', type=int, help='minimum magnitude threshold for pixels across channels')
 
-    def run(self, stack: ImageStack, in_place: bool=True, verbose=False) -> Optional[ImageStack]:
+    def run(self, stack: ImageStack, in_place: bool = True, verbose=False) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters
@@ -80,12 +78,15 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                 stack._data[ind] = stack._data[ind] * magnitude_mask
 
                 if self.normalize:
-                    stack._data[ind] = np.divide(stack._data[ind], ch_magnitude, where=magnitude_mask)
+                    stack._data[ind] = np.divide(stack._data[ind],
+                                                 ch_magnitude,
+                                                 where=magnitude_mask
+                                                 )
 
         return stack
 
-#TODO @ajc the code below fulfills the same task without xarray. instead it uses vectorized numpy array
-#what do we prefer?
+# TODO @ajc the code below fulfills the same task without xarray.
+# instead it uses vectorized numpy array. what do we prefer?
 
 # def zero_channels_old(stack, magnitude_thresh, normalize_by_magnitude=False):
 #     """

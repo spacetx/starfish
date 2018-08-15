@@ -2,7 +2,7 @@ import numpy as np
 from skimage.filters import gaussian
 import pytest
 
-from starfish.pipeline.filter.white_tophat import WhiteTophat
+from starfish.image._filter.white_tophat import WhiteTophat
 
 
 def simple_spot_3d():

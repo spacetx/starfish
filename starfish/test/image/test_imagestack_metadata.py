@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 
 from starfish.constants import Indices
-from starfish.image import ImageStack
+from starfish.stack import ImageStack
 
 NUM_ROUND = 4
 NUM_CH = 2

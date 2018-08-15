@@ -1,10 +1,10 @@
-from starfish.pipeline.features.spots.detector.gaussian import GaussianSpotDetector
-from starfish.pipeline.filter.white_tophat import WhiteTophat
-from starfish.pipeline.registration.fourier_shift import FourierShiftRegistration
+from starfish.spots._detector.gaussian import GaussianSpotDetector
+from starfish.image._filter.white_tophat import WhiteTophat
+from starfish.image._registration.fourier_shift import FourierShiftRegistration
 from starfish.util.synthesize import SyntheticData
 import numpy as np
 from starfish.constants import Indices
-from starfish.image import ImageStack
+from starfish.stack import ImageStack
 
 
 def test_iss_pipeline():

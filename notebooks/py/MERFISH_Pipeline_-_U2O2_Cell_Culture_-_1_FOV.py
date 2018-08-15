@@ -15,10 +15,6 @@
 # EPY: END code
 
 # EPY: START code
-import slicedimage
-# EPY: END code
-
-# EPY: START code
 # EPY: ESCAPE %matplotlib notebook
 
 import pprint
@@ -35,7 +31,7 @@ from starfish.experiment import Experiment
 # EPY: START code
 # load the data from cloudfront
 experiment = Experiment()
-experiment.read('http://czi.starfish.data.public.s3.amazonaws.com/20180802/MERFISH/fov_001/experiment_new.json')
+experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment.json')
 # EPY: END code
 
 # EPY: START markdown

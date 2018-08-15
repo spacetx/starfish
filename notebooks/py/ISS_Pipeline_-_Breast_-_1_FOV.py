@@ -130,7 +130,7 @@ registration.run(experiment.image)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.spots.detector import SpotFinder
+from starfish.spots import SpotFinder
 import warnings
 
 # parameters to define the allowable gaussian sizes (parameter space)
@@ -226,13 +226,11 @@ table.head()
 
 # EPY: START code
 from starfish.constants import Indices
-from starfish.image._segmentation import _WatershedSegmenter
+from starfish.image import Segmentation
 
 dapi_thresh = .16  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
 size_lim = (10, 10000)
-disk_size_markers = None
-disk_size_mask = None
 min_dist = 57
 
 stain = np.mean(experiment.image.max_proj(Indices.CH, Indices.Z), axis=0)
@@ -240,8 +238,8 @@ stain = stain/stain.max()
 nuclei = experiment.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 
 
-seg = _WatershedSegmenter(nuclei, stain)  # uses skimage watershed.
-cells_labels = seg.segment(dapi_thresh, stain_thresh, size_lim, disk_size_markers, disk_size_mask, min_dist)
+seg = Segmentation.Watershed(dapi_thresh, stain_thresh, min_distance=min_dist)  # uses skimage
+cells_labels = seg.run(nuclei, stain)
 seg.show()
 # EPY: END code
 

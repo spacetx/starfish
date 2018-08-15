@@ -177,3 +177,7 @@ fig = primary_image.show_stack(
     figure_size=(20, 20), p_min=60, p_max=99.9
 )
 # EPY: END code
+
+# EPY: START code
+# TODO ambrosejcarr: assert that the number of spots detected does not change
+# EPY: END code

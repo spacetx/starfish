@@ -115,6 +115,23 @@ glp.run(primary_image)
 # EPY: END markdown
 
 # EPY: START code
+# assert a small portion of the tensor remains unchanged to check for modifications to the filters
+expected = np.array(
+    [[14, 18, 15,  9,  4,  2,  2,  3,  6, 14],
+     [22, 25, 18,  8,  2,  0,  0,  1,  2,  6],
+     [24, 26, 16,  6,  1,  0,  0,  0,  0,  2],
+     [18, 18, 10,  3,  0,  0,  0,  0,  0,  1],
+     [ 9,  8,  4,  1,  0,  0,  0,  0,  2,  3],
+     [ 5,  4,  2,  0,  0,  0,  1,  4,  8, 11],
+     [ 8,  6,  3,  1,  0,  1,  4, 11, 20, 26],
+     [20, 17, 10,  4,  2,  2,  6, 16, 27, 34],
+     [37, 33, 20,  9,  4,  4,  7, 13, 21, 25],
+     [48, 44, 27, 13,  6,  5,  5,  7, 10, 11]], 
+)
+assert np.array_equal(primary_image.numpy_array[5, 1, 0, 1000:1010, 1000:1010], expected)
+# EPY: END code
+
+# EPY: START code
 scale_factors = {
     (t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] 
     for index, t in primary_image.tile_metadata.iterrows()
@@ -133,6 +150,23 @@ for indices in primary_image._iter_indices():
     data = primary_image.get_slice(indices)[0]
     scaled = data / scale_factors[indices[Indices.ROUND.value], indices[Indices.CH.value]]
     primary_image.set_slice(indices, scaled)
+# EPY: END code
+
+# EPY: START code
+# assert on a small part of the scaled image to verify values
+expected = np.array(
+    [[0.33527313, 0.43106545, 0.35922121, 0.21553273, 0.09579232,
+      0.04789616, 0.04789616, 0.07184424, 0.14368848, 0.33527313],
+     [0.52685777, 0.59870201, 0.43106545, 0.19158464, 0.04789616,
+      0.        , 0.        , 0.02394808, 0.04789616, 0.14368848],
+     [0.57475393, 0.62265009, 0.38316929, 0.14368848, 0.02394808,
+      0.        , 0.        , 0.        , 0.        , 0.04789616],
+     [0.43106545, 0.43106545, 0.23948081, 0.07184424, 0.        ,
+      0.        , 0.        , 0.        , 0.        , 0.02394808],
+     [0.21553273, 0.19158464, 0.09579232, 0.02394808, 0.        ,
+      0.        , 0.        , 0.        , 0.04789616, 0.07184424]]
+)
+assert np.allclose(primary_image.numpy_array[5, 1, 0, 1000:1005, 1000:1010], expected)
 # EPY: END code
 
 # EPY: START code
@@ -196,6 +230,11 @@ spot_intensities, prop_results = psd.find(primary_image)
 spot_intensities
 # EPY: END code
 
+# EPY: START code
+# verify detected number of spots
+assert spot_intensities.shape == (37742, 2, 8)
+# EPY: END code
+
 # EPY: START markdown
 # ## Compare to results from paper 
 # 
@@ -225,6 +264,11 @@ plt.ylabel('Gene copy number Starfish')
 plt.xscale('log')
 plt.yscale('log')
 plt.title(f'r = {r}');
+# EPY: END code
+
+# EPY: START code
+# assert that notebook results match published ones. 
+assert r > 0.99
 # EPY: END code
 
 # EPY: START markdown

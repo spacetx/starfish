@@ -130,6 +130,23 @@ registration = Registration.FourierShiftRegistration(
 registration.run(primary_image)
 # EPY: END code
 
+# EPY: START code
+# assert on a small piece of the image to verify that the filters and registration have not changed
+expected = np.array(
+    [[ 67,  95, 117, 112, 171, 248, 229, 254, 314, 405],
+     [ 79,  62,  92, 110, 270, 224, 194, 187, 331, 391],
+     [ 62, 153, 179, 178, 366, 305, 282, 195, 370, 552],
+     [148,  92, 239, 151, 149, 143, 207, 325, 351, 676],
+     [115, 131,  75, 152, 163, 148, 203, 236, 509, 803],
+     [ 94, 170, 145, 130,  69, 167,  73, 242, 623, 877],
+     [ 71, 165, 158, 191,  61,  77, 257, 341, 619, 799],
+     [111, 131, 223, 195, 124, 134, 293, 480, 556, 820],
+     [166, 167, 342, 235, 144, 133, 265, 447, 592, 941],
+     [126, 140, 420, 340, 150, 212, 349, 481, 634, 897]],
+    dtype=np.uint16)
+assert np.array_equal(primary_image.numpy_array[3, 2, 0, 500:510, 400:410], expected)
+# EPY: END code
+
 # EPY: START markdown
 # ## Use spot-detector to create 'encoder' table  for standardized input  to decoder
 # EPY: END markdown
@@ -166,10 +183,9 @@ with warnings.catch_warnings():
 # EPY: END code
 
 # EPY: START code
-# Verify the spot count is reasonable.
+# Verify the spot count is reasonable and has not changed between starfish builds
 spot_count = intensities.shape[0]
-assert 1000 < spot_count < 5000
-spot_count
+assert spot_count == 3767
 # EPY: END code
 
 # EPY: START markdown
@@ -220,9 +236,17 @@ table = pd.Series(counts, index=genes).sort_values(ascending=False)
 # EPY: END code
 
 # EPY: START code
-assert table.index.get_loc('HER2') < 10
-assert table.index.get_loc('VIM') < 10
-table.head()
+# verify that HER2 and VIM retain the correct expression order (by number of spots)
+assert table.index.get_loc('HER2') == 3
+assert table.index.get_loc('VIM') == 5 
+table.head(5)
+# EPY: END code
+
+# EPY: START code
+# verify that the number of blank spots and the top four genes have the expected values
+expected = pd.Series([2626, 307, 142, 134, 123], index=['None', 'ACTB', 'CTSL2', 'HER2', 'GAPDH'])
+assert np.array_equal(table.head(5), expected)
+assert np.array_equal(table.head(5).index, expected.index)
 # EPY: END code
 
 # EPY: START markdown
@@ -252,6 +276,11 @@ seg = Segmentation.Watershed(
 )
 seg.run(primary_image, nuclei)
 seg.show()
+# EPY: END code
+
+# EPY: START code
+# verify that the correct number of cells are detected
+assert seg.num_cells == 75
 # EPY: END code
 
 # EPY: START markdown

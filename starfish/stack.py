@@ -577,7 +577,7 @@ class ImageStack:
             yield array
 
     def apply(
-            self, func, is_volume=False, in_place=True, verbose: bool=False, **kwargs
+            self, func, is_volume=False, in_place=False, verbose: bool=False, **kwargs
     ) -> "ImageStack":
         """Apply func over all tiles or volumes in self
 

@@ -1,9 +1,9 @@
 import numpy as np
 from typing import Tuple
 
-from starfish.constants import Indices
-from starfish.stack import ImageStack
 from starfish.intensity_table import IntensityTable
+from starfish.stack import ImageStack
+from starfish.types import Indices
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import single_synthetic_spot

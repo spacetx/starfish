@@ -9,9 +9,8 @@ import validators
 import xarray as xr
 from sklearn.neighbors import NearestNeighbors
 
-from starfish.constants import Indices, Features
 from starfish.intensity_table import IntensityTable
-from starfish.types import Number
+from starfish.types import Features, Indices, Number
 
 
 class Codebook(xr.DataArray):

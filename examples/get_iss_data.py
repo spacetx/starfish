@@ -9,7 +9,7 @@ import requests
 from slicedimage import ImageFormat
 
 from examples.support import FetchedImage, ImageFetcher, write_experiment_json
-from starfish.constants import Indices, Features
+from starfish.types import Indices, Features
 from starfish.util.argparse import FsExistsType
 
 SHAPE = (980, 1330)

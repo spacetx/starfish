@@ -21,10 +21,9 @@ from slicedimage import Reader, Writer, TileSet, Tile
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
-from starfish.constants import Coordinates, Indices, Features
 from starfish.errors import DataFormatWarning
 from starfish.intensity_table import IntensityTable
-from starfish.spots import SpotAttributes
+from starfish.types import Coordinates, Indices, Features, SpotAttributes
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 

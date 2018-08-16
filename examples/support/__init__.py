@@ -14,7 +14,7 @@ from slicedimage import (
     Writer,
 )
 
-from starfish.constants import Coordinates, Indices
+from starfish.types import Coordinates, Indices
 
 
 AUX_IMAGE_NAMES = {

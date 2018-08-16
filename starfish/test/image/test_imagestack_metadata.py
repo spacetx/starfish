@@ -2,8 +2,8 @@ from typing import Any
 
 import pytest
 
-from starfish.constants import Indices
 from starfish.stack import ImageStack
+from starfish.types import Indices
 
 NUM_ROUND = 4
 NUM_CH = 2

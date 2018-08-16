@@ -649,10 +649,8 @@ class ImageStack:
                                                  Indices.CH.value,
                                                  Indices.Z.value])
 
-        if verbose:
-            tiles = tqdm(self._data.tiles)
-        else:
-            tiles = self._data.tiles
+        # attach tqdm reporter to tiles iterator if user selects verbose output
+        tiles = tqdm(self._data.tiles) if verbose else self._data.tiles
 
         applyfunc: Callable = partial(func, **kwargs)
 

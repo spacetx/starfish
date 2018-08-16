@@ -69,7 +69,7 @@ class ImageStack:
         # have the same size of data type. The # allocated array is the highest size we encounter.
         kind = None
         max_size = 0
-        for tile in self._image_partition.tiles():
+        for tile in tqdm(self._image_partition.tiles()):
             dtype = tile.numpy_array.dtype
             if kind is None:
                 kind = dtype.kind
@@ -114,7 +114,7 @@ class ImageStack:
         )
 
         # iterate through the tiles and set the data.
-        for tile in tqdm(self._image_partition.tiles()):
+        for tile in self._image_partition.tiles():
             h = tile.indices[Indices.ROUND]
             c = tile.indices[Indices.CH]
             zlayer = tile.indices.get(Indices.Z, 0)

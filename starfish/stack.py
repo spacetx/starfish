@@ -114,7 +114,7 @@ class ImageStack:
         )
 
         # iterate through the tiles and set the data.
-        for tile in self._image_partition.tiles():
+        for tile in tqdm(self._image_partition.tiles()):
             h = tile.indices[Indices.ROUND]
             c = tile.indices[Indices.CH]
             zlayer = tile.indices.get(Indices.Z, 0)

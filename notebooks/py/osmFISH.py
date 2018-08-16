@@ -27,5 +27,6 @@ experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180802
 # EPY: END markdown
 
 # EPY: START code
-experiment.show_stack({Indices.CH: 0})
+image = experiment.image
+image.show_stack({Indices.CH: 0})
 # EPY: END code

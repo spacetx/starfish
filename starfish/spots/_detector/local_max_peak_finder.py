@@ -4,11 +4,11 @@ import numpy as np
 import xarray as xr
 from trackpy import locate
 
-from starfish.stack import ImageStack
 from starfish.intensity_table import IntensityTable
-from starfish.spots._spot_attributes import SpotAttributes
-from starfish.spots._detector.detect import detect_spots
+from starfish.spots import SpotAttributes
+from starfish.stack import ImageStack
 from ._base import SpotFinderAlgorithmBase
+from .detect import detect_spots
 
 
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):

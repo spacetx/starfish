@@ -1,20 +1,24 @@
-import warnings
-import tempfile
 import json
 import os
+import tempfile
+import warnings
+from unittest.mock import MagicMock, patch
+
 import numpy as np
 import pytest
-from unittest.mock import patch, MagicMock
-import xarray as xr
 
-from starfish.constants import Indices, Features
 from starfish.codebook import Codebook
-
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import (
-    simple_codebook_json, simple_codebook_array, euclidean_decoded_intensities,
-    per_channel_max_decoded_intensities, loaded_codebook, small_intensity_table)
+    euclidean_decoded_intensities,
+    loaded_codebook,
+    per_channel_max_decoded_intensities,
+    simple_codebook_array,
+    simple_codebook_json,
+    small_intensity_table,
+)
+from starfish.types import Features, Indices
 
 
 def test_loading_codebook_from_json_local_file(simple_codebook_json):

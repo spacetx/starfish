@@ -1,6 +1,6 @@
 import argparse
 from functools import partial
-from typing import Union, Tuple, Optional, Callable
+from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
 from skimage import img_as_uint

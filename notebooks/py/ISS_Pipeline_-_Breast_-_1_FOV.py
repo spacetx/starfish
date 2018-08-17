@@ -21,13 +21,13 @@ from showit import image
 import pprint
 
 from starfish.experiment import Experiment
-from starfish.constants import Indices, Features
 from starfish.codebook import Codebook
+from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START code
 experiment = Experiment()
-experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/ISS/fov_001/experiment.json')
+experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180813/ISS/fov_001/experiment.json')
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 # EPY: END code
 
@@ -47,8 +47,15 @@ pp.pprint(experiment.format_metadata)
 # EPY: END markdown
 
 # EPY: START code
+primary_image = experiment.image
+dots = experiment.auxiliary_images['dots']
+nuclei = experiment.auxiliary_images['nuclei']
+images = [primary_image, nuclei, dots]
+# EPY: END code
+
+# EPY: START code
 # round, channel, x, y, z
-experiment.image.numpy_array.shape
+primary_image.numpy_array.shape
 # EPY: END code
 
 # EPY: START markdown
@@ -60,7 +67,7 @@ experiment.image.numpy_array.shape
 # EPY: END markdown
 
 # EPY: START code
-image(experiment.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.CH, Indices.Z))
+image(dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END code
 
 # EPY: START markdown
@@ -68,7 +75,7 @@ image(experiment.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.CH, In
 # EPY: END markdown
 
 # EPY: START code
-image(experiment.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z))
+image(nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END code
 
 # EPY: START markdown
@@ -91,14 +98,13 @@ codebook
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image._filter import Filter
+from starfish.image import Filter
 
 # filter raw data
 masking_radius = 15
-filt = Filter.WhiteTophat(masking_radius, verbose=True, is_volume=False)
-filt.run(experiment.image)
-for img in experiment.auxiliary_images.values():
-    filt.run(img)
+filt = Filter.WhiteTophat(masking_radius, is_volume=False)
+for img in images:
+    filt.run(img, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -115,10 +121,13 @@ for img in experiment.auxiliary_images.values():
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image._registration import Registration
+from starfish.image import Registration
 
-registration = Registration.FourierShiftRegistration(upsampling=1000, reference_stack=experiment.auxiliary_images['dots'], verbose=True)
-registration.run(experiment.image)
+registration = Registration.FourierShiftRegistration(
+    upsampling=1000, 
+    reference_stack=dots,
+    verbose=True)
+registration.run(primary_image)
 # EPY: END code
 
 # EPY: START markdown
@@ -130,7 +139,7 @@ registration.run(experiment.image)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.pipeline.spots.detector import SpotFinder
+from starfish.spots import SpotFinder
 import warnings
 
 # parameters to define the allowable gaussian sizes (parameter space)
@@ -152,8 +161,8 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
 
     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    blobs_image = experiment.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.Z)
-    intensities = p.find(experiment.image, blobs_image=blobs_image)
+    blobs_image = dots.max_proj(Indices.ROUND, Indices.Z)
+    intensities = p.find(primary_image, blobs_image=blobs_image)
 # EPY: END code
 
 # EPY: START code
@@ -225,23 +234,22 @@ table.head()
 # EPY: END markdown
 
 # EPY: START code
-from starfish.constants import Indices
-from starfish.image._segmentation import _WatershedSegmenter
+from starfish.image import Segmentation
 
 dapi_thresh = .16  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
-size_lim = (10, 10000)
-disk_size_markers = None
-disk_size_mask = None
 min_dist = 57
 
-stain = np.mean(experiment.image.max_proj(Indices.CH, Indices.Z), axis=0)
+stain = np.mean(primary_image.max_proj(Indices.CH, Indices.Z), axis=0)
 stain = stain/stain.max()
-nuclei = experiment.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+nuclei_projection = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 
-
-seg = _WatershedSegmenter(nuclei, stain)  # uses skimage watershed.
-cells_labels = seg.segment(dapi_thresh, stain_thresh, size_lim, disk_size_markers, disk_size_mask, min_dist)
+seg = Segmentation.Watershed(
+    dapi_threshold=dapi_thresh,
+    input_threshold=stain_thresh,
+    min_distance=min_dist
+)
+seg.run(primary_image, nuclei)
 seg.show()
 # EPY: END code
 
@@ -257,9 +265,9 @@ from skimage.color import rgb2gray
 GENE1 = 'HER2'
 GENE2 = 'VIM'
 
-rgb = np.zeros(experiment.image.tile_shape + (3,))
-rgb[:,:,0] = experiment.auxiliary_images['nuclei'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-rgb[:,:,1] = experiment.auxiliary_images['dots'].max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+rgb = np.zeros(primary_image.tile_shape + (3,))
+rgb[:,:,0] = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+rgb[:,:,1] = dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 do = rgb2gray(rgb)
 do = do/(do.max())
 

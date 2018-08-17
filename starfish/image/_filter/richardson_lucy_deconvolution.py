@@ -6,9 +6,9 @@ import numpy as np
 from skimage import restoration
 
 from starfish.stack import ImageStack
+from starfish.types import Number
 from ._base import FilterAlgorithmBase
 from .util import gaussian_kernel
-from starfish.types import Number
 
 
 class DeconvolvePSF(FilterAlgorithmBase):

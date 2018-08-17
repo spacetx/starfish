@@ -2,20 +2,25 @@ import numpy as np
 import pytest
 from skimage.feature import blob_log
 
-from starfish.constants import Indices
-from starfish.stack import ImageStack
 from starfish.spots._detector._base import SpotFinderAlgorithmBase
 from starfish.spots._detector.detect import detect_spots
 from starfish.spots._detector.gaussian import GaussianSpotDetector
 from starfish.spots._detector.local_max_peak_finder import LocalMaxPeakFinder
+from starfish.stack import ImageStack
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import (
-    synthetic_dataset_with_truth_values_and_called_spots, synthetic_single_spot_2d,
-    synthetic_two_spot_3d, synthetic_single_spot_imagestack_2d, synthetic_single_spot_imagestack_3d,
-    synthetic_two_spot_imagestack_3d, synthetic_dataset_with_truth_values, synthetic_single_spot_3d,
-    synthetic_two_spot_3d_2round_2ch
+    synthetic_dataset_with_truth_values,
+    synthetic_dataset_with_truth_values_and_called_spots,
+    synthetic_single_spot_2d,
+    synthetic_single_spot_3d,
+    synthetic_single_spot_imagestack_2d,
+    synthetic_single_spot_imagestack_3d,
+    synthetic_two_spot_3d,
+    synthetic_two_spot_3d_2round_2ch,
+    synthetic_two_spot_imagestack_3d,
 )
+from starfish.types import Indices
 
 
 def test_blob_log_2d(synthetic_single_spot_2d):

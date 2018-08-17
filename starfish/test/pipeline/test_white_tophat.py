@@ -1,6 +1,6 @@
 import numpy as np
-from skimage.filters import gaussian
 import pytest
+from skimage.filters import gaussian
 
 from starfish.image._filter.white_tophat import WhiteTophat
 

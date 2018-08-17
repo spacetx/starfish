@@ -5,8 +5,8 @@ import pytest
 
 from starfish.experiment import Experiment
 from starfish.image._filter import gaussian_high_pass
-from starfish.types import Number
 from starfish.test.dataset_fixtures import merfish_stack
+from starfish.types import Number
 
 
 @pytest.mark.parametrize('sigma', (1, (1, 1)))

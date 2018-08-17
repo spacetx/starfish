@@ -5,17 +5,12 @@ import pandas as pd
 import xarray as xr
 from skimage.feature import blob_log
 
-from starfish.constants import Features
-from starfish.stack import ImageStack
 from starfish.intensity_table import IntensityTable
-from starfish.spots._spot_attributes import SpotAttributes
-from starfish.spots._detector.detect import (
-    measure_spot_intensity,
-    detect_spots,
-)
-from starfish.types import Number
+from starfish.stack import ImageStack
+from starfish.types import Features, Number, SpotAttributes
 from starfish.util.argparse import FsExistsType
 from ._base import SpotFinderAlgorithmBase
+from .detect import detect_spots, measure_spot_intensity
 
 
 class GaussianSpotDetector(SpotFinderAlgorithmBase):

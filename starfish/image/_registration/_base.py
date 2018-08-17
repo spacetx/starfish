@@ -1,5 +1,5 @@
-from starfish.stack import ImageStack
 from starfish.pipeline.algorithmbase import AlgorithmBase
+from starfish.stack import ImageStack
 
 
 class RegistrationAlgorithmBase(AlgorithmBase):

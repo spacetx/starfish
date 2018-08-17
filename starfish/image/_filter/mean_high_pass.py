@@ -1,6 +1,6 @@
 import argparse
 from functools import partial
-from typing import Callable, Optional, Union, Tuple
+from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
 from scipy.ndimage.filters import uniform_filter
@@ -8,8 +8,8 @@ from skimage import img_as_uint
 
 from starfish.errors import DataFormatWarning
 from starfish.stack import ImageStack
-from ._base import FilterAlgorithmBase
 from starfish.types import Number
+from ._base import FilterAlgorithmBase
 
 
 class MeanHighPass(FilterAlgorithmBase):

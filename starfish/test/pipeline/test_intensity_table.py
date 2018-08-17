@@ -3,15 +3,19 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 
-from starfish.constants import Indices, Features
-from starfish.intensity_table import IntensityTable
 from starfish.codebook import Codebook
-from starfish.stack import ImageStack
+from starfish.intensity_table import IntensityTable
 from starfish.spots._detector.combine_adjacent_features import combine_adjacent_features
+from starfish.stack import ImageStack
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import (
-    loaded_codebook, simple_codebook_json, simple_codebook_array, single_synthetic_spot)
+    loaded_codebook,
+    simple_codebook_array,
+    simple_codebook_json,
+    single_synthetic_spot,
+)
+from starfish.types import Features, Indices
 
 
 def make_empty_intensity_table(image_shape=(2, 4, 3)):

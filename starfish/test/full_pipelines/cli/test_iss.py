@@ -11,8 +11,8 @@ import jsonpath_rw
 import numpy as np
 import pandas as pd
 
-from starfish.constants import Features
 from starfish.intensity_table import IntensityTable
+from starfish.types import Features
 from starfish.util import clock
 
 

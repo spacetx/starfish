@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 #
-# EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.4"}}, "nbformat": 4, "nbformat_minor": 2}
+# EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
 # # User note: This notebook is currently broken
@@ -23,10 +23,9 @@ import numpy as np
 from skimage.color import rgb2gray
 
 import matplotlib.pyplot as plt
-
 from showit import image, tile
 
-from starfish.constants import Indices, Features
+from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START markdown
@@ -40,9 +39,7 @@ from starfish.experiment import Experiment
 
 # replace <output directory> with where you saved the formatted data to with the above script
 in_json = '<output directory>/org.json'
-
-experiment = Experiment()
-experiment.read(in_json)
+experiment = Experiment.from_json(in_json)
 
 tile(experiment.image.squeeze(), size=10);
 # EPY: END code
@@ -56,7 +53,7 @@ image(experiment.auxiliary_images['dots'], size=10)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image._registration import Registration
+from starfish.image import Registration
 
 registration = Registration.fourier_shift(upsampling=1000)
 registration.run(experiment)
@@ -69,7 +66,7 @@ tile(experiment.image.squeeze(), size=10);
 # EPY: END markdown
 
 # EPY: START code
-from starfish.filters import white_top_hat
+from starfish.image import Filter
 
 disk_dize = 10
 
@@ -100,9 +97,9 @@ image(experiment.auxiliary_images['stain'])
 # EPY: END markdown
 
 # EPY: START code
-from starfish.spots.gaussian import GaussianSpotDetector
+from starfish.spots import SpotFinder
 
-gsp = GaussianSpotDetector(experiment)
+gsp = SpotFinder.GaussianSpotDetector(experiment)
 min_sigma = 4
 max_sigma = 6
 num_sigma=20
@@ -127,7 +124,7 @@ spots_viz.head()
 # EPY: END markdown
 
 # EPY: START code
-from starfish.watershedsegmenter import WatershedSegmenter
+from starfish.image import Segmentation
 
 dapi_thresh = .16
 stain_thresh = .22
@@ -136,7 +133,7 @@ disk_size_markers = None
 disk_size_mask = None
 min_dist = 57
 
-seg = WatershedSegmenter(experiment.auxiliary_images['dapi'], experiment.auxiliary_images['stain'])
+seg = Segmentation.WatershedSegmenter(experiment.auxiliary_images['dapi'], experiment.auxiliary_images['stain'])
 cells_labels = seg.run(dapi_thresh, stain_thresh, size_lim, disk_size_markers, disk_size_mask, min_dist)
 seg.show()
 # EPY: END code
@@ -146,7 +143,7 @@ seg.show()
 # EPY: END markdown
 
 # EPY: START code
-from starfish.assign import assign
+from starfish.spots import TargetAssignment
 from starfish.stats import label_to_regions
 
 points = spots_viz.loc[:, [Features.X, Features.Y]].values

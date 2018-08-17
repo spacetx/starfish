@@ -4,8 +4,8 @@ import regional
 from skimage.measure import points_in_poly
 from tqdm import tqdm
 
-from starfish.constants import Features
 from starfish.intensity_table import IntensityTable
+from starfish.types import Features
 from ._base import TargetAssignmentAlgorithm
 
 

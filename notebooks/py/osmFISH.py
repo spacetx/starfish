@@ -8,9 +8,9 @@
 # EPY: END markdown
 
 # EPY: START code
+from starfish import ImageStack
 from starfish.experiment import Experiment
-from starfish.image import ImageStack
-from starfish.constants import Indices
+from starfish.types import Indices
 import os
 # EPY: END code
 
@@ -27,5 +27,6 @@ experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180802
 # EPY: END markdown
 
 # EPY: START code
-experiment.image.show_stack({Indices.CH: 0})
+image = experiment.image
+image.show_stack({Indices.CH: 0})
 # EPY: END code

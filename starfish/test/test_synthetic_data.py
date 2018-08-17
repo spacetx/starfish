@@ -1,8 +1,8 @@
 import numpy as np
 
 from starfish.spots._detector.gaussian import GaussianSpotDetector
+from starfish.types import Features, Indices
 from starfish.util.synthesize import SyntheticData
-from starfish.constants import Features, Indices
 
 
 def test_round_trip_synthetic_data():

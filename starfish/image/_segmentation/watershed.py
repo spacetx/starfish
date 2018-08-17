@@ -1,16 +1,18 @@
+from typing import Optional, Tuple
+
 import numpy as np
-import scipy.ndimage.measurements as spm
 import regional
+import scipy.ndimage.measurements as spm
 from scipy.ndimage import distance_transform_edt
 from showit import image
 from skimage.feature import peak_local_max
 from skimage.morphology import watershed
 
-from starfish.constants import Indices
-from starfish.stack import ImageStack
+from starfish.image._filter.util import bin_open, bin_thresh
 from starfish.munge import relabel
-from starfish.image._filter.util import bin_thresh, bin_open
+from starfish.stack import ImageStack
 from starfish.stats import label_to_regions
+from starfish.types import Indices
 from ._base import SegmentationAlgorithmBase
 
 
@@ -22,6 +24,7 @@ class Watershed(SegmentationAlgorithmBase):
         self.dapi_threshold = dapi_threshold
         self.input_threshold = input_threshold
         self.min_distance = min_distance
+        self._segmentation_instance: Optional[_WatershedSegmenter] = None
 
     @classmethod
     def add_arguments(cls, group_parser) -> None:
@@ -44,8 +47,8 @@ class Watershed(SegmentationAlgorithmBase):
         disk_size_mask = None
 
         nuclei = nuclei_stack.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-        seg = _WatershedSegmenter(nuclei, stain)
-        cells_labels = seg.segment(
+        self._segmentation_instance = _WatershedSegmenter(nuclei, stain)
+        cells_labels = self._segmentation_instance.segment(
             self.dapi_threshold, self.input_threshold, size_lim, disk_size_markers, disk_size_mask,
             self.min_distance
         )
@@ -53,6 +56,12 @@ class Watershed(SegmentationAlgorithmBase):
         regions = label_to_regions(cells_labels)
 
         return regions
+
+    def show(self, figsize: Tuple[int, int]=(10, 10)) -> None:
+        if isinstance(self._segmentation_instance, _WatershedSegmenter):
+            self._segmentation_instance.show(figsize=figsize)
+        else:
+            raise RuntimeError('Run segmentation before attempting to show results.')
 
 
 # TODO dganguli: fill in these types & document

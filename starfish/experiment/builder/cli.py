@@ -1,9 +1,9 @@
 import argparse
 import json
 
-from examples.support import AUX_IMAGE_NAMES, write_experiment_json
 from starfish.types import Indices
 from starfish.util.argparse import FsExistsType
+from . import AUX_IMAGE_NAMES, write_experiment_json
 
 
 class StarfishIndex:

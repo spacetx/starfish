@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from starfish.constants import Indices, Features
 from starfish.munge import dataframe_to_multiindex
+from starfish.types import Indices, Features
 
 
 class IntensityTable(xr.DataArray):

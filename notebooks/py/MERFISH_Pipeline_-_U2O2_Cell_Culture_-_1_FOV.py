@@ -24,8 +24,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from showit import image as show_image
-from starfish.constants import Indices, Features
 from starfish.experiment import Experiment
+from starfish.types import Indices, Features
 # EPY: END code
 
 # EPY: START code

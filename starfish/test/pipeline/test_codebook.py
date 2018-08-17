@@ -7,8 +7,8 @@ import pytest
 from unittest.mock import patch, MagicMock
 import xarray as xr
 
-from starfish.constants import Indices, Features
 from starfish.codebook import Codebook
+from starfish.types import Indices, Features
 
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences

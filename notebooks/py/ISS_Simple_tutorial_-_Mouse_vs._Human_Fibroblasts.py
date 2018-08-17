@@ -25,7 +25,7 @@ from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 from showit import image, tile
 
-from starfish.constants import Indices, Features
+from starfish.types import Indices, Features
 # EPY: END code
 
 # EPY: START markdown

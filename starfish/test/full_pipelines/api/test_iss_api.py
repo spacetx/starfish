@@ -37,7 +37,7 @@ def test_iss_pipeline():
         measurement_type='max',
     )
     blobs_image = dots.numpy_array.reshape(1, *dots_data.shape)
-    intensities = gsd.find(data_stack=image, blobs_image=blobs_image)
+    intensities = gsd.run(data_stack=image, blobs_image=blobs_image)
     assert intensities.shape[0] == 5
 
     codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm_order=2)

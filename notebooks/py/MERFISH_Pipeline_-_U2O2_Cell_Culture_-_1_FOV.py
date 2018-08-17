@@ -192,7 +192,7 @@ psd = SpotFinder.PixelSpotDetector(
     crop_size=(0, 40, 40)
 )
 
-spot_intensities, prop_results = psd.find(primary_image)
+spot_intensities, prop_results = psd.run(primary_image)
 spot_intensities
 # EPY: END code
 

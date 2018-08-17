@@ -149,7 +149,7 @@ kwargs = dict(
     is_volume=True,
 )
 lmpf = SpotFinder.LocalMaxPeakFinder(**kwargs)
-spot_attributes = lmpf.find(primary_image)
+spot_attributes = lmpf.run(primary_image)
 # EPY: END code
 
 # EPY: START code

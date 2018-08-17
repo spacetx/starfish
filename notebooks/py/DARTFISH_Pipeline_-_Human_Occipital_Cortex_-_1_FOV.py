@@ -129,7 +129,7 @@ psd = SpotFinder.PixelSpotDetector(
     max_area=area_threshold[1]
 )
 
-spot_intensities, results = psd.find(zero_norm_stack)
+spot_intensities, results = psd.run(zero_norm_stack)
 spots_df = spot_intensities.to_dataframe()
 spots_df['area'] = np.pi*spots_df['radius']**2
 spots_df.head()
@@ -220,7 +220,7 @@ psd = SpotFinder.PixelSpotDetector(
     max_area=area_threshold[1]
 )
 
-spot_intensities, results = psd.find(zero_norm_stack)
+spot_intensities, results = psd.run(zero_norm_stack)
 # EPY: END code
 
 # EPY: START code

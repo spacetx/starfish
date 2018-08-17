@@ -185,7 +185,7 @@ def synthetic_dataset_with_truth_values_and_called_spots(
         measurement_type='max',
     )
 
-    intensities = gsd.find(data_stack=filtered)
+    intensities = gsd.run(data_stack=filtered)
     assert intensities.shape[0] == 5
 
     codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm_order=2)

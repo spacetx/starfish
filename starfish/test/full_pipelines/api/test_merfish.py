@@ -42,4 +42,4 @@ def test_merfish_pipeline(merfish_stack):
         crop_size=40
     )
 
-    psd.find(s)
+    psd.run(s)

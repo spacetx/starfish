@@ -1,13 +1,13 @@
 import argparse
 from functools import partial
-from typing import Callable, Union, Tuple, Optional
+from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
 from skimage import img_as_uint
 
 from starfish.errors import DataFormatWarning
-from starfish.stack import ImageStack
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
+from starfish.stack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
 from .util import validate_and_broadcast_kernel_size

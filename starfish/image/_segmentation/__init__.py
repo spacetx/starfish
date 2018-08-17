@@ -1,9 +1,9 @@
-import json
 import argparse
+import json
 from typing import Any, Dict, List
 
-from starfish.stack import ImageStack
 from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.stack import ImageStack
 from starfish.util.argparse import FsExistsType
 from . import watershed
 from ._base import SegmentationAlgorithmBase

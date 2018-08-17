@@ -17,13 +17,13 @@ from matplotlib import get_backend as get_matplotlib_backend
 from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import scoreatpercentile
 from skimage import exposure
-from slicedimage import Reader, Writer, TileSet, Tile
+from slicedimage import Reader, Tile, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
 from starfish.errors import DataFormatWarning
 from starfish.intensity_table import IntensityTable
-from starfish.types import Coordinates, Indices, Features, SpotAttributes
+from starfish.types import Coordinates, Features, Indices, SpotAttributes
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 

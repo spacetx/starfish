@@ -1,12 +1,12 @@
 from itertools import product
-from typing import Union, Tuple
+from typing import Tuple, Union
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
 from starfish.munge import dataframe_to_multiindex
-from starfish.types import Indices, Features
+from starfish.types import Features, Indices
 
 
 class IntensityTable(xr.DataArray):

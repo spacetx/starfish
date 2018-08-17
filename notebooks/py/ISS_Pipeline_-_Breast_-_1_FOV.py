@@ -22,7 +22,7 @@ import pprint
 
 from starfish.experiment import Experiment
 from starfish.codebook import Codebook
-from starfish.types import Indices, Features
+from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START code

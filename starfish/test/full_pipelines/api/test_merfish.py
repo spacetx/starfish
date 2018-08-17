@@ -1,9 +1,9 @@
 import pytest
 
-from starfish.spots._detector.pixel_spot_detector import PixelSpotDetector
 from starfish.image._filter.gaussian_high_pass import GaussianHighPass
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
 from starfish.image._filter.richardson_lucy_deconvolution import DeconvolvePSF
+from starfish.spots._detector.pixel_spot_detector import PixelSpotDetector
 from starfish.types import Indices
 
 

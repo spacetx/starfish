@@ -1,12 +1,13 @@
-import numpy as np
 from typing import Tuple
+
+import numpy as np
 
 from starfish.intensity_table import IntensityTable
 from starfish.stack import ImageStack
-from starfish.types import Indices
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import single_synthetic_spot
+from starfish.types import Indices
 
 
 def test_reshaping_between_stack_and_intensities(single_synthetic_spot):

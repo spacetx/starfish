@@ -11,13 +11,13 @@ import pytest
 from scipy.ndimage.filters import gaussian_filter
 
 from starfish.codebook import Codebook
-from starfish.stack import ImageStack
-from starfish.intensity_table import IntensityTable
 from starfish.experiment import Experiment
+from starfish.image._filter.white_tophat import WhiteTophat
+from starfish.intensity_table import IntensityTable
 from starfish.munge import dataframe_to_multiindex
 from starfish.spots._detector.gaussian import GaussianSpotDetector
-from starfish.image._filter.white_tophat import WhiteTophat
-from starfish.types import Indices, Features
+from starfish.stack import ImageStack
+from starfish.types import Features, Indices
 from starfish.util import synthesize
 
 

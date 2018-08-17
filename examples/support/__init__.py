@@ -1,8 +1,7 @@
 import json
 import os
-from typing import IO, Tuple
-
 from io import BytesIO
+from typing import IO, Tuple
 
 import numpy as np
 from skimage.io import imsave

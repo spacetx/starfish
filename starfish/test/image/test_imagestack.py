@@ -3,18 +3,18 @@ import pytest
 
 from starfish.intensity_table import IntensityTable
 from starfish.stack import ImageStack
-from starfish.types import Indices, Features
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import (
+    loaded_codebook,
+    simple_codebook_array,
+    simple_codebook_json,
+    single_synthetic_spot,
+    synthetic_dataset_with_truth_values,
     synthetic_intensity_table,
     synthetic_spot_pass_through_stack,
-    loaded_codebook,
-    synthetic_dataset_with_truth_values,
-    simple_codebook_json,
-    simple_codebook_array,
-    single_synthetic_spot
 )
+from starfish.types import Features, Indices
 
 
 def test_get_slice_simple_index():

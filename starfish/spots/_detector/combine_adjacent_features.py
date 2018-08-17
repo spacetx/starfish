@@ -2,7 +2,7 @@ from typing import List, NamedTuple, Tuple
 
 import numpy as np
 import pandas as pd
-from skimage.measure import regionprops, label
+from skimage.measure import label, regionprops
 
 from starfish.intensity_table import IntensityTable
 from starfish.munge import dataframe_to_multiindex

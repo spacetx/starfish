@@ -3,8 +3,8 @@ import os
 
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.stack import ImageStack
-from starfish.util.argparse import FsExistsType
 from starfish.types import Indices
+from starfish.util.argparse import FsExistsType
 from . import _base
 from . import gaussian
 from . import local_max_peak_finder

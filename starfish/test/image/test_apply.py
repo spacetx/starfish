@@ -2,8 +2,8 @@ from copy import deepcopy
 
 import numpy as np
 
-from starfish.util.synthesize import SyntheticData
 from starfish.stack import ImageStack
+from starfish.util.synthesize import SyntheticData
 
 
 def multiply(array, value):

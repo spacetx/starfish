@@ -5,8 +5,8 @@ from typing import Optional
 import numpy as np
 from tqdm import tqdm
 
-from starfish.types import Indices, Coordinates
 from starfish.stack import ImageStack
+from starfish.types import Coordinates, Indices
 from ._base import FilterAlgorithmBase
 
 

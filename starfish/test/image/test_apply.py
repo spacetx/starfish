@@ -3,8 +3,8 @@ from copy import deepcopy
 import numpy as np
 import unittest
 
-from starfish.util.synthesize import SyntheticData
 from starfish.stack import ImageStack
+from starfish.util.synthesize import SyntheticData
 
 
 class TestApply(unittest.TestCase):

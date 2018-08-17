@@ -1,18 +1,18 @@
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 import numpy as np
-import scipy.ndimage.measurements as spm
 import regional
+import scipy.ndimage.measurements as spm
 from scipy.ndimage import distance_transform_edt
 from showit import image
 from skimage.feature import peak_local_max
 from skimage.morphology import watershed
 
-from starfish.constants import Indices
-from starfish.stack import ImageStack
+from starfish.image._filter.util import bin_open, bin_thresh
 from starfish.munge import relabel
-from starfish.image._filter.util import bin_thresh, bin_open
+from starfish.stack import ImageStack
 from starfish.stats import label_to_regions
+from starfish.types import Indices
 from ._base import SegmentationAlgorithmBase
 
 

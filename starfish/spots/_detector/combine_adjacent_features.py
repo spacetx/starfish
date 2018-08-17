@@ -2,12 +2,11 @@ from typing import List, NamedTuple, Tuple
 
 import numpy as np
 import pandas as pd
-from skimage.measure import regionprops, label
+from skimage.measure import label, regionprops
 
-from starfish.constants import Indices, Features
 from starfish.intensity_table import IntensityTable
 from starfish.munge import dataframe_to_multiindex
-from starfish.types import Number
+from starfish.types import Features, Indices, Number
 
 
 class ConnectedComponentDecodingResult(NamedTuple):

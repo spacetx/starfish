@@ -6,12 +6,10 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from starfish.constants import Indices, Features
 from starfish.intensity_table import IntensityTable
 from starfish.munge import dataframe_to_multiindex
-from starfish.spots import SpotAttributes
 from starfish.stack import ImageStack
-from starfish.types import Number
+from starfish.types import Features, Indices, Number, SpotAttributes
 
 
 def measure_spot_intensity(

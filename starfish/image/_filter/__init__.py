@@ -1,16 +1,16 @@
 import argparse
 
-from starfish.stack import ImageStack
 from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.stack import ImageStack
 from starfish.util.argparse import FsExistsType
 from . import _base
 from . import bandpass
 from . import clip
 from . import gaussian_high_pass
 from . import gaussian_low_pass
+from . import mean_high_pass
 from . import richardson_lucy_deconvolution
 from . import white_tophat
-from . import mean_high_pass
 
 
 class Filter(PipelineComponent):

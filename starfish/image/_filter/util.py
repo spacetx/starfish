@@ -1,7 +1,7 @@
 from typing import Tuple, Union
 
 import numpy as np
-from skimage.morphology import disk, binary_opening
+from skimage.morphology import binary_opening, disk
 
 from starfish.types import Number
 

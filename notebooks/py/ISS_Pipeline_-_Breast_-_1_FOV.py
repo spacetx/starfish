@@ -21,8 +21,8 @@ from showit import image
 import pprint
 
 from starfish.experiment import Experiment
-from starfish.constants import Indices, Features
 from starfish.codebook import Codebook
+from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START code
@@ -234,7 +234,6 @@ table.head()
 # EPY: END markdown
 
 # EPY: START code
-from starfish.constants import Indices
 from starfish.image import Segmentation
 
 dapi_thresh = .16  # binary mask for cell (nuclear) locations

@@ -17,14 +17,13 @@ from matplotlib import get_backend as get_matplotlib_backend
 from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import scoreatpercentile
 from skimage import exposure
-from slicedimage import Reader, Writer, TileSet, Tile
+from slicedimage import Reader, Tile, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
-from starfish.constants import Coordinates, Indices, Features
 from starfish.errors import DataFormatWarning
 from starfish.intensity_table import IntensityTable
-from starfish.spots import SpotAttributes
+from starfish.types import Coordinates, Features, Indices, SpotAttributes
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
@@ -69,7 +68,7 @@ class ImageStack:
         # have the same size of data type. The # allocated array is the highest size we encounter.
         kind = None
         max_size = 0
-        for tile in self._image_partition.tiles():
+        for tile in tqdm(self._image_partition.tiles()):
             dtype = tile.numpy_array.dtype
             if kind is None:
                 kind = dtype.kind

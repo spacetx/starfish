@@ -1,8 +1,7 @@
 import json
 import os
-from typing import IO, Tuple
-
 from io import BytesIO
+from typing import IO, Tuple
 
 import numpy as np
 from skimage.io import imsave
@@ -14,7 +13,7 @@ from slicedimage import (
     Writer,
 )
 
-from starfish.constants import Coordinates, Indices
+from starfish.types import Coordinates, Indices
 
 
 AUX_IMAGE_NAMES = {

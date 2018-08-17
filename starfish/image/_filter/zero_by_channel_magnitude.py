@@ -5,7 +5,7 @@ from typing import Optional
 import numpy as np
 from tqdm import tqdm
 
-from starfish.constants import Indices, Coordinates
+from starfish.types import Indices, Coordinates
 from starfish.stack import ImageStack
 from ._base import FilterAlgorithmBase
 
@@ -84,28 +84,3 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                                                  )
 
         return stack
-
-# TODO @ajc the code below fulfills the same task without xarray.
-# instead it uses vectorized numpy array. what do we prefer?
-
-# def zero_channels_old(stack, magnitude_thresh, normalize_by_magnitude=False):
-#     """
-#     Sets all values in a round to zero if the magnitude across color channel is below a
-#     specified threshold
-#     """
-#     # r, z, y, x
-#     ch_magnitudes = np.linalg.norm(stack.numpy_array, ord=2, axis=1)
-#     magnitude_mask = ch_magnitudes >= magnitude_thresh
-#
-#     magnitude_mask_repeat = np.expand_dims(magnitude_mask, axis=1)
-#     magnitude_mask_repeat = magnitude_mask_repeat.repeat(stack.num_chs, axis=1)
-#
-#     ch_magnitudes_repeat = np.expand_dims(ch_magnitudes, axis=1)
-#     ch_magnitudes_repeat = ch_magnitudes_repeat.repeat(stack.num_chs, axis=1)
-#
-#     res = stack.numpy_array * magnitude_mask_repeat
-#
-#     if normalize_by_magnitude:
-#         res = np.divide(stack.numpy_array, ch_magnitudes_repeat, where=magnitude_mask_repeat)
-#
-#     return ImageStack.from_numpy_array(res), ch_magnitudes

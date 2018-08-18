@@ -288,8 +288,7 @@ def synthetic_spot_pass_through_stack(synthetic_dataset_with_truth_values):
     return codebook, true_intensities, img_stack
 
 
-@pytest.fixture()
-def single_synthetic_spot():
+def codebook_intensities_image_for_single_synthetic_spot():
     sd = synthesize.SyntheticData(
         n_round=2, n_ch=2, n_z=2, height=20, width=30, n_codes=1, n_spots=1
     )

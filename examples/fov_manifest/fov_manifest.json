@@ -1,0 +1,9 @@
+{
+  "version": "0.0.0",
+  "contents": {
+    "fov_000": "hybridization-fov_000.json",
+    "fov_001": "hybridization-fov_001.json",
+    "fov_00N": "hybridization-fov_00N.json"
+  },
+  "extras": null
+}

@@ -761,12 +761,12 @@ class ImageStack:
         return self._tile_shape
 
     def write(self, filepath: str, tile_opener=None) -> None:
-        """write the image tensor to disk
+        """write the image tensor to disk in spaceTx format
 
         Parameters
         ----------
         filepath : str
-            path + prefix for writing the image tensor
+            Path + prefix for the images and hybridization_images.json written by this function
         tile_opener : TODO ttung: doc me.
 
         """
@@ -825,7 +825,7 @@ class ImageStack:
 
         Writer.write_to_path(
             self._image_partition,
-            filepath,
+            filepath + '.json',
             pretty=True,
             tile_opener=tile_opener)
 

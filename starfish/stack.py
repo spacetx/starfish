@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 from starfish.errors import DataFormatWarning
 from starfish.intensity_table import IntensityTable
-from starfish.types import Coordinates, Features, Indices, SpotAttributes
+from starfish.types import Coordinates, Indices, SpotAttributes
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
@@ -101,7 +101,7 @@ class ImageStack:
             dims.append(dim_for_axis.value)
 
         shape.extend(self._tile_shape)
-        dims.extend([Coordinates.Y.value, Coordinates.X.value])
+        dims.extend([Indices.Y.value, Indices.X.value])
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
         self._data = xr.DataArray(
@@ -815,9 +815,9 @@ class ImageStack:
 
         seen_x_coords, seen_y_coords, seen_z_coords = set(), set(), set()
         for tile in self._image_partition.tiles():
-            seen_x_coords.add(tile.coordinates[Coordinates.X])
-            seen_y_coords.add(tile.coordinates[Coordinates.Y])
-            z_coords = tile.coordinates.get(Coordinates.Z, None)
+            seen_x_coords.add(tile.coordinates[Indices.X])
+            seen_y_coords.add(tile.coordinates[Indices.Y])
+            z_coords = tile.coordinates.get(Indices.Z, None)
             if z_coords is not None:
                 seen_z_coords.add(z_coords)
 
@@ -831,9 +831,9 @@ class ImageStack:
         if tile_opener is None:
             def tile_opener(tileset_path, tile, ext):
                 tile_basename = os.path.splitext(tileset_path)[0]
-                xcoord = tile.coordinates[Coordinates.X]
-                ycoord = tile.coordinates[Coordinates.Y]
-                zcoord = tile.coordinates.get(Coordinates.Z, None)
+                xcoord = tile.coordinates[Indices.X]
+                ycoord = tile.coordinates[Indices.Y]
+                zcoord = tile.coordinates.get(Indices.Z, None)
                 xcoord = tuple(xcoord) if isinstance(xcoord, list) else xcoord
                 ycoord = tuple(ycoord) if isinstance(ycoord, list) else ycoord
                 xval = x_coords_to_idx[xcoord]
@@ -922,7 +922,7 @@ class ImageStack:
             tile_extras_provider = cls._default_tile_extras_provider
 
         img = TileSet(
-            {Coordinates.X, Coordinates.Y, Indices.ROUND, Indices.CH, Indices.Z},
+            {Indices.X, Indices.Y, Indices.ROUND, Indices.CH, Indices.Z},
             {
                 Indices.ROUND: num_round,
                 Indices.CH: num_ch,
@@ -1011,7 +1011,7 @@ class ImageStack:
             raise ValueError('value exceeds dynamic range of largest skimage-supported type')
 
         # make sure requested dimensions are large enough to support intensity values
-        indices = zip((Features.Z, Features.Y, Features.X), (num_z, height, width))
+        indices = zip((Indices.Z.value, Indices.Y.value, Indices.X.value), (num_z, height, width))
         for index, requested_size in indices:
             required_size = intensities.coords[index].values.max()
             if required_size > requested_size:

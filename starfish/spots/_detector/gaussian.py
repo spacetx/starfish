@@ -7,7 +7,7 @@ from skimage.feature import blob_log
 
 from starfish.intensity_table import IntensityTable
 from starfish.stack import ImageStack
-from starfish.types import Features, Number, SpotAttributes
+from starfish.types import Features, Indices, Number, SpotAttributes
 from starfish.util.argparse import FsExistsType
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots, measure_spot_intensity
@@ -90,7 +90,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         )
 
         # create the SpotAttributes Table
-        columns = [Features.Z, Features.Y, Features.X, Features.SPOT_RADIUS]
+        columns = [Indices.Z.value, Indices.Y.value, Indices.X.value, Features.SPOT_RADIUS]
         fitted_blobs = pd.DataFrame(data=fitted_blobs_array, columns=columns)
 
         # convert standard deviation of gaussian kernel used to identify spot to radius of spot

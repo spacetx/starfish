@@ -14,7 +14,7 @@ from starfish.test.dataset_fixtures import (
     synthetic_intensity_table,
     synthetic_spot_pass_through_stack,
 )
-from starfish.types import Features, Indices
+from starfish.types import Indices
 
 
 def test_get_slice_simple_index():
@@ -204,9 +204,9 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
         np.array([g.shape[0]])
     ])
     for i in np.arange(len(breaks) - 1):
-        x[breaks[i]: breaks[i + 1]] = true_intensities.coords[Features.X][i]
-        y[breaks[i]: breaks[i + 1]] = true_intensities.coords[Features.Y][i]
-        z[breaks[i]: breaks[i + 1]] = true_intensities.coords[Features.Z][i]
+        x[breaks[i]: breaks[i + 1]] = true_intensities.coords[Indices.X.value][i]
+        y[breaks[i]: breaks[i + 1]] = true_intensities.coords[Indices.Y.value][i]
+        z[breaks[i]: breaks[i + 1]] = true_intensities.coords[Indices.Z.value][i]
 
     # only 8 values should be set, since there are only 8 locations across the tensor
     assert np.sum(image.numpy_array != 0) == 8

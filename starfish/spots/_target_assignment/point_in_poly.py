@@ -5,7 +5,7 @@ from skimage.measure import points_in_poly
 from tqdm import tqdm
 
 from starfish.intensity_table import IntensityTable
-from starfish.types import Features
+from starfish.types import Features, Indices
 from ._base import TargetAssignmentAlgorithm
 
 
@@ -26,8 +26,8 @@ class PointInPoly2D(TargetAssignmentAlgorithm):
             bool=False
     ) -> IntensityTable:
 
-        x = intensities.coords[Features.X].values
-        y = intensities.coords[Features.Y].values
+        x = intensities.coords[Indices.X.value].values
+        y = intensities.coords[Indices.Y.value].values
         points = pd.DataFrame(dict(x=x, y=y))
 
         results = pd.DataFrame({'spot_id': range(0, intensities.shape[0])})

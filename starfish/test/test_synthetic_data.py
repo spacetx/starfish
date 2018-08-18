@@ -89,9 +89,9 @@ def test_medium_synthetic_stack():
     codebook.metric_decode(calculated_intensities, max_distance=1, min_intensity=0, norm_order=2)
 
     # spots are detected in a different order that they're generated; sorting makes comparison easy
-    sorted_intensities = intensities.sortby([Features.Z, Features.Y, Features.X])
+    sorted_intensities = intensities.sortby([Indices.Z.value, Indices.Y.value, Indices.X.value])
     sorted_calculated_intensities = calculated_intensities.sortby(
-        [Features.Z, Features.Y, Features.X]
+        [Indices.Z.value, Indices.Y.value, Indices.X.value]
     )
 
     # verify that the spots are all detected, and decode to the correct targets

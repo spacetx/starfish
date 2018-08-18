@@ -24,6 +24,8 @@ class Indices(AugmentedEnum):
     ROUND = 'r'
     CH = 'c'
     Z = 'z'
+    Y = 'y'
+    X = 'x'
 
 
 class Features:
@@ -38,6 +40,3 @@ class Features:
     CODE_VALUE = 'v'
     SPOT_RADIUS = 'radius'
     DISTANCE = 'distance'
-    Z = 'z'
-    Y = 'y'
-    X = 'x'

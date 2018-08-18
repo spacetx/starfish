@@ -16,8 +16,7 @@ from .util import validate_and_broadcast_kernel_size
 class GaussianLowPass(FilterAlgorithmBase):
 
     def __init__(
-            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False, verbose: bool=False,
-            **kwargs) -> None:
+            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False, **kwargs) -> None:
         """Multi-dimensional low-pass gaussian filter.
 
         Parameters
@@ -27,13 +26,10 @@ class GaussianLowPass(FilterAlgorithmBase):
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
             independently.
-        verbose : bool
-            If True, report on the percentage completed (default = False) during processing
 
         """
         self.sigma = validate_and_broadcast_kernel_size(sigma, is_volume)
         self.is_volume = is_volume
-        self.verbose = verbose
 
     @classmethod
     def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
@@ -69,13 +65,15 @@ class GaussianLowPass(FilterAlgorithmBase):
 
         blurred = gaussian(
             image,
-            sigma=sigma, output=None, cval=0, multichannel=True, preserve_range=True, truncate=4.0
+            sigma=sigma, output=None, cval=0, multichannel=False, preserve_range=True, truncate=4.0
         )
         blurred = blurred.clip(0).astype(np.uint16)
 
         return blurred
 
-    def run(self, stack: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
+    def run(
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=False
+    ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters
@@ -84,6 +82,8 @@ class GaussianLowPass(FilterAlgorithmBase):
             Stack to be filtered.
         in_place : bool
             if True, process ImageStack in-place, otherwise return a new stack
+        verbose : bool
+            if True, report on filtering progress (default = False)
 
         Returns
         -------
@@ -93,7 +93,7 @@ class GaussianLowPass(FilterAlgorithmBase):
         """
         low_pass: Callable = partial(self.low_pass, sigma=self.sigma)
         result = stack.apply(
-            low_pass, is_volume=self.is_volume, verbose=self.verbose, in_place=in_place)
+            low_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place)
         if not in_place:
             return result
         return None

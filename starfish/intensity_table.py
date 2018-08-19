@@ -1,11 +1,10 @@
 from itertools import product
-from typing import Tuple, Union
+from typing import Dict, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
-from starfish.munge import dataframe_to_multiindex
 from starfish.types import Features, Indices
 
 
@@ -57,9 +56,22 @@ class IntensityTable(xr.DataArray):
     # constant that stores the attr key for the shape of ImageStack
     IMAGE_SHAPE = 'image_shape'
 
+    @staticmethod
+    def _build_xarray_coords(
+            spot_attributes: pd.DataFrame, channel_index: np.ndarray, round_index: np.ndarray
+    ) -> Dict[str, np.ndarray]:
+        """build a non-multi-index set of coordinates for intensity-table"""
+        coordinates = {k: (Features.AXIS, spot_attributes[k].values) for k in spot_attributes}
+        coordinates.update({
+            Features.AXIS: np.arange(len(spot_attributes)),
+            Indices.CH.value: channel_index,
+            Indices.ROUND.value: round_index
+        })
+        return coordinates
+
     @classmethod
     def empty_intensity_table(
-            cls, spot_attributes: pd.MultiIndex, n_ch: int, n_round: int,
+            cls, spot_attributes: pd.DataFrame, n_ch: int, n_round: int,
             image_shape: Tuple[int, int, int]
     ) -> "IntensityTable":
         """Create an empty intensity table with pre-set axis whose values are zero
@@ -88,31 +100,32 @@ class IntensityTable(xr.DataArray):
         data = np.zeros((spot_attributes.shape[0], n_ch, n_round))
         dims = (Features.AXIS, Indices.CH.value, Indices.ROUND.value)
         attrs = {cls.IMAGE_SHAPE: image_shape}
+        coords = cls._build_xarray_coords(spot_attributes, channel_index, round_index)
 
         intensity_table = cls(
-            data=data, coords=(spot_attributes, channel_index, round_index), dims=dims,
+            data=data, coords=coords, dims=dims,
             attrs=attrs
         )
 
         return intensity_table
 
     @staticmethod
-    def _verify_spot_attributes(spot_attributes: pd.MultiIndex) -> None:
+    def _verify_spot_attributes(spot_attributes: pd.DataFrame) -> None:
         """Run some checks on spot attributes"""
-        if not isinstance(spot_attributes, pd.MultiIndex):
+        if not isinstance(spot_attributes, pd.DataFrame):
             raise ValueError(
-                f'spot attributes must be a pandas MultiIndex, not {type(spot_attributes)}.')
+                f'spot attributes must be a pandas DataFrame , not {type(spot_attributes)}.')
 
         required_attributes = {Features.Z, Features.Y, Features.X}
-        missing_attributes = required_attributes.difference(spot_attributes.names)
+        missing_attributes = required_attributes.difference(spot_attributes.columns)
         if missing_attributes:
             raise ValueError(
-                f'Missing spot_attribute levels in provided MultiIndex: {missing_attributes}. '
+                f'Missing spot_attribute levels in provided DataFrame: {missing_attributes}. '
                 f'The following levels are required: {required_attributes}.')
 
     @classmethod
     def from_spot_data(
-            cls, intensities: Union[xr.DataArray, np.ndarray], spot_attributes: pd.MultiIndex,
+            cls, intensities: Union[xr.DataArray, np.ndarray], spot_attributes: pd.DataFrame,
             image_shape: Tuple[int, int, int],
             *args, **kwargs) -> "IntensityTable":
         """Table to store image feature intensities and associated metadata
@@ -121,7 +134,7 @@ class IntensityTable(xr.DataArray):
         ----------
         intensities : np.ndarray[Any]
             intensity data
-        spot_attributes : pd.MultiIndex
+        spot_attributes : pd.DataFrame
             Name(s) of the data dimension(s). Must be either a string (only
             for 1D data) or a sequence of strings with length equal to the
             number of dimensions. If this argument is omitted, dimension names
@@ -147,18 +160,17 @@ class IntensityTable(xr.DataArray):
                 f'shape ({intensities.shape}) is invalid.')
 
         cls._verify_spot_attributes(spot_attributes)
-
-        coords = (
-            (Features.AXIS, spot_attributes),
-            (Indices.CH.value, np.arange(intensities.shape[1])),
-            (Indices.ROUND.value, np.arange(intensities.shape[2]))
-        )
+        coords = cls._build_xarray_coords(
+            spot_attributes,
+            np.arange(intensities.shape[1]),
+            np.arange(intensities.shape[2]))
 
         dims = (Features.AXIS, Indices.CH.value, Indices.ROUND.value)
 
         attrs = {cls.IMAGE_SHAPE: image_shape}
 
-        return cls(intensities, coords, dims, attrs=attrs, *args, **kwargs)
+        intensities = cls(intensities, coords, dims, attrs=attrs, *args, **kwargs)
+        return intensities
 
     def save(self, filename: str) -> None:
         """Save an IntensityTable as a Netcdf File
@@ -236,9 +248,9 @@ class IntensityTable(xr.DataArray):
         x = np.random.randint(0, width, size=n_spots)
         r = np.empty(n_spots)
         r.fill(np.nan)  # radius is a function of the point-spread gaussian size
-
-        names = [Features.Z, Features.Y, Features.X, Features.SPOT_RADIUS]
-        spot_attributes = pd.MultiIndex.from_arrays([z, y, x, r], names=names)
+        spot_attributes = pd.DataFrame(
+            {Features.Z: z, Features.Y: y, Features.X: x, Features.SPOT_RADIUS: r}
+        )
 
         # empty data tensor
         data = np.zeros(shape=(n_spots, *codebook.shape[1:]))
@@ -317,10 +329,9 @@ class IntensityTable(xr.DataArray):
         pixel_coordinates[Features.SPOT_RADIUS] = np.full(
             pixel_coordinates.shape[0], fill_value=np.nan)
 
-        spot_attributes = dataframe_to_multiindex(pixel_coordinates)
         image_size = cropped_data.shape[:3]
 
-        return IntensityTable.from_spot_data(intensity_data, spot_attributes, image_size)
+        return IntensityTable.from_spot_data(intensity_data, pixel_coordinates, image_size)
 
     def mask_low_intensity_features(self, intensity_threshold):
         """return the indices of features that have average intensity below intensity_threshold"""
@@ -338,7 +349,7 @@ class IntensityTable(xr.DataArray):
         """turn regions back into intensities by reducing over the labeled area"""
         raise NotImplementedError
 
-    def to_dataframe(self) -> pd.DataFrame:
+    def to_features_dataframe(self) -> pd.DataFrame:
         """Generates a dataframe of the underlying features multi-index.
         This is guaranteed to contain the features x, y, z, and radius.
 
@@ -348,5 +359,5 @@ class IntensityTable(xr.DataArray):
 
 
         """
-        df = self.features.to_index().to_frame(index=False)
+        df = pd.DataFrame(dict(self[Features.AXIS].coords.variables)).drop(Features.AXIS, axis=1)
         return df

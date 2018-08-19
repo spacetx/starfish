@@ -1,14 +1,7 @@
 from typing import Any, Dict
 
 import numpy as np
-import pandas as pd
 import regional
-
-
-def dataframe_to_multiindex(dataframe: pd.DataFrame) -> pd.MultiIndex:
-    """Convert data in a DataFrame to a MultiIndex"""
-    names, arrays = zip(*(dataframe.items()))
-    return pd.MultiIndex.from_arrays(arrays=arrays, names=names)
 
 
 def spots_to_geojson(spots_viz):

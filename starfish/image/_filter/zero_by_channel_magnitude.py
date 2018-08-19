@@ -74,7 +74,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
 
             # apply mask and optionally, normalize by channel magnitude
             for c in range(stack.num_chs):
-                ind = {Indices.ROUND: r, Indices.CH: c}
+                ind = {Indices.ROUND.value: r, Indices.CH.value: c}
                 stack._data[ind] = stack._data[ind] * magnitude_mask
 
                 if self.normalize:

@@ -5,7 +5,6 @@ import pandas as pd
 from skimage.measure import label, regionprops
 
 from starfish.intensity_table import IntensityTable
-from starfish.munge import dataframe_to_multiindex
 from starfish.types import Features, Indices, Number
 
 
@@ -117,16 +116,15 @@ def combine_adjacent_features(
         mean_pixel_traces[Features.DISTANCE]
 
     # create new indexes for the output IntensityTable
-    spots_index = dataframe_to_multiindex(spots_df)
     channel_index = mean_pixel_traces.indexes[Indices.CH]
     round_index = mean_pixel_traces.indexes[Indices.ROUND]
+    coords = IntensityTable._build_xarray_coords(spots_df, channel_index, round_index)
 
     # create the output IntensityTable
     dims = (Features.AXIS, Indices.CH.value, Indices.ROUND.value)
     attrs = {IntensityTable.IMAGE_SHAPE: intensities.attrs[IntensityTable.IMAGE_SHAPE]}
     intensity_table = IntensityTable(
-        data=mean_pixel_traces, coords=(spots_index, channel_index, round_index), dims=dims,
-        attrs=attrs
+        data=mean_pixel_traces, coords=coords, dims=dims, attrs=attrs
     )
 
     ccdr = ConnectedComponentDecodingResult(props, label_image, decoded_image)

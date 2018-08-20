@@ -10,6 +10,7 @@ from slicedimage import (
     Writer,
 )
 
+from starfish.experiment import Experiment
 from starfish.types import Coordinates, Indices
 from .imagedata import FetchedImage, ImageFetcher, RandomNoiseImage, RandomNoiseImageFetcher
 
@@ -150,7 +151,7 @@ def write_experiment_json(
         postprocess_func = lambda doc: doc
 
     experiment_doc = {
-        'version': "0.0.0",
+        'version': str(Experiment.CURRENT_VERSION),
         'auxiliary_images': {},
         'extras': {},
     }

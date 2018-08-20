@@ -4,7 +4,7 @@
 # EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
-# ## Reproduce DARTFISH results with a Pixel Decoding Method
+### Reproduce DARTFISH results with a Pixel Decoding Method
 # EPY: END markdown
 
 # EPY: START code
@@ -33,9 +33,9 @@ sns.set_style('ticks')
 # EPY: END code
 
 # EPY: START markdown
-# ### Load image stack
-# 
-# Note that the data here corresopond to DARTFISHv1 2017. The group is actively working on improving the protocol.
+#### Load image stack
+#
+#Note that the data here corresopond to DARTFISHv1 2017. The group is actively working on improving the protocol.
 # EPY: END markdown
 
 # EPY: START code
@@ -54,7 +54,7 @@ stack.show_stack({Indices.CH:0}, rescale=True);
 # EPY: END code
 
 # EPY: START markdown
-# ### Load codebook
+#### Load codebook
 # EPY: END markdown
 
 # EPY: START code
@@ -63,7 +63,7 @@ cb
 # EPY: END code
 
 # EPY: START markdown
-# ### Load copy number benchmark results
+#### Load copy number benchmark results
 # EPY: END markdown
 
 # EPY: START code
@@ -72,7 +72,7 @@ cnts_benchmark.head()
 # EPY: END code
 
 # EPY: START markdown
-# ### Filter Image Stack
+#### Filter Image Stack
 # EPY: END markdown
 
 # EPY: START code
@@ -84,7 +84,7 @@ zero_norm_stack = z_filt.run(norm_stack, in_place=False)
 # EPY: END code
 
 # EPY: START markdown
-# #### Visualize barcode magnitudes to help determine an appropriate threshold for decoding
+##### Visualize barcode magnitudes to help determine an appropriate threshold for decoding
 # EPY: END markdown
 
 # EPY: START code
@@ -106,7 +106,7 @@ plt.yscale('log');
 # EPY: END code
 
 # EPY: START markdown
-# ### Decode
+#### Decode
 # EPY: END markdown
 
 # EPY: START code
@@ -136,11 +136,11 @@ spots_df.head()
 # EPY: END code
 
 # EPY: START markdown
-# ### QC Plots
+#### QC Plots
 # EPY: END markdown
 
 # EPY: START markdown
-# #### parameter tuning plots
+##### parameter tuning plots
 # EPY: END markdown
 
 # EPY: START code
@@ -176,7 +176,7 @@ plt.title('Set minimum distance threshold');
 # EPY: END code
 
 # EPY: START markdown
-# #### Copy number comparisons
+##### Copy number comparisons
 # EPY: END markdown
 
 # EPY: START code
@@ -205,7 +205,7 @@ sns.despine(offset=2)
 # EPY: END code
 
 # EPY: START markdown
-# #### visualization of rolonies
+##### visualization of rolonies
 # EPY: END markdown
 
 # EPY: START code
@@ -249,8 +249,8 @@ plt.title('Coded rolonies, zoomed in');
 # EPY: END code
 
 # EPY: START markdown
-# ### visualization of matched barcodes
-# here, we 1. pick a rolony that was succesfully decoded to a gene. 2. pull out the average pixel trace for that rolony and 3. plot that pixel trace against the barcode of that gene
+#### visualization of matched barcodes
+#here, we 1. pick a rolony that was succesfully decoded to a gene. 2. pull out the average pixel trace for that rolony and 3. plot that pixel trace against the barcode of that gene
 # EPY: END markdown
 
 # EPY: START code

@@ -102,8 +102,6 @@ def validate_and_broadcast_kernel_size(
             raise ValueError(message.format(shape=2, passed_shape=len(sigma)))
         valid_sigma = sigma
     else:
-        # TODO skimage is does not broadcast the tuple as declared in their docs. See:
-        # http://scikit-image.org/docs/dev/api/skimage.filters.html#skimage.filters.gaussian
         if is_volume:
             valid_sigma = (sigma,) * 3
         else:

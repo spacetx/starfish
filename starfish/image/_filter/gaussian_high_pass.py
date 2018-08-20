@@ -16,8 +16,7 @@ from .util import validate_and_broadcast_kernel_size
 class GaussianHighPass(FilterAlgorithmBase):
 
     def __init__(
-            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False, verbose: bool=False,
-            **kwargs
+            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False, **kwargs
     ) -> None:
         """Gaussian high pass filter
 
@@ -32,7 +31,6 @@ class GaussianHighPass(FilterAlgorithmBase):
         """
         self.sigma = validate_and_broadcast_kernel_size(sigma, is_volume)
         self.is_volume = is_volume
-        self.verbose = verbose
 
     @classmethod
     def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
@@ -95,7 +93,7 @@ class GaussianHighPass(FilterAlgorithmBase):
         """
         high_pass: Callable = partial(self.high_pass, sigma=self.sigma)
         result = stack.apply(
-            high_pass, is_volume=self.is_volume, verbose=self.verbose, in_place=in_place
+            high_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place
         )
         if not in_place:
             return result

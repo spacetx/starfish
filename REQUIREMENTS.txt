@@ -10,7 +10,7 @@ scikit-image>=0.14.0
 scikit-learn
 scipy
 showit >= 1.1.4
-slicedimage == 0.0.0-dev23
+slicedimage == 0.0.1
 scikit-learn
 tqdm
 trackpy

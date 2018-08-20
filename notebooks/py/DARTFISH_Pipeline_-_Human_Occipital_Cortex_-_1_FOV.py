@@ -130,7 +130,7 @@ psd = SpotFinder.PixelSpotDetector(
 )
 
 spot_intensities, results = psd.run(zero_norm_stack)
-spots_df = spot_intensities.to_dataframe()
+spots_df = spot_intensities.to_features_dataframe()
 spots_df['area'] = np.pi*spots_df['radius']**2
 spots_df.head()
 # EPY: END code
@@ -258,7 +258,7 @@ plt.title('Coded rolonies, zoomed in');
 pixel_traces = spot_intensities.stack(traces=(Indices.ROUND.value, Indices.CH.value))
 
 # extract dataframe from spot intensity table for indexing purposes
-pixel_traces_df = pixel_traces.to_dataframe()
+pixel_traces_df = pixel_traces.to_features_dataframe()
 pixel_traces_df['area'] = np.pi*pixel_traces_df.radius**2
 
 # pick index of a random barcode that was read and decoded from the ImageStack

@@ -7,7 +7,6 @@ import pandas as pd
 import xarray as xr
 
 from starfish.intensity_table import IntensityTable
-from starfish.munge import dataframe_to_multiindex
 from starfish.stack import ImageStack
 from starfish.types import Features, Indices, Number, SpotAttributes
 
@@ -95,12 +94,11 @@ def measure_spot_intensities(
     # determine the shape of the intensity table
     n_ch = data_image.shape[Indices.CH]
     n_round = data_image.shape[Indices.ROUND]
-    spot_attribute_index = dataframe_to_multiindex(spot_attributes)
     image_shape: Tuple[int, int, int] = data_image.raw_shape[2:]
 
     # construct the empty intensity table
     intensity_table = IntensityTable.empty_intensity_table(
-        spot_attributes=spot_attribute_index,
+        spot_attributes=spot_attributes,
         n_ch=n_ch,
         n_round=n_round,
         image_shape=image_shape
@@ -144,7 +142,8 @@ def concatenate_spot_attributes_to_intensities(
     n_round: int = max(inds[Indices.ROUND] for _, inds in spot_attributes) + 1
 
     all_spots = pd.concat([sa.data for sa, inds in spot_attributes])
-    spot_attribute_index = dataframe_to_multiindex(all_spots.drop(['spot_id', 'intensity'], axis=1))
+    # this drop call ensures only x, y, z, radius, and quality, are passed to the IntensityTable
+    features_coordinates = all_spots.drop(['spot_id', 'intensity'], axis=1)
 
     # TODO ambrosejcarr: remove image_shape from intensity_table
     z_max = max(max(sa.data['z']) for sa, inds in spot_attributes)
@@ -153,7 +152,7 @@ def concatenate_spot_attributes_to_intensities(
     image_shape = (z_max, y_max, x_max)
 
     intensity_table = IntensityTable.empty_intensity_table(
-        spot_attribute_index, n_ch, n_round, image_shape
+        features_coordinates, n_ch, n_round, image_shape
     )
 
     i = 0

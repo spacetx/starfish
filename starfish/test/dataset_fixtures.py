@@ -14,7 +14,6 @@ from starfish.codebook import Codebook
 from starfish.experiment import Experiment
 from starfish.image._filter.white_tophat import WhiteTophat
 from starfish.intensity_table import IntensityTable
-from starfish.munge import dataframe_to_multiindex
 from starfish.spots._detector.gaussian import GaussianSpotDetector
 from starfish.stack import ImageStack
 from starfish.types import Features, Indices
@@ -72,14 +71,14 @@ def small_intensity_table():
          [0, 0.1]],  # this one is a candidate for intensity filtering
     ])
 
-    spot_attributes = dataframe_to_multiindex(pd.DataFrame(
+    spot_attributes = pd.DataFrame(
         data={
             Features.X: [0, 1, 2, 3, 4],
             Features.Y: [3, 4, 5, 6, 7],
             Features.Z: [0, 0, 0, 0, 0],
             Features.SPOT_RADIUS: [0.1, 2, 3, 2, 1]
         }
-    ))
+    )
     image_shape = (3, 2, 2)
 
     return IntensityTable.from_spot_data(intensities, spot_attributes, image_shape)

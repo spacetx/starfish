@@ -1,34 +1,42 @@
 import argparse
 import io
-import json
 import os
-import zipfile
 from typing import IO, Tuple
 
-import requests
+from skimage.io import imread, imsave
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedImage, ImageFetcher, write_experiment_json
-from starfish.types import Features, Indices
+from starfish.types import Indices
 from starfish.util.argparse import FsExistsType
 
+SHAPE = (1044, 1390)
 
-class ISSImage(FetchedImage):
+
+class CroppedISSImage(FetchedImage):
     def __init__(self, file_path):
         self.file_path = file_path
 
     @property
     def shape(self) -> Tuple[int, ...]:
-        #TODO these images need to be hella cropped
-
-        return 1044, 1390
+        # TODO these images need to be hella cropped
+        return SHAPE
 
     @property
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
+    @staticmethod
+    def crop(img):
+        crp = img[40:1084, 20:1410]
+        return crp
+
     def image_data_handle(self) -> IO:
-        return open(self.file_path, "rb")
+        im = self.crop(imread(self.file_path))
+        fh = io.BytesIO()
+        imsave(fh, im, plugin='tifffile')
+        fh.seek(0)
+        return fh
 
 
 class HybridizationImageFetcher(ImageFetcher):
@@ -50,12 +58,27 @@ class HybridizationImageFetcher(ImageFetcher):
     def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
         filename = 'slideA_' + str(fov + 1) + '_' + self.hyb_dict[hyb] + '_' + self.ch_dict[ch] + '.TIF'
         file_path = os.path.join(self.input_dir, filename)
-        return ISSImage(file_path)
+        return CroppedISSImage(file_path)
 
-    @staticmethod
-    def crop(img):
-        crp = img[40:1084, 20:1410]
-        return crp
+
+class AuxImageFetcherDAPI(ImageFetcher):
+    def __init__(self, input_dir):
+        self.input_dir = input_dir
+
+    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
+        filename = 'slideA_' + str(fov + 1) + '_DO_' + 'DAPI.TIF'
+        file_path = os.path.join(self.input_dir, filename)
+        return CroppedISSImage(file_path)
+
+
+class AuxImageFetcherDots(ImageFetcher):
+    def __init__(self, input_dir):
+        self.input_dir = input_dir
+
+    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
+        filename = 'slideA_' + str(fov + 1) + '_DO_' + 'Cy3.TIF'
+        file_path = os.path.join(self.input_dir, filename)
+        return CroppedISSImage(file_path)
 
 
 def format_data(input_dir, output_dir):
@@ -82,9 +105,26 @@ def format_data(input_dir, output_dir):
 
     hfetch = HybridizationImageFetcher(input_dir)
 
+    auxfetch = {
+        'nuclei': AuxImageFetcherDAPI(input_dir),
+        'dots': AuxImageFetcherDots(input_dir),
+    }
+
     write_experiment_json(output_dir,
                           num_fovs,
                           hyb_dimensions,
                           aux_name_to_dimensions,
-                          hyb_image_fetcher=hfetch
+                          hyb_image_fetcher=hfetch,
+                          aux_image_fetcher=auxfetch,
+                          default_shape=SHAPE
                           )
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input_dir", type=FsExistsType())
+    parser.add_argument("output_dir", type=FsExistsType())
+
+    args = parser.parse_args()
+
+    format_data(args.input_dir, args.output_dir)

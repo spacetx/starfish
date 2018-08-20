@@ -57,7 +57,10 @@ def combine_adjacent_features(
     target_array = np.array(target_list)
 
     # reverses the linearization that was used to construct the IntensityTable from the ImageStack
-    decoded_image: np.ndarray = target_array.reshape(intensities.attrs[IntensityTable.IMAGE_SHAPE])
+    max_x = intensities[Features.X].values.max() + 1
+    max_y = intensities[Features.Y].values.max() + 1
+    max_z = intensities[Features.Z].values.max() + 1
+    decoded_image: np.ndarray = target_array.reshape((max_z, max_y, max_x))
 
     # label each pixel according to its component
     label_image: np.ndarray = label(decoded_image, connectivity=connectivity)
@@ -122,9 +125,8 @@ def combine_adjacent_features(
 
     # create the output IntensityTable
     dims = (Features.AXIS, Indices.CH.value, Indices.ROUND.value)
-    attrs = {IntensityTable.IMAGE_SHAPE: intensities.attrs[IntensityTable.IMAGE_SHAPE]}
     intensity_table = IntensityTable(
-        data=mean_pixel_traces, coords=coords, dims=dims, attrs=attrs
+        data=mean_pixel_traces, coords=coords, dims=dims
     )
 
     ccdr = ConnectedComponentDecodingResult(props, label_image, decoded_image)

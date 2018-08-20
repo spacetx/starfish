@@ -79,9 +79,8 @@ def small_intensity_table():
             Features.SPOT_RADIUS: [0.1, 2, 3, 2, 1]
         }
     )
-    image_shape = (3, 2, 2)
 
-    return IntensityTable.from_spot_data(intensities, spot_attributes, image_shape)
+    return IntensityTable.from_spot_data(intensities, spot_attributes)
 
 
 @pytest.fixture(scope='module')

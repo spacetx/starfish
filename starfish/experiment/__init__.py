@@ -9,6 +9,7 @@ from starfish.stack import ImageStack
 
 
 class Experiment:
+    CURRENT_VERSION = Version("1.0.0")
     MIN_SUPPORTED_VERSION = Version("1.0.0")
     MAX_SUPPORTED_VERSION = Version("1.0.0")
 

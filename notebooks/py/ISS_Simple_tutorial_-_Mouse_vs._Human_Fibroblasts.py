@@ -4,15 +4,15 @@
 # EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
-# # User note: This notebook is currently broken
-# 
-# For a working ISS demonstration, please see the ISS_Pipeline notebook in the same directory
+## User note: This notebook is currently broken
+#
+#For a working ISS demonstration, please see the ISS_Pipeline notebook in the same directory
 # EPY: END markdown
 
 # EPY: START markdown
-# # Starfish re-creation of an in-situ sequencing pipeline 
-# 
-# Here, we reproduce the results of a pipeline run on data collected using the gap filling and padlock probe litigation method described in [Ke, Mignardi, et. al, 2013](http://www.nature.com/nmeth/journal/v10/n9/full/nmeth.2563.html). These data represent 5 co-cultured mouse and human cells -- the main idea is to detect a single nucleotide polymorphism (SNP) in the Beta-Actin (ACTB) gene across species. The Python code below correctly re-produces the same results from the original cell profiler - matlab - imagej [pipeline](http://cellprofiler.org/examples/#InSitu) that is publicly accessible. 
+## Starfish re-creation of an in-situ sequencing pipeline 
+#
+#Here, we reproduce the results of a pipeline run on data collected using the gap filling and padlock probe litigation method described in [Ke, Mignardi, et. al, 2013](http://www.nature.com/nmeth/journal/v10/n9/full/nmeth.2563.html). These data represent 5 co-cultured mouse and human cells -- the main idea is to detect a single nucleotide polymorphism (SNP) in the Beta-Actin (ACTB) gene across species. The Python code below correctly re-produces the same results from the original cell profiler - matlab - imagej [pipeline](http://cellprofiler.org/examples/#InSitu) that is publicly accessible. 
 # EPY: END markdown
 
 # EPY: START code
@@ -29,9 +29,9 @@ from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START markdown
-# ## Raw Data
-# 
-# The raw data can be downloaded and formatted for analysis by running: ```python examples/get_iss_data.py ><raw data directory> <output directory> --d 1``` from the Starfish directory
+### Raw Data
+#
+#The raw data can be downloaded and formatted for analysis by running: ```python examples/get_iss_data.py ><raw data directory> <output directory> --d 1``` from the Starfish directory
 # EPY: END markdown
 
 # EPY: START code
@@ -49,7 +49,7 @@ image(experiment.auxiliary_images['dots'], size=10)
 # EPY: END code
 
 # EPY: START markdown
-# ## Register
+### Register
 # EPY: END markdown
 
 # EPY: START code
@@ -62,7 +62,7 @@ tile(experiment.image.squeeze(), size=10);
 # EPY: END code
 
 # EPY: START markdown
-# ## Filter
+### Filter
 # EPY: END markdown
 
 # EPY: START code
@@ -93,7 +93,7 @@ image(experiment.auxiliary_images['stain'])
 # EPY: END code
 
 # EPY: START markdown
-# ## Detect
+### Detect
 # EPY: END markdown
 
 # EPY: START code
@@ -120,7 +120,7 @@ spots_viz.head()
 # EPY: END code
 
 # EPY: START markdown
-# ##  Segmentation
+###  Segmentation
 # EPY: END markdown
 
 # EPY: START code
@@ -139,7 +139,7 @@ seg.show()
 # EPY: END code
 
 # EPY: START markdown
-# ## Assignment
+### Assignment
 # EPY: END markdown
 
 # EPY: START code
@@ -157,7 +157,7 @@ ass.head()
 # EPY: END code
 
 # EPY: START markdown
-# ## Decode
+### Decode
 # EPY: END markdown
 
 # EPY: START code
@@ -172,7 +172,7 @@ top_barcode
 # EPY: END code
 
 # EPY: START markdown
-# ## Visualization
+### Visualization
 # EPY: END markdown
 
 # EPY: START code
@@ -211,7 +211,7 @@ plt.plot(v_uass.y, v_uass.x, 'xw')
 # EPY: END code
 
 # EPY: START markdown
-# ## Cell by gene expression table
+### Cell by gene expression table
 # EPY: END markdown
 
 # EPY: START code

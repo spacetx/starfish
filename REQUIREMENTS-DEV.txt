@@ -4,5 +4,5 @@ jsonpath_rw
 pytest-cov>=2.5.1
 pytest-xdist
 mypy
-nbencdec
+nbencdec >= 0.0.5
 -r REQUIREMENTS.txt

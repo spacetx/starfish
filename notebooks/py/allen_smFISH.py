@@ -4,9 +4,9 @@
 # EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
-# # Reproduce Allen smFISH results with Starfish
-# 
-# This notebook walks through a work flow that reproduces the smFISH result for one field of view using the starfish package. 
+## Reproduce Allen smFISH results with Starfish
+#
+#This notebook walks through a work flow that reproduces the smFISH result for one field of view using the starfish package. 
 # EPY: END markdown
 
 # EPY: START code
@@ -31,9 +31,9 @@ experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180813/allen_smFISH/fo
 # EPY: END code
 
 # EPY: START markdown
-# Load the Stack object, which while not well-named right now, should be thought of as an access point to an "ImageDataSet". In practice, we expect the Stack object or something similar to it to be an access point for _multiple_ fields of view. In practice, the thing we talk about as a "TileSet" is the `Stack.image` object. The data are currently stored in-memory in a `numpy.ndarray`, and that is where most of our operations are done. 
-# 
-# The numpy array can be accessed through Stack.image.numpy\_array (public method, read only) or Stack.image.\_data (read and write)
+#Load the Stack object, which while not well-named right now, should be thought of as an access point to an "ImageDataSet". In practice, we expect the Stack object or something similar to it to be an access point for _multiple_ fields of view. In practice, the thing we talk about as a "TileSet" is the `Stack.image` object. The data are currently stored in-memory in a `numpy.ndarray`, and that is where most of our operations are done. 
+#
+#The numpy array can be accessed through Stack.image.numpy\_array (public method, read only) or Stack.image.\_data (read and write)
 # EPY: END markdown
 
 # EPY: START code
@@ -43,7 +43,7 @@ codebook
 # EPY: END code
 
 # EPY: START markdown
-# We're ready now to load the experiment into starfish (This experiment is big, it takes a few minutes):
+#We're ready now to load the experiment into starfish (This experiment is big, it takes a few minutes):
 # EPY: END markdown
 
 # EPY: START code
@@ -52,9 +52,9 @@ primary_image = experiment.image
 # EPY: END code
 
 # EPY: START markdown
-# All of our implemented operations leverage the `Stack.image.apply` method to apply a single function over each of the tiles or volumes in the FOV, depending on whether the method accepts a 2d or 3d array. Below, we're clipping each image independently at the 10th percentile. I've placed the imports next to the methods so that you can easily locate the code, should you want to look under the hood and understand what parameters have been chosen. 
-# 
-# The verbose flag for our apply loops could use a bit more refinement. We should be able to tell it how many images it needs to process from looking at the image stack, but for now it's dumb so just reports the number of tiles or volumes it's processed. This FOV has 102 images over 3 volumes. 
+#All of our implemented operations leverage the `Stack.image.apply` method to apply a single function over each of the tiles or volumes in the FOV, depending on whether the method accepts a 2d or 3d array. Below, we're clipping each image independently at the 10th percentile. I've placed the imports next to the methods so that you can easily locate the code, should you want to look under the hood and understand what parameters have been chosen. 
+#
+#The verbose flag for our apply loops could use a bit more refinement. We should be able to tell it how many images it needs to process from looking at the image stack, but for now it's dumb so just reports the number of tiles or volumes it's processed. This FOV has 102 images over 3 volumes. 
 # EPY: END markdown
 
 # EPY: START code
@@ -64,9 +64,9 @@ clip.run(primary_image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
-# If you ever want to visualize the image in the notebook, we've added a widget to do that. The first parameter is an indices dict that specifies which imaging round, channel, z-slice you want to view. The result is a pageable visualization across that arbitrary set of slices. Below I'm visualizing the first channel, which your codebook tells me is Nmnt. 
-# 
-# [N.B. once you click on the slider, you can page with the arrow keys on the keyboard.]
+#If you ever want to visualize the image in the notebook, we've added a widget to do that. The first parameter is an indices dict that specifies which imaging round, channel, z-slice you want to view. The result is a pageable visualization across that arbitrary set of slices. Below I'm visualizing the first channel, which your codebook tells me is Nmnt. 
+#
+#[N.B. once you click on the slider, you can page with the arrow keys on the keyboard.]
 # EPY: END markdown
 
 # EPY: START code
@@ -79,7 +79,7 @@ bandpass.run(primary_image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
-# For bandpass, there's a point where things get weird, at `c == 0; z <= 14`. In that range the images look mostly like noise. However, _above_ that, they look great + background subtracted! The later stages of the pipeline appear robust to this, though, as no spots are called for the noisy sections. 
+#For bandpass, there's a point where things get weird, at `c == 0; z <= 14`. In that range the images look mostly like noise. However, _above_ that, they look great + background subtracted! The later stages of the pipeline appear robust to this, though, as no spots are called for the noisy sections. 
 # EPY: END markdown
 
 # EPY: START code
@@ -96,7 +96,7 @@ glp.run(primary_image)
 # EPY: END code
 
 # EPY: START markdown
-# Below, because spot finding is so slow when single-plex, we'll pilot this on a max projection to show that the parameters work. Here's what trackpy.locate, which we wrap, produces for a z-projection of channel 1. To do use our plotting methods on z-projections we have to expose some of the starfish internals, which will be improved upon. 
+#Below, because spot finding is so slow when single-plex, we'll pilot this on a max projection to show that the parameters work. Here's what trackpy.locate, which we wrap, produces for a z-projection of channel 1. To do use our plotting methods on z-projections we have to expose some of the starfish internals, which will be improved upon. 
 # EPY: END markdown
 
 # EPY: START code
@@ -128,7 +128,7 @@ ax.imshow(ch1, vmin=15, vmax=52, cmap=plt.cm.gray)
 # EPY: END code
 
 # EPY: START markdown
-# Below spot finding is on the _volumes_ for each channel. This will take about `11m30s`
+#Below spot finding is on the _volumes_ for each channel. This will take about `11m30s`
 # EPY: END markdown
 
 # EPY: START code

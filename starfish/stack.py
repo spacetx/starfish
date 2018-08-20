@@ -175,6 +175,38 @@ class ImageStack:
         _, relativeurl, baseurl = resolve_path_or_url(url_or_path)
         return cls.from_url(relativeurl, baseurl)
 
+    @classmethod
+    def from_numpy_array(cls, array: np.ndarray) -> "ImageStack":
+        """Create an ImageStack from a 5d numpy array with shape (n_round, n_ch, n_z, y, x)
+
+        Parameters
+        ----------
+        array : np.ndarray
+            5-d tensor of shape (n_round, n_ch, n_z, y, x)
+
+        Returns
+        -------
+        ImageStack :
+            array data stored as an ImageStack
+
+        """
+        if len(array.shape) != 5:
+            raise ValueError('a 5-d tensor with shape (n_round, n_ch, n_z, y, x) must be provided.')
+        n_round, n_ch, n_z, height, width = array.shape
+        empty = cls.synthetic_stack(
+            num_round=n_round, num_ch=n_ch, num_z=n_z, tile_height=height, tile_width=width)
+
+        # preserve original dtype
+        empty._data = empty._data.astype(array.dtype)
+
+        for h in np.arange(n_round):
+            for c in np.arange(n_ch):
+                for z in np.arange(n_z):
+                    view = array[h, c, z]
+                    empty.set_slice({Indices.ROUND: h, Indices.CH: c, Indices.Z: z}, view)
+
+        return empty
+
     @property
     def numpy_array(self):
         """Retrieves the image data as a numpy array."""
@@ -1051,35 +1083,3 @@ class ImageStack:
         new_shape = (self.num_rounds, self.num_chs, self.num_zlayers) + self.tile_shape
         res = stack.reshape(new_shape)
         return res
-
-    @classmethod
-    def from_numpy_array(cls, array: np.ndarray) -> "ImageStack":
-        """Create an ImageStack from a 5d numpy array with shape (n_round, n_ch, n_z, y, x)
-
-        Parameters
-        ----------
-        array : np.ndarray
-            5-d tensor of shape (n_round, n_ch, n_z, y, x)
-
-        Returns
-        -------
-        ImageStack :
-            array data stored as an ImageStack
-
-        """
-        if len(array.shape) != 5:
-            raise ValueError('a 5-d tensor with shape (n_round, n_ch, n_z, y, x) must be provided.')
-        n_round, n_ch, n_z, height, width = array.shape
-        empty = cls.synthetic_stack(
-            num_round=n_round, num_ch=n_ch, num_z=n_z, tile_height=height, tile_width=width)
-
-        # preserve original dtype
-        empty._data = empty._data.astype(array.dtype)
-
-        for h in np.arange(n_round):
-            for c in np.arange(n_ch):
-                for z in np.arange(n_z):
-                    view = array[h, c, z]
-                    empty.set_slice({Indices.ROUND: h, Indices.CH: c, Indices.Z: z}, view)
-
-        return empty

@@ -56,7 +56,8 @@ class HybridizationImageFetcher(ImageFetcher):
         return dict(zip(range(4), hyb_str))
 
     def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
-        filename = 'slideA_' + str(fov + 1) + '_' + self.hyb_dict[hyb] + '_' + self.ch_dict[ch] + '.TIF'
+        filename = 'slideA_' + str(fov + 1) + '_' + \
+                   self.hyb_dict[hyb] + '_' + self.ch_dict[ch] + '.TIF'
         file_path = os.path.join(self.input_dir, filename)
         return CroppedISSImage(file_path)
 

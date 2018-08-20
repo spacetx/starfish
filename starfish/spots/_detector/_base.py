@@ -11,7 +11,7 @@ from .combine_adjacent_features import ConnectedComponentDecodingResult
 
 
 class SpotFinderAlgorithmBase(AlgorithmBase):
-    def find(
+    def run(
             self,
             hybridization_image: ImageStack,
     ) -> Union[IntensityTable, Tuple[IntensityTable, ConnectedComponentDecodingResult]]:

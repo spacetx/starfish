@@ -162,7 +162,7 @@ with warnings.catch_warnings():
 
     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
     blobs_image = dots.max_proj(Indices.ROUND, Indices.Z)
-    intensities = p.find(primary_image, blobs_image=blobs_image)
+    intensities = p.run(primary_image, blobs_image=blobs_image)
 # EPY: END code
 
 # EPY: START code

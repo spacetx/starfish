@@ -131,7 +131,7 @@ class TestWithIssData(unittest.TestCase):
             "--intensities", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "results", "spots.nc"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "regions.json"),
+                tempdir, "results", "spots.nc"),
             "PointInPoly2D",
         ],
         [

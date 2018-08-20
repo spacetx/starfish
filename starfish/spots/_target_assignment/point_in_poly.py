@@ -22,11 +22,15 @@ class PointInPoly2D(TargetAssignmentAlgorithm):
 
     @staticmethod
     def _assign(
-            cells_region: regional.many, spots: pd.DataFrame, use_hull: bool=True, verbose:
+            cells_region: regional.many, intensities: IntensityTable, use_hull: bool=True, verbose:
             bool=False
-    ) -> pd.DataFrame:
+    ) -> IntensityTable:
 
-        results = pd.DataFrame({'spot_id': range(0, spots.shape[0])})
+        x = intensities.coords[Features.X].values
+        y = intensities.coords[Features.Y].values
+        points = pd.DataFrame(dict(x=x, y=y))
+
+        results = pd.DataFrame({'spot_id': range(0, intensities.shape[0])})
         results['cell_id'] = None
 
         if verbose:
@@ -40,14 +44,16 @@ class PointInPoly2D(TargetAssignmentAlgorithm):
             else:
                 vertices = cells_region[cell_id].coordinates
             vertices = np.array(vertices)
-            in_poly = points_in_poly(spots, vertices)
+            in_poly = points_in_poly(points, vertices)
             results.loc[results.spot_id[in_poly], 'cell_id'] = cell_id
 
-        return results
+        intensities['cell_id'] = (Features.AXIS, results['cell_id'])
+
+        return intensities
 
     def run(
             self, intensity_table: IntensityTable, regions: regional.many, verbose: bool=False
-    ) -> pd.DataFrame:
+    ) -> IntensityTable:
         """Assign spots with target assignments to cells
 
         Parameters
@@ -60,14 +66,9 @@ class PointInPoly2D(TargetAssignmentAlgorithm):
 
         Returns
         -------
-        pd.DataFrame :
-            DataFrame mapping of spot ids to cell ids
-            # TODO should this be emitted as an extra column of IntensityTable, instead?
+        IntensityTable :
+            IntensityTable with added features variable containing cell ids
 
         """
         # TODO must support filtering on the passes filter column
-        # TODO does this support 3d assignment?
-        x = intensity_table.coords[Features.AXIS][Features.X].values
-        y = intensity_table.coords[Features.AXIS][Features.Y].values
-        points = pd.DataFrame(dict(x=x, y=y))
-        return self._assign(regions, points, use_hull=True, verbose=verbose)
+        return self._assign(regions, intensity_table, use_hull=True, verbose=verbose)

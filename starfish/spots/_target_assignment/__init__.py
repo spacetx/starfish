@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 from typing import List, Type
 
 from starfish.intensity_table import IntensityTable
@@ -54,7 +55,7 @@ class TargetAssignment(PipelineComponent):
 
         instance = args.target_assignment_algorithm_class(**vars(args))
 
-        result = instance.run(intensity_table, regions)
+        intensities = instance.run(intensity_table, regions)
 
-        print("Writing | cell_id | spot_id to: {}".format(args.output))
-        result.to_json(args.output, orient="records")
+        print("Writing intensities, including cell ids to {}".format(args.output))
+        intensities.save(os.path.join(args.output))

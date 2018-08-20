@@ -6,6 +6,6 @@ from starfish.pipeline.algorithmbase import AlgorithmBase
 
 
 class TargetAssignmentAlgorithm(AlgorithmBase):
-    def run(self, spots: IntensityTable, regions: regional.many) -> pd.DataFrame:
+    def run(self, spots: IntensityTable, regions: regional.many) -> IntensityTable:
         """Performs target (e.g. gene) assignment given the spots and the regions."""
         raise NotImplementedError()

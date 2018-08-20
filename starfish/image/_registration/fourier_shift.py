@@ -1,4 +1,5 @@
-from typing import Tuple, Union
+from copy import deepcopy
+from typing import Optional, Tuple, Union
 
 import numpy as np
 from scipy.ndimage import fourier_shift
@@ -16,12 +17,25 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
 
     Performs a simple translation registration.
 
-    See Also
-    --------
-    https://en.wikipedia.org/wiki/Phase_correlation
     """
     def __init__(self, upsampling: int, reference_stack: Union[str, ImageStack], **kwargs) -> None:
+        """Implements fourier shift registrations, which performs a simple translation registration
+
+        Parameters
+        ----------
+        upsampling : int
+            images are registered to within 1 / upsample_factor of a pixel
+        reference_stack : ImageStack
+            the ImageStack against which this object will register images
+
+        See Also
+        --------
+        https://en.wikipedia.org/wiki/Phase_correlation
+
+        """
         self.upsampling = upsampling
+
+        # TODO ambrosejcarr: remove the ability to load from string in the constructor, move to CLI
         if isinstance(reference_stack, ImageStack):
             self.reference_stack = reference_stack
         else:
@@ -34,7 +48,25 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
             "--reference-stack", type=FsExistsType(), required=True,
             help="The image stack to align the input image stack to.")
 
-    def run(self, image: ImageStack) -> ImageStack:
+    def run(self, image: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
+        """Register an ImageStack against a reference image.
+
+        Parameters
+        ----------
+        image : ImageStack
+            The stack to be registered
+        in_place : bool
+            If false, return a new registered stack. Else, register in-place (default False)
+
+        Returns
+        -------
+
+
+        """
+
+        if not in_place:
+            image = deepcopy(image)
+
         # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in registration?
         mp = image.max_proj(Indices.CH, Indices.Z)
         reference_image = self.reference_stack.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
@@ -54,7 +86,9 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
                     result = shift_im(data, shift)
                     image.set_slice(indices=indices, data=result)
 
-        return image
+        if not in_place:
+            return image
+        return None
 
 
 def compute_shift(

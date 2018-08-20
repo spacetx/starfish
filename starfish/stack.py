@@ -823,9 +823,11 @@ class ImageStack:
                     ),
                     "wb")
 
+        if not filepath.endswith('.json'):
+            filepath += '.json'
         Writer.write_to_path(
             self._image_partition,
-            filepath + '.json',
+            filepath,
             pretty=True,
             tile_opener=tile_opener)
 

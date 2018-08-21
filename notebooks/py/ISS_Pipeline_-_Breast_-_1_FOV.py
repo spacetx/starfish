@@ -4,11 +4,11 @@
 # EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
-# ## Reproduce In-situ Sequencing results with Starfish
-# 
-# This notebook walks through a work flow that reproduces an ISS result for one field of view using the starfish package.
-# 
-# ## Load tiff stack and visualize one field of view
+### Reproduce In-situ Sequencing results with Starfish
+#
+#This notebook walks through a work flow that reproduces an ISS result for one field of view using the starfish package.
+#
+### Load tiff stack and visualize one field of view
 # EPY: END markdown
 
 # EPY: START code
@@ -32,9 +32,9 @@ experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180813/ISS/fov_001/exper
 # EPY: END code
 
 # EPY: START markdown
-# ## Show input file format that specifies how the tiff stack is organized
-# 
-# The stack contains multiple single plane images, one for each color channel, 'c', (columns in above image) and imaging round, 'r', (rows in above image). This protocol assumes that genes are encoded with a length 4 quatenary barcode that can be read out from the images. Each round encodes a position in the codeword. The maximum signal in each color channel (columns in the above image) corresponds to a letter in the codeword. The channels, in order, correspond to the letters: 'T', 'G', 'C', 'A'. The goal is now to process these image data into spatially organized barcodes, e.g., ACTG, which can then be mapped back to a codebook that specifies what gene this codeword corresponds to.
+### Show input file format that specifies how the tiff stack is organized
+#
+#The stack contains multiple single plane images, one for each color channel, 'c', (columns in above image) and imaging round, 'r', (rows in above image). This protocol assumes that genes are encoded with a length 4 quatenary barcode that can be read out from the images. Each round encodes a position in the codeword. The maximum signal in each color channel (columns in the above image) corresponds to a letter in the codeword. The channels, in order, correspond to the letters: 'T', 'G', 'C', 'A'. The goal is now to process these image data into spatially organized barcodes, e.g., ACTG, which can then be mapped back to a codebook that specifies what gene this codeword corresponds to.
 # EPY: END markdown
 
 # EPY: START code
@@ -43,7 +43,7 @@ pp.pprint(experiment.format_metadata)
 # EPY: END code
 
 # EPY: START markdown
-# The flat TIFF files are loaded into a 4-d tensor with dimensions corresponding to imaging round, channel, x, and y. For other volumetric approaches that image the z-plane, this would be a 5-d tensor.
+#The flat TIFF files are loaded into a 4-d tensor with dimensions corresponding to imaging round, channel, x, and y. For other volumetric approaches that image the z-plane, this would be a 5-d tensor.
 # EPY: END markdown
 
 # EPY: START code
@@ -59,11 +59,11 @@ primary_image.numpy_array.shape
 # EPY: END code
 
 # EPY: START markdown
-# ## Show auxiliary images captured during the experiment
+### Show auxiliary images captured during the experiment
 # EPY: END markdown
 
 # EPY: START markdown
-# 'dots' is a general stain for all possible transcripts. This image should correspond to the maximum projcection of all color channels within a single imaging round. This auxiliary image is useful for registering images from multiple imaging rounds to this reference image. We'll see an example of this further on in the notebook
+#'dots' is a general stain for all possible transcripts. This image should correspond to the maximum projcection of all color channels within a single imaging round. This auxiliary image is useful for registering images from multiple imaging rounds to this reference image. We'll see an example of this further on in the notebook
 # EPY: END markdown
 
 # EPY: START code
@@ -71,7 +71,7 @@ image(dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END code
 
 # EPY: START markdown
-# Below is a DAPI auxiliary image, which specifically marks nuclei. This is useful cell segmentation later on in the processing.
+#Below is a DAPI auxiliary image, which specifically marks nuclei. This is useful cell segmentation later on in the processing.
 # EPY: END markdown
 
 # EPY: START code
@@ -79,11 +79,11 @@ image(nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END code
 
 # EPY: START markdown
-# ## Examine the codebook
+### Examine the codebook
 # EPY: END markdown
 
 # EPY: START markdown
-# Each 4 letter quatenary code (as read out from the 4 imaging rounds and 4 color channels) represents a gene. This relationship is stored in a codebook
+#Each 4 letter quatenary code (as read out from the 4 imaging rounds and 4 color channels) represents a gene. This relationship is stored in a codebook
 # EPY: END markdown
 
 # EPY: START code
@@ -92,9 +92,9 @@ codebook
 # EPY: END code
 
 # EPY: START markdown
-# ## Filter and scale raw data
-# 
-# Now apply the white top hat filter to both the spots image and the individual channels. White top had enhances white spots on a black background.
+### Filter and scale raw data
+#
+#Now apply the white top hat filter to both the spots image and the individual channels. White top had enhances white spots on a black background.
 # EPY: END markdown
 
 # EPY: START code
@@ -108,16 +108,16 @@ for img in images:
 # EPY: END code
 
 # EPY: START markdown
-# ## Register data
+### Register data
 # EPY: END markdown
 
 # EPY: START markdown
-# For each imaging round, the max projection across color channels should look like the dots stain.
-# Below, this computes the max projection across the color channels of an imaging round and learns the linear transformation to maps the resulting image onto the dots image.
-# 
-# The Fourier shift registration approach can be thought of as maximizing the cross-correlation of two images.
-# 
-# In the below table, Error is the minimum mean-squared error, and shift reports changes in x and y dimension.
+#For each imaging round, the max projection across color channels should look like the dots stain.
+#Below, this computes the max projection across the color channels of an imaging round and learns the linear transformation to maps the resulting image onto the dots image.
+#
+#The Fourier shift registration approach can be thought of as maximizing the cross-correlation of two images.
+#
+#In the below table, Error is the minimum mean-squared error, and shift reports changes in x and y dimension.
 # EPY: END markdown
 
 # EPY: START code
@@ -131,11 +131,11 @@ registration.run(primary_image)
 # EPY: END code
 
 # EPY: START markdown
-# ## Use spot-detector to create 'encoder' table  for standardized input  to decoder
+### Use spot-detector to create 'encoder' table  for standardized input  to decoder
 # EPY: END markdown
 
 # EPY: START markdown
-# Each pipeline exposes an encoder that translates an image into spots with intensities.  This approach uses a Gaussian spot detector.
+#Each pipeline exposes an encoder that translates an image into spots with intensities.  This approach uses a Gaussian spot detector.
 # EPY: END markdown
 
 # EPY: START code
@@ -173,7 +173,7 @@ spot_count
 # EPY: END code
 
 # EPY: START markdown
-# This visualizes a single spot (#100) across all imaging rounds and channels. It contains the intensity and bit index, which allow it to be mapped onto the correct barcode.
+#This visualizes a single spot (#100) across all imaging rounds and channels. It contains the intensity and bit index, which allow it to be mapped onto the correct barcode.
 # EPY: END markdown
 
 # EPY: START code
@@ -181,25 +181,25 @@ intensities[100]
 # EPY: END code
 
 # EPY: START markdown
-# The Encoder table is the hypothesized standardized file format for the output of a spot detector, and is the first output file format in the pipeline that is not an image or set of images
+#The Encoder table is the hypothesized standardized file format for the output of a spot detector, and is the first output file format in the pipeline that is not an image or set of images
 # EPY: END markdown
 
 # EPY: START markdown
-# `attributes` is produced by the encoder and contains all the information necessary to map the encoded spots back to the original image
-# 
-# `x, y` describe the position, while `x_min` through `y_max` describe the bounding box for the spot, which is refined by a radius `r`. This table also stores the intensity and spot_id.
+#`attributes` is produced by the encoder and contains all the information necessary to map the encoded spots back to the original image
+#
+#`x, y` describe the position, while `x_min` through `y_max` describe the bounding box for the spot, which is refined by a radius `r`. This table also stores the intensity and spot_id.
 # EPY: END markdown
 
 # EPY: START markdown
-# ## Decode
+### Decode
 # EPY: END markdown
 
 # EPY: START markdown
-# Each assay type also exposes a decoder. A decoder translates each spot (spot_id) in the Encoder table into a gene (that matches a barcode) and associates this information with the stored position. The goal is to decode and output a quality score that describes the confidence in the decoding.
+#Each assay type also exposes a decoder. A decoder translates each spot (spot_id) in the Encoder table into a gene (that matches a barcode) and associates this information with the stored position. The goal is to decode and output a quality score that describes the confidence in the decoding.
 # EPY: END markdown
 
 # EPY: START markdown
-# There are hard and soft decodings -- hard decoding is just looking for the max value in the code book. Soft decoding, by contrast, finds the closest code by distance (in intensity). Because different assays each have their own intensities and error modes, we leave decoders as user-defined functions.
+#There are hard and soft decodings -- hard decoding is just looking for the max value in the code book. Soft decoding, by contrast, finds the closest code by distance (in intensity). Because different assays each have their own intensities and error modes, we leave decoders as user-defined functions.
 # EPY: END markdown
 
 # EPY: START code
@@ -207,11 +207,11 @@ decoded = codebook.decode_per_round_max(intensities)
 # EPY: END code
 
 # EPY: START markdown
-# ## Compare to results from paper
+### Compare to results from paper
 # EPY: END markdown
 
 # EPY: START markdown
-# Besides house keeping genes, VIM and HER2 should be most highly expessed, which is consistent here.
+#Besides house keeping genes, VIM and HER2 should be most highly expessed, which is consistent here.
 # EPY: END markdown
 
 # EPY: START code
@@ -226,11 +226,11 @@ table.head()
 # EPY: END code
 
 # EPY: START markdown
-# ### Segment
+#### Segment
 # EPY: END markdown
 
 # EPY: START markdown
-# After calling spots and decoding their gene information, cells must be segmented to assign genes to cells. This paper used a seeded watershed approach.
+#After calling spots and decoding their gene information, cells must be segmented to assign genes to cells. This paper used a seeded watershed approach.
 # EPY: END markdown
 
 # EPY: START code
@@ -254,9 +254,9 @@ seg.show()
 # EPY: END code
 
 # EPY: START markdown
-# ### Visualize results
-# 
-# This FOV was selected to make sure that we can visualize the tumor/stroma boundary, below this is described by pseudo-coloring `HER2` (tumor) and vimentin (`VIM`, stroma)
+#### Visualize results
+#
+#This FOV was selected to make sure that we can visualize the tumor/stroma boundary, below this is described by pseudo-coloring `HER2` (tumor) and vimentin (`VIM`, stroma)
 # EPY: END markdown
 
 # EPY: START code

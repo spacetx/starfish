@@ -109,7 +109,7 @@ def write_experiment_json(
         fov_count,
         hyb_dimensions,
         aux_name_to_dimensions,
-        hyb_image_fetcher=None,
+        primary_image_fetcher=None,
         aux_image_fetcher=None,
         postprocess_func=None,
         default_shape=(1536, 1024),
@@ -128,7 +128,7 @@ def write_experiment_json(
     aux_name_to_dimensions : Mapping[str, Mapping[str, int]]
         Dictionary mapping the auxiliary image type to dictionaries, which map from dimension name
         to dimension size.
-    hyb_image_fetcher : Optional[ImageFetcher]
+    primary_image_fetcher : Optional[ImageFetcher]
         ImageFetcher for hybridization images.  Set this if you want specific image data to be set
         for the hybridization images.  If not provided, the image data is set to random noise via
         :class:`RandomNoiseImageFetcher`.
@@ -143,8 +143,8 @@ def write_experiment_json(
     default_shape : Tuple[int, int] (default = (1536, 1024))
         Default shape for the tiles in this experiment.
     """
-    if hyb_image_fetcher is None:
-        hyb_image_fetcher = RandomNoiseTileFetcher()
+    if primary_image_fetcher is None:
+        primary_image_fetcher = RandomNoiseTileFetcher()
     if aux_image_fetcher is None:
         aux_image_fetcher = {}
     if postprocess_func is None:
@@ -158,7 +158,7 @@ def write_experiment_json(
     hybridization_image = build_image(
         fov_count,
         hyb_dimensions[Indices.ROUND], hyb_dimensions[Indices.CH], hyb_dimensions[Indices.Z],
-        hyb_image_fetcher,
+        primary_image_fetcher,
         default_shape=default_shape,
     )
     Writer.write_to_path(

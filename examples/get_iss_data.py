@@ -110,7 +110,7 @@ def format_data(input_dir, output_dir, d):
                 Indices.Z: 1,
             }
         },
-        hyb_image_fetcher=ISSPrimaryTileFetcher(input_dir),
+        primary_image_fetcher=ISSPrimaryTileFetcher(input_dir),
         aux_image_fetcher={
             'nuclei': ISSAuxTileFetcher(os.path.join(input_dir, "DO", "c1.TIF")),
             'dots': ISSAuxTileFetcher(os.path.join(input_dir, "DO", "c2.TIF")),

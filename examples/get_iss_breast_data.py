@@ -113,19 +113,15 @@ def format_data(input_dir, output_dir):
         }
     }
 
-    hfetch = ISSCroppedBreastPrimaryTileFetcher(input_dir)
-
-    auxfetch = {
-        'nuclei': ISSCroppedBreastAuxTileFetcher(input_dir, 'nuclei'),
-        'dots': ISSCroppedBreastAuxTileFetcher(input_dir, 'dots'),
-    }
-
     write_experiment_json(output_dir,
                           num_fovs,
                           hyb_dimensions,
                           aux_name_to_dimensions,
-                          hyb_image_fetcher=hfetch,
-                          aux_image_fetcher=auxfetch,
+                          primary_image_fetcher=ISSCroppedBreastPrimaryTileFetcher(input_dir),
+                          aux_image_fetcher={
+                              'nuclei': ISSCroppedBreastAuxTileFetcher(input_dir, 'nuclei'),
+                              'dots': ISSCroppedBreastAuxTileFetcher(input_dir, 'dots'),
+                          },
                           postprocess_func=add_codebook,
                           default_shape=SHAPE
                           )

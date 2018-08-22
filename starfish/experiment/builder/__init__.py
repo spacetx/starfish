@@ -84,7 +84,7 @@ def build_image(
         for z_ix in range(z_count):
             for hyb_ix in range(hyb_count):
                 for ch_ix in range(ch_count):
-                    image = image_fetcher.get_image(fov_ix, hyb_ix, ch_ix, z_ix)
+                    image = image_fetcher.get_tile(fov_ix, hyb_ix, ch_ix, z_ix)
                     tile = Tile(
                         {
                             Coordinates.X: (0.0, 0.0001),
@@ -98,7 +98,7 @@ def build_image(
                         },
                         image.shape,
                     )
-                    tile.set_source_fh_contextmanager(image.image_data_handle, image.format)
+                    tile.set_source_fh_contextmanager(image.tile_data_handle, image.format)
                     fov_images.add_tile(tile)
         collection.add_partition("fov_{:03}".format(fov_ix), fov_images)
     return collection
@@ -109,8 +109,8 @@ def write_experiment_json(
         fov_count,
         hyb_dimensions,
         aux_name_to_dimensions,
-        primary_image_fetcher=None,
-        aux_image_fetcher=None,
+        primary_tile_fetcher=None,
+        aux_tile_fetcher=None,
         postprocess_func=None,
         default_shape=(1536, 1024),
 ):
@@ -128,11 +128,11 @@ def write_experiment_json(
     aux_name_to_dimensions : Mapping[str, Mapping[str, int]]
         Dictionary mapping the auxiliary image type to dictionaries, which map from dimension name
         to dimension size.
-    primary_image_fetcher : Optional[ImageFetcher]
+    primary_tile_fetcher : Optional[ImageFetcher]
         ImageFetcher for hybridization images.  Set this if you want specific image data to be set
         for the hybridization images.  If not provided, the image data is set to random noise via
         :class:`RandomNoiseImageFetcher`.
-    aux_image_fetcher : Optional[Mapping[str, ImageFetcher]]
+    aux_tile_fetcher : Optional[Mapping[str, ImageFetcher]]
         ImageFetchers for auxiliary images.  Set this if you want specific image data to be set for
         one or more aux image types.  If not provided for any given aux image, the image data is
         set to random noise via :class:`RandomNoiseImageFetcher`.
@@ -143,10 +143,10 @@ def write_experiment_json(
     default_shape : Tuple[int, int] (default = (1536, 1024))
         Default shape for the tiles in this experiment.
     """
-    if primary_image_fetcher is None:
-        primary_image_fetcher = RandomNoiseTileFetcher()
-    if aux_image_fetcher is None:
-        aux_image_fetcher = {}
+    if primary_tile_fetcher is None:
+        primary_tile_fetcher = RandomNoiseTileFetcher()
+    if aux_tile_fetcher is None:
+        aux_tile_fetcher = {}
     if postprocess_func is None:
         postprocess_func = lambda doc: doc
 
@@ -158,7 +158,7 @@ def write_experiment_json(
     hybridization_image = build_image(
         fov_count,
         hyb_dimensions[Indices.ROUND], hyb_dimensions[Indices.CH], hyb_dimensions[Indices.Z],
-        primary_image_fetcher,
+        primary_tile_fetcher,
         default_shape=default_shape,
     )
     Writer.write_to_path(
@@ -177,7 +177,7 @@ def write_experiment_json(
         auxiliary_image = build_image(
             fov_count,
             aux_dimensions[Indices.ROUND], aux_dimensions[Indices.CH], aux_dimensions[Indices.Z],
-            aux_image_fetcher.get(aux_name, RandomNoiseTileFetcher()),
+            aux_tile_fetcher.get(aux_name, RandomNoiseTileFetcher()),
             default_shape=default_shape,
         )
         Writer.write_to_path(

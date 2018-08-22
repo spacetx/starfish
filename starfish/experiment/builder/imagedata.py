@@ -21,7 +21,7 @@ class FetchedTile:
         raise NotImplementedError()
 
     @property
-    def image_data_handle(self) -> IO:
+    def tile_data_handle(self) -> IO:
         raise NotImplementedError()
 
 
@@ -30,7 +30,7 @@ class TileFetcher:
     This is the contract for providing the image data for constructing a
     :class:`slicedimage.Collection`.
     """
-    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
         """
         Given fov, hyb, ch, and z, return an instance of a :class:`.FetchedImage` that can be
         queried for the image data.
@@ -51,7 +51,7 @@ class RandomNoiseTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    def image_data_handle(self) -> IO:
+    def tile_data_handle(self) -> IO:
         arr = np.random.randint(0, 256, size=self.shape, dtype=np.uint8)
         output = BytesIO()
         imsave(output, arr, plugin="tifffile")
@@ -64,5 +64,5 @@ class RandomNoiseTileFetcher(TileFetcher):
     This is a simple implementation of :class:`.ImageFetcher` that simply returns a
     :class:`.RandomNoiseImage` for every fov, hyb, ch, z combination.
     """
-    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
         return RandomNoiseTile()

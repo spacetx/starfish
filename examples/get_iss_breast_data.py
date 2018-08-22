@@ -30,7 +30,7 @@ class IssCroppedBreastTile(FetchedTile):
         crp = img[40:1084, 20:1410]
         return crp
 
-    def image_data_handle(self) -> IO:
+    def tile_data_handle(self) -> IO:
         im = self.crop(imread(self.file_path))
         fh = io.BytesIO()
         imsave(fh, im, plugin='tifffile')
@@ -54,7 +54,7 @@ class ISSCroppedBreastPrimaryTileFetcher(TileFetcher):
         hyb_str = ['1st', '2nd', '3rd', '4th']
         return dict(zip(range(4), hyb_str))
 
-    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
         filename = 'slideA_' + str(fov + 1) + '_' + \
                    self.hyb_dict[hyb] + '_' + self.ch_dict[ch] + '.TIF'
         file_path = os.path.join(self.input_dir, filename)
@@ -66,7 +66,7 @@ class ISSCroppedBreastAuxTileFetcher(TileFetcher):
         self.input_dir = input_dir
         self.aux_type = aux_type
 
-    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
         if self.aux_type == 'nuclei':
             filename = 'slideA_' + str(fov + 1) + '_DO_' + 'DAPI.TIF'
         elif self.aux_type == 'dots':
@@ -117,8 +117,8 @@ def format_data(input_dir, output_dir):
                           num_fovs,
                           hyb_dimensions,
                           aux_name_to_dimensions,
-                          primary_image_fetcher=ISSCroppedBreastPrimaryTileFetcher(input_dir),
-                          aux_image_fetcher={
+                          primary_tile_fetcher=ISSCroppedBreastPrimaryTileFetcher(input_dir),
+                          aux_tile_fetcher={
                               'nuclei': ISSCroppedBreastAuxTileFetcher(input_dir, 'nuclei'),
                               'dots': ISSCroppedBreastAuxTileFetcher(input_dir, 'dots'),
                           },

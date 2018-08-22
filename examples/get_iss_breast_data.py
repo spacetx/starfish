@@ -6,20 +6,19 @@ from typing import IO, Tuple
 from skimage.io import imread, imsave
 from slicedimage import ImageFormat
 
-from starfish.experiment.builder import FetchedImage, ImageFetcher, write_experiment_json
+from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.types import Indices
 from starfish.util.argparse import FsExistsType
 
-SHAPE = (1044, 1390)
+SHAPE = 1044, 1390
 
 
-class CroppedISSImage(FetchedImage):
+class IssCroppedBreastTile(FetchedTile):
     def __init__(self, file_path):
         self.file_path = file_path
 
     @property
     def shape(self) -> Tuple[int, ...]:
-        # TODO these images need to be hella cropped
         return SHAPE
 
     @property
@@ -39,7 +38,7 @@ class CroppedISSImage(FetchedImage):
         return fh
 
 
-class HybridizationImageFetcher(ImageFetcher):
+class ISSCroppedBreastPrimaryTileFetcher(TileFetcher):
     def __init__(self, input_dir):
         self.input_dir = input_dir
 
@@ -55,35 +54,34 @@ class HybridizationImageFetcher(ImageFetcher):
         hyb_str = ['1st', '2nd', '3rd', '4th']
         return dict(zip(range(4), hyb_str))
 
-    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
+    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
         filename = 'slideA_' + str(fov + 1) + '_' + \
                    self.hyb_dict[hyb] + '_' + self.ch_dict[ch] + '.TIF'
         file_path = os.path.join(self.input_dir, filename)
-        return CroppedISSImage(file_path)
+        return IssCroppedBreastTile(file_path)
 
 
-class AuxImageFetcherDAPI(ImageFetcher):
-    def __init__(self, input_dir):
+class ISSCroppedBreastAuxTileFetcher(TileFetcher):
+    def __init__(self, input_dir, aux_type):
         self.input_dir = input_dir
+        self.aux_type = aux_type
 
-    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
-        filename = 'slideA_' + str(fov + 1) + '_DO_' + 'DAPI.TIF'
+    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+        if self.aux_type == 'nuclei':
+            filename = 'slideA_' + str(fov + 1) + '_DO_' + 'DAPI.TIF'
+        elif self.aux_type == 'dots':
+            filename = 'slideA_' + str(fov + 1) + '_DO_' + 'Cy3.TIF'
+        else:
+            msg = 'invalid aux type: {}'.format(self.aux_type)
+            msg += ' expected either nuclei or dots'
+            raise ValueError(msg)
+
         file_path = os.path.join(self.input_dir, filename)
-        return CroppedISSImage(file_path)
 
-
-class AuxImageFetcherDots(ImageFetcher):
-    def __init__(self, input_dir):
-        self.input_dir = input_dir
-
-    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
-        filename = 'slideA_' + str(fov + 1) + '_DO_' + 'Cy3.TIF'
-        file_path = os.path.join(self.input_dir, filename)
-        return CroppedISSImage(file_path)
+        return IssCroppedBreastTile(file_path)
 
 
 def format_data(input_dir, output_dir):
-
     if not input_dir.endswith("/"):
         input_dir += "/"
 
@@ -92,12 +90,6 @@ def format_data(input_dir, output_dir):
 
     def add_codebook(experiment_json_doc):
         experiment_json_doc['codebook'] = "codebook.json"
-
-        # TODO: (ttung) remove the following unholy hacks.  this is because we want to point at a
-        # tileset rather than a collection.
-        experiment_json_doc['hybridization_images'] = "hybridization-fov_000.json"
-        experiment_json_doc['auxiliary_images']['nuclei'] = "nuclei-fov_000.json"
-        experiment_json_doc['auxiliary_images']['dots'] = "dots-fov_000.json"
         return experiment_json_doc
 
     num_fovs = 16
@@ -121,11 +113,11 @@ def format_data(input_dir, output_dir):
         }
     }
 
-    hfetch = HybridizationImageFetcher(input_dir)
+    hfetch = ISSCroppedBreastPrimaryTileFetcher(input_dir)
 
     auxfetch = {
-        'nuclei': AuxImageFetcherDAPI(input_dir),
-        'dots': AuxImageFetcherDots(input_dir),
+        'nuclei': ISSCroppedBreastAuxTileFetcher(input_dir, 'nuclei'),
+        'dots': ISSCroppedBreastAuxTileFetcher(input_dir, 'dots'),
     }
 
     write_experiment_json(output_dir,
@@ -145,5 +137,7 @@ if __name__ == "__main__":
     parser.add_argument("output_dir", type=FsExistsType())
 
     args = parser.parse_args()
+    s3_bucket = "s3://czi.starfish.data.public/browse/raw/20180820/iss_breast/"
+    print("Raw data live at: {}".format(s3_bucket))
 
     format_data(args.input_dir, args.output_dir)

@@ -12,7 +12,7 @@ from slicedimage import (
 
 from starfish.experiment import Experiment
 from starfish.types import Coordinates, Indices
-from .imagedata import FetchedImage, ImageFetcher, RandomNoiseImage, RandomNoiseImageFetcher
+from .imagedata import FetchedTile, TileFetcher, RandomNoiseTile, RandomNoiseTileFetcher
 
 
 AUX_IMAGE_NAMES = {
@@ -49,7 +49,7 @@ def fov_path_generator(parent_toc_path, toc_name):
 
 def build_image(
         fov_count, hyb_count, ch_count, z_count,
-        image_fetcher: ImageFetcher,
+        image_fetcher: TileFetcher,
         default_shape: Tuple[int, int]
 ):
     """
@@ -144,7 +144,7 @@ def write_experiment_json(
         Default shape for the tiles in this experiment.
     """
     if hyb_image_fetcher is None:
-        hyb_image_fetcher = RandomNoiseImageFetcher()
+        hyb_image_fetcher = RandomNoiseTileFetcher()
     if aux_image_fetcher is None:
         aux_image_fetcher = {}
     if postprocess_func is None:
@@ -177,7 +177,7 @@ def write_experiment_json(
         auxiliary_image = build_image(
             fov_count,
             aux_dimensions[Indices.ROUND], aux_dimensions[Indices.CH], aux_dimensions[Indices.Z],
-            aux_image_fetcher.get(aux_name, RandomNoiseImageFetcher()),
+            aux_image_fetcher.get(aux_name, RandomNoiseTileFetcher()),
             default_shape=default_shape,
         )
         Writer.write_to_path(

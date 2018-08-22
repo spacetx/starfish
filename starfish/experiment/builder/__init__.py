@@ -10,6 +10,7 @@ from slicedimage import (
     Writer,
 )
 
+from starfish.experiment import Experiment
 from starfish.types import Coordinates, Indices
 from .imagedata import FetchedImage, ImageFetcher, RandomNoiseImage, RandomNoiseImageFetcher
 
@@ -74,7 +75,7 @@ def build_image(
     collection = Collection()
     for fov_ix in range(fov_count):
         fov_images = TileSet(
-            [Coordinates.X, Coordinates.Y, Indices.Z, Indices.ROUND, Indices.CH],
+            [Indices.X, Indices.Y, Indices.Z, Indices.ROUND, Indices.CH],
             {Indices.ROUND: hyb_count, Indices.CH: ch_count, Indices.Z: z_count},
             default_shape,
             ImageFormat.TIFF,
@@ -150,7 +151,7 @@ def write_experiment_json(
         postprocess_func = lambda doc: doc
 
     experiment_doc = {
-        'version': "0.0.0",
+        'version': str(Experiment.CURRENT_VERSION),
         'auxiliary_images': {},
         'extras': {},
     }

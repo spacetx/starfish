@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 from starfish.errors import DataFormatWarning
 from starfish.intensity_table import IntensityTable
-from starfish.types import Coordinates, Features, Indices, SpotAttributes
+from starfish.types import Coordinates, Indices, SpotAttributes
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
@@ -101,7 +101,7 @@ class ImageStack:
             dims.append(dim_for_axis.value)
 
         shape.extend(self._tile_shape)
-        dims.extend([Coordinates.Y.value, Coordinates.X.value])
+        dims.extend([Indices.Y.value, Indices.X.value])
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
         self._data = xr.DataArray(
@@ -174,6 +174,38 @@ class ImageStack:
         """
         _, relativeurl, baseurl = resolve_path_or_url(url_or_path)
         return cls.from_url(relativeurl, baseurl)
+
+    @classmethod
+    def from_numpy_array(cls, array: np.ndarray) -> "ImageStack":
+        """Create an ImageStack from a 5d numpy array with shape (n_round, n_ch, n_z, y, x)
+
+        Parameters
+        ----------
+        array : np.ndarray
+            5-d tensor of shape (n_round, n_ch, n_z, y, x)
+
+        Returns
+        -------
+        ImageStack :
+            array data stored as an ImageStack
+
+        """
+        if len(array.shape) != 5:
+            raise ValueError('a 5-d tensor with shape (n_round, n_ch, n_z, y, x) must be provided.')
+        n_round, n_ch, n_z, height, width = array.shape
+        empty = cls.synthetic_stack(
+            num_round=n_round, num_ch=n_ch, num_z=n_z, tile_height=height, tile_width=width)
+
+        # preserve original dtype
+        empty._data = empty._data.astype(array.dtype)
+
+        for h in np.arange(n_round):
+            for c in np.arange(n_ch):
+                for z in np.arange(n_z):
+                    view = array[h, c, z]
+                    empty.set_slice({Indices.ROUND: h, Indices.CH: c, Indices.Z: z}, view)
+
+        return empty
 
     @property
     def numpy_array(self):
@@ -761,12 +793,12 @@ class ImageStack:
         return self._tile_shape
 
     def write(self, filepath: str, tile_opener=None) -> None:
-        """write the image tensor to disk
+        """write the image tensor to disk in spaceTx format
 
         Parameters
         ----------
         filepath : str
-            path + prefix for writing the image tensor
+            Path + prefix for the images and hybridization_images.json written by this function
         tile_opener : TODO ttung: doc me.
 
         """
@@ -823,6 +855,8 @@ class ImageStack:
                     ),
                     "wb")
 
+        if not filepath.endswith('.json'):
+            filepath += '.json'
         Writer.write_to_path(
             self._image_partition,
             filepath,
@@ -888,7 +922,7 @@ class ImageStack:
             tile_extras_provider = cls._default_tile_extras_provider
 
         img = TileSet(
-            {Coordinates.X, Coordinates.Y, Indices.ROUND, Indices.CH, Indices.Z},
+            {Indices.X, Indices.Y, Indices.ROUND, Indices.CH, Indices.Z},
             {
                 Indices.ROUND: num_round,
                 Indices.CH: num_ch,
@@ -977,7 +1011,7 @@ class ImageStack:
             raise ValueError('value exceeds dynamic range of largest skimage-supported type')
 
         # make sure requested dimensions are large enough to support intensity values
-        indices = zip((Features.Z, Features.Y, Features.X), (num_z, height, width))
+        indices = zip((Indices.Z.value, Indices.Y.value, Indices.X.value), (num_z, height, width))
         for index, requested_size in indices:
             required_size = intensities.coords[index].values.max()
             if required_size > requested_size:
@@ -1049,35 +1083,3 @@ class ImageStack:
         new_shape = (self.num_rounds, self.num_chs, self.num_zlayers) + self.tile_shape
         res = stack.reshape(new_shape)
         return res
-
-    @classmethod
-    def from_numpy_array(cls, array: np.ndarray) -> "ImageStack":
-        """Create an ImageStack from a 5d numpy array with shape (n_round, n_ch, n_z, y, x)
-
-        Parameters
-        ----------
-        array : np.ndarray
-            5-d tensor of shape (n_round, n_ch, n_z, y, x)
-
-        Returns
-        -------
-        ImageStack :
-            array data stored as an ImageStack
-
-        """
-        if len(array.shape) != 5:
-            raise ValueError('a 5-d tensor with shape (n_round, n_ch, n_z, y, x) must be provided.')
-        n_round, n_ch, n_z, height, width = array.shape
-        empty = cls.synthetic_stack(
-            num_round=n_round, num_ch=n_ch, num_z=n_z, tile_height=height, tile_width=width)
-
-        # preserve original dtype
-        empty._data = empty._data.astype(array.dtype)
-
-        for h in np.arange(n_round):
-            for c in np.arange(n_ch):
-                for z in np.arange(n_z):
-                    view = array[h, c, z]
-                    empty.set_slice({Indices.ROUND: h, Indices.CH: c, Indices.Z: z}, view)
-
-        return empty

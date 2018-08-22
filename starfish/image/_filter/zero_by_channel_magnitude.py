@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 
 from starfish.stack import ImageStack
-from starfish.types import Coordinates, Indices
+from starfish.types import Indices
 from ._base import FilterAlgorithmBase
 
 
@@ -65,8 +65,8 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             # nervous about how xarray orders dimensions so i put this here explicitly ....
             dat = dat.transpose(Indices.CH.value,
                                 Indices.Z.value,
-                                Coordinates.Y.value,
-                                Coordinates.X.value
+                                Indices.Y.value,
+                                Indices.X.value
                                 )
             # ... to account for this line taking the norm across axis 0, or the channel axis
             ch_magnitude = np.linalg.norm(dat, ord=2, axis=0)

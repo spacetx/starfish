@@ -116,7 +116,7 @@ class IntensityTable(xr.DataArray):
             raise ValueError(
                 f'spot attributes must be a pandas DataFrame , not {type(spot_attributes)}.')
 
-        required_attributes = {Features.Z, Features.Y, Features.X}
+        required_attributes = {Indices.Z.value, Indices.Y.value, Indices.X.value}
         missing_attributes = required_attributes.difference(spot_attributes.columns)
         if missing_attributes:
             raise ValueError(
@@ -249,7 +249,7 @@ class IntensityTable(xr.DataArray):
         r = np.empty(n_spots)
         r.fill(np.nan)  # radius is a function of the point-spread gaussian size
         spot_attributes = pd.DataFrame(
-            {Features.Z: z, Features.Y: y, Features.X: x, Features.SPOT_RADIUS: r}
+            {Indices.Z.value: z, Indices.Y.value: y, Indices.X.value: x, Features.SPOT_RADIUS: r}
         )
 
         # empty data tensor

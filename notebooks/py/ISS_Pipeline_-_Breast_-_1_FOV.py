@@ -27,7 +27,7 @@ from starfish.types import Features, Indices
 
 # EPY: START code
 experiment = Experiment()
-experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180813/ISS/fov_001/experiment.json')
+experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180821/ISS/fov_001/experiment.json')
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 # EPY: END code
 
@@ -87,7 +87,7 @@ image(nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END markdown
 
 # EPY: START code
-codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180722/ISS/codebook.json')
+codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180821/ISS/codebook.json')
 codebook
 # EPY: END code
 

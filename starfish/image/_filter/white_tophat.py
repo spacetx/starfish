@@ -1,8 +1,7 @@
 from typing import Optional
 
 import numpy as np
-from scipy.ndimage.filters import maximum_filter, minimum_filter
-from skimage.morphology import ball, disk
+from skimage.morphology import ball, disk, white_tophat
 
 from starfish.stack import ImageStack
 from ._base import FilterAlgorithmBase
@@ -41,38 +40,12 @@ class WhiteTophat(FilterAlgorithmBase):
             "--masking-radius", default=15, type=int,
             help="diameter of morphological masking disk in pixels")
 
-    # TODO dganguli: any reason we're not using the white_tophat method?
-    # https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.\
-    # morphology.white_tophat.html
     def white_tophat(self, image: np.ndarray) -> np.ndarray:
-        """
-        run a white top hat morphological masking filter which detects peaks that are smaller
-        and brighter than their surroundings
-
-        Parameters
-        ----------
-        image: np.ndarray
-            2 or 3-d image
-
-        Returns
-        -------
-        np.ndarray:
-            filtered image
-
-        """
-
-        if image.dtype.kind != "u":
-            raise TypeError("images should be stored in an unsigned integer array")
-
         if self.is_volume:
             structuring_element = ball(self.masking_radius)
         else:
             structuring_element = disk(self.masking_radius)
-
-        min_filtered = minimum_filter(image, footprint=structuring_element)
-        max_filtered = maximum_filter(min_filtered, footprint=structuring_element)
-        filtered_image = image - np.minimum(image, max_filtered)
-        return filtered_image
+        return white_tophat(image, selem=structuring_element)
 
     def run(
             self, stack: ImageStack, in_place: bool=True, verbose: bool=False) \

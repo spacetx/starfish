@@ -73,9 +73,9 @@ def small_intensity_table():
 
     spot_attributes = pd.DataFrame(
         data={
-            Features.X: [0, 1, 2, 3, 4],
-            Features.Y: [3, 4, 5, 6, 7],
-            Features.Z: [0, 0, 0, 0, 0],
+            Indices.X.value: [0, 1, 2, 3, 4],
+            Indices.Y.value: [3, 4, 5, 6, 7],
+            Indices.Z.value: [0, 0, 0, 0, 0],
             Features.SPOT_RADIUS: [0.1, 2, 3, 2, 1]
         }
     )

@@ -75,7 +75,7 @@ def build_image(
     collection = Collection()
     for fov_ix in range(fov_count):
         fov_images = TileSet(
-            [Coordinates.X, Coordinates.Y, Indices.Z, Indices.ROUND, Indices.CH],
+            [Indices.X, Indices.Y, Indices.Z, Indices.ROUND, Indices.CH],
             {Indices.ROUND: hyb_count, Indices.CH: ch_count, Indices.Z: z_count},
             default_shape,
             ImageFormat.TIFF,

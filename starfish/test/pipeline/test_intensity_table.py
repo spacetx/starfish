@@ -24,7 +24,7 @@ def make_empty_intensity_table(image_shape=(2, 4, 3)):
     z = [1, 1]
     r = [1, 1]
     spot_attributes = pd.DataFrame(
-        {Features.X: x, Features.Y: y, Features.Z: z, Features.SPOT_RADIUS: r}
+        {Indices.X.value: x, Indices.Y.value: y, Indices.Z.value: z, Features.SPOT_RADIUS: r}
     )
     empty = IntensityTable.empty_intensity_table(spot_attributes, 2, 2, image_shape)
     return empty, spot_attributes
@@ -135,11 +135,11 @@ def test_combine_adjacent_features():
 def test_intensity_table_to_dataframe():
     table, _ = make_empty_intensity_table()
     table_df = table.to_features_dataframe()
-    assert np.array_equal(table_df[Features.X], table.coords[Features.X].values)
-    assert np.array_equal(table_df[Features.Y], table.coords[Features.Y].values)
-    assert np.array_equal(table_df[Features.Z], table.coords[Features.Z].values)
+    assert np.array_equal(table_df[Indices.X.value], table.coords[Indices.X.value].values)
+    assert np.array_equal(table_df[Indices.Y.value], table.coords[Indices.Y.value].values)
+    assert np.array_equal(table_df[Indices.Z.value], table.coords[Indices.Z.value].values)
     assert np.array_equal(table_df[Features.SPOT_RADIUS], table.coords[Features.SPOT_RADIUS].values)
     assert np.array_equal(
         table_df.columns,
-        [Features.X, Features.Y, Features.Z, Features.SPOT_RADIUS]
+        [Indices.X, Indices.Y, Indices.Z, Features.SPOT_RADIUS]
     )

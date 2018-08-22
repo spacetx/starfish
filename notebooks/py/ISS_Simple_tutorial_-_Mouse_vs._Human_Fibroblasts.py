@@ -25,7 +25,7 @@ from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 from showit import image, tile
 
-from starfish.types import Features, Indices
+from starfish.types import Indices
 # EPY: END code
 
 # EPY: START markdown
@@ -146,7 +146,7 @@ seg.show()
 from starfish.spots import TargetAssignment
 from starfish.stats import label_to_regions
 
-points = spots_viz.loc[:, [Features.X, Features.Y]].values
+points = spots_viz.loc[:, [Indices.X, Indices.Y]].values
 regions = label_to_regions(cells_labels)
 ass = assign(regions, points, use_hull=True)
 ass.groupby('cell_id',as_index=False).count().rename(columns={'spot_id':'num spots'})

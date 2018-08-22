@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 from starfish.errors import DataFormatWarning
 from starfish.intensity_table import IntensityTable
-from starfish.types import Coordinates, Features, Indices, SpotAttributes
+from starfish.types import Coordinates, Indices, SpotAttributes
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
@@ -101,7 +101,7 @@ class ImageStack:
             dims.append(dim_for_axis.value)
 
         shape.extend(self._tile_shape)
-        dims.extend([Coordinates.Y.value, Coordinates.X.value])
+        dims.extend([Indices.Y.value, Indices.X.value])
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
         self._data = xr.DataArray(
@@ -922,7 +922,7 @@ class ImageStack:
             tile_extras_provider = cls._default_tile_extras_provider
 
         img = TileSet(
-            {Coordinates.X, Coordinates.Y, Indices.ROUND, Indices.CH, Indices.Z},
+            {Indices.X, Indices.Y, Indices.ROUND, Indices.CH, Indices.Z},
             {
                 Indices.ROUND: num_round,
                 Indices.CH: num_ch,
@@ -1011,7 +1011,7 @@ class ImageStack:
             raise ValueError('value exceeds dynamic range of largest skimage-supported type')
 
         # make sure requested dimensions are large enough to support intensity values
-        indices = zip((Features.Z, Features.Y, Features.X), (num_z, height, width))
+        indices = zip((Indices.Z.value, Indices.Y.value, Indices.X.value), (num_z, height, width))
         for index, requested_size in indices:
             required_size = intensities.coords[index].values.max()
             if required_size > requested_size:

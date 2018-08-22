@@ -72,7 +72,6 @@ class IntensityTable(xr.DataArray):
     @classmethod
     def empty_intensity_table(
             cls, spot_attributes: pd.DataFrame, n_ch: int, n_round: int,
-            image_shape: Tuple[int, int, int]
     ) -> "IntensityTable":
         """Create an empty intensity table with pre-set axis whose values are zero
 
@@ -85,8 +84,6 @@ class IntensityTable(xr.DataArray):
             number of channels measured in the imaging experiment
         n_round : int
             number of imaging rounds measured in the imaging experiment
-        image_shape : Tuple[int, int, int]
-            the shape (z, y, x) of the image from which features will be extracted
 
         Returns
         -------
@@ -99,12 +96,10 @@ class IntensityTable(xr.DataArray):
         round_index = np.arange(n_round)
         data = np.zeros((spot_attributes.shape[0], n_ch, n_round))
         dims = (Features.AXIS, Indices.CH.value, Indices.ROUND.value)
-        attrs = {cls.IMAGE_SHAPE: image_shape}
         coords = cls._build_xarray_coords(spot_attributes, channel_index, round_index)
 
         intensity_table = cls(
             data=data, coords=coords, dims=dims,
-            attrs=attrs
         )
 
         return intensity_table
@@ -126,7 +121,6 @@ class IntensityTable(xr.DataArray):
     @classmethod
     def from_spot_data(
             cls, intensities: Union[xr.DataArray, np.ndarray], spot_attributes: pd.DataFrame,
-            image_shape: Tuple[int, int, int],
             *args, **kwargs) -> "IntensityTable":
         """Table to store image feature intensities and associated metadata
 
@@ -140,8 +134,6 @@ class IntensityTable(xr.DataArray):
             number of dimensions. If this argument is omitted, dimension names
             are taken from ``coords`` (if possible) and otherwise default to
             ``['dim_0', ... 'dim_n']``.
-        image_shape : Tuple[int, int, int]
-            the shape of the image (z, y, x) from which the features were extracted
         args :
             additional arguments to pass to the xarray constructor
         kwargs :
@@ -167,9 +159,7 @@ class IntensityTable(xr.DataArray):
 
         dims = (Features.AXIS, Indices.CH.value, Indices.ROUND.value)
 
-        attrs = {cls.IMAGE_SHAPE: image_shape}
-
-        intensities = cls(intensities, coords, dims, attrs=attrs, *args, **kwargs)
+        intensities = cls(intensities, coords, dims, *args, **kwargs)
         return intensities
 
     def save(self, filename: str) -> None:
@@ -266,9 +256,7 @@ class IntensityTable(xr.DataArray):
         data *= np.random.poisson(mean_photons_per_fluor, size=data.shape)
         data *= np.random.poisson(mean_fluor_per_spot, size=data.shape)
 
-        image_shape = (num_z, height, width)
-
-        intensities = cls.from_spot_data(data, spot_attributes, image_shape=image_shape)
+        intensities = cls.from_spot_data(data, spot_attributes)
         intensities[Features.TARGET] = (Features.AXIS, targets)
 
         return intensities

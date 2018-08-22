@@ -18,7 +18,7 @@ from starfish.test.dataset_fixtures import (
 from starfish.types import Features, Indices
 
 
-def make_empty_intensity_table(image_shape=(2, 4, 3)):
+def make_empty_intensity_table():
     x = [1, 2]
     y = [2, 3]
     z = [1, 1]
@@ -26,14 +26,13 @@ def make_empty_intensity_table(image_shape=(2, 4, 3)):
     spot_attributes = pd.DataFrame(
         {Indices.X.value: x, Indices.Y.value: y, Indices.Z.value: z, Features.SPOT_RADIUS: r}
     )
-    empty = IntensityTable.empty_intensity_table(spot_attributes, 2, 2, image_shape)
+    empty = IntensityTable.empty_intensity_table(spot_attributes, 2, 2)
     return empty, spot_attributes
 
 
 def test_empty_intensity_table():
-    image_shape = (2, 4, 3)
-    empty, spot_attributes = make_empty_intensity_table(image_shape=image_shape)
-    empty = IntensityTable.empty_intensity_table(spot_attributes, 2, 2, image_shape)
+    empty, spot_attributes = make_empty_intensity_table()
+    empty = IntensityTable.empty_intensity_table(spot_attributes, 2, 2)
     assert empty.shape == (2, 2, 2)
     assert np.sum(empty.values) == 0
 

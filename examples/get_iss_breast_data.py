@@ -83,6 +83,23 @@ class AuxImageFetcherDots(ImageFetcher):
 
 
 def format_data(input_dir, output_dir):
+
+    if not input_dir.endswith("/"):
+        input_dir += "/"
+
+    if not output_dir.endswith("/"):
+        output_dir += "/"
+
+    def add_codebook(experiment_json_doc):
+        experiment_json_doc['codebook'] = "codebook.json"
+
+        # TODO: (ttung) remove the following unholy hacks.  this is because we want to point at a
+        # tileset rather than a collection.
+        experiment_json_doc['hybridization_images'] = "hybridization-fov_000.json"
+        experiment_json_doc['auxiliary_images']['nuclei'] = "nuclei-fov_000.json"
+        experiment_json_doc['auxiliary_images']['dots'] = "dots-fov_000.json"
+        return experiment_json_doc
+
     num_fovs = 16
 
     hyb_dimensions = {
@@ -117,6 +134,7 @@ def format_data(input_dir, output_dir):
                           aux_name_to_dimensions,
                           hyb_image_fetcher=hfetch,
                           aux_image_fetcher=auxfetch,
+                          postprocess_func=add_codebook,
                           default_shape=SHAPE
                           )
 

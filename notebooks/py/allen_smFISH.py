@@ -27,7 +27,7 @@ from starfish.constants import Indices
 
 # EPY: START code
 # this is a large (1.1GB) FOV, so the download may take some time
-experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180813/allen_smFISH/fov_001/experiment.json'
+experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180821/allen_smFISH/fov_001/experiment.json'
 # EPY: END code
 
 # EPY: START markdown
@@ -38,7 +38,7 @@ experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180813/allen_smFISH/fo
 
 # EPY: START code
 from starfish.codebook import Codebook
-codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180813/allen_smFISH/fov_001/codebook.json')
+codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180821/allen_smFISH/fov_001/codebook.json')
 codebook
 # EPY: END code
 

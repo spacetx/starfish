@@ -12,7 +12,7 @@ from slicedimage import (
 
 from starfish.experiment import Experiment
 from starfish.types import Coordinates, Indices
-from .imagedata import FetchedTile, TileFetcher, RandomNoiseTile, RandomNoiseTileFetcher
+from .imagedata import FetchedTile, RandomNoiseTile, RandomNoiseTileFetcher, TileFetcher
 
 
 AUX_IMAGE_NAMES = {

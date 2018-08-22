@@ -8,7 +8,7 @@ from typing import IO, Tuple
 import requests
 from slicedimage import ImageFormat
 
-from starfish.experiment.builder import TileFetcher, FetchedTile
+from starfish.experiment.builder import FetchedTile, TileFetcher
 from starfish.experiment.builder import write_experiment_json
 from starfish.types import Features, Indices
 from starfish.util.argparse import FsExistsType

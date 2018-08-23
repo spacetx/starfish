@@ -47,9 +47,7 @@ class MERFISHTile(FetchedTile):
 
     def tile_data_handle(self) -> IO:
         im = imread(self.file_path)
-        print(im.shape)
         im = im[self.map[(self.hyb, self.ch)], :, :]
-        print(self.file_path, self.hyb, self.ch)
         fh = io.BytesIO()
         imsave(fh, im, plugin='tifffile')
         fh.seek(0)
@@ -71,8 +69,6 @@ class MERFISHAuxTile(FetchedTile):
 
     def tile_data_handle(self) -> IO:
         im = imread(self.file_path)[self.dapi_index, :, :]
-        print('auxim')
-        print(im.shape)
         fh = io.BytesIO()
         imsave(fh, im, plugin='tifffile')
         fh.seek(0)

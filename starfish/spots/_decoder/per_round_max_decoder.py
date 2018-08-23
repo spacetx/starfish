@@ -1,7 +1,7 @@
 from ._base import DecoderAlgorithmBase
 
 
-class IssDecoder(DecoderAlgorithmBase):
+class PerRoundMaxDecoder(DecoderAlgorithmBase):
     def __init__(self, **kwargs):
         pass
 

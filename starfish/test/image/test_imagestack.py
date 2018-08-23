@@ -6,10 +6,10 @@ from starfish.stack import ImageStack
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import (
+    codebook_intensities_image_for_single_synthetic_spot,
     loaded_codebook,
     simple_codebook_array,
     simple_codebook_json,
-    single_synthetic_spot,
     synthetic_dataset_with_truth_values,
     synthetic_intensity_table,
     synthetic_spot_pass_through_stack,
@@ -217,8 +217,8 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
 
 
 # TODO ambrosejcarr: improve the tests here.
-def test_imagestack_to_intensity_table(single_synthetic_spot):
-    codebook, intensity_table, image = single_synthetic_spot
+def test_imagestack_to_intensity_table():
+    codebook, intensity_table, image = codebook_intensities_image_for_single_synthetic_spot()
     pixel_intensities = IntensityTable.from_image_stack(image)
     pixel_intensities = codebook.metric_decode(
         pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2)

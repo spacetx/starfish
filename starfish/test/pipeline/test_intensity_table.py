@@ -13,7 +13,6 @@ from starfish.test.dataset_fixtures import (
     loaded_codebook,
     simple_codebook_array,
     simple_codebook_json,
-    single_synthetic_spot,
 )
 from starfish.types import Features, Indices
 

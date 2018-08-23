@@ -261,8 +261,8 @@ pixel_traces = spot_intensities.stack(traces=(Indices.ROUND.value, Indices.CH.va
 pixel_traces_df = pixel_traces.to_features_dataframe()
 pixel_traces_df['area'] = np.pi*pixel_traces_df.radius**2
 
-# pick index of a random barcode that was read and decoded from the ImageStack
-ind = int(np.ceil(np.random.rand()*len(pixel_traces_df)))-1
+# pick index of a barcode that was read and decoded from the ImageStack
+ind = 45
 
 # get the the corresponding gene this barcode was decoded to
 gene = pixel_traces_df.loc[ind].target

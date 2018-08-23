@@ -44,19 +44,20 @@ class ISSCroppedBreastPrimaryTileFetcher(TileFetcher):
 
     @property
     def ch_dict(self):
-        ch_str = ['Cy3 5', 'Cy3', 'Cy5', 'FITC']
-        ch = [2, 1, 3, 0]
-        ch_dict = dict(zip(ch, ch_str))
+        ch_dict = {0: 'FITC', 1: 'Cy3', 2: 'Cy3 5', 3: 'Cy5'}
         return ch_dict
 
     @property
     def hyb_dict(self):
         hyb_str = ['1st', '2nd', '3rd', '4th']
-        return dict(zip(range(4), hyb_str))
+        hyb_dict = dict(enumerate(hyb_str))
+        return hyb_dict
 
     def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
-        filename = 'slideA_' + str(fov + 1) + '_' + \
-                   self.hyb_dict[hyb] + '_' + self.ch_dict[ch] + '.TIF'
+        filename = 'slideA_{}_{}_{}.TIF'.format(str(fov + 1),
+                                                self.hyb_dict[hyb],
+                                                self.ch_dict[ch]
+                                                )
         file_path = os.path.join(self.input_dir, filename)
         return IssCroppedBreastTile(file_path)
 
@@ -68,9 +69,9 @@ class ISSCroppedBreastAuxTileFetcher(TileFetcher):
 
     def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
         if self.aux_type == 'nuclei':
-            filename = 'slideA_' + str(fov + 1) + '_DO_' + 'DAPI.TIF'
+            filename = 'slideA_{}_DO_DAPI.TIF'.format(str(fov + 1))
         elif self.aux_type == 'dots':
-            filename = 'slideA_' + str(fov + 1) + '_DO_' + 'Cy3.TIF'
+            filename = 'slideA_{}_DO_Cy3.TIF'.format(str(fov + 1))
         else:
             msg = 'invalid aux type: {}'.format(self.aux_type)
             msg += ' expected either nuclei or dots'
@@ -82,12 +83,6 @@ class ISSCroppedBreastAuxTileFetcher(TileFetcher):
 
 
 def format_data(input_dir, output_dir):
-    if not input_dir.endswith("/"):
-        input_dir += "/"
-
-    if not output_dir.endswith("/"):
-        output_dir += "/"
-
     def add_codebook(experiment_json_doc):
         experiment_json_doc['codebook'] = "codebook.json"
         return experiment_json_doc

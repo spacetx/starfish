@@ -45,7 +45,6 @@ class MERFISHTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
     def tile_data_handle(self) -> IO:
         im = imread(self.file_path)
         print(im.shape)
@@ -70,7 +69,6 @@ class MERFISHAuxTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
     def tile_data_handle(self) -> IO:
         im = imread(self.file_path)[self.dapi_index, :, :]
         print('auxim')

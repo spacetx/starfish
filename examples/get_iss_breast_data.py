@@ -30,6 +30,7 @@ class IssCroppedBreastTile(FetchedTile):
         crp = img[40:1084, 20:1410]
         return crp
 
+    @property
     def tile_data_handle(self) -> IO:
         im = self.crop(imread(self.file_path))
         fh = io.BytesIO()
@@ -123,12 +124,13 @@ def format_data(input_dir, output_dir):
 
 
 if __name__ == "__main__":
+
+    s3_bucket = "s3://czi.starfish.data.public/browse/raw/20180820/iss_breast/"
+    input_help_msg = "Path to raw data. Raw data can be downloaded from: {}".format(s3_bucket)
+    output_help_msg = "Path to output experment.json and all formatted images it references"
     parser = argparse.ArgumentParser()
-    parser.add_argument("input_dir", type=FsExistsType())
-    parser.add_argument("output_dir", type=FsExistsType())
+    parser.add_argument("input_dir", type=FsExistsType(), help=input_help_msg)
+    parser.add_argument("output_dir", type=FsExistsType(), help=output_help_msg)
 
     args = parser.parse_args()
-    s3_bucket = "s3://czi.starfish.data.public/browse/raw/20180820/iss_breast/"
-    print("Raw data live at: {}".format(s3_bucket))
-
     format_data(args.input_dir, args.output_dir)

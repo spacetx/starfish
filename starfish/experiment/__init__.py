@@ -56,7 +56,7 @@ class Experiment:
 
     def read(self, in_json_path_or_url):
         self.backend, name, self.baseurl = resolve_path_or_url(in_json_path_or_url)
-        with self.backend.read_file_handle(name) as fh:
+        with self.backend.read_contextmanager(name) as fh:
             self.format_metadata = json.load(fh)
 
         self.verify_version(self.format_metadata['version'])

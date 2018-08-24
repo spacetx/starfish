@@ -94,7 +94,7 @@ def format_data(input_dir, output_dir):
         experiment_json_doc['codebook'] = "codebook.json"
         return experiment_json_doc
 
-    num_fovs = 1
+    num_fovs = 496
 
     hyb_dimensions = {
         Indices.ROUND: 8,

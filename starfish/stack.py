@@ -59,7 +59,7 @@ class ImageStack:
     }
     N_AXES = max(data.order for data in AXES_DATA.values()) + 1
 
-    def __init__(self, image_partition):
+    def __init__(self, image_partition: TileSet) -> None:
         self._image_partition = image_partition
         self._tile_shape = image_partition.default_tile_shape
 

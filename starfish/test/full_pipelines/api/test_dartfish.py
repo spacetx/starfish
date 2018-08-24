@@ -10,6 +10,9 @@ from starfish.types import Features
 
 def test_dartfish_pipeline_cropped_data():
 
+    # set random seed to errors provoked by optimization functions
+    np.random.seed(777)
+
     # load the experiment
     experiment_json = (
         'https://dmf0bdeheu4zf.cloudfront.net/'
@@ -62,7 +65,9 @@ def test_dartfish_pipeline_cropped_data():
          [0.01960784, 0.01960784, 0., 0., 0.,
           0., 0., 0., 0., 0.],
          [0., 0., 0., 0., 0.,
-          0.01960784, 0.01960784, 0., 0., 0.]])
+          0.01960784, 0.01960784, 0., 0., 0.]],
+        dtype=np.float,
+    )
 
     assert np.allclose(
         normalized_image.numpy_array[0, 0, 0, 50:60, 60:70],
@@ -92,7 +97,9 @@ def test_dartfish_pipeline_cropped_data():
          [0.01960784, 0., 0., 0., 0.,
           0., 0., 0., 0., 0.],
          [0., 0., 0., 0., 0.,
-          0., 0.01960784, 0., 0., 0.]])
+          0., 0.01960784, 0., 0., 0.]],
+        dtype=np.float
+    )
 
     assert np.allclose(
         expected_zero_normalized_image,

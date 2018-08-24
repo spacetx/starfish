@@ -13,6 +13,9 @@ from starfish.types import Features, Indices
 
 def test_iss_pipeline_cropped_data():
 
+    # set random seed to errors provoked by optimization functions
+    np.random.seed(777)
+
     # load the experiment
     experiment_json = (
         'https://dmf0bdeheu4zf.cloudfront.net/'

@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from starfish import Codebook, Experiment
@@ -9,6 +10,9 @@ from starfish.spots._detector.local_max_peak_finder import LocalMaxPeakFinder
 
 @pytest.mark.skip('issues with checksums prevent this data from working properly')
 def test_allen_smFISH_cropped_data():
+
+    # set random seed to errors provoked by optimization functions
+    np.random.seed(777)
 
     # load the experiment
     experiment_json = (
@@ -38,7 +42,7 @@ def test_allen_smFISH_cropped_data():
     glp = GaussianLowPass(sigma=sigma, is_volume=True)
     z_filtered_image = glp.run(clipped_bandpassed_image, in_place=False)
 
-    kwargs = dict(
+    lmpf = LocalMaxPeakFinder(
         spot_diameter=3,
         min_mass=300,
         max_size=3,
@@ -49,5 +53,4 @@ def test_allen_smFISH_cropped_data():
         verbose=True,
         is_volume=True,
     )
-    lmpf = LocalMaxPeakFinder(**kwargs)
     intensities = lmpf.run(z_filtered_image)  # noqa

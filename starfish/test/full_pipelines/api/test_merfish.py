@@ -11,6 +11,9 @@ from starfish.types import Features, Indices
 
 def test_merfish_pipeline_cropped_data():
 
+    # set random seed to errors provoked by optimization functions
+    np.random.seed(777)
+
     # load the experiment
     experiment_json = (
         'https://dmf0bdeheu4zf.cloudfront.net/'
@@ -51,7 +54,8 @@ def test_merfish_pipeline_cropped_data():
          [216, 128, 5, 0, 0, 49, 81, 0, 0, 0],
          [233, 159, 44, 0, 86, 114, 103, 0, 0, 0],
          [123, 195, 226, 225, 117, 100, 144, 0, 0, 0],
-         [100, 224, 196, 344, 191, 126, 51, 0, 0, 0]], dtype=np.uint16
+         [100, 224, 196, 344, 191, 126, 51, 0, 0, 0]],
+        dtype=np.uint16
     )
 
     assert np.array_equal(
@@ -74,7 +78,8 @@ def test_merfish_pipeline_cropped_data():
          [48, 20, 14, 12, 11, 4, 0, 0, 0, 0],
          [169, 77, 59, 52, 46, 16, 1, 0, 0, 0],
          [125, 98, 142, 202, 220, 77, 5, 0, 0, 0],
-         [30, 61, 227, 619, 890, 315, 17, 0, 0, 0]], dtype=np.uint16
+         [30, 61, 227, 619, 890, 315, 17, 0, 0, 0]],
+        dtype=np.uint16
     )
     assert np.array_equal(
         expected_deconvolved_values,
@@ -137,7 +142,8 @@ def test_merfish_pipeline_cropped_data():
          [1.6861921, 1.43452164, 2.05111427, 3.05779612, 3.24654897,
           2.06369779, 0.72984434, 0.13841875, 0.01258352, 0.],
          [0.91859719, 1.28351936, 2.74320804, 4.97049164, 5.80100417,
-          3.88830865, 1.42193811, 0.26425399, 0.02516705, 0.]]
+          3.88830865, 1.42193811, 0.26425399, 0.02516705, 0.]],
+        dtype=np.float
     )
     assert np.allclose(
         expected_scaled_low_passed,

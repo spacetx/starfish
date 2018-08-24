@@ -5,7 +5,7 @@ from starfish.intensity_table import IntensityTable
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import _base
-from . import per_round_max_decoder
+from . import per_round_max_channel_decoder
 
 
 class Decoder(PipelineComponent):

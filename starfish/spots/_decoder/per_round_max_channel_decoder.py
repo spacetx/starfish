@@ -1,7 +1,7 @@
 from ._base import DecoderAlgorithmBase
 
 
-class PerRoundMaxDecoder(DecoderAlgorithmBase):
+class PerRoundMaxChannelDecoder(DecoderAlgorithmBase):
     def __init__(self, **kwargs):
         pass
 

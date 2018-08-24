@@ -13,11 +13,8 @@ dependencies:
 - scikit-learn
 - semantic_version
 - showit==1.1.4
+- slicedimage==0.0.2
 - tqdm
 - trackpy
 - validators
 - xarray
-- pip:
-  - slicedimage==0.0.1
-# see https://github.com/bioconda/bioconda-recipes/pull/10637
-#- slicedimage==0.0.1

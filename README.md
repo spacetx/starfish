@@ -54,7 +54,7 @@ starfish segment --hybridization-stack /tmp/starfish/filtered/hybridization.json
 
 starfish target_assignment --coordinates-geojson /tmp/starfish/results/regions.geojson --intensities /tmp/starfish/results/spots.nc --output /tmp/starfish/results/regions.json PointInPoly2D
 
-starfish decode -i /tmp/starfish/results/spots.nc --codebook /tmp/starfish/formatted/codebook.json -o /tmp/starfish/results/spots.nc IssDecoder
+starfish decode -i /tmp/starfish/results/spots.nc --codebook /tmp/starfish/formatted/codebook.json -o /tmp/starfish/results/spots.nc PerRoundMaxChannelDecoder
 ```
 
 ## interactive visualization in Jupyter notebooks

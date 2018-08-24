@@ -142,7 +142,7 @@ class TestWithIssData(unittest.TestCase):
                 "$['codebook']",
             ),
             "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
-            "IssDecoder",
+            "PerRoundMaxChannelDecoder",
         ],
     )
 

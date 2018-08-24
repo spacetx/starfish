@@ -1,11 +1,16 @@
 from itertools import product
-from typing import Dict, Tuple, Union
+from typing import Dict, Union
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
 from starfish.types import Features, Indices
+from starfish.plot.intensity_table import (
+    barcode_magnitude_histogram,
+    spot_area_histogram,
+    spot_distance_histogram
+)
 
 
 class IntensityTable(xr.DataArray):
@@ -346,3 +351,13 @@ class IntensityTable(xr.DataArray):
         """
         df = pd.DataFrame(dict(self[Features.AXIS].coords.variables)).drop(Features.AXIS, axis=1)
         return df
+
+    # plotting functions
+    def plot_feature_magnitudes(self, ax=None, bins=100, **kwargs):
+        barcode_magnitude_histogram(self, ax=ax, bins=bins, **kwargs)
+
+    def plot_feature_distances(self, ax=None, bins=25, **kwargs):
+        spot_distance_histogram(self, ax=ax, bins=bins, **kwargs)
+
+    def plot_feature_areas(self, ax=None, bins=25, **kwargs):
+        spot_area_histogram(self, ax=ax, bins=bins, **kwargs)

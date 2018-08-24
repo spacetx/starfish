@@ -1,5 +1,7 @@
+import numpy as np
 import regional
 from scipy.sparse import coo_matrix
+from starfish.types import Indices
 
 
 def label_to_regions(labels) -> regional.many:
@@ -18,3 +20,10 @@ def label_to_regions(labels) -> regional.many:
     regions = [region_for(label_mat_coo, label) for label in unique_labels]
 
     return regional.many(regions)
+
+
+def feature_trace_magnitudes(intensities, norm_order=2) -> np.ndarray:
+    feature_traces = intensities.stack(traces=(Indices.CH.value, Indices.ROUND.value))
+    norm = np.linalg.norm(feature_traces.values, ord=norm_order, axis=1)
+
+    return norm

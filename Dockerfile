@@ -38,9 +38,9 @@
 ##
 FROM continuumio/miniconda3
 RUN useradd -m starfish
+USER starfish
 
 # Set up the initial conda environment
-USER starfish
 COPY --chown=starfish:starfish environment.yml /src/environment.yml
 WORKDIR /src
 RUN conda env create -f environment.yml
@@ -48,7 +48,10 @@ RUN conda env create -f environment.yml
 # Prepare for build
 COPY --chown=starfish:starfish . /src
 RUN echo "source activate starfish" >> ~/.bashrc
+ENV PATH /home/starfish/.conda/envs/starfish/bin:$PATH
 
 # Build and configure for running
-RUN pip install --user -e .
+RUN pip install -e .
+
+env MPLBACKEND Agg
 ENTRYPOINT ["starfish"]

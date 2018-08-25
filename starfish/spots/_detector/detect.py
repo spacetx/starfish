@@ -13,7 +13,7 @@ from starfish.types import Features, Indices, Number, SpotAttributes
 
 def measure_spot_intensity(
         image: Union[np.ndarray, xr.DataArray],
-        spots: pd.DataFrame,
+        spots: SpotAttributes,
         measurement_function: Callable[[Sequence], Number],
         radius_is_gyration: bool=False,
 ) -> pd.Series:
@@ -49,14 +49,14 @@ def measure_spot_intensity(
         return measurement_function(data)
 
     if radius_is_gyration:
-        radius = np.ceil(spots[Features.SPOT_RADIUS]).astype(int) + 1  # round up
+        radius = np.ceil(spots.data[Features.SPOT_RADIUS]).astype(int) + 1  # round up
     else:
-        radius = spots[Features.SPOT_RADIUS].astype(int)  # truncate down to nearest integer
+        radius = spots.data[Features.SPOT_RADIUS].astype(int)  # truncate down to nearest integer
     for v, max_size in zip(['z', 'y', 'x'], image.shape):
         # numpy does exclusive max indexing, so need to subtract 1 from min to get centered box
-        spots[f'{v}_min'] = np.clip(spots[v] - (radius - 1), 0, None)
-        spots[f'{v}_max'] = np.clip(spots[v] + radius, None, max_size)
-    return spots[['z_min', 'z_max', 'y_min', 'y_max', 'x_min', 'x_max']].astype(int).apply(
+        spots.data[f'{v}_min'] = np.clip(spots.data[v] - (radius - 1), 0, None)
+        spots.data[f'{v}_max'] = np.clip(spots.data[v] + radius, None, max_size)
+    return spots.data[['z_min', 'z_max', 'y_min', 'y_max', 'x_min', 'x_max']].astype(int).apply(
         fn,
         axis=1
     )
@@ -64,7 +64,7 @@ def measure_spot_intensity(
 
 def measure_spot_intensities(
         data_image: ImageStack,
-        spot_attributes: pd.DataFrame,
+        spot_attributes: SpotAttributes,
         measurement_function: Callable[[Sequence], Number],
         radius_is_gyration: bool=False,
 ) -> IntensityTable:
@@ -144,7 +144,7 @@ def concatenate_spot_attributes_to_intensities(
     features_coordinates = all_spots.drop(['spot_id', 'intensity'], axis=1)
 
     intensity_table = IntensityTable.empty_intensity_table(
-        features_coordinates, n_ch, n_round,
+        SpotAttributes(features_coordinates), n_ch, n_round,
     )
 
     i = 0
@@ -221,7 +221,7 @@ def detect_spots(
         reference_spot_locations = spot_finding_method(reference_image, **spot_finding_kwargs)
         intensity_table = measure_spot_intensities(
             data_image=data_stack,
-            spot_attributes=reference_spot_locations.data,
+            spot_attributes=reference_spot_locations,
             measurement_function=measurement_function,
             radius_is_gyration=radius_is_gyration,
         )

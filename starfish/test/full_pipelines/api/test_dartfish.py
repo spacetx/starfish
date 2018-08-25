@@ -123,6 +123,7 @@ def test_dartfish_pipeline_cropped_data():
     spots_df['area'] = np.pi * spots_df['radius'] ** 2
 
     # verify number of spots detected
+    import pdb; pdb.set_trace()
     assert spot_intensities.sizes[Features.AXIS] == 53
 
     # compare to benchmark data -- note that this particular part of the dataset appears completely

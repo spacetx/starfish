@@ -4,7 +4,6 @@ import numpy as np
 
 from starfish.intensity_table import IntensityTable
 from starfish.stack import ImageStack
-from starfish.test.dataset_fixtures import codebook_intensities_image_for_single_synthetic_spot
 from starfish.types import Indices
 
 
@@ -13,7 +12,7 @@ def test_reshaping_between_stack_and_intensities():
     transform an pixels of an ImageStack into an IntensityTable and back again, then verify that
     the created Imagestack is the same as the original
     """
-    codebook, intensities, image = codebook_intensities_image_for_single_synthetic_spot()
+    image = ImageStack.from_numpy_array(np.random.randn(1, 2, 3, 4, 5))
     pixel_intensities = IntensityTable.from_image_stack(image, 0, 0, 0)
     image_shape = (image.shape['z'], image.shape['y'], image.shape['x'])
     image_from_pixels = pixel_intensities_to_imagestack(pixel_intensities, image_shape)

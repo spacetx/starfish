@@ -398,8 +398,12 @@ class Codebook(xr.DataArray):
         np.ndarray : targets
             the gene that corresponds to each matched code
 
+        Notes
+        -----
+        This function does not verify that the intensities have been normalized. Proceed with
+        caution.
+
         """
-        # TODO ambrosejcarr: see if features can be pre-masked to reduce NN calculations
         linear_codes = norm_codes.stack(traces=(Indices.CH.value, Indices.ROUND.value)).values
         linear_features = norm_intensities.stack(
             traces=(Indices.CH.value, Indices.ROUND.value)).values
@@ -413,7 +417,7 @@ class Codebook(xr.DataArray):
 
     def metric_decode(
             self, intensities: IntensityTable, max_distance: Number, min_intensity: Number,
-            norm_order: int, metric: str= 'euclidean'
+            norm_order: int, metric: str='euclidean'
     ) -> IntensityTable:
         """Assign the closest target by euclidean distance to each feature in an intensity table
 
@@ -442,40 +446,50 @@ class Codebook(xr.DataArray):
         Returns
         -------
         IntensityTable :
-            intensity table containing additional data variables for target assignments and metric
-            outputs
+            intensity table containing normalized intensities, target assignments, distances to
+            the nearest code, and the filtering status of each feature.
 
         """
+        # verify that the shapes of the codebook and intensities match
+        ch_match = intensities.sizes[Indices.CH] == self.sizes[Indices.CH]
+        round_match = intensities.sizes[Indices.ROUND] == self.sizes[Indices.ROUND]
+        if not (ch_match and round_match):
+            raise ValueError(
+                'Codebook and Intensities must have same number of channels and rounds')
+
         # normalize both the intensities and the codebook
         norm_intensities, norms = self._normalize_features(intensities, norm_order=norm_order)
         norm_codes, _ = self._normalize_features(self, norm_order=norm_order)
 
-        # mask low intensity features
-        intensity_mask = np.where(norms < min_intensity)[0]
-
         metric_outputs, targets = self._approximate_nearest_code(
             norm_codes, norm_intensities, metric=metric)
 
-        exceeds_distance = np.where(metric_outputs > max_distance)[0]
-        target_index = pd.Index(targets)
+        passes_filters = np.ones_like(targets, dtype=np.bool)
 
-        # remove targets associated with distant codes
-        target_index.values[exceeds_distance] = 'None'
-        target_index.values[intensity_mask] = 'None'
+        # indicate that targets with high hamming distances or low intensities should be filtered
+        intensity_mask = norms < min_intensity
+        distance_mask = metric_outputs > max_distance
+        passes_filters[intensity_mask | distance_mask] = False
 
         # set new values on the intensity table in-place
-        intensities[Features.TARGET] = (Features.AXIS, target_index)
-        intensities[Features.DISTANCE] = (Features.AXIS, metric_outputs)
+        norm_intensities[Features.TARGET] = (Features.AXIS, targets)
+        norm_intensities[Features.DISTANCE] = (Features.AXIS, metric_outputs)
+        norm_intensities[Features.PASSES_FILTERS] = (Features.AXIS, passes_filters)
 
-        return intensities
+        return norm_intensities
 
+    # TODO ambrosejcarr, dganguli: This method has no channel scaling, which could bias the
+    # result toward a high-intensity channel
     def decode_per_round_max(self, intensities: IntensityTable) -> IntensityTable:
         """decode each feature by selecting the per-imaging-round max-valued channel
 
         Notes
         -----
-        If no code matches the per-channel max of a feature, it will be assigned 'None' instead
+        If no code matches the per-channel max of a feature, it will be assigned 'nan' instead
         of a target value
+        In cases where intensities are very discrete, note that argmax breaks ties by picking
+        the last channel -- this can lead to unexpected results where some "tied" channels will
+        decode, but others will be assigned 'nan'.
 
         Parameters
         ----------
@@ -513,24 +527,37 @@ class Codebook(xr.DataArray):
                      'formats': ncols * [array.dtype]}
             return array.view(dtype)
 
+        # verify that the shapes of the codebook and intensities match
+        ch_match = intensities.sizes[Indices.CH] == self.sizes[Indices.CH]
+        round_match = intensities.sizes[Indices.ROUND] == self.sizes[Indices.ROUND]
+        if not (ch_match and round_match):
+            raise ValueError(
+                'Codebook and Intensities must have same number of channels and rounds')
+
         max_channels = intensities.argmax(Indices.CH.value)
         codes = self.argmax(Indices.CH.value)
 
         a = _view_row_as_element(codes.values.reshape(self.shape[0], -1))
         b = _view_row_as_element(max_channels.values.reshape(intensities.shape[0], -1))
 
-        # TODO ambrosejcarr: the object makes working with the data awkward
-        # we could store a map between targets and ints as an `attr`, and use that to convert
-        # for the public API.
-        targets = np.empty(intensities.shape[0], dtype=object)
-        targets.fill("None")
+        targets = np.full(intensities.shape[0], fill_value=np.nan, dtype=object)
 
-        for i in np.arange(a.shape[0]):
+        # decode the intensities
+        for i in np.arange(codes.shape[0]):
             targets[np.where(a[i] == b)[0]] = codes[Features.TARGET][i]
         target_index = pd.Index(targets.astype('U'))
 
-        intensities[Features.TARGET] = (
-            Features.AXIS, target_index)
+        # TODO improve distance to contain more useful information
+        # create binary distance and passes filters metadata for this decoder
+        distance = np.zeros_like(targets, dtype=np.uint8)
+        distance[pd.isnull(targets)] = 1
+
+        passes_filters = np.ones_like(targets, dtype=np.bool)
+        passes_filters[pd.isnull(targets)] = False
+
+        intensities[Features.TARGET] = (Features.AXIS, target_index)
+        intensities[Features.DISTANCE] = (Features.AXIS, distance)
+        intensities[Features.PASSES_FILTERS] = (Features.AXIS, passes_filters)
 
         return intensities
 

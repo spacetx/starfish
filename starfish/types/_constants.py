@@ -40,3 +40,4 @@ class Features:
     CODE_VALUE = 'v'
     SPOT_RADIUS = 'radius'
     DISTANCE = 'distance'
+    PASSES_FILTERS = 'passes_filters'

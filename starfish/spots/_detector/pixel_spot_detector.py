@@ -6,6 +6,7 @@ from starfish.stack import ImageStack
 from ._base import SpotFinderAlgorithmBase
 from .combine_adjacent_features import (
     combine_adjacent_features,
+    CombineAdjacentFeatures,
     ConnectedComponentDecodingResult,
 )
 
@@ -76,11 +77,17 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
             norm_order=self.norm_order,
             metric=self.metric
         )
-        decoded_spots, image_decoding_results = combine_adjacent_features(
-            decoded_intensities,
+        caf = CombineAdjacentFeatures(
             min_area=self.min_area,
             max_area=self.max_area
         )
+        decoded_spots, image_decoding_results = caf.run(intensities=decoded_intensities)
+
+        # decoded_spots, image_decoding_results = combine_adjacent_features(
+        #     decoded_intensities,
+        #     min_area=self.min_area,
+        #     max_area=self.max_area
+        # )
 
         return decoded_spots, image_decoding_results
 

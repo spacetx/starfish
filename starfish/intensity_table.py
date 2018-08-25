@@ -53,9 +53,6 @@ class IntensityTable(xr.DataArray):
 
     """
 
-    # constant that stores the attr key for the shape of ImageStack
-    IMAGE_SHAPE = 'image_shape'
-
     @staticmethod
     def _build_xarray_coords(
             spot_attributes: pd.DataFrame, channel_index: np.ndarray, round_index: np.ndarray

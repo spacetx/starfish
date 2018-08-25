@@ -11,35 +11,12 @@ import pytest
 from scipy.ndimage.filters import gaussian_filter
 
 from starfish.codebook import Codebook
-from starfish.experiment import Experiment
 from starfish.image._filter.white_tophat import WhiteTophat
 from starfish.intensity_table import IntensityTable
 from starfish.spots._detector.gaussian import GaussianSpotDetector
 from starfish.stack import ImageStack
 from starfish.types import Features, Indices
 from starfish.util import synthesize
-
-
-# TODO ambrosejcarr: all fixtures should emit a stack and a codebook
-@pytest.fixture(scope='session')
-def merfish_stack() -> Experiment:
-    """retrieve MERFISH testing data from cloudfront and expose it at the module level
-
-    Notes
-    -----
-    Because download takes time, this fixture runs once per session -- that is, the download is run
-    only once.
-
-    Returns
-    -------
-    Stack :
-        starfish.io.Stack object containing MERFISH data
-    """
-    s = Experiment()
-    s.read(
-        'https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment.json'
-    )
-    return deepcopy(s)
 
 
 @pytest.fixture(scope='session')

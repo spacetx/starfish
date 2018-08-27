@@ -48,7 +48,9 @@ class SpaceTxValidator:
             return json.load(f)
 
     @staticmethod
-    def _recurse_through_errors(error_iterator: Iterator[ValidationError], level: int=0) -> None:
+    def _recurse_through_errors(error_iterator: Iterator[ValidationError],
+                                level: int=0,
+                                filename: str=None) -> None:
         """Recurse through ValidationErrors, printing message and schema path
 
         Parameters
@@ -57,18 +59,23 @@ class SpaceTxValidator:
             iterator over ValidationErrors that occur during validation
         level : int
             current level of recursion
+        filename : str
+            informational string regarding the source file of the given object
 
         """
-        fmt = "{stars} {message}\n"
+        fmt = "\n{stars} {message}\n"
         fmt += "\tSchema:         \t{schema}\n"
         fmt += "\tSubschema level:\t{level}\n"
         fmt += "\tPath to error:  \t{path}\n"
+        if filename:
+            fmt += "\tFilename:       \t{filename}\n"
         for error in error_iterator:
             message = fmt.format(
-                stars="***" * level, level=str(level),path="/".join(error.absolute_schema_path),
+                stars="***" * level,  level=str(level), path="/".join(error.absolute_schema_path),
                 message=error.message, cause=error.cause, schema=error.schema.get("$id", "unknown"),
+                filename=filename,
             )
-            print(message)
+            warnings.warn(message)
             if error.context:
                 level += 1
                 SpaceTxValidator._recurse_through_errors(error.context, level=level)
@@ -91,7 +98,7 @@ class SpaceTxValidator:
         target_object = self.load_json(target_file)
         return self.validate_object(target_object, target_file)
 
-    def validate_object(self, target_object: Dict, target_file: str = None) -> bool:
+    def validate_object(self, target_object: Dict, target_file: str=None) -> bool:
         """validate a loaded json object, returning True if valid, and False otherwise
 
         Parameters
@@ -110,8 +117,6 @@ class SpaceTxValidator:
         if self._validator.is_valid(target_object):
             return True
         else:
-            if target_file:
-                print(f"Errors in: {target_file}")
             es: Iterator[ValidationError] = self._validator.iter_errors(target_object)
-            self._recurse_through_errors(es)
+            self._recurse_through_errors(es, filename=target_file)
             return False

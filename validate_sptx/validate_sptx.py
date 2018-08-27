@@ -52,7 +52,7 @@ def validate_sptx(experiment_json: str) -> None:
             valid &= manifest_validator.validate_object(manifest)
 
             # contains fields of view
-            for fov in manifest['contents']:
+            for key, fov in manifest['contents'].items():
                 with backend.read_contextmanager(fov) as fh:
                     fovs.append(json.load(fh))
 

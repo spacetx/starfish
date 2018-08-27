@@ -1,6 +1,7 @@
+# Also update environment.yml
 click
 flake8
 jsonschema
 mypy
 pytest
-slicedimage == 0.0.0-dev21
+slicedimage == 0.0.3

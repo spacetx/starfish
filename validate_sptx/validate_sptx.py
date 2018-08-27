@@ -24,7 +24,7 @@ def validate_sptx(experiment_json: str) -> None:
 
     # use slicedimage to read the top-level experiment json file passed by the user
     backend, name, baseurl = resolve_path_or_url(experiment_json)
-    with backend.read_file_handle(name) as fh:
+    with backend.read_contextmanager(name) as fh:
         experiment = json.load(fh)
 
     # validate experiment.json
@@ -34,13 +34,13 @@ def validate_sptx(experiment_json: str) -> None:
     # validate manifests that it links to.
     possible_manifests = []
     manifest_validator = SpaceTxValidator(_get_absolute_schema_path('fov_manifest.json'))
-    with backend.read_file_handle(experiment['hybridization_images']) as fh:
+    with backend.read_contextmanager(experiment['hybridization_images']) as fh:
         possible_manifests.append(json.load(fh))
 
     # loop over all the manifests that are stored in auxiliary images. Disallowed names will
     # have already been excluded by experiment validation.
     for manifest in experiment['auxiliary_images'].values():
-        with backend.read_file_handle(manifest) as fh:
+        with backend.read_contextmanager(manifest) as fh:
             possible_manifests.append(json.load(fh))
 
     # we allow the objects linked from hybridization_images and auxiliary images to either be
@@ -53,7 +53,7 @@ def validate_sptx(experiment_json: str) -> None:
 
             # contains fields of view
             for fov in manifest['contents']:
-                with backend.read_file_handle(fov) as fh:
+                with backend.read_contextmanager(fov) as fh:
                     fovs.append(json.load(fh))
 
         else:  # manifest is a field of view
@@ -67,7 +67,7 @@ def validate_sptx(experiment_json: str) -> None:
 
     # validate codebook
     codebook_validator = SpaceTxValidator(_get_absolute_schema_path('codebook/codebook.json'))
-    with backend.read_file_handle(experiment['codebook']) as fh:
+    with backend.read_contextmanager(experiment['codebook']) as fh:
         codebook = json.load(fh)
     valid &= codebook_validator.validate_object(codebook)
 

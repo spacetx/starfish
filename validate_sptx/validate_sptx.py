@@ -56,22 +56,22 @@ def validate_sptx(experiment_json: str) -> None:
             # contains fields of view
             for key, fov in manifest['contents'].items():
                 with backend.read_contextmanager(fov) as fh:
-                    fovs.append(json.load(fh))
+                    fovs.append((json.load(fh), fov))
 
         else:  # manifest is a field of view
-            fovs.append(manifest)
+            fovs.append((manifest, None))
 
     # validate fovs
     assert len(fovs) != 0
     fov_validator = SpaceTxValidator(_get_absolute_schema_path('field_of_view/field_of_view.json'))
-    for fov in fovs:
-        valid &= fov_validator.validate_object(fov)
+    for fov, filename in fovs:
+        valid &= fov_validator.validate_object(fov, filename)
 
     # validate codebook
     codebook_validator = SpaceTxValidator(_get_absolute_schema_path('codebook/codebook.json'))
     with backend.read_contextmanager(experiment['codebook']) as fh:
         codebook = json.load(fh)
-    valid &= codebook_validator.validate_object(codebook)
+    valid &= codebook_validator.validate_object(codebook, experiment['codebook'])
 
     if valid:
         sys.exit(0)

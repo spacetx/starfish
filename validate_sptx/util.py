@@ -59,11 +59,16 @@ class SpaceTxValidator:
             current level of recursion
 
         """
+        fmt = "{stars} {message}\n"
+        fmt += "\tSchema:         \t{schema}\n"
+        fmt += "\tSubschema level:\t{level}\n"
+        fmt += "\tPath to error:  \t{path}\n"
         for error in error_iterator:
-            message = "{stars} subschema level {level}\nPath to error:\t{path}\n".format(
-                stars="***" * level, level=str(level), path=error.absolute_schema_path
+            message = fmt.format(
+                stars="***" * level, level=str(level),path="/".join(error.absolute_schema_path),
+                message=error.message, cause=error.cause, schema=error.schema.get("$id", "unknown"),
             )
-            warnings.warn(message)
+            print(message)
             if error.context:
                 level += 1
                 SpaceTxValidator._recurse_through_errors(error.context, level=level)
@@ -84,15 +89,17 @@ class SpaceTxValidator:
 
         """
         target_object = self.load_json(target_file)
-        return self.validate_object(target_object)
+        return self.validate_object(target_object, target_file)
 
-    def validate_object(self, target_object: Dict) -> bool:
+    def validate_object(self, target_object: Dict, target_file: str = None) -> bool:
         """validate a loaded json object, returning True if valid, and False otherwise
 
         Parameters
         ----------
         target_object : Dict
             loaded json object to be validated against the schem passed to this object's constructor
+        target_file : str
+            informational string regarding the source file of the given object
 
         Returns
         -------
@@ -103,6 +110,8 @@ class SpaceTxValidator:
         if self._validator.is_valid(target_object):
             return True
         else:
+            if target_file:
+                print(f"Errors in: {target_file}")
             es: Iterator[ValidationError] = self._validator.iter_errors(target_object)
             self._recurse_through_errors(es)
             return False

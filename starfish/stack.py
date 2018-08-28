@@ -4,6 +4,7 @@ import warnings
 from copy import deepcopy
 from functools import partial
 from itertools import product
+from multiprocessing import Pool
 from typing import (
     Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple,
     Union
@@ -608,7 +609,8 @@ class ImageStack:
             yield array
 
     def apply(
-            self, func, is_volume=False, in_place=True, verbose: bool=False, **kwargs
+            self, func, is_volume=False, in_place=True, verbose: bool=False, multiprocess=True,
+            **kwargs
     ) -> "ImageStack":
         """Apply func over all tiles or volumes in self
 
@@ -626,6 +628,8 @@ class ImageStack:
             produced.
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
+        multiprocess : bool
+            If True, spawn a pool of workers to complete the apply
         kwargs : dict
             Additional arguments to pass to func
 
@@ -641,23 +645,32 @@ class ImageStack:
                 func, is_volume=is_volume, in_place=True, verbose=verbose, **kwargs
             )
 
-        mapfunc: Callable = map  # TODO: ambrosejcarr posix-compliant multiprocessing
+        if multiprocess:
+            p = Pool()
+            mapfunc: Callable = p.map
+        else:
+            mapfunc = map
+
         indices = list(self._iter_indices(is_volume=is_volume))
 
-        if verbose:
+        if verbose and multiprocess is False:
             tiles = tqdm(self._iter_tiles(indices))
         else:
             tiles = self._iter_tiles(indices)
 
         applyfunc: Callable = partial(func, **kwargs)
-        results = mapfunc(applyfunc, tiles)
+        results = mapfunc(applyfunc, list(tiles))
 
         for r, inds in zip(results, indices):
             self.set_slice(inds, r)
+        p.close()
+        p.join()
 
         return self
 
-    def transform(self, func, is_volume=False, verbose=False, **kwargs) -> List[Any]:
+    def transform(
+            self, func, is_volume=False, verbose=False, multiprocess=True, **kwargs
+    ) -> List[Any]:
         """Apply func over all tiles or volumes in self
 
         Parameters
@@ -669,6 +682,8 @@ class ImageStack:
             (default False) If True, pass 3d volumes (x, y, z) to func
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
+        multiprocess : bool
+            If True, spawn a pool of workers to complete the apply
         kwargs : dict
             Additional arguments to pass to func being applied
 
@@ -677,16 +692,22 @@ class ImageStack:
         List[Any] :
             The results of applying func to stored image data
         """
-        mapfunc: Callable = map
+        if multiprocess:
+            p = Pool()
+            mapfunc: Callable = p.map
+        else:
+            mapfunc = map
         indices = list(self._iter_indices(is_volume=is_volume))
 
-        if verbose:
+        if verbose and multiprocess is False:
             tiles = tqdm(self._iter_tiles(indices))
         else:
             tiles = self._iter_tiles(indices)
 
         applyfunc: Callable = partial(func, **kwargs)
         results = mapfunc(applyfunc, tiles)
+        p.close()
+        p.join()
 
         return list(zip(results, indices))
 

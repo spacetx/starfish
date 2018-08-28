@@ -138,7 +138,7 @@ class Codebook(xr.DataArray):
         Examples
         --------
 
-        >>> from starfish.constants import Indices
+        >>> from starfish.types import Indices
         >>> from starfish.codebook import Codebook
         >>> codebook = [
         >>>     {
@@ -247,7 +247,7 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        >>> from starfish.constants import Indices
+        >>> from starfish.types import Indices
         >>> from starfish.codebook import Codebook
         >>> import tempfile
         >>> import json

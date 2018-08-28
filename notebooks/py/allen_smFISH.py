@@ -15,7 +15,7 @@
 import matplotlib.pyplot as plt
 
 from starfish.experiment import Experiment
-from starfish.constants import Indices
+from starfish.types import Indices
 # EPY: END code
 
 # EPY: START code
@@ -27,7 +27,7 @@ from starfish.constants import Indices
 
 # EPY: START code
 # this is a large (1.1GB) FOV, so the download may take some time
-experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180821/allen_smFISH/fov_001/experiment.json'
+experiment_json = "https://dmf0bdeheu4zf.cloudfront.net/20180827/allen_smFISH/experiment.json"
 # EPY: END code
 
 # EPY: START markdown
@@ -36,19 +36,17 @@ experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180821/allen_smFISH/fo
 #The numpy array can be accessed through Stack.image.numpy\_array (public method, read only) or Stack.image.\_data (read and write)
 # EPY: END markdown
 
-# EPY: START code
-from starfish.codebook import Codebook
-codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180821/allen_smFISH/fov_001/codebook.json')
-codebook
-# EPY: END code
-
 # EPY: START markdown
 #We're ready now to load the experiment into starfish (This experiment is big, it takes a few minutes):
 # EPY: END markdown
 
 # EPY: START code
 experiment = Experiment.from_json(experiment_json)
-primary_image = experiment.image
+primary_image = experiment.fov().primary_image
+# EPY: END code
+
+# EPY: START code
+experiment.codebook
 # EPY: END code
 
 # EPY: START markdown

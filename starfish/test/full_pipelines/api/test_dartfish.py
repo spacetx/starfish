@@ -15,12 +15,11 @@ def test_dartfish_pipeline_cropped_data():
 
     # load the experiment
     experiment_json = (
-        'https://dmf0bdeheu4zf.cloudfront.net/'
-        'TEST/20180821/DARTFISH_TEST/fov_001/experiment.json'
+        "https://dmf0bdeheu4zf.cloudfront.net/20180827/DARTFISH-TEST/experiment.json"
     )
     experiment = Experiment.from_json(experiment_json)
 
-    primary_image = experiment.image
+    primary_image = experiment.fov().primary_image
     primary_image._data = primary_image._data.astype(float)
 
     expected_primary_image = np.array(
@@ -110,12 +109,8 @@ def test_dartfish_pipeline_cropped_data():
     area_threshold = (5, 30)
     distance_threshold = 3
 
-    codebook = Codebook.from_json(
-        'https://dmf0bdeheu4zf.cloudfront.net/20180813/DARTFISH/fov_001/codebook.json'
-    )
-
     psd = PixelSpotDetector(
-        codebook=codebook,
+        codebook=experiment.codebook,
         metric='euclidean',
         distance_threshold=distance_threshold,
         magnitude_threshold=magnitude_threshold,

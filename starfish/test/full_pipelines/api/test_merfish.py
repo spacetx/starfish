@@ -16,11 +16,10 @@ def test_merfish_pipeline_cropped_data():
 
     # load the experiment
     experiment_json = (
-        'https://dmf0bdeheu4zf.cloudfront.net/'
-        'TEST/20180821/MERFISH_TEST/fov_001/experiment.json'
+        "https://dmf0bdeheu4zf.cloudfront.net/20180827/MERFISH-TEST/experiment.json"
     )
     experiment = Experiment.from_json(experiment_json)
-    primary_image = experiment.image
+    primary_image = experiment.fov().primary_image
 
     expected_primary_image = np.array(
         [[6287, 6419, 6612, 6705, 6641, 6555, 6784, 6978, 7084, 7058],
@@ -114,7 +113,7 @@ def test_merfish_pipeline_cropped_data():
     # scale the data by the scale factors
     scale_factors = {
         (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
-        for t in experiment.format_metadata['extras']['scale_factors']
+        for t in experiment.extras['scale_factors']
     }
     for indices in low_passed._iter_indices():
         data = low_passed.get_slice(indices)[0]
@@ -151,12 +150,8 @@ def test_merfish_pipeline_cropped_data():
     )
 
     # detect and decode spots
-    codebook = Codebook.from_json(
-        'https://dmf0bdeheu4zf.cloudfront.net/'
-        'TEST/20180821/MERFISH_TEST/fov_001/codebook.json'
-    )
     psd = PixelSpotDetector(
-        codebook=codebook,
+        codebook=experiment.codebook,
         metric='euclidean',
         distance_threshold=0.5176,
         magnitude_threshold=1,

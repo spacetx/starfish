@@ -4,6 +4,7 @@ import warnings
 from copy import deepcopy
 from functools import partial
 from itertools import product
+from multiprocessing import Pool, pool
 from typing import (
     Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple,
     Union
@@ -608,7 +609,8 @@ class ImageStack:
             yield array
 
     def apply(
-            self, func, is_volume=False, in_place=True, verbose: bool=False, **kwargs
+            self, func, is_volume=False, in_place=True, verbose: bool=False, n_processes: bool=None,
+            **kwargs
     ) -> "ImageStack":
         """Apply func over all tiles or volumes in self
 
@@ -626,6 +628,9 @@ class ImageStack:
             produced.
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
+        n_processes : bool
+            The number of processes to use for apply. If None, uses the output of os.cpu_count()
+            (default = None).
         kwargs : dict
             Additional arguments to pass to func
 
@@ -648,16 +653,36 @@ class ImageStack:
             self._data = self._data.stack(tiles=[Indices.ROUND.value,
                                                  Indices.CH.value,
                                                  Indices.Z.value])
+        tile_indices = self._data.tiles
 
-        # attach tqdm reporter to tiles iterator if user selects verbose output
-        tiles = tqdm(self._data.tiles) if verbose else self._data.tiles
-
+        # set the keyword arguments in the apply function
         applyfunc: Callable = partial(func, **kwargs)
 
-        for t in tiles:
-            tile = self._data.sel(tiles=t)
-            self._data.loc[{'tiles': t}] = applyfunc(tile)
+        # set the map function according to the number of requested processes
+        if n_processes == 1:
+            p = None
+            mapfunc = map
+        else:
+            p = Pool(n_processes)
+            mapfunc = p.imap  # type: ignore
 
+        # set the progress bar function depending on the verbosity request
+        progress_func = tqdm if verbose else lambda f: f  # pass-through lambda
+
+        # define the iterable to be mapped
+        tiles = (self._data.sel(tiles=t) for t in tile_indices)
+
+        # string all the iterators together
+        results = zip(
+            progress_func(mapfunc(applyfunc, tiles)),
+            tile_indices
+        )
+
+        # execute the combined iterator
+        for result, t in results:
+            self._data.loc[{'tiles': t}] = result
+
+        # unstack the data
         self._data = self._data.unstack('tiles').transpose(
             Indices.ROUND.value,
             Indices.CH.value,
@@ -665,6 +690,11 @@ class ImageStack:
             'y',
             'x'
         )
+
+        # if a processing pool was used, close it
+        if isinstance(p, pool.Pool):
+            p.close()
+            p.join()
 
         return self
 

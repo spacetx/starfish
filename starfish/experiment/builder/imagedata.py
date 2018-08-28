@@ -51,6 +51,7 @@ class RandomNoiseTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
+    @property
     def tile_data_handle(self) -> IO:
         arr = np.random.randint(0, 256, size=self.shape, dtype=np.uint8)
         output = BytesIO()

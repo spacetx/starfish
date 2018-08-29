@@ -154,7 +154,7 @@ class Experiment:
         extras = experiment_document['extras']
 
         primary_image: Union[Collection, TileSet] = Reader.parse_doc(
-            experiment_document['hybridization_images'], baseurl)
+            experiment_document['primary_images'], baseurl)
         auxiliary_images: MutableMapping[str, Union[Collection, TileSet]] = dict()
         for aux_image_type, aux_image_url in experiment_document['auxiliary_images'].items():
             auxiliary_images[aux_image_type] = Reader.parse_doc(aux_image_url, baseurl)

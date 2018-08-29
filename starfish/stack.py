@@ -798,7 +798,7 @@ class ImageStack:
         Parameters
         ----------
         filepath : str
-            Path + prefix for the images and hybridization_images.json written by this function
+            Path + prefix for the images and primary_images.json written by this function
         tile_opener : TODO ttung: doc me.
 
         """

@@ -169,7 +169,7 @@ def write_experiment_json(
         tile_opener=tile_opener,
         tile_writer=tile_writer,
     )
-    experiment_doc['hybridization_images'] = "hybridization.json"
+    experiment_doc['primary_images'] = "hybridization.json"
 
     for aux_name, aux_dimensions in aux_name_to_dimensions.items():
         if aux_dimensions is None:

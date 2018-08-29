@@ -339,8 +339,10 @@ class Codebook(xr.DataArray):
             json.dump(code_array, f)
 
     @staticmethod
-    def _normalize_features(array: Union["Codebook", IntensityTable], norm_order) \
-            -> Tuple[Union["Codebook", IntensityTable], np.ndarray]:
+    def _normalize_features(
+            array: Union["Codebook", IntensityTable],
+            norm_order,
+    ) -> Tuple[Union["Codebook", IntensityTable], np.ndarray]:
         """unit normalize each feature of array
 
         Parameters

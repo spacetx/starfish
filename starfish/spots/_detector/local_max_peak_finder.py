@@ -124,10 +124,12 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         attributes['spot_id'] = np.arange(attributes.shape[0])
         return SpotAttributes(attributes)
 
-    def run(self, data_stack: ImageStack,
+    def run(
+            self,
+            data_stack: ImageStack,
             blobs_image: Optional[Union[np.ndarray, xr.DataArray]]=None,
-            reference_image_from_max_projection: bool=False) \
-            -> IntensityTable:
+            reference_image_from_max_projection: bool=False,
+    ) -> IntensityTable:
         """
         Find spots.
 

@@ -115,8 +115,7 @@ def combine_adjacent_features(
 
     # now I need to make an IntensityTable from this thing.
     spots_df = pd.DataFrame(spots)
-    spots_df[Features.DISTANCE] = \
-        mean_pixel_traces[Features.DISTANCE]
+    spots_df[Features.DISTANCE] = mean_pixel_traces[Features.DISTANCE]
 
     # create new indexes for the output IntensityTable
     channel_index = mean_pixel_traces.indexes[Indices.CH]

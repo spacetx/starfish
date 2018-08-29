@@ -6,7 +6,7 @@ import numpy as np
 
 from starfish.types import Features
 from .style import BACKGROUND_COLORMAP, TARGETS_COLORMAP
-from .util import set_default_arguments, dpi_correction, remove_axis_frame, annotate_axis
+from .util import annotate_axis, dpi_correction, remove_axis_frame, set_default_arguments
 
 
 # TODO use the name of the IntensityTable if it exists for a title
@@ -22,21 +22,47 @@ def spots(
         spots_kwargs: Optional[dict]=None,
         decoded_image_kwargs: Optional[dict]=None,
 ) -> matplotlib.axes.Axes:
-    """
+    """Plot decoded spots with a variety of options for background image
+
+    Usage
+    -----
+
+    Plotting Spots:
+
+    Provide either
+    1. intensities, in which case spots will be plotted based on the estimated
+       radius and position for each feature, or
+    2. decoded_image, in which case pixels will be colored by their decoded feature
+
+    Plotting Background:
+
+    Provide one of:
+    1. background_image, which will plot the image for use as a background. Commonly this could
+       include a nuclei or dots image.
+    2. background_shape, which will be used to construct a black background against which spots
+       will be plotted. If decoded_image is provided as the spots parameter, then background
+       arguments can be omitted, since the shape of the background can be inferred from the
+       decoded_image.
 
     Parameters
     ----------
-    intensities
-    decoded_image
-    background_image
-    background_shape
-    ax
-    background_kwargs
-    spots_kwargs
-    decoded_image_kwargs
+    intensities : Optional[IntensityTable]
+        contains spots to plot
+    decoded_image : Optional[np.ndarray]
+        image, where values are coded to represent features
+    background_image :
+        an image atop which spots or decoded pixels should be plotted
+    background_shape :
+        the shape for a blank background. Required when background_image is not provided and
+        intensities are passed.
+    ax : ax: Optional[matplotlib.axes.Axes]
+    background_kwargs, spots_kwargs, decoded_image_kwargs : Optional[dict]
+        Keyword arguments to pass to plotting functions for background, spots, and decoded_image
 
     Returns
     -------
+    matplotlib.axes.Axes :
+        The axis the plot was constructed in.
 
     """
 

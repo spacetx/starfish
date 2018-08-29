@@ -1,6 +1,7 @@
 import numpy as np
 import regional
 from scipy.sparse import coo_matrix
+
 from starfish.types import Indices
 
 

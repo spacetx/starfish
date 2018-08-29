@@ -2,7 +2,7 @@ import warnings
 
 import numpy as np
 
-from starfish import Codebook, Experiment
+from starfish import Experiment
 from starfish.image._filter.white_tophat import WhiteTophat
 from starfish.image._registration.fourier_shift import FourierShiftRegistration
 from starfish.image._segmentation.watershed import Watershed
@@ -18,13 +18,12 @@ def test_iss_pipeline_cropped_data():
 
     # load the experiment
     experiment_json = (
-        'https://dmf0bdeheu4zf.cloudfront.net/'
-        'TEST/20180821/ISS_TEST/fov_001/experiment.json'
+        "https://dmf0bdeheu4zf.cloudfront.net/20180827/ISS-TEST/experiment.json"
     )
     experiment = Experiment.from_json(experiment_json)
-    dots = experiment.auxiliary_images['dots']
-    nuclei = experiment.auxiliary_images['nuclei']
-    primary_image = experiment.image
+    dots = experiment.fov()['dots']
+    nuclei = experiment.fov()['nuclei']
+    primary_image = experiment.fov().primary_image
 
     # register the data
     fsr = FourierShiftRegistration(upsampling=1000, reference_stack=dots)
@@ -93,12 +92,7 @@ def test_iss_pipeline_cropped_data():
     assert intensities.sizes[Features.AXIS] == 99
 
     # decode
-    codebook_json = (
-        'https://dmf0bdeheu4zf.cloudfront.net/'
-        'TEST/20180821/ISS_TEST/fov_001/codebook.json'
-    )
-    codebook = Codebook.from_json(codebook_json)
-    decoded_intensities = codebook.decode_per_round_max(intensities)
+    decoded_intensities = experiment.codebook.decode_per_round_max(intensities)
 
     # decoding identifies 4 genes, each with 1 count
     genes, gene_counts = np.unique(decoded_intensities['target'], return_counts=True)

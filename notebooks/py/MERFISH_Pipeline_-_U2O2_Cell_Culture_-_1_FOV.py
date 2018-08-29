@@ -30,8 +30,7 @@ from starfish.types import Features, Indices
 
 # EPY: START code
 # load the data from cloudfront
-experiment = Experiment()
-experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment.json')
+experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180827/MERFISH/experiment.json")
 # EPY: END code
 
 # EPY: START markdown
@@ -39,7 +38,7 @@ experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/e
 # EPY: END markdown
 
 # EPY: START code
-primary_image = experiment.image
+primary_image = experiment.fov().primary_image
 # EPY: END code
 
 # EPY: START code
@@ -59,7 +58,7 @@ primary_image.show_stack({Indices.CH: 0})
 
 # EPY: START code
 pp = pprint.PrettyPrinter(indent=2)
-pp.pprint(experiment.format_metadata)
+pp.pprint(experiment._src_doc)
 # EPY: END code
 
 # EPY: START markdown
@@ -71,9 +70,7 @@ pp.pprint(experiment.format_metadata)
 # EPY: END markdown
 
 # EPY: START code
-from starfish import Codebook
-codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/codebook.json')
-codebook
+experiment.codebook
 # EPY: END code
 
 # EPY: START markdown
@@ -182,7 +179,7 @@ show_image(mp, clim=clim)
 # EPY: START code
 from starfish.spots import SpotFinder
 psd = SpotFinder.PixelSpotDetector(
-    codebook=codebook,
+    codebook=experiment.codebook,
     metric='euclidean',
     distance_threshold=0.5176,
     magnitude_threshold=1,

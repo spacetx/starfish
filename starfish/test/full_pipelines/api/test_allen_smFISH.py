@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from starfish import Codebook, Experiment
+from starfish import Experiment
 from starfish.image._filter.bandpass import Bandpass
 from starfish.image._filter.clip import Clip
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
@@ -16,18 +16,11 @@ def test_allen_smFISH_cropped_data():
 
     # load the experiment
     experiment_json = (
-        'https://dmf0bdeheu4zf.cloudfront.net/'
-        'TEST/20180821/allen_smFISH_TEST/fov_001/experiment.json'
+        "https://dmf0bdeheu4zf.cloudfront.net/20180827/allen_smFISH-TEST/experiment.json"
     )
     experiment = Experiment.from_json(experiment_json)
 
-    # load the codebook
-    codebook = Codebook.from_json(  # noqa
-        'https://dmf0bdeheu4zf.cloudfront.net/20180813/allen_smFISH/'
-        'fov_001/codebook.json'
-    )
-
-    primary_image = experiment.image
+    primary_image = experiment.fov().primary_image
 
     clip = Clip(p_min=10, p_max=100)
     clipped_image = clip.run(primary_image, in_place=False)

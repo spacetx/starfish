@@ -26,7 +26,9 @@ from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START code
-experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180827/ISS/experiment.json")
+
+experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180828/ISS/experiment.json")
+
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 # EPY: END code
 
@@ -88,6 +90,7 @@ image(nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 
 # EPY: START code
 experiment.codebook
+
 # EPY: END code
 
 # EPY: START markdown
@@ -123,7 +126,7 @@ for img in images:
 from starfish.image import Registration
 
 registration = Registration.FourierShiftRegistration(
-    upsampling=1000, 
+    upsampling=1000,
     reference_stack=dots,
     verbose=True)
 registration.run(primary_image)

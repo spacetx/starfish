@@ -96,8 +96,8 @@ def test_iss_pipeline_cropped_data():
 
     # decoding identifies 4 genes, each with 1 count
     genes, gene_counts = np.unique(decoded_intensities['target'], return_counts=True)
-    assert np.array_equal(genes, np.array(['CD68', 'GUS', 'None', 'ST-3', 'VEGF']))
-    assert np.array_equal(gene_counts, [1, 1, 95, 1, 1])
+    assert np.array_equal(genes, np.array(['CD68', 'GUS', 'ST-3', 'VEGF', 'nan']))
+    assert np.array_equal(gene_counts, [1, 1, 1, 1, 95])
 
     # segment
     # TODO ambrosejcarr: do these need to be adjusted for the image size?

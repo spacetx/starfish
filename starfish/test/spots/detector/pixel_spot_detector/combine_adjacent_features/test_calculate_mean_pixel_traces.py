@@ -1,10 +1,13 @@
 import numpy as np
 from skimage.measure import label
 
-from starfish import IntensityTable, ImageStack
+from starfish import ImageStack, IntensityTable
 from starfish.spots._detector.combine_adjacent_features import CombineAdjacentFeatures
 from starfish.types import Features
 
+
+# TODO make sure these arrays contain background pixels to catch errors relating to possible
+# one-off errors
 
 def labeled_intensities_factory():
     data = np.array(
@@ -65,4 +68,3 @@ def test_calculate_mean_pixel_traces():
 
     # no values should be filtered, as all spots decoded
     assert np.all(passes_filter)
-

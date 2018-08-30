@@ -1,8 +1,9 @@
-import pytest
 import numpy as np
 import pandas as pd
-from starfish.types import SpotAttributes, Indices, Features
+import pytest
+
 from starfish import IntensityTable
+from starfish.types import Features, Indices, SpotAttributes
 
 
 def spot_attribute_factory(n):
@@ -33,4 +34,4 @@ def test_from_spot_attributes_must_have_aligned_dimensions_spot_attributes_and_d
     spot_attributes = spot_attribute_factory(2)
     data = np.zeros(30).reshape(3, 5, 2)
     with pytest.raises(ValueError):
-        intensities = IntensityTable.from_spot_data(data, spot_attributes)
+        IntensityTable.from_spot_data(data, spot_attributes)

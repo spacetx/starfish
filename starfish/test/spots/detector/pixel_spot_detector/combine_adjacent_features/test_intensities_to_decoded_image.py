@@ -1,12 +1,11 @@
 import numpy as np
 
 from starfish import ImageStack, IntensityTable
+from starfish.spots._detector.combine_adjacent_features import CombineAdjacentFeatures, TargetsMap
 from starfish.types import Features
-from starfish.spots._detector.combine_adjacent_features import TargetsMap, CombineAdjacentFeatures
 
 
-def test_intensities_to_decoded_image():
-
+def decoded_intensity_table_factory():
     # mock up an ImageStack that has gene labels, including null labels
     # data doesn't matter
     data = np.zeros((1, 1, 2, 3, 3))
@@ -27,16 +26,42 @@ def test_intensities_to_decoded_image():
     intensities = IntensityTable.from_image_stack(image_stack)
     intensities[Features.TARGET] = (Features.AXIS, np.ravel(labels_with_nan))
 
+    # label the third column of this data as failing filters
+    passes_filters = np.ones(data.shape, dtype=bool)
+    passes_filters[:, :, :, :, -1] = 0
+    intensities[Features.PASSES_FILTERS] = (Features.AXIS, np.ravel(passes_filters))
+
+    return intensities, labels_with_nan
+
+
+def test_intensities_to_decoded_image():
+
+    intensities, labels_with_nan = decoded_intensity_table_factory()
+
     # test producing a decoded image
     targets_map = TargetsMap(intensities[Features.TARGET].values)
-    decoded_image = CombineAdjacentFeatures._intensities_to_decoded_image(intensities, targets_map)
+    decoded_image = CombineAdjacentFeatures._intensities_to_decoded_image(
+        intensities,
+        targets_map,
+        mask_filtered_features=False
+    )
 
-    # because we've mutated zero to nan, and we otherwise map numbers sequentially, this decoded
-    # outcome should be the same as the input labels, converted to ints.
-    # int_labels = labels.astype(int)
-    # assert np.array_equal(int_labels, decoded_image)
-
-    # TODO there is some rearranging going on here?
     # we should be able to map the results back to labels_with_nan using the targets dict
     reverted_labels = targets_map.targets_as_str(np.ravel(decoded_image)).reshape(2, 3, 3)
     assert np.array_equal(reverted_labels, labels_with_nan)
+
+
+def test_intensities_failing_filters_are_masked_when_requested():
+
+    intensities, labels_with_nan = decoded_intensity_table_factory()
+
+    # test producing a decoded image
+    targets_map = TargetsMap(intensities[Features.TARGET].values)
+    decoded_image = CombineAdjacentFeatures._intensities_to_decoded_image(
+        intensities,
+        targets_map,
+        mask_filtered_features=True
+    )
+
+    # the third column should now be masked
+    assert np.all(decoded_image[:, :, -1] == 0)

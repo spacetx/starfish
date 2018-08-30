@@ -3,8 +3,8 @@ import json
 import numpy as np
 import pandas as pd
 
+from starfish.types import Features, Indices
 from ._validated_table import ValidatedTable
-from starfish.types import Indices, Features
 
 
 class SpotAttributes(ValidatedTable):

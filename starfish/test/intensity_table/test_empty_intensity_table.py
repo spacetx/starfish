@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from starfish import IntensityTable
-from starfish.types import Indices, Features, SpotAttributes
+from starfish.types import Features, Indices, SpotAttributes
 
 
 def test_intensity_table_can_be_created_from_spot_attributes():

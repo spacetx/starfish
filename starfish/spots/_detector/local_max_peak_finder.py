@@ -3,11 +3,11 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import xarray as xr
+from trackpy import locate
+
 from starfish.intensity_table import IntensityTable
 from starfish.stack import ImageStack
 from starfish.types import SpotAttributes
-from trackpy import locate
-
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
 

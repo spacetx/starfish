@@ -92,7 +92,12 @@ def test_example_intensity_that_has_no_match_is_assigned_nan():
     # assert that the feature did not decode
     assert decoded_intensities[Features.TARGET] == 'nan'
     assert np.array_equal(decoded_intensities[Features.PASSES_FILTERS], [False])
-    assert np.array_equal(decoded_intensities[Features.DISTANCE], [1])
+
+    # distance is calculated as the fraction of signal NOT in the selected channel. Here all of
+    # the signal is in the max channel, so distance is 0.
+    # Admittedly, this is a little bit confusing, since distance here measures both how correct
+    # a code is, and how wrong one is. However, I think this is still the right approach.
+    assert np.array_equal(decoded_intensities[Features.DISTANCE], [0])
 
 
 def test_argmax_selects_the_last_equal_intensity_channel_and_decodes_consistently():

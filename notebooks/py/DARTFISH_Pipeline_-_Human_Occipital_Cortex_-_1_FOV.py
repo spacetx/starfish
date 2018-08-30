@@ -226,6 +226,18 @@ spot_intensities, results = psd.run(zero_norm_stack)
 # EPY: END code
 
 # EPY: START code
+np.unique(spot_intensities['passes_filters'], return_counts=True)
+# EPY: END code
+
+# EPY: START code
+passes_filters = spot_intensities.where(spot_intensities['passes_filters'], drop=True)
+# EPY: END code
+
+# EPY: START code
+counts = pd.Series(*np.unique(passes_filters['target'], return_counts=True)[::-1]).sort_values(ascending=False)
+# EPY: END code
+
+# EPY: START code
 # exclude spots that don't meet our area thresholds
 area_lookup = lambda x: 0 if x == 0 else results.region_properties[x - 1].area
 vfunc = np.vectorize(area_lookup)

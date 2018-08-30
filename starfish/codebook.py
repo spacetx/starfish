@@ -476,7 +476,7 @@ class Codebook(xr.DataArray):
         norm_intensities[Features.DISTANCE] = (Features.AXIS, metric_outputs)
         norm_intensities[Features.PASSES_FILTERS] = (Features.AXIS, passes_filters)
 
-        return norm_intensities
+        return IntensityTable(norm_intensities)
 
     # TODO ambrosejcarr, dganguli: This method has no channel scaling, which could bias the
     # result toward a high-intensity channel
@@ -537,6 +537,12 @@ class Codebook(xr.DataArray):
         max_channels = intensities.argmax(Indices.CH.value)
         codes = self.argmax(Indices.CH.value)
 
+        # calculate distance scores by evaluating the fraction of each channel not taken up
+        # by the maximum channel.
+        max_intensities = intensities.max(Indices.CH.value)
+        round_intensities = intensities.sum(Indices.CH.value)
+        distance = 1 - (max_intensities / round_intensities).mean(Indices.ROUND.value)
+
         a = _view_row_as_element(codes.values.reshape(self.shape[0], -1))
         b = _view_row_as_element(max_channels.values.reshape(intensities.shape[0], -1))
 
@@ -545,13 +551,9 @@ class Codebook(xr.DataArray):
         # decode the intensities
         for i in np.arange(codes.shape[0]):
             targets[np.where(a[i] == b)[0]] = codes[Features.TARGET][i]
-        target_index = pd.Index(targets.astype('U'))
+        target_index = pd.Index(targets.astype('U'))  # TODO ambrosejcarr, index not necessary
 
-        # TODO improve distance to contain more useful information
-        # create binary distance and passes filters metadata for this decoder
-        distance = np.zeros_like(targets, dtype=np.uint8)
-        distance[pd.isnull(targets)] = 1
-
+        # a code passes filters if it decodes successfully
         passes_filters = np.ones_like(targets, dtype=np.bool)
         passes_filters[pd.isnull(targets)] = False
 

@@ -79,15 +79,10 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         )
         caf = CombineAdjacentFeatures(
             min_area=self.min_area,
-            max_area=self.max_area
+            max_area=self.max_area,
+            mask_filtered_features=True,  # TODO remove me
         )
         decoded_spots, image_decoding_results = caf.run(intensities=decoded_intensities)
-
-        # decoded_spots, image_decoding_results = combine_adjacent_features(
-        #     decoded_intensities,
-        #     min_area=self.min_area,
-        #     max_area=self.max_area
-        # )
 
         return decoded_spots, image_decoding_results
 

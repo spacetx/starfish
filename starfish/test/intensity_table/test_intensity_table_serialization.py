@@ -2,6 +2,7 @@ import os
 import tempfile
 
 import numpy as np
+
 from starfish import ImageStack, IntensityTable
 
 

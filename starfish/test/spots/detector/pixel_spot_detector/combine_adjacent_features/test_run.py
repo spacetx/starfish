@@ -1,10 +1,10 @@
 import numpy as np
 
-from starfish.types import Features
 from starfish.spots._detector.combine_adjacent_features import (
+    combine_adjacent_features,
     CombineAdjacentFeatures,
-    combine_adjacent_features
 )
+from starfish.types import Features
 from .test_calculate_mean_pixel_traces import labeled_intensities_factory
 
 
@@ -20,6 +20,11 @@ def test_combine_adjacent_features_no_filtering():
     # transform the label image into labels by reshaping
     targets = np.ravel(label_image).astype(str)
     intensities[Features.TARGET] = (Features.AXIS, targets)
+
+    # assign each of the features as passing basic filters
+    intensities[Features.PASSES_FILTERS] = (
+        Features.AXIS, np.ones(intensities.sizes[Features.AXIS], dtype=np.bool)
+    )
 
     min_area = 1
     max_area = 3

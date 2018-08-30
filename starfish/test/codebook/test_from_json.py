@@ -5,6 +5,8 @@ import tempfile
 from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from starfish import Codebook
 from starfish.types import Features, Indices
 
@@ -45,7 +47,6 @@ def test_codebook_loads_from_local_file() -> None:
 
     # load the codebook
     codebook = Codebook.from_json(codebook_json)
-
     assert codebook.sizes[Indices.ROUND] == 2
     assert codebook.sizes[Indices.CH] == 3
     assert codebook.sizes[Features.TARGET] == 2
@@ -54,6 +55,7 @@ def test_codebook_loads_from_local_file() -> None:
     shutil.rmtree(directory)
 
 
+@pytest.mark.skip('Tested elsewhere now that we use slicedimage backend. TODO Confirm and delete.')
 @patch('starfish.codebook.urllib.request.urlopen')
 def test_codebook_loads_from_https_file(mock_urlopen):
 

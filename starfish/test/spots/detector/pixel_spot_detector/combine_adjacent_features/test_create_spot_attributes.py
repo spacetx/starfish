@@ -13,7 +13,7 @@ def test_create_spot_attributes():
     region_properties = regionprops(label_image)
     target_map = TargetsMap(np.array(list('abcdef')))
     caf = CombineAdjacentFeatures(min_area=1, max_area=3, connectivity=2)
-    passes_filters = np.ones(4)
+    passes_filters = pd.Series(np.ones(4))
     spot_attributes, passes_filters = caf._create_spot_attributes(
         region_properties, decoded_image, target_map, passes_filters)
 
@@ -28,4 +28,3 @@ def test_create_spot_attributes():
     # the features should be e, d, c, b (but aren't!)
 
     # distances should be all 0
-

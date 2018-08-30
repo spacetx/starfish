@@ -163,20 +163,25 @@ def test_merfish_pipeline_cropped_data():
     spot_intensities, prop_results = psd.run(low_passed)
 
     # verify that the number of spots are correct
-    assert spot_intensities.sizes[Features.AXIS] == 1019
+    spots_passing_filters = spot_intensities[Features.PASSES_FILTERS].sum()
+    assert spots_passing_filters == 1019
+    # assert spot_intensities.sizes[Features.AXIS] == 1019
 
     # compare to paper results
     bench = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/benchmark_results.csv',
                         dtype={'barcode': object})
-
     benchmark_counts = bench.groupby('gene')['gene'].count()
-    genes, counts = np.unique(spot_intensities[Features.TARGET], return_counts=True)
+
+    spot_intensities_passing_filters = spot_intensities.where(
+        spot_intensities[Features.PASSES_FILTERS], drop=True
+    )
+    genes, counts = np.unique(spot_intensities_passing_filters[Features.TARGET], return_counts=True)
     result_counts = pd.Series(counts, index=genes)
 
     # assert that number of high-expression detected genes are correct
     expected_counts = pd.Series(
         [101, 84, 70, 48, 40],
-        index=(None, 'SRRM2', 'FASN', 'IGF2R', 'MYH10')
+        index=(np.nan, 'SRRM2', 'FASN', 'IGF2R', 'MYH10')
     )
     assert np.array_equal(
         expected_counts.values,

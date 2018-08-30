@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from starfish import Experiment
+from starfish import Experiment, IntensityTable
 from starfish.image._filter.scale_by_percentile import ScaleByPercentile
 from starfish.image._filter.zero_by_channel_magnitude import ZeroByChannelMagnitude
 from starfish.spots._detector.pixel_spot_detector import PixelSpotDetector
@@ -115,16 +115,18 @@ def test_dartfish_pipeline_cropped_data():
         distance_threshold=distance_threshold,
         magnitude_threshold=magnitude_threshold,
         min_area=area_threshold[0],
-        max_area=area_threshold[1]
+        max_area=area_threshold[1],
     )
 
     spot_intensities, results = psd.run(zero_norm_stack)
-    spots_df = spot_intensities.to_features_dataframe()
+    spots_df = IntensityTable(
+        spot_intensities.where(spot_intensities[Features.PASSES_FILTERS], drop=True)
+    ).to_features_dataframe()
     spots_df['area'] = np.pi * spots_df['radius'] ** 2
 
     # verify number of spots detected
-    import pdb; pdb.set_trace()
-    assert spot_intensities.sizes[Features.AXIS] == 53
+    spots_passing_filters = spot_intensities[Features.PASSES_FILTERS].sum()
+    assert spots_passing_filters == 53
 
     # compare to benchmark data -- note that this particular part of the dataset appears completely
     # uncorrelated
@@ -138,6 +140,7 @@ def test_dartfish_pipeline_cropped_data():
 
     # get top 5 genes and verify they are correct
     high_expression_genes = cnts_starfish.sort_values('cnt_starfish', ascending=False).head(5)
+
     assert np.array_equal(
         high_expression_genes['cnt_starfish'].values,
         [7, 3, 2, 2, 2]

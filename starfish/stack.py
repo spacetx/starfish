@@ -1,10 +1,10 @@
 import collections
+import multiprocessing
 import os
 import warnings
 from copy import deepcopy
 from functools import partial
 from itertools import product
-from multiprocessing import Pool, pool
 from typing import (
     Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple,
     Union
@@ -663,29 +663,22 @@ class ImageStack:
         # set the keyword arguments in the apply function
         applyfunc: Callable = partial(func, **kwargs)
 
-        # set the map function according to the number of requested processes
-        if n_processes == 1:
-            p = None
-            mapfunc = map
-        else:
-            p = Pool(n_processes)
-            mapfunc = p.imap  # type: ignore
-
         # set the progress bar function depending on the verbosity request
         progress_func = tqdm if verbose else lambda f: f  # pass-through lambda
 
         # define the iterable to be mapped
         tiles = (self._data.sel(tiles=t) for t in tile_indices)
 
-        # string all the iterators together
-        results = zip(
-            progress_func(mapfunc(applyfunc, tiles)),
-            tile_indices
-        )
+        with multiprocessing.Pool(n_processes) as pool:
+            # string all the iterators together
+            results = zip(
+                progress_func(pool.imap(applyfunc, tiles)),
+                tile_indices
+            )
 
-        # execute the combined iterator
-        for result, t in results:
-            self._data.loc[{'tiles': t}] = result
+            # execute the combined iterator
+            for result, t in results:
+                self._data.loc[{'tiles': t}] = result
 
         # unstack the data
         self._data = self._data.unstack('tiles').transpose(
@@ -695,11 +688,6 @@ class ImageStack:
             'y',
             'x'
         )
-
-        # if a processing pool was used, close it
-        if isinstance(p, pool.Pool):
-            p.close()
-            p.join()
 
         return self
 

@@ -609,7 +609,12 @@ class ImageStack:
             yield array
 
     def apply(
-            self, func, is_volume=False, in_place=True, verbose: bool=False, n_processes: bool=None,
+            self,
+            func,
+            is_volume=False,
+            in_place=True,
+            verbose: bool=False,
+            n_processes: Optional[int]=None,
             **kwargs
     ) -> "ImageStack":
         """Apply func over all tiles or volumes in self
@@ -628,7 +633,7 @@ class ImageStack:
             produced.
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
-        n_processes : bool
+        n_processes : Optional[int]
             The number of processes to use for apply. If None, uses the output of os.cpu_count()
             (default = None).
         kwargs : dict

@@ -41,7 +41,7 @@ sns.set_style('ticks')
 # EPY: START code
 
 exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180828/DARTFISH/experiment.json')
-stack = exp.image
+stack = exp.fov().primary_image
 
 # TODO the latter will be fixed by https://github.com/spacetx/starfish/issues/316
 stack._data = stack._data.astype(float)
@@ -60,9 +60,7 @@ stack.show_stack({Indices.CH:0}, rescale=True);
 # EPY: END markdown
 
 # EPY: START code
-
 exp.codebook
-
 # EPY: END code
 
 # EPY: START markdown

@@ -20,7 +20,7 @@
 import pprint
 
 import numpy as np
-import pandas as pd 
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from showit import image as show_image
@@ -30,7 +30,7 @@ from starfish.types import Features, Indices
 
 # EPY: START code
 # load the data from cloudfront
-experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180827/MERFISH/experiment.json")
+experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180828/MERFISH/experiment.json")
 # EPY: END code
 
 # EPY: START markdown
@@ -49,11 +49,11 @@ primary_image.show_stack({Indices.CH: 0})
 # EPY: START markdown
 ### Show input file format that specifies how the tiff stack is organized
 #
-#The stack contains multiple images corresponding to the channel and imaging rounds. MERFISH builds a 16 bit barcode from 8 imaging rounds, each of which measures two channels that correspond to contiguous (but not necessarily consistently ordered) bits of the barcode. 
+#The stack contains multiple images corresponding to the channel and imaging rounds. MERFISH builds a 16 bit barcode from 8 imaging rounds, each of which measures two channels that correspond to contiguous (but not necessarily consistently ordered) bits of the barcode.
 #
 #The MERFISH computational pipeline also constructs a scalar that corrects for intensity differences across each of the 16 images, e.g., one scale factor per bit position.
 #
-#The stacks in this example are pre-registered using fiduciary beads. 
+#The stacks in this example are pre-registered using fiduciary beads.
 # EPY: END markdown
 
 # EPY: START code
@@ -88,7 +88,7 @@ ghp.run(primary_image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
-#The below algorithm deconvolves out the point spread function introduced by the microcope and is specifically designed for this use case. The number of iterations is an important parameter that needs careful optimization. 
+#The below algorithm deconvolves out the point spread function introduced by the microcope and is specifically designed for this use case. The number of iterations is an important parameter that needs careful optimization.
 # EPY: END markdown
 
 # EPY: START code
@@ -97,9 +97,9 @@ dpsf.run(primary_image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
-#Recall that the image is pre-registered, as stated above. Despite this, individual RNA molecules may still not be perfectly aligned across imaging rounds. This is crucial in order to read out a measure of the itended barcode (across imaging rounds) in order to map it to the codebook. To solve for potential mis-alignment, the images can be blurred with a 1-pixel Gaussian kernel. The risk here is that this will obfuscate signals from nearby molecules. 
+#Recall that the image is pre-registered, as stated above. Despite this, individual RNA molecules may still not be perfectly aligned across imaging rounds. This is crucial in order to read out a measure of the itended barcode (across imaging rounds) in order to map it to the codebook. To solve for potential mis-alignment, the images can be blurred with a 1-pixel Gaussian kernel. The risk here is that this will obfuscate signals from nearby molecules.
 #
-#A local search in pixel space across imaging rounds can also solve this. 
+#A local search in pixel space across imaging rounds can also solve this.
 # EPY: END markdown
 
 # EPY: START code
@@ -113,7 +113,7 @@ glp.run(primary_image)
 
 # EPY: START code
 scale_factors = {
-    (t[Indices.ROUND], t[Indices.CH]): t['scale_factor'] 
+    (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
     for index, t in primary_image.tile_metadata.iterrows()
 }
 # EPY: END code
@@ -123,7 +123,7 @@ scale_factors = {
 # will operate entirely on float data and this cast can be removed
 primary_image._data = primary_image._data.astype(np.float64)
 
-# this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to 
+# this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to
 # at least we can do it with get_slice and set_slice right now.
 
 for indices in primary_image._iter_indices():
@@ -145,9 +145,9 @@ show_image(mp, clim=clim)
 # EPY: START markdown
 ### Use spot-detector to create 'encoder' table  for standardized input  to decoder
 #
-#Each pipeline exposes a spot detector, and this spot detector translates the filtered image into an encoded table by detecting spots. The table contains the spot_id, the corresponding intensity (v) and the channel (c), imaging round (r) of each spot. 
+#Each pipeline exposes a spot detector, and this spot detector translates the filtered image into an encoded table by detecting spots. The table contains the spot_id, the corresponding intensity (v) and the channel (c), imaging round (r) of each spot.
 #
-#The MERFISH pipeline merges these two steps together by finding pixel-based features, and then later collapsing these into spots and filtering out undesirable (non-spot) features. 
+#The MERFISH pipeline merges these two steps together by finding pixel-based features, and then later collapsing these into spots and filtering out undesirable (non-spot) features.
 #
 #Therefore, no encoder table is generated, but a robust SpotAttribute and DecodedTable are both produced:
 # EPY: END markdown
@@ -157,20 +157,20 @@ show_image(mp, clim=clim)
 #
 #Each assay type also exposes a decoder. A decoder translates each spot (spot_id) in the encoded table into a gene that matches a barcode in the codebook. The goal is to decode and output a quality score, per spot, that describes the confidence in the decoding. Recall that in the MERFISH pipeline, each 'spot' is actually a 16 dimensional vector, one per pixel in the image. From here on, we will refer to these as pixel vectors. Once these pixel vectors are decoded into gene values, contiguous pixels that are decoded to the same gene are labeled as 'spots' via a connected components labeler. We shall refer to the latter as spots.
 #
-#There are hard and soft decodings -- hard decoding is just looking for the max value in the code book. Soft decoding, by contrast, finds the closest code by distance in intensity. Because different assays each have their own intensities and error modes, we leave decoders as user-defined functions. 
+#There are hard and soft decodings -- hard decoding is just looking for the max value in the code book. Soft decoding, by contrast, finds the closest code by distance in intensity. Because different assays each have their own intensities and error modes, we leave decoders as user-defined functions.
 #
-#For MERFISH, which uses soft decoding, there are several parameters which are important to determining the result of the decoding method: 
+#For MERFISH, which uses soft decoding, there are several parameters which are important to determining the result of the decoding method:
 #
 #### Distance threshold
-#In MERFISH, each pixel vector is a 16d vector that we want to map onto a barcode via minimum euclidean distance. Each barcode in the codebook, and each pixel vector is first mapped to the unit sphere by L2 normalization. As such, the maximum distance between a pixel vector and the nearest single-bit error barcode is 0.5176. As such, the decoder only accepts pixel vectors that are below this distance for assignment to a codeword in the codebook. 
+#In MERFISH, each pixel vector is a 16d vector that we want to map onto a barcode via minimum euclidean distance. Each barcode in the codebook, and each pixel vector is first mapped to the unit sphere by L2 normalization. As such, the maximum distance between a pixel vector and the nearest single-bit error barcode is 0.5176. As such, the decoder only accepts pixel vectors that are below this distance for assignment to a codeword in the codebook.
 #
 #### Magnitude threshold
-#This is a signal floor for decoding. Pixel vectors with an L2 norm below this floor are not considered for decoding. 
+#This is a signal floor for decoding. Pixel vectors with an L2 norm below this floor are not considered for decoding.
 #
 #### Area threshold
 #Contiguous pixels that decode to the same gene are called as spots via connected components labeling. The minimum area of these spots are set by this parameter. The intuition is that pixel vectors, that pass the distance and magnitude thresholds, shold probably not be trusted as genes as the mRNA transcript would be too small for them to be real. This parameter can be set based on microscope resolution and signal amplification strategy.
 #
-#### Crop size 
+#### Crop size
 #The crop size crops the image by a number of pixels large enough to eliminate parts of the image that suffer from boundary effects from both signal aquisition (e.g., FOV overlap) and image processing. Here this value is 40.
 #
 #Given these three thresholds, for each pixel vector, the decoder picks the closest code (minimum distance) that satisfies each of the above thresholds, where the distance is calculated between the code and a normalized intensity vector and throws away subsequent spots that are too small.
@@ -185,7 +185,7 @@ psd = SpotFinder.PixelSpotDetector(
     magnitude_threshold=1,
     min_area=2,
     max_area=np.inf,
-    norm_order=2, 
+    norm_order=2,
     crop_size=(0, 40, 40)
 )
 
@@ -194,15 +194,15 @@ spot_intensities
 # EPY: END code
 
 # EPY: START markdown
-### Compare to results from paper 
+### Compare to results from paper
 #
-#The below plot aggregates gene copy number across single cells in the field of view and compares the results to the published intensities in the MERFISH paper. 
+#The below plot aggregates gene copy number across single cells in the field of view and compares the results to the published intensities in the MERFISH paper.
 #
-#To make this match perfectly, run deconvolution 15 times instead of 14. As presented below, STARFISH displays a lower detection rate.  
+#To make this match perfectly, run deconvolution 15 times instead of 14. As presented below, STARFISH displays a lower detection rate.
 # EPY: END markdown
 
 # EPY: START code
-bench = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/benchmark_results.csv', 
+bench = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/benchmark_results.csv',
                     dtype = {'barcode':object})
 
 benchmark_counts = bench.groupby('gene')['gene'].count()

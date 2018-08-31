@@ -15,7 +15,7 @@ def test_dartfish_pipeline_cropped_data():
 
     # load the experiment
     experiment_json = (
-        "https://dmf0bdeheu4zf.cloudfront.net/20180827/DARTFISH-TEST/experiment.json"
+        "https://dmf0bdeheu4zf.cloudfront.net/20180828/DARTFISH-TEST/experiment.json"
     )
     experiment = Experiment.from_json(experiment_json)
 

@@ -55,7 +55,7 @@ class TestWithIssData(unittest.TestCase):
             "starfish", "registration",
             "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
                 [tempdir, "formatted", "experiment.json"],
-                "$['hybridization_images']",
+                "$['primary_images']",
             ),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "registered", "hybridization.json"),

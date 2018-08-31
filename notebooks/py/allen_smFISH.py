@@ -6,7 +6,7 @@
 # EPY: START markdown
 ## Reproduce Allen smFISH results with Starfish
 #
-#This notebook walks through a work flow that reproduces the smFISH result for one field of view using the starfish package. 
+#This notebook walks through a work flow that reproduces the smFISH result for one field of view using the starfish package.
 # EPY: END markdown
 
 # EPY: START code
@@ -19,19 +19,19 @@ from starfish.types import Indices
 # EPY: END code
 
 # EPY: START code
-# # developer note: for rapid iteration, it may be better to run this cell, download the data once, and load 
-# # the data from the local disk. If so, uncomment this cell and run this instead of the above. 
+# # developer note: for rapid iteration, it may be better to run this cell, download the data once, and load
+# # the data from the local disk. If so, uncomment this cell and run this instead of the above.
 # !aws s3 sync s3://czi.starfish.data.public/20180606/allen_smFISH ./allen_smFISH
 # experiment_json = os.path.abspath("./allen_smFISH/fov_001/experiment.json")
 # EPY: END code
 
 # EPY: START code
 # this is a large (1.1GB) FOV, so the download may take some time
-experiment_json = "https://dmf0bdeheu4zf.cloudfront.net/20180827/allen_smFISH/experiment.json"
+experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180828/allen_smFISH/experiment.json'
 # EPY: END code
 
 # EPY: START markdown
-#Load the Stack object, which while not well-named right now, should be thought of as an access point to an "ImageDataSet". In practice, we expect the Stack object or something similar to it to be an access point for _multiple_ fields of view. In practice, the thing we talk about as a "TileSet" is the `Stack.image` object. The data are currently stored in-memory in a `numpy.ndarray`, and that is where most of our operations are done. 
+#Load the Stack object, which while not well-named right now, should be thought of as an access point to an "ImageDataSet". In practice, we expect the Stack object or something similar to it to be an access point for _multiple_ fields of view. In practice, the thing we talk about as a "TileSet" is the `Stack.image` object. The data are currently stored in-memory in a `numpy.ndarray`, and that is where most of our operations are done.
 #
 #The numpy array can be accessed through Stack.image.numpy\_array (public method, read only) or Stack.image.\_data (read and write)
 # EPY: END markdown
@@ -50,9 +50,9 @@ experiment.codebook
 # EPY: END code
 
 # EPY: START markdown
-#All of our implemented operations leverage the `Stack.image.apply` method to apply a single function over each of the tiles or volumes in the FOV, depending on whether the method accepts a 2d or 3d array. Below, we're clipping each image independently at the 10th percentile. I've placed the imports next to the methods so that you can easily locate the code, should you want to look under the hood and understand what parameters have been chosen. 
+#All of our implemented operations leverage the `Stack.image.apply` method to apply a single function over each of the tiles or volumes in the FOV, depending on whether the method accepts a 2d or 3d array. Below, we're clipping each image independently at the 10th percentile. I've placed the imports next to the methods so that you can easily locate the code, should you want to look under the hood and understand what parameters have been chosen.
 #
-#The verbose flag for our apply loops could use a bit more refinement. We should be able to tell it how many images it needs to process from looking at the image stack, but for now it's dumb so just reports the number of tiles or volumes it's processed. This FOV has 102 images over 3 volumes. 
+#The verbose flag for our apply loops could use a bit more refinement. We should be able to tell it how many images it needs to process from looking at the image stack, but for now it's dumb so just reports the number of tiles or volumes it's processed. This FOV has 102 images over 3 volumes.
 # EPY: END markdown
 
 # EPY: START code
@@ -62,7 +62,7 @@ clip.run(primary_image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
-#If you ever want to visualize the image in the notebook, we've added a widget to do that. The first parameter is an indices dict that specifies which imaging round, channel, z-slice you want to view. The result is a pageable visualization across that arbitrary set of slices. Below I'm visualizing the first channel, which your codebook tells me is Nmnt. 
+#If you ever want to visualize the image in the notebook, we've added a widget to do that. The first parameter is an indices dict that specifies which imaging round, channel, z-slice you want to view. The result is a pageable visualization across that arbitrary set of slices. Below I'm visualizing the first channel, which your codebook tells me is Nmnt.
 #
 #[N.B. once you click on the slider, you can page with the arrow keys on the keyboard.]
 # EPY: END markdown
@@ -77,12 +77,12 @@ bandpass.run(primary_image, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
-#For bandpass, there's a point where things get weird, at `c == 0; z <= 14`. In that range the images look mostly like noise. However, _above_ that, they look great + background subtracted! The later stages of the pipeline appear robust to this, though, as no spots are called for the noisy sections. 
+#For bandpass, there's a point where things get weird, at `c == 0; z <= 14`. In that range the images look mostly like noise. However, _above_ that, they look great + background subtracted! The later stages of the pipeline appear robust to this, though, as no spots are called for the noisy sections.
 # EPY: END markdown
 
 # EPY: START code
 # I wasn't sure if this clipping was supposed to be by volume or tile. I've done tile here, but it can be easily
-# switched to volume. 
+# switched to volume.
 clip = Filter.Clip(p_min=10, p_max=100, is_volume=False)
 clip.run(primary_image, verbose=True)
 # EPY: END code
@@ -94,16 +94,16 @@ glp.run(primary_image)
 # EPY: END code
 
 # EPY: START markdown
-#Below, because spot finding is so slow when single-plex, we'll pilot this on a max projection to show that the parameters work. Here's what trackpy.locate, which we wrap, produces for a z-projection of channel 1. To do use our plotting methods on z-projections we have to expose some of the starfish internals, which will be improved upon. 
+#Below, because spot finding is so slow when single-plex, we'll pilot this on a max projection to show that the parameters work. Here's what trackpy.locate, which we wrap, produces for a z-projection of channel 1. To do use our plotting methods on z-projections we have to expose some of the starfish internals, which will be improved upon.
 # EPY: END markdown
 
 # EPY: START code
 from trackpy import locate
 
-# grab a section from the tensor. 
+# grab a section from the tensor.
 ch1 = primary_image.max_proj(Indices.Z)[0, 1]
 
-results = locate(ch1, diameter=3, minmass=250, maxsize=3, separation=5, preprocess=False, percentile=10) 
+results = locate(ch1, diameter=3, minmass=250, maxsize=3, separation=5, preprocess=False, percentile=10)
 results.columns = ['x', 'y', 'intensity', 'radius', 'eccentricity', 'signal', 'raw_mass', 'ep']
 # EPY: END code
 
@@ -112,7 +112,7 @@ results.head()
 # EPY: END code
 
 # EPY: START code
-#TODO ambrosejcarr: Showing spots is broken right now. 
+#TODO ambrosejcarr: Showing spots is broken right now.
 # EPY: END code
 
 # EPY: START code
@@ -132,9 +132,9 @@ ax.imshow(ch1, vmin=15, vmax=52, cmap=plt.cm.gray)
 # EPY: START code
 from starfish.spots import SpotFinder
 
-# I've guessed at these parameters from the allen_smFISH code, but you might want to tweak these a bit. 
-# as you can see, this function takes a while. It will be great to parallelize this. That's also coming, 
-# although we haven't figured out where it fits in the priority list. 
+# I've guessed at these parameters from the allen_smFISH code, but you might want to tweak these a bit.
+# as you can see, this function takes a while. It will be great to parallelize this. That's also coming,
+# although we haven't figured out where it fits in the priority list.
 kwargs = dict(
     spot_diameter=3, # must be odd integer
     min_mass=300,
@@ -163,15 +163,15 @@ for attrs, (round, ch) in spot_attributes:
 # EPY: END code
 
 # EPY: START code
-# this is not a very performant function because of how matplotlib renders circles as individual artists, 
+# this is not a very performant function because of how matplotlib renders circles as individual artists,
 # but I think it's useful for debugging the spot detection.
 
-# Note that in places where spots are "missed" it is often because they've been localized to individual 
+# Note that in places where spots are "missed" it is often because they've been localized to individual
 # nearby z-planes, whereas most spots exist across several layers of z.
 
 fig = primary_image.show_stack(
-    {Indices.CH.value: 1, Indices.ROUND.value: 0}, 
-    show_spots=spot_attributes[1][0], 
+    {Indices.CH.value: 1, Indices.ROUND.value: 0},
+    show_spots=spot_attributes[1][0],
     figure_size=(20, 20), p_min=60, p_max=99.9
 )
 # EPY: END code

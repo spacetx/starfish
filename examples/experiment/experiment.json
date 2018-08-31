@@ -1,6 +1,6 @@
 {
   "version": "0.0.0",
-  "hybridization_images": "hybridization.json",
+  "primary_images": "primary_images.json",
   "auxiliary_images": {
     "nuclei": "nuclei.json"
   },

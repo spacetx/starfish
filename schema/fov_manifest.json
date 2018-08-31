@@ -19,7 +19,7 @@
         "^.*?.json$": {
           "type": "string",
           "examples": [
-            "hybridization-fov_000.json",
+            "primary_images-fov_000.json",
             "experiment5.json"
           ]
         }

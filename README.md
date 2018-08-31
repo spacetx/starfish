@@ -35,7 +35,7 @@ Example:
 ```json
 {
   "version": "0.0.0",
-  "hybridization_images": "hybridization.json",
+  "primary_images": "primary_images.json",
   "auxiliary_images": {
     "nuclei": "nuclei.json"
   },
@@ -48,18 +48,18 @@ Example:
 
 ## Manifest
 
-Both the `hybridization.json` and `nuclei.json` files referenced by the above `experiment.json` may contain links to Field of View Manifests (for simple experiments with only one field of view, these fields may also directly reference a field of view). 
+Both the `primary_images.json` and `nuclei.json` files referenced by the above `experiment.json` may contain links to Field of View Manifests (for simple experiments with only one field of view, these fields may also directly reference a field of view). 
 The Manifest is a simple association of a field of view name with the json file that defines the field of view. 
-In this example, we demonstrate a hybridization manifest with three fields of view. 
+In this example, we demonstrate a primary images manifest with three fields of view. 
 Such an experiment would likely also have a nuclei manifest, which would _also_ contain three fields of view. 
 
 ```json
 {
   "version": "0.0.0",
   "contents": {
-    "fov_000": "hybridization-fov_000.json",
-    "fov_001": "hybridization-fov_001.json",
-    "fov_00N": "hybridization-fov_002.json"
+    "fov_000": "primary-images-fov_000.json",
+    "fov_001": "primary-images-fov_001.json",
+    "fov_00N": "primary-images-fov_002.json"
   },
   "extras": null
 }

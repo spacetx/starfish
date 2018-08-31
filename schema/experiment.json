@@ -5,7 +5,7 @@
   "description": "An image-based transcriptomics or proteomics experiment.",
   "required": [
     "version",
-    "hybridization_images",
+    "primary_images",
     "codebook"
   ],
   "additionalProperties": false,
@@ -13,10 +13,10 @@
     "version": {
       "$ref": "schema/version.json"
     },
-    "hybridization_images": {
+    "primary_images": {
       "type": "string",
       "description": "Images that measure transcript or protein targets in one or more fields of view.",
-      "example": "hybridization.json",
+      "example": "primary_images.json",
       "pattern": "^.*?.json$"
     },
     "codebook": {

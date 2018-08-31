@@ -1,4 +1,5 @@
 import collections
+import multiprocessing
 import os
 import warnings
 from copy import deepcopy
@@ -536,7 +537,13 @@ class ImageStack:
             yield array
 
     def apply(
-            self, func, is_volume=False, in_place=True, verbose: bool=False, **kwargs
+            self,
+            func,
+            is_volume=False,
+            in_place=True,
+            verbose: bool=False,
+            n_processes: Optional[int]=None,
+            **kwargs
     ) -> "ImageStack":
         """Apply func over all tiles or volumes in self
 
@@ -554,6 +561,9 @@ class ImageStack:
             produced.
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
+        n_processes : Optional[int]
+            The number of processes to use for apply. If None, uses the output of os.cpu_count()
+            (default = None).
         kwargs : dict
             Additional arguments to pass to func
 
@@ -569,19 +579,43 @@ class ImageStack:
                 func, is_volume=is_volume, in_place=True, verbose=verbose, **kwargs
             )
 
-        mapfunc: Callable = map  # TODO: ambrosejcarr posix-compliant multiprocessing
-        indices = list(self._iter_indices(is_volume=is_volume))
-
-        if verbose:
-            tiles = tqdm(self._iter_tiles(indices))
+        if is_volume:
+            self._data = self._data.stack(tiles=[Indices.ROUND.value,
+                                                 Indices.CH.value])
         else:
-            tiles = self._iter_tiles(indices)
+            self._data = self._data.stack(tiles=[Indices.ROUND.value,
+                                                 Indices.CH.value,
+                                                 Indices.Z.value])
+        tile_indices = self._data.tiles
 
+        # set the keyword arguments in the apply function
         applyfunc: Callable = partial(func, **kwargs)
-        results = mapfunc(applyfunc, tiles)
 
-        for r, inds in zip(results, indices):
-            self.set_slice(inds, r)
+        # set the progress bar function depending on the verbosity request
+        progress_func = tqdm if verbose else lambda f: f  # pass-through lambda
+
+        # define the iterable to be mapped
+        tiles = (self._data.sel(tiles=t) for t in tile_indices)
+
+        with multiprocessing.Pool(n_processes) as pool:
+            # string all the iterators together
+            results = zip(
+                progress_func(pool.imap(applyfunc, tiles)),
+                tile_indices
+            )
+
+            # execute the combined iterator
+            for result, t in results:
+                self._data.loc[{'tiles': t}] = result
+
+        # unstack the data
+        self._data = self._data.unstack('tiles').transpose(
+            Indices.ROUND.value,
+            Indices.CH.value,
+            Indices.Z.value,
+            'y',
+            'x'
+        )
 
         return self
 

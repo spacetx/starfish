@@ -51,6 +51,7 @@ def dpi_correction(figure: Optional[matplotlib.figure.Figure]=None) -> float:
     """
     if figure is None:
         figure = plt.gcf()
+    # 72 is the default pixel:point ratio for matplotlib
     point_multiplier = 72. / figure.dpi
     return point_multiplier
 
@@ -105,4 +106,16 @@ def annotate_axis(
         axis.set_xlabel(xlabel, **kwargs)
     if ylabel is not None:
         axis.set_ylabel(ylabel, **kwargs)
+    return axis
+
+
+def equalize_axes_extents(axis: Optional[matplotlib.axes.Axes]=None) -> matplotlib.axes.Axes:
+    """set the x and y axes to the greater extent of both axes"""
+    axis = axis if axis is not None else plt.gca()
+    x_min, x_max = axis.get_ylim()
+    y_min, y_max = axis.get_xlim()
+    max_ = max(x_max, y_max)
+    min_ = min(x_min, x_max)
+    axis.set_xlim(min_, max_)
+    axis.set_ylim(min_, max_)
     return axis

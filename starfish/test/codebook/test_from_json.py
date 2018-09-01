@@ -84,3 +84,13 @@ def test_codebook_loads_from_https_file(mock_urlopen):
     assert codebook.sizes[Indices.ROUND] == 2
     assert codebook.sizes[Features.TARGET] == 1
     assert mock_urlopen.call_count == 1
+
+
+def test_codebook_serialization():
+    codebook_array = codebook_json_data_factory()
+    codebook = Codebook.from_code_array(codebook_array)
+    directory = tempfile.mkdtemp()
+    json_codebook = os.path.join(directory, 'codebook.json')
+    codebook.to_json(json_codebook)
+    codebook_reloaded = Codebook.from_json(json_codebook)
+    assert codebook_reloaded.equals(codebook)

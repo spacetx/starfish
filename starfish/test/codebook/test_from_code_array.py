@@ -85,4 +85,26 @@ def test_from_code_array_expands_codebook_when_provided_n_codes_that_exceeds_arr
     assert codebook.sizes[Features.TARGET] == 2
 
 
+def test_from_code_array_throws_exceptions_when_data_does_not_match_channel_or_round_requests():
+    """
+    The codebook factory produces codes with 3 channels and 2 rounds. This test provides numbers
+    larger than that, and the codebook should be expanded to those numbers as a result.
+    """
+    code_array: List = codebook_array_factory()
+
+    # should throw an exception, as 3 channels are present in the data
+    with pytest.raises(ValueError):
+        Codebook.from_code_array(code_array, n_ch=2, n_round=4)
+
+    # should throw an exception, as 2 rounds are present in the data
+    with pytest.raises(ValueError):
+        Codebook.from_code_array(code_array, n_ch=3, n_round=1)
+
+
+def test_from_code_array_throws_exception_when_data_is_improperly_formatted():
+    code_array: List = codebook_array_factory()
+    code_array[0][Features.CODEWORD][0] = ('I should be a dict, oops!',)
+    with pytest.raises(TypeError):
+        Codebook.from_code_array(code_array, n_ch=3, n_round=1)
+
 # TODO codebook should throw an error when an empty array is passed

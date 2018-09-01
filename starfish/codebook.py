@@ -471,25 +471,23 @@ class Codebook(xr.DataArray):
         distance_mask = metric_outputs > max_distance
         passes_filters[intensity_mask | distance_mask] = False
 
-        # set new values on the intensity table in-place
+        # set targets, distances, and filtering results
         norm_intensities[Features.TARGET] = (Features.AXIS, targets)
         norm_intensities[Features.DISTANCE] = (Features.AXIS, metric_outputs)
         norm_intensities[Features.PASSES_FILTERS] = (Features.AXIS, passes_filters)
 
         return IntensityTable(norm_intensities)
 
-    # TODO ambrosejcarr, dganguli: This method has no channel scaling, which could bias the
-    # result toward a high-intensity channel
     def decode_per_round_max(self, intensities: IntensityTable) -> IntensityTable:
         """decode each feature by selecting the per-imaging-round max-valued channel
 
         Notes
         -----
-        If no code matches the per-channel max of a feature, it will be assigned 'nan' instead
-        of a target value
-        In cases where intensities are very discrete, note that argmax breaks ties by picking
-        the last channel -- this can lead to unexpected results where some "tied" channels will
-        decode, but others will be assigned 'nan'.
+        - If no code matches the per-channel max of a feature, it will be assigned 'nan' instead
+          of a target value
+        - Note that numpy's argmax breaks ties by picking the first channel -- this can lead to
+          unexpected results where some "tied" channels will decode, but others will be assigned
+          'nan'.
 
         Parameters
         ----------
@@ -537,8 +535,8 @@ class Codebook(xr.DataArray):
         max_channels = intensities.argmax(Indices.CH.value)
         codes = self.argmax(Indices.CH.value)
 
-        # calculate distance scores by evaluating the fraction of each channel not taken up
-        # by the maximum channel.
+        # calculate distance scores by evaluating the fraction of signal in each round that is
+        # found in the non-maximal channels.
         max_intensities = intensities.max(Indices.CH.value)
         round_intensities = intensities.sum(Indices.CH.value)
         distance = 1 - (max_intensities / round_intensities).mean(Indices.ROUND.value)
@@ -551,13 +549,12 @@ class Codebook(xr.DataArray):
         # decode the intensities
         for i in np.arange(codes.shape[0]):
             targets[np.where(a[i] == b)[0]] = codes[Features.TARGET][i]
-        target_index = pd.Index(targets.astype('U'))  # TODO ambrosejcarr, index not necessary
 
         # a code passes filters if it decodes successfully
         passes_filters = np.ones_like(targets, dtype=np.bool)
         passes_filters[pd.isnull(targets)] = False
 
-        intensities[Features.TARGET] = (Features.AXIS, target_index)
+        intensities[Features.TARGET] = (Features.AXIS, targets.astype('U'))
         intensities[Features.DISTANCE] = (Features.AXIS, distance)
         intensities[Features.PASSES_FILTERS] = (Features.AXIS, passes_filters)
 

@@ -96,7 +96,7 @@ def test_example_intensity_that_has_no_match_is_assigned_nan():
     # distance is calculated as the fraction of signal NOT in the selected channel. Here all of
     # the signal is in the max channel, so distance is 0.
     # Admittedly, this is a little bit confusing, since distance here measures both how correct
-    # a code is, and how wrong one is. However, I think this is still the right approach.
+    # a code is, but also how wrong one is when it _doesn't_ decode properly.
     assert np.array_equal(decoded_intensities[Features.DISTANCE], [0])
 
 

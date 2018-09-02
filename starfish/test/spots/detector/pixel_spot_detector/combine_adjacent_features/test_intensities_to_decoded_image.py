@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 
 from starfish import ImageStack, IntensityTable
@@ -5,7 +7,7 @@ from starfish.spots._detector.combine_adjacent_features import CombineAdjacentFe
 from starfish.types import Features
 
 
-def decoded_intensity_table_factory():
+def decoded_intensity_table_factory() -> Tuple[IntensityTable, np.ndarray]:
     # mock up an ImageStack that has gene labels, including null labels
     # data doesn't matter
     data = np.zeros((1, 1, 2, 3, 3))
@@ -35,6 +37,7 @@ def decoded_intensity_table_factory():
 
 
 def test_intensities_to_decoded_image():
+    """Test that the decoded image matches the labels object that it is expected to."""
 
     intensities, labels_with_nan = decoded_intensity_table_factory()
 
@@ -52,6 +55,10 @@ def test_intensities_to_decoded_image():
 
 
 def test_intensities_failing_filters_are_masked_when_requested():
+    """
+    Test that a masking request causes masked features to be set to zero (background) in the label
+    image.
+    """
 
     intensities, labels_with_nan = decoded_intensity_table_factory()
 

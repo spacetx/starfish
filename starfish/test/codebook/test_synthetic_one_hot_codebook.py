@@ -31,7 +31,7 @@ def test_target_names_are_incorporated_into_synthetic_codebook():
     assert np.array_equal(codebook[Features.TARGET], list('ab'))
 
 
-# TODO this should probably be better than an AssertionError
+# TODO ambrosejcarr: This should probably be clearer than an AssertionError
 def test_wrong_number_of_target_names_raises_error():
     """here we request 3 codes but provide only two names, which should raise an error"""
     with pytest.raises(AssertionError):

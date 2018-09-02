@@ -46,7 +46,7 @@ def codebook_factory() -> Codebook:
 
 def test_metric_decode():
     """
-    This test exposes 3 test features, each the the same normalized traces.
+    This test exposes 3 test features, each the the same normalized trace.
     The first should decode to GENE_A, and pass both the intensity and distance filters
     The second should decode to GENE_B, but fail the intensity filter
     The third should decode to GENE_B, as it is less far from that gene than GENE_A, but
@@ -73,19 +73,19 @@ def test_metric_decode():
 
     assert hasattr(decoded_intensities, Features.DISTANCE)
 
-    assert decoded_intensities.sizes[Features.AXIS] == 3, 'Should have 3 features.'
+    assert decoded_intensities.sizes[Features.AXIS] == 3
 
     assert np.array_equal(
         decoded_intensities[Features.TARGET].values,
         ['GENE_A', 'GENE_B', 'GENE_B'],
-    ), 'Should decode to A, B, B.'
+    )
 
     assert np.array_equal(
         decoded_intensities[Features.PASSES_FILTERS].values,
         [True, False, False]
-    ), 'Should filter 2nd and 3rd genes.'
+    )
 
-    assert not np.all(decoded_intensities == intensities), 'should return normalized values'
+    assert not np.all(decoded_intensities == intensities)
 
 
 def test_unmatched_intensities_and_codebook_table_sizes_throws_value_error():

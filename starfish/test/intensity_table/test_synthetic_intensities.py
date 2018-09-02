@@ -29,6 +29,13 @@ def codebook_array_factory() -> Codebook:
 
 
 def test_synthetic_intensity_generation():
+    """
+    Create a 2-spot IntensityTable of pixel size (z=3, y=4, x=5) from a codebook with 3 channels
+    and 2 rounds.
+
+    Verify that the constructed Synthetic IntensityTable conforms to those dimensions, and given
+    a known random seed, that the output spots decode to match a target in the input Codebook
+    """
     # set seed to check that codebook is matched. This seed generates 2 instances of GENE_B
     np.random.seed(1)
     codebook = codebook_array_factory()

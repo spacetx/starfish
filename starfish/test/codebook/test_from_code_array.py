@@ -107,4 +107,5 @@ def test_from_code_array_throws_exception_when_data_is_improperly_formatted():
     with pytest.raises(TypeError):
         Codebook.from_code_array(code_array, n_ch=3, n_round=1)
 
+
 # TODO codebook should throw an error when an empty array is passed

@@ -400,8 +400,7 @@ class Codebook(xr.DataArray):
 
         Notes
         -----
-        This function does not verify that the intensities have been normalized. Proceed with
-        caution.
+        This function does not verify that the intensities have been normalized.
 
         """
         linear_codes = norm_codes.stack(traces=(Indices.CH.value, Indices.ROUND.value)).values
@@ -414,6 +413,17 @@ class Codebook(xr.DataArray):
         gene_ids = np.ravel(norm_codes.indexes[Features.TARGET].values[indices])
 
         return np.ravel(metric_output), gene_ids
+
+    def _validate_decode_intensity_input_matches_codebook_shape(
+            self,
+            intensities: IntensityTable,
+    ):
+        # verify that the shapes of the codebook and intensities match
+        ch_match = intensities.sizes[Indices.CH] == self.sizes[Indices.CH]
+        round_match = intensities.sizes[Indices.ROUND] == self.sizes[Indices.ROUND]
+        if not (ch_match and round_match):
+            raise ValueError(
+                'Codebook and Intensities must have same number of channels and rounds')
 
     def metric_decode(
             self, intensities: IntensityTable, max_distance: Number, min_intensity: Number,
@@ -446,16 +456,12 @@ class Codebook(xr.DataArray):
         Returns
         -------
         IntensityTable :
-            intensity table containing normalized intensities, target assignments, distances to
+            Intensity table containing normalized intensities, target assignments, distances to
             the nearest code, and the filtering status of each feature.
 
         """
-        # verify that the shapes of the codebook and intensities match
-        ch_match = intensities.sizes[Indices.CH] == self.sizes[Indices.CH]
-        round_match = intensities.sizes[Indices.ROUND] == self.sizes[Indices.ROUND]
-        if not (ch_match and round_match):
-            raise ValueError(
-                'Codebook and Intensities must have same number of channels and rounds')
+
+        self._validate_decode_intensity_input_matches_codebook_shape(intensities)
 
         # normalize both the intensities and the codebook
         norm_intensities, norms = self._normalize_features(intensities, norm_order=norm_order)
@@ -476,6 +482,7 @@ class Codebook(xr.DataArray):
         norm_intensities[Features.DISTANCE] = (Features.AXIS, metric_outputs)
         norm_intensities[Features.PASSES_FILTERS] = (Features.AXIS, passes_filters)
 
+        # norm_intensities is a DataArray, make it back into an IntensityTable
         return IntensityTable(norm_intensities)
 
     def decode_per_round_max(self, intensities: IntensityTable) -> IntensityTable:
@@ -483,11 +490,11 @@ class Codebook(xr.DataArray):
 
         Notes
         -----
-        - If no code matches the per-channel max of a feature, it will be assigned 'nan' instead
+        - If no code matches the per-round maximum for a feature, it will be assigned 'nan' instead
           of a target value
-        - Note that numpy's argmax breaks ties by picking the first channel -- this can lead to
-          unexpected results where some "tied" channels will decode, but others will be assigned
-          'nan'.
+        - Numpy's argmax breaks ties by picking the first channel -- this can lead to
+          unexpected results where some features with "tied" channels will decode, but others will
+          be assigned 'nan'.
 
         Parameters
         ----------
@@ -525,12 +532,7 @@ class Codebook(xr.DataArray):
                      'formats': ncols * [array.dtype]}
             return array.view(dtype)
 
-        # verify that the shapes of the codebook and intensities match
-        ch_match = intensities.sizes[Indices.CH] == self.sizes[Indices.CH]
-        round_match = intensities.sizes[Indices.ROUND] == self.sizes[Indices.ROUND]
-        if not (ch_match and round_match):
-            raise ValueError(
-                'Codebook and Intensities must have same number of channels and rounds')
+        self._validate_decode_intensity_input_matches_codebook_shape(intensities)
 
         max_channels = intensities.argmax(Indices.CH.value)
         codes = self.argmax(Indices.CH.value)

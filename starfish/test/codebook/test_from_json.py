@@ -87,10 +87,22 @@ def test_codebook_loads_from_https_file(mock_urlopen):
 
 
 def test_codebook_serialization():
+    """
+    Test that codebook can be saved to disk and recovered, and that the recovered codebook is
+    identical to the one that it was serialized from.
+    """
+    # Create a codebook
     codebook_array = codebook_json_data_factory()
     codebook = Codebook.from_code_array(codebook_array)
+
+    # Dump it to a temporary file
     directory = tempfile.mkdtemp()
     json_codebook = os.path.join(directory, 'codebook.json')
     codebook.to_json(json_codebook)
+
+    # Retrieve it and test that the data it contains has not changed
     codebook_reloaded = Codebook.from_json(json_codebook)
     assert codebook_reloaded.equals(codebook)
+
+    # clean up
+    shutil.rmtree(directory)

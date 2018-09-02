@@ -7,7 +7,7 @@ def test_simple_intensities_find_correct_nearest_code():
     """
     Test some simple examples for correct decoding. Here the first example should decode to GENE_A,
     the second to GENE_B. The third is closer to GENE_A. The fourth is equidistant to GENE_A and
-    GENE_B, but it picks GENE_A because it comes first in the codebook.
+    GENE_B, but it picks GENE_A because GENE_A comes first in the codebook.
     """
     data = np.array(
         [[[0, 0.5],

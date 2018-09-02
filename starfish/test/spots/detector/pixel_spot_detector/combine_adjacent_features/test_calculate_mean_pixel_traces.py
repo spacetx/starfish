@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 from skimage.measure import label
 
@@ -6,10 +8,12 @@ from starfish.spots._detector.combine_adjacent_features import CombineAdjacentFe
 from starfish.types import Features
 
 
-# TODO make sure these arrays contain background pixels to catch errors relating to possible
-# one-off errors
-
-def labeled_intensities_factory():
+# TODO ambrosejcarr: make sure these arrays contain background pixels to catch  one-off errors
+def labeled_intensities_factory() -> Tuple[IntensityTable, np.ndarray, np.ndarray]:
+    """
+    Create a decoded IntensityTable with distance scores, and a corresponding label_image and
+    decoded_image.
+    """
     data = np.array(
         [[[[0, 0], [1, 1]],  # ch 1
           [[5, 5], [2, 3]]],
@@ -36,15 +40,18 @@ def labeled_intensities_factory():
     return intensity_table, label_image, decoded_image
 
 
-# todo do I need to make sure this works over multiple hybridization rounds?
+# TODO ambrosejcarr: increase test fixture complexity to verify this works over multiple rounds
 def test_calculate_mean_pixel_traces():
+    """
+    Test that calculate_mean_pixel_traces matches the mean trace produced from the ndarray data
+    used to construct the testing fixtures.
+    """
     intensity_table, label_image, _ = labeled_intensities_factory()
 
     passes_filter = np.ones(4)
-    mean_pixel_traces, passes_filter = CombineAdjacentFeatures._calculate_mean_pixel_traces(
+    mean_pixel_traces = CombineAdjacentFeatures._calculate_mean_pixel_traces(
         label_image,
         intensity_table,
-        passes_filter
     )
 
     # evaluate the mean pixel traces, we have 4 different spot ids

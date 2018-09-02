@@ -36,7 +36,7 @@ def test_intensity_table_can_be_created_from_spot_attributes():
 
 
 def test_from_spot_attributes_throws_type_error_when_passed_a_dataframe():
-    """make sure SpotAttributes is passed instead!"""
+    """SpotAttributes should be passed instead."""
     # input has two spots
     not_spot_attributes = pd.DataFrame(
         data=np.array(

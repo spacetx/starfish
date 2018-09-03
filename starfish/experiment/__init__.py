@@ -64,6 +64,15 @@ class FieldOfView:
         else:
             self._auxiliary_images = dict()
 
+    def __repr__(self):
+        auxiliary_images = '\n    '.join(f'{k}: {v}' for k, v in self._auxiliary_images.items())
+        return (
+                f"<starfish.FieldOfView>\n"
+                f"  Primary Image: {self._primary_image}\n"
+                f"  Auxiliary Images:\n"
+                f"    {auxiliary_images}"
+        )
+
     @property
     def name(self) -> Optional[str]:
         return self._name
@@ -124,6 +133,23 @@ class Experiment:
         self._codebook = codebook
         self._extras = extras
         self._src_doc = src_doc
+
+    def __repr__(self):
+
+        # truncate the list of fields of view if it is very long
+        if len(self._fovs) > 4:
+            fovs = self._fovs[:4] + ['...,\n']
+        else:
+            fovs = self._fovs
+
+        # convert fovs to string, careful not to re-convert the ellipsis
+        string_fovs = ',\n'.join(repr(f) if not isinstance(f, str) else f for f in fovs)
+
+        # return the formatted string
+        return (
+            f"<starfish.Experiment (FOVs={len(self._fovs)})>\n"
+            f"FOVs:\n[{string_fovs}]"
+        )
 
     @classmethod
     def from_json(cls, json_url: str) -> "Experiment":

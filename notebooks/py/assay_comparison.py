@@ -16,6 +16,8 @@ sns.set_style('ticks')
 # EPY: START code
 # munging
 import os
+import requests
+import tempfile
 # EPY: END code
 
 # EPY: START code
@@ -42,15 +44,20 @@ iss_link = os.path.join(data_root, "iss.nc")
 merfish_link = os.path.join(data_root, "merfish.nc")
 dartfish_link = os.path.join(data_root, "dartfish.nc")
 
-tmp = os.environ['TMPDIR']
+tmp = tempfile.gettempdir()
 iss_nc = os.path.join(tmp, "iss.nc")
 merfish_nc = os.path.join(tmp, "merfish.nc")
 dartfish_nc = os.path.join(tmp, "dartfish.nc")
 
 
-# EPY: ESCAPE !curl -o $iss_nc $iss_link
-# EPY: ESCAPE !curl -o $merfish_nc $merfish_link
-# EPY: ESCAPE !curl -o $dartfish_nc $dartfish_link
+def curl(dest_path, link):
+    with open(dest_path, "wb") as fh:
+        fh.write(requests.get(link).content)
+
+
+curl(iss_nc, iss_link)
+curl(merfish_nc, merfish_link)
+curl(dartfish_nc, dartfish_link)
 
 iss_intensity_table = IntensityTable.load(iss_nc)
 merfish_intensity_table = IntensityTable.load(merfish_nc)
@@ -67,35 +74,35 @@ datasets = [iss_intensity_table, merfish_intensity_table, dartfish_intensity_tab
 
 # EPY: START code
 # construct background images for each assay
-stack = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180821/DARTFISH/fov_001/experiment.json'
+experiment = Experiment.from_json(
+    'https://dmf0bdeheu4zf.cloudfront.net/20180828/DARTFISH/experiment.json'
 )
 
-dartfish_nuclei = stack.auxiliary_images['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+dartfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 dartfish_link = os.path.join(data_root, "dartfish_dots_image.npy")
 dartfish_npy = os.path.join(tmp, "dartfish.npy")
-# EPY: ESCAPE !curl -o $dartfish_npy $dartfish_link
+curl(dartfish_npy, dartfish_link)
 dartfish_dots = np.load(dartfish_npy)
 # EPY: END code
 
 # EPY: START code
-stack = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180821/ISS/fov_001/experiment.json'
+experiment = Experiment.from_json(
+    'https://dmf0bdeheu4zf.cloudfront.net/20180828/ISS/experiment.json'
 )
 
-iss_nuclei = stack.auxiliary_images['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
-iss_dots = stack.auxiliary_images['dots'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+iss_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+iss_dots = experiment.fov()['dots'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 # EPY: END code
 
 # EPY: START code
 stack = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment.json'
+    'https://dmf0bdeheu4zf.cloudfront.net/20180828/MERFISH/experiment.json'
 )
-merfish_nuclei = stack.auxiliary_images['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+merfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 
 # merfish doesn't have a dots image, and some of the channels are stronger than others.
 # We can use the scale factors to get the right levels
-merfish_background = stack.image.max_proj(Indices.CH, Indices.ROUND)
+merfish_background = experiment.fov().primary_image.max_proj(Indices.CH, Indices.ROUND)
 merfish_background = np.reshape(merfish_background, (1, 1, *merfish_background.shape))
 merfish_background = ImageStack.from_numpy_array(merfish_background)
 
@@ -122,8 +129,8 @@ merfish_npy = os.path.join(tmp, "merfish_decoded_image.npy")
 dartfish_npy = os.path.join(tmp, "dartfish_decoded_image.npy")
 
 
-# EPY: ESCAPE !curl -o $merfish_npy $merfish_link
-# EPY: ESCAPE !curl -o $dartfish_npy $dartfish_link
+curl(merfish_npy, merfish_link)
+curl(dartfish_npy, dartfish_link)
 
 
 merfish_decoded_image = np.squeeze(np.load(merfish_npy))
@@ -258,7 +265,7 @@ f.tight_layout()
 
 # EPY: START code
 dartfish_copy_number = pd.read_csv(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180821/DARTFISH/fov_001/counts.csv',
+    'https://dmf0bdeheu4zf.cloudfront.net/20180828/DARTFISH/fov_001/counts.csv',
     index_col=0,
     squeeze=True
 )

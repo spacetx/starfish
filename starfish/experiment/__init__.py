@@ -137,13 +137,14 @@ class Experiment:
     def __repr__(self):
 
         # truncate the list of fields of view if it is very long
-        if len(self._fovs) > 4:
-            fovs = self._fovs[:4] + ['...,\n']
+        print_nmax = 4
+        if len(self._fovs) > print_nmax:
+            fovs = self._fovs[:print_nmax] + ["...,\n"]
         else:
             fovs = self._fovs
 
         # convert fovs to string, careful not to re-convert the ellipsis
-        string_fovs = ',\n'.join(repr(f) if not isinstance(f, str) else f for f in fovs)
+        string_fovs = ",\n".join(repr(f) if not isinstance(f, str) else f for f in fovs)
 
         # return the formatted string
         return (

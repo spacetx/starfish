@@ -26,7 +26,11 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=install_requires,
     entry_points={
-        'console_scripts': "starfish=starfish.starfish:starfish"
+        'console_scripts': [
+            "starfish=starfish.starfish:starfish",
+            "validate-sptx=validate_sptx.validate_sptx:validate_sptx",
+        ]
     },
-    classifiers=CLASSIFIERS
+    classifiers=CLASSIFIERS,
+    include_package_data=True,
 )

@@ -1,16 +1,18 @@
 import json
 import os
+import posixpath
 import sys
+from pkg_resources import resource_filename
 
 import click
 from slicedimage.io import resolve_path_or_url
 
-from .util import SpaceTxValidator, package_root
+from .util import SpaceTxValidator
 
 
 def _get_absolute_schema_path(schema_name: str) -> str:
     """turn the name of the schema into an absolute path by joining it to <package_root>/schema."""
-    return os.path.join(package_root, 'schema', schema_name)
+    return resource_filename("validate_sptx", posixpath.join("schema", schema_name))
 
 
 @click.command()

@@ -1,12 +1,10 @@
 import json
 import os
 import warnings
+from pkg_resources import resource_filename
 from typing import Dict, Iterator
 
 from jsonschema import RefResolver, Draft4Validator, ValidationError
-
-_dir_path = os.path.dirname(os.path.realpath(__file__))
-package_root, _ = os.path.split(_dir_path.rstrip('/'))
 
 
 class SpaceTxValidator:
@@ -38,6 +36,8 @@ class SpaceTxValidator:
             json-schema validator specific to the supplied schema, with references resolved
 
         """
+        experiment_schema_path = resource_filename("validate_sptx", "schema/experiment.json")
+        package_root = os.path.dirname(os.path.dirname(experiment_schema_path))
         base_uri = 'file://' + package_root + '/'
         resolver = RefResolver(base_uri, schema)
         return Draft4Validator(schema, resolver=resolver)

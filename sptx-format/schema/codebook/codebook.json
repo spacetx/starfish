@@ -1,0 +1,25 @@
+{
+  "$id": "https://github.com/spacetx/sptx-format/schema/codebook/codebook.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "required": [
+      "codeword",
+      "target"
+    ],
+    "properties": {
+      "codeword": {
+        "$ref": "schema/codebook/codeword.json"
+      },
+      "target": {
+        "type": "string",
+        "description": "the target molecule (often gene or protein) identified by a codeword",
+        "examples": [
+          "ACTB", "CD4"
+        ]
+      }
+    }
+  }
+}

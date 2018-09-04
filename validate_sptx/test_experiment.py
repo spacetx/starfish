@@ -1,12 +1,13 @@
 import os
+from pkg_resources import resource_filename
 
 import pytest
 
-from .util import SpaceTxValidator, package_root
+from .util import SpaceTxValidator
 
-schema_path = os.path.join(package_root, 'schema', 'experiment.json')
-validator = SpaceTxValidator(schema_path)
-example = os.path.join(package_root, 'examples', 'experiment', 'experiment.json')
+experiment_schema_path = resource_filename("validate_sptx", "schema/experiment.json")
+validator = SpaceTxValidator(experiment_schema_path)
+example = resource_filename("validate_sptx", "examples/experiment/experiment.json")
 
 
 def test_fov():
@@ -28,6 +29,6 @@ def test_version_must_be_semantic():
 
 
 def test_dartfish_example_experiment():
-    dartfish_example = os.path.join(
-        package_root, 'examples', 'experiment', 'dartfish_experiment.json')
+    dartfish_example = resource_filename(
+        "validate_sptx", "examples/experiment/dartfish_experiment.json")
     assert validator.validate_file(dartfish_example)

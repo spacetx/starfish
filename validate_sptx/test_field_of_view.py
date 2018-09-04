@@ -1,12 +1,13 @@
 import os
+from pkg_resources import resource_filename
 
 import pytest
 
-from .util import SpaceTxValidator, package_root
+from .util import SpaceTxValidator
 
-schema_path = os.path.join(package_root, 'schema', 'field_of_view', 'field_of_view.json')
-validator = SpaceTxValidator(schema_path)
-example = os.path.join(package_root, 'examples', 'field_of_view', 'field_of_view.json')
+fov_schema_path = resource_filename("validate_sptx", "schema/field_of_view/field_of_view.json")
+validator = SpaceTxValidator(fov_schema_path)
+example = resource_filename("validate_sptx", "examples/field_of_view/field_of_view.json")
 
 
 def test_field_of_view():
@@ -14,16 +15,14 @@ def test_field_of_view():
 
 
 def test_dartfish_example_field_of_view():
-    dartfish_example_path = os.path.join(
-        package_root, 'examples', 'field_of_view', 'dartfish_field_of_view.json'
-    )
+    dartfish_example_path = resource_filename(
+        "validate_sptx", "examples/field_of_view/dartfish_field_of_view.json")
     assert validator.validate_file(dartfish_example_path)
 
 
 def test_dartfish_nuclei_example_field_of_view():
-    dartfish_example_path = os.path.join(
-        package_root, 'examples', 'field_of_view', 'dartfish_nuclei.json'
-    )
+    dartfish_example_path = resource_filename(
+        "validate_sptx", "examples/field_of_view/dartfish_nuclei.json")
     assert validator.validate_file(dartfish_example_path)
 
 

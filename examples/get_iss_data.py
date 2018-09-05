@@ -8,21 +8,15 @@ from typing import IO, Tuple
 import requests
 from slicedimage import ImageFormat
 
-from starfish.experiment.builder import FetchedImage, ImageFetcher, write_experiment_json
+from starfish.experiment.builder import FetchedTile, TileFetcher
+from starfish.experiment.builder import write_experiment_json
 from starfish.types import Features, Indices
 from starfish.util.argparse import FsExistsType
 
-SHAPE = (980, 1330)
+SHAPE = 980, 1330
 
 
-def download(input_dir, url):
-    print("Downloading data ...")
-    r = requests.get(url)
-    z = zipfile.ZipFile(io.BytesIO(r.content))
-    z.extractall(input_dir)
-
-
-class ISSImage(FetchedImage):
+class ISSTile(FetchedTile):
     def __init__(self, file_path):
         self.file_path = file_path
 
@@ -34,24 +28,32 @@ class ISSImage(FetchedImage):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    def image_data_handle(self) -> IO:
+    @property
+    def tile_data_handle(self) -> IO:
         return open(self.file_path, "rb")
 
 
-class HybridizationImageFetcher(ImageFetcher):
+class ISSPrimaryTileFetcher(TileFetcher):
     def __init__(self, input_dir):
         self.input_dir = input_dir
 
-    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
-        return ISSImage(os.path.join(self.input_dir, str(hyb + 1), "c{}.TIF".format(ch + 2)))
+    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+        return ISSTile(os.path.join(self.input_dir, str(hyb + 1), "c{}.TIF".format(ch + 2)))
 
 
-class AuxImageFetcher(ImageFetcher):
+class ISSAuxTileFetcher(TileFetcher):
     def __init__(self, path):
         self.path = path
 
-    def get_image(self, fov: int, hyb: int, ch: int, z: int) -> FetchedImage:
-        return ISSImage(self.path)
+    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+        return ISSTile(self.path)
+
+
+def download(input_dir, url):
+    print("Downloading data ...")
+    r = requests.get(url)
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    z.extractall(input_dir)
 
 
 def write_json(res, output_path):
@@ -83,7 +85,7 @@ def format_data(input_dir, output_dir, d):
 
         # TODO: (ttung) remove the following unholy hacks.  this is because we want to point at a
         # tileset rather than a collection.
-        experiment_json_doc['hybridization_images'] = "hybridization-fov_000.json"
+        experiment_json_doc['primary_images'] = "hybridization-fov_000.json"
         experiment_json_doc['auxiliary_images']['nuclei'] = "nuclei-fov_000.json"
         experiment_json_doc['auxiliary_images']['dots'] = "dots-fov_000.json"
         return experiment_json_doc
@@ -109,13 +111,13 @@ def format_data(input_dir, output_dir, d):
                 Indices.Z: 1,
             }
         },
-        hyb_image_fetcher=HybridizationImageFetcher(input_dir),
-        aux_image_fetcher={
-            'nuclei': AuxImageFetcher(os.path.join(input_dir, "DO", "c1.TIF")),
-            'dots': AuxImageFetcher(os.path.join(input_dir, "DO", "c2.TIF")),
+        primary_tile_fetcher=ISSPrimaryTileFetcher(input_dir),
+        aux_tile_fetcher={
+            'nuclei': ISSAuxTileFetcher(os.path.join(input_dir, "DO", "c1.TIF")),
+            'dots': ISSAuxTileFetcher(os.path.join(input_dir, "DO", "c2.TIF")),
         },
         postprocess_func=add_codebook,
-        default_shape=SHAPE,
+        default_shape=SHAPE
     )
 
     codebook = [

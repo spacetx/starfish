@@ -1,4 +1,5 @@
 import collections
+import multiprocessing
 import os
 import warnings
 from copy import deepcopy
@@ -59,7 +60,7 @@ class ImageStack:
     }
     N_AXES = max(data.order for data in AXES_DATA.values()) + 1
 
-    def __init__(self, image_partition):
+    def __init__(self, image_partition: TileSet) -> None:
         self._image_partition = image_partition
         self._tile_shape = image_partition.default_tile_shape
 
@@ -303,7 +304,6 @@ class ImageStack:
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],
             color_map: str= 'gray', figure_size: Tuple[int, int]=(10, 10),
-            show_spots: Optional[SpotAttributes]=None,
             rescale: bool=False, p_min: Optional[float]=None, p_max: Optional[float]=None, **kwargs
     ):
         """Create an interactive visualization of an image stack
@@ -320,10 +320,6 @@ class ImageStack:
             string id of a matplotlib colormap
         figure_size : Tuple[int, int] (default = (10, 10))
             size of the figure in inches
-        show_spots : Optional[SpotAttributes]
-            [Preliminary functionality] if provided, should be a SpotAttribute table that
-            corresponds to the volume being displayed. This will be paired automatically in the
-            future.
         rescale : bool (default = False)
             if True, rescale the data to exclude high and low-value outliers
             (see skimage.exposure.rescale_intensity).
@@ -362,21 +358,21 @@ class ImageStack:
                                                                             )
 
         if mpl_is_notebook:
-            self._show_matplotlib_notebook(linear_view,
-                                           labels,
-                                           n_tiles,
-                                           show_spots,
-                                           figure_size,
-                                           color_map
-                                           )
+            self._show_matplotlib_notebook(
+                linear_view,
+                labels,
+                n_tiles,
+                figure_size,
+                color_map
+            )
         else:
-            return self._show_matplotlib_inline(linear_view,
-                                                labels,
-                                                n_tiles,
-                                                show_spots,
-                                                figure_size,
-                                                color_map
-                                                )
+            return self._show_matplotlib_inline(
+                linear_view,
+                labels,
+                n_tiles,
+                figure_size,
+                color_map
+            )
 
     def _get_scaled_clipped_linear_view(self, indices, rescale, p_min, p_max):
 
@@ -427,9 +423,10 @@ class ImageStack:
 
         return linear_view, labels, n_tiles
 
-    def _show_matplotlib_notebook(self, linear_view, labels, n_tiles,
-                                  show_spots, figure_size, color_map
-                                  ):
+    @staticmethod
+    def _show_matplotlib_notebook(
+            linear_view, labels, n_tiles, figure_size, color_map
+    ):
         from ipywidgets import interact, fixed
 
         fig, ax = plt.subplots(figsize=figure_size)
@@ -437,22 +434,9 @@ class ImageStack:
         ax.set_xticks([])
         ax.set_yticks([])
 
-        if show_spots is not None:
-            circs, circle_mask = self._show_spots(result_df=show_spots.data,
-                                                  ax=ax,
-                                                  n_slices=linear_view.shape[0]
-                                                  )
-
         def show_plane(ax, plane, plane_index, cmap="gray", title=None):
             # Update the image in the current plane
             im.set_data(plane)
-
-            # Update the spots, if necessary
-            if show_spots is not None:
-                # TODO: kevinyamauchi vectorize/broadcast?
-                for i, state in enumerate(circle_mask[plane_index]):
-                    circs[i].set_visible(state)
-
             if title:
                 ax.set_title(title)
 
@@ -462,18 +446,14 @@ class ImageStack:
 
         interact(display_slice, ax=fixed(ax), plane_index=(0, n_tiles - 1))
 
-    def _show_matplotlib_inline(self, linear_view, labels, n_tiles,
-                                show_spots, figure_size, color_map
-                                ):
+    @staticmethod
+    def _show_matplotlib_inline(
+            linear_view, labels, n_tiles, figure_size, color_map
+    ):
         from ipywidgets import interact
 
         def show_plane(ax, plane, plane_index, cmap="gray", title=None):
             ax.imshow(plane, cmap=cmap)
-
-            if show_spots:
-                # this is slow. This link might have something to help:
-                # https://bastibe.de/2013-05-30-speeding-up-matplotlib.html
-                self._show_spots(show_spots.data, ax=ax, z_dist=plane_index)
 
             if title:
                 ax.set_title(title, fontsize=16)
@@ -488,57 +468,6 @@ class ImageStack:
             plt.show()
 
         return display_slice
-
-    # TODO ambrosejcarr: update to use IntensityTable instead of SpotAttributes
-    # TODO ambrosejcarr: also, show_spots is probably definitely broken
-    # TODO ambrosejcarr: it's probably also broken differently for each matplotlib backend
-    @staticmethod
-    def _show_spots(result_df, ax, size=1, n_slices=0, z_dist=1, scale_radius=5):
-        """function to plot spot finding results on top of any image as hollow red circles
-
-        called spots are colored by category
-
-        Parameters:
-        -----------
-        result_df : pd.Dataframe
-            result dataframe containing spot calls that correspond to the image channel
-        ax, matplotlib.Axes.Axis
-            axis to plot spots on
-        size :
-            Line width for the displayed spots
-        n_slices : int
-            The number of z slices being displayed. Default: 0
-        z_dist : float
-            The max distance a spot can be from the displayed slice to be visible. Default (1.5)
-        scale_radius : float
-            The size of the displayed spots is the scale_radius multiplied by the fit radius.
-            Default: 5
-
-
-        """
-        from matplotlib import pyplot as plt
-
-        n_circles = result_df.shape[0]
-
-        # Create the mask
-        if n_slices != 0 and 'z' in result_df.columns:
-            circle_mask = np.zeros((n_slices, n_circles), dtype='bool')
-
-            for i in range(n_slices):
-                on_circles = np.abs(result_df['z'] - i) < z_dist
-                circle_mask[i] = on_circles
-        else:
-            circle_mask = np.ones((n_slices, n_circles), dtype='bool')
-
-        # Plot the spots
-        circs = []
-        for i in range(n_circles):
-            r, x, y = result_df.loc[i, ['r', 'x', 'y']]  # radius is duplicated
-            c = plt.Circle((y, x), r * scale_radius, color='r', linewidth=size, fill=False)
-            circs.append(c)
-            ax.add_patch(c)
-
-        return circs, circle_mask
 
     @staticmethod
     def _build_slice_list(
@@ -608,7 +537,13 @@ class ImageStack:
             yield array
 
     def apply(
-            self, func, is_volume=False, in_place=True, verbose: bool=False, **kwargs
+            self,
+            func,
+            is_volume=False,
+            in_place=True,
+            verbose: bool=False,
+            n_processes: Optional[int]=None,
+            **kwargs
     ) -> "ImageStack":
         """Apply func over all tiles or volumes in self
 
@@ -626,6 +561,9 @@ class ImageStack:
             produced.
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
+        n_processes : Optional[int]
+            The number of processes to use for apply. If None, uses the output of os.cpu_count()
+            (default = None).
         kwargs : dict
             Additional arguments to pass to func
 
@@ -641,19 +579,43 @@ class ImageStack:
                 func, is_volume=is_volume, in_place=True, verbose=verbose, **kwargs
             )
 
-        mapfunc: Callable = map  # TODO: ambrosejcarr posix-compliant multiprocessing
-        indices = list(self._iter_indices(is_volume=is_volume))
-
-        if verbose:
-            tiles = tqdm(self._iter_tiles(indices))
+        if is_volume:
+            self._data = self._data.stack(tiles=[Indices.ROUND.value,
+                                                 Indices.CH.value])
         else:
-            tiles = self._iter_tiles(indices)
+            self._data = self._data.stack(tiles=[Indices.ROUND.value,
+                                                 Indices.CH.value,
+                                                 Indices.Z.value])
+        tile_indices = self._data.tiles
 
+        # set the keyword arguments in the apply function
         applyfunc: Callable = partial(func, **kwargs)
-        results = mapfunc(applyfunc, tiles)
 
-        for r, inds in zip(results, indices):
-            self.set_slice(inds, r)
+        # set the progress bar function depending on the verbosity request
+        progress_func = tqdm if verbose else lambda f: f  # pass-through lambda
+
+        # define the iterable to be mapped
+        tiles = (self._data.sel(tiles=t) for t in tile_indices)
+
+        with multiprocessing.Pool(n_processes) as pool:
+            # string all the iterators together
+            results = zip(
+                progress_func(pool.imap(applyfunc, tiles)),
+                tile_indices
+            )
+
+            # execute the combined iterator
+            for result, t in results:
+                self._data.loc[{'tiles': t}] = result
+
+        # unstack the data
+        self._data = self._data.unstack('tiles').transpose(
+            Indices.ROUND.value,
+            Indices.CH.value,
+            Indices.Z.value,
+            'y',
+            'x'
+        )
 
         return self
 
@@ -798,7 +760,7 @@ class ImageStack:
         Parameters
         ----------
         filepath : str
-            Path + prefix for the images and hybridization_images.json written by this function
+            Path + prefix for the images and primary_images.json written by this function
         tile_opener : TODO ttung: doc me.
 
         """

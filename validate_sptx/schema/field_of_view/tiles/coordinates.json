@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/sptx-format/schema/field_of_view/tiles/coordinates.json",
+  "type": "object",
+  "description": "Physical coordinates of the tile.",
+  "required": [
+    "x",
+    "y"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "x": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {
+        "type": "number",
+        "description": "Minimum and maximum physical x coordinate of this tile.",
+        "examples": [
+          [0, 0.00009999999747378752],
+          [4, 6],
+          [-5, -3.2]
+        ]
+      }
+    },
+    "y": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {
+        "type": "number",
+        "description": "Minimum and maximum physical y-coordinate of this tile.",
+        "examples": [
+          [0, 0.00009999999747378752],
+          [4, 6],
+          [-5, -3.2]
+        ]
+      }
+    },
+    "z": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {
+        "type": "number",
+        "title": "Minimum and maximum physical z-coordinate of this tile.",
+        "default": 0,
+        "examples": [
+          [0, 0.00009999999747378752],
+          [4, 6],
+          [-5]
+        ]
+      }
+    }
+  }
+}

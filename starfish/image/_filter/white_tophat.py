@@ -48,8 +48,8 @@ class WhiteTophat(FilterAlgorithmBase):
         return white_tophat(image, selem=structuring_element)
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False) \
-            -> Optional[ImageStack]:
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=False
+    ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters

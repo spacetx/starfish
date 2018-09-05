@@ -1,13 +1,12 @@
 import json
-import urllib.request
 import uuid
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
-import validators
 import xarray as xr
 from sklearn.neighbors import NearestNeighbors
+from slicedimage.io import resolve_path_or_url
 
 from starfish.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number
@@ -139,7 +138,7 @@ class Codebook(xr.DataArray):
         Examples
         --------
 
-        >>> from starfish.constants import Indices
+        >>> from starfish.types import Indices
         >>> from starfish.codebook import Codebook
         >>> codebook = [
         >>>     {
@@ -248,7 +247,7 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        >>> from starfish.constants import Indices
+        >>> from starfish.types import Indices
         >>> from starfish.codebook import Codebook
         >>> import tempfile
         >>> import json
@@ -298,12 +297,9 @@ class Codebook(xr.DataArray):
             Codebook with shape (targets, channels, imaging_rounds)
 
         """
-        if validators.url(json_codebook):
-            with urllib.request.urlopen(json_codebook) as response:
-                code_array = json.loads(response.read().decode('utf-8'))
-        else:
-            with open(json_codebook, 'r') as f:
-                code_array = json.load(f)
+        backend, name, _ = resolve_path_or_url(json_codebook)
+        with backend.read_contextmanager(name) as fh:
+            code_array = json.load(fh)
         return cls.from_code_array(code_array, n_round, n_ch)
 
     def to_json(self, filename: str) -> None:
@@ -343,8 +339,10 @@ class Codebook(xr.DataArray):
             json.dump(code_array, f)
 
     @staticmethod
-    def _normalize_features(array: Union["Codebook", IntensityTable], norm_order) \
-            -> Tuple[Union["Codebook", IntensityTable], np.ndarray]:
+    def _normalize_features(
+            array: Union["Codebook", IntensityTable],
+            norm_order,
+    ) -> Tuple[Union["Codebook", IntensityTable], np.ndarray]:
         """unit normalize each feature of array
 
         Parameters

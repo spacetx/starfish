@@ -54,7 +54,7 @@ starfish segment --hybridization-stack /tmp/starfish/filtered/hybridization.json
 
 starfish target_assignment --coordinates-geojson /tmp/starfish/results/regions.geojson --intensities /tmp/starfish/results/spots.nc --output /tmp/starfish/results/regions.json PointInPoly2D
 
-starfish decode -i /tmp/starfish/results/spots.nc --codebook /tmp/starfish/formatted/codebook.json -o /tmp/starfish/results/spots.nc IssDecoder
+starfish decode -i /tmp/starfish/results/spots.nc --codebook /tmp/starfish/formatted/codebook.json -o /tmp/starfish/results/spots.nc PerRoundMaxChannelDecoder
 ```
 
 ## interactive visualization in Jupyter notebooks
@@ -77,3 +77,20 @@ Clone the repo and look through (CONTRIBUTING.md)[CONTRIBUTING.md]
 % cd starfish
 ```
 
+## citing starfish
+
+to cite starfish, please use: 
+
+Axelrod S, Carr AJ, Freeman J, Ganguli D, Long B, Tung T, and others. 
+Starfish: Open Source Image Based Transcriptomics and Proteomics Tools, 2018-, 
+http://github.com/spacetx/starfish [Online; accessed <date>].
+
+Here’s an example of a BibTeX entry:
+
+@misc{,
+author = {Shannon Axelrod, Ambrose J Carr, Jeremy Freeman, Deep Ganguli, Brian Long, Tony Tung, and others},
+title = {{Starfish}: Open Source Image Based Transcriptomics and Proteomics Tools},
+year = {2018--},
+url = "http://github.com/spacetx/starfish",
+note = {[Online; accessed <date>]}
+}

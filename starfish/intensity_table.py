@@ -1,5 +1,5 @@
 from itertools import product
-from typing import Dict, Tuple, Union
+from typing import Dict, Union
 
 import numpy as np
 import pandas as pd
@@ -52,9 +52,6 @@ class IntensityTable(xr.DataArray):
       target     (features) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
 
     """
-
-    # constant that stores the attr key for the shape of ImageStack
-    IMAGE_SHAPE = 'image_shape'
 
     @staticmethod
     def _build_xarray_coords(
@@ -345,7 +342,20 @@ class IntensityTable(xr.DataArray):
         -------
         pd.DataFrame
 
-
         """
         df = pd.DataFrame(dict(self[Features.AXIS].coords.variables)).drop(Features.AXIS, axis=1)
         return df
+
+    def feature_trace_magnitudes(self) -> np.ndarray:
+        """Return the magnitudes of each feature across rounds and channels
+
+        Returns
+        -------
+        np.ndarray :
+            vector of feature norms
+
+        """
+        feature_traces = self.stack(traces=(Indices.CH.value, Indices.ROUND.value))
+        norm = np.linalg.norm(feature_traces.values, ord=2, axis=1)  # 2 = feature magnitudes
+
+        return norm

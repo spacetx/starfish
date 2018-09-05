@@ -57,9 +57,9 @@ def combine_adjacent_features(
     target_array = np.array(target_list)
 
     # reverses the linearization that was used to construct the IntensityTable from the ImageStack
-    max_x = intensities[Features.X].values.max() + 1
-    max_y = intensities[Features.Y].values.max() + 1
-    max_z = intensities[Features.Z].values.max() + 1
+    max_x = intensities[Indices.X.value].values.max() + 1
+    max_y = intensities[Indices.Y.value].values.max() + 1
+    max_z = intensities[Indices.Z.value].values.max() + 1
     decoded_image: np.ndarray = target_array.reshape((max_z, max_y, max_x))
 
     # label each pixel according to its component
@@ -115,8 +115,7 @@ def combine_adjacent_features(
 
     # now I need to make an IntensityTable from this thing.
     spots_df = pd.DataFrame(spots)
-    spots_df[Features.DISTANCE] = \
-        mean_pixel_traces[Features.DISTANCE]
+    spots_df[Features.DISTANCE] = mean_pixel_traces[Features.DISTANCE]
 
     # create new indexes for the output IntensityTable
     channel_index = mean_pixel_traces.indexes[Indices.CH]

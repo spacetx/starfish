@@ -39,8 +39,10 @@ sns.set_style('ticks')
 # EPY: END markdown
 
 # EPY: START code
-exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180821/DARTFISH/fov_001/experiment.json')
-stack = exp.image
+
+exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180828/DARTFISH/experiment.json')
+stack = exp.fov().primary_image
+
 # TODO the latter will be fixed by https://github.com/spacetx/starfish/issues/316
 stack._data = stack._data.astype(float)
 # EPY: END code
@@ -58,8 +60,7 @@ stack.show_stack({Indices.CH:0}, rescale=True);
 # EPY: END markdown
 
 # EPY: START code
-cb = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180821/DARTFISH/fov_001/codebook.json')
-cb
+exp.codebook
 # EPY: END code
 
 # EPY: START markdown
@@ -67,7 +68,8 @@ cb
 # EPY: END markdown
 
 # EPY: START code
-cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180821/DARTFISH/fov_001/counts.csv')
+
+cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180828/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 # EPY: END code
 
@@ -89,7 +91,7 @@ zero_norm_stack = z_filt.run(norm_stack, in_place=False)
 
 # EPY: START code
 def compute_magnitudes(stack, norm_order=2):
-    
+
     pixel_intensities = IntensityTable.from_image_stack(zero_norm_stack)
     feature_traces = pixel_intensities.stack(traces=(Indices.CH.value, Indices.ROUND.value))
     norm = np.linalg.norm(feature_traces.values, ord=norm_order, axis=1)
@@ -110,9 +112,9 @@ plt.yscale('log');
 # EPY: END markdown
 
 # EPY: START code
-# how much magnitude should a barcode have for it to be considered by decoding? this was set by looking at 
+# how much magnitude should a barcode have for it to be considered by decoding? this was set by looking at
 # the plot above
-magnitude_threshold = 0.5 
+magnitude_threshold = 0.5
 # how big do we expect our spots to me, min/max size. this was set to be equivalent to the parameters
 # determined by the Zhang lab.
 area_threshold = (5, 30)
@@ -121,7 +123,7 @@ area_threshold = (5, 30)
 distance_threshold = 3
 
 psd = SpotFinder.PixelSpotDetector(
-    codebook=cb,
+    codebook=exp.codebook,
     metric='euclidean',
     distance_threshold=distance_threshold,
     magnitude_threshold=magnitude_threshold,
@@ -212,7 +214,7 @@ sns.despine(offset=2)
 distance_threshold = min_dist
 
 psd = SpotFinder.PixelSpotDetector(
-    codebook=cb,
+    codebook=exp.codebook,
     metric='euclidean',
     distance_threshold=distance_threshold,
     magnitude_threshold=magnitude_threshold,
@@ -261,14 +263,14 @@ pixel_traces = spot_intensities.stack(traces=(Indices.ROUND.value, Indices.CH.va
 pixel_traces_df = pixel_traces.to_features_dataframe()
 pixel_traces_df['area'] = np.pi*pixel_traces_df.radius**2
 
-# pick index of a random barcode that was read and decoded from the ImageStack
-ind = int(np.ceil(np.random.rand()*len(pixel_traces_df)))-1
+# pick index of a barcode that was read and decoded from the ImageStack
+ind = 45
 
 # get the the corresponding gene this barcode was decoded to
 gene = pixel_traces_df.loc[ind].target
 
 # query the codebook for the actual barcode corresponding to this gene
-real_barcode = cb[cb.target==gene].stack(traces=(Indices.ROUND.value, Indices.CH.value)).values[0]
+real_barcode = exp.codebook[exp.codebook.target==gene].stack(traces=(Indices.ROUND.value, Indices.CH.value)).values[0]
 read_out_barcode = pixel_traces[ind,:]
 
 plt.plot(real_barcode, 'ok')

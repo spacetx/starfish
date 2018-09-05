@@ -26,8 +26,7 @@ from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START code
-experiment = Experiment()
-experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180821/ISS/fov_001/experiment.json')
+experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180828/ISS/experiment.json")
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 # EPY: END code
 
@@ -39,7 +38,7 @@ experiment.read('https://dmf0bdeheu4zf.cloudfront.net/20180821/ISS/fov_001/exper
 
 # EPY: START code
 pp = pprint.PrettyPrinter(indent=2)
-pp.pprint(experiment.format_metadata)
+pp.pprint(experiment._src_doc)
 # EPY: END code
 
 # EPY: START markdown
@@ -47,9 +46,10 @@ pp.pprint(experiment.format_metadata)
 # EPY: END markdown
 
 # EPY: START code
-primary_image = experiment.image
-dots = experiment.auxiliary_images['dots']
-nuclei = experiment.auxiliary_images['nuclei']
+fov = experiment.fov()
+primary_image = fov.primary_image
+dots = fov['dots']
+nuclei = fov['nuclei']
 images = [primary_image, nuclei, dots]
 # EPY: END code
 
@@ -87,8 +87,7 @@ image(nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END markdown
 
 # EPY: START code
-codebook = Codebook.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180821/ISS/codebook.json')
-codebook
+experiment.codebook
 # EPY: END code
 
 # EPY: START markdown
@@ -124,7 +123,7 @@ for img in images:
 from starfish.image import Registration
 
 registration = Registration.FourierShiftRegistration(
-    upsampling=1000, 
+    upsampling=1000,
     reference_stack=dots,
     verbose=True)
 registration.run(primary_image)
@@ -203,7 +202,7 @@ intensities[100]
 # EPY: END markdown
 
 # EPY: START code
-decoded = codebook.decode_per_round_max(intensities)
+decoded = experiment.codebook.decode_per_round_max(intensities)
 # EPY: END code
 
 # EPY: START markdown

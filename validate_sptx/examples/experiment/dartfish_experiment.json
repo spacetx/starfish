@@ -1,0 +1,6 @@
+{
+  "version": "1.0.0",
+  "primary_images": "dartfish_field_of_view.json",
+  "auxiliary_images": {"nuclei": "dartfish_nuclei.json"},
+  "codebook": "codebook.json"
+}

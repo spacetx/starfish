@@ -35,25 +35,10 @@ def merfish_stack() -> Experiment:
     Stack :
         starfish.io.Stack object containing MERFISH data
     """
-    s = Experiment()
-    s.read(
-        'https://dmf0bdeheu4zf.cloudfront.net/20180802/MERFISH/fov_001/experiment.json'
+    s = Experiment.from_json(
+        'https://dmf0bdeheu4zf.cloudfront.net/20180828/MERFISH/experiment.json'
     )
     return deepcopy(s)
-
-
-@pytest.fixture(scope='session')
-def labeled_synthetic_dataset():
-    stp = synthesize.SyntheticSpotTileProvider()
-    image = ImageStack.synthetic_stack(tile_data_provider=stp.tile)
-    max_proj = image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-    view = max_proj.reshape((1, 1, 1) + max_proj.shape)
-    dots = ImageStack.from_numpy_array(view)
-
-    def labeled_synthetic_dataset_factory():
-        return deepcopy(image), deepcopy(dots), deepcopy(stp.codebook)
-
-    return labeled_synthetic_dataset_factory
 
 
 @pytest.fixture(scope='function')

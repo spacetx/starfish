@@ -16,9 +16,15 @@ from .detect import detect_spots, measure_spot_intensity
 class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
     def __init__(
-            self, min_sigma: Number, max_sigma: Number, num_sigma: int, threshold: Number,
-            overlap=0.5, measurement_type='max', is_volume: bool=True, **kwargs) \
-            -> None:
+            self,
+            min_sigma: Number,
+            max_sigma: Number,
+            num_sigma: int,
+            threshold: Number,
+            overlap: float=0.5,
+            measurement_type='max',
+            is_volume: bool=True, **kwargs
+    ) -> None:
         """Multi-dimensional gaussian spot detector
 
         This method is a wrapper for skimage.feature.blob_log
@@ -107,10 +113,11 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         return SpotAttributes(rounded_blobs)
 
     def run(
-            self, data_stack: ImageStack,
+            self,
+            data_stack: ImageStack,
             blobs_image: Optional[Union[np.ndarray, xr.DataArray]]=None,
-            reference_image_from_max_projection: bool=False) \
-            -> IntensityTable:
+            reference_image_from_max_projection: bool=False,
+    ) -> IntensityTable:
         """find spots in an ImageStack
 
         Parameters

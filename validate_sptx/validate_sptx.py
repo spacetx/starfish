@@ -7,6 +7,8 @@ from pkg_resources import resource_filename
 import click
 from slicedimage.io import resolve_path_or_url
 
+from typing import Dict
+
 from .util import SpaceTxValidator
 
 
@@ -69,9 +71,12 @@ def validate_sptx(experiment_json: str) -> None:
 
     # validate codebook
     codebook_validator = SpaceTxValidator(_get_absolute_schema_path('codebook/codebook.json'))
-    with backend.read_contextmanager(experiment['codebook']) as fh:
-        codebook = json.load(fh)
-    valid &= codebook_validator.validate_object(codebook, experiment['codebook'])
+    codebook_file = experiment.get('codebook')
+    codebook: Dict = {}
+    if codebook_file is not None:
+        with backend.read_contextmanager(codebook_file) as fh:
+            codebook = json.load(fh)
+    valid &= codebook_validator.validate_object(codebook, codebook_file)
 
     if valid:
         sys.exit(0)

@@ -67,6 +67,10 @@ class TestWithIssData(unittest.TestCase):
             "--upsampling", "1000",
         ],
         [
+            "validate-sptx", "--experiment-json",
+            lambda tempdir: os.sep.join([tempdir, "formatted", "experiment.json"])
+        ],
+        [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "registered", "hybridization.json"),
@@ -168,6 +172,15 @@ class TestWithIssData(unittest.TestCase):
                         "-p",
                         "--source", "starfish",
                         "-m", "starfish",
+                    ]
+                    coverage_cmdline.extend(cmdline[1:])
+                    cmdline = coverage_cmdline
+                elif cmdline[0] == "validate-sptx" and coverage_enabled:
+                    coverage_cmdline = [
+                        "coverage", "run",
+                        "-p",
+                        "--source", "validate_sptx",
+                        "-m", "validate_sptx",
                     ]
                     coverage_cmdline.extend(cmdline[1:])
                     cmdline = coverage_cmdline

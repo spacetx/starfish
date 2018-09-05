@@ -2,7 +2,7 @@
 
 If you're reading this section, you're probably interested in contributing to Starfish.  Welcome and thanks for your interest in contributing!
 
-# How can I contribute?
+## How can I contribute?
 Starfish is designed to specify pipeline recipes for image processing. To support this use, the library is composed as a series of `pipeline_component` modules.
 The objects that sub-class `pipeline_component` spawn a command-line interface that should identically track the API of the python library.
 
@@ -10,7 +10,7 @@ A typical starfish run consists of running one or more image processing filter s
 The identified features are then decoded into the genes that they correspond to by mapping the fluorescence channel (and optionally hybridization round) using a codebook.
 Finally, the filtered data are segmented, identifying which cell each feature belongs to.
 
-# Creating a new algorithm for an existing `pipeline_component`:
+## Creating a new algorithm for an existing `pipeline_component`:
 
 For example, to add a new image filter, one would:
 

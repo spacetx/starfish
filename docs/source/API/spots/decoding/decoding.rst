@@ -1,0 +1,4 @@
+.. _decoding
+
+Decoding
+========

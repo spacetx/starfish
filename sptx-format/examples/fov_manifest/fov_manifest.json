@@ -1,0 +1,9 @@
+{
+  "version": "0.0.0",
+  "contents": {
+    "fov_000": "primary-images-fov_000.json",
+    "fov_001": "primary-images-fov_001.json",
+    "fov_00N": "primary-images-fov_00N.json"
+  },
+  "extras": null
+}

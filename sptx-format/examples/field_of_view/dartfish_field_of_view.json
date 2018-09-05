@@ -1,0 +1,527 @@
+{
+    "default_tile_shape": [
+        988,
+        988
+    ],
+    "dimensions": [
+        "x",
+        "y",
+        "c",
+        "z",
+        "r"
+    ],
+    "extras": {},
+    "shape": {
+        "c": 3,
+        "r": 6,
+        "z": 1
+    },
+    "fov": 0,
+    "tiles": [
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H0-C0.tif",
+            "indices": {
+                "c": 0,
+                "r": 0,
+                "z": 0
+            },
+            "sha256": "ce0aa8bf07f76da915dc8907d6f75a23176c61f561c62f2735418e694211b0f6",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H0-C1.tif",
+            "indices": {
+                "c": 1,
+                "r": 0,
+                "z": 0
+            },
+            "sha256": "984893cce88beddac682c3ac22eaef21cbd14a7fddb4a069083439117e9b3769",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H0-C2.tif",
+            "indices": {
+                "c": 2,
+                "r": 0,
+                "z": 0
+            },
+            "sha256": "e52c50c6fe6437311ca078fe20ee67a5ce00cf810ed670eaf1db7efecbdd2e63",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H1-C0.tif",
+            "indices": {
+                "c": 0,
+                "r": 1,
+                "z": 0
+            },
+            "sha256": "2cfa3a7703b50a6f37dffb6b21aa7273f1e9de3940d11e1269d86b547935d0a0",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H1-C1.tif",
+            "indices": {
+                "c": 1,
+                "r": 1,
+                "z": 0
+            },
+            "sha256": "84800824854353d4fdd1aa1c19a13154b9d7f8c0c76fa3f010d41210ee6060bc",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H1-C2.tif",
+            "indices": {
+                "c": 2,
+                "r": 1,
+                "z": 0
+            },
+            "sha256": "28b3849fb5c51d276d9a01ff78dae8c5e4d4e22601ee0596d4780d17f75775f2",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H2-C0.tif",
+            "indices": {
+                "c": 0,
+                "r": 2,
+                "z": 0
+            },
+            "sha256": "5e1fb043b8f8319312b60be3e7f8158bce3aa5615214693287f6f7a61ae5fa76",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H2-C1.tif",
+            "indices": {
+                "c": 1,
+                "r": 2,
+                "z": 0
+            },
+            "sha256": "c633aaeabf484d0bb9fe46ae957698f53d7abb2d7de55e8614ead38a0c75d4d4",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H2-C2.tif",
+            "indices": {
+                "c": 2,
+                "r": 2,
+                "z": 0
+            },
+            "sha256": "7f294d9af9c06a75552fe08255e1550f77c33db0d7d6dfa6ff5372f75d5b952d",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H3-C0.tif",
+            "indices": {
+                "c": 0,
+                "r": 3,
+                "z": 0
+            },
+            "sha256": "f2f784a47d6cce291931caa9574f057aa5c869137e43be1534b7905053844695",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H3-C1.tif",
+            "indices": {
+                "c": 1,
+                "r": 3,
+                "z": 0
+            },
+            "sha256": "856aaec2c0d7cb81fc2e8b2000dc1c2bd8cf4d126c58ec0d891a767fe3608985",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H3-C2.tif",
+            "indices": {
+                "c": 2,
+                "r": 3,
+                "z": 0
+            },
+            "sha256": "1e7843278ab3592bdbbe1c0d3b1e04256add0d896c50728f0638c55a8bc05c08",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H4-C0.tif",
+            "indices": {
+                "c": 0,
+                "r": 4,
+                "z": 0
+            },
+            "sha256": "77d6b2070bfc601c5a6aeae993b91bc2ec7fa184ddf5e8dc1d221becff992878",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H4-C1.tif",
+            "indices": {
+                "c": 1,
+                "r": 4,
+                "z": 0
+            },
+            "sha256": "d942748626bba157271a100d0fba9cf72f4ebfcdf9aa370684ccb9a910bd9277",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H4-C2.tif",
+            "indices": {
+                "c": 2,
+                "r": 4,
+                "z": 0
+            },
+            "sha256": "ca324aee3b3c7f0eaf5649bf41236f47226d22b9bb3048798e7e53fe6e1935c1",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H5-C0.tif",
+            "indices": {
+                "c": 0,
+                "r": 5,
+                "z": 0
+            },
+            "sha256": "0f5c42e2005efcc803d7c014bd3d6a6ac8bcbcdca8bf82e85eccd6673b4c21ae",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H5-C1.tif",
+            "indices": {
+                "c": 1,
+                "r": 5,
+                "z": 0
+            },
+            "sha256": "2a450963f3e32c65c08cc5193d3425c17f06301f0b7cca9c9f74008dcc6e80a8",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        },
+        {
+            "coordinates": {
+                "x": [
+                    0.0,
+                    0.001
+                ],
+                "y": [
+                    0.0,
+                    0.001
+                ],
+                "z": [
+                    0.0,
+                    0.001
+                ]
+            },
+            "file": "pre-registered-X0-Y0-Z0-H5-C2.tif",
+            "indices": {
+                "c": 2,
+                "r": 5,
+                "z": 0
+            },
+            "sha256": "d47ad52ddb19b6e3d5838ac3ce296ba1902e39bef0b3c6944a9e31f51124ab78",
+            "tile_format": "TIFF",
+            "tile_shape": [
+                988,
+                988
+            ]
+        }
+    ],
+    "version": "1.0.0"
+}

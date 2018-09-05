@@ -86,7 +86,6 @@ The below example describes a 2-channel, 8-round coded experiment that samples a
 ```json
 {
   "version": "0.0.0",
-  "fov": 0,
   "dimensions": [
       "x",
       "y",

@@ -26,3 +26,5 @@ dependencies:
 - trackpy
 - validators
 - xarray
+- pip:
+  - jsonpath-rw

@@ -36,7 +36,7 @@ def validate_sptx(experiment_json: str) -> None:
     # validate manifests that it links to.
     possible_manifests = []
     manifest_validator = SpaceTxValidator(_get_absolute_schema_path('fov_manifest.json'))
-    with backend.read_contextmanager(experiment['hybridization_images']) as fh:
+    with backend.read_contextmanager(experiment['primary_images']) as fh:
         possible_manifests.append(json.load(fh))
 
     # loop over all the manifests that are stored in auxiliary images. Disallowed names will
@@ -45,7 +45,7 @@ def validate_sptx(experiment_json: str) -> None:
         with backend.read_contextmanager(manifest) as fh:
             possible_manifests.append(json.load(fh))
 
-    # we allow the objects linked from hybridization_images and auxiliary images to either be
+    # we allow the objects linked from primary_images and auxiliary images to either be
     # manifests OR field_of_view files. We distinguish these by checking if they have a `contents`
     # flag, which indicates it is a manifest.
     fovs = []

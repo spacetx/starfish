@@ -4,6 +4,7 @@ import argparse
 import cProfile
 from pstats import Stats
 
+from validate_sptx.cli import Cli as ValidateCli
 from starfish.experiment.builder.cli import Cli as BuilderCli
 from starfish.image import (
     Filter,
@@ -46,6 +47,9 @@ def build_parser():
 
     build_group = subparsers.add_parser("build")
     BuilderCli.add_to_parser(build_group)
+
+    validate_group = subparsers.add_parser("validate")
+    ValidateCli.add_to_parser(validate_group)
 
     return parser
 

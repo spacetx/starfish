@@ -22,7 +22,7 @@ class SpaceTxValidator:
         fuzz : bool
             if true, then the json documents which are validated will
             be modified piece-wise and a statement printed to standard
-            out about whether or no they are still valid.
+            out about whether or not they are still valid.
 
         """
         self._schema: Dict = self.load_json(schema)
@@ -121,7 +121,7 @@ class SpaceTxValidator:
         Returns
         -------
         bool :
-            True, if object valid, else False
+            True, if object valid or fuzz=True, else False
 
         """
 

@@ -13,9 +13,11 @@ class Cli:
         parser.add_argument(
             "--experiment-json",
             type=FsExistsType())
+        parser.add_argument(
+            "--fuzz", action="store_true")
         parser.set_defaults(starfish_command=Cli.run)
         Cli.parser_group = parser
 
     @staticmethod
     def run(args, print_help=False):
-        validate_sptx(args.experiment_json)
+        validate_sptx(args.experiment_json, fuzz=args.fuzz)

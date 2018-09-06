@@ -9,13 +9,17 @@ from jsonschema import RefResolver, Draft4Validator, ValidationError
 
 class SpaceTxValidator:
 
-    def __init__(self, schema: str) -> None:
+    def __init__(self, schema: str, fuzz: bool=False) -> None:
         """create a validator for a json-schema compliant spaceTx specification file
 
         Parameters
         ----------
         schema : str
             file path to schema
+        fuzz : bool
+            if true, then the json documents which are validated will
+            be modified piece-wise and a statement printed to standard
+            out about whether or no they are still valid.
 
         """
         self._schema: Dict = self.load_json(schema)

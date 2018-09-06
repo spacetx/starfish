@@ -13,8 +13,7 @@ class Cli:
         parser.add_argument(
             "--experiment-json",
             required=True,
-            metavar="JSON_FILE_OR_URL",
-            type=FsExistsType())
+            metavar="JSON_FILE_OR_URL")
         parser.add_argument(
             "--fuzz", action="store_true")
         parser.set_defaults(starfish_command=Cli.run)

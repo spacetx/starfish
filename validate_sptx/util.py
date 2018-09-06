@@ -146,29 +146,77 @@ class Fuzzer(object):
 
     def __init__(self, validator, obj, out=sys.stdout):
         self.validator = validator
-        self.orig = copy.deepcopy(obj)
         self.obj = obj
-        self.stack = []
         self.out = out
+        self.stack = []
 
     def fuzz(self):
+        self.out.write(f"{self.state()}\t\n")
         self._descend(self.obj)
 
     def state(self):
-        return '\t'.join("T" * 3) + '\t'
+        rv = [
+            self.check_add(),
+            self.check_delete(),
+            self.check_change("I", 123456789),
+            self.check_change("S", "fake"),
+        ]
+        return ' '.join(rv) + "\t"
+
+    def check_add(self):
+        # Don't mess with the top level
+        if not self.stack: return "A"
+        dupe = copy.deepcopy(self.obj)
+        target = dupe
+        for level in self.stack[0:-1]:
+            target = target.__getitem__(level)
+        if isinstance(target, dict):
+            target["fake"] = "!"
+        elif isinstance(target, list):
+            target.append("!")
+        else:
+            raise Exception("unknown")
+        valid = self.validator.is_valid(dupe)
+        return valid and " " or "X"
+
+    def check_delete(self):
+        # Don't mess with the top level
+        if not self.stack: return "D"
+        dupe = copy.deepcopy(self.obj)
+        target = dupe
+        for level in self.stack[0:-1]:
+            target = target.__getitem__(level)
+        target.__delitem__(self.stack[-1])
+        valid = self.validator.is_valid(dupe)
+        return valid and " " or "X"
+
+    def check_change(self, big, value):
+        # Don't mess with the top level
+        if not self.stack: return big
+        dupe = copy.deepcopy(self.obj)
+        target = dupe
+        for level in self.stack[0:-1]:
+            target = target.__getitem__(level)
+        target.__setitem__(self.stack[-1], value)
+        valid = self.validator.is_valid(dupe)
+        return valid and " " or "X"
 
     def _descend(self, obj, depth=0, prefix=""):
         if isinstance(obj, list):
             for i, o in enumerate(obj):
                 depth += 1
+                self.stack.append(i)
                 self._descend(o, depth, prefix="- ")
+                self.stack.pop()
                 depth -= 1
         elif isinstance(obj, dict):
             for k in obj:
                 self.out.write(f"{self.state()}{' ' * depth}{prefix}{k}:\n")
                 if prefix == "- ": prefix = "  "
                 depth += 1
+                self.stack.append(k)
                 self._descend(obj[k], depth, prefix="  "+prefix)
+                self.stack.pop()
                 depth -= 1
         else:
             self.out.write(f"{self.state()}{' ' * depth}{prefix}{obj}\n")

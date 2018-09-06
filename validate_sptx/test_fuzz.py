@@ -13,13 +13,23 @@ def test_fuzz_mock():
         "list": [1, 2, 3]
     }
     values = [
-        obj,
-        obj,
-        obj,
+        { "list": [1, 2, 3, '!'] },
+        { "list": [2, 3] },
+        { "list": [123456789, 2, 3] },
+        { "list": ["fake", 2, 3] },
+        { "list": [1, 2, 3, '!'] },
+        { "list": [1, 3] },
+        { "list": [1, 123456789, 3] },
+        { "list": [1, "fake", 3] },
+        { "list": [1, 2, 3, '!'] },
+        { "list": [1, 2] },
+        { "list": [1, 2, 123456789] },
+        { "list": [1, 2, "fake"] },
     ]
     class Validator(object):
         def is_valid(self, obj):
             assert obj == values.pop(0)
+            return True
     Fuzzer(Validator(), obj).fuzz()
 
 

@@ -78,11 +78,13 @@ def validate_sptx(experiment_json: str) -> None:
             codebook = json.load(fh)
     valid &= codebook_validator.validate_object(codebook, codebook_file)
 
+    return valid
+
+
+if __name__ == "__main__":
+    valid = validate_sptx()
+
     if valid:
         sys.exit(0)
     else:
         sys.exit(1)
-
-
-if __name__ == "__main__":
-    validate_sptx()

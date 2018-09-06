@@ -19,9 +19,23 @@ def _get_absolute_schema_path(schema_name: str) -> str:
 
 @click.command()
 @click.option('--experiment-json', help='image metadata file to validate')
-def validate_sptx(experiment_json: str) -> None:
+def validate_sptx(experiment_json: str, fuzz: bool=False) -> bool:
     """validate a spaceTx formatted experiment.
     Accepts local filepaths or files hosted at http links.
+
+    Parameters
+    ----------
+    experiment_json : str
+        path or URL to a target json object to be validated against the schema passed to this
+        object's constructor
+    fuzz : bool
+        whether or not to perform element-by-element fuzzing.
+        If true, will return true and will *not* use warnings.
+
+    Returns
+    -------
+    bool :
+        True, if object valid, else False
     """
 
     valid = True

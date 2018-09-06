@@ -1,6 +1,9 @@
+import copy
 import json
 import os
+import sys
 import warnings
+
 from pkg_resources import resource_filename
 from typing import Dict, Iterator
 
@@ -102,7 +105,7 @@ class SpaceTxValidator:
         target_object = self.load_json(target_file)
         return self.validate_object(target_object, target_file)
 
-    def validate_object(self, target_object: Dict, target_file: str=None) -> bool:
+    def validate_object(self, target_object: Dict, target_file: str=None, fuzz: bool=False) -> bool:
         """validate a loaded json object, returning True if valid, and False otherwise
 
         Parameters
@@ -111,6 +114,9 @@ class SpaceTxValidator:
             loaded json object to be validated against the schem passed to this object's constructor
         target_file : str
             informational string regarding the source file of the given object
+        fuzz : bool
+            whether or not to perform element-by-element fuzzing.
+            If true, will return true and will *not* use warnings.
 
         Returns
         -------
@@ -118,9 +124,51 @@ class SpaceTxValidator:
             True, if object valid, else False
 
         """
+
+        if fuzz:
+            if target_file:
+                print(f"> Fuzzing {target_file}...")
+            else:
+                print("> Fuzzing unknown...")
+            fuzzer = Fuzzer(self._validator, target_object)
+            fuzzer.fuzz()
+            return True
+
         if self._validator.is_valid(target_object):
             return True
         else:
             es: Iterator[ValidationError] = self._validator.iter_errors(target_object)
             self._recurse_through_errors(es, filename=target_file)
             return False
+
+
+class Fuzzer(object):
+
+    def __init__(self, validator, obj, out=sys.stdout):
+        self.validator = validator
+        self.orig = copy.deepcopy(obj)
+        self.obj = obj
+        self.stack = []
+        self.out = out
+
+    def fuzz(self):
+        self._descend(self.obj)
+
+    def state(self):
+        return '\t'.join("T" * 3) + '\t'
+
+    def _descend(self, obj, depth=0, prefix=""):
+        if isinstance(obj, list):
+            for i, o in enumerate(obj):
+                depth += 1
+                self._descend(o, depth, prefix="- ")
+                depth -= 1
+        elif isinstance(obj, dict):
+            for k in obj:
+                self.out.write(f"{self.state()}{' ' * depth}{prefix}{k}:\n")
+                if prefix == "- ": prefix = "  "
+                depth += 1
+                self._descend(obj[k], depth, prefix="  "+prefix)
+                depth -= 1
+        else:
+            self.out.write(f"{self.state()}{' ' * depth}{prefix}{obj}\n")

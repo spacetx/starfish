@@ -2,7 +2,7 @@ import argparse
 import json
 
 from starfish.util.argparse import FsExistsType
-from .validate_sptx import validate_sptx
+from validate_sptx.validate_sptx import validate
 
 
 class Cli:
@@ -12,6 +12,8 @@ class Cli:
     def add_to_parser(parser):
         parser.add_argument(
             "--experiment-json",
+            required=True,
+            metavar="JSON_FILE_OR_URL",
             type=FsExistsType())
         parser.add_argument(
             "--fuzz", action="store_true")
@@ -20,4 +22,4 @@ class Cli:
 
     @staticmethod
     def run(args, print_help=False):
-        validate_sptx(args.experiment_json, fuzz=args.fuzz)
+        validate(args.experiment_json, fuzz=args.fuzz)

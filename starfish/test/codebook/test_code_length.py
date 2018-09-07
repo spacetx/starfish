@@ -11,7 +11,7 @@ def test_code_length_properly_counts_bit_length_of_codes():
     use the codebook factory from another testing module that produces codes with 3 channels and
     two rounds. This produces a code which should have length 6.
 
-    Then, pass n_round=10 to make the total length 3 * 10 = 30 and verify that the code lenght is
+    Then, pass n_round=10 to make the total length 3 * 10 = 30 and verify that the code length is
     returned as 30.
     """
     codebook_data = codebook_array_factory()

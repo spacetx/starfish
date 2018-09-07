@@ -11,6 +11,13 @@ experiment_validator = SpaceTxValidator(experiment_schema_path)
 
 
 def test_fuzz_mock():
+    """
+    Starting from the simple obj test class, the Fuzzer will
+    propose all the different mutations contained in the the
+    values list. The mocked validator will pop them off, in
+    order, and compare what it is being given. For testing
+    purposes, it will always return true.
+    """
     obj = {
         "list": [1, 2, 3]
     }
@@ -51,6 +58,12 @@ def test_fuzz_mock():
 
 
 def test_fuzz_codebook():
+    """
+    simple validation of a hard-coded example codebook.
+
+    The actual values don't matter overly much, but it
+    provides a good example of the output.
+    """
     codebook = [
         {
           "codeword": [
@@ -65,6 +78,12 @@ def test_fuzz_codebook():
 
 
 def test_fuzz_experiment():
+    """
+    simple validation of a hard-coded example experiment.
+
+    The actual values don't matter overly much, but it
+    provides a good example of the output.
+    """
     experiment = {
         "version": "0.0.0",
         "primary_images": "primary_images.json",

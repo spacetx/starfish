@@ -11,6 +11,7 @@ class Cli:
 
     @staticmethod
     def add_to_parser(parser):
+        """adds experiment-json and fuzz arguments to the given parser"""
         parser.add_argument(
             "--experiment-json",
             required=True,
@@ -22,6 +23,7 @@ class Cli:
 
     @staticmethod
     def run(args, print_help=False):
+        """invokes validate with the parsed commandline arguments"""
         try:
             validate(args.experiment_json, fuzz=args.fuzz)
         except KeyboardInterrupt:

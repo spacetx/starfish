@@ -17,9 +17,9 @@ class SpaceTxValidator:
 
         Parameters
         ----------
-        schema: str
+        schema : str
             file path to schema
-        fuzz: bool
+        fuzz : bool
             if true, then the json documents which are validated will
             be modified piece-wise and a statement printed to standard
             out about whether or not they are still valid.
@@ -34,7 +34,7 @@ class SpaceTxValidator:
 
         Parameters
         ----------
-        schema: Dict
+        schema : Dict
             loaded json schema
 
         Returns
@@ -62,9 +62,9 @@ class SpaceTxValidator:
 
         Parameters
         ----------
-        error_iterator: Iterator[ValidationError]
+        error_iterator : Iterator[ValidationError]
             iterator over ValidationErrors that occur during validation
-        level: int
+        level : int
             current level of recursion
         filename: str
             informational string regarding the source file of the given object
@@ -92,7 +92,7 @@ class SpaceTxValidator:
 
         Parameters
         ----------
-        target_file: str
+        target_file : str
             path or URL to a target json object to be validated against the schema passed to this
             object's constructor
 
@@ -110,9 +110,9 @@ class SpaceTxValidator:
 
         Parameters
         ----------
-        target_object: Dict
+        target_object : Dict
             loaded json object to be validated against the schem passed to this object's constructor
-        target_file: str
+        target_file : str
             informational string regarding the source file of the given object
         fuzz: bool
             whether or not to perform element-by-element fuzzing.
@@ -149,11 +149,11 @@ class Fuzzer(object):
 
         Parameters
         ----------
-        validator: SpaceTxValidator
+        validator : SpaceTxValidator
             validator which should match the given object type
-        obj: Any
+        obj : Any
             JSON-like object which will be checked against the validator
-        out: IO
+        out : IO
             if true, then the json documents which are validated will
             be modified piece-wise and a statement printed to standard
             out about whether or not they are still valid.
@@ -215,11 +215,11 @@ class Fuzzer(object):
 
         Parameters
         ----------
-        obj: Any
+        obj : Any
             JSON-like object tree
-        depth: int
+        depth : int
             depth in the tree that is currently being evaluated
-        prefix: str
+        prefix : str
             value which should be prepended to printouts at this level
         """
         if self.stack is None:
@@ -256,7 +256,7 @@ class Checker(object):
 
         Parameters
         ----------
-        fuzz: Fuzzer
+        fuzz : Fuzzer
             the containing instance
 
         Returns

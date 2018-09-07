@@ -1,5 +1,6 @@
 import argparse
 import json
+import sys
 
 from starfish.util.argparse import FsExistsType
 from validate_sptx.validate_sptx import validate
@@ -21,4 +22,7 @@ class Cli:
 
     @staticmethod
     def run(args, print_help=False):
-        validate(args.experiment_json, fuzz=args.fuzz)
+        try:
+            validate(args.experiment_json, fuzz=args.fuzz)
+        except KeyboardInterrupt:
+            sys.exit(3)

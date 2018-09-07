@@ -1,5 +1,3 @@
-.. _codebook
-
 Codebook
 ========
 

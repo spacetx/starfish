@@ -1,5 +1,3 @@
-.. _intensity_table
-
 IntensityTable
 ==============
 

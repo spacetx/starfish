@@ -229,19 +229,18 @@ class ImageStack:
         numpy array representing the slice, and a list of the remaining axes beyond the normal x-y
         tile.
 
-        Example:
-            ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
-            ImageStack Implicit axes: X, Y with shape 10, 20, respectively.
-            Called to slice with indices {Z: 5}.
-            Result: a 4-dimensional numpy array with shape (3, 4, 20, 10) and the remaining axes
-                    [H, C].
+        Examples
+        --------
+        ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
+        ImageStack Implicit axes: X, Y with shape 10, 20, respectively.
+        Called to slice with indices {Z: 5}.
+        Result: a 4-dimensional numpy array with shape (3, 4, 20, 10) and the remaining axes [H, C].
 
-        Example:
-            Original axes: H, C, and Z.
-            Implicit axes: X, Y.
-            Called to slice with indices {Z: 5, C: slice(2, 4)}.
-            Result: a 4-dimensional numpy array with shape (3, 2, 20, 10) and the remaining axes
-                    [H, C].
+        Original axes: H, C, and Z.
+        Implicit axes: X, Y.
+        Called to slice with indices {Z: 5, C: slice(2, 4)}.
+        Result: a 4-dimensional numpy array with shape (3, 2, 20, 10) and the remaining axes [H, C].
+
         """
         slice_list, axes = self._build_slice_list(indices)
         result = self._data.values[slice_list]
@@ -258,19 +257,19 @@ class ImageStack:
         numpy array. If the optional parameter axes is provided, that represents the axes of the
         numpy array beyond the x-y tile.
 
-        Example:
-            ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
-            ImageStack Implicit axes: X, Y with shape 10, 20, respectively.
-            Called to set a slice with indices {Z: 5}.
-            Data: a 4-dimensional numpy array with shape (3, 4, 10, 20)
-            Result: Replace the data for Z=5.
+        Examples
+        --------
+        ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
+        ImageStack Implicit axes: X, Y with shape 10, 20, respectively.
+        Called to set a slice with indices {Z: 5}.
+        Data: a 4-dimensional numpy array with shape (3, 4, 10, 20)
+        Result: Replace the data for Z=5.
 
-        Example:
-            ImageStack axes: H, C, and Z. (shape 3, 4, 5)
-            ImageStack Implicit axes: X, Y. (shape 10, 20)
-            Called to set a slice with indices {Z: 5, C: slice(2, 4)}.
-            Data: a 4-dimensional numpy array with shape (3, 2, 10, 20)
-            Result: Replace the data for Z=5, C=2-3.
+        ImageStack axes: H, C, and Z. (shape 3, 4, 5)
+        ImageStack Implicit axes: X, Y. (shape 10, 20)
+        Called to set a slice with indices {Z: 5, C: slice(2, 4)}.
+        Data: a 4-dimensional numpy array with shape (3, 2, 10, 20)
+        Result: Replace the data for Z=5, C=2-3.
         """
         slice_list, expected_axes = self._build_slice_list(indices)
 

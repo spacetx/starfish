@@ -201,7 +201,10 @@ class Fuzzer(object):
     class Del(Checker):
         LETTER = "D"
         def handle(self, fuzz, target):
-            target.__delitem__(fuzz.stack[-1])
+            key = fuzz.stack[-1]
+            if isinstance(key, tuple):
+                key = key[0]
+            target.__delitem__(key)
 
     class Change(Checker):
 
@@ -210,7 +213,10 @@ class Fuzzer(object):
             self.call = call
 
         def handle(self, fuzz, target):
-            target.__setitem__(fuzz.stack[-1], self.call())
+            key = fuzz.stack[-1]
+            if isinstance(key, tuple):
+                key = key[0]
+            target.__setitem__(key, self.call())
 
     def _descend(self, obj, depth=0, prefix=""):
         if isinstance(obj, list):
@@ -222,7 +228,11 @@ class Fuzzer(object):
                 depth -= 1
         elif isinstance(obj, dict):
             for k in obj:
+                # This is something of a workaround in that we need a special
+                # case for object keys since no __getitem__ method will suffice.
+                self.stack.append((k,))
                 self.out.write(f"{self.state()}{' ' * depth}{prefix}{k}:\n")
+                self.stack.pop()
                 if prefix == "- ": prefix = "  "
                 depth += 1
                 self.stack.append(k)

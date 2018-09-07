@@ -6,7 +6,6 @@
     "version",
     "dimensions",
     "shape",
-    "fov",
     "tiles"
   ],
   "additionalProperties": false,
@@ -67,14 +66,6 @@
           ]
         }
       }
-    },
-    "fov": {
-      "type": "integer",
-      "minimum": 0,
-      "description": "Identifies the index of this field of view within a larger experiment.",
-      "examples": [
-        0, 1, 4
-      ]
     },
     "tiles": {
       "minItems": 1,

@@ -1,3 +1,7 @@
+"""
+Tests for IntensityTable.from_spot_data method
+"""
+
 import numpy as np
 import pandas as pd
 import pytest

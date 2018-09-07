@@ -1,3 +1,7 @@
+"""
+Tests for codebook.from_code_array method
+"""
+
 from typing import Any, Dict, List
 
 import numpy as np
@@ -32,7 +36,7 @@ def codebook_array_factory() -> List[Dict[str, Any]]:
 
 def test_from_code_array_has_three_channels_two_rounds_and_two_codes():
     """
-    Tests that from_code_array loads a small codebook that matches expectations about its values
+    Tests that from_code_array loads a small codebook that has the correct size and values
     """
     code_array: List = codebook_array_factory()
     codebook: Codebook = Codebook.from_code_array(code_array)

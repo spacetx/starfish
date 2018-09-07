@@ -1,3 +1,7 @@
+"""
+Tests for IntensityTable.save and IntensityTable.load methods
+"""
+
 import os
 import tempfile
 

@@ -1,3 +1,7 @@
+"""
+Tests for codebook.from_json method
+"""
+
 import json
 import os
 import tempfile
@@ -32,7 +36,10 @@ def codebook_json_data_factory() -> List[Dict[str, Any]]:
 
 
 def test_codebook_loads_from_local_file() -> None:
-    """dumps the codebook data to a temporary json file and reads it back into a Codebook."""
+    """
+    dumps the codebook data to a temporary json file and reads it back into a Codebook,
+    verifying that the data has not changed.
+    """
 
     # dump codebook to disk
     codebook_data: List = codebook_json_data_factory()

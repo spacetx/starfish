@@ -1,3 +1,7 @@
+"""
+Tests for IntensityTable.synthetic_intensities method.
+"""
+
 import numpy as np
 
 from starfish import Codebook, IntensityTable

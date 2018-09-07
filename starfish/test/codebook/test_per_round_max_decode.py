@@ -1,3 +1,7 @@
+"""
+Tests for codebook.per_round_max_decode method
+"""
+
 import numpy as np
 import pandas as pd
 import pytest

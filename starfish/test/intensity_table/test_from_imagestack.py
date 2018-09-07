@@ -1,3 +1,7 @@
+"""
+Tests for IntensityTable.from_image_stack method
+"""
+
 import numpy as np
 
 from starfish import ImageStack, IntensityTable

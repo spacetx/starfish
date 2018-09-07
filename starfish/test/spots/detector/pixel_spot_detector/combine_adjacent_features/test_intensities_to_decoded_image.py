@@ -1,3 +1,7 @@
+"""
+Tests for CombineAdjacentFeatures._intensities_to_decoded_image method
+"""
+
 from typing import Tuple
 
 import numpy as np
@@ -8,8 +12,10 @@ from starfish.types import Features
 
 
 def decoded_intensity_table_factory() -> Tuple[IntensityTable, np.ndarray]:
-    # mock up an ImageStack that has gene labels, including null labels
-    # data doesn't matter
+    """
+    Create an IntensityTable that has gene labels, including null labels. The data doesn't matter,
+    so will use np.zeros
+    """
     data = np.zeros((1, 1, 2, 3, 3))
     labels = np.array(
         [[[0, 1, 1],

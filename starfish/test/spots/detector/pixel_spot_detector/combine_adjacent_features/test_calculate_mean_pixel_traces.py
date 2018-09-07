@@ -1,3 +1,7 @@
+"""
+Tests for CombineAdjacentFeatures._calculate_mean_pixel_traces method
+"""
+
 from typing import Tuple
 
 import numpy as np

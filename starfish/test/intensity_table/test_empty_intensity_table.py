@@ -1,3 +1,7 @@
+"""
+Tests for IntensityTable.empty_intensity_table method
+"""
+
 import numpy as np
 import pandas as pd
 import pytest

@@ -1,3 +1,7 @@
+"""
+Tests for CombineAdjacentFeatures._create_spot_attributes method
+"""
+
 import numpy as np
 from skimage.measure import regionprops
 

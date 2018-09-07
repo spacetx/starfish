@@ -1,3 +1,7 @@
+"""
+Tests for codebook._approximate_nearest_code method
+"""
+
 import numpy as np
 
 from .test_metric_decode import codebook_factory, intensity_table_factory
@@ -5,7 +9,7 @@ from .test_metric_decode import codebook_factory, intensity_table_factory
 
 def test_simple_intensities_find_correct_nearest_code():
     """
-    Test some simple examples for correct decoding. Here the first example should decode to GENE_A,
+    Test four simple examples for correct decoding. Here the first example should decode to GENE_A,
     the second to GENE_B. The third is closer to GENE_A. The fourth is equidistant to GENE_A and
     GENE_B, but it picks GENE_A because GENE_A comes first in the codebook.
     """

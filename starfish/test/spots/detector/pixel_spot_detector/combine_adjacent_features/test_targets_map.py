@@ -1,3 +1,7 @@
+"""
+Tests for starfish.spots._detector.combine_adjacent_features.TargetsMap
+"""
+
 import numpy as np
 
 from starfish.spots._detector.combine_adjacent_features import TargetsMap

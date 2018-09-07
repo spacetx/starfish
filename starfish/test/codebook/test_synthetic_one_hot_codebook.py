@@ -1,3 +1,7 @@
+"""
+Tests for codebook.synthetic_one_hot_codebook method
+"""
+
 import numpy as np
 import pytest
 
@@ -8,7 +12,8 @@ from starfish.types import Features, Indices
 def test_synthetic_one_hot_codebook_returns_requested_codebook():
     """
     Make a request and verify that the size and shape match the request, and
-    that each round has only one round 'on'. """
+    that each round has only one round 'on'.
+    """
     codebook: Codebook = Codebook.synthetic_one_hot_codebook(
         n_round=4,
         n_channel=2,

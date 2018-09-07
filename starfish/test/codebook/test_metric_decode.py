@@ -1,3 +1,7 @@
+"""
+Tests for codebook.metric_decode method
+"""
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -7,7 +11,9 @@ from starfish.types import Features, Indices, SpotAttributes
 
 
 def intensity_table_factory(data: np.ndarray=np.array([[[0, 3], [4, 0]]])) -> IntensityTable:
-    """IntensityTable with a single feature that was measured over 2 channels and 2 rounds."""
+    """
+    Produces an IntensityTable with a single feature that was measured over 2 channels and 2 rounds.
+    """
 
     # generates spot attributes equal in size to the number of passed features.
     # each attribute has coordinates (z, y, x) equal to the feature index, and radius 1.

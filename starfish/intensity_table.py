@@ -138,6 +138,9 @@ class IntensityTable(xr.DataArray):
                 f'intensities must be a (features * ch * round) 3-d tensor. Provided intensities '
                 f'shape ({intensities.shape}) is invalid.')
 
+        if not isinstance(spot_attributes, SpotAttributes):
+            raise TypeError('parameter spot_attributes must be a starfish SpotAttributes object.')
+
         coords = cls._build_xarray_coords(
             spot_attributes,
             np.arange(intensities.shape[1]),
@@ -298,13 +301,15 @@ class IntensityTable(xr.DataArray):
         y = np.arange(ymin, ymax)
         x = np.arange(xmin, xmax)
 
-        attribute_data = pd.DataFrame(
+        feature_attribute_data = pd.DataFrame(
             data=np.array(list(product(z, y, x))),
             columns=['z', 'y', 'x']
         )
-        attribute_data[Features.SPOT_RADIUS] = np.full(attribute_data.shape[0], fill_value=0.5)
+        feature_attribute_data[Features.SPOT_RADIUS] = np.full(
+            feature_attribute_data.shape[0], fill_value=0.5
+        )
 
-        pixel_coordinates = SpotAttributes(attribute_data)
+        pixel_coordinates = SpotAttributes(feature_attribute_data)
 
         return IntensityTable.from_spot_data(intensity_data, pixel_coordinates)
 

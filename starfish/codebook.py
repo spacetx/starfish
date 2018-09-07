@@ -470,12 +470,12 @@ class Codebook(xr.DataArray):
         metric_outputs, targets = self._approximate_nearest_code(
             norm_codes, norm_intensities, metric=metric)
 
-        passes_filters = np.ones_like(targets, dtype=np.bool)
-
-        # indicate that targets with high hamming distances or low intensities should be filtered
-        intensity_mask = norms < min_intensity
-        distance_mask = metric_outputs > max_distance
-        passes_filters[intensity_mask | distance_mask] = False
+        # only targets with low hamming distances and high intensities should be retained
+        passes_filters = np.logical_and(
+            norms >= min_intensity,
+            metric_outputs <= max_distance,
+            dtype=np.bool
+        )
 
         # set targets, distances, and filtering results
         norm_intensities[Features.TARGET] = (Features.AXIS, targets)
@@ -537,6 +537,7 @@ class Codebook(xr.DataArray):
         max_channels = intensities.argmax(Indices.CH.value)
         codes = self.argmax(Indices.CH.value)
 
+        # TODO ambrosejcarr, dganguli: explore this quality score further
         # calculate distance scores by evaluating the fraction of signal in each round that is
         # found in the non-maximal channels.
         max_intensities = intensities.max(Indices.CH.value)
@@ -553,8 +554,7 @@ class Codebook(xr.DataArray):
             targets[np.where(a[i] == b)[0]] = codes[Features.TARGET][i]
 
         # a code passes filters if it decodes successfully
-        passes_filters = np.ones_like(targets, dtype=np.bool)
-        passes_filters[pd.isnull(targets)] = False
+        passes_filters = ~pd.isnull(targets)
 
         intensities[Features.TARGET] = (Features.AXIS, targets.astype('U'))
         intensities[Features.DISTANCE] = (Features.AXIS, distance)

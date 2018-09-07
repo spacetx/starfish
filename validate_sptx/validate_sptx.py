@@ -38,7 +38,7 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     Returns
     -------
     bool :
-        True, if object valid, else False
+        True, if object valid or fuzz=True, else False
     """
 
     valid = True

@@ -18,7 +18,7 @@ def test_iss_pipeline_cropped_data():
 
     # load the experiment
     experiment_json = (
-        "https://dmf0bdeheu4zf.cloudfront.net/20180828/ISS-TEST/experiment.json"
+        "https://dmf0bdeheu4zf.cloudfront.net/20180905/ISS-TEST/experiment.json"
     )
     experiment = Experiment.from_json(experiment_json)
     dots = experiment.fov()['dots']

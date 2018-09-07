@@ -108,9 +108,9 @@ class Experiment:
     codebook      Returns the codebook associated with this experiment.
     extras        Returns the extras dictionary associated with this experiment.
     """
-    CURRENT_VERSION = Version("1.0.0")
-    MIN_SUPPORTED_VERSION = Version("1.0.0")
-    MAX_SUPPORTED_VERSION = Version("1.0.0")
+    CURRENT_VERSION = Version("2.0.0")
+    MIN_SUPPORTED_VERSION = Version("2.0.0")
+    MAX_SUPPORTED_VERSION = Version("2.0.0")
 
     def __init__(
             self,

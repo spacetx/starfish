@@ -23,5 +23,7 @@ script:
     .venv/bin/pip install starfish;
     make PYTHON=.venv/bin/python run_notebooks;
   fi
+- |-
+  docker run -ti --rm spacetx/starfish build --fov-count 1 --hybridization-dimensions '{"z": 1}' /tmp/
 after_success:
 - bash <(curl -s https://codecov.io/bash)

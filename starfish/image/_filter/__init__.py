@@ -49,10 +49,16 @@ class Filter(PipelineComponent):
 
         print('Filtering images ...' + str(args.filter_algorithm_class))
         stack = ImageStack.from_path_or_url(args.input)
+        print("INPUT")
+        print(stack.numpy_array[0, 0, 0, 50:60, 60:70])
 
         instance = args.filter_algorithm_class(**vars(args))
         output = instance.run(stack, in_place=False)
         output.write(args.output)
+
+        print("OUTPUT")
+        print(output.numpy_array[0, 0, 0, 50:60, 60:70])
+
 
 
 

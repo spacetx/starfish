@@ -30,6 +30,8 @@ def get_jsonpath_from_file(json_filepath_components: Sequence[str], jsonpath: st
 
 
 class TestWithIssData(CLITest):
+    __test__ = True
+
     SUBDIRS = (
         "raw",
         "formatted",

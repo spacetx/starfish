@@ -27,7 +27,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             if True, this scales all rounds to have unit L2 norm across channels
         """
         self.thresh = float(thresh)
-        self.normalize = normalize
+        self.normalize = normalize == "True"
 
     @classmethod
     def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
@@ -56,7 +56,6 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             if in-place is False, return the results of filter as a new stack
 
         """
-
         channels_per_round = stack._data.groupby(Indices.ROUND.value)
         channels_per_round = tqdm(channels_per_round) if verbose else channels_per_round
 
@@ -86,5 +85,4 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                                                  ch_magnitude,
                                                  where=magnitude_mask
                                                  )
-
         return stack

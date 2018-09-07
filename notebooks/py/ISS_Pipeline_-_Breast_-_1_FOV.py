@@ -166,7 +166,7 @@ with warnings.catch_warnings():
 
 # EPY: START code
 # Verify the spot count is reasonable.
-spot_count = intensities.shape[0]
+spot_count = intensities.loc[intensities[Features.PASSES_FILTERS]].sizes[Features.AXIS]
 assert 1000 < spot_count < 5000
 spot_count
 # EPY: END code
@@ -214,7 +214,7 @@ decoded = experiment.codebook.decode_per_round_max(intensities)
 # EPY: END markdown
 
 # EPY: START code
-genes, counts = np.unique(decoded[Features.TARGET], return_counts=True)
+genes, counts = np.unique(decoded.loc[decoded[Features.PASSES_FILTERS]][Features.TARGET], return_counts=True)
 table = pd.Series(counts, index=genes).sort_values(ascending=False)
 # EPY: END code
 

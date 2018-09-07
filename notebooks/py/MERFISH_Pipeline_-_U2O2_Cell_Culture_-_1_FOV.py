@@ -190,6 +190,7 @@ psd = SpotFinder.PixelSpotDetector(
 )
 
 spot_intensities, prop_results = psd.run(primary_image)
+spot_intensities = spot_intensities.loc[spot_intensities[Features.PASSES_FILTERS]]
 spot_intensities
 # EPY: END code
 

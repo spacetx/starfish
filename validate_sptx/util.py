@@ -248,7 +248,8 @@ class Fuzzer(object):
             self.out.write(f"{self.state()}{' ' * depth}{prefix}{obj}\n")
 
 class Checker(object):
-    LETTER = "?"
+
+    LETTER : str = "?"
 
     def check(self, fuzz: Fuzzer) -> str:
         """create a copy of the current state of the object tree,

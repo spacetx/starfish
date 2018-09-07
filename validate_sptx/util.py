@@ -148,58 +148,69 @@ class Fuzzer(object):
         self.validator = validator
         self.obj = obj
         self.out = out
-        self.stack = []
+        self.stack = None
 
     def fuzz(self):
-        self.out.write(f"{self.state()}\t\n")
-        self._descend(self.obj)
+        header = f"{self.state()}"
+        header += "If the letter is present, mutation is valid!"
+        self.out.write(f"{header}\n")
+        self.out.write("".join([x in ("\t", "\n") and x or "-" for x in header]))
+        self.out.write("\n")
+        self.stack = []
+        try:
+            self._descend(self.obj)
+        finally:
+            self.stack = None
 
     def state(self):
         rv = [
-            self.check_add(),
-            self.check_delete(),
-            self.check_change("I", 123456789),
-            self.check_change("S", "fake"),
+            self.Add().check(self),
+            self.Del().check(self),
+            self.Change("I", lambda *args: 123456789).check(self),
+            self.Change("S", lambda *args: "fake").check(self),
+            self.Change("M", lambda *args: dict()).check(self),
+            self.Change("L", lambda *args: list()).check(self),
         ]
         return ' '.join(rv) + "\t"
 
-    def check_add(self):
-        # Don't mess with the top level
-        if not self.stack: return "A"
-        dupe = copy.deepcopy(self.obj)
-        target = dupe
-        for level in self.stack[0:-1]:
-            target = target.__getitem__(level)
-        if isinstance(target, dict):
-            target["fake"] = "!"
-        elif isinstance(target, list):
-            target.append("!")
-        else:
-            raise Exception("unknown")
-        valid = self.validator.is_valid(dupe)
-        return valid and " " or "X"
+    class Checker(object):
 
-    def check_delete(self):
-        # Don't mess with the top level
-        if not self.stack: return "D"
-        dupe = copy.deepcopy(self.obj)
-        target = dupe
-        for level in self.stack[0:-1]:
-            target = target.__getitem__(level)
-        target.__delitem__(self.stack[-1])
-        valid = self.validator.is_valid(dupe)
-        return valid and " " or "X"
+        def check(self, fuzz):
+            # Don't mess with the top level
+            if fuzz.stack is None: return self.LETTER
+            if not fuzz.stack: return "-"
+            # Operate on a copy for mutating
+            dupe = copy.deepcopy(fuzz.obj)
+            target = dupe
+            for level in fuzz.stack[0:-1]:
+                target = target.__getitem__(level)
+            self.handle(fuzz, target)
+            valid = fuzz.validator.is_valid(dupe)
+            return valid and self.LETTER or "."
 
-    def check_change(self, big, value):
-        # Don't mess with the top level
-        if not self.stack: return big
-        dupe = copy.deepcopy(self.obj)
-        target = dupe
-        for level in self.stack[0:-1]:
-            target = target.__getitem__(level)
-        target.__setitem__(self.stack[-1], value)
-        valid = self.validator.is_valid(dupe)
-        return valid and " " or "X"
+    class Add(Checker):
+        LETTER = "A"
+        def handle(self, fuzz, target):
+            if isinstance(target, dict):
+                target["fake"] = "!"
+            elif isinstance(target, list):
+                target.append("!")
+            else:
+                raise Exception("unknown")
+
+    class Del(Checker):
+        LETTER = "D"
+        def handle(self, fuzz, target):
+            target.__delitem__(fuzz.stack[-1])
+
+    class Change(Checker):
+
+        def __init__(self, letter, call):
+            self.LETTER = letter
+            self.call = call
+
+        def handle(self, fuzz, target):
+            target.__setitem__(fuzz.stack[-1], self.call())
 
     def _descend(self, obj, depth=0, prefix=""):
         if isinstance(obj, list):

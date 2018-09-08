@@ -4,7 +4,6 @@ import argparse
 import cProfile
 from pstats import Stats
 
-from validate_sptx.cli import Cli as ValidateCli
 from starfish.experiment.builder.cli import Cli as BuilderCli
 from starfish.image import (
     Filter,
@@ -16,6 +15,7 @@ from starfish.spots import (
     SpotFinder,
     TargetAssignment,
 )
+from validate_sptx.cli import Cli as ValidateCli
 from .util.argparse import FsExistsType
 
 

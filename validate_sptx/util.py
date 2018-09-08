@@ -3,11 +3,10 @@ import json
 import os
 import sys
 import warnings
+from typing import Any, Dict, IO, Iterator, List, Optional, Union
 
+from jsonschema import Draft4Validator, RefResolver, ValidationError
 from pkg_resources import resource_filename
-from typing import Any, Dict, IO, Iterator, List, Optional
-
-from jsonschema import RefResolver, Draft4Validator, ValidationError
 
 
 class SpaceTxValidator:
@@ -78,7 +77,7 @@ class SpaceTxValidator:
             fmt += "\tFilename:       \t{filename}\n"
         for error in error_iterator:
             message = fmt.format(
-                stars="***" * level,  level=str(level), path="/".join(error.absolute_schema_path),
+                stars="***" * level, level=str(level), path="/".join(error.absolute_schema_path),
                 message=error.message, cause=error.cause, schema=error.schema.get("$id", "unknown"),
                 filename=filename,
             )
@@ -105,13 +104,19 @@ class SpaceTxValidator:
         target_object = self.load_json(target_file)
         return self.validate_object(target_object, target_file)
 
-    def validate_object(self, target_object: Dict, target_file: str=None, fuzz: bool=False) -> bool:
+    def validate_object(
+            self,
+            target_object: Union[dict, list],
+            target_file: str=None,
+            fuzz: bool=False,
+    ) -> bool:
         """validate a loaded json object, returning True if valid, and False otherwise
 
         Parameters
         ----------
         target_object : Dict
-            loaded json object to be validated against the schem passed to this object's constructor
+            loaded json object to be validated against the schema passed to this object's
+            constructor
         target_file : str
             informational string regarding the source file of the given object
         fuzz: bool
@@ -238,10 +243,11 @@ class Fuzzer(object):
                 self.stack.append((k,))
                 self.out.write(f"{self.state()}{' ' * depth}{prefix}{k}:\n")
                 self.stack.pop()
-                if prefix == "- ": prefix = "  "
+                if prefix == "- ":
+                    prefix = "  "
                 depth += 1
                 self.stack.append(k)
-                self.descend(obj[k], depth, prefix="  "+prefix)
+                self.descend(obj[k], depth, prefix="  " + prefix)
                 self.stack.pop()
                 depth -= 1
         else:
@@ -249,7 +255,7 @@ class Fuzzer(object):
 
 class Checker(object):
 
-    LETTER : str = "?"
+    LETTER: str = "?"
 
     def check(self, fuzz: Fuzzer) -> str:
         """create a copy of the current state of the object tree,
@@ -267,8 +273,10 @@ class Checker(object):
 
         """
         # Don't mess with the top level
-        if fuzz.stack is None: return self.LETTER
-        if not fuzz.stack: return "-"
+        if fuzz.stack is None:
+            return self.LETTER
+        if not fuzz.stack:
+            return "-"
         # Operate on a copy for mutating
         dupe = copy.deepcopy(fuzz.obj)
         target = dupe
@@ -279,7 +287,7 @@ class Checker(object):
         return valid and self.LETTER or "."
 
     def handle(self, fuzz, target):
-       raise NotImplementedError()
+        raise NotImplementedError()
 
 class Add(Checker):
 

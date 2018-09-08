@@ -5,9 +5,7 @@ MODULES=starfish examples validate_sptx
 all:	lint mypy test
 
 lint:
-	# TODO: (ttung) suppressing lint checks for separate high-churn PR.
-	# flake8 $(MODULES)
-	echo "LINT SUPPRESSED"
+	flake8 $(MODULES)
 
 test:
 	pytest -v -n 8 --cov starfish --cov validate_sptx

@@ -1,7 +1,5 @@
-import os
-from pkg_resources import resource_filename
-
 import pytest
+from pkg_resources import resource_filename
 
 from .util import SpaceTxValidator
 

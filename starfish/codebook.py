@@ -186,7 +186,7 @@ class Codebook(xr.DataArray):
             Codebook :
                 Codebook with shape (targets, channels, imaging_rounds)
 
-            """
+        """
 
         # guess the max round and channel if not provided, otherwise check provided values are valid
         max_round, max_ch = 0, 0
@@ -254,49 +254,50 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        >>> from starfish.types import Indices
-        >>> from starfish.codebook import Codebook
-        >>> import tempfile
-        >>> import json
-        >>> import os
-        >>> dir_ = tempfile.mkdtemp()
+        Create a codebook from in-memory data::
 
-        >>> codebook = [
-        >>>     {
-        >>>         Features.CODEWORD: [
-        >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-        >>>             {Indices.ROUND.value: 1, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-        >>>         ],
-        >>>         Features.TARGET: "ACTB_human"
-        >>>     },
-        >>>     {
-        >>>         Features.CODEWORD: [
-        >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-        >>>             {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1},
-        >>>         ],
-        >>>         Features.TARGET: "ACTB_mouse"
-        >>>     },
-        >>> ]
-        >>> # make a fake file
-        >>> json_codebook = os.path.join(dir_, 'codebook.json')
-        >>> with open(json_codebook, 'w') as f:
-        >>>     json.dump(codebook, f)
-        >>> # read codebook from file
-        >>> Codebook.from_json(json_codebook)
-       <xarray.Codebook (target: 2, c: 4, h: 2)>
-        array([[[0, 0],
-                [0, 0],
-                [0, 0],
-                [1, 1]],
+            >>> from starfish.types import Indices
+            >>> from starfish.codebook import Codebook
+            >>> import tempfile
+            >>> import json
+            >>> import os
+            >>> dir_ = tempfile.mkdtemp()
+            >>> codebook = [
+            >>>     {
+            >>>         Features.CODEWORD: [
+            >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>             {Indices.ROUND.value: 1, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>         ],
+            >>>         Features.TARGET: "ACTB_human"
+            >>>     },
+            >>>     {
+            >>>         Features.CODEWORD: [
+            >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>             {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1},
+            >>>         ],
+            >>>         Features.TARGET: "ACTB_mouse"
+            >>>     },
+            >>> ]
+            >>> # make a fake file
+            >>> json_codebook = os.path.join(dir_, 'codebook.json')
+            >>> with open(json_codebook, 'w') as f:
+            >>>     json.dump(codebook, f)
+            >>> # read codebook from file
+            >>> Codebook.from_json(json_codebook)
+           <xarray.Codebook (target: 2, c: 4, h: 2)>
+            array([[[0, 0],
+                    [0, 0],
+                    [0, 0],
+                    [1, 1]],
 
-               [[0, 0],
-                [0, 1],
-                [0, 0],
-                [1, 0]]], dtype=uint8)
-        Coordinates:
-          * target     (target) object 'ACTB_human' 'ACTB_mouse'
-          * c          (c) int64 0 1 2 3
-          * h          (h) int64 0 1
+                   [[0, 0],
+                    [0, 1],
+                    [0, 0],
+                    [1, 0]]], dtype=uint8)
+            Coordinates:
+              * target     (target) object 'ACTB_human' 'ACTB_mouse'
+              * c          (c) int64 0 1 2 3
+              * h          (h) int64 0 1
 
         Returns
         -------
@@ -560,20 +561,22 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        >>> from starfish.codebook import Codebook
-        >>> Codebook.synthetic_one_hot_codebook(n_round=2, n_channel=3, n_codes=2)
-        <xarray.Codebook (target: 2, c: 3, h: 2)>
-        array([[[0, 1],
-                [0, 0],
-                [1, 0]],
+        Create a Codebook with 2 rounds, 3 channels, and 2 codes::
 
-               [[1, 1],
-                [0, 0],
-                [0, 0]]], dtype=uint8)
-        Coordinates:
-          * target     (target) object b25180dc-8af5-48f1-bff4-b5649683516d ...
-          * c          (c) int64 0 1 2
-          * h          (h) int64 0 1
+            >>> from starfish.codebook import Codebook
+            >>> Codebook.synthetic_one_hot_codebook(n_round=2, n_channel=3, n_codes=2)
+            <xarray.Codebook (target: 2, c: 3, h: 2)>
+            array([[[0, 1],
+                    [0, 0],
+                    [1, 0]],
+
+                   [[1, 1],
+                    [0, 0],
+                    [0, 0]]], dtype=uint8)
+            Coordinates:
+              * target     (target) object b25180dc-8af5-48f1-bff4-b5649683516d ...
+              * c          (c) int64 0 1 2
+              * h          (h) int64 0 1
 
         Returns
         -------

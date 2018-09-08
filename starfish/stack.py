@@ -32,25 +32,38 @@ _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'req
 class ImageStack:
     """Container for a TileSet (field of view)
 
+    Attributes
+    ----------
+    num_chs : int
+        the number of channels stored in the image tensor
+    num_rounds : int
+        the number of imaging rounds stored in the image tensor
+    num_zlayers : int
+        the number of z-layers stored in the image tensor
+    numpy_array : np.ndarray
+        the 5-d image tensor is stored in this array
+    raw_shape : Tuple[int]
+        the shape of the image tensor (in integers)
+    shape : Dict[str, int]
+           the shape of the image tensor by categorical index (channels, imaging rounds, z-layers)
+
     Methods
     -------
-    get_slice    retrieve a slice of the image tensor
-    set_slice    set a slice of the image tensor
-    apply        apply a 2d or 3d function across all Tiles in the image tensor
-    max_proj     return a max projection over one or more axis of the image tensor
-    show_stack   show an interactive, pageable view of the image tensor, or a slice of the image
-                 tensor
-    write        save the (potentially modified) image tensor to disk
+    get_slice(indices)
+        retrieve a slice of the image tensor
+    set_slice(indices, data, axes=None)
+        set a slice of the image tensor
+    apply(func, is_volume=False, in_place=True, verbose=False, n_processes=None)
+        apply a 2d or 3d function across all Tiles in the image tensor
+    max_proj(*dims)
+        return a max projection over one or more axis of the image tensor
+    show_stack(indices, color_map='gray', figure_size=(10, 10), rescale=False, p_min=None, \
+            p_max=None)
+        show an interactive, pageable view of the image tensor, or a slice of the image tensor
+    write(filepath, tile_opener=None)
+        save the (potentially modified) image tensor to disk
 
-    Properties
-    ----------
-    num_chs      the number of channels stored in the image tensor
-    num_rounds   the number of imaging rounds stored in the image tensor
-    num_zlayers  the number of z-layers stored in the image tensor
-    numpy_array  the 5-d image tensor is stored in this array
-    raw_shape    the shape of the image tensor (in integers)
-    shape        the shape of the image tensor by categorical index (channels, imaging rounds,
-                 z-layers)
+
     """
 
     AXES_DATA: Mapping[Indices, _DimensionMetadata] = {
@@ -147,8 +160,8 @@ class ImageStack:
           3. url: hybridization.json  baseurl: https://www.example.com/images
           4. url: images/hybridization.json  baseurl: https://www.example.com
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         url : str
             Either an absolute URL or a relative URL referring to the image to be read.
         baseurl : Optional[str]
@@ -168,8 +181,8 @@ class ImageStack:
           1. url_or_path: file:///Users/starfish-user/images/hybridization.json
           2. url_or_path: /Users/starfish-user/images/hybridization.json
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         url_or_path : str
             Either an absolute URL or a filesystem path to an imagestack.
         """

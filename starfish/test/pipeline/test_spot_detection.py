@@ -9,7 +9,7 @@ from starfish.spots._detector.local_max_peak_finder import LocalMaxPeakFinder
 from starfish.stack import ImageStack
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
-from starfish.test.dataset_fixtures import (
+from starfish.test.dataset_fixtures import (  # noqa: F401
     synthetic_dataset_with_truth_values,
     synthetic_dataset_with_truth_values_and_called_spots,
     synthetic_single_spot_2d,

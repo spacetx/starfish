@@ -24,7 +24,7 @@ from tqdm import tqdm
 
 from starfish.errors import DataFormatWarning
 from starfish.intensity_table import IntensityTable
-from starfish.types import Coordinates, Indices, SpotAttributes
+from starfish.types import Coordinates, Indices
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 

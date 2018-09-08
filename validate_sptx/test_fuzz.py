@@ -1,5 +1,3 @@
-import os
-
 from pkg_resources import resource_filename
 
 from .util import Fuzzer, SpaceTxValidator

@@ -5,7 +5,7 @@ from starfish.intensity_table import IntensityTable
 from starfish.stack import ImageStack
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
-from starfish.test.dataset_fixtures import (
+from starfish.test.dataset_fixtures import (  # noqa: F401
     codebook_intensities_image_for_single_synthetic_spot,
     loaded_codebook,
     simple_codebook_array,

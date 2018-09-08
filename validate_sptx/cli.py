@@ -1,8 +1,5 @@
-import argparse
-import json
 import sys
 
-from starfish.util.argparse import FsExistsType
 from validate_sptx.validate_sptx import validate
 
 

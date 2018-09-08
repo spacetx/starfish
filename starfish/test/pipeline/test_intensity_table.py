@@ -9,7 +9,7 @@ from starfish.spots._detector.combine_adjacent_features import combine_adjacent_
 from starfish.stack import ImageStack
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
-from starfish.test.dataset_fixtures import (
+from starfish.test.dataset_fixtures import (  # noqa: F401
     loaded_codebook,
     simple_codebook_array,
     simple_codebook_json,

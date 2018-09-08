@@ -1,13 +1,11 @@
 import json
-import os
 import posixpath
 import sys
-from pkg_resources import resource_filename
+from typing import Dict
 
 import click
+from pkg_resources import resource_filename
 from slicedimage.io import resolve_path_or_url
-
-from typing import Dict
 
 from .util import SpaceTxValidator
 

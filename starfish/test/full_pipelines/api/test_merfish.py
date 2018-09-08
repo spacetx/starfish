@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from starfish import Codebook, Experiment
+from starfish import Experiment
 from starfish.image._filter.gaussian_high_pass import GaussianHighPass
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
 from starfish.image._filter.richardson_lucy_deconvolution import DeconvolvePSF
@@ -16,7 +16,7 @@ def test_merfish_pipeline_cropped_data():
 
     # load the experiment
     experiment_json = (
-        "https://dmf0bdeheu4zf.cloudfront.net/20180828/MERFISH-TEST/experiment.json"
+        "https://dmf0bdeheu4zf.cloudfront.net/20180905/MERFISH-TEST/experiment.json"
     )
     experiment = Experiment.from_json(experiment_json)
     primary_image = experiment.fov().primary_image

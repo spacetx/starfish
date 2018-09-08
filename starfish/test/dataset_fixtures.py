@@ -36,7 +36,7 @@ def merfish_stack() -> Experiment:
         starfish.io.Stack object containing MERFISH data
     """
     s = Experiment.from_json(
-        'https://dmf0bdeheu4zf.cloudfront.net/20180828/MERFISH/experiment.json'
+        'https://dmf0bdeheu4zf.cloudfront.net/20180905/MERFISH/experiment.json'
     )
     return deepcopy(s)
 

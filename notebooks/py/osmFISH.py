@@ -19,7 +19,7 @@ import os
 # EPY: END markdown
 
 # EPY: START code
-experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180828/osmFISH/experiment.json")
+experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180905/osmFISH/experiment.json")
 # EPY: END code
 
 # EPY: START markdown

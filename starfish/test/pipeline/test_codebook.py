@@ -8,7 +8,7 @@ import pytest
 from starfish.codebook import Codebook
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
-from starfish.test.dataset_fixtures import (
+from starfish.test.dataset_fixtures import (  # noqa: F401
     euclidean_decoded_intensities,
     loaded_codebook,
     per_channel_max_decoded_intensities,

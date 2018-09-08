@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from starfish import Codebook, Experiment
+from starfish import Experiment
 from starfish.image._filter.scale_by_percentile import ScaleByPercentile
 from starfish.image._filter.zero_by_channel_magnitude import ZeroByChannelMagnitude
 from starfish.spots._detector.pixel_spot_detector import PixelSpotDetector
@@ -15,7 +15,7 @@ def test_dartfish_pipeline_cropped_data():
 
     # load the experiment
     experiment_json = (
-        "https://dmf0bdeheu4zf.cloudfront.net/20180828/DARTFISH-TEST/experiment.json"
+        "https://dmf0bdeheu4zf.cloudfront.net/20180905/DARTFISH-TEST/experiment.json"
     )
     experiment = Experiment.from_json(experiment_json)
 

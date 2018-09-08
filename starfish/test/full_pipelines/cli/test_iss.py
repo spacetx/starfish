@@ -1,9 +1,7 @@
 import json
 import os
 import shutil
-import subprocess
 import sys
-import tempfile
 import unittest
 from typing import Sequence
 
@@ -13,7 +11,6 @@ import pandas as pd
 
 from starfish.intensity_table import IntensityTable
 from starfish.types import Features
-from starfish.util import clock
 from starfish.util import exec
 
 

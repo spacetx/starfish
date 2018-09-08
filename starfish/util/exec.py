@@ -18,7 +18,7 @@ from starfish.util import clock
 
 def stages(commands: Sequence[Sequence[Union[str, Callable]]],
            subdirs: Sequence[str]=None,
-           keep_data:bool=False) -> None:
+           keep_data: bool=False) -> None:
     """
     Execute a list of commands in a temporary directory
     cleaning them up unless otherwise requested.

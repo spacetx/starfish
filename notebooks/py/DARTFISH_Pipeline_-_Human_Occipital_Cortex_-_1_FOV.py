@@ -137,7 +137,7 @@ spot_intensities, results = psd.run(zero_norm_stack)
 # EPY: START code
 spots_df = spot_intensities.to_features_dataframe()
 spots_df['area'] = np.pi*spots_df['radius']**2
-spots_df = spots_df.loc[spots_df[Features.PASSES_FILTERS]]
+spots_df = spots_df.loc[spots_df[Features.PASSES_THRESHOLDS]]
 spots_df.head()
 # EPY: END code
 
@@ -227,7 +227,7 @@ psd = SpotFinder.PixelSpotDetector(
 )
 
 spot_intensities, results = psd.run(zero_norm_stack)
-spot_intensities = IntensityTable(spot_intensities.where(spot_intensities['passes_filters'], drop=True))
+spot_intensities = IntensityTable(spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True))
 # EPY: END code
 
 # EPY: START code

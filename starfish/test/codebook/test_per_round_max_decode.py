@@ -75,7 +75,7 @@ def test_example_intensity_decodes_to_gene_a():
     decoded_intensities = codebook.decode_per_round_max(intensities)
 
     assert decoded_intensities[Features.TARGET] == 'GENE_A'
-    assert np.array_equal(decoded_intensities[Features.PASSES_FILTERS], [True])
+    assert np.array_equal(decoded_intensities[Features.PASSES_THRESHOLDS], [True])
     assert np.array_equal(decoded_intensities[Features.DISTANCE], [0])
 
 
@@ -95,7 +95,7 @@ def test_example_intensity_that_has_no_match_is_assigned_nan():
 
     # assert that the feature did not decode
     assert decoded_intensities[Features.TARGET] == 'nan'
-    assert np.array_equal(decoded_intensities[Features.PASSES_FILTERS], [False])
+    assert np.array_equal(decoded_intensities[Features.PASSES_THRESHOLDS], [False])
 
     # distance is calculated as the fraction of signal NOT in the selected channel. Here all of
     # the signal is in the max channel, so distance is 0.

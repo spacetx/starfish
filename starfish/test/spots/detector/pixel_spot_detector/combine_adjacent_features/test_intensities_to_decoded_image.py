@@ -37,7 +37,7 @@ def decoded_intensity_table_factory() -> Tuple[IntensityTable, np.ndarray]:
     # label the third column of this data as failing filters
     passes_filters = np.ones(data.shape, dtype=bool)
     passes_filters[:, :, :, :, -1] = 0
-    intensities[Features.PASSES_FILTERS] = (Features.AXIS, np.ravel(passes_filters))
+    intensities[Features.PASSES_THRESHOLDS] = (Features.AXIS, np.ravel(passes_filters))
 
     return intensities, labels_with_nan
 

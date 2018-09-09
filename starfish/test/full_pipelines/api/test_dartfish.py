@@ -120,12 +120,12 @@ def test_dartfish_pipeline_cropped_data():
 
     spot_intensities, results = psd.run(zero_norm_stack)
     spots_df = IntensityTable(
-        spot_intensities.where(spot_intensities[Features.PASSES_FILTERS], drop=True)
+        spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True)
     ).to_features_dataframe()
     spots_df['area'] = np.pi * spots_df['radius'] ** 2
 
     # verify number of spots detected
-    spots_passing_filters = spot_intensities[Features.PASSES_FILTERS].sum()
+    spots_passing_filters = spot_intensities[Features.PASSES_THRESHOLDS].sum()
     assert spots_passing_filters == 53
 
     # compare to benchmark data -- note that this particular part of the dataset appears completely

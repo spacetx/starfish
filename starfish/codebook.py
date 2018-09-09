@@ -470,7 +470,7 @@ class Codebook(xr.DataArray):
         metric_outputs, targets = self._approximate_nearest_code(
             norm_codes, norm_intensities, metric=metric)
 
-        # only targets with low hamming distances and high intensities should be retained
+        # only targets with low distances and high intensities should be retained
         passes_filters = np.logical_and(
             norms >= min_intensity,
             metric_outputs <= max_distance,
@@ -480,7 +480,7 @@ class Codebook(xr.DataArray):
         # set targets, distances, and filtering results
         norm_intensities[Features.TARGET] = (Features.AXIS, targets)
         norm_intensities[Features.DISTANCE] = (Features.AXIS, metric_outputs)
-        norm_intensities[Features.PASSES_FILTERS] = (Features.AXIS, passes_filters)
+        norm_intensities[Features.PASSES_THRESHOLDS] = (Features.AXIS, passes_filters)
 
         # norm_intensities is a DataArray, make it back into an IntensityTable
         return IntensityTable(norm_intensities)
@@ -558,7 +558,7 @@ class Codebook(xr.DataArray):
 
         intensities[Features.TARGET] = (Features.AXIS, targets.astype('U'))
         intensities[Features.DISTANCE] = (Features.AXIS, distance)
-        intensities[Features.PASSES_FILTERS] = (Features.AXIS, passes_filters)
+        intensities[Features.PASSES_THRESHOLDS] = (Features.AXIS, passes_filters)
 
         return intensities
 

@@ -40,5 +40,5 @@ class Features:
     CODE_VALUE = 'v'
     SPOT_RADIUS = 'radius'
     DISTANCE = 'distance'
-    PASSES_FILTERS = 'passes_filters'
+    PASSES_THRESHOLDS = 'passes_thresholds'
     CELL_ID = 'cell_id'

@@ -163,7 +163,7 @@ def test_merfish_pipeline_cropped_data():
     spot_intensities, prop_results = psd.run(low_passed)
 
     # verify that the number of spots are correct
-    spots_passing_filters = spot_intensities[Features.PASSES_FILTERS].sum()
+    spots_passing_filters = spot_intensities[Features.PASSES_THRESHOLDS].sum()
     assert spots_passing_filters == 1019
     # assert spot_intensities.sizes[Features.AXIS] == 1019
 
@@ -173,7 +173,7 @@ def test_merfish_pipeline_cropped_data():
     benchmark_counts = bench.groupby('gene')['gene'].count()
 
     spot_intensities_passing_filters = spot_intensities.where(
-        spot_intensities[Features.PASSES_FILTERS], drop=True
+        spot_intensities[Features.PASSES_THRESHOLDS], drop=True
     )
     genes, counts = np.unique(spot_intensities_passing_filters[Features.TARGET], return_counts=True)
     result_counts = pd.Series(counts, index=genes)

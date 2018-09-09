@@ -138,7 +138,7 @@ class CombineAdjacentFeatures:
 
         int_targets = target_map.targets_as_int(intensities[Features.TARGET].values)
         if mask_filtered_features:
-            fails_filters = np.where(~intensities[Features.PASSES_FILTERS])[0]
+            fails_filters = np.where(~intensities[Features.PASSES_THRESHOLDS])[0]
             int_targets[fails_filters] = 0
 
         decoded_image: np.ndarray = int_targets.reshape((max_z, max_y, max_x))
@@ -356,7 +356,7 @@ class CombineAdjacentFeatures:
 
         # augment the SpotAttributes with filtering results and distances from nearest codes
         spot_attributes.data[Features.DISTANCE] = mean_pixel_traces[Features.DISTANCE]
-        spot_attributes.data[Features.PASSES_FILTERS] = passes_filter
+        spot_attributes.data[Features.PASSES_THRESHOLDS] = passes_filter
 
         # create new indexes for the output IntensityTable
         channel_index = mean_pixel_traces.indexes[Indices.CH]

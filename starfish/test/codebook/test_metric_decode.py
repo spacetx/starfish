@@ -87,7 +87,7 @@ def test_metric_decode():
     )
 
     assert np.array_equal(
-        decoded_intensities[Features.PASSES_FILTERS].values,
+        decoded_intensities[Features.PASSES_THRESHOLDS].values,
         [True, False, False]
     )
 

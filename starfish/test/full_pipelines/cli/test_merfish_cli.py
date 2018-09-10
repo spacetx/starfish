@@ -39,7 +39,7 @@ class TestWithMerfishData(CLITest):
                 tempdir, "filtered", "filtered.json"),
             "DeconvolvePSF",
             "--sigma", "2",
-            "--num-iter", "15"
+            "--num-iter", "9"
         ],
         [
             "starfish", "filter",
@@ -59,7 +59,7 @@ class TestWithMerfishData(CLITest):
             "--codebook", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "registered", "codebook.json"),
             "--distance-threshold", "0.5176",
-            "--magnitude-threshold", "1",
+            "--magnitude-threshold", "5e-5",
             "--norm-order", "2",
             "--crop-x", "0",
             "--crop-y", "40",

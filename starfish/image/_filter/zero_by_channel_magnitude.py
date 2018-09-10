@@ -27,14 +27,14 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             if True, this scales all rounds to have unit L2 norm across channels
         """
         self.thresh = float(thresh)
-        self.normalize = normalize == "True"
+        self.normalize = normalize
 
     @classmethod
     def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             '--thresh', type=str, help='minimum magnitude threshold for pixels across channels')
         group_parser.add_argument(
-            '--normalize', type=bool, help='if True, this scales all rounds to have unit L2 norm across channels')
+            '--normalize', action="store_true", help='Scales all rounds to have unit L2 norm across channels')
 
     def run(
             self, stack: ImageStack, in_place: bool = True, verbose=False,

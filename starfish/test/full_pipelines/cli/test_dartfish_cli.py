@@ -42,7 +42,6 @@ class TestWithDartfishData(CLITest):
             tempdir, "filtered", "filtered.json"),
             "ZeroByChannelMagnitude",
             "--thresh", ".05",
-            "--normalize", "False"
         ],
         [
             "starfish", "detect_spots",

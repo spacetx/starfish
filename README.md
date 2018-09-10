@@ -71,7 +71,7 @@ This is a work in progess -- based on our output file formats (e.g., geo_json) w
 
 ## development
 
-Clone the repo and look through (CONTRIBUTING.md)[CONTRIBUTING.md]
+Clone the repo and look through [CONTRIBUTING.md](docs/source/contributing/contributing.md)
 ```
 % git clone https://github.com/spacetx/starfish.git
 % cd starfish

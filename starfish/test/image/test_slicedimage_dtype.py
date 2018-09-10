@@ -39,7 +39,6 @@ def create_tile_data_provider(dtype: np.number, corner_dtype: np.number):
     return tile_data_provider
 
 
-@pytest.mark.skip('ttung fix')
 def test_multiple_tiles_of_different_kind():
     with pytest.raises(TypeError):
         ImageStack.synthetic_stack(
@@ -49,7 +48,6 @@ def test_multiple_tiles_of_different_kind():
         )
 
 
-@pytest.mark.skip('ttung fix')
 def test_multiple_tiles_of_same_dtype():
     stack = ImageStack.synthetic_stack(
         NUM_ROUND, NUM_CH, NUM_Z,
@@ -61,7 +59,7 @@ def test_multiple_tiles_of_same_dtype():
          NUM_CH,
          NUM_Z,
          HEIGHT,
-         WIDTH), dtype=np.float)
+         WIDTH), dtype=np.uint32)
     assert np.array_equal(stack.numpy_array, img_as_float(expected))
 
 
@@ -86,7 +84,7 @@ def test_int_type_promotion():
          WIDTH), dtype=np.int32)
     corner.fill(16777216)
     expected[0, 0, 0] = corner
-    assert np.array_equal(stack.numpy_array, expected)
+    assert np.array_equal(stack.numpy_array, img_as_float(expected))
 
 
 @pytest.mark.skip('ttung fix')
@@ -113,7 +111,6 @@ def test_uint_type_promotion():
     assert np.array_equal(stack.numpy_array, img_as_float(expected))
 
 
-@pytest.mark.skip('ttung fix')
 def test_float_type_promotion():
     with warnings.catch_warnings(record=True) as w:
         stack = ImageStack.synthetic_stack(

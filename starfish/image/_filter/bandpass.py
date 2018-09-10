@@ -25,7 +25,8 @@ class Bandpass(FilterAlgorithmBase):
         threshold : float
             zero any pixels below this intensity value
         truncate : float
-            truncate the filter at this many standard deviations
+            truncate the gaussian kernel, used by the gaussian filter, at this many standard
+            deviations
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
         kwargs
@@ -64,7 +65,8 @@ class Bandpass(FilterAlgorithmBase):
         threshold : float
             zero any pixels below this intensity value
         truncate : float
-            truncate the filter at this many standard deviations
+            truncate the gaussian kernel, used by the gaussian filter, at this many standard
+            deviations
 
         Returns
         -------

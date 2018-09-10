@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
+from starfish.image._filter.util import preserve_float_range
 from starfish.types import Features, Indices, SpotAttributes
 
 
@@ -248,7 +249,7 @@ class IntensityTable(xr.DataArray):
         data *= np.random.poisson(mean_fluor_per_spot, size=data.shape)
 
         # convert data to float for consistency with starfish
-        data = (data - data.min()) / data.max()
+        data = preserve_float_range(data)
         assert 0 < data.max() <= 1
 
         intensities = cls.from_spot_data(data, spot_attributes)

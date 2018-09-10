@@ -23,6 +23,7 @@ from slicedimage import Reader, Tile, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
+from starfish.errors import DataFormatWarning
 from starfish.intensity_table import IntensityTable
 from starfish.types import Coordinates, Indices
 
@@ -119,6 +120,16 @@ class ImageStack:
             c = tile.indices[Indices.CH]
             zlayer = tile.indices.get(Indices.Z, 0)
             data = tile.numpy_array
+
+            if max_size != data.dtype.itemsize:
+                warnings.warn(
+                    f"Tile "
+                    f"(R: {tile.indices[Indices.ROUND]} C: {tile.indices[Indices.CH]} "
+                    f"Z: {tile.indices[Indices.Z]}) has "
+                    f"dtype {data.dtype}.  One or more tiles is of a larger dtype "
+                    f"{self._data.dtype}.",
+                    DataFormatWarning)
+
             data = img_as_float(data)
             self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
 

@@ -27,16 +27,16 @@ class TestWithMerfishData(CLITest):
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "registered/fov_001", "hybridization.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "hybridization.json"),
+                tempdir, "filtered", "gaussian_filtered.json"),
             "GaussianHighPass",
             "--sigma", "3",
         ],
         [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "hybridization.json"),
+                tempdir, "filtered", "gaussian_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "filtered.json"),
+                tempdir, "filtered", "deconvolve_filtered.json"),
             "DeconvolvePSF",
             "--sigma", "2",
             "--num-iter", "9"
@@ -44,16 +44,16 @@ class TestWithMerfishData(CLITest):
         [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "filtered.json"),
+                tempdir, "filtered", "deconvolve_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "filtered1.json"),
+                tempdir, "filtered", "gaussian_filtered.json"),
             "GaussianLowPass",
             "--sigma", "1"
         ],
         [
             "starfish", "detect_spots",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "filtered1.json"),
+                tempdir, "filtered", "gaussian_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
             "PixelSpotDetector",
             "--codebook", lambda tempdir, *args, **kwargs: os.path.join(

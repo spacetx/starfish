@@ -30,23 +30,23 @@ class TestWithDartfishData(CLITest):
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "registered/fov_001", "hybridization.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "hybridization.json"),
+                tempdir, "filtered", "scale_filtered.json"),
             "ScaleByPercentile",
             "--p", "100",
         ],
         [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "hybridization.json"),
+            tempdir, "filtered", "scale_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "filtered.json"),
+            tempdir, "filtered", "zero_filtered.json"),
             "ZeroByChannelMagnitude",
             "--thresh", ".05",
         ],
         [
             "starfish", "detect_spots",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "filtered.json"),
+                tempdir, "filtered", "zero_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
             "PixelSpotDetector",
             "--codebook", lambda tempdir, *args, **kwargs: os.path.join(

@@ -30,7 +30,7 @@ class TestAllenData(CLITest):
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
             tempdir, "registered/fov_001", "hybridization.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "hybridization.json"),
+            tempdir, "filtered", "clip_filtered.json"),
             "Clip",
             "--p-min", "10",
             "--p-max", "100"
@@ -38,9 +38,9 @@ class TestAllenData(CLITest):
         [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "hybridization.json"),
+            tempdir, "filtered", "clip_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "filtered.json"),
+            tempdir, "filtered", "bandpass_filtered.json"),
             "Bandpass",
             "--lshort", ".5",
             "--llong", "7",
@@ -49,9 +49,9 @@ class TestAllenData(CLITest):
         [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "filtered.json"),
+            tempdir, "filtered", "bandpass_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "filtered1.json"),
+            tempdir, "filtered", "clip2_filtered.json"),
             "Clip",
             "--p-min", "10",
             "--p-max", "100"
@@ -59,16 +59,16 @@ class TestAllenData(CLITest):
         [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "filtered1.json"),
+            tempdir, "filtered", "clip2_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "filtered2.json"),
+            tempdir, "filtered", "gaussian_filtered.json"),
             "GaussianLowPass",
             "--sigma", "1"
         ],
         [
             "starfish", "detect_spots",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "filtered1.json"),
+            tempdir, "filtered", "gaussian_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
             "LocalMaxPeakFinder",
             "--spot-diameter", "3",

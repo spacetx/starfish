@@ -25,7 +25,7 @@ class Bandpass(FilterAlgorithmBase):
         threshold : float
             zero any pixels below this intensity value
         truncate : float
-            # TODO dganguli: this is not documented by trackpy, can you help?
+            truncate the filter at this many standard deviations
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
         kwargs
@@ -44,7 +44,9 @@ class Bandpass(FilterAlgorithmBase):
             "--llong", type=int, help="filter signals above this frequency")
         group_parser.add_argument(
             "--threshold", type=int, help="clip pixels below this intensity value")
-        group_parser.add_argument("--truncate", default=4, type=int)  # TODO dganguli doc this too
+        group_parser.add_argument(
+            "--truncate", default=4, type=float,
+            help="truncate the filter at this many standard deviations")
 
     @staticmethod
     def bandpass(
@@ -62,7 +64,7 @@ class Bandpass(FilterAlgorithmBase):
         threshold : float
             zero any pixels below this intensity value
         truncate : float
-             # TODO dganguli: this is not documented by trackpy, can you help?
+            truncate the filter at this many standard deviations
 
         Returns
         -------
@@ -77,7 +79,8 @@ class Bandpass(FilterAlgorithmBase):
         return bandpassed
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            n_processes: Optional[int]=None
     ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
@@ -89,6 +92,8 @@ class Bandpass(FilterAlgorithmBase):
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             if True, report the filtering progress across the tiles or volumes of the ImageStack
+        n_processes : Optional[int]
+            Number of parallel processes to devote to calculating the filter
 
         Returns
         -------
@@ -101,7 +106,8 @@ class Bandpass(FilterAlgorithmBase):
             lshort=self.lshort, llong=self.llong, threshold=self.threshold, truncate=self.truncate
         )
         result = stack.apply(
-            bandpass_, verbose=verbose, in_place=in_place, is_volume=self.is_volume
+            bandpass_,
+            verbose=verbose, in_place=in_place, is_volume=self.is_volume, n_processes=n_processes
         )
         if not in_place:
             return result

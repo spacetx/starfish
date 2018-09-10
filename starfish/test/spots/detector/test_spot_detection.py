@@ -25,7 +25,7 @@ def simple_local_max_spot_detector() -> LocalMaxPeakFinder:
     """create a basic local max peak finder"""
     return LocalMaxPeakFinder(
         spot_diameter=3,
-        min_mass=5,
+        min_mass=0.01,
         max_size=10,
         separation=2,
     )
@@ -55,22 +55,22 @@ def synthetic_two_spot_3d_2round_2ch() -> ImageStack:
     """
 
     # blank data_image
-    data = np.zeros((2, 2, 10, 100, 100), dtype=np.uint16)
+    data = np.zeros((2, 2, 10, 100, 100), dtype=np.float)
 
     # round 0 channel 0
-    data[0, 0, 4, 10, 90] = 1000
+    data[0, 0, 4, 10, 90] = 1.0
     data[0, 0, 5, 90, 10] = 0
 
     # round 0 channel 1
     data[0, 1, 4, 10, 90] = 0
-    data[0, 1, 5, 90, 10] = 1000
+    data[0, 1, 5, 90, 10] = 1.0
 
     # round 1 channel 0
     data[1, 0, 4, 10, 90] = 0
-    data[1, 0, 5, 90, 10] = 1000
+    data[1, 0, 5, 90, 10] = 1.0
 
     # round 1 channel 1
-    data[1, 1, 4, 10, 90] = 1000
+    data[1, 1, 4, 10, 90] = 1.0
     data[1, 1, 5, 90, 10] = 0
 
     data = gaussian_filter(data, sigma=(0, 0, 2, 2, 2))
@@ -108,8 +108,8 @@ def test_spot_detection_with_reference_image(
         radius_is_gyration=radius_is_gyration,
     )
     assert intensity_table.shape == (2, 2, 2), "wrong number of spots detected"
-    expected = [14, 14]
-    assert np.array_equal(intensity_table.sum((Indices.ROUND, Indices.CH)), expected), \
+    expected = [0.01587425, 0.01587425]
+    assert np.allclose(intensity_table.sum((Indices.ROUND, Indices.CH)).values, expected), \
         "wrong spot intensities detected"
 
 
@@ -136,8 +136,8 @@ def test_spot_detection_with_reference_image_from_max_projection(
         radius_is_gyration=radius_is_gyration,
     )
     assert intensity_table.shape == (2, 2, 2), "wrong number of spots detected"
-    expected = [14, 14]
-    assert np.array_equal(intensity_table.sum((Indices.ROUND, Indices.CH)), expected), \
+    expected = [0.01587425, 0.01587425]
+    assert np.allclose(intensity_table.sum((Indices.ROUND, Indices.CH)).values, expected), \
         "wrong spot intensities detected"
 
 
@@ -164,6 +164,6 @@ def test_spot_finding_no_reference_image(
         radius_is_gyration=radius_is_gyration,
     )
     assert intensity_table.shape == (4, 2, 2), "wrong number of spots detected"
-    expected = [7, 7, 7, 7]
-    assert np.array_equal(intensity_table.sum((Indices.ROUND, Indices.CH)), expected), \
+    expected = [0.00793712] * 4
+    assert np.allclose(intensity_table.sum((Indices.ROUND, Indices.CH)).values, expected), \
         "wrong spot intensities detected"

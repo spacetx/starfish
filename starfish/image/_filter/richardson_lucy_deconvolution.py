@@ -8,7 +8,7 @@ from skimage import restoration
 from starfish.stack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
-from .util import gaussian_kernel
+from .util import gaussian_kernel, preserve_float_range
 
 
 class DeconvolvePSF(FilterAlgorithmBase):
@@ -63,8 +63,8 @@ class DeconvolvePSF(FilterAlgorithmBase):
         psf : np.ndarray
             Point spread function
         clip : bool (default = False)
-            If true, pixel value of the result above 1 or under -1 are thresholded for skimage
-            pipeline compatibility.
+            If true, pixel value of the result above 1 are scaled to 1 and below zero are clipped
+            for starfish pipeline compatibility.
 
         Notes
         ------
@@ -76,21 +76,24 @@ class DeconvolvePSF(FilterAlgorithmBase):
             Deconvolved image, same shape as input
 
         """
-
-        # TODO ambrosejcarr: the restoration function is producing the following warning:
-        # /usr/local/lib/python3.6/site-packages/skimage/restoration/deconvolution.py:389:
-        # RuntimeWarning: invalid value encountered in true_divide:
-        # relative_blur = image / convolve_method(im_deconv, psf, 'same')
-        img_deconv: np.ndarray = restoration.richardson_lucy(
-            img, psf, iterations=num_iter, clip=clip
+        result: np.ndarray = restoration.richardson_lucy(
+            img, psf, iterations=num_iter
         )
 
-        # here be dragons. img_deconv is a float. this should not work, but the result looks nice
-        # modulo boundary values? wtf indeed.
-        img_deconv = img_deconv.astype(np.uint16)
-        return img_deconv
+        if np.all(np.isnan(result)):
+            raise RuntimeError(
+                'All-NaN output data detected. Likely cause is that deconvolution has been run for '
+                'too many iterations.')
 
-    def run(self, stack: ImageStack, in_place: bool=True, verbose=False) -> Optional[ImageStack]:
+        if clip:
+            result = preserve_float_range(result)
+
+        return result
+
+    def run(
+            self, stack: ImageStack, in_place: bool=True, verbose=False,
+            n_processes: Optional[int]=None
+    ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters
@@ -101,6 +104,8 @@ class DeconvolvePSF(FilterAlgorithmBase):
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             if True, report on the percentage completed during processing (default = False)
+        n_processes : Optional[int]
+            Number of parallel processes to devote to calculating the filter
 
         Returns
         -------
@@ -110,7 +115,10 @@ class DeconvolvePSF(FilterAlgorithmBase):
         """
         func: Callable = partial(self.richardson_lucy_deconv, num_iter=self.num_iter, psf=self.psf,
                                  clip=self.clip)
-        result = stack.apply(func, in_place=in_place, verbose=verbose)
+        result = stack.apply(
+            func,
+            in_place=in_place, verbose=verbose, n_processes=n_processes
+        )
         if not in_place:
             return result
         return None

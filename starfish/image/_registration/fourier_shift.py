@@ -84,6 +84,13 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
                     data, axes = image.get_slice(indices=indices)
                     assert len(axes) == 0
                     result = shift_im(data, shift)
+
+                    result[result < 0] = 0  # clip values below zero
+
+                    # if any values are above zero, scale to max=zero
+                    if np.any(result > 1):
+                        result = result / result.max()
+
                     image.set_slice(indices=indices, data=result)
 
         if not in_place:

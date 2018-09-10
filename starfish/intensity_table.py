@@ -247,6 +247,10 @@ class IntensityTable(xr.DataArray):
         data *= np.random.poisson(mean_photons_per_fluor, size=data.shape)
         data *= np.random.poisson(mean_fluor_per_spot, size=data.shape)
 
+        # convert data to float for consistency with starfish
+        data = (data - data.min()) / data.max()
+        assert 0 < data.max() <= 1
+
         intensities = cls.from_spot_data(data, spot_attributes)
         intensities[Features.TARGET] = (Features.AXIS, targets)
 

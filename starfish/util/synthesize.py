@@ -99,14 +99,18 @@ class SyntheticData:
     def intensities(self, codebook=None) -> IntensityTable:
         if codebook is None:
             codebook = self.codebook()
-        return IntensityTable.synthetic_intensities(
+        intensities = IntensityTable.synthetic_intensities(
             codebook, self.n_z, self.height, self.width, self.n_spots,
             self.mean_fluor_per_spot, self.mean_photons_per_fluor)
+        assert intensities.dtype == float and intensities.max() <= 1
+        return intensities
 
     def spots(self, intensities=None) -> ImageStack:
         if intensities is None:
             intensities = self.intensities()
-        return ImageStack.synthetic_spots(
+        stack = ImageStack.synthetic_spots(
             intensities, self.n_z, self.height, self.width, self.n_photons_background,
             self.point_spread_function, self.camera_detection_efficiency,
             self.background_electrons, self.gray_level, self.ad_coversion_bits)
+        assert stack.numpy_array.dtype == float
+        return stack

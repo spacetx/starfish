@@ -92,8 +92,8 @@ ghp.run(primary_image, verbose=True)
 # EPY: END markdown
 
 # EPY: START code
-dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2)
-dpsf.run(primary_image, verbose=True)
+dpsf = Filter.DeconvolvePSF(num_iter=9, sigma=2, clip=True)
+dpsf.run(primary_image, verbose=True, n_processes=)
 # EPY: END code
 
 # EPY: START markdown
@@ -119,10 +119,6 @@ scale_factors = {
 # EPY: END code
 
 # EPY: START code
-# it's important to convert the data to float here to retain the correct precision for the scaling. Later, starfish
-# will operate entirely on float data and this cast can be removed
-primary_image._data = primary_image._data.astype(np.float64)
-
 # this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to
 # at least we can do it with get_slice and set_slice right now.
 
@@ -182,7 +178,7 @@ psd = SpotFinder.PixelSpotDetector(
     codebook=experiment.codebook,
     metric='euclidean',
     distance_threshold=0.5176,
-    magnitude_threshold=1,
+    magnitude_threshold=5e-5,
     min_area=2,
     max_area=np.inf,
     norm_order=2,

@@ -13,6 +13,8 @@
 
 # EPY: START code
 # EPY: ESCAPE %matplotlib inline
+# EPY: ESCAPE %load_ext autoreload
+# EPY: ESCAPE %autoreload 2
 
 import numpy as np
 import pandas as pd

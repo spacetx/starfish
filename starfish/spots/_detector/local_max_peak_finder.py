@@ -1,3 +1,4 @@
+import warnings
 from typing import Optional, Tuple, Union
 
 import numpy as np
@@ -97,18 +98,20 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             spot attributes table for all detected spots
 
         """
-        attributes = locate(
-            image,
-            diameter=self.diameter,
-            minmass=self.minmass,
-            maxsize=self.maxsize,
-            separation=self.separation,
-            noise_size=self.noise_size,
-            smoothing_size=self.smoothing_size,
-            threshold=self.threshold,
-            percentile=self.percentile,
-            preprocess=self.preprocess
-        )
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', FutureWarning)  # trackpy numpy indexing warning
+            attributes = locate(
+                image,
+                diameter=self.diameter,
+                minmass=self.minmass,
+                maxsize=self.maxsize,
+                separation=self.separation,
+                noise_size=self.noise_size,
+                smoothing_size=self.smoothing_size,
+                threshold=self.threshold,
+                percentile=self.percentile,
+                preprocess=self.preprocess
+            )
 
         # TODO ambrosejcarr: data should always be at least pseudo-3d, this may not be necessary
         # TODO ambrosejcarr: this is where max vs. sum vs. mean would be parametrized.

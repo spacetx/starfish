@@ -133,17 +133,19 @@ class TestWithIssData(unittest.TestCase):
             "--intensities", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "results", "spots.nc"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "spots.nc"),
+                tempdir, "results", "targeted-spots.nc"),
             "PointInPoly2D",
         ],
         [
             "starfish", "decode",
-            "-i", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
+            "-i", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "results", "targeted-spots.nc"),
             "--codebook", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
                 [tempdir, "formatted", "experiment.json"],
                 "$['codebook']",
             ),
-            "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
+            "-o", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "results", "decoded-spots.nc"),
             "PerRoundMaxChannelDecoder",
         ],
     )
@@ -157,7 +159,7 @@ class TestWithIssData(unittest.TestCase):
         )
 
         try:
-            intensities = IntensityTable.load(os.path.join(tempdir, "results", "spots.nc"))
+            intensities = IntensityTable.load(os.path.join(tempdir, "results", "decoded-spots.nc"))
             genes, counts = np.unique(
                 intensities.coords[Features.TARGET], return_counts=True)
             gene_counts = pd.Series(counts, genes)

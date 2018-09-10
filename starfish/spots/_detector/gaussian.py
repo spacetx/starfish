@@ -104,13 +104,13 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         fitted_blobs[Features.SPOT_RADIUS] = converted_radius
 
         # convert the array to int so it can be used to index
-        rounded_blobs: pd.DataFrame = fitted_blobs.astype(int)
+        rounded_blobs = SpotAttributes(fitted_blobs.astype(int))
 
-        rounded_blobs['intensity'] = measure_spot_intensity(
+        rounded_blobs.data['intensity'] = measure_spot_intensity(
             data_image, rounded_blobs, self.measurement_function)
-        rounded_blobs['spot_id'] = np.arange(rounded_blobs.shape[0])
+        rounded_blobs.data['spot_id'] = np.arange(rounded_blobs.data.shape[0])
 
-        return SpotAttributes(rounded_blobs)
+        return rounded_blobs
 
     def run(
             self,

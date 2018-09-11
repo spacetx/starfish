@@ -47,15 +47,5 @@ class PipelineComponent(metaclass=PipelineComponentType):
         return cls._algorithm_to_class_map
 
     @classmethod
-    def run(cls, algorithm_name, stack, *args, **kwargs):
-        """
-        Runs the registration component using the algorithm name, stack, and arguments for the
-        specific algorithm.
-        """
-        algorithm_cls = cls._algorithm_to_class_map[algorithm_name]
-        instance = algorithm_cls(*args, **kwargs)
-        return instance.register(stack)
-
-    @classmethod
     def _cli(cls, args: argparse.Namespace):
         raise NotImplementedError()

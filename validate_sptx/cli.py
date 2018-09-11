@@ -22,6 +22,10 @@ class Cli:
     def run(args, print_help=False):
         """invokes validate with the parsed commandline arguments"""
         try:
-            validate(args.experiment_json, fuzz=args.fuzz)
+            valid = validate(args.experiment_json, fuzz=args.fuzz)
+            if valid:
+                sys.exit(0)
+            else:
+                sys.exit(1)
         except KeyboardInterrupt:
             sys.exit(3)

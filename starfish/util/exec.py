@@ -9,7 +9,8 @@ from starfish.util import clock
 
 def stages(commands: Sequence[Sequence[Union[str, Callable]]],
            subdirs: Sequence[str]=None,
-           keep_data: bool=False) -> None:
+
+           keep_data: bool=False) -> str:
     """
     Execute a list of commands in a temporary directory
     cleaning them up unless otherwise requested.
@@ -27,6 +28,11 @@ def stages(commands: Sequence[Sequence[Union[str, Callable]]],
     keep_data : bool
         If not true, shutil.rmtree will be called on the temporary
         directory used by this invocation.
+
+    Return
+    ------
+    str :
+        Path to the temporary directory used by this invocation.
 
     Environment variables
     ---------------------
@@ -50,6 +56,8 @@ def stages(commands: Sequence[Sequence[Union[str, Callable]]],
             cmdline = prepare_stage(stage, tempdir)
             with clock.timeit(callback):
                 subprocess.check_call(cmdline)
+
+        return tempdir
 
     finally:
         if not keep_data:

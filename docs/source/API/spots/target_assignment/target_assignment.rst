@@ -1,0 +1,4 @@
+.. _assignment
+
+Target Assignment
+=================

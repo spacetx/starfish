@@ -1,5 +1,4 @@
 import os
-import shutil
 import subprocess
 import tempfile
 from typing import Callable, Sequence, Union
@@ -40,7 +39,13 @@ def stages(commands: Sequence[Sequence[Union[str, Callable]]],
          If set, then command lists will have `coverage run ...` options
          prepended before execution.
     """
-    tempdir = tempfile.mkdtemp()
+
+    if keep_data:
+        tempobj = None
+        tempdir = tempfile.mkdtemp()
+    else:
+        tempobj = tempfile.TemporaryDirectory()
+        tempdir = tempobj.name
 
     def callback(interval):
         print(" ".join(stage[:2]), " ==> {} seconds".format(interval))
@@ -60,8 +65,8 @@ def stages(commands: Sequence[Sequence[Union[str, Callable]]],
         return tempdir
 
     finally:
-        if not keep_data:
-            shutil.rmtree(tempdir)
+        if tempobj:
+            tempobj.cleanup()
 
 
 def prepare_stage(stage: Sequence[Union[str, Callable]],

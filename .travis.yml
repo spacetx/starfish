@@ -11,6 +11,7 @@ install:
 - docker build -t spacetx/starfish .
 script:
 - export MPLBACKEND=Agg
+- export STARFISH_STRICT_LOADING=true
 - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
 - set -eo pipefail
 - make all

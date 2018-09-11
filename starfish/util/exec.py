@@ -35,7 +35,7 @@ def stages(commands: Sequence[Sequence[Union[str, Callable]]],
 
     Environment variables
     ---------------------
-    STARFISH_COVERAGE:
+    STARFISH_COVERAGE :
          If set, then command lists will have `coverage run ...` options
          prepended before execution.
     """

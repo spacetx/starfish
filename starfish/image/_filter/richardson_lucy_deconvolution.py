@@ -1,9 +1,9 @@
 import argparse
 from functools import partial
-from typing import Callable, Optional
+from typing import Optional
 
 import numpy as np
-from skimage import restoration
+from scipy.signal import convolve, fftconvolve
 
 from starfish.stack import ImageStack
 from starfish.types import Number
@@ -50,45 +50,82 @@ class DeconvolvePSF(FilterAlgorithmBase):
 
     @staticmethod
     def richardson_lucy_deconv(
-            img: np.ndarray, num_iter: int, psf: np.ndarray, clip: bool=False) -> np.ndarray:
+            image: np.ndarray, iterations: int, psf: np.ndarray, clip: bool=False) -> np.ndarray:
         """
         Deconvolves input image with a specified point spread function.
 
        Parameters
-        ----------
-        img : np.ndarray
-            Image to filter.
-        num_iter : int
-            Number of iterations to run algorithm
-        psf : np.ndarray
-            Point spread function
-        clip : bool (default = False)
-            If true, pixel value of the result above 1 are scaled to 1 and below zero are clipped
-            for starfish pipeline compatibility.
-
-        Notes
-        ------
-        wrapper for skimage.restoration.richardson_lucy
+        image : ndarray
+           Input degraded image (can be N dimensional).
+        psf : ndarray
+           The point spread function.
+        iterations : int
+           Number of iterations. This parameter plays the role of
+           regularisation.
+        clip : boolean, optional
+           True by default. If true, pixel value of the result above 1 or
+           under -1 are thresholded for skimage pipeline compatibility.
 
         Returns
         -------
-        np.ndarray :
-            Deconvolved image, same shape as input
+        im_deconv : ndarray
+           The deconvolved image.
+
+        Examples
+        --------
+        >>> from skimage import color, data, restoration
+        >>> camera = color.rgb2gray(data.camera())
+        >>> from scipy.signal import convolve2d
+        >>> psf = np.ones((5, 5)) / 25
+        >>> camera = convolve2d(camera, psf, 'same')
+        >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
+        >>> deconvolved = restoration.richardson_lucy(camera, psf, 5)
+
+        References
+        ----------
+        .. [1] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
 
         """
-        result: np.ndarray = restoration.richardson_lucy(
-            img, psf, iterations=num_iter
-        )
+        # compute the times for direct convolution and the fft method. The fft is of
+        # complexity O(N log(N)) for each dimension and the direct method does
+        # straight arithmetic (and is O(n*k) to add n elements k times)
+        direct_time = np.prod(image.shape + psf.shape)
+        fft_time = np.sum([n * np.log(n) for n in image.shape + psf.shape])
 
-        if np.all(np.isnan(result)):
+        # see whether the fourier transform convolution method or the direct
+        # convolution method is faster (discussed in scikit-image PR #1792)
+        time_ratio = 40.032 * fft_time / direct_time
+
+        if time_ratio <= 1 or len(image.shape) > 2:
+            convolve_method = fftconvolve
+        else:
+            convolve_method = convolve
+
+        image = image.astype(np.float)
+        psf = psf.astype(np.float)
+        im_deconv = 0.5 * np.ones(image.shape)
+        psf_mirror = psf[::-1, ::-1]
+
+        eps = np.finfo(image.dtype).eps
+        for _ in range(iterations):
+            x = convolve_method(im_deconv, psf, 'same')
+            np.place(x, x == 0, eps)
+            relative_blur = image / x + eps
+            im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
+
+        # for _ in range(iterations):
+        #     relative_blur = image / convolve_method(im_deconv, psf, 'same')
+        #     im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
+
+        if np.all(np.isnan(im_deconv)):
             raise RuntimeError(
                 'All-NaN output data detected. Likely cause is that deconvolution has been run for '
                 'too many iterations.')
 
         if clip:
-            result = preserve_float_range(result)
+            im_deconv = preserve_float_range(im_deconv)
 
-        return result
+        return im_deconv
 
     def run(
             self, stack: ImageStack, in_place: bool=True, verbose=False,
@@ -113,8 +150,10 @@ class DeconvolvePSF(FilterAlgorithmBase):
             if in-place is False, return the results of filter as a new stack
 
         """
-        func: Callable = partial(self.richardson_lucy_deconv, num_iter=self.num_iter, psf=self.psf,
-                                 clip=self.clip)
+        func = partial(
+            self.richardson_lucy_deconv,
+            iterations=self.num_iter, psf=self.psf, clip=self.clip
+        )
         result = stack.apply(
             func,
             in_place=in_place, verbose=verbose, n_processes=n_processes

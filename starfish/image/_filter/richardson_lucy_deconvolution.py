@@ -85,6 +85,14 @@ class DeconvolvePSF(FilterAlgorithmBase):
         ----------
         .. [1] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
 
+        Notes
+        -----
+        This code is copied from skimage.restoration. We copied it to implement a bugfix wherein
+        zeros in the input image or zeros produced during an intermediate would induce divide by
+        zero -> Nan. These Nans would then propagate throughout the image, invalidating the results.
+        Longer term, we will make a PR to skimage to introduce the fix. There is some existing work
+        linked here: https://github.com/scikit-image/scikit-image/issues/2551
+
         """
         # compute the times for direct convolution and the fft method. The fft is of
         # complexity O(N log(N)) for each dimension and the direct method does
@@ -112,10 +120,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
             np.place(x, x == 0, eps)
             relative_blur = image / x + eps
             im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
-
-        # for _ in range(iterations):
-        #     relative_blur = image / convolve_method(im_deconv, psf, 'same')
-        #     im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
 
         if np.all(np.isnan(im_deconv)):
             raise RuntimeError(

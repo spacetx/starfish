@@ -10,7 +10,6 @@ from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 
 
 class TestAllenData(CLITest):
-    __test__ = True
 
     SUBDIRS = (
         "registered",
@@ -83,7 +82,7 @@ class TestAllenData(CLITest):
     )
 
     def verify_results(self, intensities):
-        #TODO
+        #TODO DEEP SAYS WAIT ON THIS TEST TILL STUFF GETS FIGURED OUT
         pass
 
 

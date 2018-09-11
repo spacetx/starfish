@@ -12,7 +12,7 @@ scikit-learn
 scipy
 seaborn
 showit >= 1.1.4
-slicedimage == 0.0.6
+git+git://github.com/joshmoore/slicedimage@tile-validation#egg=slicedimage
 scikit-learn
 tqdm
 trackpy

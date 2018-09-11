@@ -15,6 +15,9 @@ CLASSIFIERS = [
 ]
 
 install_requires = [line.rstrip() for line in open(os.path.join(os.path.dirname(__file__), "REQUIREMENTS.txt"))]
+for idx, requirement in enumerate(install_requires):
+    if "#egg=" in requirement:
+        install_requires[idx] = requirement.split("=")[-1]
 
 setuptools.setup(
     name="starfish",

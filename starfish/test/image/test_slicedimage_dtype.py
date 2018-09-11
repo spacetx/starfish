@@ -63,7 +63,6 @@ def test_multiple_tiles_of_same_dtype():
     assert np.array_equal(stack.numpy_array, img_as_float(expected))
 
 
-@pytest.mark.skip('ttung fix')
 def test_int_type_promotion():
     with warnings.catch_warnings(record=True) as w:
         stack = ImageStack.synthetic_stack(
@@ -73,21 +72,19 @@ def test_int_type_promotion():
         )
         assert len(w) == 1
         assert issubclass(w[0].category, DataFormatWarning)
-    expected = np.ones(
+    expected = img_as_float(np.ones(
         (NUM_ROUND,
          NUM_CH,
          NUM_Z,
          HEIGHT,
-         WIDTH), dtype=np.int32)
-    corner = np.empty(
+         WIDTH), dtype=np.int32))
+    corner = img_as_float(np.ones(
         (HEIGHT,
-         WIDTH), dtype=np.int32)
-    corner.fill(16777216)
+         WIDTH), dtype=np.int8))
     expected[0, 0, 0] = corner
     assert np.array_equal(stack.numpy_array, img_as_float(expected))
 
 
-@pytest.mark.skip('ttung fix')
 def test_uint_type_promotion():
     with warnings.catch_warnings(record=True) as w:
         stack = ImageStack.synthetic_stack(
@@ -97,16 +94,15 @@ def test_uint_type_promotion():
         )
         assert len(w) == 1
         assert issubclass(w[0].category, DataFormatWarning)
-    expected = np.ones(
+    expected = img_as_float(np.ones(
         (NUM_ROUND,
          NUM_CH,
          NUM_Z,
          HEIGHT,
-         WIDTH), dtype=np.uint32)
-    corner = np.empty(
+         WIDTH), dtype=np.uint32))
+    corner = img_as_float(np.ones(
         (HEIGHT,
-         WIDTH), dtype=np.uint32)
-    corner.fill(16777216)
+         WIDTH), dtype=np.uint8))
     expected[0, 0, 0] = corner
     assert np.array_equal(stack.numpy_array, img_as_float(expected))
 

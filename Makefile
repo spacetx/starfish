@@ -18,6 +18,9 @@ test:
 mypy:
 	mypy --ignore-missing-imports $(MODULES)
 
+docs-%:
+	make -C docs $*
+
 include notebooks/subdir.mk
 
 .PHONY: all lint lint-non-init lint-init test mypy

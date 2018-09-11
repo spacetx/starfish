@@ -7,4 +7,5 @@ mypy
 nbencdec >= 0.0.5
 recommonmark
 sphinx
+sphinx_rtd_theme
 -r REQUIREMENTS.txt

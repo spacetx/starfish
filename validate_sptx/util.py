@@ -152,10 +152,10 @@ class SpaceTxValidator:
         """
 
         if target_file:
-            print(f"> Fuzzing {target_file}...")
+            out.write(f"> Fuzzing {target_file}...\n")
         else:
-            print("> Fuzzing unknown...")
-        fuzzer = Fuzzer(self._validator, target_object)
+            out.write("> Fuzzing unknown...\n")
+        fuzzer = Fuzzer(self._validator, target_object, out)
         fuzzer.fuzz()
 
 
@@ -265,7 +265,9 @@ class Fuzzer(object):
 
 class Checker(object):
 
-    LETTER: str = "?"
+    @property
+    def LETTER(self) -> str:
+        return "?"
 
     def check(self, fuzz: Fuzzer) -> str:
         """create a copy of the current state of the object tree,
@@ -301,7 +303,9 @@ class Checker(object):
 
 class Add(Checker):
 
-    LETTER = "A"
+    @property
+    def LETTER(self) -> str:
+        return "A"
 
     def handle(self, fuzz, target):
         if isinstance(target, dict):
@@ -313,7 +317,9 @@ class Add(Checker):
 
 class Del(Checker):
 
-    LETTER = "D"
+    @property
+    def LETTER(self) -> str:
+        return "D"
 
     def handle(self, fuzz, target):
         key = fuzz.stack[-1]
@@ -323,8 +329,12 @@ class Del(Checker):
 
 class Change(Checker):
 
+    @property
+    def LETTER(self) -> str:
+        return self.letter
+
     def __init__(self, letter, call):
-        self.LETTER = letter
+        self.letter = letter
         self.call = call
 
     def handle(self, fuzz, target):

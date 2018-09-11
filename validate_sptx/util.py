@@ -11,17 +11,13 @@ from pkg_resources import resource_filename
 
 class SpaceTxValidator:
 
-    def __init__(self, schema: str, fuzz: bool=False) -> None:
+    def __init__(self, schema: str) -> None:
         """create a validator for a json-schema compliant spaceTx specification file
 
         Parameters
         ----------
         schema : str
             file path to schema
-        fuzz : bool
-            if true, then the json documents which are validated will
-            be modified piece-wise and a statement printed to standard
-            out about whether or not they are still valid.
 
         """
         self._schema: Dict = self.load_json(schema)
@@ -108,7 +104,6 @@ class SpaceTxValidator:
             self,
             target_object: Union[dict, list],
             target_file: str=None,
-            fuzz: bool=False,
     ) -> bool:
         """validate a loaded json object, returning True if valid, and False otherwise
 
@@ -119,25 +114,13 @@ class SpaceTxValidator:
             constructor
         target_file : str
             informational string regarding the source file of the given object
-        fuzz: bool
-            whether or not to perform element-by-element fuzzing.
-            If true, will return true and will *not* use warnings.
 
         Returns
         -------
         bool :
-            True, if object valid or fuzz=True, else False
+            True, if object valid, else False
 
         """
-
-        if fuzz:
-            if target_file:
-                print(f"> Fuzzing {target_file}...")
-            else:
-                print("> Fuzzing unknown...")
-            fuzzer = Fuzzer(self._validator, target_object)
-            fuzzer.fuzz()
-            return True
 
         if self._validator.is_valid(target_object):
             return True
@@ -145,6 +128,35 @@ class SpaceTxValidator:
             es: Iterator[ValidationError] = self._validator.iter_errors(target_object)
             self._recurse_through_errors(es, filename=target_file)
             return False
+
+    def fuzz_object(
+            self,
+            target_object: Union[dict, list],
+            target_file: str=None,
+            out: IO=sys.stdout,
+    ) -> None:
+        """performs mutations on the given object and tests for validity.
+
+        A representation of the validity is printed to the given output stream.
+
+        Parameters
+        ----------
+        target_object : Dict
+            loaded json object to be validated against the schema passed to this object's
+            constructor
+        target_file : str
+            informational string regarding the source file of the given object
+        out : IO
+            output stream for printing
+
+        """
+
+        if target_file:
+            print(f"> Fuzzing {target_file}...")
+        else:
+            print("> Fuzzing unknown...")
+        fuzzer = Fuzzer(self._validator, target_object)
+        fuzzer.fuzz()
 
 
 class Fuzzer(object):
@@ -159,9 +171,7 @@ class Fuzzer(object):
         obj : Any
             JSON-like object which will be checked against the validator
         out : IO
-            if true, then the json documents which are validated will
-            be modified piece-wise and a statement printed to standard
-            out about whether or not they are still valid.
+            output stream for printing
 
         """
         self.validator = validator

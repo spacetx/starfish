@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Sequence,  Union
+from typing import Callable, Optional, Sequence, Union
 
 import numpy as np
 import xarray as xr
@@ -10,7 +10,7 @@ from starfish.types import Number, SpotAttributes
 
 
 class SpotFinderAlgorithmBase(AlgorithmBase):
-    def run (
+    def run(
             self, stack: ImageStack,
             blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
             reference_image_from_max_projection: bool = False) \

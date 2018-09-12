@@ -44,7 +44,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
             '--num-iter', type=int, help='number of iterations to run')
         group_parser.add_argument(
             '--sigma', type=float, help='standard deviation of gaussian kernel')
-        #TODO DEAL WITH THIS
         group_parser.add_argument(
             '--no-clip', action='store_false',
             help='(default True) if True, clip values below -1 and above 1')

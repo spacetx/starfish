@@ -1,8 +1,6 @@
 import os
 import sys
-import numpy as np
 
-from starfish.types import Features
 from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 
 
@@ -70,6 +68,4 @@ class TestWithMerfishData(CLITest):
     )
 
     def verify_results(self, intensities):
-       pass
-
-
+        pass

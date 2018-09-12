@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 
 from starfish import IntensityTable
-from starfish.types import Features
 from starfish.test.full_pipelines.cli._base_cli_test import CLITest
+from starfish.types import Features
 
 
 class TestWithDartfishData(CLITest):
@@ -37,9 +37,9 @@ class TestWithDartfishData(CLITest):
         [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "scale_filtered.json"),
+                tempdir, "filtered", "scale_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "zero_filtered.json"),
+                tempdir, "filtered", "zero_filtered.json"),
             "ZeroByChannelMagnitude",
             "--thresh", ".05",
         ],
@@ -70,8 +70,8 @@ class TestWithDartfishData(CLITest):
         spots_passing_filters = intensities[Features.PASSES_THRESHOLDS].sum()
         assert spots_passing_filters == 53  # TODO note, had to change this by 1
 
-        # compare to benchmark data -- note that this particular part of the dataset appears completely
-        # uncorrelated
+        # compare to benchmark data -- note that this particular part of the dataset
+        # appears completely uncorrelated
         cnts_benchmark = pd.read_csv(
             'https://dmf0bdeheu4zf.cloudfront.net/20180813/DARTFISH/fov_001/counts.csv')
 
@@ -102,7 +102,3 @@ class TestWithDartfishData(CLITest):
         corrcoef = corrcoef[0, 1]
 
         assert np.round(corrcoef, 5) == 0.04422
-
-
-
-

@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from typing import List, Tuple
 
 from starfish.intensity_table import IntensityTable
 from starfish.util import clock
@@ -11,8 +12,8 @@ from starfish.util import clock
 class CLITest(unittest.TestCase):
     __test__ = False
 
-    SUBDIRS = None
-    STAGES = None
+    SUBDIRS = Tuple[str]
+    STAGES = Tuple[List]
 
     def verify_results(self, intensities):
         pass
@@ -29,7 +30,7 @@ class CLITest(unittest.TestCase):
             for subdir in self.SUBDIRS:
                 os.makedirs("{tempdir}".format(
                     tempdir=os.path.join(tempdir, subdir)))
-            for i,stage in enumerate(self.STAGES):
+            for i, stage in enumerate(self.STAGES):
                 cmdline = [
                     element(tempdir=tempdir) if callable(element) else element
                     for element in stage

@@ -53,11 +53,3 @@ class Filter(PipelineComponent):
         instance = args.filter_algorithm_class(**vars(args))
         output = instance.run(stack, in_place=False)
         output.write(args.output)
-
-
-
-
-
-
-
-

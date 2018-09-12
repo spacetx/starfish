@@ -1,4 +1,4 @@
-from typing import Optional, Union, Tuple
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -12,7 +12,7 @@ from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedCompone
 
 class PixelSpotDetector(SpotFinderAlgorithmBase):
     def __init__(
-            self, codebook: Codebook, metric: str, distance_threshold: float,
+            self, codebook: Optional[Codebook], metric: str, distance_threshold: float,
             magnitude_threshold: int, min_area: int, max_area: int, norm_order: int=2,
             crop_x: int=0, crop_y: int=0, crop_z: int=0, **kwargs) -> None:
         """Decode an image by first coding each pixel, then combining the results into spots
@@ -53,7 +53,6 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         self.crop_x = crop_x
         self.crop_y = crop_y
         self.crop_z = crop_z
-
 
     def run(
             self, stack: ImageStack,
@@ -107,7 +106,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
             "--min-area", type=int, default=2, help="minimum area of a feature"
         )
         group_parser.add_argument(
-            "--max-area", type=int,  default=np.inf, help="maximum area of a feature"
+            "--max-area", type=int, default=np.inf, help="maximum area of a feature"
         )
         group_parser.add_argument(
             "--norm-order", type=int, default=2, help="order of L_p norm to apply to intensities "

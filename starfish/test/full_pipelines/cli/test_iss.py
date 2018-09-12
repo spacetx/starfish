@@ -7,8 +7,8 @@ import jsonpath_rw
 import numpy as np
 import pandas as pd
 
-from starfish.types import Features
 from starfish.test.full_pipelines.cli._base_cli_test import CLITest
+from starfish.types import Features
 
 
 def get_jsonpath_from_file(json_filepath_components: Sequence[str], jsonpath: str):
@@ -150,5 +150,3 @@ class TestWithIssData(CLITest):
             intensities.coords[Features.TARGET], return_counts=True)
         gene_counts = pd.Series(counts, genes)
         assert gene_counts['ACTB_human'] > gene_counts['ACTB_mouse']
-
-

@@ -1,9 +1,10 @@
 import argparse
+from io import BytesIO
 from zipfile import ZipFile
 
-from starfish.util.argparse import FsExistsType
 import requests
-from io import BytesIO
+
+from starfish.util.argparse import FsExistsType
 
 
 if __name__ == "__main__":
@@ -15,5 +16,3 @@ if __name__ == "__main__":
     r = requests.get(args.zip)
     z = ZipFile(BytesIO(r.content))
     z.extractall(args.output_dir)
-
-

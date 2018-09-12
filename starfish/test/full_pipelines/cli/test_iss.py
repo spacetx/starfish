@@ -1,19 +1,14 @@
 import json
 import os
-import shutil
-import subprocess
 import sys
-import tempfile
-import unittest
 from typing import Sequence
 
 import jsonpath_rw
 import numpy as np
 import pandas as pd
 
-from starfish.intensity_table import IntensityTable
 from starfish.types import Features
-from starfish.util import clock
+from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 
 
 def get_jsonpath_from_file(json_filepath_components: Sequence[str], jsonpath: str):
@@ -34,7 +29,7 @@ def get_jsonpath_from_file(json_filepath_components: Sequence[str], jsonpath: st
         return os.path.join(dirname, jsonpath_rw.parse(jsonpath).find(document)[0].value)
 
 
-class TestWithIssData(unittest.TestCase):
+class TestWithIssData(CLITest):
     SUBDIRS = (
         "raw",
         "formatted",
@@ -148,40 +143,10 @@ class TestWithIssData(unittest.TestCase):
         ],
     )
 
-    def test_run_pipeline(self):
-        tempdir = tempfile.mkdtemp()
-        coverage_enabled = "STARFISH_COVERAGE" in os.environ
+    def verify_results(self, intensities):
+        genes, counts = np.unique(
+            intensities.coords[Features.TARGET], return_counts=True)
+        gene_counts = pd.Series(counts, genes)
+        assert gene_counts['ACTB_human'] > gene_counts['ACTB_mouse']
 
-        def callback(interval):
-            print(" ".join(stage[:2]), " ==> {} seconds".format(interval))
 
-        try:
-            for subdir in TestWithIssData.SUBDIRS:
-                os.makedirs("{tempdir}".format(
-                    tempdir=os.path.join(tempdir, subdir)))
-            for stage in TestWithIssData.STAGES:
-                cmdline = [
-                    element(tempdir=tempdir) if callable(element) else element
-                    for element in stage
-                ]
-                if cmdline[0] == "starfish" and coverage_enabled:
-                    coverage_cmdline = [
-                        "coverage", "run",
-                        "-p",
-                        "--source", "starfish",
-                        "-m", "starfish",
-                    ]
-                    coverage_cmdline.extend(cmdline[1:])
-                    cmdline = coverage_cmdline
-                with clock.timeit(callback):
-                    subprocess.check_call(cmdline)
-
-            intensities = IntensityTable.load(os.path.join(tempdir, "results", "decoded-spots.nc"))
-            genes, counts = np.unique(
-                intensities.coords[Features.TARGET], return_counts=True)
-            gene_counts = pd.Series(counts, genes)
-            assert gene_counts['ACTB_human'] > gene_counts['ACTB_mouse']
-
-        finally:
-            if os.getenv("TEST_ISS_KEEP_DATA") is None:
-                shutil.rmtree(tempdir)

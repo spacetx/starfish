@@ -72,4 +72,7 @@ class SpotFinder(PipelineComponent):
             blobs_image=blobs_image,
             reference_image_from_max_projection=args.reference_image_from_max_projection
         )
-        intensities.save(args.output)
+        # When PixelSpotDetector is used run() returns a tuple
+        if isinstance(intensities, tuple):
+            intensities = intensities[0]
+        intensities.save(os.path.join(args.output, 'spots.nc'))

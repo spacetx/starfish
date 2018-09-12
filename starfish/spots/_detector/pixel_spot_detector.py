@@ -1,4 +1,7 @@
-from typing import Tuple
+from typing import Optional, Tuple, Union
+
+import numpy as np
+import xarray as xr
 
 from starfish.codebook import Codebook
 from starfish.intensity_table import IntensityTable
@@ -9,7 +12,7 @@ from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedCompone
 
 class PixelSpotDetector(SpotFinderAlgorithmBase):
     def __init__(
-            self, codebook: Codebook, metric: str, distance_threshold: float,
+            self, codebook, metric: str, distance_threshold: float,
             magnitude_threshold: int, min_area: int, max_area: int, norm_order: int=2,
             crop_x: int=0, crop_y: int=0, crop_z: int=0, **kwargs) -> None:
         """Decode an image by first coding each pixel, then combining the results into spots
@@ -48,7 +51,11 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         self.crop_y = crop_y
         self.crop_z = crop_z
 
-    def run(self, stack: ImageStack) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
+    def run(
+            self, stack: ImageStack,
+            blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
+            reference_image_from_max_projection: bool = False) \
+            -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """decode pixels and combine them into spots using connected component labeling
 
         Parameters
@@ -87,7 +94,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         group_parser.add_argument("--codebook-input", help="csv file containing a codebook")
         group_parser.add_argument("--metric", type=str, default='euclidean')
         group_parser.add_argument(
-            "--distance-threshold", default=0.5176,
+            "--distance-threshold", type=float, default=0.5176,
             help="maximum distance a pixel may be from a codeword before it is filtered"
         )
         group_parser.add_argument(
@@ -95,6 +102,16 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         )
         group_parser.add_argument(
             "--area-threshold", type=float, default=2, help="minimum area of a feature"
+        )
+ 	group_parser.add_argument(
+	  "--min-area", type=int, default=2, help="minimum area of a feature"
+        )
+        group_parser.add_argument(
+            "--max-area", type=int, default=np.inf, help="maximum area of a feature"
+        )
+        group_parser.add_argument(
+            "--norm-order", type=int, default=2, help="order of L_p norm to apply to intensities "
+            "and codes when using metric_decode to pair each intensities to its closest target"
         )
         group_parser.add_argument('--crop-x', type=int, default=0)
         group_parser.add_argument('--crop-y', type=int, default=0)

@@ -12,6 +12,7 @@ import pandas as pd
 from starfish.intensity_table import IntensityTable
 from starfish.types import Features
 from starfish.util import exec
+from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 
 
 def get_jsonpath_from_file(json_filepath_components: Sequence[str], jsonpath: str):
@@ -32,7 +33,9 @@ def get_jsonpath_from_file(json_filepath_components: Sequence[str], jsonpath: st
         return os.path.join(dirname, jsonpath_rw.parse(jsonpath).find(document)[0].value)
 
 
-class TestWithIssData(unittest.TestCase):
+class TestWithIssData(CLITest):
+    __test__ = True
+
     SUBDIRS = (
         "raw",
         "formatted",
@@ -145,25 +148,13 @@ class TestWithIssData(unittest.TestCase):
                 "$['codebook']",
             ),
             "-o", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "decoded-spots.nc"),
+                tempdir, "results", "spots.nc"),
             "PerRoundMaxChannelDecoder",
         ],
     )
 
-    def test_run_pipeline(self):
-
-        tempdir = exec.stages(
-            TestWithIssData.STAGES,
-            TestWithIssData.SUBDIRS,
-            keep_data=True,
-        )
-
-        try:
-            intensities = IntensityTable.load(os.path.join(tempdir, "results", "decoded-spots.nc"))
-            genes, counts = np.unique(
-                intensities.coords[Features.TARGET], return_counts=True)
-            gene_counts = pd.Series(counts, genes)
-            assert gene_counts['ACTB_human'] > gene_counts['ACTB_mouse']
-        finally:
-            if os.getenv("TEST_ISS_KEEP_DATA") is None:
-                shutil.rmtree(tempdir)
+    def verify_results(self, intensities):
+        genes, counts = np.unique(
+            intensities.coords[Features.TARGET], return_counts=True)
+        gene_counts = pd.Series(counts, genes)
+        assert gene_counts['ACTB_human'] > gene_counts['ACTB_mouse']

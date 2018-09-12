@@ -800,16 +800,16 @@ class ImageStack:
         tile_opener : TODO ttung: doc me.
 
         """
-        if self._data_needs_writeback:
-            for tile in self._image_partition.tiles():
-                h = tile.indices[Indices.ROUND]
-                c = tile.indices[Indices.CH]
-                zlayer = tile.indices.get(Indices.Z, 0)
-                tile.numpy_array, axes = self.get_slice(
-                    indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}
-                )
-                assert len(axes) == 0
-            self._data_needs_writeback = False
+
+        for tile in self._image_partition.tiles():
+            h = tile.indices[Indices.ROUND]
+            c = tile.indices[Indices.CH]
+            zlayer = tile.indices.get(Indices.Z, 0)
+            tile.numpy_array, axes = self.get_slice(
+                indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}
+            )
+            assert len(axes) == 0
+        self._data_needs_writeback = False
 
         seen_x_coords, seen_y_coords, seen_z_coords = set(), set(), set()
         for tile in self._image_partition.tiles():

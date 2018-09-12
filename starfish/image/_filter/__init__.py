@@ -47,18 +47,14 @@ class Filter(PipelineComponent):
             cls.filter_group.print_help()
             cls.filter_group.exit(status=2)
 
-        print('Filtering images ...' + str(args.filter_algorithm_class))
+        print('Filtering images ...')
         stack = ImageStack.from_path_or_url(args.input)
-        print("INPUT")
-        print(stack.numpy_array[0, 0, 0, 50:60, 60:70])
 
         instance = args.filter_algorithm_class(**vars(args))
         output = instance.run(stack, in_place=False)
         output.write(args.output)
 
-        print("OUTPUT")
-        print(output.numpy_array[0, 0, 0, 50:60, 60:70])
-        print(output.numpy_array.min())
+
 
 
 

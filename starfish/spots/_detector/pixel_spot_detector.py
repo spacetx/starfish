@@ -45,10 +45,10 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         else:
             self.codebook = codebook
         self.metric = metric
-        self.distance_threshold = float(distance_threshold)
-        self.magnitude_threshold = float(magnitude_threshold)
-        self.min_area = float(min_area)
-        self.max_area = float(max_area)
+        self.distance_threshold = distance_threshold
+        self.magnitude_threshold = magnitude_threshold
+        self.min_area = min_area
+        self.max_area = max_area
         self.norm_order = norm_order
         self.crop_x = crop_x
         self.crop_y = crop_y
@@ -97,7 +97,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         group_parser.add_argument("--codebook", help="json file containing a codebook")
         group_parser.add_argument("--metric", type=str, default='euclidean')
         group_parser.add_argument(
-            "--distance-threshold", default=0.5176,
+            "--distance-threshold", type=float, default=0.5176,
             help="maximum distance a pixel may be from a codeword before it is filtered"
         )
         group_parser.add_argument(

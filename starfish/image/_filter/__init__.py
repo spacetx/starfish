@@ -58,6 +58,7 @@ class Filter(PipelineComponent):
 
         print("OUTPUT")
         print(output.numpy_array[0, 0, 0, 50:60, 60:70])
+        print(output.numpy_array.min())
 
 
 

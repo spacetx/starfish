@@ -32,7 +32,9 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
     @classmethod
     def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
-            '--thresh', type=int, help='minimum magnitude threshold for pixels across channels')
+            '--thresh', type=float, help='minimum magnitude threshold for pixels across channels')
+        group_parser.add_argument(
+            '--normalize', action="store_true", help='Scales all rounds to have unit L2 norm across channels')
 
     def run(
             self, stack: ImageStack, in_place: bool = True, verbose=False,
@@ -54,7 +56,6 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             if in-place is False, return the results of filter as a new stack
 
         """
-
         channels_per_round = stack._data.groupby(Indices.ROUND.value)
         channels_per_round = tqdm(channels_per_round) if verbose else channels_per_round
 
@@ -84,5 +85,4 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                                                  ch_magnitude,
                                                  where=magnitude_mask
                                                  )
-
         return stack

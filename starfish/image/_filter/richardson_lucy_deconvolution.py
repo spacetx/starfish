@@ -14,7 +14,7 @@ from .util import gaussian_kernel, preserve_float_range
 class DeconvolvePSF(FilterAlgorithmBase):
 
     def __init__(
-            self, num_iter: int, sigma: Number, clip: bool=False, **kwargs) -> None:
+            self, num_iter: int, sigma: Number, clip: bool=True, **kwargs) -> None:
         """Deconvolve a point spread function
 
         Parameters
@@ -44,13 +44,14 @@ class DeconvolvePSF(FilterAlgorithmBase):
             '--num-iter', type=int, help='number of iterations to run')
         group_parser.add_argument(
             '--sigma', type=float, help='standard deviation of gaussian kernel')
+        #TODO DEAL WITH THIS
         group_parser.add_argument(
-            '--clip', action='store_true',
-            help='(default False) if True, clip values below -1 and above 1')
+            '--no-clip', action='store_false',
+            help='(default True) if True, clip values below -1 and above 1')
 
     @staticmethod
     def richardson_lucy_deconv(
-            image: np.ndarray, iterations: int, psf: np.ndarray, clip: bool=False) -> np.ndarray:
+            image: np.ndarray, iterations: int, psf: np.ndarray, clip: bool=True) -> np.ndarray:
         """
         Deconvolves input image with a specified point spread function.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 #
-# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
+# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "starfish", "language": "python", "name": "starfish"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
 ### Reproduce Published results with Starfish
@@ -84,7 +84,7 @@ experiment.codebook
 # EPY: START code
 from starfish.image import Filter
 ghp = Filter.GaussianHighPass(sigma=3)
-ghp.run(primary_image, verbose=True)
+high_passed = ghp.run(primary_image, verbose=True, in_place=False)
 # EPY: END code
 
 # EPY: START markdown
@@ -92,8 +92,8 @@ ghp.run(primary_image, verbose=True)
 # EPY: END markdown
 
 # EPY: START code
-dpsf = Filter.DeconvolvePSF(num_iter=9, sigma=2, clip=True)
-dpsf.run(primary_image, verbose=True, n_processes=)
+dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2, clip=True)
+deconvolved = dpsf.run(high_passed, verbose=True, in_place=False)
 # EPY: END code
 
 # EPY: START markdown
@@ -103,8 +103,8 @@ dpsf.run(primary_image, verbose=True, n_processes=)
 # EPY: END markdown
 
 # EPY: START code
-glp = Filter.GaussianLowPass(sigma=1, verbose=True)
-glp.run(primary_image)
+glp = Filter.GaussianLowPass(sigma=1)
+low_passed = glp.run(deconvolved, in_place=False, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -121,21 +121,13 @@ scale_factors = {
 # EPY: START code
 # this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to
 # at least we can do it with get_slice and set_slice right now.
+from copy import deepcopy
+scaled_image = deepcopy(low_passed)
 
 for indices in primary_image._iter_indices():
-    data = primary_image.get_slice(indices)[0]
+    data = scaled_image.get_slice(indices)[0]
     scaled = data / scale_factors[indices[Indices.ROUND.value], indices[Indices.CH.value]]
-    primary_image.set_slice(indices, scaled)
-# EPY: END code
-
-# EPY: START code
-from scipy.stats import scoreatpercentile
-# EPY: END code
-
-# EPY: START code
-mp = primary_image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-clim = scoreatpercentile(mp, [0.5, 99.5])
-show_image(mp, clim=clim)
+    scaled_image.set_slice(indices, scaled)
 # EPY: END code
 
 # EPY: START markdown
@@ -178,14 +170,14 @@ psd = SpotFinder.PixelSpotDetector(
     codebook=experiment.codebook,
     metric='euclidean',
     distance_threshold=0.5176,
-    magnitude_threshold=5e-5,
+    magnitude_threshold=1.77e-5,
     min_area=2,
     max_area=np.inf,
     norm_order=2,
     crop_size=(0, 40, 40)
 )
 
-spot_intensities, prop_results = psd.run(primary_image)
+spot_intensities, prop_results = psd.run(scaled_image)
 spot_intensities = spot_intensities.loc[spot_intensities[Features.PASSES_THRESHOLDS]]
 spot_intensities
 # EPY: END code
@@ -228,8 +220,22 @@ plt.title(f'r = {r}');
 # EPY: END markdown
 
 # EPY: START code
-area_lookup = lambda x: 0 if x == 0 else prop_results.region_properties[x - 1].area
-vfunc = np.vectorize(area_lookup)
-mask = np.squeeze(vfunc(prop_results.label_image))
-show_image(np.squeeze(prop_results.decoded_image)*(mask > 2), cmap = 'nipy_spectral')
+from scipy.stats import scoreatpercentile
+import warnings
+
+f, (ax1, ax2) = plt.subplots(1, 2, figsize=(30, 15))
+
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore', FutureWarning)
+    area_lookup = lambda x: 0 if x == 0 else prop_results.region_properties[x - 1].area
+    vfunc = np.vectorize(area_lookup)
+    mask = np.squeeze(vfunc(prop_results.label_image))
+    show_image(np.squeeze(prop_results.decoded_image)*(mask > 2), cmap='nipy_spectral', ax=ax1)
+    ax1.axes.set_axis_off()
+
+    mp = scaled_image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+    clim = scoreatpercentile(mp, [0.5, 99.5])
+    show_image(mp, clim=clim, ax=ax2)
+
+    f.tight_layout()
 # EPY: END code

@@ -140,7 +140,7 @@ class TestWithIssData(CLITest):
                 "$['codebook']",
             ),
             "-o", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "decoded-spots.nc"),
+                tempdir, "results", "spots.nc"),
             "PerRoundMaxChannelDecoder",
         ],
     )

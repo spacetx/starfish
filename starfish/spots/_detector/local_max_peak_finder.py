@@ -186,3 +186,6 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             "--percentile", default=None, type=float,
             help="clip bandpass below this value. Thresholding is done on already background-"
                  "subtracted images. Default 1 for integer images and 1/255 for float")
+        group_parser.add_argument(
+            "--is-volume", action="store_true",
+            help="indicates that the image stack should be filtered in 3d")

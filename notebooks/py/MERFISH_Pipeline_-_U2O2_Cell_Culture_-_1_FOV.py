@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 
 from showit import image as show_image
 from starfish.experiment import Experiment
-from starfish.image._filter.scale_by_percentile import ScaleByPercentile
+from starfish.image import Filter
 from starfish.types import Features, Indices
 # EPY: END code
 
@@ -109,7 +109,7 @@ low_passed = glp.run(deconvolved, in_place=False, verbose=True)
 # EPY: END code
 
 # EPY: START code
-sc_filt = ScaleByPercentile(p=90)
+sc_filt = Filter.ScaleByPercentile(p=90)
 scaled_image = sc_filt.run(low_passed, in_place=False)
 # EPY: END code
 

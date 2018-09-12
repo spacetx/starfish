@@ -218,7 +218,6 @@ def test_merfish_pipeline_cropped_data():
         dtype=np.float32
     )
 
-    # print(scaled_image.numpy_array[5, 0, 0, 40:50, 45:55])
     assert np.allclose(
         expected_scaled_low_passed,
         scaled_image.numpy_array[5, 0, 0, 40:50, 45:55]

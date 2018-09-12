@@ -59,16 +59,16 @@ class TestWithDartfishData(CLITest):
     )
 
     def verify_results(self, intensities):
-        assert intensities[Features.PASSES_FILTERS].sum()
+        assert intensities[Features.PASSES_THRESHOLDS].sum()
 
         spots_df = IntensityTable(
-            intensities.where(intensities[Features.PASSES_FILTERS], drop=True)
+            intensities.where(intensities[Features.PASSES_THRESHOLDS], drop=True)
         ).to_features_dataframe()
         spots_df['area'] = np.pi * spots_df['radius'] ** 2
 
         # verify number of spots detected
-        spots_passing_filters = intensities[Features.PASSES_FILTERS].sum()
-        assert spots_passing_filters == 54  # TODO note, had to change this by 1
+        spots_passing_filters = intensities[Features.PASSES_THRESHOLDS].sum()
+        assert spots_passing_filters == 53  # TODO note, had to change this by 1
 
         # compare to benchmark data -- note that this particular part of the dataset appears completely
         # uncorrelated

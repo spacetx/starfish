@@ -67,10 +67,10 @@ class FieldOfView:
     def __repr__(self):
         auxiliary_images = '\n    '.join(f'{k}: {v}' for k, v in self._auxiliary_images.items())
         return (
-                f"<starfish.FieldOfView>\n"
-                f"  Primary Image: {self._primary_image}\n"
-                f"  Auxiliary Images:\n"
-                f"    {auxiliary_images}"
+            f"<starfish.FieldOfView>\n"
+            f"  Primary Image: {self._primary_image}\n"
+            f"  Auxiliary Images:\n"
+            f"    {auxiliary_images}"
         )
 
     @property
@@ -136,21 +136,22 @@ class Experiment:
 
     def __repr__(self):
 
-        # truncate the list of fields of view if it is very long
-        print_nmax = 4
-        if len(self._fovs) > print_nmax:
-            fovs = self._fovs[:print_nmax] + ["...,\n"]
-        else:
-            fovs = self._fovs
+        # truncate the list of fields of view if it is longer than print_n_fov
+        print_n_fov = 4
+        n_fields_of_view = list(self.items())[:print_n_fov]
+        fields_of_view_str = "\n".join(
+            f'{k}: {v}' for k, v in n_fields_of_view
+        )
 
-        # convert fovs to string, careful not to re-convert the ellipsis
-        string_fovs = ",\n".join(repr(f) if not isinstance(f, str) else f for f in fovs)
+        # add an ellipsis if not all fields of view are being printed
+        if len(self._fovs) > print_n_fov:
+            fov_repr = f"{{\n{fields_of_view_str}\n  ...,\n}}"
+        else:
+            fov_repr = f"{{\n{fields_of_view_str}\n}}"
 
         # return the formatted string
-        return (
-            f"<starfish.Experiment (FOVs={len(self._fovs)})>\n"
-            f"FOVs:\n[{string_fovs}]"
-        )
+        object_repr = f"<starfish.Experiment (FOVs={len(self._fovs)})>\n"
+        return object_repr + fov_repr
 
     @classmethod
     def from_json(cls, json_url: str) -> "Experiment":
@@ -255,6 +256,15 @@ class Experiment:
         if len(fovs) == 0:
             raise IndexError(f"No field of view with name \"{item}\"")
         return fovs[0]
+
+    def keys(self):
+        return (fov.name for fov in self.fovs())
+
+    def values(self):
+        return (fov for fov in self.fovs())
+
+    def items(self):
+        return ((fov.name, fov) for fov in self.fovs())
 
     @property
     def codebook(self) -> Codebook:

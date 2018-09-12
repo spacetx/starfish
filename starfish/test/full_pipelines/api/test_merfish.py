@@ -43,7 +43,7 @@ def test_merfish_pipeline_cropped_data():
           0.11042954, 0.10994125, 0.10493629, 0.10205234, 0.10099947],
          [0.11708248, 0.11792172, 0.1163653, 0.11743343, 0.11384756,
           0.11157397, 0.10919356, 0.10666056, 0.10330358, 0.1016556]],
-        dtype=np.float
+        dtype=np.float32
     )
     assert np.allclose(
         expected_primary_image,
@@ -85,7 +85,7 @@ def test_merfish_pipeline_cropped_data():
          [1.52147513e-03, 3.41107862e-03, 2.98134040e-03, 5.24483122e-03,
           2.91270155e-03, 1.91782816e-03, 7.70164461e-04, 0.00000000e+00,
           0.00000000e+00, 0.00000000e+00]],
-        dtype=np.float
+        dtype=np.float32
     )
 
     assert np.allclose(
@@ -96,7 +96,7 @@ def test_merfish_pipeline_cropped_data():
     # deconvolve the point spread function
     num_iter = 9  # largest number that does not clobber whole tiles
     dpsf = DeconvolvePSF(num_iter=num_iter, sigma=2)
-    deconvolved = dpsf.run(high_passed, in_place=False, n_processes=1)
+    deconvolved = dpsf.run(high_passed, in_place=False)
 
     # assert that the deconvolved data is correct
     expected_deconvolved_values = np.array(
@@ -130,7 +130,7 @@ def test_merfish_pipeline_cropped_data():
          [9.99903305e-04, 1.61879312e-03, 3.86601263e-03, 7.53386941e-03,
           9.54075614e-03, 5.00072604e-03, 7.98692089e-04, 3.43009332e-05,
           5.45006845e-07, 1.50291884e-08]],
-        dtype=np.float
+        dtype=np.float32
     )
 
     assert np.allclose(
@@ -173,7 +173,7 @@ def test_merfish_pipeline_cropped_data():
          [1.48679575e-03, 1.96269962e-03, 3.37493576e-03, 5.19915860e-03,
           5.78267517e-03, 4.15057690e-03, 1.80804349e-03, 4.60562185e-04,
           6.77878588e-05, 7.27396431e-06]],
-        dtype=np.float
+        dtype=np.float32
     )
     assert np.allclose(
         expected_low_passed,
@@ -215,7 +215,7 @@ def test_merfish_pipeline_cropped_data():
          [4.02738214e-01, 5.31649411e-01, 9.14191008e-01, 1.40832996e+00,
             1.56639075e+00, 1.12429368e+00, 4.89756435e-01, 1.24755450e-01,
             1.83621347e-02, 1.97034585e-03]],
-        dtype=np.float
+        dtype=np.float32
     )
 
     # print(scaled_image.numpy_array[5, 0, 0, 40:50, 45:55])

@@ -138,16 +138,16 @@ class ImageStack:
 
     @staticmethod
     def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
-        """verify that data is of dtype float and in range [0, 1]"""
+        """verify that data is of dtype float32 and in range [0, 1]"""
         if data.dtype != np.float32:
             raise TypeError(
-                f"ImageStack data must be of type float, not {data.dtype}. Please convert data "
-                f"using skimage.img_as_float prior to calling set_slice."
+                f"ImageStack data must be of type float32, not {data.dtype}. Please convert data "
+                f"using skimage.img_as_float32 prior to calling set_slice."
             )
         if np.min(data) < 0 or np.max(data) > 1:
             raise ValueError(
-                f"ImageStack data must be of type float and in the range [0, 1]. Please convert "
-                f"data using skimage.img_as_float prior to calling set_slice."
+                f"ImageStack data must be of type float32 and in the range [0, 1]. Please convert "
+                f"data using skimage.img_as_float32 prior to calling set_slice."
             )
 
     @classmethod
@@ -261,10 +261,10 @@ class ImageStack:
 
         if result.dtype != np.float32:
             warnings.warn(
-                f"Non-float dtype: {result.dtype} detected. Data has likely been set using private "
-                f"attributes of ImageStack. ImageStack only supports float data in the range "
-                f"[0, 1]. Many algorithms will not function properly if provided other DataTypes. "
-                f"See: http://scikit-image.org/docs/dev/user_guide/data_types.html")
+                f"Non-float32 dtype: {result.dtype} detected. Data has likely been set using "
+                f"private attributes of ImageStack. ImageStack only supports float data in the "
+                f"range [0, 1]. Many algorithms will not function properly if provided other "
+                f"DataTypes. See: http://scikit-image.org/docs/dev/user_guide/data_types.html")
 
         return result, axes
 

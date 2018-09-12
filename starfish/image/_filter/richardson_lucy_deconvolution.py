@@ -48,6 +48,8 @@ class DeconvolvePSF(FilterAlgorithmBase):
             '--clip', action='store_true',
             help='(default False) if True, clip values below -1 and above 1')
 
+    # Here be dragons. This algorithm had a bug, but the results looked nice. Now we've "fixed" it
+    # and the results look bad. #548 addresses this problem.
     @staticmethod
     def richardson_lucy_deconv(
             image: np.ndarray, iterations: int, psf: np.ndarray, clip: bool=False) -> np.ndarray:

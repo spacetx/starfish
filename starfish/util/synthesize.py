@@ -1,5 +1,7 @@
 from typing import Tuple
 
+import numpy as np
+
 from starfish.codebook import Codebook
 from starfish.intensity_table import IntensityTable
 from starfish.stack import ImageStack
@@ -102,7 +104,7 @@ class SyntheticData:
         intensities = IntensityTable.synthetic_intensities(
             codebook, self.n_z, self.height, self.width, self.n_spots,
             self.mean_fluor_per_spot, self.mean_photons_per_fluor)
-        assert intensities.dtype == float and intensities.max() <= 1
+        assert intensities.dtype == np.float32 and intensities.max() <= 1
         return intensities
 
     def spots(self, intensities=None) -> ImageStack:
@@ -112,5 +114,5 @@ class SyntheticData:
             intensities, self.n_z, self.height, self.width, self.n_photons_background,
             self.point_spread_function, self.camera_detection_efficiency,
             self.background_electrons, self.gray_level, self.ad_coversion_bits)
-        assert stack.numpy_array.dtype == float
+        assert stack.numpy_array.dtype == np.float32
         return stack

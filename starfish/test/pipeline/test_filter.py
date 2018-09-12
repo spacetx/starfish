@@ -9,7 +9,7 @@ from starfish.types import Number
 
 
 def random_data_image_stack_factory():
-    data = np.random.uniform(0, 1, 100).reshape(1, 1, 1, 10, 10)
+    data = np.random.uniform(0, 1, 100).reshape(1, 1, 1, 10, 10).astype(np.float32)
     return ImageStack.from_numpy_array(data)
 
 

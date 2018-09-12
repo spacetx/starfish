@@ -92,7 +92,11 @@ def test_set_slice_simple_index():
     round_ = 1
     y, x = stack.tile_shape
 
-    expected = np.ones((stack.shape[Indices.CH], stack.shape[Indices.Z], y, x)) / 2
+    expected = np.full(
+        (stack.shape[Indices.CH], stack.shape[Indices.Z], y, x),
+        fill_value=0.5,
+        dtype=np.float32
+    )
     index = {Indices.ROUND: round_}
 
     stack.set_slice(index, expected)
@@ -109,7 +113,11 @@ def test_set_slice_middle_index():
     ch = 1
     y, x = stack.tile_shape
 
-    expected = np.ones((stack.shape[Indices.ROUND], stack.shape[Indices.Z], y, x)) / 2
+    expected = np.full(
+        (stack.shape[Indices.ROUND], stack.shape[Indices.Z], y, x),
+        fill_value=0.5,
+        dtype=np.float32
+    )
     index = {Indices.CH: ch}
 
     stack.set_slice(index, expected)
@@ -125,11 +133,11 @@ def test_set_slice_range():
     zrange = slice(1, 3)
     y, x = stack.tile_shape
 
-    expected = np.ones((
-        stack.shape[Indices.ROUND],
-        stack.shape[Indices.CH],
-        zrange.stop - zrange.start,
-        y, x), dtype=float) * 0.5
+    expected = np.full(
+        (stack.shape[Indices.ROUND], stack.shape[Indices.CH], zrange.stop - zrange.start, y, x),
+        fill_value=0.5,
+        dtype=np.float32
+    )
     index = {Indices.Z: zrange}
 
     stack.set_slice(index, expected)
@@ -138,7 +146,7 @@ def test_set_slice_range():
 
 
 def test_from_numpy_array_raises_error_when_incorrect_dims_passed():
-    array = np.ones((2, 2))
+    array = np.ones((2, 2), dtype=np.float32)
     # verify this method works with the correct shape
     image = ImageStack.from_numpy_array(array.reshape((1, 1, 1, 2, 2)))
     assert isinstance(image, ImageStack)
@@ -151,7 +159,7 @@ def test_from_numpy_array_raises_error_when_incorrect_dims_passed():
 
 
 def test_max_projection_preserves_dtype():
-    original_dtype = np.float
+    original_dtype = np.float32
     array = np.ones((2, 2, 2), dtype=original_dtype)
     image = ImageStack.from_numpy_array(array.reshape((1, 1, 2, 2, 2)))
 

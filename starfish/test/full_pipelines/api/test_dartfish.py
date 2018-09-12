@@ -20,7 +20,7 @@ def test_dartfish_pipeline_cropped_data():
     experiment = Experiment.from_json(experiment_json)
 
     primary_image = experiment.fov().primary_image
-    primary_image._data = primary_image._data.astype(float)
+    primary_image._data = primary_image._data.astype(np.float32)
 
     expected_primary_image = np.array(
         [[1.52590219e-05, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
@@ -53,7 +53,7 @@ def test_dartfish_pipeline_cropped_data():
          [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
           0.00000000e+00, 1.52590219e-05, 1.52590219e-05, 0.00000000e+00,
           0.00000000e+00, 0.00000000e+00]],
-        dtype=np.float
+        dtype=np.float32
     )
 
     assert np.allclose(
@@ -85,7 +85,7 @@ def test_dartfish_pipeline_cropped_data():
           0., 0., 0., 0., 0.],
          [0., 0., 0., 0., 0.,
           0.01960784, 0.01960784, 0., 0., 0.]],
-        dtype=np.float,
+        dtype=np.float32,
     )
 
     assert np.allclose(
@@ -117,7 +117,7 @@ def test_dartfish_pipeline_cropped_data():
           0., 0., 0., 0., 0.],
          [0., 0., 0., 0., 0.,
           0., 0.01960784, 0., 0., 0.]],
-        dtype=np.float
+        dtype=np.float32
     )
 
     assert np.allclose(
@@ -146,7 +146,7 @@ def test_dartfish_pipeline_cropped_data():
 
     # verify number of spots detected
     spots_passing_filters = spot_intensities[Features.PASSES_THRESHOLDS].sum()
-    assert spots_passing_filters == 54
+    assert spots_passing_filters == 53
 
     # compare to benchmark data -- note that this particular part of the dataset appears completely
     # uncorrelated
@@ -179,4 +179,4 @@ def test_dartfish_pipeline_cropped_data():
     corrcoef = np.corrcoef(x, y)
     corrcoef = corrcoef[0, 1]
 
-    assert np.round(corrcoef, 5) == -0.00992
+    assert np.round(corrcoef, 5) == 0.04422

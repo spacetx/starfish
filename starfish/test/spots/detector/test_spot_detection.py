@@ -55,7 +55,7 @@ def synthetic_two_spot_3d_2round_2ch() -> ImageStack:
     """
 
     # blank data_image
-    data = np.zeros((2, 2, 10, 100, 100), dtype=np.float)
+    data = np.zeros((2, 2, 10, 100, 100), dtype=np.float32)
 
     # round 0 channel 0
     data[0, 0, 4, 10, 90] = 1.0

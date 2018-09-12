@@ -22,8 +22,8 @@ def labeled_intensities_factory() -> Tuple[IntensityTable, np.ndarray, np.ndarra
         [[[[0., 0.], [.1, .1]],  # ch 1
           [[.5, .5], [.2, .3]]],
          [[[.1, .1], [0, 0]],  # ch 2, x & y are reversed
-          [[.2, .3], [.5, .5]]]]
-
+          [[.2, .3], [.5, .5]]]],
+        dtype=np.float32
     )
     image_stack = ImageStack.from_numpy_array(data.reshape(1, 2, 2, 2, 2))
     intensity_table = IntensityTable.from_image_stack(image_stack)
@@ -73,7 +73,8 @@ def test_calculate_mean_pixel_traces():
          [[.15],
           [.25]],
          [[.2],
-          [.25]]]
+          [.25]]],
+        dtype=np.float32
     )
     assert np.allclose(expected_values, mean_pixel_traces.values)
 

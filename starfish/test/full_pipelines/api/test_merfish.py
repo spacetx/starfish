@@ -42,7 +42,7 @@ def test_merfish_pipeline_cropped_data():
           0.11042954, 0.10994125, 0.10493629, 0.10205234, 0.10099947],
          [0.11708248, 0.11792172, 0.1163653, 0.11743343, 0.11384756,
           0.11157397, 0.10919356, 0.10666056, 0.10330358, 0.1016556]],
-        dtype=np.float
+        dtype=np.float32
     )
     assert np.allclose(
         expected_primary_image,
@@ -84,7 +84,7 @@ def test_merfish_pipeline_cropped_data():
          [1.52147513e-03, 3.41107862e-03, 2.98134040e-03, 5.24483122e-03,
           2.91270155e-03, 1.91782816e-03, 7.70164461e-04, 0.00000000e+00,
           0.00000000e+00, 0.00000000e+00]],
-        dtype=np.float
+        dtype=np.float32
     )
 
     assert np.allclose(
@@ -129,7 +129,7 @@ def test_merfish_pipeline_cropped_data():
          [9.99903305e-04, 1.61879312e-03, 3.86601263e-03, 7.53386941e-03,
           9.54075614e-03, 5.00072604e-03, 7.98692089e-04, 3.43009332e-05,
           5.45006845e-07, 1.50291884e-08]],
-        dtype=np.float
+        dtype=np.float32
     )
 
     assert np.allclose(
@@ -172,7 +172,7 @@ def test_merfish_pipeline_cropped_data():
          [1.48679575e-03, 1.96269962e-03, 3.37493576e-03, 5.19915860e-03,
           5.78267517e-03, 4.15057690e-03, 1.80804349e-03, 4.60562185e-04,
           6.77878588e-05, 7.27396431e-06]],
-        dtype=np.float
+        dtype=np.float32
     )
     assert np.allclose(
         expected_low_passed,
@@ -221,7 +221,7 @@ def test_merfish_pipeline_cropped_data():
          [1.87091288e-05, 2.46976761e-05, 4.24685823e-05, 6.54237326e-05,
           7.27664267e-05, 5.22288805e-05, 2.27515571e-05, 5.79549491e-06,
           8.53010090e-07, 9.15320981e-08]],
-        dtype=np.float
+        dtype=np.float32
     )
     assert np.allclose(
         expected_scaled_low_passed,

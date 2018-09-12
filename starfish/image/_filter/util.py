@@ -135,4 +135,4 @@ def preserve_float_range(array: Union[xr.DataArray, np.ndarray]) -> Union[xr.Dat
             array[array < 0] = 0
     if np.any(array > 1):
         array /= array.max()
-    return array
+    return array.astype(np.float32)

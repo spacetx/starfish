@@ -18,7 +18,7 @@ from matplotlib import get_backend as get_matplotlib_backend
 from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import scoreatpercentile
 from skimage import exposure
-from skimage import img_as_float, img_as_uint
+from skimage import img_as_float32, img_as_uint
 from slicedimage import Reader, Tile, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
@@ -109,7 +109,7 @@ class ImageStack:
         self._data = xr.DataArray(
             np.zeros(
                 shape=shape,
-                dtype=np.float,
+                dtype=np.float32,
             ),
             dims=dims,
         )
@@ -130,7 +130,7 @@ class ImageStack:
                     f"{self._data.dtype}.",
                     DataFormatWarning)
 
-            data = img_as_float(data)
+            data = img_as_float32(data)
             self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
 
         # set_slice will mark the data as needing writeback, so we need to unset that.
@@ -139,7 +139,7 @@ class ImageStack:
     @staticmethod
     def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
         """verify that data is of dtype float and in range [0, 1]"""
-        if data.dtype != float:
+        if data.dtype != np.float32:
             raise TypeError(
                 f"ImageStack data must be of type float, not {data.dtype}. Please convert data "
                 f"using skimage.img_as_float prior to calling set_slice."
@@ -259,7 +259,7 @@ class ImageStack:
         slice_list, axes = self._build_slice_list(indices)
         result = self._data.values[slice_list]
 
-        if result.dtype != float:
+        if result.dtype != np.float32:
             warnings.warn(
                 f"Non-float dtype: {result.dtype} detected. Data has likely been set using private "
                 f"attributes of ImageStack. ImageStack only supports float data in the range "
@@ -880,7 +880,7 @@ class ImageStack:
         """
         Returns a tile of just ones for any given round/ch/z.
         """
-        return np.ones((height, width), dtype=float)
+        return np.ones((height, width), dtype=np.float32)
 
     @classmethod
     def synthetic_stack(
@@ -1032,7 +1032,7 @@ class ImageStack:
 
             image[round_, ch, values.z, values.y, values.x] = values
 
-        intensities.values = img_as_float(intensities)
+        intensities.values = img_as_float32(intensities)
 
         # add imaging noise
         image += np.random.poisson(n_photons_background, size=image.shape).astype(np.uint32)
@@ -1058,7 +1058,7 @@ class ImageStack:
         with warnings.catch_warnings():
             # possible precision loss when casting from uint to float is acceptable
             warnings.simplefilter('ignore', UserWarning)
-            image = img_as_float(image)
+            image = img_as_float32(image)
 
         return cls.from_numpy_array(image)
 

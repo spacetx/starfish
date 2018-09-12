@@ -1,6 +1,7 @@
 from typing import Tuple, Union
 
 import numpy as np
+import xarray as xr
 from skimage.morphology import binary_opening, disk
 
 from starfish.types import Number
@@ -108,3 +109,30 @@ def validate_and_broadcast_kernel_size(
             valid_sigma = (sigma,) * 2
 
     return valid_sigma
+
+
+def preserve_float_range(array: Union[xr.DataArray, np.ndarray]) -> Union[xr.DataArray, np.ndarray]:
+    """
+    Clip values below zero and scale values by the max, but only if sub- or super-maximal values are
+    detected. Otherwise, this function will preserve the dynamic range of the input image.
+
+    Parameters
+    ----------
+    array : Union[xr.DataArray, np.ndarray]
+        Array whose values should be in the interval [0, 1] but may not be.
+
+    Returns
+    -------
+    array : Union[xr.DataArray, np.ndarray]
+        Array whose values are in the interval [0, 1].
+
+    """
+    array = array.copy()
+    if np.any(array < 0):
+        if isinstance(array, xr.DataArray):
+            array.values[array.values < 0] = 0
+        else:
+            array[array < 0] = 0
+    if np.any(array > 1):
+        array /= array.max()
+    return array.astype(np.float32)

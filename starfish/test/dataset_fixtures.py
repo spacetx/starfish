@@ -178,7 +178,7 @@ def synthetic_dataset_with_truth_values_and_called_spots(
 
 @pytest.fixture()
 def synthetic_single_spot_2d():
-    data = np.zeros((100, 100), dtype=np.uint16)
+    data = np.zeros((100, 100), dtype=np.float32)
     data[10, 90] = 1000
     data = gaussian_filter(data, sigma=2)
     return data
@@ -186,7 +186,7 @@ def synthetic_single_spot_2d():
 
 @pytest.fixture()
 def synthetic_single_spot_3d():
-    data = np.zeros((10, 100, 100), dtype=np.uint16)
+    data = np.zeros((10, 100, 100), dtype=np.float32)
     data[5, 10, 90] = 1000
     data = gaussian_filter(data, sigma=2)
     return data
@@ -194,7 +194,7 @@ def synthetic_single_spot_3d():
 
 @pytest.fixture()
 def synthetic_two_spot_3d():
-    data = np.zeros((10, 100, 100), dtype=np.uint16)
+    data = np.zeros((10, 100, 100), dtype=np.float32)
     data[4, 10, 90] = 1000
     data[6, 90, 10] = 1000
     data = gaussian_filter(data, sigma=2)
@@ -220,22 +220,22 @@ def synthetic_two_spot_3d_2round_2ch() -> ImageStack:
     """
 
     # blank data_image
-    data = np.zeros((2, 2, 10, 100, 100), dtype=np.uint16)
+    data = np.zeros((2, 2, 10, 100, 100), dtype=np.float32)
 
     # round 0 channel 0
-    data[0, 0, 4, 10, 90] = 1000
+    data[0, 0, 4, 10, 90] = 1
     data[0, 0, 5, 90, 10] = 0
 
     # round 0 channel 1
     data[0, 1, 4, 10, 90] = 0
-    data[0, 1, 5, 90, 10] = 1000
+    data[0, 1, 5, 90, 10] = 1
 
     # round 1 channel 0
     data[1, 0, 4, 10, 90] = 0
-    data[1, 0, 5, 90, 10] = 1000
+    data[1, 0, 5, 90, 10] = 1
 
     # round 1 channel 1
-    data[1, 1, 4, 10, 90] = 1000
+    data[1, 1, 4, 10, 90] = 1
     data[1, 1, 5, 90, 10] = 0
 
     data = gaussian_filter(data, sigma=(0, 0, 2, 2, 2))

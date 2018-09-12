@@ -17,7 +17,7 @@ def test_intensity_table_serialization():
     """
 
     # create an IntensityTable
-    data = np.zeros(100).reshape(1, 5, 2, 2, 5)
+    data = np.zeros(100, dtype=np.float32).reshape(1, 5, 2, 2, 5)
     image_stack = ImageStack.from_numpy_array(data)
     intensities = IntensityTable.from_image_stack(image_stack)
 

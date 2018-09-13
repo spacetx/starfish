@@ -1,7 +1,8 @@
 import argparse
 import os
+from typing import Type
 
-from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.stack import ImageStack
 from starfish.types import Indices
 from starfish.util.argparse import FsExistsType
@@ -16,8 +17,8 @@ class SpotFinder(PipelineComponent):
     spot_finder_group: argparse.ArgumentParser
 
     @classmethod
-    def implementing_algorithms(cls):
-        return _base.SpotFinderAlgorithmBase.__subclasses__()
+    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
+        return _base.SpotFinderAlgorithmBase
 
     @classmethod
     def add_to_parser(cls, subparsers):

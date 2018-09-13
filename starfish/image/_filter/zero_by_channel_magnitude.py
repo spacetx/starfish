@@ -1,6 +1,6 @@
 import argparse
-from copy import deepcopy
 import multiprocessing
+from copy import deepcopy
 from functools import partial
 from typing import Optional, Tuple
 

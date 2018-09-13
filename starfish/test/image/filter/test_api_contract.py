@@ -4,11 +4,11 @@ parameters for the constructor (omit is_volume), and it will be tested against t
 way of registration to the FilterAlgorithmBase
 """
 
-import pytest
-from starfish.image import Filter
-from starfish import ImageStack
 import numpy as np
+import pytest
 
+from starfish import ImageStack
+from starfish.image import Filter
 
 methods = Filter.implementing_algorithms()
 

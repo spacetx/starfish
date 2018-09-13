@@ -28,7 +28,7 @@ default_filtering_parameters = {
 
 
 def generate_default_data():
-    data = np.random.rand(2, 2, 2, 40, 50)
+    data = np.random.rand(2, 2, 2, 40, 50).astype(np.float32)
     return ImageStack.from_numpy_array(data)
 
 
@@ -82,7 +82,7 @@ def test_all_methods_adhere_to_contract(filter_class):
         raise AssertionError(f'{filter_class} must accept verbose parameter')
 
     # output is dtype float and within the expected interval of [0, 1]
-    assert filtered.numpy_array.dtype == np.float, f'{filter_class} must output float data'
+    assert filtered.numpy_array.dtype == np.float32, f'{filter_class} must output float32 data'
     assert np.all(filtered.numpy_array >= 0), \
         f'{filter_class} must output a result where all values are >= 0'
     assert np.all(filtered.numpy_array <= 1), \

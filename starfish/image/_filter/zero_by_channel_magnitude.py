@@ -14,7 +14,7 @@ from ._base import FilterAlgorithmBase
 
 
 class ZeroByChannelMagnitude(FilterAlgorithmBase):
-    def __init__(self, thresh: int, normalize: bool, is_volume: bool=False, **kwargs) -> None:
+    def __init__(self, thresh: float, normalize: bool, is_volume: bool=False, **kwargs) -> None:
         """For assays in which we expect codewords to have explicit zero values,
         e.g., DARTFISH, SEQFISH, etc., this filter allows for the explicit zeroing
         out of pixels, for each round, where there is insufficient signal magnitude across channels.
@@ -27,10 +27,11 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             are set to 0
         is_volume : bool = False
             Currently, only 2d-data is supported  # TODO dganguli: please implement 3D
-
         normalize : bool
             if True, this scales all rounds to have unit L2 norm across channels
         """
+        if is_volume is True:
+            raise NotImplementedError("Currently only 2-d filtering is supported")
         self.thresh = thresh
         self.normalize = normalize
         self.is_volume = is_volume

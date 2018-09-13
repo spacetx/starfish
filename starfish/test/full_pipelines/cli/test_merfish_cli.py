@@ -51,9 +51,18 @@ class TestWithMerfishData(CLITest):
             "--sigma", "1"
         ],
         [
+            "starfish", "filter",
+            "--input", lambda tempdir, *args, **kwargs: os.path.join(
+            tempdir, "filtered", "deconvolve_filtered.json"),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(
+            tempdir, "filtered", "scale_filtered.json"),
+            "ScaleByPercentile",
+            "--p", "90",
+        ],
+        [
             "starfish", "detect_spots",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "gaussian_filtered.json"),
+                tempdir, "filtered", "scale_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
             "PixelSpotDetector",
             "--codebook", lambda tempdir, *args, **kwargs: os.path.join(

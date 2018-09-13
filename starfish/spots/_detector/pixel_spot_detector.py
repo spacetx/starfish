@@ -40,7 +40,10 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
             an ImageStack (default = 0)
 
         """
-        self.codebook = codebook
+        if isinstance(codebook, str):
+            self.codebook = Codebook.from_json(codebook)
+        else:
+            self.codebook = codebook
         self.metric = metric
         self.distance_threshold = distance_threshold
         self.magnitude_threshold = magnitude_threshold
@@ -91,7 +94,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
 
     @classmethod
     def add_arguments(cls, group_parser):
-        group_parser.add_argument("--codebook-input", help="csv file containing a codebook")
+        group_parser.add_argument("--codebook", help="json file containing a codebook")
         group_parser.add_argument("--metric", type=str, default='euclidean')
         group_parser.add_argument(
             "--distance-threshold", type=float, default=0.5176,
@@ -103,8 +106,8 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         group_parser.add_argument(
             "--area-threshold", type=float, default=2, help="minimum area of a feature"
         )
- 	group_parser.add_argument(
-	  "--min-area", type=int, default=2, help="minimum area of a feature"
+        group_parser.add_argument(
+            "--min-area", type=int, default=2, help="minimum area of a feature"
         )
         group_parser.add_argument(
             "--max-area", type=int, default=np.inf, help="maximum area of a feature"

@@ -53,9 +53,9 @@ class TestWithMerfishData(CLITest):
         [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "deconvolve_filtered.json"),
+                tempdir, "filtered", "deconvolve_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-            tempdir, "filtered", "scale_filtered.json"),
+                tempdir, "filtered", "scale_filtered.json"),
             "ScaleByPercentile",
             "--p", "90",
         ],

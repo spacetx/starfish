@@ -1,18 +1,14 @@
 import json
 import os
-import shutil
 import sys
-import unittest
 from typing import Sequence
 
 import jsonpath_rw
 import numpy as np
 import pandas as pd
 
-from starfish.intensity_table import IntensityTable
-from starfish.types import Features
-from starfish.util import exec
 from starfish.test.full_pipelines.cli._base_cli_test import CLITest
+from starfish.types import Features
 
 
 def get_jsonpath_from_file(json_filepath_components: Sequence[str], jsonpath: str):

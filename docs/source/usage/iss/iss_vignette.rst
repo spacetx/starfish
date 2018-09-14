@@ -152,9 +152,12 @@ The above steps can be recapitulated using starfish as follows:
 
 .. literalinclude:: iss_pipeline.py
 
-
-Running Starfish
-----------------
-
 Visualizing Outputs
 -------------------
+
+Starfish loops into a variety of visualization ecosystems, and has some of its own plotting methods
+in ``starfish.plot``, but it can also output spot data for visualization with high-performance WebGL
+based tools like MERmaid.
+
+To dump data for use with MERmaid, simply call ``decoded_intensities.save_mermaid()`` and then
+follow the installation instructions for MERmaid.

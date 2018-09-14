@@ -163,6 +163,10 @@ class ImageStack:
                 f"data using skimage.img_as_float32 prior to calling set_slice."
             )
 
+    def __repr__(self):
+        shape = ', '.join(f'{k}: {v}' for k, v in self._data.sizes.items())
+        return f"<starfish.ImageStack ({shape})>"
+
     @classmethod
     def from_url(cls, url: str, baseurl: Optional[str]):
         """

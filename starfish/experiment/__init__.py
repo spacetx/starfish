@@ -64,6 +64,15 @@ class FieldOfView:
         else:
             self._auxiliary_images = dict()
 
+    def __repr__(self):
+        auxiliary_images = '\n    '.join(f'{k}: {v}' for k, v in self._auxiliary_images.items())
+        return (
+            f"<starfish.FieldOfView>\n"
+            f"  Primary Image: {self._primary_image}\n"
+            f"  Auxiliary Images:\n"
+            f"    {auxiliary_images}"
+        )
+
     @property
     def name(self) -> Optional[str]:
         return self._name
@@ -124,6 +133,25 @@ class Experiment:
         self._codebook = codebook
         self._extras = extras
         self._src_doc = src_doc
+
+    def __repr__(self):
+
+        # truncate the list of fields of view if it is longer than print_n_fov
+        print_n_fov = 4
+        n_fields_of_view = list(self.items())[:print_n_fov]
+        fields_of_view_str = "\n".join(
+            f'{k}: {v}' for k, v in n_fields_of_view
+        )
+
+        # add an ellipsis if not all fields of view are being printed
+        if len(self._fovs) > print_n_fov:
+            fov_repr = f"{{\n{fields_of_view_str}\n  ...,\n}}"
+        else:
+            fov_repr = f"{{\n{fields_of_view_str}\n}}"
+
+        # return the formatted string
+        object_repr = f"<starfish.Experiment (FOVs={len(self._fovs)})>\n"
+        return object_repr + fov_repr
 
     @classmethod
     def from_json(cls, json_url: str) -> "Experiment":
@@ -228,6 +256,15 @@ class Experiment:
         if len(fovs) == 0:
             raise IndexError(f"No field of view with name \"{item}\"")
         return fovs[0]
+
+    def keys(self):
+        return (fov.name for fov in self.fovs())
+
+    def values(self):
+        return (fov for fov in self.fovs())
+
+    def items(self):
+        return ((fov.name, fov) for fov in self.fovs())
 
     @property
     def codebook(self) -> Codebook:

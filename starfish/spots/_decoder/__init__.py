@@ -1,8 +1,9 @@
 import argparse
+from typing import Type
 
 from starfish.codebook import Codebook
 from starfish.intensity_table import IntensityTable
-from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import _base
 from . import per_round_max_channel_decoder
@@ -13,8 +14,8 @@ class Decoder(PipelineComponent):
     decoder_group: argparse.ArgumentParser
 
     @classmethod
-    def implementing_algorithms(cls):
-        return _base.DecoderAlgorithmBase.__subclasses__()
+    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
+        return _base.DecoderAlgorithmBase
 
     @classmethod
     def add_to_parser(cls, subparsers):

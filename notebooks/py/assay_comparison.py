@@ -75,7 +75,7 @@ datasets = [iss_intensity_table, merfish_intensity_table, dartfish_intensity_tab
 # EPY: START code
 # construct background images for each assay
 experiment = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180905/DARTFISH/experiment.json'
+    'https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/experiment.json'
 )
 
 dartfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
@@ -87,7 +87,7 @@ dartfish_dots = np.load(dartfish_npy)
 
 # EPY: START code
 experiment = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180905/ISS/experiment.json'
+    'https://dmf0bdeheu4zf.cloudfront.net/20180911/ISS/experiment.json'
 )
 
 iss_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
@@ -96,7 +96,7 @@ iss_dots = experiment.fov()['dots'].max_proj(Indices.CH, Indices.ROUND, Indices.
 
 # EPY: START code
 stack = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180905/MERFISH/experiment.json'
+    'https://dmf0bdeheu4zf.cloudfront.net/20180911/MERFISH/experiment.json'
 )
 merfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 
@@ -265,7 +265,7 @@ f.tight_layout()
 
 # EPY: START code
 dartfish_copy_number = pd.read_csv(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180905/DARTFISH/fov_001/counts.csv',
+    'https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/fov_001/counts.csv',
     index_col=0,
     squeeze=True
 )

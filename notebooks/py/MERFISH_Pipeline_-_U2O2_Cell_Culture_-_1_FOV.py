@@ -30,7 +30,7 @@ from starfish.types import Features, Indices
 
 # EPY: START code
 # load the data from cloudfront
-experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180905/MERFISH/experiment.json")
+experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180911/MERFISH/experiment.json")
 # EPY: END code
 
 # EPY: START markdown

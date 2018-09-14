@@ -72,4 +72,4 @@ class SpotFinder(PipelineComponent):
             blobs_image=blobs_image,
             reference_image_from_max_projection=args.reference_image_from_max_projection
         )
-        intensities.save(os.path.join(args.output, 'spots.nc'))
+        intensities.save(args.output)

@@ -127,7 +127,8 @@ class TestWithIssData(unittest.TestCase):
             "starfish", "detect_spots",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "hybridization.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "results", "spots.nc"),
             "GaussianSpotDetector",
             "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "dots.json"),

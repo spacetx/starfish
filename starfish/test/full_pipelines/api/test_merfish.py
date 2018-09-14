@@ -5,8 +5,9 @@ from starfish import Experiment
 from starfish.image._filter.gaussian_high_pass import GaussianHighPass
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
 from starfish.image._filter.richardson_lucy_deconvolution import DeconvolvePSF
+from starfish.image._filter.scale_by_percentile import ScaleByPercentile
 from starfish.spots._detector.pixel_spot_detector import PixelSpotDetector
-from starfish.types import Features, Indices
+from starfish.types import Features
 
 
 def test_merfish_pipeline_cropped_data():
@@ -179,53 +180,47 @@ def test_merfish_pipeline_cropped_data():
         low_passed.numpy_array[5, 0, 0, 40:50, 45:55]
     )
 
-    # scale the data by the scale factors
-    scale_factors = {
-        (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
-        for t in experiment.extras['scale_factors']
-    }
-    for indices in low_passed._iter_indices():
-        data = low_passed.get_slice(indices)[0]
-        scaled = data / scale_factors[indices[Indices.ROUND.value], indices[Indices.CH.value]]
-        low_passed.set_slice(indices, scaled)
+    sc_filt = ScaleByPercentile(p=90)
+    scaled_image = sc_filt.run(low_passed, in_place=False)
 
     # assert that the scaled data is correct
     expected_scaled_low_passed = np.array(
-        [[1.09703669e-06, 2.92032245e-06, 5.51915361e-06, 7.92915038e-06,
-          1.05728195e-05, 1.63055822e-05, 2.68814789e-05, 3.85195949e-05,
-          4.46838411e-05, 4.43835477e-05],
-         [2.17391120e-07, 7.43758608e-07, 1.86740046e-06, 3.86495712e-06,
-          7.79368301e-06, 1.59540056e-05, 2.89201062e-05, 4.12791677e-05,
-          4.55931080e-05, 4.19979593e-05],
-         [1.06391783e-07, 3.13363967e-07, 8.86053528e-07, 2.20132288e-06,
-          5.09827762e-06, 1.08442016e-05, 1.90824316e-05, 2.57053220e-05,
-          2.64338778e-05, 2.24797005e-05],
-         [3.84230295e-07, 4.22684951e-07, 7.31617101e-07, 1.45611178e-06,
-          2.86817554e-06, 5.22051512e-06, 7.98709900e-06, 9.53294238e-06,
-          8.80727460e-06, 6.80151373e-06],
-         [2.03941887e-06, 1.31977911e-06, 1.18917853e-06, 1.42524999e-06,
-          1.84916279e-06, 2.28113967e-06, 2.50487609e-06, 2.31912514e-06,
-          1.77563057e-06, 1.19388978e-06],
-         [7.82464092e-06, 4.46181149e-06, 3.13946794e-06, 2.75312477e-06,
-          2.47201934e-06, 1.88570421e-06, 1.14166423e-06, 5.73844482e-07,
-          2.68157425e-07, 1.31908195e-07],
-         [1.92213313e-05, 1.15544705e-05, 8.65853712e-06, 7.76990907e-06,
-          6.59367844e-06, 4.28538147e-06, 1.89308368e-06, 5.42968232e-07,
-          1.04673045e-07, 1.75666301e-08],
-         [2.94879063e-05, 2.08855698e-05, 1.95925818e-05, 2.08684007e-05,
-          1.91853127e-05, 1.26006887e-05, 5.33190243e-06, 1.37614641e-06,
-          2.11312024e-07, 1.93363093e-08],
-         [2.87093448e-05, 2.66190885e-05, 3.38628560e-05, 4.39774578e-05,
-          4.46771545e-05, 3.05869439e-05, 1.30335706e-05, 3.30413232e-06,
-          4.88366824e-07, 4.29884250e-08],
-         [1.87091288e-05, 2.46976761e-05, 4.24685823e-05, 6.54237326e-05,
-          7.27664267e-05, 5.22288805e-05, 2.27515571e-05, 5.79549491e-06,
-          8.53010090e-07, 9.15320981e-08]],
+        [[2.36151423e-02, 6.28637671e-02, 1.18807055e-01, 1.70685455e-01,
+            2.27593824e-01, 3.50998789e-01, 5.78658342e-01, 8.29183519e-01,
+            9.61876750e-01, 9.55412626e-01],
+         [4.67962492e-03, 1.60103776e-02, 4.01982553e-02, 8.31982940e-02,
+            1.67769194e-01, 3.43430549e-01, 6.22542262e-01, 8.88586640e-01,
+            9.81449664e-01, 9.04059589e-01],
+         [2.29021232e-03, 6.74555730e-03, 1.90734547e-02, 4.73863631e-02,
+            1.09747060e-01, 2.33435377e-01, 4.10773665e-01, 5.53339660e-01,
+            5.69022715e-01, 4.83904064e-01],
+         [8.27101339e-03, 9.09881108e-03, 1.57489982e-02, 3.13447155e-02,
+            6.17412329e-02, 1.12378329e-01, 1.71932489e-01, 2.05208659e-01,
+            1.89587697e-01, 1.46411166e-01],
+         [4.39009629e-02, 2.84098629e-02, 2.55985856e-02, 3.06803901e-02,
+            3.98056917e-02, 4.91045304e-02, 5.39206900e-02, 4.99221161e-02,
+            3.82226892e-02, 2.56999806e-02],
+         [1.68435052e-01, 9.60460454e-02, 6.75810724e-02, 5.92646487e-02,
+            5.32135367e-02, 4.05923128e-02, 2.45758332e-02, 1.23527460e-02,
+            5.77242952e-03, 2.83948984e-03],
+         [4.13763195e-01, 2.48724550e-01, 1.86386168e-01, 1.67257488e-01,
+            1.41937658e-01, 9.22485143e-02, 4.07511257e-02, 1.16881039e-02,
+            2.25322321e-03, 3.78144148e-04],
+         [6.34764552e-01, 4.49588507e-01, 4.21755642e-01, 4.49219465e-01,
+            4.12988871e-01, 2.71246254e-01, 1.14776127e-01, 2.96233352e-02,
+            4.54876432e-03, 4.16238996e-04],
+         [6.18005455e-01, 5.73010147e-01, 7.28941679e-01, 9.46671605e-01,
+            9.61733460e-01, 6.58423424e-01, 2.80564368e-01, 7.11256936e-02,
+            1.05127227e-02, 9.25380969e-04],
+         [4.02738214e-01, 5.31649411e-01, 9.14191008e-01, 1.40832996e+00,
+            1.56639075e+00, 1.12429368e+00, 4.89756435e-01, 1.24755450e-01,
+            1.83621347e-02, 1.97034585e-03]],
         dtype=np.float32
     )
+
     assert np.allclose(
         expected_scaled_low_passed,
-        low_passed.numpy_array[5, 0, 0, 40:50, 45:55]
+        scaled_image.numpy_array[5, 0, 0, 40:50, 45:55]
     )
 
     # detect and decode spots
@@ -239,11 +234,11 @@ def test_merfish_pipeline_cropped_data():
         norm_order=2,
         crop_size=(0, 40, 40)
     )
-    spot_intensities, prop_results = psd.run(low_passed)
+    spot_intensities, prop_results = psd.run(scaled_image)
 
     # verify that the number of spots are correct
     spots_passing_filters = spot_intensities[Features.PASSES_THRESHOLDS].sum()
-    assert spots_passing_filters == 1125
+    assert spots_passing_filters == 1493
 
     # compare to paper results
     bench = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/benchmark_results.csv',
@@ -258,8 +253,8 @@ def test_merfish_pipeline_cropped_data():
 
     # assert that number of high-expression detected genes are correct
     expected_counts = pd.Series(
-        [101, 74, 50, 38, 27],
-        index=('MALAT1', 'nan', 'SRRM2', 'FASN', 'PRKDC')
+        [120, 90, 56, 49, 37],
+        index=('nan', 'MALAT1', 'SRRM2', 'FASN', 'IGF2R')
     )
     assert np.array_equal(
         expected_counts.values,
@@ -274,4 +269,4 @@ def test_merfish_pipeline_cropped_data():
 
     corrcoef = np.corrcoef(tmp[:, 1], tmp[:, 0])[0, 1]
 
-    assert np.round(corrcoef, 4) == 0.9739
+    assert np.round(corrcoef, 4) == 0.894

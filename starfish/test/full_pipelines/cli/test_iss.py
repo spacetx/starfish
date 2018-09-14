@@ -32,6 +32,8 @@ def get_jsonpath_from_file(json_filepath_components: Sequence[str], jsonpath: st
 class TestWithIssData(CLITest):
     __test__ = True
 
+    spots_file = "decoded-spots.nc"
+
     SUBDIRS = (
         "raw",
         "formatted",
@@ -43,10 +45,9 @@ class TestWithIssData(CLITest):
     STAGES = (
         [
             sys.executable,
-            "examples/get_iss_data.py",
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "raw"),
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted"),
-            "--d", "1",
+            "examples/get_cli_test_data.py",
+            "https://dmf0bdeheu4zf.cloudfront.net/20180828/test-iss-data.zip",
+            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
         ],
         [
             "starfish", "registration",
@@ -169,12 +170,13 @@ class TestWithIssData(CLITest):
                 "$['codebook']",
             ),
             "-o", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "spots.nc"),
+                tempdir, "results", "decoded-spots.nc"),
             "PerRoundMaxChannelDecoder",
         ],
     )
 
     def verify_results(self, intensities):
+        # TODO make this test stronger
         genes, counts = np.unique(
             intensities.coords[Features.TARGET], return_counts=True)
         gene_counts = pd.Series(counts, genes)

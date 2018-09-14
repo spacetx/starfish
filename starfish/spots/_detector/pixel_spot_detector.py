@@ -1,7 +1,6 @@
-from typing import Optional, Tuple, Union
+from typing import Tuple
 
 import numpy as np
-import xarray as xr
 
 from starfish.codebook import Codebook
 from starfish.intensity_table import IntensityTable
@@ -56,9 +55,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
 
     def run(
             self, stack: ImageStack,
-            blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
-            reference_image_from_max_projection: bool = False) \
-            -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
+    ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """decode pixels and combine them into spots using connected component labeling
 
         Parameters
@@ -101,19 +98,20 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
             help="maximum distance a pixel may be from a codeword before it is filtered"
         )
         group_parser.add_argument(
-            "--magnitude-threshold", type=float, default=1, help="minimum magnitude of a feature"
+            "--magnitude-threshold", type=float, default=1,
+            help="minimum magnitude of a feature"
         )
         group_parser.add_argument(
-            "--area-threshold", type=float, default=2, help="minimum area of a feature"
+            "--min-area", type=int, default=2,
+            help="minimum area of a feature"
         )
         group_parser.add_argument(
-            "--min-area", type=int, default=2, help="minimum area of a feature"
+            "--max-area", type=int, default=np.inf,
+            help="maximum area of a feature"
         )
         group_parser.add_argument(
-            "--max-area", type=int, default=np.inf, help="maximum area of a feature"
-        )
-        group_parser.add_argument(
-            "--norm-order", type=int, default=2, help="order of L_p norm to apply to intensities "
+            "--norm-order", type=int, default=2,
+            help="order of L_p norm to apply to intensities "
             "and codes when using metric_decode to pair each intensities to its closest target"
         )
         group_parser.add_argument('--crop-x', type=int, default=0)

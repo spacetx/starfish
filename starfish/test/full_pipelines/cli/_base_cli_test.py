@@ -10,13 +10,21 @@ from starfish.util import clock
 
 
 class CLITest(unittest.TestCase):
+    """This is a base class for testing CLI methods. Each stage should correspond to a different pipeline step.
+    Running the test will go through each stage and run the command line method with given arguments.
+    The last stage should produce a file called results containing an IntensityTable.
+    Each cli test should define it's own verify_results method.
+    """
+    # Since this is a base class we don't want to actually run it as a test.
+    # #For classes that inherit CLITest this will need to be set to True.
     __test__ = False
 
     SUBDIRS = Tuple[str]
     STAGES = Tuple[List]
+    spots_file = "spots.nc"
 
     def verify_results(self, intensities):
-        pass
+        raise NotImplementedError()
 
     def test_run_pipline(self):
         tempdir = tempfile.mkdtemp()
@@ -46,7 +54,7 @@ class CLITest(unittest.TestCase):
                     cmdline = coverage_cmdline
                 with clock.timeit(callback):
                     subprocess.check_call(cmdline)
-            intensities = IntensityTable.load(os.path.join(tempdir, "results", "spots.nc"))
+            intensities = IntensityTable.load(os.path.join(tempdir, "results", self.spots_file))
             self.verify_results(intensities)
 
         finally:

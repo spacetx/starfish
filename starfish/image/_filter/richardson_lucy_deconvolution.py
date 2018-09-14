@@ -46,7 +46,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
             '--sigma', type=float, help='standard deviation of gaussian kernel')
         group_parser.add_argument(
             '--no-clip', action='store_false',
-            help='(default True) if True, clip values below -1 and above 1')
+            help='(default True) if True, clip values below 0 and above 1')
 
     # Here be dragons. This algorithm had a bug, but the results looked nice. Now we've "fixed" it
     # and the results look bad. #548 addresses this problem.

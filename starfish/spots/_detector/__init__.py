@@ -61,17 +61,17 @@ class SpotFinder(PipelineComponent):
 
         print('Detecting Spots ...')
         image_stack = ImageStack.from_path_or_url(args.input)
+        instance = args.spot_finder_algorithm_class(**vars(args))
         if args.blobs_stack is not None:
             blobs_stack = ImageStack.from_path_or_url(args.blobs_stack)  # type: ignore
             blobs_image = blobs_stack.max_proj(Indices.ROUND, Indices.CH)
+            intensities = instance.run(
+                image_stack,
+                blobs_image=blobs_image,
+                reference_image_from_max_projection=args.reference_image_from_max_projection
+            )
         else:
-            blobs_image = None
-        instance = args.spot_finder_algorithm_class(**vars(args))
-        intensities = instance.run(
-            image_stack,
-            blobs_image=blobs_image,
-            reference_image_from_max_projection=args.reference_image_from_max_projection
-        )
+            intensities = instance.run(image_stack)
 
         # When PixelSpotDetector is used run() returns a tuple
         if isinstance(intensities, tuple):

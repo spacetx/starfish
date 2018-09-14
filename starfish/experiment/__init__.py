@@ -26,7 +26,7 @@ class FieldOfView:
     """
     def __init__(
             self,
-            name: Optional[str],
+            name: str,
             primary_image: Optional[ImageStack]=None,
             auxiliary_images: Optional[MutableMapping[str, ImageStack]]=None,
             primary_image_tileset: Optional[TileSet]=None,
@@ -74,7 +74,7 @@ class FieldOfView:
         )
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str:
         return self._name
 
     @property

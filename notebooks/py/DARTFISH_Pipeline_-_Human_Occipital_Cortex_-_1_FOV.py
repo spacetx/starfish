@@ -16,6 +16,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
 from starfish.experiment import Experiment
 from starfish.types import Features, Indices
@@ -40,7 +41,12 @@ sns.set_style('ticks')
 
 # EPY: START code
 
-exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180905/DARTFISH-TEST/experiment.json')
+test = os.getenv("USE_TEST_DATA") is not None
+if test:
+    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180905/DARTFISH-TEST/experiment.json')
+else:
+    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180905/DARTFISH/experiment.json')
+
 stack = exp.fov().primary_image
 
 # TODO the latter will be fixed by https://github.com/spacetx/starfish/issues/316

@@ -18,6 +18,7 @@
 # EPY: ESCAPE %matplotlib inline
 
 import pprint
+import os
 
 import numpy as np
 import pandas as pd
@@ -30,11 +31,11 @@ from starfish.types import Features, Indices
 
 # EPY: START code
 # load the data from cloudfront
-<<<<<<< HEAD:notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
-experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180911/MERFISH/experiment.json")
-=======
-experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180905/MERFISH-TEST/experiment.json')
->>>>>>> d50ad78... changes.:notebooks/py/merfish_pipeline.py
+test = os.getenv("USE_TEST_DATA") is not None
+if test:
+    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180905/MERFISH-TEST/experiment.json')
+else:
+    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180905/MERFISH/experiment.json')
 # EPY: END code
 
 # EPY: START markdown
@@ -181,67 +182,65 @@ psd = SpotFinder.PixelSpotDetector(
     crop_size=(0, 40, 40)
 )
 
-spot_intensities, prop_results = psd.run(scaled_image)
+initial_spot_intensities, prop_results = psd.run(scaled_image)
 
-if False:
-    spot_intensities = spot_intensities.loc[spot_intensities[Features.PASSES_THRESHOLDS]]
-    spot_intensities
-    # EPY: END code
+spot_intensities = initial_spot_intensities.loc[initial_spot_intensities[Features.PASSES_THRESHOLDS]]
+# EPY: END code
 
-    # EPY: START markdown
-    ### Compare to results from paper
-    #
-    #The below plot aggregates gene copy number across single cells in the field of view and compares the results to the published intensities in the MERFISH paper.
-    #
-    #To make this match perfectly, run deconvolution 15 times instead of 14. As presented below, STARFISH displays a lower detection rate.
-    # EPY: END markdown
+# EPY: START markdown
+### Compare to results from paper
+#
+#The below plot aggregates gene copy number across single cells in the field of view and compares the results to the published intensities in the MERFISH paper.
+#
+#To make this match perfectly, run deconvolution 15 times instead of 14. As presented below, STARFISH displays a lower detection rate.
+# EPY: END markdown
 
-    # EPY: START code
-    bench = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/benchmark_results.csv',
-                        dtype = {'barcode':object})
+# EPY: START code
+bench = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/benchmark_results.csv',
+                    dtype = {'barcode':object})
 
-    benchmark_counts = bench.groupby('gene')['gene'].count()
-    genes, counts = np.unique(spot_intensities[Features.AXIS][Features.TARGET], return_counts=True)
-    result_counts = pd.Series(counts, index=genes)
+benchmark_counts = bench.groupby('gene')['gene'].count()
+genes, counts = np.unique(spot_intensities[Features.AXIS][Features.TARGET], return_counts=True)
+result_counts = pd.Series(counts, index=genes)
 
-    tmp = pd.concat([result_counts, benchmark_counts], join='inner', axis=1).values
+tmp = pd.concat([result_counts, benchmark_counts], join='inner', axis=1).values
 
-    r = np.corrcoef(tmp[:, 1], tmp[:, 0])[0, 1]
-    x = np.linspace(50, 2000)
-    f, ax = plt.subplots(figsize=(6, 6))
-    ax.scatter(tmp[:, 1], tmp[:, 0], 50, zorder=2)
-    ax.plot(x, x, '-k', zorder=1)
+r = np.corrcoef(tmp[:, 1], tmp[:, 0])[0, 1]
+x = np.linspace(50, 2000)
+f, ax = plt.subplots(figsize=(6, 6))
+ax.scatter(tmp[:, 1], tmp[:, 0], 50, zorder=2)
+ax.plot(x, x, '-k', zorder=1)
 
-    plt.xlabel('Gene copy number Benchmark')
-    plt.ylabel('Gene copy number Starfish')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.title(f'r = {r}');
-    # EPY: END code
+plt.xlabel('Gene copy number Benchmark')
+plt.ylabel('Gene copy number Starfish')
+plt.xscale('log')
+plt.yscale('log')
+plt.title(f'r = {r}');
+# EPY: END code
 
-    # EPY: START markdown
-    ### Visualize results
-    #
-    #This image applies a pseudo-color to each gene channel to visualize the position and size of all called spots in a subset of the test image
-    # EPY: END markdown
+# EPY: START markdown
+### Visualize results
+#
+#This image applies a pseudo-color to each gene channel to visualize the position and size of all called spots in a subset of the test image
+# EPY: END markdown
 
-    # EPY: START code
-    from scipy.stats import scoreatpercentile
-    import warnings
+# EPY: START code
+from scipy.stats import scoreatpercentile
+import warnings
 
-    f, (ax1, ax2) = plt.subplots(1, 2, figsize=(30, 15))
+f, (ax1, ax2) = plt.subplots(1, 2, figsize=(30, 15))
 
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore', FutureWarning)
-        area_lookup = lambda x: 0 if x == 0 else prop_results.region_properties[x - 1].area
-        vfunc = np.vectorize(area_lookup)
-        mask = np.squeeze(vfunc(prop_results.label_image))
-        show_image(np.squeeze(prop_results.decoded_image)*(mask > 2), cmap='nipy_spectral', ax=ax1)
-        ax1.axes.set_axis_off()
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore', FutureWarning)
+    area_lookup = lambda x: 0 if x == 0 else prop_results.region_properties[x - 1].area
+    vfunc = np.vectorize(area_lookup)
+    mask = np.squeeze(vfunc(prop_results.label_image))
+    show_image(np.squeeze(prop_results.decoded_image)*(mask > 2), cmap='nipy_spectral', ax=ax1)
+    ax1.axes.set_axis_off()
 
-        mp = scaled_image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-        clim = scoreatpercentile(mp, [0.5, 99.5])
-        show_image(mp, clim=clim, ax=ax2)
+    mp = scaled_image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+    clim = scoreatpercentile(mp, [0.5, 99.5])
+    show_image(mp, clim=clim, ax=ax2)
 
-        f.tight_layout()
-    # EPY: END code
+    f.tight_layout()
+# EPY: END code

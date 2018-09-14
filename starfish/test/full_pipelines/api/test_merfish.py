@@ -208,7 +208,7 @@ def test_merfish_pipeline_cropped_data():
         scaled_image.numpy_array[5, 0, 0, 40:50, 45:55]
     )
 
-    spot_intensities, prop_results = merfish.spot_intensities, merfish.prop_results
+    spot_intensities, prop_results = merfish.initial_spot_intensities, merfish.prop_results
 
     # verify that the number of spots are correct
     spots_passing_filters = spot_intensities[Features.PASSES_THRESHOLDS].sum()

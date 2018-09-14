@@ -44,10 +44,10 @@ REQUIREMENTS-DEV.txt : REQUIREMENTS.txt.in
 include notebooks/subdir.mk
 
 slow: fast run_notebooks docker
-	virtualenv -p python .venv
-	.venv/bin/pip install -r REQUIREMENTS-NOTEBOOK.txt
-	.venv/bin/pip install starfish
-	make PYTHON=.venv/bin/python run_notebooks
+	python -m venv .notebooks-exec-env
+	.notebooks-exec-env/bin/pip install -r REQUIREMENTS-NOTEBOOK.txt
+	.notebooks-exec-env/bin/pip install starfish
+	make PYTHON=.notebooks-exec-env/bin/python run_notebooks
 
 docker:
 	docker build -t spacetx/starfish .

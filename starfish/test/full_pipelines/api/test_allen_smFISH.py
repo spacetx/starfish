@@ -16,7 +16,7 @@ def test_allen_smFISH_cropped_data():
 
     # load the experiment
     experiment_json = (
-        "https://dmf0bdeheu4zf.cloudfront.net/20180905/allen_smFISH-TEST/experiment.json"
+        "https://dmf0bdeheu4zf.cloudfront.net/20180911/allen_smFISH-TEST/experiment.json"
     )
     experiment = Experiment.from_json(experiment_json)
 

@@ -83,11 +83,6 @@ def format_data(input_dir, output_dir, d):
     def add_codebook(experiment_json_doc):
         experiment_json_doc['codebook'] = "codebook.json"
 
-        # TODO: (ttung) remove the following unholy hacks.  this is because we want to point at a
-        # tileset rather than a collection.
-        experiment_json_doc['primary_images'] = "hybridization-fov_000.json"
-        experiment_json_doc['auxiliary_images']['nuclei'] = "nuclei-fov_000.json"
-        experiment_json_doc['auxiliary_images']['dots'] = "dots-fov_000.json"
         return experiment_json_doc
 
     # the magic numbers here are just for the ISS example data set.

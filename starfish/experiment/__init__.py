@@ -108,9 +108,9 @@ class Experiment:
     codebook      Returns the codebook associated with this experiment.
     extras        Returns the extras dictionary associated with this experiment.
     """
-    CURRENT_VERSION = Version("2.0.0")
-    MIN_SUPPORTED_VERSION = Version("2.0.0")
-    MAX_SUPPORTED_VERSION = Version("2.0.0")
+    CURRENT_VERSION = Version("3.0.0")
+    MIN_SUPPORTED_VERSION = Version("3.0.0")
+    MAX_SUPPORTED_VERSION = Version("3.0.0")
 
     def __init__(
             self,
@@ -153,30 +153,15 @@ class Experiment:
 
         extras = experiment_document['extras']
 
-        primary_image: Union[Collection, TileSet] = Reader.parse_doc(
-            experiment_document['primary_images'], baseurl)
-        auxiliary_images: MutableMapping[str, Union[Collection, TileSet]] = dict()
+        primary_image: Collection = Reader.parse_doc(experiment_document['primary_images'], baseurl)
+        auxiliary_images: MutableMapping[str, Collection] = dict()
         for aux_image_type, aux_image_url in experiment_document['auxiliary_images'].items():
             auxiliary_images[aux_image_type] = Reader.parse_doc(aux_image_url, baseurl)
 
-        if isinstance(primary_image, TileSet):
-            # make sure that all the aux images are also TileSets
-            for aux_image_tileset in auxiliary_images.values():
-                assert isinstance(aux_image_tileset, TileSet)
-
-            fov = FieldOfView(
-                None,
-                primary_image_tileset=primary_image,
-                auxiliary_image_tilesets=auxiliary_images
-            )
-            return Experiment([fov], codebook, extras, src_doc=experiment_document)
-
-        # everything should be Collections
         fovs: MutableSequence[FieldOfView] = list()
         for fov_name, primary_tileset in primary_image.all_tilesets():
             aux_image_tilesets_for_fov: MutableMapping[str, TileSet] = dict()
             for aux_image_type, aux_image_collection in auxiliary_images.items():
-                assert isinstance(aux_image_collection, Collection)
                 aux_image_tileset = aux_image_collection.find_tileset(fov_name)
                 if aux_image_tileset is not None:
                     aux_image_tilesets_for_fov[aux_image_type] = aux_image_tileset

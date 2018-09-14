@@ -16,7 +16,7 @@ def test_intensity_table_can_be_constructed_from_an_imagestack():
     locations.
     """
     r, c, z, y, x = 1, 5, 2, 2, 5
-    data = np.zeros(100).reshape(r, c, z, y, x)
+    data = np.zeros(100, dtype=np.float32).reshape(r, c, z, y, x)
     image_stack = ImageStack.from_numpy_array(data)
     intensities = IntensityTable.from_image_stack(image_stack)
 

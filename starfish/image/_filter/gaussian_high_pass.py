@@ -3,14 +3,13 @@ from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
-from skimage import img_as_uint
+import xarray as xr
 
-from starfish.errors import DataFormatWarning
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
 from starfish.stack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
-from .util import validate_and_broadcast_kernel_size
+from .util import preserve_float_range, validate_and_broadcast_kernel_size
 
 
 class GaussianHighPass(FilterAlgorithmBase):
@@ -41,7 +40,9 @@ class GaussianHighPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(image: np.ndarray, sigma: Union[Number, Tuple[Number]]) -> np.ndarray:
+    def high_pass(
+            image: Union[xr.DataArray, np.ndarray], sigma: Union[Number, Tuple[Number]]
+    ) -> Union[xr.DataArray, np.ndarray]:
         """
         Applies a gaussian high pass filter to an image
 
@@ -58,21 +59,16 @@ class GaussianHighPass(FilterAlgorithmBase):
             filtered image of the same shape as the input image
 
         """
-        if image.dtype != np.uint16:
-            DataFormatWarning("gaussian filters currently only support uint16 images. Image data "
-                              "will be converted.")
-            image = img_as_uint(image)
 
-        blurred: np.ndarray = GaussianLowPass.low_pass(image, sigma)
-
-        over_flow_ind: np.ndarray[bool] = image < blurred
-        filtered: np.ndarray = image - blurred
-        filtered.values[over_flow_ind.values] = 0
+        blurred = GaussianLowPass.low_pass(image, sigma)
+        filtered = image - blurred
+        filtered = preserve_float_range(filtered)
 
         return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=True
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=True,
+            n_processes: Optional[int]=None
     ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
@@ -84,6 +80,8 @@ class GaussianHighPass(FilterAlgorithmBase):
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             if True, report on filtering progress (default = False)
+        n_processes : Optional[int]
+            Number of parallel processes to devote to calculating the filter
 
         Returns
         -------
@@ -93,7 +91,8 @@ class GaussianHighPass(FilterAlgorithmBase):
         """
         high_pass: Callable = partial(self.high_pass, sigma=self.sigma)
         result = stack.apply(
-            high_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place
+            high_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place,
+            n_processes=n_processes
         )
         if not in_place:
             return result

@@ -19,11 +19,11 @@ def labeled_intensities_factory() -> Tuple[IntensityTable, np.ndarray, np.ndarra
     decoded_image.
     """
     data = np.array(
-        [[[[0, 0], [1, 1]],  # ch 1
-          [[5, 5], [2, 3]]],
-         [[[1, 1], [0, 0]],  # ch 2, x & y are reversed
-          [[2, 3], [5, 5]]]]
-
+        [[[[0., 0.], [.1, .1]],  # ch 1
+          [[.5, .5], [.2, .3]]],
+         [[[.1, .1], [0, 0]],  # ch 2, x & y are reversed
+          [[.2, .3], [.5, .5]]]],
+        dtype=np.float32
     )
     image_stack = ImageStack.from_numpy_array(data.reshape(1, 2, 2, 2, 2))
     intensity_table = IntensityTable.from_image_stack(image_stack)
@@ -66,16 +66,17 @@ def test_calculate_mean_pixel_traces():
 
     # values can be calculated from the simple example, and should match the mean pixel traces
     expected_values = np.array(
-        [[[2.5],
-          [1.5]],
-         [[2.5],
-          [2]],
-         [[1.5],
-          [2.5]],
-         [[2],
-          [2.5]]]
+        [[[.25],
+          [.15]],
+         [[.25],
+          [.2]],
+         [[.15],
+          [.25]],
+         [[.2],
+          [.25]]],
+        dtype=np.float32
     )
-    assert np.array_equal(expected_values, mean_pixel_traces.values)
+    assert np.allclose(expected_values, mean_pixel_traces.values)
 
     # no values should be filtered, as all spots decoded
     assert np.all(passes_filter)

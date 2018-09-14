@@ -18,6 +18,7 @@ from matplotlib import get_backend as get_matplotlib_backend
 from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import scoreatpercentile
 from skimage import exposure
+from skimage import img_as_float32, img_as_uint
 from slicedimage import Reader, Tile, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
@@ -121,7 +122,7 @@ class ImageStack:
         self._data = xr.DataArray(
             np.zeros(
                 shape=shape,
-                dtype=np.dtype(f"{kind}{max_size}"),
+                dtype=np.float32,
             ),
             dims=dims,
         )
@@ -132,12 +133,8 @@ class ImageStack:
             c = tile.indices[Indices.CH]
             zlayer = tile.indices.get(Indices.Z, 0)
             data = tile.numpy_array
+
             if max_size != data.dtype.itemsize:
-                if data.dtype.kind == "i" or data.dtype.kind == "u":
-                    # fixed point can be done with a simple multiply.
-                    src_range = np.iinfo(data.dtype).max - np.iinfo(data.dtype).min + 1
-                    dst_range = np.iinfo(self._data.dtype).max - np.iinfo(self._data.dtype).min + 1
-                    data = data * (dst_range / src_range)
                 warnings.warn(
                     f"Tile "
                     f"(R: {tile.indices[Indices.ROUND]} C: {tile.indices[Indices.CH]} "
@@ -145,9 +142,26 @@ class ImageStack:
                     f"dtype {data.dtype}.  One or more tiles is of a larger dtype "
                     f"{self._data.dtype}.",
                     DataFormatWarning)
+
+            data = img_as_float32(data)
             self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
+
         # set_slice will mark the data as needing writeback, so we need to unset that.
         self._data_needs_writeback = False
+
+    @staticmethod
+    def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
+        """verify that data is of dtype float32 and in range [0, 1]"""
+        if data.dtype != np.float32:
+            raise TypeError(
+                f"ImageStack data must be of type float32, not {data.dtype}. Please convert data "
+                f"using skimage.img_as_float32 prior to calling set_slice."
+            )
+        if np.min(data) < 0 or np.max(data) > 1:
+            raise ValueError(
+                f"ImageStack data must be of type float32 and in the range [0, 1]. Please convert "
+                f"data using skimage.img_as_float32 prior to calling set_slice."
+            )
 
     @classmethod
     def from_url(cls, url: str, baseurl: Optional[str]):
@@ -206,12 +220,11 @@ class ImageStack:
         """
         if len(array.shape) != 5:
             raise ValueError('a 5-d tensor with shape (n_round, n_ch, n_z, y, x) must be provided.')
+        cls._validate_data_dtype_and_range(array)
+
         n_round, n_ch, n_z, height, width = array.shape
         empty = cls.synthetic_stack(
             num_round=n_round, num_ch=n_ch, num_z=n_z, tile_height=height, tile_width=width)
-
-        # preserve original dtype
-        empty._data = empty._data.astype(array.dtype)
 
         for h in np.arange(n_round):
             for c in np.arange(n_ch):
@@ -257,6 +270,14 @@ class ImageStack:
         """
         slice_list, axes = self._build_slice_list(indices)
         result = self._data.values[slice_list]
+
+        if result.dtype != np.float32:
+            warnings.warn(
+                f"Non-float32 dtype: {result.dtype} detected. Data has likely been set using "
+                f"private attributes of ImageStack. ImageStack only supports float data in the "
+                f"range [0, 1]. Many algorithms will not function properly if provided other "
+                f"DataTypes. See: http://scikit-image.org/docs/dev/user_guide/data_types.html")
+
         return result, axes
 
     def set_slice(
@@ -284,6 +305,9 @@ class ImageStack:
         Data: a 4-dimensional numpy array with shape (3, 2, 10, 20)
         Result: Replace the data for Z=5, C=2-3.
         """
+
+        self._validate_data_dtype_and_range(data)
+
         slice_list, expected_axes = self._build_slice_list(indices)
 
         if axes is not None:
@@ -868,7 +892,7 @@ class ImageStack:
         """
         Returns a tile of just ones for any given round/ch/z.
         """
-        return np.ones((height, width))
+        return np.ones((height, width), dtype=np.float32)
 
     @classmethod
     def synthetic_stack(
@@ -968,6 +992,8 @@ class ImageStack:
 
         Returns
         -------
+        ImageStack :
+            synthetic spots
 
         """
         # check some params
@@ -1001,8 +1027,12 @@ class ImageStack:
                 num_z,
                 height,
                 width
-            )
+            ), dtype=np.uint32
         )
+
+        # starfish uses float images, but the logic here requires uint. We cast, and will cast back
+        # at the end of the function
+        intensities.values = img_as_uint(intensities)
 
         for ch, round_ in product(*(range(s) for s in intensities.shape[1:])):
             spots = intensities[:, ch, round_]
@@ -1014,14 +1044,16 @@ class ImageStack:
 
             image[round_, ch, values.z, values.y, values.x] = values
 
+        intensities.values = img_as_float32(intensities)
+
         # add imaging noise
-        image += np.random.poisson(n_photons_background, size=image.shape)
+        image += np.random.poisson(n_photons_background, size=image.shape).astype(np.uint32)
 
         # blur image over coordinates, but not over round_/channels (dim 0, 1)
         sigma = (0, 0) + point_spread_function
         image = gaussian_filter(image, sigma=sigma, mode='nearest')
 
-        image *= camera_detection_efficiency
+        image = image * camera_detection_efficiency
 
         image += np.random.normal(scale=background_electrons, size=image.shape)
 
@@ -1031,8 +1063,15 @@ class ImageStack:
         # clip in case we've picked up some negative values
         image = np.clip(image, 0, a_max=None)
 
-        # set correct dtype and convert to stack
+        # set the smallest int datatype that supports the data's intensity range
         image = select_uint_dtype(image)
+
+        # convert to float for ImageStack
+        with warnings.catch_warnings():
+            # possible precision loss when casting from uint to float is acceptable
+            warnings.simplefilter('ignore', UserWarning)
+            image = img_as_float32(image)
+
         return cls.from_numpy_array(image)
 
     def squeeze(self) -> np.ndarray:

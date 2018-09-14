@@ -92,7 +92,11 @@ def test_set_slice_simple_index():
     round_ = 1
     y, x = stack.tile_shape
 
-    expected = np.ones((stack.shape[Indices.CH], stack.shape[Indices.Z], y, x)) * 2
+    expected = np.full(
+        (stack.shape[Indices.CH], stack.shape[Indices.Z], y, x),
+        fill_value=0.5,
+        dtype=np.float32
+    )
     index = {Indices.ROUND: round_}
 
     stack.set_slice(index, expected)
@@ -109,7 +113,11 @@ def test_set_slice_middle_index():
     ch = 1
     y, x = stack.tile_shape
 
-    expected = np.ones((stack.shape[Indices.ROUND], stack.shape[Indices.Z], y, x)) * 2
+    expected = np.full(
+        (stack.shape[Indices.ROUND], stack.shape[Indices.Z], y, x),
+        fill_value=0.5,
+        dtype=np.float32
+    )
     index = {Indices.CH: ch}
 
     stack.set_slice(index, expected)
@@ -125,11 +133,11 @@ def test_set_slice_range():
     zrange = slice(1, 3)
     y, x = stack.tile_shape
 
-    expected = np.ones((
-        stack.shape[Indices.ROUND],
-        stack.shape[Indices.CH],
-        zrange.stop - zrange.start,
-        y, x)) * 10
+    expected = np.full(
+        (stack.shape[Indices.ROUND], stack.shape[Indices.CH], zrange.stop - zrange.start, y, x),
+        fill_value=0.5,
+        dtype=np.float32
+    )
     index = {Indices.Z: zrange}
 
     stack.set_slice(index, expected)
@@ -137,14 +145,8 @@ def test_set_slice_range():
     assert np.array_equal(stack.get_slice(index)[0], expected)
 
 
-def test_from_numpy_array_preserves_data():
-    array = np.random.random((1, 1, 1, 2, 2))
-    image_stack = ImageStack.from_numpy_array(array)
-    assert np.array_equal(array, image_stack.numpy_array)
-
-
 def test_from_numpy_array_raises_error_when_incorrect_dims_passed():
-    array = np.ones((2, 2))
+    array = np.ones((2, 2), dtype=np.float32)
     # verify this method works with the correct shape
     image = ImageStack.from_numpy_array(array.reshape((1, 1, 1, 2, 2)))
     assert isinstance(image, ImageStack)
@@ -156,15 +158,8 @@ def test_from_numpy_array_raises_error_when_incorrect_dims_passed():
         ImageStack.from_numpy_array(array.reshape((1, 1, 1, 1, 2, 2)))
 
 
-def test_from_numpy_array_preserves_dtype():
-    original_dtype = np.uint16
-    array = np.ones((2, 2, 2), dtype=original_dtype)
-    image = ImageStack.from_numpy_array(array.reshape((1, 1, 2, 2, 2)))
-    assert image.numpy_array.dtype == original_dtype
-
-
 def test_max_projection_preserves_dtype():
-    original_dtype = np.uint16
+    original_dtype = np.float32
     array = np.ones((2, 2, 2), dtype=original_dtype)
     image = ImageStack.from_numpy_array(array.reshape((1, 1, 2, 2, 2)))
 
@@ -193,7 +188,7 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
 
     codebook, true_intensities, image = synthetic_spot_pass_through_stack
 
-    g, c, h = np.where(true_intensities.values)
+    g, c, r = np.where(true_intensities.values)
 
     x = np.empty_like(g)
     y = np.empty_like(g)
@@ -211,8 +206,8 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
     # only 8 values should be set, since there are only 8 locations across the tensor
     assert np.sum(image.numpy_array != 0) == 8
 
-    assert np.array_equal(
-        image.numpy_array[h, c, z, y, x],
+    assert np.allclose(
+        image.numpy_array[r, c, z, y, x],
         true_intensities.values[np.where(true_intensities)])
 
 

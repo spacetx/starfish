@@ -8,23 +8,19 @@ See this [document](https://docs.google.com/document/d/1IHIngoMKr-Tnft2xOI3Q-5rL
 ![alt text](https://github.com/chanzuckerberg/starfish/raw/master/design/pipeline-diagram.png "candidate pipeline")
 
 ## installation
-Starfish supports python 3.6 and above. To Install the starfish package, first verify that your python version is compatible. You can check this with pip, which may be called `pip` or `pip3` depending on how you installed python.
+Starfish supports python 3.6 and above. To install the starfish package, first verify that your python version is compatible. You can check this by running `python --version`.
 
-The output should look similar to this:
+Starfish names its dependencies and lists explicit versions, due to sensitivity to subtle algorithm changes.  For that reason, it is strongly encouraged that you set up a [virtualenv](https://packaging.python.org/tutorials/installing-packages/#creating-virtual-environments).  Create a work folder and set up the virtual environment like:
 ```
-% pip3 --version
-pip 10.0.1 from /usr/local/lib/python3.6/site-packages/pip (python 3.6)
-```
-
-While not required, you may wish to set up a [virtualenv](https://virtualenv.pypa.io/en/stable/). To do this, execute:
-```
+% mkdir starfish
+% cd starfish
 % python -m venv .venv
+% source .venv/bin/activate
 ```
 
-Install the starfish module in edit-mode and all the dependencies for starfish:
+Install the starfish module:
 ```
-% git clone https://github.com/spacetx/starfish.git
-% pip install -e starfish
+% pip install starfish
 ```
 
 ## usage
@@ -62,7 +58,7 @@ starfish decode -i /tmp/starfish/results/spots.nc --codebook /tmp/starfish/forma
 To use the interactive notebook widgets, run the following commands. Please note that the widget currently 
 supports Jupyter notebooks, but not Jupyter Lab. 
 ```
-pip3 install -r REQUIREMENTS-NOTEBOOK.txt
+pip install -r REQUIREMENTS-NOTEBOOK.txt
 jupyter nbextension enable --py widgetsnbextension
 ```
 
@@ -75,6 +71,9 @@ Clone the repo and look through [CONTRIBUTING.md](docs/source/contributing/contr
 ```
 % git clone https://github.com/spacetx/starfish.git
 % cd starfish
+% python -m venv .venv
+% .venv/bin/activate
+% pip install -e .
 ```
 
 ## citing starfish

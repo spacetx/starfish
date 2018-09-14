@@ -1,8 +1,8 @@
 import argparse
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type
 
-from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.stack import ImageStack
 from starfish.util.argparse import FsExistsType
 from . import watershed
@@ -14,8 +14,8 @@ class Segmentation(PipelineComponent):
     segmentation_group: argparse.ArgumentParser
 
     @classmethod
-    def implementing_algorithms(cls):
-        return SegmentationAlgorithmBase.__subclasses__()
+    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
+        return SegmentationAlgorithmBase
 
     @classmethod
     def add_to_parser(cls, subparsers) -> None:

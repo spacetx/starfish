@@ -118,7 +118,7 @@ low_passed = glp.run(deconvolved, in_place=False, verbose=True)
 # EPY: START code
 scale_factors = {
     (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
-    for index, t in primary_image.tile_metadata.iterrows()
+    for t in experiment.extras['scale_factors']
 }
 # EPY: END code
 

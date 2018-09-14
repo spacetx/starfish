@@ -41,6 +41,12 @@ class SpotFinder(PipelineComponent):
                 'are found in this image and then measured across all images in the input stack.'
             )
         )
+        spot_finder_group.add_argument(
+            "--codebook", default=None, required=False,
+            help=(
+                'json file containing a codebook'
+            )
+        )
         spot_finder_group.set_defaults(starfish_command=SpotFinder._cli)
         spot_finder_subparsers = spot_finder_group.add_subparsers(
             dest="spot_finder_algorithm_class")

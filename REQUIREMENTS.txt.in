@@ -1,0 +1,20 @@
+click
+jsonschema
+matplotlib
+numpy != 1.13.0
+pandas >= 0.23.4
+pytest>=3.6.3
+regional
+requests
+semantic_version
+scikit-image>=0.14.0
+scikit-learn
+scipy
+seaborn
+showit >= 1.1.4
+slicedimage == 0.0.6
+scikit-learn
+tqdm
+trackpy
+validators
+xarray

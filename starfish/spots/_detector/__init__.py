@@ -2,7 +2,8 @@ import argparse
 import os
 from typing import Type
 
-from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.codebook import Codebook
+from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.stack import ImageStack
 from starfish.types import Indices
 from starfish.util.argparse import FsExistsType
@@ -62,6 +63,11 @@ class SpotFinder(PipelineComponent):
         print('Detecting Spots ...')
         image_stack = ImageStack.from_path_or_url(args.input)
         instance = args.spot_finder_algorithm_class(**vars(args))
+
+        # Get codebook for PixelSpotDetector
+        if args.codebook is not None:
+            instance.codebook = Codebook.from_json(args.codebook)
+
         if args.blobs_stack is not None:
             blobs_stack = ImageStack.from_path_or_url(args.blobs_stack)  # type: ignore
             blobs_image = blobs_stack.max_proj(Indices.ROUND, Indices.CH)

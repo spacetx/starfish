@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Union, Tuple
 
 import numpy as np
 
@@ -11,7 +11,7 @@ from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedCompone
 
 class PixelSpotDetector(SpotFinderAlgorithmBase):
     def __init__(
-            self, codebook, metric: str, distance_threshold: float,
+            self, codebook: Codebook, metric: str, distance_threshold: float,
             magnitude_threshold: int, min_area: int, max_area: int, norm_order: int=2,
             crop_x: int=0, crop_y: int=0, crop_z: int=0, **kwargs) -> None:
         """Decode an image by first coding each pixel, then combining the results into spots
@@ -39,10 +39,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
             an ImageStack (default = 0)
 
         """
-        if isinstance(codebook, str):
-            self.codebook = Codebook.from_json(codebook)
-        else:
-            self.codebook = codebook
+        self.codebook = codebook
         self.metric = metric
         self.distance_threshold = distance_threshold
         self.magnitude_threshold = magnitude_threshold

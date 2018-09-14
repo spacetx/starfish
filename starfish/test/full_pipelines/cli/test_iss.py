@@ -12,6 +12,9 @@ import pandas as pd
 from starfish.intensity_table import IntensityTable
 from starfish.types import Features
 from starfish.util import exec
+import sys
+sys.path.append('../../../../notebooks/py/')
+iss = __import__('ISS_Pipeline_-_Breast_-_1_FOV')
 
 
 def get_jsonpath_from_file(json_filepath_components: Sequence[str], jsonpath: str):

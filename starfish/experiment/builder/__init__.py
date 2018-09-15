@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Tuple
+from typing import Any, BinaryIO, Callable, Dict, Mapping, Optional, Tuple, Union
 
 from slicedimage import (
     Collection,
@@ -12,7 +12,8 @@ from slicedimage import (
 
 from starfish.experiment import Experiment
 from starfish.types import Coordinates, Indices
-from .imagedata import FetchedTile, RandomNoiseTile, RandomNoiseTileFetcher, TileFetcher
+from .defaultproviders import RandomNoiseTile, RandomNoiseTileFetcher
+from .providers import FetchedTile, TileFetcher
 
 
 AUX_IMAGE_NAMES = {
@@ -21,7 +22,7 @@ AUX_IMAGE_NAMES = {
 }
 
 
-def tile_opener(toc_path, tile, file_ext):
+def _tile_opener(toc_path: str, tile: Tile, file_ext: str) -> BinaryIO:
     tile_basename = os.path.splitext(toc_path)[0]
     return open(
         "{}-Z{}-H{}-C{}.{}".format(
@@ -34,12 +35,12 @@ def tile_opener(toc_path, tile, file_ext):
         "wb")
 
 
-def tile_writer(tile, fh):
+def _tile_writer(tile: Tile, fh: BinaryIO) -> ImageFormat:
     tile.copy(fh)
     return ImageFormat.TIFF
 
 
-def fov_path_generator(parent_toc_path, toc_name):
+def _fov_path_generator(parent_toc_path: str, toc_name: str) -> str:
     toc_basename = os.path.splitext(os.path.basename(parent_toc_path))[0]
     return os.path.join(
         os.path.dirname(parent_toc_path),
@@ -48,10 +49,10 @@ def fov_path_generator(parent_toc_path, toc_name):
 
 
 def build_image(
-        fov_count, hyb_count, ch_count, z_count,
+        fov_count: int, hyb_count: int, ch_count: int, z_count: int,
         image_fetcher: TileFetcher,
         default_shape: Tuple[int, int]
-):
+) -> Collection:
     """
     Build and returns an image set with the following characteristics:
 
@@ -65,6 +66,8 @@ def build_image(
         Number for channels in this image set.
     z_count : int
         Number of z-layers in this image set.
+    image_fetcher : TileFetcher
+        Instance of TileFetcher that provides the data for the tile.
     default_shape : Tuple[int, int]
         Default shape of the individual tiles in this image set.
 
@@ -105,15 +108,15 @@ def build_image(
 
 
 def write_experiment_json(
-        path,
-        fov_count,
-        hyb_dimensions,
-        aux_name_to_dimensions,
-        primary_tile_fetcher=None,
-        aux_tile_fetcher=None,
-        postprocess_func=None,
-        default_shape=(1536, 1024),
-):
+        path: str,
+        fov_count: int,
+        hyb_dimensions: Mapping[Union[str, Indices], int],
+        aux_name_to_dimensions: Mapping[str, Mapping[Union[str, Indices], int]],
+        primary_tile_fetcher: Optional[TileFetcher]=None,
+        aux_tile_fetcher: Optional[Mapping[str, TileFetcher]]=None,
+        postprocess_func: Optional[Callable[[dict], dict]]=None,
+        default_shape: Tuple[int, int]=(1536, 1024),
+) -> None:
     """
     Build and returns a top-level experiment description with the following characteristics:
 
@@ -123,19 +126,19 @@ def write_experiment_json(
         Directory to write the files to.
     fov_count : int
         Number of fields of view in this experiment.
-    hyb_dimensions : Mapping[str, int]
+    hyb_dimensions : Mapping[Union[str, Indices], int]
         Dictionary mapping dimension name to dimension size for the hybridization image.
-    aux_name_to_dimensions : Mapping[str, Mapping[str, int]]
+    aux_name_to_dimensions : Mapping[str, Mapping[Union[str, Indices], int]]
         Dictionary mapping the auxiliary image type to dictionaries, which map from dimension name
         to dimension size.
-    primary_tile_fetcher : Optional[ImageFetcher]
-        ImageFetcher for hybridization images.  Set this if you want specific image data to be set
+    primary_tile_fetcher : Optional[TileFetcher]
+        TileFetcher for hybridization images.  Set this if you want specific image data to be set
         for the hybridization images.  If not provided, the image data is set to random noise via
-        :class:`RandomNoiseImageFetcher`.
-    aux_tile_fetcher : Optional[Mapping[str, ImageFetcher]]
-        ImageFetchers for auxiliary images.  Set this if you want specific image data to be set for
+        :class:`RandomNoiseTileFetcher`.
+    aux_tile_fetcher : Optional[Mapping[str, TileFetcher]]
+        TileFetchers for auxiliary images.  Set this if you want specific image data to be set for
         one or more aux image types.  If not provided for any given aux image, the image data is
-        set to random noise via :class:`RandomNoiseImageFetcher`.
+        set to random noise via :class:`RandomNoiseTileFetcher`.
     postprocess_func : Optional[Callable[[dict], dict]]
         If provided, this is called with the experiment document for any postprocessing.
         An example of this would be to add something to one of the top-level extras field.
@@ -150,7 +153,7 @@ def write_experiment_json(
     if postprocess_func is None:
         postprocess_func = lambda doc: doc
 
-    experiment_doc = {
+    experiment_doc: Dict[str, Any] = {
         'version': str(Experiment.CURRENT_VERSION),
         'auxiliary_images': {},
         'extras': {},
@@ -165,9 +168,9 @@ def write_experiment_json(
         hybridization_image,
         os.path.join(path, "hybridization.json"),
         pretty=True,
-        partition_path_generator=fov_path_generator,
-        tile_opener=tile_opener,
-        tile_writer=tile_writer,
+        partition_path_generator=_fov_path_generator,
+        tile_opener=_tile_opener,
+        tile_writer=_tile_writer,
     )
     experiment_doc['primary_images'] = "hybridization.json"
 
@@ -184,9 +187,9 @@ def write_experiment_json(
             auxiliary_image,
             os.path.join(path, "{}.json".format(aux_name)),
             pretty=True,
-            partition_path_generator=fov_path_generator,
-            tile_opener=tile_opener,
-            tile_writer=tile_writer,
+            partition_path_generator=_fov_path_generator,
+            tile_opener=_tile_opener,
+            tile_writer=_tile_writer,
         )
         experiment_doc['auxiliary_images'][aux_name] = "{}.json".format(aux_name)
 

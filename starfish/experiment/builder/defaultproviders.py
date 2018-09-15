@@ -3,7 +3,7 @@ This module implements default providers of data to the experiment builders.
 """
 
 from io import BytesIO
-from typing import IO, Tuple
+from typing import IO, Mapping, Tuple, Union
 
 import numpy as np
 from skimage.io import imsave
@@ -11,6 +11,7 @@ from slicedimage import (
     ImageFormat,
 )
 
+from starfish.types import Coordinates, Number
 from .providers import FetchedTile, TileFetcher
 
 
@@ -22,6 +23,14 @@ class RandomNoiseTile(FetchedTile):
     @property
     def shape(self) -> Tuple[int, ...]:
         return 1536, 1024
+
+    @property
+    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+        return {
+            Coordinates.X: (0.0, 0.0001),
+            Coordinates.Y: (0.0, 0.0001),
+            Coordinates.Z: (0.0, 0.0001),
+        }
 
     @property
     def format(self) -> ImageFormat:

@@ -2,11 +2,13 @@
 This module describes the contracts to provide data to the experiment builder.
 """
 
-from typing import IO, Tuple
+from typing import IO, Mapping, Tuple, Union
 
 from slicedimage import (
     ImageFormat,
 )
+
+from starfish.types import Coordinates, Number
 
 
 class FetchedTile:
@@ -22,6 +24,17 @@ class FetchedTile:
         -------
         Tuple[int, ...]
             The tile shape in (y, x)
+        """
+        raise NotImplementedError()
+
+    @property
+    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+        """Return the tile's coordinates in the global coordinate space..
+
+        Returns
+        -------
+        Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]
+            Maps from a coordinate type (e.g. 'x', 'y', or 'z') to its value or range.
         """
         raise NotImplementedError()
 

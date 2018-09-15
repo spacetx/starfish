@@ -89,11 +89,7 @@ def build_image(
                 for ch_ix in range(ch_count):
                     image = image_fetcher.get_tile(fov_ix, hyb_ix, ch_ix, z_ix)
                     tile = Tile(
-                        {
-                            Coordinates.X: (0.0, 0.0001),
-                            Coordinates.Y: (0.0, 0.0001),
-                            Coordinates.Z: (0.0, 0.0001),
-                        },
+                        image.coordinates,
                         {
                             Indices.Z: z_ix,
                             Indices.ROUND: hyb_ix,

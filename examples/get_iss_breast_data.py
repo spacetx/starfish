@@ -2,14 +2,14 @@ import argparse
 import io
 import os
 from datetime import datetime
-from typing import IO, Tuple
+from typing import IO, Mapping, Tuple, Union
 
 from skimage.external import tifffile
 from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Indices
+from starfish.types import Coordinates, Indices, Number
 from starfish.util.argparse import FsExistsType
 
 SHAPE = 1044, 1390
@@ -22,6 +22,15 @@ class IssCroppedBreastTile(FetchedTile):
     @property
     def shape(self) -> Tuple[int, ...]:
         return SHAPE
+
+    @property
+    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+        # FIXME: (dganguli) please provide proper coordinates here.
+        return {
+            Coordinates.X: (0.0, 0.0001),
+            Coordinates.Y: (0.0, 0.0001),
+            Coordinates.Z: (0.0, 0.0001),
+        }
 
     @property
     def format(self) -> ImageFormat:

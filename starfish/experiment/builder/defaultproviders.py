@@ -1,3 +1,7 @@
+"""
+This module implements default providers of data to the experiment builders.
+"""
+
 from io import BytesIO
 from typing import IO, Tuple
 
@@ -7,35 +11,7 @@ from slicedimage import (
     ImageFormat,
 )
 
-
-class FetchedTile:
-    """
-    This is the contract for providing the data for constructing a :class:`slicedimage.Tile`.
-    """
-    @property
-    def shape(self) -> Tuple[int, ...]:
-        raise NotImplementedError()
-
-    @property
-    def format(self) -> ImageFormat:
-        raise NotImplementedError()
-
-    @property
-    def tile_data_handle(self) -> IO:
-        raise NotImplementedError()
-
-
-class TileFetcher:
-    """
-    This is the contract for providing the image data for constructing a
-    :class:`slicedimage.Collection`.
-    """
-    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
-        """
-        Given fov, hyb, ch, and z, return an instance of a :class:`.FetchedImage` that can be
-        queried for the image data.
-        """
-        raise NotImplementedError()
+from .providers import FetchedTile, TileFetcher
 
 
 class RandomNoiseTile(FetchedTile):

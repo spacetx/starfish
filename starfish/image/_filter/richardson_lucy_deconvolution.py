@@ -56,7 +56,8 @@ class DeconvolvePSF(FilterAlgorithmBase):
         """
         Deconvolves input image with a specified point spread function.
 
-       Parameters
+        Parameters
+        ----------
         image : ndarray
            Input degraded image (can be N dimensional).
         psf : ndarray

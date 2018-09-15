@@ -49,5 +49,5 @@ class Decoder(PipelineComponent):
         codebook = Codebook.from_json(args.codebook)
 
         # decode and save output
-        intensities = instance.decode(intensities, codebook)
+        intensities = instance.run(intensities, codebook)
         intensities.save(args.output)

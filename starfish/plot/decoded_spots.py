@@ -25,22 +25,17 @@ def decoded_spots(
 ) -> matplotlib.axes.Axes:
     """Plot decoded spots with a variety of options for background image
 
-    Usage
-    -----
+    For plotting spots, provide either:
 
-    Plotting Spots:
-
-    Provide either
-    1. intensities, in which case spots will be plotted based on the estimated
+    1. ``intensities``, in which case spots will be plotted based on the estimated
        radius and position for each feature, or
-    2. decoded_image, in which case pixels will be colored by their decoded feature
+    2. ``decoded_image``, in which case pixels will be colored by their decoded feature
 
-    Plotting Background:
+    For plotting background, provide either:
 
-    Provide one of:
-    1. background_image, which will plot the image for use as a background. Commonly this could
+    1. ``background_image``, which will plot the image for use as a background. Commonly this could
        include a nuclei or dots image.
-    2. background_shape, which will be used to construct a black background against which spots
+    2. ``background_shape``, which will be used to construct a black background against which spots
        will be plotted. If decoded_image is provided as the spots parameter, then background
        arguments can be omitted, since the shape of the background can be inferred from the
        decoded_image.
@@ -51,12 +46,12 @@ def decoded_spots(
         contains spots to plot
     decoded_image : Optional[np.ndarray]
         image, where values are coded to represent features
-    background_image :
+    background_image : Optional[np.ndarray]
         an image atop which spots or decoded pixels should be plotted
-    background_shape :
+    background_shape : Optional[Tuple[int, int]]
         the shape for a blank background. Required when background_image is not provided and
         intensities are passed.
-    ax : ax: Optional[matplotlib.axes.Axes]
+    ax : Optional[matplotlib.axes.Axes]
     background_kwargs, spots_kwargs, decoded_image_kwargs : Optional[dict]
         Keyword arguments to pass to plotting functions for background, spots, and decoded_image
 

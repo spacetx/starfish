@@ -45,10 +45,10 @@ tile to fill out the remainder of the metadata, such as the tile's shape and dat
 
 These are the abstract classes that must be subclassed for each set of naming conventions:
 
-.. literalinclude:: /../../starfish/experiment/builder/imagedata.py
+.. literalinclude:: /../../starfish/experiment/builder/providers.py
     :pyobject: FetchedTile
 
-.. literalinclude:: /../../starfish/experiment/builder/imagedata.py
+.. literalinclude:: /../../starfish/experiment/builder/providers.py
     :pyobject: TileFetcher
 
 To create a formatter object for in-situ sequencing, we subclass the ``TileFetcher`` and
@@ -84,7 +84,7 @@ are needed. One parses the primary images, and another the auxiliary nuclei imag
 used to seed the basin for segmentation.
 
 .. literalinclude:: /../../examples/get_iss_breast_data.py
-    :pyobject: IssCroppedBreastTile
+    :pyobject: ISSCroppedBreastPrimaryTileFetcher
 
 .. literalinclude:: /../../examples/get_iss_breast_data.py
     :pyobject: ISSCroppedBreastAuxTileFetcher

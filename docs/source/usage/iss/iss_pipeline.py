@@ -60,5 +60,5 @@ def process_experiment(experiment: starfish.Experiment):
 
 
 # run the script
-exp = starfish.Experiment("iss/formatted/experiment.json")
+exp = starfish.Experiment.from_json("iss/formatted/experiment.json")
 decoded_intensities, regions = process_experiment(exp)

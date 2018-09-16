@@ -1,11 +1,8 @@
 <img src="https://github.com/chanzuckerberg/starfish/raw/master/design/logo.png" width="250">
 
-<<<<<<< Updated upstream
 The goal of *starfish* is to **prototype** a reference pipeline for the analysis of image-based transcriptomics data that works across technologies. 
 This is a **work in progress** and will be developed in the open.
 
-<<<<<<< HEAD
-=======
 We are currently in **pre-alpha**, finishing proof of concept pipelines for each of the spaceTx contributors that leverage starfish's shared object model.
 At this time starfish is mature enough to support computational developers interested in adapting other assays to starfish's object model.
 
@@ -21,18 +18,6 @@ At this time starfish is mature enough to support computational developers inter
 | FISSEQ       | no data    | no pipeline                  |
 | seq-FISH     | no data    | no pipeline                  |
 
->>>>>>> 42f05e4... add table, remove roadmap
-=======
-The goal of *starfish* is to **prototype** a reference pipeline for the analysis of image-based transcriptomics data that works across technologies. This is a **work in progress** and will be developed in the open.
-
-We are currently in **pre-alpha**, finishing proof of concept pipelines for each of the spaceTx contributors that leverage starfish's shared object model.
-At this time starfish is mature enough to support computational developers interested in adapting other assays to starfish's object model.
-However, please note that these endeavors, while strongly encouraged, will likely come with significant computational time investment.
-
-Please see our project [roadmap](https://docs.google.com/document/d/1ZEzH42o7mn8ukSwONmMJpNQxoctWYHSMwVos-ZthyhI/edit?usp=sharing) for a more detailed view of our development priorities.
-
-
->>>>>>> Stashed changes
 ## concept
 See this [document](https://docs.google.com/document/d/1IHIngoMKr-Tnft2xOI3Q-5rL3GSX2E3PnJrpsOX5ZWs/edit?usp=sharing) for details. The diagram below describes the core pipeline components and associated file manifests that this package plans to standardize and implement.
 

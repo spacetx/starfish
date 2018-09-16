@@ -9,10 +9,13 @@ transcriptomics data. The first vignette provides an example of using starfish t
 
 .. toctree::
    :maxdepth: 2
-   :caption: Vignettes:
+   :caption: Vignettes
 
 .. toctree::
    iss/iss_vignette.rst
+
+.. toctree::
+   iss/iss_cli_vignette.rst
 
 .. toctree::
    fov-builder/fov-builder.rst

@@ -11,7 +11,7 @@ from slicedimage import (
 )
 
 from starfish.experiment import Experiment
-from starfish.types import Coordinates, Indices
+from starfish.types import Indices
 from .defaultproviders import RandomNoiseTile, RandomNoiseTileFetcher
 from .providers import FetchedTile, TileFetcher
 
@@ -49,7 +49,7 @@ def _fov_path_generator(parent_toc_path: str, toc_name: str) -> str:
 
 
 def build_image(
-        fov_count: int, hyb_count: int, ch_count: int, z_count: int,
+        fov_count: int, round_count: int, ch_count: int, z_count: int,
         image_fetcher: TileFetcher,
         default_shape: Tuple[int, int]
 ) -> Collection:
@@ -60,8 +60,8 @@ def build_image(
     ----------
     fov_count : int
         Number of fields of view in this image set.
-    hyb_count : int
-        Number for hybridizations in this image set.
+    round_count : int
+        Number for rounds in this image set.
     ch_count : int
         Number for channels in this image set.
     z_count : int
@@ -79,20 +79,20 @@ def build_image(
     for fov_ix in range(fov_count):
         fov_images = TileSet(
             [Indices.X, Indices.Y, Indices.Z, Indices.ROUND, Indices.CH],
-            {Indices.ROUND: hyb_count, Indices.CH: ch_count, Indices.Z: z_count},
+            {Indices.ROUND: round_count, Indices.CH: ch_count, Indices.Z: z_count},
             default_shape,
             ImageFormat.TIFF,
         )
 
         for z_ix in range(z_count):
-            for hyb_ix in range(hyb_count):
+            for round_ix in range(round_count):
                 for ch_ix in range(ch_count):
-                    image = image_fetcher.get_tile(fov_ix, hyb_ix, ch_ix, z_ix)
+                    image = image_fetcher.get_tile(fov_ix, round_ix, ch_ix, z_ix)
                     tile = Tile(
                         image.coordinates,
                         {
                             Indices.Z: z_ix,
-                            Indices.ROUND: hyb_ix,
+                            Indices.ROUND: round_ix,
                             Indices.CH: ch_ix,
                         },
                         image.shape,
@@ -106,7 +106,7 @@ def build_image(
 def write_experiment_json(
         path: str,
         fov_count: int,
-        hyb_dimensions: Mapping[Union[str, Indices], int],
+        primary_image_dimensions: Mapping[Union[str, Indices], int],
         aux_name_to_dimensions: Mapping[str, Mapping[Union[str, Indices], int]],
         primary_tile_fetcher: Optional[TileFetcher]=None,
         aux_tile_fetcher: Optional[Mapping[str, TileFetcher]]=None,
@@ -122,14 +122,14 @@ def write_experiment_json(
         Directory to write the files to.
     fov_count : int
         Number of fields of view in this experiment.
-    hyb_dimensions : Mapping[Union[str, Indices], int]
-        Dictionary mapping dimension name to dimension size for the hybridization image.
+    primary_image_dimensions : Mapping[Union[str, Indices], int]
+        Dictionary mapping dimension name to dimension size for the primary image.
     aux_name_to_dimensions : Mapping[str, Mapping[Union[str, Indices], int]]
         Dictionary mapping the auxiliary image type to dictionaries, which map from dimension name
         to dimension size.
     primary_tile_fetcher : Optional[TileFetcher]
-        TileFetcher for hybridization images.  Set this if you want specific image data to be set
-        for the hybridization images.  If not provided, the image data is set to random noise via
+        TileFetcher for primary images.  Set this if you want specific image data to be set for the
+        primary images.  If not provided, the image data is set to random noise via
         :class:`RandomNoiseTileFetcher`.
     aux_tile_fetcher : Optional[Mapping[str, TileFetcher]]
         TileFetchers for auxiliary images.  Set this if you want specific image data to be set for
@@ -154,21 +154,23 @@ def write_experiment_json(
         'auxiliary_images': {},
         'extras': {},
     }
-    hybridization_image = build_image(
+    primary_image = build_image(
         fov_count,
-        hyb_dimensions[Indices.ROUND], hyb_dimensions[Indices.CH], hyb_dimensions[Indices.Z],
+        primary_image_dimensions[Indices.ROUND],
+        primary_image_dimensions[Indices.CH],
+        primary_image_dimensions[Indices.Z],
         primary_tile_fetcher,
         default_shape=default_shape,
     )
     Writer.write_to_path(
-        hybridization_image,
-        os.path.join(path, "hybridization.json"),
+        primary_image,
+        os.path.join(path, "primary_image.json"),
         pretty=True,
         partition_path_generator=_fov_path_generator,
         tile_opener=_tile_opener,
         tile_writer=_tile_writer,
     )
-    experiment_doc['primary_images'] = "hybridization.json"
+    experiment_doc['primary_images'] = "primary_image.json"
 
     for aux_name, aux_dimensions in aux_name_to_dimensions.items():
         if aux_dimensions is None:

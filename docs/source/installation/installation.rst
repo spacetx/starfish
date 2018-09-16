@@ -19,13 +19,14 @@ Next, clone starfish:
 
     % git clone https://github.com/spacetx/starfish.git
 
-Starfish names its dependencies and lists explicit versions, due to sensitivity to subtle algorithm changes.  For that reason, it is strongly encouraged that you set up a [virtualenv](https://packaging.python.org/tutorials/installing-packages/#creating-virtual-environments).  Create a work folder and set up the virtual environment like:
-While not required, you may wish to set up a `virtualenv <https://virtualenv.pypa.io/en/stable/>`_.
-To do this, execute:
+Starfish names its dependencies and lists explicit versions, due to sensitivity to subtle algorithm 
+changes.  For that reason, it is strongly encouraged that you set up a 
+virtualenv_. Create a work folder and set up the virtual environment like:
+
+.. _virtualenv: https://packaging.python.org/tutorials/installing-packages/#creating-virtual-environments
 
 .. code-block:: bash
 
-    % mkdir starfish
     % cd starfish
     % python -m venv .venv
     % source .venv/bin/activate

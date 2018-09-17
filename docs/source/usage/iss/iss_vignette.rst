@@ -21,7 +21,8 @@ data, you can run the following commands:
         --recursive \
         --exclude "*" \
         --include "slideA_1_*" \
-        --include "slideA_2_*"
+        --include "slideA_2_*" \
+        --no-sign-request
     ls iss/raw
 
 This command should download 44 images:

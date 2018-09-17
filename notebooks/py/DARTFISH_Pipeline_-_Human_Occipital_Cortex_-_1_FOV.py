@@ -49,8 +49,6 @@ else:
 
 stack = exp.fov().primary_image
 
-# TODO the latter will be fixed by https://github.com/spacetx/starfish/issues/316
-stack._data = stack._data.astype(float)
 # EPY: END code
 
 # EPY: START code
@@ -140,8 +138,7 @@ psd = SpotFinder.PixelSpotDetector(
 spot_intensities, results = psd.run(zero_norm_stack)
 # EPY: END code
 
-if False:
-
+if not test:
     # EPY: START code
     spots_df = spot_intensities.to_features_dataframe()
     spots_df['area'] = np.pi*spots_df['radius']**2

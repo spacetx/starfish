@@ -31,9 +31,9 @@ from starfish.types import Features, Indices
 # EPY: START code
 test = os.getenv("USE_TEST_DATA") is not None
 if test:
-    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180905/ISS-TEST/experiment.json')
+    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/ISS-TEST/experiment.json')
 else:
-    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180905/ISS/experiment.json')
+    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/ISS/experiment.json')
 
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 # EPY: END code

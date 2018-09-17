@@ -43,9 +43,9 @@ sns.set_style('ticks')
 
 test = os.getenv("USE_TEST_DATA") is not None
 if test:
-    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180905/DARTFISH-TEST/experiment.json')
+    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH-TEST/experiment.json')
 else:
-    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180905/DARTFISH/experiment.json')
+    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/experiment.json')
 
 stack = exp.fov().primary_image
 

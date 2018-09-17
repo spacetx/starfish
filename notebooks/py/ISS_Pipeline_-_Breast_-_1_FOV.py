@@ -134,7 +134,7 @@ registration = Registration.FourierShiftRegistration(
     upsampling=1000,
     reference_stack=dots,
     verbose=True)
-registration.run(primary_image)
+registered_image = registration.run(primary_image, in_place=False)
 # EPY: END code
 
 # EPY: START markdown
@@ -169,25 +169,12 @@ with warnings.catch_warnings():
 
     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
     blobs_image = dots.max_proj(Indices.ROUND, Indices.Z)
-    intensities = p.run(primary_image, blobs_image=blobs_image)
+    intensities = p.run(registered_image, blobs_image=blobs_image)
 # EPY: END code
 
 # EPY: START code
 # Verify the spot count is reasonable.
 spot_count = intensities.sizes[Features.AXIS]
-
-if not test:
-    assert 1000 < spot_count < 5000
-    spot_count
-    # EPY: END code
-
-    # EPY: START markdown
-    #This visualizes a single spot (#100) across all imaging rounds and channels. It contains the intensity and bit index, which allow it to be mapped onto the correct barcode.
-    # EPY: END markdown
-
-    # EPY: START code
-    intensities[100]
-    # EPY: END code
 
 # EPY: START markdown
 #The Encoder table is the hypothesized standardized file format for the output of a spot detector, and is the first output file format in the pipeline that is not an image or set of images
@@ -227,12 +214,6 @@ genes, counts = np.unique(decoded.loc[decoded[Features.PASSES_THRESHOLDS]][Featu
 table = pd.Series(counts, index=genes).sort_values(ascending=False)
 # EPY: END code
 
-if not test:
-    # EPY: START code
-    assert table.index.get_loc('HER2') < 10
-    assert table.index.get_loc('VIM') < 10
-    table.head()
-    # EPY: END code
 
 # EPY: START markdown
 #### Segment
@@ -249,7 +230,7 @@ dapi_thresh = .16  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
 min_dist = 57
 
-stain = np.mean(primary_image.max_proj(Indices.CH, Indices.Z), axis=0)
+stain = np.mean(registered_image.max_proj(Indices.CH, Indices.Z), axis=0)
 stain = stain/stain.max()
 nuclei_projection = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 
@@ -258,36 +239,35 @@ seg = Segmentation.Watershed(
     input_threshold=stain_thresh,
     min_distance=min_dist
 )
-regions = seg.run(primary_image, nuclei)
+regions = seg.run(registered_image, nuclei)
 seg.show()
 # EPY: END code
 
-if not test:
-    # EPY: START markdown
-    #### Visualize results
-    #
-    #This FOV was selected to make sure that we can visualize the tumor/stroma boundary, below this is described by pseudo-coloring `HER2` (tumor) and vimentin (`VIM`, stroma)
-    # EPY: END markdown
+# EPY: START markdown
+#### Visualize results
+#
+#This FOV was selected to make sure that we can visualize the tumor/stroma boundary, below this is described by pseudo-coloring `HER2` (tumor) and vimentin (`VIM`, stroma)
+# EPY: END markdown
 
-    # EPY: START code
-    from skimage.color import rgb2gray
+# EPY: START code
+from skimage.color import rgb2gray
 
-    GENE1 = 'HER2'
-    GENE2 = 'VIM'
+GENE1 = 'HER2'
+GENE2 = 'VIM'
 
-    rgb = np.zeros(primary_image.tile_shape + (3,))
-    rgb[:,:,0] = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-    rgb[:,:,1] = dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-    do = rgb2gray(rgb)
-    do = do/(do.max())
+rgb = np.zeros(registered_image.tile_shape + (3,))
+rgb[:,:,0] = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+rgb[:,:,1] = dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+do = rgb2gray(rgb)
+do = do/(do.max())
 
-    image(do,size=10)
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore', FutureWarning)
-        is_gene1 = decoded.where(decoded[Features.AXIS][Features.TARGET] == GENE1, drop=True)
-        is_gene2 = decoded.where(decoded[Features.AXIS][Features.TARGET] == GENE2, drop=True)
+image(do,size=10)
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore', FutureWarning)
+    is_gene1 = decoded.where(decoded[Features.AXIS][Features.TARGET] == GENE1, drop=True)
+    is_gene2 = decoded.where(decoded[Features.AXIS][Features.TARGET] == GENE2, drop=True)
 
-    plt.plot(is_gene1.x, is_gene1.y, 'or')
-    plt.plot(is_gene2.x, is_gene2.y, 'ob')
-    plt.title(f'Red: {GENE1}, Blue: {GENE2}');
-    # EPY: END code
+plt.plot(is_gene1.x, is_gene1.y, 'or')
+plt.plot(is_gene2.x, is_gene2.y, 'ob')
+plt.title(f'Red: {GENE1}, Blue: {GENE2}');
+# EPY: END code

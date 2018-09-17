@@ -1,13 +1,15 @@
+import os
+import sys
+
 import numpy as np
 import pandas as pd
+from definitions import ROOT_DIR
 
 from starfish import IntensityTable
-
 from starfish.types import Features
-import sys
-import os
+
 os.environ["USE_TEST_DATA"] = "1"
-sys.path.append('../../../../notebooks/py/')
+sys.path.append(os.path.join(ROOT_DIR, "notebooks/py/"))
 dartfish = __import__('DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV')
 
 
@@ -122,7 +124,7 @@ def test_dartfish_pipeline_cropped_data():
         zero_norm_stack.numpy_array[0, 0, 0, 50:60, 60:70]
     )
 
-    spot_intensities, results = dartfish.spot_intensities, dartfish.results
+    spot_intensities = dartfish.spot_intensities
     spots_df = IntensityTable(
         spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True)
     ).to_features_dataframe()

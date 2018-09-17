@@ -1,11 +1,14 @@
+import os
+import sys
+
 import numpy as np
+from definitions import ROOT_DIR
 
 from starfish.spots._target_assignment.point_in_poly import PointInPoly2D
 from starfish.types import Features
-import sys
-import os
+
 os.environ["USE_TEST_DATA"] = "1"
-sys.path.append('../../../../notebooks/py/')
+sys.path.append(os.path.join(ROOT_DIR, "notebooks/py/"))
 iss = __import__('ISS_Pipeline_-_Breast_-_1_FOV')
 
 
@@ -14,97 +17,77 @@ def test_iss_pipeline_cropped_data():
     # set random seed to errors provoked by optimization functions
     np.random.seed(777)
 
-    # # load the experiment
-    # experiment_json = (
-    #     "https://dmf0bdeheu4zf.cloudfront.net/20180911/ISS-TEST/experiment.json"
-    # )
-    # experiment = Experiment.from_json(experiment_json)
-    # dots = experiment.fov()['dots']
-    # nuclei = experiment.fov()['nuclei']
-    # primary_image = experiment.fov().primary_image
-    #
-    # # register the data
-    # fsr = FourierShiftRegistration(upsampling=1000, reference_stack=dots)
-    # registered_primary_image = fsr.run(primary_image, in_place=False)
-    #
+    white_top_hat_filtered_image = iss.primary_image
+
     # # pick a random part of the registered image and assert on it
-    # expected_registration_values = np.array(
-    #     [[0.08983251, 0.0892154, 0.09003078, 0.08990231, 0.08938038,
-    #       0.09227149, 0.09755211, 0.09819349, 0.10127072, 0.11408974],
-    #      [0.09666385, 0.09456035, 0.09506275, 0.09561637, 0.09453626,
-    #       0.09606067, 0.09903451, 0.1003365, 0.10371296, 0.10477841],
-    #      [0.10850635, 0.1023093, 0.10086684, 0.09936101, 0.09779496,
-    #       0.09937705, 0.10170354, 0.1025213, 0.10687973, 0.11058433],
-    #      [0.1199711, 0.10944109, 0.10901033, 0.10414005, 0.10293939,
-    #       0.10342702, 0.10531835, 0.10537095, 0.10613398, 0.11440884],
-    #      [0.14026444, 0.1256294, 0.12075542, 0.11679934, 0.11446859,
-    #       0.10895271, 0.10925814, 0.10629877, 0.1091761, 0.11063146],
-    #      [0.14706053, 0.14194803, 0.1374521, 0.13111584, 0.12235309,
-    #       0.11825943, 0.11697862, 0.11199736, 0.10853392, 0.10885843],
-    #      [0.14707456, 0.14934249, 0.15015754, 0.14010485, 0.1318078,
-    #       0.12978303, 0.1208757, 0.11374975, 0.11375835, 0.11191528],
-    #      [0.13387902, 0.14654579, 0.15143262, 0.1455235, 0.13806314,
-    #       0.12928307, 0.12664636, 0.11756866, 0.11668609, 0.11233816],
-    #      [0.12615235, 0.13472537, 0.14411529, 0.14993921, 0.14286724,
-    #       0.13577826, 0.127131, 0.1216145, 0.11704073, 0.11607594],
-    #      [0.12429121, 0.12665416, 0.13423485, 0.14545396, 0.15071892,
-    #       0.1419759, 0.1289691, 0.1242372, 0.12026623, 0.12084184]],
-    #     dtype=np.float
-    # )
-    # assert np.allclose(
-    #     expected_registration_values,
-    #     registered_primary_image.numpy_array[2, 2, 0, 40:50, 40:50]
-    # )
-    #
-    # # filter the data
-    # filt = WhiteTophat(masking_radius=15)
-    # filtered_dots, filtered_nuclei, filtered_primary_image = [
-    #     filt.run(img, in_place=False) for img in (dots, nuclei, registered_primary_image)
-    # ]
-    #
-    # # assert on a random part of the filtered image
-    # expected_filtered_values = np.array(
-    #     [[0.00095978, 0.00242981, 0.00034942, 0.00102001, 0.,
-    #       0., 0., 0., 0.00279868, 0.00414499],
-    #      [0.00732663, 0.00806766, 0.00228394, 0.00097898, 0.00068559,
-    #       0.00174595, 0., 0., 0., 0.],
-    #      [0.01592878, 0.00296821, 0.00454778, 0.00466756, 0.,
-    #       0., 0.00064306, 0.0017258, 0., 0.],
-    #      [0.030638, 0.01616477, 0.00813692, 0.00225843, 0.00491835,
-    #       0.0014467, 0.0018941, 0., 0., 0.00026727],
-    #      [0.037273, 0.02376178, 0.0159938, 0.01196495, 0.0130818,
-    #       0.00187735, 0.00246782, 0.00162887, 0.0010042, 0.],
-    #      [0.0414216, 0.03275366, 0.02653611, 0.02131327, 0.0153529,
-    #       0.0083164, 0.00564933, 0., 0.00263396, 0.],
-    #      [0.04375885, 0.04228986, 0.03714352, 0.03701786, 0.02504258,
-    #       0.01528613, 0.01023919, 0.00292638, 0.00166556, 0.],
-    #      [0.04098595, 0.0469675, 0.04553796, 0.03968509, 0.03191137,
-    #       0.02195033, 0.01346012, 0.00810439, 0.00333658, 0.],
-    #      [0.03039079, 0.04116304, 0.04920747, 0.04320574, 0.03614666,
-    #       0.02622336, 0.02255489, 0.01660567, 0.00587476, 0.00147908],
-    #      [0.02868421, 0.03238469, 0.04618791, 0.0484842, 0.03658872,
-    #       0.02521646, 0.0232316, 0.02098654, 0.01103822, 0.00434919]],
-    #     dtype=np.float
-    # )
-    # assert np.allclose(
-    #     expected_filtered_values,
-    #     filtered_primary_image.numpy_array[1, 1, 0, 40:50, 40:50]
-    # )
-    #
-    # # call spots
-    # gsd = GaussianSpotDetector(
-    #     min_sigma=1,
-    #     max_sigma=10,
-    #     num_sigma=30,
-    #     threshold=0.01,
-    #     measurement_type='mean',
-    # )
-    # with warnings.catch_warnings():
-    #     warnings.simplefilter("ignore")
-    #
-    #     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    #     blobs_image = dots.max_proj(Indices.ROUND, Indices.Z)
-    #     intensities = gsd.run(primary_image, blobs_image=blobs_image)
+    expected_filtered_values = np.array(
+        [[0.1041123, 0.09968718, 0.09358358, 0.09781034, 0.08943313, 0.08853284,
+          0.08714428, 0.07518119, 0.07139697, 0.0585336, ],
+         [0.09318685, 0.09127947, 0.0890364, 0.094728, 0.08799877, 0.08693064,
+          0.08230717, 0.06738383, 0.05857938, 0.04223698],
+         [0.08331426, 0.0812543, 0.08534371, 0.0894789, 0.09184404, 0.08274967,
+          0.0732433, 0.05564965, 0.04577706, 0.03411917],
+         [0.06741435, 0.07370108, 0.06511024, 0.07193103, 0.07333485, 0.07672236,
+          0.06019684, 0.04415961, 0.03649958, 0.02737468],
+         [0.05780118, 0.06402685, 0.05947966, 0.05598535, 0.05192646, 0.04870679,
+          0.04164187, 0.03291371, 0.03030441, 0.02694743],
+         [0.04649424, 0.06117342, 0.05899138, 0.05101091, 0.03639277, 0.03379873,
+          0.03382925, 0.0282597, 0.02383459, 0.01651026],
+         [0.0414435, 0.04603647, 0.05458152, 0.04969863, 0.03799496, 0.0325475,
+          0.02928206, 0.02685588, 0.02172885, 0.01722743],
+         [0.04107728, 0.04161135, 0.04798963, 0.05156023, 0.03952087, 0.02899214,
+          0.02589456, 0.02824444, 0.01815823, 0.01557945],
+         [0.03901731, 0.03302052, 0.03498893, 0.03929199, 0.03695735, 0.02943466,
+          0.01945525, 0.01869231, 0.01666284, 0.01240558],
+         [0.02664226, 0.02386511, 0.02206454, 0.02978561, 0.03265431, 0.0265507,
+          0.02214084, 0.01844815, 0.01542687, 0.01353475]],
+        dtype=np.float32
+    )
+    assert np.allclose(
+        expected_filtered_values,
+        white_top_hat_filtered_image.numpy_array[2, 2, 0, 40:50, 40:50]
+    )
+
+    registered_image = iss.registered_image
+
+    # assert on a random part of the filtered image
+    expected_registered_values = np.array(
+        [[1.15684755e-02, 3.86373512e-03, 2.60785664e-03, 1.35898031e-03,
+          0.00000000e+00, 0.00000000e+00, 1.15468545e-04, 0.00000000e+00,
+          0.00000000e+00, 7.16284662e-03],
+         [1.33818155e-02, 8.74291547e-03, 8.54650512e-03, 5.62853599e-03,
+          1.74340000e-03, 5.84440822e-05, 5.53897815e-04, 7.40510353e-04,
+          1.09384397e-04, 0.00000000e+00],
+         [2.32197642e-02, 1.48485349e-02, 1.20572122e-02, 1.00518325e-02,
+          3.78616550e-03, 5.51953330e-04, 1.58034940e-03, 0.00000000e+00,
+          6.80672762e-04, 3.19095445e-03],
+         [3.35171446e-02, 2.30573826e-02, 1.86911281e-02, 1.16252769e-02,
+          6.42230362e-03, 4.63001803e-03, 2.50486028e-03, 1.08768849e-03,
+          0.00000000e+00, 6.75229309e-03],
+         [5.30732870e-02, 3.61515097e-02, 3.07820514e-02, 2.19761301e-02,
+          1.52691351e-02, 9.15373303e-03, 5.41988341e-03, 0.00000000e+00,
+          9.24524793e-04, 3.14691127e-03],
+         [6.05984218e-02, 5.18058091e-02, 4.45022509e-02, 3.48668806e-02,
+          2.37355866e-02, 1.48193939e-02, 1.27216997e-02, 4.51163156e-03,
+          9.03905951e-04, 1.46147527e-03],
+         [6.03375509e-02, 6.00600466e-02, 5.51640466e-02, 4.15391065e-02,
+          3.14524844e-02, 2.64199078e-02, 1.41928447e-02, 6.39168778e-03,
+          5.34856878e-03, 3.28401709e-03],
+         [4.75437082e-02, 5.76229692e-02, 5.73692545e-02, 4.73626107e-02,
+          3.53275351e-02, 2.55322661e-02, 1.92126688e-02, 9.48204752e-03,
+          9.59323533e-03, 3.06630856e-03],
+         [3.94404493e-02, 4.60249558e-02, 4.95812669e-02, 5.13879694e-02,
+          3.92197557e-02, 2.88589876e-02, 1.97741222e-02, 1.41243441e-02,
+          8.03299714e-03, 6.66760467e-03],
+         [3.60199437e-02, 3.75546440e-02, 4.03789952e-02, 4.74576391e-02,
+          4.75049056e-02, 3.51673886e-02, 2.08846033e-02, 1.69556923e-02,
+          1.06233349e-02, 1.02646966e-02]],
+        dtype=np.float32
+    )
+    assert np.allclose(
+        expected_registered_values,
+        registered_image.numpy_array[2, 2, 0, 40:50, 40:50]
+    )
 
     intensities = iss.intensities
 
@@ -112,12 +95,13 @@ def test_iss_pipeline_cropped_data():
     assert intensities.sizes[Features.AXIS] == 99
 
     # decode
-    decoded_intensities = iss.decoded
+    decoded = iss.decoded
 
     # decoding identifies 4 genes, each with 1 count
     genes, gene_counts = iss.genes, iss.counts
-    assert np.array_equal(genes, np.array(['CD68', 'GUS', 'ST-3', 'VEGF', 'nan']))
-    assert np.array_equal(gene_counts, [1, 1, 1, 1, 95])
+    assert np.array_equal(genes, np.array(['ACTB', 'CD68', 'CTSL2', 'EPCAM', 'ETV4', 'GAPDH',
+                                           'HER2', 'MET', 'RAC1', 'TFRC', 'TP53', 'VEGF']))
+    assert np.array_equal(gene_counts, [18, 1, 5, 2, 1, 12, 3, 1, 2, 1, 1, 2])
 
     regions = iss.regions
 
@@ -128,7 +112,7 @@ def test_iss_pipeline_cropped_data():
 
     # assign targets
     pip = PointInPoly2D()
-    pip.run(decoded_intensities, regions)
+    pip.run(decoded, regions)
 
     # 18 of the spots are assigned to cell 1 (although most spots do not decode!)
-    assert np.sum(decoded_intensities['cell_id'] == 0) == 18
+    assert np.sum(decoded['cell_id'] == 0) == 18

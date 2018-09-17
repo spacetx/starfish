@@ -30,7 +30,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         normalize : bool
             if True, this scales all rounds to have unit L2 norm across channels
         """
-        if is_volume is True:
+        if is_volume:
             raise NotImplementedError("Currently only 2-d filtering is supported")
         self.thresh = thresh
         self.normalize = normalize

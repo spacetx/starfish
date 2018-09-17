@@ -1,5 +1,18 @@
 """
-This module stores a contract for new Filter algorithms. To add a new filter, simply add default
+This module stores a contract for new Filter algorithms. 
+
+Contract
+--------
+
+- constructor accepts 3d and 2d data, where default is 2d
+- values emitted by a filter are floats between 0 and 1 (inclusive)
+- exposes a `run`() method
+- run accepts an in-place parameter which defaults to True
+- run always returns an ImageStack (if in-place, returns a reference to the modified input data)
+- run accepts an `n_processes` parameter which determines 
+- run accepts a `verbose` parameter, which triggers tqdm to print progress
+
+To add a new filter, simply add default
 parameters for the constructor (omit is_volume), and it will be tested against the contract by
 way of registration to the FilterAlgorithmBase
 """

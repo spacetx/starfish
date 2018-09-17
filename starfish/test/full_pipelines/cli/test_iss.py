@@ -43,20 +43,20 @@ class TestWithIssData(CLITest):
     )
 
     STAGES = (
-        [
-            sys.executable,
-            "examples/get_iss_data.py",
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "raw"),
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted"),
-            "--d", "1",
-        ],
-        # TODO make this work
         # [
         #     sys.executable,
-        #     "examples/get_cli_test_data.py",
-        #     "https://dmf0bdeheu4zf.cloudfront.net/20180828/test-iss-data.zip",
-        #     lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
+        #     "examples/get_iss_data.py",
+        #     lambda tempdir, *args, **kwargs: os.path.join(tempdir, "raw"),
+        #     lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted"),
+        #     "--d", "1",
         # ],
+        # TODO make this work
+        [
+            sys.executable,
+            "examples/get_cli_test_data.py",
+            "https://dmf0bdeheu4zf.cloudfront.net/20180828/ISS-TEST/test-iss-data.zip",
+            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted")
+        ],
         [
             "starfish", "registration",
             "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(

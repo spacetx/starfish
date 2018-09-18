@@ -198,12 +198,12 @@ def write_experiment_json(
         json.dump(experiment_doc, fh, indent=4)
 
     codebook_stub = [
-      {
-        "codeword": [
-          {"r": 0, "c": 0, "v": 1},
-        ],
-        "target": "PLEASE_REPLACE_ME"
-      },
+        {
+            "codeword": [
+                {"r": 0, "c": 0, "v": 1},
+            ],
+            "target": "PLEASE_REPLACE_ME"
+        },
     ]
     with open(os.path.join(path, "codebook.json"), "w") as fh:
         json.dump(codebook_stub, fh, indent=4)

@@ -68,16 +68,21 @@ Dots: an image containing the locations of imaging features across a field of vi
 Other stains or labels: these optional (but recommended) image(s), including but not limited to antibody stains, may capture additional information about cell boundaries or subcellular structure that will be useful for cell segmentation and/or additional spatial analyses.
 
 ### Registration
-Refers to the process of aligning multiple images of the same spatial location, most commonly across multiple rounds of imaging within a FOV.
+Refers to the process of aligning multiple images of the same spatial location, most commonly across 
+multiple rounds of imaging within a FOV.
 
 ### Stitching
-The process of combining images from multiple fields of view into a larger image that spans the extent of the sample.
+The process of combining images from multiple fields of view into a larger image that spans the 
+extent of the sample.
 
-### feature
-The value of a spot (aggregated across all pixel values circumscribed by that spot) or the value of a single pixel.
+### Feature
+The value of a spot (aggregated across all pixel values circumscribed by that spot) or the value of 
+a single pixel.
 
-### feature trace 
-Feature values across all imaging rounds and/or color channels. these map to codewords in a codebook.
+### Feature (Spot, Pixel) Trace 
+Feature intensity values across all imaging rounds and/or color channels. these map to codewords in 
+a codebook.
 
 ### decoding
-Matching putative barcodes to codewords in a codebook to read out the corresponding target believed to be associated with that barcode.
+Matching putative barcodes to codewords in a codebook to read out the corresponding target believed 
+to be associated with that barcode.

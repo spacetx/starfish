@@ -9,6 +9,7 @@ from . import bandpass
 from . import clip
 from . import gaussian_high_pass
 from . import gaussian_low_pass
+from . import laplace
 from . import mean_high_pass
 from . import richardson_lucy_deconvolution
 from . import scale_by_percentile

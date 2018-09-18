@@ -12,7 +12,9 @@
 # EPY: END markdown
 
 # EPY: START code
-# EPY: ESCAPE %matplotlib notebook
+# EPY: ESCAPE %matplotlib inline
+# EPY: ESCAPE %load_ext autoreload
+# EPY: ESCAPE %autoreload 2
 
 import numpy as np
 import pandas as pd
@@ -26,7 +28,7 @@ from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START code
-experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180828/ISS/experiment.json")
+experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180911/ISS/experiment.json")
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 # EPY: END code
 
@@ -166,7 +168,7 @@ with warnings.catch_warnings():
 
 # EPY: START code
 # Verify the spot count is reasonable.
-spot_count = intensities.shape[0]
+spot_count = intensities.sizes[Features.AXIS]
 assert 1000 < spot_count < 5000
 spot_count
 # EPY: END code
@@ -214,7 +216,7 @@ decoded = experiment.codebook.decode_per_round_max(intensities)
 # EPY: END markdown
 
 # EPY: START code
-genes, counts = np.unique(decoded[Features.TARGET], return_counts=True)
+genes, counts = np.unique(decoded.loc[decoded[Features.PASSES_THRESHOLDS]][Features.TARGET], return_counts=True)
 table = pd.Series(counts, index=genes).sort_values(ascending=False)
 # EPY: END code
 

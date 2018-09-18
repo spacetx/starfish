@@ -5,6 +5,7 @@ import numpy as np
 from scipy.ndimage import fourier_shift
 from skimage.feature import register_translation
 
+from starfish.image._filter.util import preserve_float_range
 from starfish.stack import ImageStack
 from starfish.types import Indices
 from starfish.util.argparse import FsExistsType
@@ -83,7 +84,10 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
                     indices = {Indices.ROUND: r, Indices.CH: c, Indices.Z: z}
                     data, axes = image.get_slice(indices=indices)
                     assert len(axes) == 0
+
                     result = shift_im(data, shift)
+                    result = preserve_float_range(result)
+
                     image.set_slice(indices=indices, data=result)
 
         if not in_place:

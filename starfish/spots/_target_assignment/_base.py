@@ -1,4 +1,3 @@
-import pandas as pd
 import regional
 
 from starfish.intensity_table import IntensityTable

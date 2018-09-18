@@ -34,7 +34,7 @@ def histogram(
         data vector to be summarized
     ax : Optional[matplotlib.axes.Axes]
         Axis to plot in. If not provided, defaults to current axis.
-    bins :
+    bins : int
         Number of bins. Default 25.
     log : bool
         Whether to plot the y-axis of the histogram in log scale.

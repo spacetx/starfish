@@ -18,7 +18,7 @@ install_requires = [line.rstrip() for line in open(os.path.join(os.path.dirname(
 
 setuptools.setup(
     name="starfish",
-    version="0.0.17",
+    version="0.0.21",
     description="Pipelines and pipeline components for the analysis of image-based transcriptomics data",
     author="Deep Ganguli",
     author_email="dganguli@chanzuckerberg.com",

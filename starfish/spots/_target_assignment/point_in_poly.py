@@ -31,7 +31,7 @@ class PointInPoly2D(TargetAssignmentAlgorithm):
         points = pd.DataFrame(dict(x=x, y=y))
 
         results = pd.DataFrame({'spot_id': range(0, intensities.shape[0])})
-        results['cell_id'] = None
+        results[Features.CELL_ID] = None
 
         if verbose:
             cell_iterator = tqdm(range(cells_region.count))
@@ -45,9 +45,9 @@ class PointInPoly2D(TargetAssignmentAlgorithm):
                 vertices = cells_region[cell_id].coordinates
             vertices = np.array(vertices)
             in_poly = points_in_poly(points, vertices)
-            results.loc[results.spot_id[in_poly], 'cell_id'] = cell_id
+            results.loc[results.spot_id[in_poly], Features.CELL_ID] = cell_id
 
-        intensities['cell_id'] = (Features.AXIS, results['cell_id'])
+        intensities[Features.CELL_ID] = (Features.AXIS, results[Features.CELL_ID])
 
         return intensities
 

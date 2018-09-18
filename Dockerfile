@@ -36,18 +36,22 @@
 ##
 ##   $ docker run -e TEST_ISS_KEEP_DATA=true --entrypoint=pytest spacetx/starfish -vsxk TestWithIssData
 ##
-FROM python:3.6
-
-COPY REQUIREMENTS.txt /src/
-COPY REQUIREMENTS-DEV.txt /src/
-COPY REQUIREMENTS-NOTEBOOK.txt /src/
-RUN pip install -r /src/REQUIREMENTS-DEV.txt -r /src/REQUIREMENTS-NOTEBOOK.txt
-
+FROM continuumio/miniconda3
 RUN useradd -m starfish
-COPY . /src
-RUN chown -R starfish:starfish /src
 USER starfish
+
+# Set up the initial conda environment
+COPY --chown=starfish:starfish environment.yml /src/environment.yml
 WORKDIR /src
-RUN pip install --user -e .
-ENV PATH=${PATH}:/home/starfish/.local/bin
+RUN conda env create -f environment.yml
+
+# Prepare for build
+COPY --chown=starfish:starfish . /src
+RUN echo "source activate starfish" >> ~/.bashrc
+ENV PATH /home/starfish/.conda/envs/starfish/bin:$PATH
+
+# Build and configure for running
+RUN pip install -e .
+
+env MPLBACKEND Agg
 ENTRYPOINT ["starfish"]

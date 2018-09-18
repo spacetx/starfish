@@ -26,7 +26,7 @@ class FieldOfView:
     """
     def __init__(
             self,
-            name: Optional[str],
+            name: str,
             primary_image: Optional[ImageStack]=None,
             auxiliary_images: Optional[MutableMapping[str, ImageStack]]=None,
             primary_image_tileset: Optional[TileSet]=None,
@@ -64,8 +64,17 @@ class FieldOfView:
         else:
             self._auxiliary_images = dict()
 
+    def __repr__(self):
+        auxiliary_images = '\n    '.join(f'{k}: {v}' for k, v in self._auxiliary_images.items())
+        return (
+            f"<starfish.FieldOfView>\n"
+            f"  Primary Image: {self._primary_image}\n"
+            f"  Auxiliary Images:\n"
+            f"    {auxiliary_images}"
+        )
+
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str:
         return self._name
 
     @property
@@ -108,9 +117,9 @@ class Experiment:
     codebook      Returns the codebook associated with this experiment.
     extras        Returns the extras dictionary associated with this experiment.
     """
-    CURRENT_VERSION = Version("1.0.0")
-    MIN_SUPPORTED_VERSION = Version("1.0.0")
-    MAX_SUPPORTED_VERSION = Version("1.0.0")
+    CURRENT_VERSION = Version("3.0.0")
+    MIN_SUPPORTED_VERSION = Version("3.0.0")
+    MAX_SUPPORTED_VERSION = Version("3.0.0")
 
     def __init__(
             self,
@@ -124,6 +133,25 @@ class Experiment:
         self._codebook = codebook
         self._extras = extras
         self._src_doc = src_doc
+
+    def __repr__(self):
+
+        # truncate the list of fields of view if it is longer than print_n_fov
+        print_n_fov = 4
+        n_fields_of_view = list(self.items())[:print_n_fov]
+        fields_of_view_str = "\n".join(
+            f'{k}: {v}' for k, v in n_fields_of_view
+        )
+
+        # add an ellipsis if not all fields of view are being printed
+        if len(self._fovs) > print_n_fov:
+            fov_repr = f"{{\n{fields_of_view_str}\n  ...,\n}}"
+        else:
+            fov_repr = f"{{\n{fields_of_view_str}\n}}"
+
+        # return the formatted string
+        object_repr = f"<starfish.Experiment (FOVs={len(self._fovs)})>\n"
+        return object_repr + fov_repr
 
     @classmethod
     def from_json(cls, json_url: str) -> "Experiment":
@@ -153,30 +181,15 @@ class Experiment:
 
         extras = experiment_document['extras']
 
-        primary_image: Union[Collection, TileSet] = Reader.parse_doc(
-            experiment_document['primary_images'], baseurl)
-        auxiliary_images: MutableMapping[str, Union[Collection, TileSet]] = dict()
+        primary_image: Collection = Reader.parse_doc(experiment_document['primary_images'], baseurl)
+        auxiliary_images: MutableMapping[str, Collection] = dict()
         for aux_image_type, aux_image_url in experiment_document['auxiliary_images'].items():
             auxiliary_images[aux_image_type] = Reader.parse_doc(aux_image_url, baseurl)
 
-        if isinstance(primary_image, TileSet):
-            # make sure that all the aux images are also TileSets
-            for aux_image_tileset in auxiliary_images.values():
-                assert isinstance(aux_image_tileset, TileSet)
-
-            fov = FieldOfView(
-                None,
-                primary_image_tileset=primary_image,
-                auxiliary_image_tilesets=auxiliary_images
-            )
-            return Experiment([fov], codebook, extras, src_doc=experiment_document)
-
-        # everything should be Collections
         fovs: MutableSequence[FieldOfView] = list()
         for fov_name, primary_tileset in primary_image.all_tilesets():
             aux_image_tilesets_for_fov: MutableMapping[str, TileSet] = dict()
             for aux_image_type, aux_image_collection in auxiliary_images.items():
-                assert isinstance(aux_image_collection, Collection)
                 aux_image_tileset = aux_image_collection.find_tileset(fov_name)
                 if aux_image_tileset is not None:
                     aux_image_tilesets_for_fov[aux_image_type] = aux_image_tileset
@@ -243,6 +256,15 @@ class Experiment:
         if len(fovs) == 0:
             raise IndexError(f"No field of view with name \"{item}\"")
         return fovs[0]
+
+    def keys(self):
+        return (fov.name for fov in self.fovs())
+
+    def values(self):
+        return (fov for fov in self.fovs())
+
+    def items(self):
+        return ((fov.name, fov) for fov in self.fovs())
 
     @property
     def codebook(self) -> Codebook:

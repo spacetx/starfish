@@ -1,6 +1,7 @@
 import argparse
+from typing import Type
 
-from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.stack import ImageStack
 from starfish.util.argparse import FsExistsType
 from . import fourier_shift
@@ -12,8 +13,8 @@ class Registration(PipelineComponent):
     register_group: argparse.ArgumentParser
 
     @classmethod
-    def implementing_algorithms(cls):
-        return RegistrationAlgorithmBase.__subclasses__()
+    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
+        return RegistrationAlgorithmBase
 
     @classmethod
     def add_to_parser(cls, subparsers):

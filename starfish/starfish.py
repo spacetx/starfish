@@ -15,6 +15,7 @@ from starfish.spots import (
     SpotFinder,
     TargetAssignment,
 )
+from validate_sptx.cli import Cli as ValidateCli
 from .util.argparse import FsExistsType
 
 
@@ -46,6 +47,9 @@ def build_parser():
 
     build_group = subparsers.add_parser("build")
     BuilderCli.add_to_parser(build_group)
+
+    validate_group = subparsers.add_parser("validate")
+    ValidateCli.add_to_parser(validate_group)
 
     return parser
 

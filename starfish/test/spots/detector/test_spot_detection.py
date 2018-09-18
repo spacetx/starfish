@@ -1,48 +1,13 @@
 import numpy as np
 import pytest
-from skimage.feature import blob_log
+from scipy.ndimage.filters import gaussian_filter
 
 from starfish.spots._detector._base import SpotFinderAlgorithmBase
 from starfish.spots._detector.detect import detect_spots
 from starfish.spots._detector.gaussian import GaussianSpotDetector
 from starfish.spots._detector.local_max_peak_finder import LocalMaxPeakFinder
 from starfish.stack import ImageStack
-# don't inspect pytest fixtures in pycharm
-# noinspection PyUnresolvedReferences
-from starfish.test.dataset_fixtures import (
-    synthetic_dataset_with_truth_values,
-    synthetic_dataset_with_truth_values_and_called_spots,
-    synthetic_single_spot_2d,
-    synthetic_single_spot_3d,
-    synthetic_single_spot_imagestack_2d,
-    synthetic_single_spot_imagestack_3d,
-    synthetic_two_spot_3d,
-    synthetic_two_spot_3d_2round_2ch,
-    synthetic_two_spot_imagestack_3d,
-)
 from starfish.types import Indices
-
-
-def test_blob_log_2d(synthetic_single_spot_2d):
-    """Tests that skimage.feature.blob_log is acting as we expect on 2d data"""
-    result = blob_log(synthetic_single_spot_2d, min_sigma=2, max_sigma=4, num_sigma=10, threshold=0)
-    assert np.array_equal(result, np.array([[10, 90, 2]]))
-
-
-def test_blob_log_3d(synthetic_single_spot_3d):
-    """Tests that skimage.feature.blob_log is acting as we expect on 3d data"""
-    result = blob_log(synthetic_single_spot_3d, min_sigma=2, max_sigma=4, num_sigma=10, threshold=0)
-    assert np.array_equal(result, np.array([[5, 10, 90, 2]]))
-
-
-def test_blob_log_3d_flat(synthetic_single_spot_2d):
-    """
-    Tests that skimage.feature.blob_log is acting as we expect on pseudo-3d data where the
-    z-axis has size 1
-    """
-    data = synthetic_single_spot_2d.reshape(1, *synthetic_single_spot_2d.shape)
-    result = blob_log(data, min_sigma=2, max_sigma=4, num_sigma=10, threshold=0)
-    assert np.array_equal(result, np.array([[0, 10, 90, 2]]))
 
 
 def simple_gaussian_spot_detector() -> GaussianSpotDetector:
@@ -60,7 +25,7 @@ def simple_local_max_spot_detector() -> LocalMaxPeakFinder:
     """create a basic local max peak finder"""
     return LocalMaxPeakFinder(
         spot_diameter=3,
-        min_mass=5,
+        min_mass=0.01,
         max_size=10,
         separation=2,
     )
@@ -69,6 +34,48 @@ def simple_local_max_spot_detector() -> LocalMaxPeakFinder:
 # initialize spot detectors
 gaussian_spot_detector = simple_gaussian_spot_detector()
 local_max_spot_detector = simple_local_max_spot_detector()
+
+
+def synthetic_two_spot_3d_2round_2ch() -> ImageStack:
+    """produce a 2-channel 2-hyb ImageStack
+
+    Notes
+    -----
+    - After Gaussian filtering, all max intensities are 7
+    - Two spots are located at (4, 10, 90) and (6, 90, 10)
+    - Both spots are 1-hot, and decode to:
+        - spot 1: (round 0, ch 0), (round 1, ch 1)
+        - spot 2: (round 0, ch 1), (round 1, ch 0)
+
+    Returns
+    -------
+    ImageStack :
+        noiseless ImageStack containing two spots
+
+    """
+
+    # blank data_image
+    data = np.zeros((2, 2, 10, 100, 100), dtype=np.float32)
+
+    # round 0 channel 0
+    data[0, 0, 4, 10, 90] = 1.0
+    data[0, 0, 5, 90, 10] = 0
+
+    # round 0 channel 1
+    data[0, 1, 4, 10, 90] = 0
+    data[0, 1, 5, 90, 10] = 1.0
+
+    # round 1 channel 0
+    data[1, 0, 4, 10, 90] = 0
+    data[1, 0, 5, 90, 10] = 1.0
+
+    # round 1 channel 1
+    data[1, 1, 4, 10, 90] = 1.0
+    data[1, 1, 5, 90, 10] = 0
+
+    data = gaussian_filter(data, sigma=(0, 0, 2, 2, 2))
+    return ImageStack.from_numpy_array(data)
+
 
 # create the data_stack
 data_stack = synthetic_two_spot_3d_2round_2ch()
@@ -101,8 +108,8 @@ def test_spot_detection_with_reference_image(
         radius_is_gyration=radius_is_gyration,
     )
     assert intensity_table.shape == (2, 2, 2), "wrong number of spots detected"
-    expected = [14, 14]
-    assert np.array_equal(intensity_table.sum((Indices.ROUND, Indices.CH)), expected), \
+    expected = [0.01587425, 0.01587425]
+    assert np.allclose(intensity_table.sum((Indices.ROUND, Indices.CH)).values, expected), \
         "wrong spot intensities detected"
 
 
@@ -129,8 +136,8 @@ def test_spot_detection_with_reference_image_from_max_projection(
         radius_is_gyration=radius_is_gyration,
     )
     assert intensity_table.shape == (2, 2, 2), "wrong number of spots detected"
-    expected = [14, 14]
-    assert np.array_equal(intensity_table.sum((Indices.ROUND, Indices.CH)), expected), \
+    expected = [0.01587425, 0.01587425]
+    assert np.allclose(intensity_table.sum((Indices.ROUND, Indices.CH)).values, expected), \
         "wrong spot intensities detected"
 
 
@@ -157,6 +164,6 @@ def test_spot_finding_no_reference_image(
         radius_is_gyration=radius_is_gyration,
     )
     assert intensity_table.shape == (4, 2, 2), "wrong number of spots detected"
-    expected = [7, 7, 7, 7]
-    assert np.array_equal(intensity_table.sum((Indices.ROUND, Indices.CH)), expected), \
+    expected = [0.00793712] * 4
+    assert np.allclose(intensity_table.sum((Indices.ROUND, Indices.CH)).values, expected), \
         "wrong spot intensities detected"

@@ -18,13 +18,14 @@ from matplotlib import get_backend as get_matplotlib_backend
 from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import scoreatpercentile
 from skimage import exposure
+from skimage import img_as_float32, img_as_uint
 from slicedimage import Reader, Tile, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
 from starfish.errors import DataFormatWarning
 from starfish.intensity_table import IntensityTable
-from starfish.types import Coordinates, Indices, SpotAttributes
+from starfish.types import Coordinates, Indices
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
@@ -32,25 +33,38 @@ _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'req
 class ImageStack:
     """Container for a TileSet (field of view)
 
+    Attributes
+    ----------
+    num_chs : int
+        the number of channels stored in the image tensor
+    num_rounds : int
+        the number of imaging rounds stored in the image tensor
+    num_zlayers : int
+        the number of z-layers stored in the image tensor
+    numpy_array : np.ndarray
+        the 5-d image tensor is stored in this array
+    raw_shape : Tuple[int]
+        the shape of the image tensor (in integers)
+    shape : Dict[str, int]
+           the shape of the image tensor by categorical index (channels, imaging rounds, z-layers)
+
     Methods
     -------
-    get_slice    retrieve a slice of the image tensor
-    set_slice    set a slice of the image tensor
-    apply        apply a 2d or 3d function across all Tiles in the image tensor
-    max_proj     return a max projection over one or more axis of the image tensor
-    show_stack   show an interactive, pageable view of the image tensor, or a slice of the image
-                 tensor
-    write        save the (potentially modified) image tensor to disk
+    get_slice(indices)
+        retrieve a slice of the image tensor
+    set_slice(indices, data, axes=None)
+        set a slice of the image tensor
+    apply(func, is_volume=False, in_place=True, verbose=False, n_processes=None)
+        apply a 2d or 3d function across all Tiles in the image tensor
+    max_proj(*dims)
+        return a max projection over one or more axis of the image tensor
+    show_stack(indices, color_map='gray', figure_size=(10, 10), rescale=False, p_min=None, \
+            p_max=None)
+        show an interactive, pageable view of the image tensor, or a slice of the image tensor
+    write(filepath, tile_opener=None)
+        save the (potentially modified) image tensor to disk
 
-    Properties
-    ----------
-    num_chs      the number of channels stored in the image tensor
-    num_rounds   the number of imaging rounds stored in the image tensor
-    num_zlayers  the number of z-layers stored in the image tensor
-    numpy_array  the 5-d image tensor is stored in this array
-    raw_shape    the shape of the image tensor (in integers)
-    shape        the shape of the image tensor by categorical index (channels, imaging rounds,
-                 z-layers)
+
     """
 
     AXES_DATA: Mapping[Indices, _DimensionMetadata] = {
@@ -108,7 +122,7 @@ class ImageStack:
         self._data = xr.DataArray(
             np.zeros(
                 shape=shape,
-                dtype=np.dtype(f"{kind}{max_size}"),
+                dtype=np.float32,
             ),
             dims=dims,
         )
@@ -119,12 +133,8 @@ class ImageStack:
             c = tile.indices[Indices.CH]
             zlayer = tile.indices.get(Indices.Z, 0)
             data = tile.numpy_array
+
             if max_size != data.dtype.itemsize:
-                if data.dtype.kind == "i" or data.dtype.kind == "u":
-                    # fixed point can be done with a simple multiply.
-                    src_range = np.iinfo(data.dtype).max - np.iinfo(data.dtype).min + 1
-                    dst_range = np.iinfo(self._data.dtype).max - np.iinfo(self._data.dtype).min + 1
-                    data = data * (dst_range / src_range)
                 warnings.warn(
                     f"Tile "
                     f"(R: {tile.indices[Indices.ROUND]} C: {tile.indices[Indices.CH]} "
@@ -132,9 +142,30 @@ class ImageStack:
                     f"dtype {data.dtype}.  One or more tiles is of a larger dtype "
                     f"{self._data.dtype}.",
                     DataFormatWarning)
+
+            data = img_as_float32(data)
             self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
+
         # set_slice will mark the data as needing writeback, so we need to unset that.
         self._data_needs_writeback = False
+
+    @staticmethod
+    def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
+        """verify that data is of dtype float32 and in range [0, 1]"""
+        if data.dtype != np.float32:
+            raise TypeError(
+                f"ImageStack data must be of type float32, not {data.dtype}. Please convert data "
+                f"using skimage.img_as_float32 prior to calling set_slice."
+            )
+        if np.min(data) < 0 or np.max(data) > 1:
+            raise ValueError(
+                f"ImageStack data must be of type float32 and in the range [0, 1]. Please convert "
+                f"data using skimage.img_as_float32 prior to calling set_slice."
+            )
+
+    def __repr__(self):
+        shape = ', '.join(f'{k}: {v}' for k, v in self._data.sizes.items())
+        return f"<starfish.ImageStack ({shape})>"
 
     @classmethod
     def from_url(cls, url: str, baseurl: Optional[str]):
@@ -147,8 +178,8 @@ class ImageStack:
           3. url: hybridization.json  baseurl: https://www.example.com/images
           4. url: images/hybridization.json  baseurl: https://www.example.com
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         url : str
             Either an absolute URL or a relative URL referring to the image to be read.
         baseurl : Optional[str]
@@ -168,8 +199,8 @@ class ImageStack:
           1. url_or_path: file:///Users/starfish-user/images/hybridization.json
           2. url_or_path: /Users/starfish-user/images/hybridization.json
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         url_or_path : str
             Either an absolute URL or a filesystem path to an imagestack.
         """
@@ -193,12 +224,11 @@ class ImageStack:
         """
         if len(array.shape) != 5:
             raise ValueError('a 5-d tensor with shape (n_round, n_ch, n_z, y, x) must be provided.')
+        cls._validate_data_dtype_and_range(array)
+
         n_round, n_ch, n_z, height, width = array.shape
         empty = cls.synthetic_stack(
             num_round=n_round, num_ch=n_ch, num_z=n_z, tile_height=height, tile_width=width)
-
-        # preserve original dtype
-        empty._data = empty._data.astype(array.dtype)
 
         for h in np.arange(n_round):
             for c in np.arange(n_ch):
@@ -229,22 +259,29 @@ class ImageStack:
         numpy array representing the slice, and a list of the remaining axes beyond the normal x-y
         tile.
 
-        Example:
-            ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
-            ImageStack Implicit axes: X, Y with shape 10, 20, respectively.
-            Called to slice with indices {Z: 5}.
-            Result: a 4-dimensional numpy array with shape (3, 4, 20, 10) and the remaining axes
-                    [H, C].
+        Examples
+        --------
+        ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
+        ImageStack Implicit axes: X, Y with shape 10, 20, respectively.
+        Called to slice with indices {Z: 5}.
+        Result: a 4-dimensional numpy array with shape (3, 4, 20, 10) and the remaining axes [H, C].
 
-        Example:
-            Original axes: H, C, and Z.
-            Implicit axes: X, Y.
-            Called to slice with indices {Z: 5, C: slice(2, 4)}.
-            Result: a 4-dimensional numpy array with shape (3, 2, 20, 10) and the remaining axes
-                    [H, C].
+        Original axes: H, C, and Z.
+        Implicit axes: X, Y.
+        Called to slice with indices {Z: 5, C: slice(2, 4)}.
+        Result: a 4-dimensional numpy array with shape (3, 2, 20, 10) and the remaining axes [H, C].
+
         """
         slice_list, axes = self._build_slice_list(indices)
         result = self._data.values[slice_list]
+
+        if result.dtype != np.float32:
+            warnings.warn(
+                f"Non-float32 dtype: {result.dtype} detected. Data has likely been set using "
+                f"private attributes of ImageStack. ImageStack only supports float data in the "
+                f"range [0, 1]. Many algorithms will not function properly if provided other "
+                f"DataTypes. See: http://scikit-image.org/docs/dev/user_guide/data_types.html")
+
         return result, axes
 
     def set_slice(
@@ -258,20 +295,23 @@ class ImageStack:
         numpy array. If the optional parameter axes is provided, that represents the axes of the
         numpy array beyond the x-y tile.
 
-        Example:
-            ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
-            ImageStack Implicit axes: X, Y with shape 10, 20, respectively.
-            Called to set a slice with indices {Z: 5}.
-            Data: a 4-dimensional numpy array with shape (3, 4, 10, 20)
-            Result: Replace the data for Z=5.
+        Examples
+        --------
+        ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
+        ImageStack Implicit axes: X, Y with shape 10, 20, respectively.
+        Called to set a slice with indices {Z: 5}.
+        Data: a 4-dimensional numpy array with shape (3, 4, 10, 20)
+        Result: Replace the data for Z=5.
 
-        Example:
-            ImageStack axes: H, C, and Z. (shape 3, 4, 5)
-            ImageStack Implicit axes: X, Y. (shape 10, 20)
-            Called to set a slice with indices {Z: 5, C: slice(2, 4)}.
-            Data: a 4-dimensional numpy array with shape (3, 2, 10, 20)
-            Result: Replace the data for Z=5, C=2-3.
+        ImageStack axes: H, C, and Z. (shape 3, 4, 5)
+        ImageStack Implicit axes: X, Y. (shape 10, 20)
+        Called to set a slice with indices {Z: 5, C: slice(2, 4)}.
+        Data: a 4-dimensional numpy array with shape (3, 2, 10, 20)
+        Result: Replace the data for Z=5, C=2-3.
         """
+
+        self._validate_data_dtype_and_range(data)
+
         slice_list, expected_axes = self._build_slice_list(indices)
 
         if axes is not None:
@@ -856,7 +896,7 @@ class ImageStack:
         """
         Returns a tile of just ones for any given round/ch/z.
         """
-        return np.ones((height, width))
+        return np.ones((height, width), dtype=np.float32)
 
     @classmethod
     def synthetic_stack(
@@ -956,6 +996,8 @@ class ImageStack:
 
         Returns
         -------
+        ImageStack :
+            synthetic spots
 
         """
         # check some params
@@ -989,8 +1031,12 @@ class ImageStack:
                 num_z,
                 height,
                 width
-            )
+            ), dtype=np.uint32
         )
+
+        # starfish uses float images, but the logic here requires uint. We cast, and will cast back
+        # at the end of the function
+        intensities.values = img_as_uint(intensities)
 
         for ch, round_ in product(*(range(s) for s in intensities.shape[1:])):
             spots = intensities[:, ch, round_]
@@ -1002,14 +1048,16 @@ class ImageStack:
 
             image[round_, ch, values.z, values.y, values.x] = values
 
+        intensities.values = img_as_float32(intensities)
+
         # add imaging noise
-        image += np.random.poisson(n_photons_background, size=image.shape)
+        image += np.random.poisson(n_photons_background, size=image.shape).astype(np.uint32)
 
         # blur image over coordinates, but not over round_/channels (dim 0, 1)
         sigma = (0, 0) + point_spread_function
         image = gaussian_filter(image, sigma=sigma, mode='nearest')
 
-        image *= camera_detection_efficiency
+        image = image * camera_detection_efficiency
 
         image += np.random.normal(scale=background_electrons, size=image.shape)
 
@@ -1019,8 +1067,15 @@ class ImageStack:
         # clip in case we've picked up some negative values
         image = np.clip(image, 0, a_max=None)
 
-        # set correct dtype and convert to stack
+        # set the smallest int datatype that supports the data's intensity range
         image = select_uint_dtype(image)
+
+        # convert to float for ImageStack
+        with warnings.catch_warnings():
+            # possible precision loss when casting from uint to float is acceptable
+            warnings.simplefilter('ignore', UserWarning)
+            image = img_as_float32(image)
+
         return cls.from_numpy_array(image)
 
     def squeeze(self) -> np.ndarray:

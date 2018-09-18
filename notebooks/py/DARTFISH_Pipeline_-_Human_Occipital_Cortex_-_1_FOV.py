@@ -40,7 +40,7 @@ sns.set_style('ticks')
 
 # EPY: START code
 
-exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180828/DARTFISH/experiment.json')
+exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/experiment.json')
 stack = exp.fov().primary_image
 
 # TODO the latter will be fixed by https://github.com/spacetx/starfish/issues/316
@@ -69,7 +69,7 @@ exp.codebook
 
 # EPY: START code
 
-cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180828/DARTFISH/fov_001/counts.csv')
+cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 # EPY: END code
 
@@ -132,8 +132,12 @@ psd = SpotFinder.PixelSpotDetector(
 )
 
 spot_intensities, results = psd.run(zero_norm_stack)
+# EPY: END code
+
+# EPY: START code
 spots_df = spot_intensities.to_features_dataframe()
 spots_df['area'] = np.pi*spots_df['radius']**2
+spots_df = spots_df.loc[spots_df[Features.PASSES_THRESHOLDS]]
 spots_df.head()
 # EPY: END code
 
@@ -223,6 +227,7 @@ psd = SpotFinder.PixelSpotDetector(
 )
 
 spot_intensities, results = psd.run(zero_norm_stack)
+spot_intensities = IntensityTable(spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True))
 # EPY: END code
 
 # EPY: START code

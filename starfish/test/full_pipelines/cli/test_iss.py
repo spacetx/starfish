@@ -1,9 +1,7 @@
 import json
 import os
 import shutil
-import subprocess
 import sys
-import tempfile
 import unittest
 from typing import Sequence
 
@@ -13,7 +11,7 @@ import pandas as pd
 
 from starfish.intensity_table import IntensityTable
 from starfish.types import Features
-from starfish.util import clock
+from starfish.util import exec
 
 
 def get_jsonpath_from_file(json_filepath_components: Sequence[str], jsonpath: str):
@@ -54,17 +52,33 @@ class TestWithIssData(unittest.TestCase):
         [
             "starfish", "registration",
             "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "formatted", "experiment.json"],
-                "$['primary_images']",
+                [
+                    tempdir,
+                    get_jsonpath_from_file(
+                        [tempdir, "formatted", "experiment.json"],
+                        "$['primary_images']",
+                    ),
+                ],
+                "$['contents']['fov_000']"
             ),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "registered", "hybridization.json"),
             "FourierShiftRegistration",
             "--reference-stack", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "formatted", "experiment.json"],
-                "$['auxiliary_images']['dots']",
+                [
+                    tempdir,
+                    get_jsonpath_from_file(
+                        [tempdir, "formatted", "experiment.json"],
+                        "$['auxiliary_images']['dots']",
+                    ),
+                ],
+                "$['contents']['fov_000']"
             ),
             "--upsampling", "1000",
+        ],
+        [
+            "starfish", "validate", "--experiment-json",
+            lambda tempdir: os.sep.join([tempdir, "formatted", "experiment.json"])
         ],
         [
             "starfish", "filter",
@@ -78,8 +92,14 @@ class TestWithIssData(unittest.TestCase):
         [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "formatted", "experiment.json"],
-                "$['auxiliary_images']['nuclei']",
+                [
+                    tempdir,
+                    get_jsonpath_from_file(
+                        [tempdir, "formatted", "experiment.json"],
+                        "$['auxiliary_images']['nuclei']",
+                    ),
+                ],
+                "$['contents']['fov_000']"
             ),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "nuclei.json"),
@@ -89,8 +109,14 @@ class TestWithIssData(unittest.TestCase):
         [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "formatted", "experiment.json"],
-                "$['auxiliary_images']['dots']",
+                [
+                    tempdir,
+                    get_jsonpath_from_file(
+                        [tempdir, "formatted", "experiment.json"],
+                        "$['auxiliary_images']['dots']",
+                    ),
+                ],
+                "$['contents']['fov_000']"
             ),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "dots.json"),
@@ -101,7 +127,8 @@ class TestWithIssData(unittest.TestCase):
             "starfish", "detect_spots",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "hybridization.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "results", "spots.nc"),
             "GaussianSpotDetector",
             "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "dots.json"),
@@ -131,55 +158,37 @@ class TestWithIssData(unittest.TestCase):
             "--intensities", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "results", "spots.nc"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "spots.nc"),
+                tempdir, "results", "targeted-spots.nc"),
             "PointInPoly2D",
         ],
         [
             "starfish", "decode",
-            "-i", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
+            "-i", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "results", "targeted-spots.nc"),
             "--codebook", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
                 [tempdir, "formatted", "experiment.json"],
                 "$['codebook']",
             ),
-            "-o", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
+            "-o", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "results", "decoded-spots.nc"),
             "PerRoundMaxChannelDecoder",
         ],
     )
 
     def test_run_pipeline(self):
-        tempdir = tempfile.mkdtemp()
-        coverage_enabled = "STARFISH_COVERAGE" in os.environ
 
-        def callback(interval):
-            print(" ".join(stage[:2]), " ==> {} seconds".format(interval))
+        tempdir = exec.stages(
+            TestWithIssData.STAGES,
+            TestWithIssData.SUBDIRS,
+            keep_data=True,
+        )
 
         try:
-            for subdir in TestWithIssData.SUBDIRS:
-                os.makedirs("{tempdir}".format(
-                    tempdir=os.path.join(tempdir, subdir)))
-            for stage in TestWithIssData.STAGES:
-                cmdline = [
-                    element(tempdir=tempdir) if callable(element) else element
-                    for element in stage
-                ]
-                if cmdline[0] == "starfish" and coverage_enabled:
-                    coverage_cmdline = [
-                        "coverage", "run",
-                        "-p",
-                        "--source", "starfish",
-                        "-m", "starfish",
-                    ]
-                    coverage_cmdline.extend(cmdline[1:])
-                    cmdline = coverage_cmdline
-                with clock.timeit(callback):
-                    subprocess.check_call(cmdline)
-
-            intensities = IntensityTable.load(os.path.join(tempdir, "results", "spots.nc"))
+            intensities = IntensityTable.load(os.path.join(tempdir, "results", "decoded-spots.nc"))
             genes, counts = np.unique(
                 intensities.coords[Features.TARGET], return_counts=True)
             gene_counts = pd.Series(counts, genes)
             assert gene_counts['ACTB_human'] > gene_counts['ACTB_mouse']
-
         finally:
             if os.getenv("TEST_ISS_KEEP_DATA") is None:
                 shutil.rmtree(tempdir)

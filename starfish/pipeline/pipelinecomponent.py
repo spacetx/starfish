@@ -2,6 +2,8 @@ import argparse
 import collections
 from typing import Mapping, Optional, Type
 
+from .algorithmbase import AlgorithmBase
+
 
 class PipelineComponentType(type):
     """
@@ -19,7 +21,7 @@ class PipelineComponentType(type):
         if cls._algorithm_to_class_map is None:
             cls._algorithm_to_class_map = dict()
 
-            queue = collections.deque(cls.implementing_algorithms())
+            queue = collections.deque(cls.get_algorithm_base_class().__subclasses__())
             while len(queue) > 0:
                 algorithm_cls = queue.popleft()
                 queue.extend(algorithm_cls.__subclasses__())
@@ -34,9 +36,9 @@ class PipelineComponent(metaclass=PipelineComponentType):
     _algorithm_to_class_map: Optional[Mapping[str, Type]] = None
 
     @classmethod
-    def implementing_algorithms(cls):
+    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
         """
-        Get a list of classes that implement an algorithm relevant to this pipeline stage.
+        Get the base class that algorithms which implement this pipeline stage must extend.
         Pipeline components must provide this method.
         """
         raise NotImplementedError()
@@ -45,16 +47,6 @@ class PipelineComponent(metaclass=PipelineComponentType):
     def algorithm_to_class_map(cls):
         """Returns a mapping from algorithm names to the classes that implement them."""
         return cls._algorithm_to_class_map
-
-    @classmethod
-    def run(cls, algorithm_name, stack, *args, **kwargs):
-        """
-        Runs the registration component using the algorithm name, stack, and arguments for the
-        specific algorithm.
-        """
-        algorithm_cls = cls._algorithm_to_class_map[algorithm_name]
-        instance = algorithm_cls(*args, **kwargs)
-        return instance.register(stack)
 
     @classmethod
     def _cli(cls, args: argparse.Namespace):

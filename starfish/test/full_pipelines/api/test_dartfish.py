@@ -124,7 +124,7 @@ def test_dartfish_pipeline_cropped_data():
         zero_norm_stack.numpy_array[0, 0, 0, 50:60, 60:70]
     )
 
-    spot_intensities = dartfish.spot_intensities
+    spot_intensities = dartfish.initial_spot_intensities
     spots_df = IntensityTable(
         spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True)
     ).to_features_dataframe()

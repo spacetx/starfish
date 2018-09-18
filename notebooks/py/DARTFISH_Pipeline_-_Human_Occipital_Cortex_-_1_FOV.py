@@ -73,7 +73,7 @@ exp.codebook
 
 # EPY: START code
 
-cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180905/DARTFISH/fov_001/counts.csv')
+cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 # EPY: END code
 
@@ -135,147 +135,149 @@ psd = SpotFinder.PixelSpotDetector(
     max_area=area_threshold[1]
 )
 
-spot_intensities, results = psd.run(zero_norm_stack)
+initial_spot_intensities, results = psd.run(zero_norm_stack)
 # EPY: END code
 
+# EPY: START code
+spots_df = initial_spot_intensities.to_features_dataframe()
+spots_df['area'] = np.pi*spots_df['radius']**2
+spots_df = spots_df.loc[spots_df[Features.PASSES_THRESHOLDS]]
+spots_df.head()
+# EPY: END code
+
+# EPY: START markdown
+#### QC Plots
+# EPY: END markdown
+
+# EPY: START markdown
+##### parameter tuning plots
+# EPY: END markdown
+
+# EPY: START code
+# these plots help inform how the parameters above were wet.
+# looking at the last plot below, I reset the distance_threshold parameter to
+min_dist = 0.6
+
+plt.figure(figsize=(10,3))
+
+plt.subplot(131)
+plt.hist(mags, bins=100);
+plt.yscale('log')
+plt.xlabel('barcode magnitude')
+plt.ylabel('number of pixels')
+sns.despine(offset=2)
+plt.vlines(magnitude_threshold, ymin=plt.gca().get_ylim()[0], ymax=plt.gca().get_ylim()[1])
+plt.title('Set magnitude threshod')
+
+plt.subplot(132)
+spots_df['area'] = np.pi*spots_df.radius**2
+spots_df.area.hist(bins=30);
+plt.xlabel('area')
+plt.ylabel('number of spots')
+sns.despine(offset=2)
+plt.title('Set area threshold')
+
+plt.subplot(133)
+spots_df.distance.hist(bins=30)
+plt.xlabel('min distance to code');
+plt.vlines(min_dist, ymin=plt.gca().get_ylim()[0], ymax=plt.gca().get_ylim()[1])
+sns.despine(offset=2)
+plt.title('Set minimum distance threshold');
+# EPY: END code
+
+# EPY: START markdown
+##### Copy number comparisons
+# EPY: END markdown
+
+# EPY: START code
+# select spots with distance less than a threshold, and count the number of each target gene
+cnts_starfish = spots_df[spots_df.distance<=min_dist].groupby('target').count()['area']
+cnts_starfish = cnts_starfish.reset_index(level=0)
+cnts_starfish.rename(columns = {'target':'gene', 'area':'cnt_starfish'}, inplace=True)
+
+benchmark_comparison = pd.merge(cnts_benchmark, cnts_starfish, on='gene', how='left')
+benchmark_comparison.head(20)
+# EPY: END code
+
+# EPY: START code
+x = benchmark_comparison.dropna().cnt.values
+y = benchmark_comparison.dropna().cnt_starfish.values
+r = np.corrcoef(x, y)
+r = r[0,1]
+
+plt.scatter(x, y, 50,zorder=2)
+
+plt.xlabel('Gene copy number Benchmark')
+plt.ylabel('Gene copy number Starfish')
+plt.title('r = {}'.format(r))
+
+sns.despine(offset=2)
+# EPY: END code
+
+# EPY: START markdown
+##### visualization of rolonies
+# EPY: END markdown
+
+# EPY: START code
+distance_threshold = min_dist
+
+psd = SpotFinder.PixelSpotDetector(
+    codebook=exp.codebook,
+    metric='euclidean',
+    distance_threshold=distance_threshold,
+    magnitude_threshold=magnitude_threshold,
+    min_area=area_threshold[0],
+    max_area=area_threshold[1]
+)
+
+spot_intensities, results = psd.run(zero_norm_stack)
+spot_intensities = IntensityTable(spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True))
+# EPY: END code
+
+# EPY: START code
+# exclude spots that don't meet our area thresholds
+area_lookup = lambda x: 0 if x == 0 else results.region_properties[x - 1].area
+vfunc = np.vectorize(area_lookup)
+mask = np.squeeze(vfunc(results.label_image))
+new_image = np.squeeze(results.decoded_image)*(mask > area_threshold[0])*(mask < area_threshold[1])
+
+plt.figure(figsize=(10,10))
+plt.imshow(new_image, cmap = 'nipy_spectral');
+plt.axis('off');
+plt.title('Coded rolonies');
+
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Rectangle
+
+rect = [Rectangle((100, 600), width=200, height=200)]
+pc = PatchCollection(rect, facecolor='none', alpha=1.0, edgecolor='w', linewidth=1.5)
+plt.gca().add_collection(pc)
+
+plt.figure(figsize=(10,10))
+plt.imshow(new_image[600:800, 100:300], cmap = 'nipy_spectral');
+plt.axis('off');
+plt.title('Coded rolonies, zoomed in');
+# EPY: END code
+
+# EPY: START markdown
+#### visualization of matched barcodes
+#here, we 1. pick a rolony that was succesfully decoded to a gene. 2. pull out the average pixel trace for that rolony and 3. plot that pixel trace against the barcode of that gene
+# EPY: END markdown
+
+# EPY: START code
+# reshape the spot intensity table into a RxC barcode vector
+pixel_traces = spot_intensities.stack(traces=(Indices.ROUND.value, Indices.CH.value))
+
+# extract dataframe from spot intensity table for indexing purposes
+pixel_traces_df = pixel_traces.to_features_dataframe()
+pixel_traces_df['area'] = np.pi*pixel_traces_df.radius**2
+
+# pick index of a barcode that was read and decoded from the ImageStack
+ind = 45
+
+# The test will error here on pixel_traces[ind,:] with an out of index error
+# because we are using the test data.
 if not test:
-    # EPY: START code
-    spots_df = spot_intensities.to_features_dataframe()
-    spots_df['area'] = np.pi*spots_df['radius']**2
-    spots_df = spots_df.loc[spots_df[Features.PASSES_THRESHOLDS]]
-    spots_df.head()
-    # EPY: END code
-
-    # EPY: START markdown
-    #### QC Plots
-    # EPY: END markdown
-
-    # EPY: START markdown
-    ##### parameter tuning plots
-    # EPY: END markdown
-
-    # EPY: START code
-    # these plots help inform how the parameters above were wet.
-    # looking at the last plot below, I reset the distance_threshold parameter to
-    min_dist = 0.6
-
-    plt.figure(figsize=(10,3))
-
-    plt.subplot(131)
-    plt.hist(mags, bins=100);
-    plt.yscale('log')
-    plt.xlabel('barcode magnitude')
-    plt.ylabel('number of pixels')
-    sns.despine(offset=2)
-    plt.vlines(magnitude_threshold, ymin=plt.gca().get_ylim()[0], ymax=plt.gca().get_ylim()[1])
-    plt.title('Set magnitude threshod')
-
-    plt.subplot(132)
-    spots_df['area'] = np.pi*spots_df.radius**2
-    spots_df.area.hist(bins=30);
-    plt.xlabel('area')
-    plt.ylabel('number of spots')
-    sns.despine(offset=2)
-    plt.title('Set area threshold')
-
-    plt.subplot(133)
-    spots_df.distance.hist(bins=30)
-    plt.xlabel('min distance to code');
-    plt.vlines(min_dist, ymin=plt.gca().get_ylim()[0], ymax=plt.gca().get_ylim()[1])
-    sns.despine(offset=2)
-    plt.title('Set minimum distance threshold');
-    # EPY: END code
-
-    # EPY: START markdown
-    ##### Copy number comparisons
-    # EPY: END markdown
-
-    # EPY: START code
-    # select spots with distance less than a threshold, and count the number of each target gene
-    cnts_starfish = spots_df[spots_df.distance<=min_dist].groupby('target').count()['area']
-    cnts_starfish = cnts_starfish.reset_index(level=0)
-    cnts_starfish.rename(columns = {'target':'gene', 'area':'cnt_starfish'}, inplace=True)
-
-    benchmark_comparison = pd.merge(cnts_benchmark, cnts_starfish, on='gene', how='left')
-    benchmark_comparison.head(20)
-    # EPY: END code
-
-    # EPY: START code
-    x = benchmark_comparison.dropna().cnt.values
-    y = benchmark_comparison.dropna().cnt_starfish.values
-    r = np.corrcoef(x, y)
-    r = r[0,1]
-
-    plt.scatter(x, y, 50,zorder=2)
-
-    plt.xlabel('Gene copy number Benchmark')
-    plt.ylabel('Gene copy number Starfish')
-    plt.title('r = {}'.format(r))
-
-    sns.despine(offset=2)
-    # EPY: END code
-
-    # EPY: START markdown
-    ##### visualization of rolonies
-    # EPY: END markdown
-
-    # EPY: START code
-    distance_threshold = min_dist
-
-    psd = SpotFinder.PixelSpotDetector(
-        codebook=exp.codebook,
-        metric='euclidean',
-        distance_threshold=distance_threshold,
-        magnitude_threshold=magnitude_threshold,
-        min_area=area_threshold[0],
-        max_area=area_threshold[1]
-    )
-
-    spot_intensities, results = psd.run(zero_norm_stack)
-    spot_intensities = IntensityTable(spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True))
-    # EPY: END code
-
-    # EPY: START code
-    # exclude spots that don't meet our area thresholds
-    area_lookup = lambda x: 0 if x == 0 else results.region_properties[x - 1].area
-    vfunc = np.vectorize(area_lookup)
-    mask = np.squeeze(vfunc(results.label_image))
-    new_image = np.squeeze(results.decoded_image)*(mask > area_threshold[0])*(mask < area_threshold[1])
-
-    plt.figure(figsize=(10,10))
-    plt.imshow(new_image, cmap = 'nipy_spectral');
-    plt.axis('off');
-    plt.title('Coded rolonies');
-
-    from matplotlib.collections import PatchCollection
-    from matplotlib.patches import Rectangle
-
-    rect = [Rectangle((100, 600), width=200, height=200)]
-    pc = PatchCollection(rect, facecolor='none', alpha=1.0, edgecolor='w', linewidth=1.5)
-    plt.gca().add_collection(pc)
-
-    plt.figure(figsize=(10,10))
-    plt.imshow(new_image[600:800, 100:300], cmap = 'nipy_spectral');
-    plt.axis('off');
-    plt.title('Coded rolonies, zoomed in');
-    # EPY: END code
-
-    # EPY: START markdown
-    #### visualization of matched barcodes
-    #here, we 1. pick a rolony that was succesfully decoded to a gene. 2. pull out the average pixel trace for that rolony and 3. plot that pixel trace against the barcode of that gene
-    # EPY: END markdown
-
-    # EPY: START code
-    # reshape the spot intensity table into a RxC barcode vector
-    pixel_traces = spot_intensities.stack(traces=(Indices.ROUND.value, Indices.CH.value))
-
-    # extract dataframe from spot intensity table for indexing purposes
-    pixel_traces_df = pixel_traces.to_features_dataframe()
-    pixel_traces_df['area'] = np.pi*pixel_traces_df.radius**2
-
-    # pick index of a barcode that was read and decoded from the ImageStack
-    ind = 45
-
     # get the the corresponding gene this barcode was decoded to
     gene = pixel_traces_df.loc[ind].target
 

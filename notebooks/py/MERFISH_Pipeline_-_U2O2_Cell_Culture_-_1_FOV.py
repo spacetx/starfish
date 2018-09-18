@@ -25,13 +25,12 @@ import matplotlib.pyplot as plt
 
 from showit import image as show_image
 from starfish.experiment import Experiment
-from starfish.image import Filter
 from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START code
 # load the data from cloudfront
-experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180905/MERFISH/experiment.json")
+experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180911/MERFISH/experiment.json")
 # EPY: END code
 
 # EPY: START markdown
@@ -108,9 +107,27 @@ glp = Filter.GaussianLowPass(sigma=1)
 low_passed = glp.run(deconvolved, in_place=False, verbose=True)
 # EPY: END code
 
+# EPY: START markdown
+#Use MERFISH-calculated size factors to scale the channels across the imaging rounds and visualize the resulting filtered and scaled images. Right now we have to extract this information from the metadata and apply this transformation manually.
+# EPY: END markdown
+
 # EPY: START code
-sc_filt = Filter.ScaleByPercentile(p=90)
-scaled_image = sc_filt.run(low_passed, in_place=False)
+scale_factors = {
+    (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
+    for index, t in primary_image.tile_metadata.iterrows()
+}
+# EPY: END code
+
+# EPY: START code
+# this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to
+# at least we can do it with get_slice and set_slice right now.
+from copy import deepcopy
+scaled_image = deepcopy(low_passed)
+
+for indices in primary_image._iter_indices():
+    data = scaled_image.get_slice(indices)[0]
+    scaled = data / scale_factors[indices[Indices.ROUND.value], indices[Indices.CH.value]]
+    scaled_image.set_slice(indices, scaled)
 # EPY: END code
 
 # EPY: START markdown

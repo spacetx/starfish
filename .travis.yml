@@ -8,22 +8,17 @@ install:
 - pip install --force-reinstall --upgrade -r REQUIREMENTS-DEV.txt -r REQUIREMENTS-NOTEBOOK.txt
 - pip install -e .
 - pip freeze
-- docker build -t spacetx/starfish .
 script:
 - export MPLBACKEND=Agg
 - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
 - set -eo pipefail
-- make all
-- if [ "$BRANCH" == "master" ]; then
-    make run_notebooks;
-  fi
-- if [ "$BRANCH" == "master" ]; then
-    virtualenv -p python .venv;
-    .venv/bin/pip install -r REQUIREMENTS-NOTEBOOK.txt;
-    .venv/bin/pip install starfish;
-    make PYTHON=.venv/bin/python run_notebooks;
-  fi
-- |-
-  docker run -ti --rm spacetx/starfish build --fov-count 1 --hybridization-dimensions '{"z": 1}' /tmp/
+- case "$BRANCH" in
+  master|merge)
+    make slow
+    ;;
+  *)
+    make fast
+    ;;
+  esac
 after_success:
 - bash <(curl -s https://codecov.io/bash)

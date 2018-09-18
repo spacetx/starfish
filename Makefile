@@ -2,7 +2,9 @@ SHELL := /bin/bash
 
 MODULES=starfish examples validate_sptx
 
-all:	lint mypy test
+all:	fast
+
+fast:	lint mypy test
 
 lint:   lint-non-init lint-init
 
@@ -41,4 +43,14 @@ REQUIREMENTS-DEV.txt : REQUIREMENTS.txt.in
 
 include notebooks/subdir.mk
 
-.PHONY: all lint lint-non-init lint-init test mypy refresh_all_requirements
+slow: fast run_notebooks docker
+	python -m venv .notebooks-exec-env
+	.notebooks-exec-env/bin/pip install -r REQUIREMENTS-NOTEBOOK.txt
+	.notebooks-exec-env/bin/pip install starfish
+	make PYTHON=.notebooks-exec-env/bin/python run_notebooks
+
+docker:
+	docker build -t spacetx/starfish .
+	docker run -ti --rm spacetx/starfish build --fov-count 1 --hybridization-dimensions '{"z": 1}' /tmp/
+
+.PHONY: all fast lint lint-non-init lint-init test mypy refresh_all_requirements slow docker

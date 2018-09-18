@@ -6,8 +6,8 @@ from copy import deepcopy
 from functools import partial
 from itertools import product
 from typing import (
-    Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple,
-    Union
+    Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Set, Sequence,
+    Tuple, Union
 )
 
 import matplotlib.pyplot as plt
@@ -579,8 +579,8 @@ class ImageStack:
     def apply(
             self,
             func,
-            is_volume=False,
-            in_place=False,
+            split_by: Set[Indices]={Indices.X, Indices.Y},
+            in_place=True,
             verbose: bool=False,
             n_processes: Optional[int]=None,
             **kwargs
@@ -593,10 +593,11 @@ class ImageStack:
             Function to apply. must expect a first argument which is a 2d or 3d numpy array
             (see is_volume) and return a
             np.ndarray. If inplace is True, must return an array of the same shape.
-        is_volume : bool
-            (default False) If True, pass 3d volumes (x, y, z) to func
+        apply_over: Set[Indices, ...]
+            (default {Indices.X, Indices.Y}) By default, apply over X and Y (tiles). Alternatively,
+            One could pass {Indices.X, Indices.Y, Indices.Z} to apply over volumes.
         in_place : bool
-            (default False) If True, function is executed in place. If n_proc is not 1, the tile or
+            (default True) If True, function is executed in place. If n_proc is not 1, the tile or
             volume will be copied once during execution. If false, a new ImageStack object will be
             produced.
         verbose : bool
@@ -617,17 +618,19 @@ class ImageStack:
             image_stack = deepcopy(self)
             return image_stack.apply(
                 func,
-                is_volume=is_volume, in_place=True, verbose=verbose, n_processes=n_processes,
-                **kwargs
+                split_by=split_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
             )
 
-        if is_volume:
-            self._data = self._data.stack(tiles=[Indices.ROUND.value,
-                                                 Indices.CH.value])
-        else:
-            self._data = self._data.stack(tiles=[Indices.ROUND.value,
-                                                 Indices.CH.value,
-                                                 Indices.Z.value])
+        axes = {
+            Indices.ROUND.value,
+            Indices.CH.value,
+            Indices.Z.value,
+            Indices.Y.value,
+            Indices.X.value
+        }
+        stack_axes = list(axes - set(split_by))
+
+        self._data = self._data.stack(tiles=stack_axes)
         tile_indices = self._data.tiles
 
         # set the keyword arguments in the apply function
@@ -655,8 +658,8 @@ class ImageStack:
             Indices.ROUND.value,
             Indices.CH.value,
             Indices.Z.value,
-            'y',
-            'x'
+            Indices.Y.value,
+            Indices.X.value
         )
 
         return self

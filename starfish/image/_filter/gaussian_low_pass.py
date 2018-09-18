@@ -8,7 +8,11 @@ from skimage.filters import gaussian
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
-from .util import preserve_float_range, validate_and_broadcast_kernel_size
+from .util import (
+    determine_axes_to_split_by,
+    preserve_float_range,
+    validate_and_broadcast_kernel_size,
+)
 
 
 class GaussianLowPass(FilterAlgorithmBase):
@@ -96,9 +100,10 @@ class GaussianLowPass(FilterAlgorithmBase):
             original stack.
 
         """
+        split_by = determine_axes_to_split_by(self.is_volume)
         low_pass: Callable = partial(self._low_pass, sigma=self.sigma)
         result = stack.apply(
-            low_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place,
-            n_processes=n_processes
+            low_pass,
+            split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result

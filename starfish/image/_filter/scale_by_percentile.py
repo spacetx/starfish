@@ -5,6 +5,7 @@ import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
 from ._base import FilterAlgorithmBase
+from .util import determine_axes_to_split_by
 
 
 class ScaleByPercentile(FilterAlgorithmBase):
@@ -84,9 +85,10 @@ class ScaleByPercentile(FilterAlgorithmBase):
             original stack.
 
         """
+        split_by = determine_axes_to_split_by(self.is_volume)
         clip = partial(self._scale, p=self.p)
         result = stack.apply(
             clip,
-            is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes
+            split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result

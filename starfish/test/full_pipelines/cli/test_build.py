@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 
-from starfish.util import clock
+from starfish.util import exec
 
 
 class TestWithBuildData(unittest.TestCase):
@@ -17,46 +17,12 @@ class TestWithBuildData(unittest.TestCase):
             lambda tempdir: tempdir
         ],
         [
-            "validate-sptx", "--experiment-json",
+            "starfish", "validate", "--experiment-json",
             lambda tempdir: os.sep.join([tempdir, "experiment.json"])
         ],
     )
 
     def test_run_build(self):
-        tempdir = tempfile.mkdtemp()
-        coverage_enabled = "STARFISH_COVERAGE" in os.environ
-
-        def callback(interval):
-            print(" ".join(stage[:2]), " ==> {} seconds".format(interval))
-
-        try:
-            # TODO: duplicated, time to refactor
-            for stage in TestWithBuildData.STAGES:
-                cmdline = [
-                    element(tempdir=tempdir) if callable(element) else element
-                    for element in stage
-                ]
-                if cmdline[0] == "starfish" and coverage_enabled:
-                    coverage_cmdline = [
-                        "coverage", "run",
-                        "-p",
-                        "--source", "starfish",
-                        "-m", "starfish",
-                    ]
-                    coverage_cmdline.extend(cmdline[1:])
-                    cmdline = coverage_cmdline
-                elif cmdline[0] == "validate-sptx" and coverage_enabled:
-                    coverage_cmdline = [
-                        "coverage", "run",
-                        "-p",
-                        "--source", "validate_sptx",
-                        "-m", "validate_sptx",
-                    ]
-                    coverage_cmdline.extend(cmdline[1:])
-                    cmdline = coverage_cmdline
-                with clock.timeit(callback):
-                    subprocess.check_call(cmdline)
-
-        finally:
-            if os.getenv("TEST_BUILD_KEEP_DATA") is None:
-                shutil.rmtree(tempdir)
+        exec.stages(
+            TestWithBuildData.STAGES,
+            keep_data=("TEST_BUILD_KEEP_DATA" in os.environ))

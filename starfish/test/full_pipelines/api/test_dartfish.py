@@ -3,20 +3,22 @@ import sys
 
 import numpy as np
 import pandas as pd
-from definitions import ROOT_DIR
 
+import starfish
 from starfish import IntensityTable
 from starfish.types import Features
 
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(starfish.__file__)))
 os.environ["USE_TEST_DATA"] = "1"
-sys.path.append(os.path.join(ROOT_DIR, "notebooks/py/"))
-dartfish = __import__('DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV')
+sys.path.append(os.path.join(ROOT_DIR, "notebooks", "py"))
 
 
 def test_dartfish_pipeline_cropped_data():
 
     # set random seed to errors provoked by optimization functions
     np.random.seed(777)
+
+    dartfish = __import__('DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV')
 
     primary_image = dartfish.stack
 

@@ -2,20 +2,22 @@ import os
 import sys
 
 import numpy as np
-from definitions import ROOT_DIR
 
+import starfish
 from starfish.spots._target_assignment.point_in_poly import PointInPoly2D
 from starfish.types import Features
 
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(starfish.__file__)))
 os.environ["USE_TEST_DATA"] = "1"
-sys.path.append(os.path.join(ROOT_DIR, "notebooks/py/"))
-iss = __import__('ISS_Pipeline_-_Breast_-_1_FOV')
+sys.path.append(os.path.join(ROOT_DIR, "notebooks", "py"))
 
 
 def test_iss_pipeline_cropped_data():
 
     # set random seed to errors provoked by optimization functions
     np.random.seed(777)
+
+    iss = __import__('ISS_Pipeline_-_Breast_-_1_FOV')
 
     white_top_hat_filtered_image = iss.primary_image
 
@@ -43,6 +45,9 @@ def test_iss_pipeline_cropped_data():
           0.02214084, 0.01844815, 0.01542687, 0.01353475]],
         dtype=np.float32
     )
+
+    assert (white_top_hat_filtered_image.numpy_array.dtype == np.float32)
+
     assert np.allclose(
         expected_filtered_values,
         white_top_hat_filtered_image.numpy_array[2, 2, 0, 40:50, 40:50]

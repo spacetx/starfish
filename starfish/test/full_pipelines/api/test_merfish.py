@@ -3,19 +3,21 @@ import sys
 
 import numpy as np
 import pandas as pd
-from definitions import ROOT_DIR
 
+import starfish
 from starfish.types import Features
 
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(starfish.__file__)))
 os.environ["USE_TEST_DATA"] = "1"
-sys.path.append(os.path.join(ROOT_DIR, "notebooks/py/"))
-merfish = __import__('MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV')
+sys.path.append(os.path.join(ROOT_DIR, "notebooks", "py"))
 
 
 def test_merfish_pipeline_cropped_data():
 
     # set random seed to errors provoked by optimization functions
     np.random.seed(777)
+
+    merfish = __import__('MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV')
 
     primary_image = merfish.primary_image
 

@@ -193,14 +193,17 @@ def write_experiment_json(
         experiment_doc['auxiliary_images'][aux_name] = "{}.json".format(aux_name)
 
     experiment_doc = postprocess_func(experiment_doc)
+    experiment_doc["codebook"] = "codebook.json"
     with open(os.path.join(path, "experiment.json"), "w") as fh:
         json.dump(experiment_doc, fh, indent=4)
 
     codebook_stub = [
-        {
-            "codeword": [{"c": 0, "r": 1, "v": 1.0}],
-            "target": "PLEASE_REPLACE_ME"
-        }
+      {
+        "codeword": [
+          {"r": 0, "c": 0, "v": 1},
+        ],
+        "target": "PLEASE_REPLACE_ME"
+      },
     ]
     with open(os.path.join(path, "codebook.json"), "w") as fh:
         json.dump(codebook_stub, fh, indent=4)

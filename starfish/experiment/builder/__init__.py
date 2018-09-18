@@ -96,6 +96,7 @@ def build_image(
                             Indices.CH: ch_ix,
                         },
                         image.shape,
+                        extras=image.extras,
                     )
                     tile.set_source_fh_contextmanager(image.tile_data_handle, image.format)
                     fov_images.add_tile(tile)

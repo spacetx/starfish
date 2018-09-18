@@ -39,6 +39,17 @@ class FetchedTile:
         raise NotImplementedError()
 
     @property
+    def extras(self) -> dict:
+        """Return the extras data associated with the tile.
+
+        Returns
+        -------
+        Mapping[str, Any]
+            Maps from a key to its value.
+        """
+        return {}
+
+    @property
     def format(self) -> ImageFormat:
         """Return the Tile's format
 

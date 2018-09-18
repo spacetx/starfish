@@ -40,7 +40,6 @@ sns.set_style('ticks')
 # EPY: END markdown
 
 # EPY: START code
-
 test = os.getenv("USE_TEST_DATA") is not None
 if test:
     exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH-TEST/experiment.json')
@@ -48,7 +47,6 @@ else:
     exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/experiment.json')
 
 stack = exp.fov().primary_image
-
 # EPY: END code
 
 # EPY: START code
@@ -72,7 +70,6 @@ exp.codebook
 # EPY: END markdown
 
 # EPY: START code
-
 cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 # EPY: END code
@@ -291,4 +288,4 @@ if not test:
     plt.xticks(range(18))
     plt.title(gene)
     plt.xlabel('Index into R (0:5) and C(0:2)');
-    # EPY: END code
+# EPY: END code

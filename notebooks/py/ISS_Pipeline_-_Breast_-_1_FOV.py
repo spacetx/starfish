@@ -172,12 +172,8 @@ with warnings.catch_warnings():
     intensities = p.run(registered_image, blobs_image=blobs_image)
 # EPY: END code
 
-# EPY: START code
-# Verify the spot count is reasonable.
-spot_count = intensities.sizes[Features.AXIS]
-
 # EPY: START markdown
-#The Encoder table is the hypothesized standardized file format for the output of a spot detector, and is the first output file format in the pipeline that is not an image or set of images
+# The Encoder table is the hypothesized standardized file format for the output of a spot detector, and is the first output file format in the pipeline that is not an image or set of images
 # EPY: END markdown
 
 # EPY: START markdown
@@ -213,7 +209,6 @@ decoded = experiment.codebook.decode_per_round_max(intensities)
 genes, counts = np.unique(decoded.loc[decoded[Features.PASSES_THRESHOLDS]][Features.TARGET], return_counts=True)
 table = pd.Series(counts, index=genes).sort_values(ascending=False)
 # EPY: END code
-
 
 # EPY: START markdown
 #### Segment

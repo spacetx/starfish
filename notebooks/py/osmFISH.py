@@ -26,7 +26,6 @@ else:
     experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/osmFISH/experiment.json')
 # EPY: END code
 
-
 # EPY: START markdown
 #The below plot displays the z-volume for channel 0 of fov_001
 # EPY: END markdown

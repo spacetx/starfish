@@ -197,6 +197,7 @@ with warnings.catch_warnings():
 # EPY: START code
 decoded = experiment.codebook.decode_per_round_max(intensities)
 # EPY: END code
+
 # EPY: START markdown
 ### Compare to results from paper
 # EPY: END markdown

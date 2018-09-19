@@ -1,6 +1,6 @@
 import pytest
 
-from starfish.experiment import Experiment
+from starfish.experiment.experiment import Experiment
 
 
 def test_min_version():

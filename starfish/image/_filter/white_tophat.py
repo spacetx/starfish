@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 from skimage.morphology import ball, disk, white_tophat
 
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from ._base import FilterAlgorithmBase
 
 

@@ -7,7 +7,7 @@ from scipy.ndimage.filters import uniform_filter
 from skimage import img_as_uint
 
 from starfish.errors import DataFormatWarning
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
 from .util import preserve_float_range

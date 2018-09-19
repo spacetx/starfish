@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
+from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table import IntensityTable
-from starfish.stack import ImageStack
 from starfish.types import Features, Indices, Number, SpotAttributes
 
 

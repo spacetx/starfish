@@ -10,7 +10,7 @@ from slicedimage import (
     Writer,
 )
 
-from starfish.experiment import Experiment
+from starfish.experiment.experiment import Experiment
 from starfish.types import Indices
 from .defaultproviders import RandomNoiseTile, RandomNoiseTileFetcher
 from .providers import FetchedTile, TileFetcher

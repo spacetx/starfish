@@ -17,14 +17,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from starfish.experiment import Experiment
+from starfish import Experiment, ImageStack
 from starfish.types import Features, Indices
 
 from starfish.codebook import Codebook
 
 from starfish.intensity_table import IntensityTable
 
-from starfish.stack import ImageStack
 from starfish.image import Filter
 from starfish.spots import SpotFinder
 

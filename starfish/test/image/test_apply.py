@@ -2,7 +2,7 @@ from copy import deepcopy
 
 import numpy as np
 
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.util.synthesize import SyntheticData
 
 

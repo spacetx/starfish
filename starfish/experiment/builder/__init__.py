@@ -10,7 +10,7 @@ from slicedimage import (
     Writer,
 )
 
-from starfish.experiment.experiment import Experiment
+from starfish.experiment.version import CURRENT_VERSION
 from starfish.types import Indices
 from .defaultproviders import RandomNoiseTile, RandomNoiseTileFetcher
 from .providers import FetchedTile, TileFetcher
@@ -151,7 +151,7 @@ def write_experiment_json(
         postprocess_func = lambda doc: doc
 
     experiment_doc: Dict[str, Any] = {
-        'version': str(Experiment.CURRENT_VERSION),
+        'version': str(CURRENT_VERSION),
         'auxiliary_images': {},
         'extras': {},
     }

@@ -17,6 +17,9 @@ dir_, _ = os.path.split(__file__)
 root_dir = os.path.abspath(os.path.join(dir_, '..', '..'))
 sys.path.insert(0, root_dir)
 
+# needed to build on readthedocs, avoids Tk invocation
+import matplotlib
+matplotlib.use('agg')
 
 # -- Project information -----------------------------------------------------
 

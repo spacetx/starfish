@@ -39,7 +39,7 @@ sns.set_style('ticks')
 
 # EPY: START code
 
-exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/experiment.json')
+exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/experiment.json')
 stack = exp.fov().primary_image
 
 # TODO the latter will be fixed by https://github.com/spacetx/starfish/issues/316
@@ -68,7 +68,7 @@ exp.codebook
 
 # EPY: START code
 
-cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/fov_001/counts.csv')
+cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 # EPY: END code
 

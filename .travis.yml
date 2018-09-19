@@ -25,3 +25,7 @@ cache:
   - $HOME/.starfish-cache
 after_success:
 - bash <(curl -s https://codecov.io/bash)
+notifications:
+  slack:
+    secure: "QlBgC2XbhzL4GULlzz/n4wsPeVfsg0bqsml4FVdj+cW5WXrOsnC3fISeHok5QVTWqUMPToyFZM0tK2Qdz0JEKy4h+uS22IeoerB8aV2vEfKwayPwlBARhiHj2BXiQH4iX6FeDeMtVBULXhkPNv2mQsRacS6qNgYrGwRSRTPnFtXzZOnRMnJ/P6gzlILuoEYMQz7f72YkloiiLIbwsCbIlAUcUorypwt8PUNGa7zWHOBWu0qElZ5ckAznL6if5T/fNts4p2sS6+bpU/MxIezrUgdv/vJxdhircu7l/6rnc8GZinxrTWlQZbQdq1HphPZHbeHwpA1bdkbleQQCtcdEBSA6T7KVBhXXD1AZefgg+ldzV2C+I+h/9tkqDrNPOmeghIGtWWTwS3GM51XdnvW4+o6AVSV5j1IA83tBHy8fEIGCWaHyefYCQQSThsUeYSNkwKSGKh26zQz2LHxGGNEfY3Ggm6g4tzNgE2Ub73rJFZaeCqDaieUWHUUdxc5uCigy4jDqqfNZIu07PtzIpMPmOnnBQbkw7q8LI3LYKs4r33zq3FkPKR3hOnZkh1KNX1k8FwVAPgXJC8dWOk+GTmChH/DD76t7A415VITGprX1mS0zUFmMWp7ey6v3B0l2tpr4XlSWKqpPt7jUKYp0ca8znzyP2AU/8/bsmthcHnMlOt4="
+    on_success: change

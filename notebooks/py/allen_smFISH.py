@@ -14,7 +14,7 @@
 
 import matplotlib.pyplot as plt
 
-from starfish.experiment import Experiment
+from starfish import Experiment
 from starfish.types import Indices
 # EPY: END code
 

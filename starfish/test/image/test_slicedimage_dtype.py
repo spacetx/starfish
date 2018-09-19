@@ -5,7 +5,7 @@ import pytest
 from skimage import img_as_float32
 
 from starfish.errors import DataFormatWarning
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 
 NUM_ROUND = 2
 NUM_CH = 2

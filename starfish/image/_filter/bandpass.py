@@ -4,7 +4,7 @@ from typing import Optional
 import numpy as np
 from trackpy import bandpass
 
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
 

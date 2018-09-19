@@ -20,5 +20,9 @@ script:
     make fast
     ;;
   esac
+cache:
+  directories:
+  - $HOME/.cache/pip
+  - $HOME/.starfish-cache
 after_success:
 - bash <(curl -s https://codecov.io/bash)

@@ -9,19 +9,26 @@ stages:
 - test
 jobs:
   include:
-    - script:
+    - name: Syntax and Tests
+      script:
         - make install-src
         - make fast
       after_success:
         - bash <(curl -s https://codecov.io/bash)
-    - if: branch =~ ^master OR branch =~ ^merge
+    - name: Docker
+      if: branch =~ ^master OR branch =~ ^merge
+      script:
+        - make docker
+    - name: Development Notebooks
+      if: branch =~ ^master OR branch =~ ^merge AND tag != cron
       script:
         - make install-src
-        - make docker
-    - if: branch =~ ^master OR branch =~ ^merge
-      script:
-        - if [ "$TRAVIS_EVENT_TYPE" = "cron" ] ; then make install-pypi; else make install-src; fi
         - make notebooks
+    - name: Released Notebooks
+      if: branch =~ ^master OR branch =~ ^merge AND tag = cron
+      script:
+        - make notebooks
+        - make install-pypi
 cache:
   directories:
   - $HOME/.cache/pip

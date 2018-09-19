@@ -2,8 +2,9 @@
 This module describes the contracts to provide data to the experiment builder.
 """
 
-from typing import IO, Mapping, Tuple, Union
+from typing import Mapping, Tuple, Union
 
+import numpy as np
 from slicedimage import (
     ImageFormat,
 )
@@ -61,13 +62,13 @@ class FetchedTile:
         raise NotImplementedError()
 
     @property
-    def tile_data_handle(self) -> IO:
-        """Return an open file handle containing image data
+    def tile_data(self) -> np.ndarray:
+        """Return the image data representing the tile.
 
         Returns
         -------
-        IO :
-            An open file handle that references image data
+        ndarray :
+            The image data
         """
         raise NotImplementedError()
 

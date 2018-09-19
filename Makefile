@@ -1,5 +1,7 @@
 SHELL := /bin/bash
 
+MPLBACKEND?=Agg
+
 MODULES=starfish examples validate_sptx
 
 all:	fast
@@ -43,18 +45,19 @@ REQUIREMENTS-DEV.txt : REQUIREMENTS.txt.in
 
 include notebooks/subdir.mk
 
-slow: fast run_notebooks docker pip-notebook-test
-
-# Note that this rule is very specifically tailored to travis's environment, as `python -m venv` on
-# travis does not produce a functional virtualenv.
-pip-notebook-test:
-	virtualenv -p $$(which python) .notebooks-exec-env
-	.notebooks-exec-env/bin/pip install -r REQUIREMENTS-NOTEBOOK.txt
-	.notebooks-exec-env/bin/pip install starfish
-	make PYTHON=.notebooks-exec-env/bin/python run_notebooks
+slow: fast run_notebooks docker
 
 docker:
 	docker build -t spacetx/starfish .
 	docker run -ti --rm spacetx/starfish build --fov-count 1 --hybridization-dimensions '{"z": 1}' /tmp/
 
-.PHONY: all fast lint lint-non-init lint-init test mypy refresh_all_requirements slow docker
+install-src:
+	pip install --force-reinstall --upgrade -r REQUIREMENTS-DEV.txt -r REQUIREMENTS-NOTEBOOK.txt
+	pip install -e .
+	pip freeze
+
+install-pypi:
+	pip install -r REQUIREMENTS-NOTEBOOK.txt
+	pip install starfish
+
+.PHONY: all fast lint lint-non-init lint-init test mypy refresh_all_requirements slow docker install-dev install-pypi

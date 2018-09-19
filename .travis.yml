@@ -4,21 +4,18 @@ services:
 python:
 - 3.6
 dist: trusty
-install:
-- pip install --force-reinstall --upgrade -r REQUIREMENTS-DEV.txt -r REQUIREMENTS-NOTEBOOK.txt
-- pip install -e .
-- pip freeze
-script:
-- export MPLBACKEND=Agg
-- export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-- case "$BRANCH" in
-  master|merge)
-    make slow
-    ;;
-  *)
-    make fast
-    ;;
-  esac
+stages:
+- install
+- test
+jobs:
+  include:
+    - stage: install
+      script: if [ "$TRAVIS_EVENT_TYPE" = "cron" ] ; then make install-pypi; else make install-src; fi
+    - script: make fast
+    - if: branch =~ ^master OR branch =~ ^merge
+      script: make docker
+    - if: branch =~ ^master OR branch =~ ^merge
+      script: make notebooks
 cache:
   directories:
   - $HOME/.cache/pip

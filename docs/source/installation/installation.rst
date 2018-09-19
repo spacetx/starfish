@@ -13,12 +13,6 @@ The output should look similar to this:
    % python --version
    Python 3.6.5
 
-Next, clone starfish: 
-
-.. code-block:: bash
-
-    % git clone https://github.com/spacetx/starfish.git
-
 Starfish names its dependencies and lists explicit versions, due to sensitivity to subtle algorithm 
 changes.  For that reason, it is strongly encouraged that you set up a 
 virtualenv_. Create a work folder and set up the virtual environment like:
@@ -27,11 +21,12 @@ virtualenv_. Create a work folder and set up the virtual environment like:
 
 .. code-block:: bash
 
+    % mkdir starfish
     % cd starfish
     % python -m venv .venv
     % source .venv/bin/activate
 
-Finally, the starfish module:
+Finally, the install starfish:
 
 .. code-block:: bash
 

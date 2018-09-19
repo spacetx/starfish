@@ -80,7 +80,7 @@ The value of a spot (aggregated across all pixel values circumscribed by that sp
 a single pixel.
 
 ### Feature (Spot, Pixel) Trace 
-Feature intensity values across all imaging rounds and/or color channels. these map to codewords in 
+Feature intensity values across all imaging rounds and/or color channels. These map to codewords in
 a codebook.
 
 ### decoding

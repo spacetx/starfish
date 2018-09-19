@@ -20,15 +20,15 @@ jobs:
       script:
         - make docker
     - name: Development Notebooks
-      if: branch =~ ^master OR branch =~ ^merge AND tag != cron
+      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
       script:
         - make install-src
-        - make notebooks
+        - make run_notebooks
     - name: Released Notebooks
-      if: branch =~ ^master OR branch =~ ^merge AND tag = cron
+      if: (branch =~ ^master OR branch =~ ^merge) AND tag = cron
       script:
-        - make notebooks
         - make install-pypi
+        - make run_notebooks
 cache:
   directories:
   - $HOME/.cache/pip

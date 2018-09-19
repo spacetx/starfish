@@ -9,15 +9,19 @@ stages:
 - test
 jobs:
   include:
-    - stage: install
-      script: if [ "$TRAVIS_EVENT_TYPE" = "cron" ] ; then make install-pypi; else make install-src; fi
-    - script: make fast
+    - script:
+        - make install-src
+        - make fast
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - if: branch =~ ^master OR branch =~ ^merge
-      script: make docker
+      script:
+        - make install-src
+        - make docker
     - if: branch =~ ^master OR branch =~ ^merge
-      script: make notebooks
+      script:
+        - if [ "$TRAVIS_EVENT_TYPE" = "cron" ] ; then make install-pypi; else make install-src; fi
+        - make notebooks
 cache:
   directories:
   - $HOME/.cache/pip

@@ -8,6 +8,7 @@ from slicedimage.urlpath import pathjoin
 
 from starfish.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
+from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
 
 class FieldOfView:
@@ -117,10 +118,6 @@ class Experiment:
     codebook      Returns the codebook associated with this experiment.
     extras        Returns the extras dictionary associated with this experiment.
     """
-    CURRENT_VERSION = Version("3.0.0")
-    MIN_SUPPORTED_VERSION = Version("3.0.0")
-    MAX_SUPPORTED_VERSION = Version("3.0.0")
-
     def __init__(
             self,
             fovs: Sequence[FieldOfView],
@@ -206,11 +203,11 @@ class Experiment:
     @classmethod
     def verify_version(cls, semantic_version_str: str) -> None:
         version = Version(semantic_version_str)
-        if not (Experiment.MIN_SUPPORTED_VERSION <= version <= Experiment.MAX_SUPPORTED_VERSION):
+        if not (MIN_SUPPORTED_VERSION <= version <= MAX_SUPPORTED_VERSION):
             raise ValueError(
                 f"version {version} not supported.  This version of the starfish library only "
-                f"supports formats from {Experiment.MIN_SUPPORTED_VERSION} to "
-                f"{Experiment.MAX_SUPPORTED_VERSION}")
+                f"supports formats from {MIN_SUPPORTED_VERSION} to "
+                f"{MAX_SUPPORTED_VERSION}")
 
     def fov(
             self,

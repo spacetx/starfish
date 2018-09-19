@@ -15,17 +15,17 @@ subclass ``SpotFinderAlgorithmBase``:
 Gaussian Spot Detector
 ----------------------
 
-.. autoclass:: starfish.spots.SpotFinder.GaussianSpotDetector
+.. autoclass:: starfish.spots._detector.gaussian.GaussianSpotDetector
     :members:
 
 Local Max Peak Finder
 ---------------------
 
-.. autoclass:: starfish.spots.SpotFinder.LocalMaxPeakFinder
+.. autoclass:: starfish.spots._detector.local_max_peak_finder.LocalMaxPeakFinder
     :members:
 
 Pixel Spot Detector
 -------------------
 
-.. autoclass:: starfish.spots.SpotFinder.PixelSpotDetector
+.. autoclass:: starfish.spots._detector.pixel_spot_detector.PixelSpotDetector
     :members:

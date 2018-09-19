@@ -17,6 +17,9 @@ dir_, _ = os.path.split(__file__)
 root_dir = os.path.abspath(os.path.join(dir_, '..', '..'))
 sys.path.insert(0, root_dir)
 
+# needed to build on readthedocs, avoids Tk invocation
+import matplotlib
+matplotlib.use('agg')
 
 # -- Project information -----------------------------------------------------
 
@@ -137,7 +140,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'Starfish.tex', 'Starfish Documentation',
-     'Ambrose J. Carr, Tony Tung, Shannon Axelrod, Brian Long, Jeremy Freeman, Deep Ganguli'),
+     'Ambrose J. Carr, Tony Tung, Shannon Axelrod, Brian Long, Jeremy Freeman, Deep Ganguli', 'manual'),
 ]
 
 

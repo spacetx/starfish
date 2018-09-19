@@ -15,5 +15,5 @@ classes that subclass ``TargetAssignmentAlgorithmBase``:
 Point In Poly 2D
 ----------------
 
-.. autoclass:: starfish.spots.TargetAssignment.PointInPoly2D
+.. autoclass:: starfish.spots._target_assignment.point_in_poly.PointInPoly2D
     :members:

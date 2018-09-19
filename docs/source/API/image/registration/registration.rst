@@ -16,6 +16,6 @@ that subclass ``RegistrationAlgorithmBase``:
 Fourier Shift
 -------------
 
-.. autoclass:: starfish.image.Registration.FourierShiftRegistration
+.. autoclass:: starfish.image._registration.fourier_shift.FourierShiftRegistration
    :members:
 

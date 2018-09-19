@@ -52,7 +52,9 @@ We also encourage rational use of in-line variable annotation when the type of a
 
 - Numpy provides an excellent [development workflow](https://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html) that we encourage you to follow when developing features for starfish!
 
-- All commits must have informative names; try to think about what will still make sense looking back on them next year.
+- All commits must have informative summaries; try to think about what will still make sense looking back on them next year.
+
+- All pull requests should describe your testing plan.  
 
 - When merging a pull request, squash commits down to the smallest logical number of commits. In cases where a single commit suffices, use the "Squash and Merge" strategy, since it adds the PR number to the commit name. If multiple commits remain, use "Rebase and Merge".
 

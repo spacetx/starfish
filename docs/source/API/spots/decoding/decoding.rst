@@ -15,5 +15,5 @@ Decoders can be imported using ``starfish.spots.Decoder``, which registers all c
 Per Round Max Channel Decoder
 -----------------------------
 
-.. autoclass:: starfish.spots.Decoder.PerRoundMaxChannelDecoder
+.. autoclass:: starfish.spots._decoder.per_round_max_channel_decoder.PerRoundMaxChannelDecoder
     :members:

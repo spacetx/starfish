@@ -140,7 +140,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'Starfish.tex', 'Starfish Documentation',
-     'Ambrose J. Carr, Tony Tung, Shannon Axelrod, Brian Long, Jeremy Freeman, Deep Ganguli'),
+     'Ambrose J. Carr, Tony Tung, Shannon Axelrod, Brian Long, Jeremy Freeman, Deep Ganguli', 'manual'),
 ]
 
 

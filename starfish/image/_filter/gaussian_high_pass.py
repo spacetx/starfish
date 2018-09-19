@@ -6,7 +6,7 @@ import numpy as np
 import xarray as xr
 
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
 from .util import preserve_float_range, validate_and_broadcast_kernel_size

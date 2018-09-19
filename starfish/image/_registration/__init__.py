@@ -1,8 +1,8 @@
 import argparse
 from typing import Type
 
+from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
-from starfish.stack import ImageStack
 from starfish.util.argparse import FsExistsType
 from . import fourier_shift
 from ._base import RegistrationAlgorithmBase

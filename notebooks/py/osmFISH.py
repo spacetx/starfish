@@ -8,8 +8,7 @@
 # EPY: END markdown
 
 # EPY: START code
-from starfish import ImageStack
-from starfish.experiment import Experiment
+from starfish import Experiment, ImageStack
 from starfish.types import Indices
 import os
 # EPY: END code

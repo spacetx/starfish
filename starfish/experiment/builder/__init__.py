@@ -51,7 +51,7 @@ def _fov_path_generator(parent_toc_path: str, toc_name: str) -> str:
 def build_image(
         fov_count: int, round_count: int, ch_count: int, z_count: int,
         image_fetcher: TileFetcher,
-        default_shape: Tuple[int, int]
+        default_shape: Optional[Tuple[int, int]]=None,
 ) -> Collection:
     """
     Build and returns an image set with the following characteristics:
@@ -68,7 +68,7 @@ def build_image(
         Number of z-layers in this image set.
     image_fetcher : TileFetcher
         Instance of TileFetcher that provides the data for the tile.
-    default_shape : Tuple[int, int]
+    default_shape : Optional[Tuple[int, int]]
         Default shape of the individual tiles in this image set.
 
     Returns
@@ -112,7 +112,7 @@ def write_experiment_json(
         primary_tile_fetcher: Optional[TileFetcher]=None,
         aux_tile_fetcher: Optional[Mapping[str, TileFetcher]]=None,
         postprocess_func: Optional[Callable[[dict], dict]]=None,
-        default_shape: Tuple[int, int]=(1536, 1024),
+        default_shape: Optional[Tuple[int, int]]=None,
 ) -> None:
     """
     Build and returns a top-level experiment description with the following characteristics:
@@ -140,7 +140,7 @@ def write_experiment_json(
         If provided, this is called with the experiment document for any postprocessing.
         An example of this would be to add something to one of the top-level extras field.
         The callable should return what is to be written as the experiment document.
-    default_shape : Tuple[int, int] (default = (1536, 1024))
+    default_shape : Optional[Tuple[int, int]] (default = None)
         Default shape for the tiles in this experiment.
     """
     if primary_tile_fetcher is None:

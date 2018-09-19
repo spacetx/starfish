@@ -145,9 +145,6 @@ class ImageStack:
             data = img_as_float32(data)
             self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
 
-        # set_slice will mark the data as needing writeback, so we need to unset that.
-        self._data_needs_writeback = False
-
     @staticmethod
     def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
         """verify that data is of dtype float32 and in range [0, 1]"""
@@ -247,7 +244,6 @@ class ImageStack:
     def numpy_array(self, data):
         """Sets the image's data from a numpy array."""
         self._data.values = data.view()
-        self._data_needs_writeback = True
 
     def get_slice(
             self,
@@ -338,7 +334,6 @@ class ImageStack:
                 data.shape, self._data[slice_list].shape))
 
         self._data.values[slice_list] = data
-        self._data_needs_writeback = True
 
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],
@@ -803,16 +798,14 @@ class ImageStack:
         tile_opener : TODO ttung: doc me.
 
         """
-        if self._data_needs_writeback:
-            for tile in self._image_partition.tiles():
-                h = tile.indices[Indices.ROUND]
-                c = tile.indices[Indices.CH]
-                zlayer = tile.indices.get(Indices.Z, 0)
-                tile.numpy_array, axes = self.get_slice(
-                    indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}
-                )
-                assert len(axes) == 0
-            self._data_needs_writeback = False
+        for tile in self._image_partition.tiles():
+            h = tile.indices[Indices.ROUND]
+            c = tile.indices[Indices.CH]
+            zlayer = tile.indices.get(Indices.Z, 0)
+            tile.numpy_array, axes = self.get_slice(
+                indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}
+            )
+            assert len(axes) == 0
 
         seen_x_coords, seen_y_coords, seen_z_coords = set(), set(), set()
         for tile in self._image_partition.tiles():

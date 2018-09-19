@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 MPLBACKEND?=Agg
+export MPLBACKEND
 
 MODULES=starfish examples validate_sptx
 

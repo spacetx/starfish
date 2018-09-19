@@ -43,8 +43,12 @@ REQUIREMENTS-DEV.txt : REQUIREMENTS.txt.in
 
 include notebooks/subdir.mk
 
-slow: fast run_notebooks docker
-	python -m venv .notebooks-exec-env
+slow: fast run_notebooks docker pip-notebook-test
+
+# Note that this rule is very specifically tailored to travis's environment, as `python -m venv` on
+# travis does not produce a functional virtualenv.
+pip-notebook-test:
+	virtualenv -p $$(which python) .notebooks-exec-env
 	.notebooks-exec-env/bin/pip install -r REQUIREMENTS-NOTEBOOK.txt
 	.notebooks-exec-env/bin/pip install starfish
 	make PYTHON=.notebooks-exec-env/bin/python run_notebooks

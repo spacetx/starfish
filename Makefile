@@ -61,4 +61,4 @@ install-pypi:
 	pip install -r REQUIREMENTS-NOTEBOOK.txt
 	pip install starfish
 
-.PHONY: all fast lint lint-non-init lint-init test mypy refresh_all_requirements slow docker install-dev install-pypi
+.PHONY: all fast lint lint-non-init lint-init test mypy refresh_all_requirements slow docker install-src install-pypi

@@ -4,6 +4,8 @@ Starfish
 .. image:: https://travis-ci.org/spacetx/starfish.svg?branch=master
     :target: https://travis-ci.org/spacetx/starfish
     :width: 30%
+.. image:: https://codecov.io/gh/spacetx/starfish/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/spacetx/starfish
 .. image:: https://readthedocs.org/projects/pip/badge/?version=latest&style=flat
     :width: 30%
 

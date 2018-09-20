@@ -8,8 +8,7 @@
 # EPY: END markdown
 
 # EPY: START code
-from starfish import ImageStack
-from starfish.experiment import Experiment
+from starfish import Experiment, ImageStack
 from starfish.types import Indices
 import os
 # EPY: END code
@@ -21,9 +20,9 @@ import os
 # EPY: START code
 test = os.getenv("USE_TEST_DATA") is not None
 if test:
-    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/osmFISH-TEST/experiment.json')
+    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/osmFISH-TEST/experiment.json')
 else:
-    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/osmFISH/experiment.json')
+    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/osmFISH/experiment.json')
 # EPY: END code
 
 # EPY: START markdown

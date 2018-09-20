@@ -15,7 +15,7 @@
 import matplotlib.pyplot as plt
 import os
 
-from starfish.experiment import Experiment
+from starfish import Experiment
 from starfish.types import Indices
 # EPY: END code
 
@@ -30,9 +30,9 @@ from starfish.types import Indices
 # this is a large (1.1GB) FOV, so the download may take some time
 test = os.getenv("USE_TEST_DATA") is not None
 if test:
-    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/allen_smFISH-TESE/experiment.json')
+    experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180919/allen_smFISH-TESE/experiment.json'
 else:
-    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/allen_smFISH/experiment.json')
+    experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180919/allen_smFISH/experiment.json'
 # EPY: END code
 
 # EPY: START markdown

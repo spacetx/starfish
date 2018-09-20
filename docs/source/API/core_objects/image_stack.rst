@@ -1,5 +1,5 @@
 ImageStack
 ==========
 
-.. automodule:: starfish.stack
+.. automodule:: starfish.imagestack.imagestack
    :members:

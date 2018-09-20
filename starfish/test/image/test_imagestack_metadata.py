@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
 
 NUM_ROUND = 4

@@ -18,14 +18,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
-from starfish.experiment import Experiment
+from starfish import Experiment, ImageStack
 from starfish.types import Features, Indices
 
 from starfish.codebook import Codebook
 
 from starfish.intensity_table import IntensityTable
 
-from starfish.stack import ImageStack
 from starfish.image import Filter
 from starfish.spots import SpotFinder
 
@@ -42,10 +41,9 @@ sns.set_style('ticks')
 # EPY: START code
 test = os.getenv("USE_TEST_DATA") is not None
 if test:
-    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH-TEST/experiment.json')
+    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH-TEST/experiment.json')
 else:
-    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/experiment.json')
-
+    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/experiment.json')
 stack = exp.fov().primary_image
 # EPY: END code
 
@@ -70,7 +68,7 @@ exp.codebook
 # EPY: END markdown
 
 # EPY: START code
-cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/fov_001/counts.csv')
+cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 # EPY: END code
 

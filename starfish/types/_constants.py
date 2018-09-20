@@ -15,9 +15,9 @@ class AugmentedEnum(Enum):
 
 
 class Coordinates(AugmentedEnum):
-    Z = 'z'
-    Y = 'y'
-    X = 'x'
+    Z = 'zc'
+    Y = 'yc'
+    X = 'xc'
 
 
 class Indices(AugmentedEnum):

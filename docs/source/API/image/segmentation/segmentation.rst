@@ -16,6 +16,6 @@ that subclass ``SegmentationAlgorithmBase``:
 Watershed
 ---------
 
-.. autoclass:: starfish.image.Segmentation.Watershed
+.. autoclass:: starfish.image._segmentation.watershed.Watershed
    :members:
 

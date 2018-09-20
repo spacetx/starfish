@@ -3,9 +3,9 @@ from typing import Callable, Sequence, Tuple, Union
 import numpy as np
 import xarray as xr
 
+from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table import IntensityTable
 from starfish.pipeline.algorithmbase import AlgorithmBase
-from starfish.stack import ImageStack
 from starfish.types import Number, SpotAttributes
 from .combine_adjacent_features import ConnectedComponentDecodingResult
 

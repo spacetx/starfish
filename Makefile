@@ -5,8 +5,14 @@ export MPLBACKEND
 
 MODULES=starfish examples validate_sptx
 
+define print_help
+    @printf "    %-24s   $(2)\n" $(1)
+endef
+
 all:	fast
 
+### UNIT #####################################################
+#
 fast:	lint mypy test
 
 lint:   lint-non-init lint-init
@@ -23,9 +29,27 @@ test:
 mypy:
 	mypy --ignore-missing-imports $(MODULES)
 
+help-unit:
+	$(call print_help, all, alias for fast)
+
+.PHONY: all fast lint lint-non-init lint-init test mypy help-unit
+#
+##############################################################
+
+### DOCS #####################################################
+#
 docs-%:
 	make -C docs $*
 
+help-docs:
+	$(call print_help, docs-TASK, alias for 'make TASK' in the docs subdirectory)
+
+.PHONY: help-docs
+#
+##############################################################
+
+### REQUIREMENTS #############################################
+#
 refresh_all_requirements:
 	@echo -n '' >| REQUIREMENTS.txt
 	@echo -n '' >| REQUIREMENTS-DEV.txt
@@ -44,6 +68,15 @@ REQUIREMENTS.txt REQUIREMENTS-DEV.txt : %.txt : %.txt.in
 
 REQUIREMENTS-DEV.txt : REQUIREMENTS.txt.in
 
+help-requirements:
+	$(call print_help, refresh_all_requirements, regenerate REQUIREMENTS files)
+
+.PHONY: refresh_all_requirements
+#
+##############################################################
+
+### INTEGRATION ##############################################
+#
 include notebooks/subdir.mk
 
 slow: fast run_notebooks docker
@@ -52,6 +85,17 @@ docker:
 	docker build -t spacetx/starfish .
 	docker run -ti --rm spacetx/starfish build --fov-count 1 --hybridization-dimensions '{"z": 1}' /tmp/
 
+help-integration:
+	$(call print_help, slow, alias for 'fast run_notebooks docker')
+	$(call print_help, run_notebooks, run all files matching 'notebooks/py/*.py')
+	$(call print_help, docker, build docker and run a simple container)
+
+.PHONY: slow docker
+#
+##############################################################
+
+### INSTALL ##################################################
+#
 install-src:
 	pip install --force-reinstall --upgrade -r REQUIREMENTS-DEV.txt
 	pip install -e .
@@ -60,12 +104,28 @@ install-src:
 install-pypi:
 	pip install -r REQUIREMENTS-NOTEBOOK.txt starfish
 
-install-travis: install-$(TRAVIS_EVENT_TYPE)
+install-travis: install-travis-$(TRAVIS_EVENT_TYPE)
 
-install-cron: install-pypi
-install-: install-src
-install-api: install-src
-install-pull_request: install-src
-install-push: install-src
+install-travis-cron: install-pypi
+install-travis-: install-src
+install-travis-api: install-src
+install-travis-pull_request: install-src
+install-travis-push: install-src
 
-.PHONY: all fast lint lint-non-init lint-init test mypy refresh_all_requirements slow docker install-src install-pypi
+help-install:
+	$(call print_help, install-src, pip install the current directory)
+	$(call print_help, install-pypi, pip install starfish from pypi)
+	$(call print_help, install-travis, chooses between src and pypi based on TRAVIS_EVENT_TYPE)
+
+.PHONY: install-src install-pypi
+.PHONY: install-travis install-cron install
+#
+###############################################################
+
+help: help-main help-parts
+help-main:
+	@echo "Main starfish make targets:"
+	@echo
+	$(call print_help, help, print this text)
+help-parts: help-unit help-docs help-requirements help-integration help-install
+.PHONY: help help-unit help-requirements help-integration help-install

@@ -56,7 +56,7 @@ def test_dartfish_pipeline_cropped_data():
         dtype=np.float32
     )
 
-    assert (primary_image.numpy_array.dtype == np.float32)
+    assert primary_image.numpy_array.dtype == np.float32
 
     assert np.allclose(
         primary_image.numpy_array[0, 0, 0, 50:60, 60:70],
@@ -88,7 +88,7 @@ def test_dartfish_pipeline_cropped_data():
           0.01960784, 0.01960784, 0., 0., 0.]],
         dtype=np.float32,
     )
-    assert (normalized_image.numpy_array.dtype == np.float32)
+    assert normalized_image.numpy_array.dtype == np.float32
 
     assert np.allclose(
         normalized_image.numpy_array[0, 0, 0, 50:60, 60:70],

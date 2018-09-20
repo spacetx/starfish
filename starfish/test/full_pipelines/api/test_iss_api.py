@@ -46,7 +46,7 @@ def test_iss_pipeline_cropped_data():
         dtype=np.float32
     )
 
-    assert (white_top_hat_filtered_image.numpy_array.dtype == np.float32)
+    assert white_top_hat_filtered_image.numpy_array.dtype == np.float32
 
     assert np.allclose(
         expected_filtered_values,

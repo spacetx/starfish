@@ -53,7 +53,7 @@ docker:
 	docker run -ti --rm spacetx/starfish build --fov-count 1 --hybridization-dimensions '{"z": 1}' /tmp/
 
 install-src:
-	pip install --force-reinstall --upgrade -r REQUIREMENTS-DEV.txt -r REQUIREMENTS-NOTEBOOK.txt
+	pip install --force-reinstall --upgrade -r REQUIREMENTS-DEV.txt
 	pip install -e .
 	pip freeze
 

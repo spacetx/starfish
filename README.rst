@@ -1,6 +1,10 @@
 Starfish
 ========
 
+.. docs badge
+
+.. image:: https://readthedocs.org/projects/pip/badge/?version=latest&style=flat
+
 .. ideally we could use the ..include directive here instead of copy and pasting the following
    information
 

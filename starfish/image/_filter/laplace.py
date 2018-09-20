@@ -2,19 +2,19 @@
 import argparse
 from functools import partial
 from numbers import Number
-from typing import Union, Tuple, Optional, Callable
+from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
 from scipy.ndimage import gaussian_laplace
 
-from starfish.stack import ImageStack
 from starfish.image._filter._base import FilterAlgorithmBase
 from starfish.image._filter.util import preserve_float_range
+from starfish.stack import ImageStack
 
 
 class Laplace(FilterAlgorithmBase):
     """
-    Multi-dimensional Laplace filter, using Gaussian second derivatives. 
+    Multi-dimensional Laplace filter, using Gaussian second derivatives.
     This filter wraps scipy.ndimage.gaussian_laplace
 
     Parameters
@@ -38,19 +38,19 @@ class Laplace(FilterAlgorithmBase):
         sigma_gauss : Union[Number, Tuple[Number]]
             Standard deviation for Gaussian kernel to enhance dots.
 
-        mode: The mode parameter determines how the input array is extended when 
-            the filter overlaps a border. By passing a sequence of modes with 
-            length equal to the number of dimensions of the input array, 
-            different modes can be specified along each axis. Default value 
-            is ‘reflect’. 
+        mode: The mode parameter determines how the input array is extended when
+            the filter overlaps a border. By passing a sequence of modes with
+            length equal to the number of dimensions of the input array,
+            different modes can be specified along each axis. Default value
+            is ‘reflect’.
             The valid values and their behavior is as follows:
 
             ‘reflect’ (d c b a | a b c d | d c b a)
             The input is extended by reflecting about the edge of the last pixel.
 
             ‘constant’ (k k k k | a b c d | k k k k)
-            The input is extended by filling all values beyond the edge with the same constant value, 
-            defined by the cval parameter.
+            The input is extended by filling all values beyond the edge with the same
+            constant value, defined by the cval parameter.
 
             ‘nearest’ (a a a a | a b c d | d d d d)
             The input is extended by replicating the last pixel.
@@ -76,16 +76,18 @@ class Laplace(FilterAlgorithmBase):
     @classmethod
     def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
-            "--sigma", type=float, help="Standard deviation of gaussian kernel for spot enhancement")
+            "--sigma", type=float,
+            help="Standard deviation of gaussian kernel for spot enhancement")
         group_parser.add_argument(
-            "--mode", default="reflect", help="How the input array is extended when the filter overlaps a border")
+            "--mode", default="reflect",
+            help="How the input array is extended when the filter overlaps a border")
         group_parser.add_argument(
-            "--cval", default=0.0, help="Value to fill past edges of input if mode is ‘constant")
+            "--cval", default=0.0,
+            help="Value to fill past edges of input if mode is ‘constant")
 
     @staticmethod
     def _gaussian_laplace(image: np.ndarray, sigma: Union[Number, Tuple[Number]],
                           mode: str = 'reflect', cval: float = 0.0) -> np.ndarray:
-
         filtered = gaussian_laplace(
             image, sigma=sigma, mode=mode, cval=cval)
 

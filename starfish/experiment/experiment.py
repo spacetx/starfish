@@ -9,8 +9,8 @@ from slicedimage.urlpath import pathjoin
 
 from starfish.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
-from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 from validate_sptx import validate_sptx
+from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
 
 class FieldOfView:

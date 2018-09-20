@@ -1,3 +1,10 @@
+"""
+Notes
+-----
+This test and docs/source/usage/iss/iss_cli.sh test the same code paths and should be updated
+together
+"""
+
 import json
 import os
 import shutil

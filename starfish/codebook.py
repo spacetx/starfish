@@ -24,44 +24,50 @@ class Codebook(xr.DataArray):
     The codebook is a subclass of xarray, and exposes the complete public API of that package in
     addition to the methods and constructors listed below.
 
-    Constructors
-    ------------
+    Methods
+    -------
     from_code_array(code_array, n_round, n_ch)
         construct a codebook from a spaceTx-spec array of codewords
+
     from_json(json_codebook, n_round, n_ch)
         load a codebook from a spaceTx spec-compliant json file
-    synthetic_one_hot_codebook
+
+    to_json(filename)
+        save a codebook to json
+
+    synthetic_one_hot_codebook(n_round, n_channel, n_codes, target_names=None)
         Construct a codebook of random codes where only one channel is on per imaging round.
         This is the typical codebook format for in-situ sequencing and non-multiplex smFISH
         experiments.
 
-    Methods
-    -------
     decode_euclidean(intensities)
         find the closest code for each spot in intensities by euclidean distance
+
     decode_per_round_maximum(intensities)
         find codes that match the per-channel max intensity for each spot in intensities
+
     code_length()
         return the total length of the codes in the codebook
 
     Examples
     --------
+    Build a codebook using ``Codebook.synthetic_one_hot_codebook``::
 
-    >>> from starfish.util.synthesize import SyntheticData
-    >>> sd = SyntheticData(n_ch=3, n_round=4, n_codes=2)
-    >>> sd.codebook()
-    <xarray.Codebook (target: 2, c: 3, h: 4)>
-    array([[[0, 0, 0, 0],
-            [0, 0, 1, 1],
-            [1, 1, 0, 0]],
+        >>> from starfish import Codebook
+        >>> sd = Codebook.synthetic_one_hot_codebook(n_ch=3, n_round=4, n_codes=2)
+        >>> sd.codebook()
+        <xarray.Codebook (target: 2, c: 3, h: 4)>
+        array([[[0, 0, 0, 0],
+                [0, 0, 1, 1],
+                [1, 1, 0, 0]],
 
-           [[1, 0, 0, 0],
-            [0, 0, 1, 0],
-            [0, 1, 0, 1]]], dtype=uint8)
-    Coordinates:
-      * target     (target) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
-      * c          (c) int64 0 1 2
-      * h          (h) int64 0 1 2 3
+               [[1, 0, 0, 0],
+                [0, 0, 1, 0],
+                [0, 1, 0, 1]]], dtype=uint8)
+        Coordinates:
+          * target     (target) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
+          * c          (c) int64 0 1 2
+          * h          (h) int64 0 1 2 3
 
     See Also
     --------
@@ -137,47 +143,48 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
+        Construct a codebook from some array data in python memory::
 
-        >>> from starfish.types import Indices
-        >>> from starfish.codebook import Codebook
-        >>> codebook = [
-        >>>     {
-        >>>         Features.CODEWORD: [
-        >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-        >>>             {Indices.ROUND.value: 1, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-        >>>         ],
-        >>>         Features.TARGET: "ACTB_human"
-        >>>     },
-        >>>     {
-        >>>         Features.CODEWORD: [
-        >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-        >>>             {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1},
-        >>>         ],
-        >>>         Features.TARGET: "ACTB_mouse"
-        >>>     },
-        >>> ]
-        >>> Codebook.from_code_array(codebook)
-        <xarray.Codebook (target: 2, c: 4, h: 2)>
-        array([[[0, 0],
-                [0, 0],
-                [0, 0],
-                [1, 1]],
+            >>> from starfish.types import Indices
+            >>> from starfish.codebook import Codebook
+            >>> codebook = [
+            >>>     {
+            >>>         Features.CODEWORD: [
+            >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>             {Indices.ROUND.value: 1, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>         ],
+            >>>         Features.TARGET: "ACTB_human"
+            >>>     },
+            >>>     {
+            >>>         Features.CODEWORD: [
+            >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>             {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1},
+            >>>         ],
+            >>>         Features.TARGET: "ACTB_mouse"
+            >>>     },
+            >>> ]
+            >>> Codebook.from_code_array(codebook)
+            <xarray.Codebook (target: 2, c: 4, h: 2)>
+            array([[[0, 0],
+                    [0, 0],
+                    [0, 0],
+                    [1, 1]],
 
-               [[0, 0],
-                [0, 1],
-                [0, 0],
-                [1, 0]]], dtype=uint8)
-        Coordinates:
-          * target     (target) object 'ACTB_human' 'ACTB_mouse'
-          * c          (c) int64 0 1 2 3
-          * h          (h) int64 0 1
+                   [[0, 0],
+                    [0, 1],
+                    [0, 0],
+                    [1, 0]]], dtype=uint8)
+            Coordinates:
+              * target     (target) object 'ACTB_human' 'ACTB_mouse'
+              * c          (c) int64 0 1 2 3
+              * h          (h) int64 0 1
 
-        Codebook.from_json(json_codebook)
+            Codebook.from_json(json_codebook)
 
-        Returns
-        -------
-        Codebook :
-            Codebook with shape (targets, channels, imaging_rounds)
+            Returns
+            -------
+            Codebook :
+                Codebook with shape (targets, channels, imaging_rounds)
 
         """
 
@@ -247,49 +254,50 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        >>> from starfish.types import Indices
-        >>> from starfish.codebook import Codebook
-        >>> import tempfile
-        >>> import json
-        >>> import os
-        >>> dir_ = tempfile.mkdtemp()
+        Create a codebook from in-memory data::
 
-        >>> codebook = [
-        >>>     {
-        >>>         Features.CODEWORD: [
-        >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-        >>>             {Indices.ROUND.value: 1, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-        >>>         ],
-        >>>         Features.TARGET: "ACTB_human"
-        >>>     },
-        >>>     {
-        >>>         Features.CODEWORD: [
-        >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-        >>>             {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1},
-        >>>         ],
-        >>>         Features.TARGET: "ACTB_mouse"
-        >>>     },
-        >>> ]
-        >>> # make a fake file
-        >>> json_codebook = os.path.join(dir_, 'codebook.json')
-        >>> with open(json_codebook, 'w') as f:
-        >>>     json.dump(codebook, f)
-        >>> # read codebook from file
-        >>> Codebook.from_json(json_codebook)
-       <xarray.Codebook (target: 2, c: 4, h: 2)>
-        array([[[0, 0],
-                [0, 0],
-                [0, 0],
-                [1, 1]],
+            >>> from starfish.types import Indices
+            >>> from starfish.codebook import Codebook
+            >>> import tempfile
+            >>> import json
+            >>> import os
+            >>> dir_ = tempfile.mkdtemp()
+            >>> codebook = [
+            >>>     {
+            >>>         Features.CODEWORD: [
+            >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>             {Indices.ROUND.value: 1, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>         ],
+            >>>         Features.TARGET: "ACTB_human"
+            >>>     },
+            >>>     {
+            >>>         Features.CODEWORD: [
+            >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>             {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1},
+            >>>         ],
+            >>>         Features.TARGET: "ACTB_mouse"
+            >>>     },
+            >>> ]
+            >>> # make a fake file
+            >>> json_codebook = os.path.join(dir_, 'codebook.json')
+            >>> with open(json_codebook, 'w') as f:
+            >>>     json.dump(codebook, f)
+            >>> # read codebook from file
+            >>> Codebook.from_json(json_codebook)
+           <xarray.Codebook (target: 2, c: 4, h: 2)>
+            array([[[0, 0],
+                    [0, 0],
+                    [0, 0],
+                    [1, 1]],
 
-               [[0, 0],
-                [0, 1],
-                [0, 0],
-                [1, 0]]], dtype=uint8)
-        Coordinates:
-          * target     (target) object 'ACTB_human' 'ACTB_mouse'
-          * c          (c) int64 0 1 2 3
-          * h          (h) int64 0 1
+                   [[0, 0],
+                    [0, 1],
+                    [0, 0],
+                    [1, 0]]], dtype=uint8)
+            Coordinates:
+              * target     (target) object 'ACTB_human' 'ACTB_mouse'
+              * c          (c) int64 0 1 2 3
+              * h          (h) int64 0 1
 
         Returns
         -------
@@ -581,21 +589,22 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        >>> from starfish.codebook import Codebook
+        Create a Codebook with 2 rounds, 3 channels, and 2 codes::
 
-        >>> Codebook.synthetic_one_hot_codebook(n_round=2, n_channel=3, n_codes=2)
-        <xarray.Codebook (target: 2, c: 3, h: 2)>
-        array([[[0, 1],
-                [0, 0],
-                [1, 0]],
+            >>> from starfish.codebook import Codebook
+            >>> Codebook.synthetic_one_hot_codebook(n_round=2, n_channel=3, n_codes=2)
+            <xarray.Codebook (target: 2, c: 3, h: 2)>
+            array([[[0, 1],
+                    [0, 0],
+                    [1, 0]],
 
-               [[1, 1],
-                [0, 0],
-                [0, 0]]], dtype=uint8)
-        Coordinates:
-          * target     (target) object b25180dc-8af5-48f1-bff4-b5649683516d ...
-          * c          (c) int64 0 1 2
-          * h          (h) int64 0 1
+                   [[1, 1],
+                    [0, 0],
+                    [0, 0]]], dtype=uint8)
+            Coordinates:
+              * target     (target) object b25180dc-8af5-48f1-bff4-b5649683516d ...
+              * c          (c) int64 0 1 2
+              * h          (h) int64 0 1
 
         Returns
         -------

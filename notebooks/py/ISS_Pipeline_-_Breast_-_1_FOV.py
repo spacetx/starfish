@@ -13,6 +13,8 @@
 
 # EPY: START code
 # EPY: ESCAPE %matplotlib inline
+# EPY: ESCAPE %load_ext autoreload
+# EPY: ESCAPE %autoreload 2
 
 import numpy as np
 import pandas as pd
@@ -20,13 +22,13 @@ import matplotlib.pyplot as plt
 from showit import image
 import pprint
 
-from starfish.experiment import Experiment
+from starfish import Experiment
 from starfish.codebook import Codebook
 from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START code
-experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180905/ISS/experiment.json")
+experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180919/ISS/experiment.json")
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 # EPY: END code
 

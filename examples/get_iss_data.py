@@ -3,14 +3,14 @@ import io
 import json
 import os
 import zipfile
-from typing import IO, Tuple
+from typing import IO, Mapping, Tuple, Union
 
 import requests
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, TileFetcher
 from starfish.experiment.builder import write_experiment_json
-from starfish.types import Features, Indices
+from starfish.types import Coordinates, Features, Indices, Number
 from starfish.util.argparse import FsExistsType
 
 SHAPE = 980, 1330
@@ -23,6 +23,15 @@ class ISSTile(FetchedTile):
     @property
     def shape(self) -> Tuple[int, ...]:
         return SHAPE
+
+    @property
+    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+        # FIXME: (dganguli) please provide proper coordinates here.
+        return {
+            Coordinates.X: (0.0, 0.0001),
+            Coordinates.Y: (0.0, 0.0001),
+            Coordinates.Z: (0.0, 0.0001),
+        }
 
     @property
     def format(self) -> ImageFormat:
@@ -83,11 +92,6 @@ def format_data(input_dir, output_dir, d):
     def add_codebook(experiment_json_doc):
         experiment_json_doc['codebook'] = "codebook.json"
 
-        # TODO: (ttung) remove the following unholy hacks.  this is because we want to point at a
-        # tileset rather than a collection.
-        experiment_json_doc['primary_images'] = "hybridization-fov_000.json"
-        experiment_json_doc['auxiliary_images']['nuclei'] = "nuclei-fov_000.json"
-        experiment_json_doc['auxiliary_images']['dots'] = "dots-fov_000.json"
         return experiment_json_doc
 
     # the magic numbers here are just for the ISS example data set.

@@ -1,7 +1,8 @@
 import argparse
+from typing import Type
 
-from starfish.pipeline.pipelinecomponent import PipelineComponent
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
+from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import _base
 from . import bandpass
@@ -20,8 +21,8 @@ class Filter(PipelineComponent):
     filter_group: argparse.ArgumentParser
 
     @classmethod
-    def implementing_algorithms(cls):
-        return _base.FilterAlgorithmBase.__subclasses__()
+    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
+        return _base.FilterAlgorithmBase
 
     @classmethod
     def add_to_parser(cls, subparsers):

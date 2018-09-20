@@ -1,5 +1,9 @@
+"""
+This module implements default providers of data to the experiment builders.
+"""
+
 from io import BytesIO
-from typing import IO, Tuple
+from typing import IO, Mapping, Tuple, Union
 
 import numpy as np
 from skimage.io import imsave
@@ -7,35 +11,8 @@ from slicedimage import (
     ImageFormat,
 )
 
-
-class FetchedTile:
-    """
-    This is the contract for providing the data for constructing a :class:`slicedimage.Tile`.
-    """
-    @property
-    def shape(self) -> Tuple[int, ...]:
-        raise NotImplementedError()
-
-    @property
-    def format(self) -> ImageFormat:
-        raise NotImplementedError()
-
-    @property
-    def tile_data_handle(self) -> IO:
-        raise NotImplementedError()
-
-
-class TileFetcher:
-    """
-    This is the contract for providing the image data for constructing a
-    :class:`slicedimage.Collection`.
-    """
-    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
-        """
-        Given fov, hyb, ch, and z, return an instance of a :class:`.FetchedImage` that can be
-        queried for the image data.
-        """
-        raise NotImplementedError()
+from starfish.types import Coordinates, Number
+from .providers import FetchedTile, TileFetcher
 
 
 class RandomNoiseTile(FetchedTile):
@@ -46,6 +23,14 @@ class RandomNoiseTile(FetchedTile):
     @property
     def shape(self) -> Tuple[int, ...]:
         return 1536, 1024
+
+    @property
+    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+        return {
+            Coordinates.X: (0.0, 0.0001),
+            Coordinates.Y: (0.0, 0.0001),
+            Coordinates.Z: (0.0, 0.0001),
+        }
 
     @property
     def format(self) -> ImageFormat:

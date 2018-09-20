@@ -1,30 +1,78 @@
 language: python
+env:
+  global:
+    - STARFISH_STRICT_LOADING=true
 services:
 - docker
 python:
 - 3.6
 dist: trusty
-install:
-- pip install -r REQUIREMENTS-DEV.txt -r REQUIREMENTS-NOTEBOOK.txt
-- pip install -e .
-- pip freeze
-- docker build -t spacetx/starfish .
-script:
-- export MPLBACKEND=Agg
-- export STARFISH_STRICT_LOADING=true
-- export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-- set -eo pipefail
-- make all
-- if [ "$BRANCH" == "master" ]; then
-    make run_notebooks;
-  fi
-- if [ "$BRANCH" == "master" ]; then
-    virtualenv -p python .venv;
-    .venv/bin/pip install -r REQUIREMENTS-NOTEBOOK.txt;
-    .venv/bin/pip install starfish;
-    make PYTHON=.venv/bin/python run_notebooks;
-  fi
-- |-
-  docker run -ti --rm spacetx/starfish build --fov-count 1 --hybridization-dimensions '{"z": 1}' /tmp/
-after_success:
-- bash <(curl -s https://codecov.io/bash)
+stages:
+- test
+jobs:
+  include:
+    - name: Syntax and Tests
+      script:
+        - make install-src
+        - make fast
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+    - name: Docker
+      if: branch =~ ^master OR branch =~ ^merge
+      script:
+        - make docker
+    - name: Allen Notebook
+      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
+      env:
+      script:
+        - make install-src
+        - make run__notebooks/py/allen_smFISH.py
+    - name: MERFISH Notebook
+      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
+      env:
+      script:
+        - make install-src
+        - make run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
+    - name: Assay Notebook
+      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
+      env:
+      script:
+        - make install-src
+        - make run__notebooks/py/assay_comparison.py
+    - name: osmFISH Notebook
+      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
+      env:
+      script:
+        - make install-src
+        - make run__notebooks/py/osmFISH.py
+    - name: DARTFISH Notebook
+      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
+      env:
+      script:
+        - make install-src
+        - make run__notebooks/py/DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV.py
+    - name: Simulation Notebook
+      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
+      env:
+      script:
+        - make install-src
+        - make run__notebooks/py/Starfish_simulation.py
+    - name: ISS Notebook
+      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
+      env:
+      script:
+        - make install-src
+        - make run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
+    - name: Released Notebooks
+      if: (branch =~ ^master OR branch =~ ^merge) AND tag = cron
+      script:
+        - make install-pypi
+        - make run_notebooks
+cache:
+  directories:
+  - $HOME/.cache/pip
+  - $HOME/.starfish-cache
+notifications:
+  slack:
+    secure: "QlBgC2XbhzL4GULlzz/n4wsPeVfsg0bqsml4FVdj+cW5WXrOsnC3fISeHok5QVTWqUMPToyFZM0tK2Qdz0JEKy4h+uS22IeoerB8aV2vEfKwayPwlBARhiHj2BXiQH4iX6FeDeMtVBULXhkPNv2mQsRacS6qNgYrGwRSRTPnFtXzZOnRMnJ/P6gzlILuoEYMQz7f72YkloiiLIbwsCbIlAUcUorypwt8PUNGa7zWHOBWu0qElZ5ckAznL6if5T/fNts4p2sS6+bpU/MxIezrUgdv/vJxdhircu7l/6rnc8GZinxrTWlQZbQdq1HphPZHbeHwpA1bdkbleQQCtcdEBSA6T7KVBhXXD1AZefgg+ldzV2C+I+h/9tkqDrNPOmeghIGtWWTwS3GM51XdnvW4+o6AVSV5j1IA83tBHy8fEIGCWaHyefYCQQSThsUeYSNkwKSGKh26zQz2LHxGGNEfY3Ggm6g4tzNgE2Ub73rJFZaeCqDaieUWHUUdxc5uCigy4jDqqfNZIu07PtzIpMPmOnnBQbkw7q8LI3LYKs4r33zq3FkPKR3hOnZkh1KNX1k8FwVAPgXJC8dWOk+GTmChH/DD76t7A415VITGprX1mS0zUFmMWp7ey6v3B0l2tpr4XlSWKqpPt7jUKYp0ca8znzyP2AU/8/bsmthcHnMlOt4="
+    on_success: change

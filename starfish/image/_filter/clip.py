@@ -3,7 +3,7 @@ from typing import Optional
 
 import numpy as np
 
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from ._base import FilterAlgorithmBase
 
 
@@ -67,7 +67,8 @@ class Clip(FilterAlgorithmBase):
         return image.astype(dtype)
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            n_processes: Optional[int]=None
     ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
@@ -79,6 +80,8 @@ class Clip(FilterAlgorithmBase):
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
+        n_processes : Optional[int]
+            Number of parallel processes to devote to calculating the filter
 
         Returns
         -------
@@ -87,7 +90,10 @@ class Clip(FilterAlgorithmBase):
 
         """
         clip = partial(self.clip, p_min=self.p_min, p_max=self.p_max)
-        result = stack.apply(clip, is_volume=self.is_volume, verbose=verbose, in_place=in_place)
+        result = stack.apply(
+            clip,
+            is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes
+        )
         if not in_place:
             return result
         return None

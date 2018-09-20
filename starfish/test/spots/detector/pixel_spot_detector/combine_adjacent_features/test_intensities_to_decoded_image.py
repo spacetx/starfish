@@ -16,7 +16,7 @@ def decoded_intensity_table_factory() -> Tuple[IntensityTable, np.ndarray]:
     Create an IntensityTable that has gene labels, including null labels. The data doesn't matter,
     so will use np.zeros
     """
-    data = np.zeros((1, 1, 2, 3, 3))
+    data = np.zeros((1, 1, 2, 3, 3), dtype=np.float32)
     labels = np.array(
         [[[0, 1, 1],
           [0, 2, 2],

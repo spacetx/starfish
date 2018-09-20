@@ -5,7 +5,7 @@ from typing import Optional
 import numpy as np
 from tqdm import tqdm
 
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
 from ._base import FilterAlgorithmBase
 
@@ -34,7 +34,9 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         group_parser.add_argument(
             '--thresh', type=int, help='minimum magnitude threshold for pixels across channels')
 
-    def run(self, stack: ImageStack, in_place: bool = True, verbose=False) -> Optional[ImageStack]:
+    def run(
+            self, stack: ImageStack, in_place: bool = True, verbose=False,
+    ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters

@@ -3,14 +3,12 @@ from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
-from skimage import img_as_uint
 from skimage.filters import gaussian
 
-from starfish.errors import DataFormatWarning
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
-from .util import validate_and_broadcast_kernel_size
+from .util import preserve_float_range, validate_and_broadcast_kernel_size
 
 
 class GaussianLowPass(FilterAlgorithmBase):
@@ -58,21 +56,19 @@ class GaussianLowPass(FilterAlgorithmBase):
             Blurred data in same shape as input image, converted to np.uint16 dtype.
 
         """
-        if image.dtype != np.uint16:
-            DataFormatWarning(
-                "gaussian filters only support uint16 images. Image data will be converted")
-            image = img_as_uint(image)
 
-        blurred = gaussian(
+        filtered = gaussian(
             image,
             sigma=sigma, output=None, cval=0, multichannel=False, preserve_range=True, truncate=4.0
         )
-        blurred = blurred.clip(0).astype(np.uint16)
 
-        return blurred
+        filtered = preserve_float_range(filtered)
+
+        return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            n_processes: Optional[int]=None,
     ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
@@ -84,6 +80,8 @@ class GaussianLowPass(FilterAlgorithmBase):
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             if True, report on filtering progress (default = False)
+        n_processes : Optional[int]
+            Number of parallel processes to devote to calculating the filter
 
         Returns
         -------
@@ -93,7 +91,9 @@ class GaussianLowPass(FilterAlgorithmBase):
         """
         low_pass: Callable = partial(self.low_pass, sigma=self.sigma)
         result = stack.apply(
-            low_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place)
+            low_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place,
+            n_processes=n_processes
+        )
         if not in_place:
             return result
         return None

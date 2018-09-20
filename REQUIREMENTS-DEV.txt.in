@@ -1,0 +1,11 @@
+flake8
+flake8-import-order
+jsonpath_rw
+pytest-cov>=2.5.1
+pytest-xdist
+mypy
+nbencdec >= 0.0.5
+recommonmark
+sphinx
+sphinx_rtd_theme
+-r REQUIREMENTS.txt.in

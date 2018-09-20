@@ -11,7 +11,7 @@ from . import image
 from . import spots
 # top-level objects
 from .codebook import Codebook
-from .experiment import Experiment
+from .experiment.experiment import Experiment
+from .imagestack.imagestack import ImageStack
 from .intensity_table import IntensityTable
-from .stack import ImageStack
 from .starfish import starfish

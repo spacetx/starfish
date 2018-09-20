@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 from skimage.morphology import ball, disk, white_tophat
 
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from ._base import FilterAlgorithmBase
 
 
@@ -48,7 +48,8 @@ class WhiteTophat(FilterAlgorithmBase):
         return white_tophat(image, selem=structuring_element)
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            n_processes: Optional[int]=None
     ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
@@ -60,6 +61,8 @@ class WhiteTophat(FilterAlgorithmBase):
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
+        n_processes : Optional[int]
+            Number of parallel processes to devote to calculating the filter
 
         Returns
         -------
@@ -68,7 +71,9 @@ class WhiteTophat(FilterAlgorithmBase):
 
         """
         result = stack.apply(
-            self.white_tophat, is_volume=self.is_volume, verbose=verbose, in_place=in_place)
+            self.white_tophat,
+            is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes
+        )
         if not in_place:
             return result
         return None

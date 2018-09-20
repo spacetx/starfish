@@ -1,8 +1,8 @@
 from typing import Tuple
 
 from starfish.codebook import Codebook
+from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table import IntensityTable
-from starfish.stack import ImageStack
 from ._base import SpotFinderAlgorithmBase
 from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedComponentDecodingResult
 

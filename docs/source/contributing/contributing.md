@@ -2,7 +2,7 @@
 
 If you're reading this section, you're probably interested in contributing to Starfish.  Welcome and thanks for your interest in contributing!
 
-# How can I contribute?
+## How can I contribute?
 Starfish is designed to specify pipeline recipes for image processing. To support this use, the library is composed as a series of `pipeline_component` modules.
 The objects that sub-class `pipeline_component` spawn a command-line interface that should identically track the API of the python library.
 
@@ -10,7 +10,7 @@ A typical starfish run consists of running one or more image processing filter s
 The identified features are then decoded into the genes that they correspond to by mapping the fluorescence channel (and optionally hybridization round) using a codebook.
 Finally, the filtered data are segmented, identifying which cell each feature belongs to.
 
-# Creating a new algorithm for an existing `pipeline_component`:
+## Creating a new algorithm for an existing `pipeline_component`:
 
 For example, to add a new image filter, one would:
 
@@ -52,7 +52,9 @@ We also encourage rational use of in-line variable annotation when the type of a
 
 - Numpy provides an excellent [development workflow](https://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html) that we encourage you to follow when developing features for starfish!
 
-- All commits must have informative names; try to think about what will still make sense looking back on them next year.
+- All commits must have informative summaries; try to think about what will still make sense looking back on them next year.
+
+- All pull requests should describe your testing plan.  
 
 - When merging a pull request, squash commits down to the smallest logical number of commits. In cases where a single commit suffices, use the "Squash and Merge" strategy, since it adds the PR number to the commit name. If multiple commits remain, use "Rebase and Merge".
 

@@ -5,51 +5,61 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
+from starfish.image._filter.util import preserve_float_range
 from starfish.types import Features, Indices, SpotAttributes
 
 
 class IntensityTable(xr.DataArray):
-    """3 dimensional container for spot/pixel features extracted from image data
+    """Container for spot/pixel features extracted from image data
 
     An IntensityTable is comprised of each feature's intensity across channels and imaging
     rounds, where features are typically spots or pixels. This forms an
-    (n_feature, n_channel, n_round) tensor implemented as an xarray.DataArray object.
+    ``(n_feature, n_channel, n_round)`` tensor implemented as an xarray.DataArray object.
     In addition to the basic xarray methods, IntensityTable implements:
-
-    Constructors
-    -------
-    empty_intensity_table  creates an IntensityTable with all intensities equal to zero
-    from_spot_data         creates an IntensityTable from a 3d array and a spot attributes dataframe
-    synthetic_intensities  creates an IntensityTable with synthetic spots, given a codebook
 
     Methods
     -------
-    save                   save the IntensityTable to netCDF
-    load                   load an IntensityTable from netCDF
+    empty_intensity_table(spot_attributes, n_ch, n_round)
+        creates an IntensityTable with all intensities equal to zero
+
+    from_spot_data(intensities, spot_attributes)
+        creates an IntensityTable from a 3d array and a spot attributes dataframe
+
+    synthetic_intensities(codebook, num_z=12, height=50, width=40, n_spots=10, \
+            mean_fluor_per_spot=200, mean_photons_per_fluor=50)
+        creates an IntensityTable with synthetic spots, given a codebook
+
+    save(filename)
+        save the IntensityTable to netCDF
+
+    load(filename)
+        load an IntensityTable from netCDF
 
     Examples
     --------
-    >>> from starfish.util.synthesize import SyntheticData
-    >>> sd = SyntheticData(n_ch=3, n_round=4, n_codes=2)
-    >>> codes = sd.codebook()
-    >>> sd.intensities(codebook=codes)
-    <xarray.IntensityTable (features: 2, c: 3, h: 4)>
-    array([[[    0.,     0.,     0.,     0.],
-            [    0.,     0.,  8022., 12412.],
-            [11160.,  9546.,     0.,     0.]],
+    Create an IntensityTable using the ``synthetic_intensities`` method::
 
-           [[    0.,     0.,     0.,     0.],
-            [    0.,     0., 10506., 10830.],
-            [11172., 12331.,     0.,     0.]]])
-    Coordinates:
-    * features   (features) MultiIndex
-    - z          (features) int64 7 3
-    - y          (features) int64 14 32
-    - x          (features) int64 32 15
-    - r          (features) float64 nan nan
-    * c          (c) int64 0 1 2
-    * h          (h) int64 0 1 2 3
-      target     (features) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
+        >>> from starfish.util.synthesize import SyntheticData
+        >>> sd = SyntheticData(n_ch=3, n_round=4, n_codes=2)
+        >>> codes = sd.codebook()
+        >>> sd.intensities(codebook=codes)
+        <xarray.IntensityTable (features: 2, c: 3, h: 4)>
+        array([[[    0.,     0.,     0.,     0.],
+                [    0.,     0.,  8022., 12412.],
+                [11160.,  9546.,     0.,     0.]],
+
+               [[    0.,     0.,     0.,     0.],
+                [    0.,     0., 10506., 10830.],
+                [11172., 12331.,     0.,     0.]]])
+        Coordinates:
+        * features   (features) MultiIndex
+        - z          (features) int64 7 3
+        - y          (features) int64 14 32
+        - x          (features) int64 32 15
+        - r          (features) float64 nan nan
+        * c          (c) int64 0 1 2
+        * h          (h) int64 0 1 2 3
+          target     (features) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
 
     """
 
@@ -246,6 +256,10 @@ class IntensityTable(xr.DataArray):
         # add physical properties of fluorescence
         data *= np.random.poisson(mean_photons_per_fluor, size=data.shape)
         data *= np.random.poisson(mean_fluor_per_spot, size=data.shape)
+
+        # convert data to float for consistency with starfish
+        data = preserve_float_range(data)
+        assert 0 < data.max() <= 1
 
         intensities = cls.from_spot_data(data, spot_attributes)
         intensities[Features.TARGET] = (Features.AXIS, targets)

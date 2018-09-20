@@ -2,8 +2,8 @@ from typing import Tuple
 
 import numpy as np
 
+from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table import IntensityTable
-from starfish.stack import ImageStack
 from starfish.types import Indices
 
 
@@ -12,7 +12,8 @@ def test_reshaping_between_stack_and_intensities():
     transform an pixels of an ImageStack into an IntensityTable and back again, then verify that
     the created Imagestack is the same as the original
     """
-    image = ImageStack.from_numpy_array(np.random.randn(1, 2, 3, 4, 5))
+    np.random.seed(777)
+    image = ImageStack.from_numpy_array(np.random.rand(1, 2, 3, 4, 5).astype(np.float32))
     pixel_intensities = IntensityTable.from_image_stack(image, 0, 0, 0)
     image_shape = (image.shape['z'], image.shape['y'], image.shape['x'])
     image_from_pixels = pixel_intensities_to_imagestack(pixel_intensities, image_shape)

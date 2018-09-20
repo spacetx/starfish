@@ -4,7 +4,7 @@ import os
 from typing import List, Type
 
 from starfish.intensity_table import IntensityTable
-from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import point_in_poly
 from ._base import TargetAssignmentAlgorithm
@@ -15,8 +15,8 @@ class TargetAssignment(PipelineComponent):
     target_assignment_group: argparse.ArgumentParser
 
     @classmethod
-    def implementing_algorithms(cls) -> List[Type[TargetAssignmentAlgorithm]]:
-        return TargetAssignmentAlgorithm.__subclasses__()
+    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
+        return TargetAssignmentAlgorithm
 
     @classmethod
     def add_to_parser(cls, subparsers) -> None:

@@ -1,3 +1,10 @@
+"""
+Notes
+-----
+This test and docs/source/usage/iss/iss_cli.sh test the same code paths and should be updated
+together
+"""
+
 import json
 import os
 import shutil
@@ -52,15 +59,27 @@ class TestWithIssData(unittest.TestCase):
         [
             "starfish", "registration",
             "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "formatted", "experiment.json"],
-                "$['primary_images']",
+                [
+                    tempdir,
+                    get_jsonpath_from_file(
+                        [tempdir, "formatted", "experiment.json"],
+                        "$['primary_images']",
+                    ),
+                ],
+                "$['contents']['fov_000']"
             ),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "registered", "hybridization.json"),
             "FourierShiftRegistration",
             "--reference-stack", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "formatted", "experiment.json"],
-                "$['auxiliary_images']['dots']",
+                [
+                    tempdir,
+                    get_jsonpath_from_file(
+                        [tempdir, "formatted", "experiment.json"],
+                        "$['auxiliary_images']['dots']",
+                    ),
+                ],
+                "$['contents']['fov_000']"
             ),
             "--upsampling", "1000",
         ],
@@ -80,8 +99,14 @@ class TestWithIssData(unittest.TestCase):
         [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "formatted", "experiment.json"],
-                "$['auxiliary_images']['nuclei']",
+                [
+                    tempdir,
+                    get_jsonpath_from_file(
+                        [tempdir, "formatted", "experiment.json"],
+                        "$['auxiliary_images']['nuclei']",
+                    ),
+                ],
+                "$['contents']['fov_000']"
             ),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "nuclei.json"),
@@ -91,8 +116,14 @@ class TestWithIssData(unittest.TestCase):
         [
             "starfish", "filter",
             "--input", lambda tempdir, *args, **kwargs: get_jsonpath_from_file(
-                [tempdir, "formatted", "experiment.json"],
-                "$['auxiliary_images']['dots']",
+                [
+                    tempdir,
+                    get_jsonpath_from_file(
+                        [tempdir, "formatted", "experiment.json"],
+                        "$['auxiliary_images']['dots']",
+                    ),
+                ],
+                "$['contents']['fov_000']"
             ),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "dots.json"),
@@ -103,7 +134,8 @@ class TestWithIssData(unittest.TestCase):
             "starfish", "detect_spots",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "hybridization.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "results", "spots.nc"),
             "GaussianSpotDetector",
             "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "dots.json"),

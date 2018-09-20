@@ -7,9 +7,10 @@ from scipy.ndimage.filters import uniform_filter
 from skimage import img_as_uint
 
 from starfish.errors import DataFormatWarning
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
+from .util import preserve_float_range
 
 
 class MeanHighPass(FilterAlgorithmBase):
@@ -81,14 +82,14 @@ class MeanHighPass(FilterAlgorithmBase):
 
         blurred: np.ndarray = uniform_filter(image, size)
 
-        over_flow_ind: np.ndarray[bool] = image < blurred
         filtered: np.ndarray = image - blurred
-        filtered[over_flow_ind] = 0
+        filtered = preserve_float_range(filtered)
 
         return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False
+            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            n_processes: Optional[int]=None
     ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
@@ -100,6 +101,8 @@ class MeanHighPass(FilterAlgorithmBase):
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             if True, report on filtering progress (default = False)
+        n_processes : Optional[int]
+            Number of parallel processes to devote to calculating the filter
 
         Returns
         -------
@@ -109,7 +112,9 @@ class MeanHighPass(FilterAlgorithmBase):
         """
         high_pass: Callable = partial(self.high_pass, size=self.size)
         result = stack.apply(
-            high_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place)
+            high_pass,
+            is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes
+        )
         if not in_place:
             return result
         return None

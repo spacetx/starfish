@@ -16,7 +16,7 @@ Starfish
 Introduction
 ------------
 
-.. image:: /../../design/logo.png
+.. image:: design/logo.png
     :width: 250px
 
 The goal of *starfish* is to **prototype** a reference pipeline for the analysis of image-based
@@ -49,7 +49,7 @@ associated file manifests that this package plans to standardize and implement.
 
 .. _document: https://docs.google.com/document/d/1IHIngoMKr-Tnft2xOI3Q-5rL3GSX2E3PnJrpsOX5ZWs/edit?usp=sharing
 
-.. image:: /../../design/pipeline-diagram.png
+.. image:: design/pipeline-diagram.png
     :alt: pipeline diagram
 
 Documentation

@@ -1,12 +1,11 @@
 Starfish
 ========
 
-.. badges
-
-.. image:: https://readthedocs.org/projects/pip/badge/?version=latest&style=flat
-
 .. image:: https://travis-ci.org/spacetx/starfish.svg?branch=master
     :target: https://travis-ci.org/spacetx/starfish
+    :width: 30%
+.. image:: https://readthedocs.org/projects/pip/badge/?version=latest&style=flat
+    :width: 30%
 
 .. ideally we could use the ..include directive here instead of copy and pasting the following
    information

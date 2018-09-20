@@ -1,0 +1,63 @@
+mkdir -p /tmp/starfish/raw
+mkdir -p /tmp/starfish/formatted
+mkdir -p /tmp/starfish/registered
+mkdir -p /tmp/starfish/filtered
+mkdir -p /tmp/starfish/results
+
+python examples/get_iss_data.py /tmp/starfish/raw /tmp/starfish/formatted --d 1
+
+starfish registration \
+    -i /tmp/starfish/formatted/hybridization-fov_000.json \
+    -o /tmp/starfish/registered/hybridization.json \
+    FourierShiftRegistration \
+    --reference-stack /tmp/starfish/formatted/nuclei-fov_000.json \
+    --upsampling 1000
+
+starfish filter \
+    -i /tmp/starfish/registered/hybridization.json \
+    -o /tmp/starfish/filtered/hybridization.json \
+    WhiteTophat \
+    --masking-radius 15
+
+starfish filter \
+    -i /tmp/starfish/formatted/nuclei-fov_000.json \
+    -o /tmp/starfish/filtered/nuclei.json \
+    WhiteTophat \
+    --masking-radius 15
+
+starfish filter \
+    -i /tmp/starfish/formatted/dots-fov_000.json \
+    -o /tmp/starfish/filtered/dots.json \
+    WhiteTophat \
+    --masking-radius 15
+
+starfish detect_spots \
+    --input /tmp/starfish/filtered/hybridization.json \
+    --output /tmp/starfish/results/spots.nc \
+    GaussianSpotDetector \
+    --blobs-stack /tmp/starfish/filtered/dots.json \
+    --min-sigma 4 \
+    --max-sigma 6 \
+    --num-sigma 20 \
+    --threshold 0.01
+
+starfish segment \
+    --hybridization-stack /tmp/starfish/filtered/hybridization.json \
+    --nuclei-stack /tmp/starfish/filtered/nuclei.json \
+    -o /tmp/starfish/results/regions.geojson \
+    Watershed \
+    --dapi-threshold .16 \
+    --input-threshold .22 \
+    --min-distance 57
+
+starfish target_assignment \
+    --coordinates-geojson /tmp/starfish/results/regions.geojson \
+    --intensities /tmp/starfish/results/spots.nc \
+    --output /tmp/starfish/results/targeted-spots.nc \
+    PointInPoly2D
+
+starfish decode \
+    -i /tmp/starfish/results/targeted-spots.nc \
+    --codebook /tmp/starfish/formatted/codebook.json \
+    -o /tmp/starfish/results/decoded-spots.nc \
+    PerRoundMaxChannelDecoder

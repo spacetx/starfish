@@ -31,7 +31,8 @@ _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'req
 
 
 class ImageStack:
-    """Container for a TileSet (field of view)
+    """
+    Container for a TileSet (field of view)
 
     Attributes
     ----------
@@ -63,8 +64,6 @@ class ImageStack:
         show an interactive, pageable view of the image tensor, or a slice of the image tensor
     write(filepath, tile_opener=None)
         save the (potentially modified) image tensor to disk
-
-
     """
 
     AXES_DATA: Mapping[Indices, _DimensionMetadata] = {
@@ -145,9 +144,6 @@ class ImageStack:
 
             data = img_as_float32(data)
             self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
-
-        # set_slice will mark the data as needing writeback, so we need to unset that.
-        self._data_needs_writeback = False
 
     @staticmethod
     def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
@@ -248,7 +244,6 @@ class ImageStack:
     def numpy_array(self, data):
         """Sets the image's data from a numpy array."""
         self._data.values = data.view()
-        self._data_needs_writeback = True
 
     def get_slice(
             self,
@@ -339,7 +334,6 @@ class ImageStack:
                 data.shape, self._data[slice_list].shape))
 
         self._data.values[slice_list] = data
-        self._data_needs_writeback = True
 
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],
@@ -804,7 +798,6 @@ class ImageStack:
         tile_opener : TODO ttung: doc me.
 
         """
-
         for tile in self._image_partition.tiles():
             h = tile.indices[Indices.ROUND]
             c = tile.indices[Indices.CH]
@@ -813,7 +806,6 @@ class ImageStack:
                 indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}
             )
             assert len(axes) == 0
-        self._data_needs_writeback = False
 
         seen_x_coords, seen_y_coords, seen_z_coords = set(), set(), set()
         for tile in self._image_partition.tiles():

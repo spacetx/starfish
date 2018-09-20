@@ -1,8 +1,13 @@
 SHELL := /bin/bash
 
+MPLBACKEND?=Agg
+export MPLBACKEND
+
 MODULES=starfish examples validate_sptx
 
-all:	lint mypy test
+all:	fast
+
+fast:	lint mypy test
 
 lint:   lint-non-init lint-init
 
@@ -41,4 +46,19 @@ REQUIREMENTS-DEV.txt : REQUIREMENTS.txt.in
 
 include notebooks/subdir.mk
 
-.PHONY: all lint lint-non-init lint-init test mypy refresh_all_requirements
+slow: fast run_notebooks docker
+
+docker:
+	docker build -t spacetx/starfish .
+	docker run -ti --rm spacetx/starfish build --fov-count 1 --hybridization-dimensions '{"z": 1}' /tmp/
+
+install-src:
+	pip install --force-reinstall --upgrade -r REQUIREMENTS-DEV.txt -r REQUIREMENTS-NOTEBOOK.txt
+	pip install -e .
+	pip freeze
+
+install-pypi:
+	pip install -r REQUIREMENTS-NOTEBOOK.txt
+	pip install starfish
+
+.PHONY: all fast lint lint-non-init lint-init test mypy refresh_all_requirements slow docker install-dev install-pypi

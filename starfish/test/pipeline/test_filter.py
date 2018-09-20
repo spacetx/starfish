@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from starfish.image._filter import gaussian_high_pass
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 
 

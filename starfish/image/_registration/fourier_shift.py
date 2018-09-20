@@ -6,7 +6,7 @@ from scipy.ndimage import fourier_shift
 from skimage.feature import register_translation
 
 from starfish.image._filter.util import preserve_float_range
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
 from starfish.util.argparse import FsExistsType
 from ._base import RegistrationAlgorithmBase

@@ -3,8 +3,8 @@ import os
 from typing import Type
 
 from starfish.codebook import Codebook
+from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
-from starfish.stack import ImageStack
 from starfish.types import Indices
 from starfish.util.argparse import FsExistsType
 from . import _base

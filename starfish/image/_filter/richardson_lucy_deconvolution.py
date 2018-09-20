@@ -5,7 +5,7 @@ from typing import Optional
 import numpy as np
 from scipy.signal import convolve, fftconvolve
 
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
 from .util import gaussian_kernel, preserve_float_range

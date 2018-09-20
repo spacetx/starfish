@@ -124,8 +124,11 @@ help-install:
 
 help: help-main help-parts
 help-main:
-	@echo "Main starfish make targets:"
-	@echo
+	@echo Main starfish make targets:
+	@echo =======================================================================================
 	$(call print_help, help, print this text)
 help-parts: help-unit help-docs help-requirements help-integration help-install
+	@echo =======================================================================================
+	@echo Default: all
+
 .PHONY: help help-unit help-requirements help-integration help-install

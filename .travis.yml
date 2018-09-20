@@ -39,6 +39,9 @@ jobs:
     - name: Released Notebooks
       if: branch =~ /^(master|merge) AND tag = cron
       script: make check_notebooks install-travis run_notebooks
+    - name: Check Requirements
+      if: branch = /^master$/ AND tag = cron
+      script: make refresh_all_requirements check_requirements
 cache:
   directories:
   - $HOME/.cache/pip

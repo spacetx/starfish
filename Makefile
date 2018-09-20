@@ -50,6 +50,11 @@ help-docs:
 
 ### REQUIREMENTS #############################################
 #
+check_requirements:
+	if [[ $$(git status --porcelain REQUIREMENTS*) ]]; then \
+	    echo "Modifications found in REQUIREMENTS files"; exit 2; \
+	fi
+
 refresh_all_requirements:
 	@echo -n '' >| REQUIREMENTS.txt
 	@echo -n '' >| REQUIREMENTS-DEV.txt
@@ -69,7 +74,8 @@ REQUIREMENTS.txt REQUIREMENTS-DEV.txt : %.txt : %.txt.in
 REQUIREMENTS-DEV.txt : REQUIREMENTS.txt.in
 
 help-requirements:
-	$(call print_help, refresh_all_requirements, regenerate REQUIREMENTS files)
+	$(call print_help, refresh_all_requirements, regenerate requirements files)
+	$(call print_help, check_requirements, fail if requirements files have been modified)
 
 .PHONY: refresh_all_requirements
 #

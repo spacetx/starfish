@@ -268,22 +268,22 @@ pixel_traces_df = pixel_traces.to_features_dataframe()
 pixel_traces_df['area'] = np.pi*pixel_traces_df.radius**2
 
 # pick index of a barcode that was read and decoded from the ImageStack
-ind = 45
+ind = 4
 
 # The test will error here on pixel_traces[ind,:] with an out of index error
 # because we are using the test data.
-if not test:
-    # get the the corresponding gene this barcode was decoded to
-    gene = pixel_traces_df.loc[ind].target
 
-    # query the codebook for the actual barcode corresponding to this gene
-    real_barcode = exp.codebook[exp.codebook.target==gene].stack(traces=(Indices.ROUND.value, Indices.CH.value)).values[0]
-    read_out_barcode = pixel_traces[ind,:]
+# get the the corresponding gene this barcode was decoded to
+gene = pixel_traces_df.loc[ind].target
 
-    plt.plot(real_barcode, 'ok')
-    plt.stem(read_out_barcode)
-    sns.despine(offset=2)
-    plt.xticks(range(18))
-    plt.title(gene)
-    plt.xlabel('Index into R (0:5) and C(0:2)');
+# query the codebook for the actual barcode corresponding to this gene
+real_barcode = exp.codebook[exp.codebook.target==gene].stack(traces=(Indices.ROUND.value, Indices.CH.value)).values[0]
+read_out_barcode = pixel_traces[ind,:]
+
+plt.plot(real_barcode, 'ok')
+plt.stem(read_out_barcode)
+sns.despine(offset=2)
+plt.xticks(range(18))
+plt.title(gene)
+plt.xlabel('Index into R (0:5) and C(0:2)');
 # EPY: END code

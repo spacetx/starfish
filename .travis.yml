@@ -4,59 +4,41 @@ services:
 python:
 - 3.6
 dist: trusty
+stages:
+- test
 jobs:
   include:
     - name: Syntax and Tests
-      script:
-        - make check_notebooks
-        - make install-src
-        - make fast
+      script: make check_notebooks install-src fast
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Docker
       if: head_branch =~ /^(master|merge)
-      script:
-        - make docker
+      script: make docker
     - name: Allen Notebook
       if: head_branch =~ /^(master|merge)
-      script:
-        - make install-travis
-        - make run__notebooks/py/allen_smFISH.py
+      script: make install-travis run__notebooks/py/allen_smFISH.py
     - name: MERFISH Notebook
       if: head_branch =~ /^(master|merge)
-      script:
-        - make install-travis
-        - make run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
+      script: make install-travis run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
     - name: Assay Notebook
       if: head_branch =~ /^(master|merge)
-      script:
-        - make install-travis
-        - make run__notebooks/py/assay_comparison.py
+      script: make install-travis run__notebooks/py/assay_comparison.py
     - name: osmFISH Notebook
       if: head_branch =~ /^(master|merge)
-      script:
-        - make install-travis
-        - make run__notebooks/py/osmFISH.py
+      script: make install-travis run__notebooks/py/osmFISH.py
     - name: DARTFISH Notebook
       if: head_branch =~ /^(master|merge)
-      script:
-        - make install-travis
-        - make run__notebooks/py/DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV.py
+      script: make install-travis run__notebooks/py/DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV.py
     - name: Simulation Notebook
       if: head_branch =~ /^(master|merge)
-      script:
-        - make install-travis
-        - make run__notebooks/py/Starfish_simulation.py
+      script: make install-travis run__notebooks/py/Starfish_simulation.py
     - name: ISS Notebook
       if: head_branch =~ /^(master|merge)
-      script:
-        - make install-travis
-        - make run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
+      script: make install-travis run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
     - name: Released Notebooks
-      if: head_branch =~ /^(master|merge)
-        - make check_notebooks
-        - make install-travis
-        - make run_notebooks
+      if: branch =~ /^(master|merge) AND tag = cron
+      script: make check_notebooks install-travis run_notebooks
 cache:
   directories:
   - $HOME/.cache/pip

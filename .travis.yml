@@ -4,68 +4,58 @@ services:
 python:
 - 3.6
 dist: trusty
-matrix:
-  fast_finish: true
 jobs:
   include:
     - name: Syntax and Tests
       script:
-        - make install-src
         - make check_notebooks
+        - make install-src
         - make fast
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Docker
-      if: branch =~ ^master OR branch =~ ^merge
+      if: head_branch =~ /^(master|merge)
       script:
         - make docker
     - name: Allen Notebook
-      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
-      env:
+      if: head_branch =~ /^(master|merge)
       script:
-        - make install-src
+        - make install-travis
         - make run__notebooks/py/allen_smFISH.py
     - name: MERFISH Notebook
-      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
-      env:
+      if: head_branch =~ /^(master|merge)
       script:
-        - make install-src
+        - make install-travis
         - make run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
     - name: Assay Notebook
-      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
-      env:
+      if: head_branch =~ /^(master|merge)
       script:
-        - make install-src
+        - make install-travis
         - make run__notebooks/py/assay_comparison.py
     - name: osmFISH Notebook
-      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
-      env:
+      if: head_branch =~ /^(master|merge)
       script:
-        - make install-src
+        - make install-travis
         - make run__notebooks/py/osmFISH.py
     - name: DARTFISH Notebook
-      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
-      env:
+      if: head_branch =~ /^(master|merge)
       script:
-        - make install-src
+        - make install-travis
         - make run__notebooks/py/DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV.py
     - name: Simulation Notebook
-      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
-      env:
+      if: head_branch =~ /^(master|merge)
       script:
-        - make install-src
+        - make install-travis
         - make run__notebooks/py/Starfish_simulation.py
     - name: ISS Notebook
-      if: (branch =~ ^master OR branch =~ ^merge) AND tag != cron
-      env:
+      if: head_branch =~ /^(master|merge)
       script:
-        - make install-src
+        - make install-travis
         - make run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
     - name: Released Notebooks
-      if: (branch =~ ^master OR branch =~ ^merge) AND tag = cron
-      script:
-        - make install-pypi
+      if: head_branch =~ /^(master|merge)
         - make check_notebooks
+        - make install-travis
         - make run_notebooks
 cache:
   directories:

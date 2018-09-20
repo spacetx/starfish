@@ -60,4 +60,12 @@ install-src:
 install-pypi:
 	pip install -r REQUIREMENTS-NOTEBOOK.txt starfish
 
+install-travis: install-$(TRAVIS_EVENT_TYPE)
+
+install-cron: install-pypi
+install-: install-src
+install-api: install-src
+install-pull_request: install-src
+install-push: install-src
+
 .PHONY: all fast lint lint-non-init lint-init test mypy refresh_all_requirements slow docker install-src install-pypi

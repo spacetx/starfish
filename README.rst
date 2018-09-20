@@ -5,9 +5,10 @@ Starfish
     :target: https://travis-ci.org/spacetx/starfish
     :width: 30%
 .. image:: https://codecov.io/gh/spacetx/starfish/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/spacetx/starfish
-.. image:: https://readthedocs.org/projects/pip/badge/?version=latest&style=flat
-    :width: 30%
+    :target: https://codecov.io/gh/spacetx/starfish
+.. image:: https://readthedocs.org/projects/spacetx-starfish/badge/?version=latest
+    :target: https://spacetx-starfish.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 .. ideally we could use the ..include directive here instead of copy and pasting the following
    information

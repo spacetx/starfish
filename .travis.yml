@@ -4,13 +4,14 @@ services:
 python:
 - 3.6
 dist: trusty
-stages:
-- test
+matrix:
+  fast_finish: true
 jobs:
   include:
     - name: Syntax and Tests
       script:
         - make install-src
+        - make check_notebooks
         - make fast
       after_success:
         - bash <(curl -s https://codecov.io/bash)
@@ -64,6 +65,7 @@ jobs:
       if: (branch =~ ^master OR branch =~ ^merge) AND tag = cron
       script:
         - make install-pypi
+        - make check_notebooks
         - make run_notebooks
 cache:
   directories:

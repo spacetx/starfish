@@ -180,12 +180,8 @@ class Experiment:
 
         if isinstance(primary_image, TileSet):
             # make sure that all the aux images are also TileSets
-            if strict:
-                primary_image.validate()
             for aux_image_tileset in auxiliary_images.values():
                 assert isinstance(aux_image_tileset, TileSet)
-                if strict:
-                    aux_image_tileset.validate()
 
             fov = FieldOfView(
                 None,
@@ -197,16 +193,12 @@ class Experiment:
         # everything should be Collections
         fovs: MutableSequence[FieldOfView] = list()
         for fov_name, primary_tileset in primary_image.all_tilesets():
-            if strict:
-                primary_tileset.validate()
             aux_image_tilesets_for_fov: MutableMapping[str, TileSet] = dict()
             for aux_image_type, aux_image_collection in auxiliary_images.items():
                 assert isinstance(aux_image_collection, Collection)
                 aux_image_tileset = aux_image_collection.find_tileset(fov_name)
                 if aux_image_tileset is not None:
                     aux_image_tilesets_for_fov[aux_image_type] = aux_image_tileset
-                    if strict:
-                        aux_image_tileset.validate()
 
             fov = FieldOfView(
                 fov_name,

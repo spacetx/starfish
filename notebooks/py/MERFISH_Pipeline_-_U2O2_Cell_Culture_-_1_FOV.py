@@ -117,10 +117,16 @@ low_passed = glp.run(deconvolved, in_place=False, verbose=True)
 # EPY: END markdown
 
 # EPY: START code
-scale_factors = {
-    (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
-    for t in experiment.extras['scale_factors']
-}
+if test:
+    scale_factors = {
+        (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
+        for t in experiment.extras['scale_factors']
+    }
+else:
+    scale_factors = {
+        (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
+        for index, t in primary_image.tile_metadata.iterrows()
+    }
 # EPY: END code
 
 # EPY: START code

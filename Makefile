@@ -9,6 +9,15 @@ define print_help
     @printf "    %-24s   $(2)\n" $(1)
 endef
 
+define create_venv
+    if [[ "$(TRAVIS)" = "" ]]; then \
+        python -m venv $(1); \
+    else \
+        virtualenv -p $$(which python) $(1); \
+    fi
+endef
+
+
 all:	fast
 
 ### UNIT #####################################################
@@ -64,7 +73,7 @@ refresh_all_requirements:
 
 REQUIREMENTS.txt REQUIREMENTS-DEV.txt : %.txt : %.txt.in
 	[ ! -e .requirements-env ] || exit 1
-	python -m venv .$<-env
+	$(call create_venv, .$<-env)
 	.$<-env/bin/pip install -r $@
 	.$<-env/bin/pip install -r $<
 	echo "# You should not edit this file directly.  Instead, you should edit one of the following files ($^) and run make $@" >| $@

@@ -28,7 +28,6 @@ class TestWithIssData(CLITest):
     )
 
     STAGES = (
-        # TODO make this work
         [
             sys.executable,
             "examples/get_cli_test_data.py",
@@ -45,10 +44,6 @@ class TestWithIssData(CLITest):
             "--reference-stack", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "formatted/fov_001", "dots.json"),
             "--upsampling", "1000",
-        ],
-        [
-            "starfish", "validate", "--experiment-json",
-            lambda tempdir: os.sep.join([tempdir, "formatted", "experiment.json"])
         ],
         [
             "starfish", "filter",

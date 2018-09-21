@@ -14,8 +14,9 @@ if __name__ == "__main__":
     parser.add_argument("output_dir", type=FsExistsType())
     args = parser.parse_args()
 
-    # #saves image stacks locally
+    # save image stacks locally
     exp = Experiment.from_json(args.experiment_url + 'experiment.json')
+
     fov_dir = args.output_dir + '/fov_001/'
     os.mkdir(fov_dir)
 
@@ -23,7 +24,7 @@ if __name__ == "__main__":
     for image_type in exp.fov().auxiliary_image_types:
         exp.fov()[image_type].write(fov_dir + (image_type + '.json'))
 
-    # get codebook from url and save locally
+    # get codebook from url and save locally to tmp dir
     codebook = requests.get(args.experiment_url + 'codebook.json')
     data = codebook.json()
     with open(args.output_dir + '/codebook.json', 'w') as f:

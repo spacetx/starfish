@@ -15,7 +15,7 @@ class CLITest(unittest.TestCase):
     it's own verify_results method.
     """
     # Since this is a base class we don't want to actually run it as a test.
-    # #For classes that inherit CLITest this will need to be set to True.
+    # For classes that inherit CLITest this will need to be set to True.
     __test__ = False
 
     SUBDIRS = Tuple[str]

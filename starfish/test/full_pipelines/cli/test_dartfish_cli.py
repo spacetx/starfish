@@ -47,7 +47,8 @@ class TestWithDartfishData(CLITest):
             "starfish", "detect_spots",
             "--input", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "zero_filtered.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),
+            "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                tempdir, "results", "spots.nc"),
             "PixelSpotDetector",
             "--codebook", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "registered", "codebook.json"),

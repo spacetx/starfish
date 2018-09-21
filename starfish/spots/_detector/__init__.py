@@ -44,7 +44,9 @@ class SpotFinder(PipelineComponent):
         spot_finder_group.add_argument(
             "--codebook", default=None, required=False,
             help=(
-                'json file containing a codebook'
+                'A spaceTx spec-compliant json file that describes a three dimensional tensor '
+                'whose values are the expected intensity of a spot for each code in each imaging '
+                'round and each color channel.'
             )
         )
         spot_finder_group.set_defaults(starfish_command=SpotFinder._cli)
@@ -68,11 +70,11 @@ class SpotFinder(PipelineComponent):
 
         print('Detecting Spots ...')
         image_stack = ImageStack.from_path_or_url(args.input)
-        instance = args.spot_finder_algorithm_class(**vars(args))
 
-        # Get codebook for PixelSpotDetector
         if args.codebook is not None:
-            instance.codebook = Codebook.from_json(args.codebook)
+            args.codebook = Codebook.from_json(args.codebook)
+
+        instance = args.spot_finder_algorithm_class(**vars(args))
 
         if args.blobs_stack is not None:
             blobs_stack = ImageStack.from_path_or_url(args.blobs_stack)  # type: ignore
@@ -88,4 +90,4 @@ class SpotFinder(PipelineComponent):
         # When PixelSpotDetector is used run() returns a tuple
         if isinstance(intensities, tuple):
             intensities = intensities[0]
-        intensities.save(os.path.join(args.output, 'spots.nc'))
+        intensities.save(args.output)

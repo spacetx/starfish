@@ -22,7 +22,7 @@ class TestWithDartfishData(CLITest):
         [
             sys.executable,
             "examples/get_cli_test_data.py",
-            "https://dmf0bdeheu4zf.cloudfront.net/20180828/DARTFISH-TEST/dartfish-test-data.zip",
+            "https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH-TEST/",
             lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
         ],
         [

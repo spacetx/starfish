@@ -174,8 +174,9 @@ class Experiment:
         ---------------------
         STARFISH_STRICT_LOADING :
              If set, then all JSON loaded by this method will be
-             passed to the appropriate validator. This value can
-             be overwritten by use of the `strict` parameter.
+             passed to the appropriate validator. The `strict`
+             parameter to this method has priority over the
+             environment variable.
 
         """
         if strict is None:

@@ -3,9 +3,7 @@ from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
-
 import xarray as xr
-
 from scipy.ndimage.filters import uniform_filter
 
 from starfish.imagestack.imagestack import ImageStack

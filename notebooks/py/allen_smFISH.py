@@ -32,7 +32,7 @@ test = os.getenv("USE_TEST_DATA") is not None
 if test:
     experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180919/allen_smFISH-TESE/experiment.json'
 else:
-    experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180919/allen_smFISH/experiment.json'
+    experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180924/allen_smFISH/experiment.json'
 # EPY: END code
 
 # EPY: START markdown

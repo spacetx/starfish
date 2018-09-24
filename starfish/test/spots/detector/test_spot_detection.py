@@ -5,7 +5,7 @@ from scipy.ndimage.filters import gaussian_filter
 from starfish.spots._detector._base import SpotFinderAlgorithmBase
 from starfish.spots._detector.detect import detect_spots
 from starfish.spots._detector.gaussian import GaussianSpotDetector
-from starfish.spots._detector.local_max_peak_finder import TrackpyLocalMaxPeakFinder
+from starfish.spots._detector.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
 from starfish.stack import ImageStack
 from starfish.types import Indices
 

@@ -1,6 +1,5 @@
 import argparse
 from copy import deepcopy
-from typing import Optional
 
 import numpy as np
 from tqdm import tqdm
@@ -36,7 +35,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
 
     def run(
             self, stack: ImageStack, in_place: bool = True, verbose=False,
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -50,8 +49,9 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in-place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
 

@@ -3,12 +3,11 @@ from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
+
 import xarray as xr
 
 from scipy.ndimage.filters import uniform_filter
-from skimage import img_as_uint
 
-from starfish.errors import DataFormatWarning
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
@@ -52,8 +51,9 @@ class MeanHighPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(image: Union[xr.DataArray, np.ndarray], size: Union[Number, Tuple[Number]]
-        ) -> Union[xr.DataArray, np.ndarray]:
+    def high_pass(
+            image: Union[xr.DataArray, np.ndarray], size: Union[Number, Tuple[Number]]
+    ) -> Union[xr.DataArray, np.ndarray]:
         """
         Applies a mean high pass filter to an image
 

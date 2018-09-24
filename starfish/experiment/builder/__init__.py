@@ -35,11 +35,6 @@ def _tile_opener(toc_path: str, tile: Tile, file_ext: str) -> BinaryIO:
         "wb")
 
 
-def _tile_writer(tile: Tile, fh: BinaryIO) -> ImageFormat:
-    tile.copy(fh)
-    return ImageFormat.TIFF
-
-
 def _fov_path_generator(parent_toc_path: str, toc_name: str) -> str:
     toc_basename = os.path.splitext(os.path.basename(parent_toc_path))[0]
     return os.path.join(
@@ -98,7 +93,7 @@ def build_image(
                         image.shape,
                         extras=image.extras,
                     )
-                    tile.set_source_fh_contextmanager(image.tile_data_handle, image.format)
+                    tile.numpy_array = image.tile_data
                     fov_images.add_tile(tile)
         collection.add_partition("fov_{:03}".format(fov_ix), fov_images)
     return collection
@@ -169,7 +164,7 @@ def write_experiment_json(
         pretty=True,
         partition_path_generator=_fov_path_generator,
         tile_opener=_tile_opener,
-        tile_writer=_tile_writer,
+        tile_format=ImageFormat.TIFF,
     )
     experiment_doc['primary_images'] = "primary_image.json"
 
@@ -188,7 +183,7 @@ def write_experiment_json(
             pretty=True,
             partition_path_generator=_fov_path_generator,
             tile_opener=_tile_opener,
-            tile_writer=_tile_writer,
+            tile_format=ImageFormat.TIFF,
         )
         experiment_doc['auxiliary_images'][aux_name] = "{}.json".format(aux_name)
 

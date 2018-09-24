@@ -3,6 +3,8 @@ from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
+import xarray as xr
+
 from scipy.ndimage.filters import uniform_filter
 from skimage import img_as_uint
 
@@ -10,7 +12,7 @@ from starfish.errors import DataFormatWarning
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
-from .util import preserve_float_range
+from .util import preserve_float_range, validate_and_broadcast_kernel_size
 
 
 class MeanHighPass(FilterAlgorithmBase):
@@ -38,15 +40,7 @@ class MeanHighPass(FilterAlgorithmBase):
 
         """
 
-        if isinstance(size, tuple):
-            message = ("if passing an anisotropic kernel, the dimensionality must match the data "
-                       "shape ({shape}), not {passed_shape}")
-            if is_volume and len(size) != 3:
-                raise ValueError(message.format(shape=3, passed_shape=len(size)))
-            if not is_volume and len(size) != 2:
-                raise ValueError(message.format(shape=2, passed_shape=len(size)))
-
-        self.size = size
+        self.size = validate_and_broadcast_kernel_size(size, is_volume)
         self.is_volume = is_volume
 
     @classmethod

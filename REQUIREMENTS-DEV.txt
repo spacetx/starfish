@@ -81,7 +81,7 @@ semantic-version==2.6.0
 showit==1.1.4
 simplegeneric==0.8.1
 six==1.11.0
-slicedimage==0.0.7
+slicedimage==0.1.0
 snowballstemmer==1.2.1
 Sphinx==1.8.0
 sphinx-rtd-theme==0.4.1

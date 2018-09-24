@@ -38,7 +38,8 @@ class GaussianLowPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def low_pass(image: np.ndarray, sigma: Union[Number, Tuple[Number]]) -> np.ndarray:
+    def low_pass(image: np.ndarray, sigma: Union[Number, Tuple[Number]],
+                 rescale: bool = False) -> np.ndarray:
         """
         Apply a Gaussian blur operation over a multi-dimensional image.
 
@@ -54,6 +55,7 @@ class GaussianLowPass(FilterAlgorithmBase):
         -------
         np.ndarray :
             Blurred data in same shape as input image, converted to np.uint16 dtype.
+            :param rescale:
 
         """
 
@@ -62,7 +64,7 @@ class GaussianLowPass(FilterAlgorithmBase):
             sigma=sigma, output=None, cval=0, multichannel=False, preserve_range=True, truncate=4.0
         )
 
-        filtered = preserve_float_range(filtered)
+        filtered = preserve_float_range(filtered, rescale)
 
         return filtered
 

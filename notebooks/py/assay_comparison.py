@@ -96,7 +96,7 @@ iss_dots = experiment.fov()['dots'].max_proj(Indices.CH, Indices.ROUND, Indices.
 
 # EPY: START code
 stack = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180919/MERFISH/experiment.json'
+    'https://dmf0bdeheu4zf.cloudfront.net/20180924/MERFISH/experiment.json'
 )
 merfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 

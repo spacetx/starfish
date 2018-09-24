@@ -67,7 +67,7 @@ class GaussianHighPass(FilterAlgorithmBase):
         return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=True,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=True,
             n_processes: Optional[int]=None
     ) -> ImageStack:
         """Perform filtering of an image stack

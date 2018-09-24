@@ -108,7 +108,7 @@ merfish_background = ImageStack.from_numpy_array(merfish_background)
 
 from starfish.image import Filter
 clip = Filter.Clip(p_max=99.7)
-merfish_dots = clip.run(merfish_background, in_place=False)
+merfish_dots = clip.run(merfish_background)
 
 merfish_dots = merfish_dots.max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 # EPY: END code

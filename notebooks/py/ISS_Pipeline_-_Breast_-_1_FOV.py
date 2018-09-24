@@ -111,7 +111,7 @@ from starfish.image import Filter
 masking_radius = 15
 filt = Filter.WhiteTophat(masking_radius, is_volume=False)
 for img in images:
-    filt.run(img, verbose=True)
+    filt.run(img, verbose=True, in_place=True)
 # EPY: END code
 
 # EPY: START markdown

@@ -48,7 +48,7 @@ class GaussianHighPass(FilterAlgorithmBase):
 
         Parameters
         ----------
-        image : numpy.ndarray[np.uint16]
+        image : numpy.ndarray[np.float32]
             2-d or 3-d image data
         sigma : Union[Number, Tuple[Number]]
             Standard deviation of gaussian kernel

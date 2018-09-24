@@ -135,7 +135,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
         return im_deconv
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose=False,
+            self, stack: ImageStack, in_place: bool=False, verbose=False,
             n_processes: Optional[int]=None
     ) -> ImageStack:
         """Perform filtering of an image stack

@@ -34,7 +34,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             '--thresh', type=int, help='minimum magnitude threshold for pixels across channels')
 
     def run(
-            self, stack: ImageStack, in_place: bool = True, verbose=False,
+            self, stack: ImageStack, in_place: bool=False, verbose=False,
     ) -> ImageStack:
         """Perform filtering of an image stack
 

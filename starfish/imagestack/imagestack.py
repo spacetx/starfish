@@ -55,7 +55,7 @@ class ImageStack:
         retrieve a slice of the image tensor
     set_slice(indices, data, axes=None)
         set a slice of the image tensor
-    apply(func, is_volume=False, in_place=True, verbose=False, n_processes=None)
+    apply(func, is_volume=False, in_place=False, verbose=False, n_processes=None)
         apply a 2d or 3d function across all Tiles in the image tensor
     max_proj(*dims)
         return a max projection over one or more axis of the image tensor
@@ -574,7 +574,7 @@ class ImageStack:
             self,
             func,
             is_volume=False,
-            in_place=True,
+            in_place=False,
             verbose: bool=False,
             n_processes: Optional[int]=None,
             **kwargs
@@ -590,7 +590,7 @@ class ImageStack:
         is_volume : bool
             (default False) If True, pass 3d volumes (x, y, z) to func
         in_place : bool
-            (default True) If True, function is executed in place. If n_proc is not 1, the tile or
+            (default False) If True, function is executed in place. If n_proc is not 1, the tile or
             volume will be copied once during execution. If false, a new ImageStack object will be
             produced.
         verbose : bool

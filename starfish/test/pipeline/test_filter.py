@@ -17,10 +17,10 @@ def random_data_image_stack_factory():
 def test_gaussian_high_pass(sigma: Union[Number, Tuple[Number]]) -> None:
     """high pass is subtractive, sum of array should be less after running."""
     image_stack = random_data_image_stack_factory()
-    ghp = gaussian_high_pass.GaussianHighPass(sigma=sigma)
     sum_before = np.sum(image_stack.numpy_array)
-    ghp.run(image_stack)
-    assert np.sum(image_stack.numpy_array) < sum_before
+    ghp = gaussian_high_pass.GaussianHighPass(sigma=sigma)
+    result = ghp.run(image_stack)
+    assert np.sum(result.numpy_array) < sum_before
 
 
 @pytest.mark.parametrize('sigma', (1, (1, 1)))
@@ -29,8 +29,8 @@ def test_gaussian_high_pass_apply(sigma: Union[Number, Tuple[Number]]) -> None:
     image_stack = random_data_image_stack_factory()
     sum_before = np.sum(image_stack.numpy_array)
     ghp = gaussian_high_pass.GaussianHighPass(sigma=sigma)
-    ghp.run(image_stack)
-    assert np.sum(image_stack.numpy_array) < sum_before
+    result = ghp.run(image_stack)
+    assert np.sum(result.numpy_array) < sum_before
 
 
 @pytest.mark.parametrize('sigma', (1, (1, 0, 1)))
@@ -39,5 +39,5 @@ def test_gaussian_high_pass_apply_3d(sigma: Union[Number, Tuple[Number]]) -> Non
     image_stack = random_data_image_stack_factory()
     sum_before = np.sum(image_stack.numpy_array)
     ghp = gaussian_high_pass.GaussianHighPass(sigma=sigma, is_volume=True)
-    ghp.run(image_stack)
-    assert np.sum(image_stack.numpy_array) < sum_before
+    result = ghp.run(image_stack)
+    assert np.sum(result.numpy_array) < sum_before

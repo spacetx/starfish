@@ -80,8 +80,8 @@ cnts_benchmark.head()
 sc_filt = Filter.ScaleByPercentile(p=100)
 z_filt = Filter.ZeroByChannelMagnitude(thresh=.05, normalize=False)
 
-norm_stack = sc_filt.run(stack, in_place=False)
-zero_norm_stack = z_filt.run(norm_stack, in_place=False)
+norm_stack = sc_filt.run(stack)
+zero_norm_stack = z_filt.run(norm_stack)
 # EPY: END code
 
 # EPY: START markdown

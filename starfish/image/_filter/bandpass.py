@@ -81,7 +81,7 @@ class Bandpass(FilterAlgorithmBase):
         return bandpassed
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
             n_processes: Optional[int]=None
     ) -> ImageStack:
         """Perform filtering of an image stack

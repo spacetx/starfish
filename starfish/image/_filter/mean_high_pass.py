@@ -58,27 +58,24 @@ class MeanHighPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(image: np.ndarray, size: Number) -> np.ndarray:
+    def high_pass(image: Union[xr.DataArray, np.ndarray], size: Union[Number, Tuple[Number]]
+        ) -> Union[xr.DataArray, np.ndarray]:
         """
-        Applies a gaussian high pass filter to an image
+        Applies a mean high pass filter to an image
 
         Parameters
         ----------
-        image : numpy.ndarray[np.uint16]
+        image : numpy.ndarray[np.float32]
             2-d or 3-d image data
-        size : Number
+        size : Union[Number, Tuple[Number]]
             width of the kernel
 
         Returns
         -------
-        np.ndarray :
+        np.ndarray [np.float32]:
             Filtered image, same shape as input
 
         """
-        if image.dtype != np.uint16:
-            DataFormatWarning(
-                "Mean filters currently only support uint16 images. Image data will be converted.")
-            image = img_as_uint(image)
 
         blurred: np.ndarray = uniform_filter(image, size)
 

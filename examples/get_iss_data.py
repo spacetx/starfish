@@ -3,9 +3,11 @@ import io
 import json
 import os
 import zipfile
-from typing import IO, Mapping, Tuple, Union
+from typing import Mapping, Tuple, Union
 
+import numpy as np
 import requests
+from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, TileFetcher
@@ -38,8 +40,8 @@ class ISSTile(FetchedTile):
         return ImageFormat.TIFF
 
     @property
-    def tile_data_handle(self) -> IO:
-        return open(self.file_path, "rb")
+    def tile_data(self) -> np.ndarray:
+        return imread(self.file_path)
 
 
 class ISSPrimaryTileFetcher(TileFetcher):

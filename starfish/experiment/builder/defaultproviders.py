@@ -2,11 +2,9 @@
 This module implements default providers of data to the experiment builders.
 """
 
-from io import BytesIO
-from typing import IO, Mapping, Tuple, Union
+from typing import Mapping, Tuple, Union
 
 import numpy as np
-from skimage.io import imsave
 from slicedimage import (
     ImageFormat,
 )
@@ -37,12 +35,8 @@ class RandomNoiseTile(FetchedTile):
         return ImageFormat.TIFF
 
     @property
-    def tile_data_handle(self) -> IO:
-        arr = np.random.randint(0, 256, size=self.shape, dtype=np.uint8)
-        output = BytesIO()
-        imsave(output, arr, plugin="tifffile")
-        output.seek(0)
-        return output
+    def tile_data(self) -> np.ndarray:
+        return np.random.randint(0, 256, size=self.shape, dtype=np.uint8)
 
 
 class RandomNoiseTileFetcher(TileFetcher):

@@ -1,10 +1,8 @@
 import argparse
-import io
 import os
-from datetime import datetime
-from typing import IO, Mapping, Tuple, Union
+from typing import Mapping, Tuple, Union
 
-from skimage.external import tifffile
+import numpy as np
 from skimage.io import imread
 from slicedimage import ImageFormat
 
@@ -42,18 +40,8 @@ class IssCroppedBreastTile(FetchedTile):
         return crp
 
     @property
-    def tile_data_handle(self) -> IO:
-        im = self.crop(imread(self.file_path))
-        fh = io.BytesIO()
-        with tifffile.TiffWriter(fh) as tifffh:
-            tifffh.save(
-                im,
-                # always write with a fixed timestamp so we don't get different tile files each time
-                # we run this script.
-                datetime=datetime.fromtimestamp(0)
-            )
-        fh.seek(0)
-        return fh
+    def tile_data(self) -> np.ndarray:
+        return self.crop(imread(self.file_path))
 
 
 class ISSCroppedBreastPrimaryTileFetcher(TileFetcher):

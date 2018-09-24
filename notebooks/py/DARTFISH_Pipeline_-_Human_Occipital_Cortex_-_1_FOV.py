@@ -16,6 +16,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
 from starfish import Experiment, ImageStack
 from starfish.types import Features, Indices
@@ -38,12 +39,12 @@ sns.set_style('ticks')
 # EPY: END markdown
 
 # EPY: START code
-
-exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/experiment.json')
+test = os.getenv("USE_TEST_DATA") is not None
+if test:
+    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH-TEST/experiment.json')
+else:
+    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/experiment.json')
 stack = exp.fov().primary_image
-
-# TODO the latter will be fixed by https://github.com/spacetx/starfish/issues/316
-stack._data = stack._data.astype(float)
 # EPY: END code
 
 # EPY: START code
@@ -67,7 +68,6 @@ exp.codebook
 # EPY: END markdown
 
 # EPY: START code
-
 cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 # EPY: END code
@@ -130,11 +130,11 @@ psd = SpotFinder.PixelSpotDetector(
     max_area=area_threshold[1]
 )
 
-spot_intensities, results = psd.run(zero_norm_stack)
+initial_spot_intensities, results = psd.run(zero_norm_stack)
 # EPY: END code
 
 # EPY: START code
-spots_df = spot_intensities.to_features_dataframe()
+spots_df = initial_spot_intensities.to_features_dataframe()
 spots_df['area'] = np.pi*spots_df['radius']**2
 spots_df = spots_df.loc[spots_df[Features.PASSES_THRESHOLDS]]
 spots_df.head()
@@ -268,7 +268,10 @@ pixel_traces_df = pixel_traces.to_features_dataframe()
 pixel_traces_df['area'] = np.pi*pixel_traces_df.radius**2
 
 # pick index of a barcode that was read and decoded from the ImageStack
-ind = 45
+ind = 4
+
+# The test will error here on pixel_traces[ind,:] with an out of index error
+# because we are using the test data.
 
 # get the the corresponding gene this barcode was decoded to
 gene = pixel_traces_df.loc[ind].target

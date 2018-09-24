@@ -18,7 +18,11 @@ import os
 # EPY: END markdown
 
 # EPY: START code
-experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180919/osmFISH/experiment.json")
+test = os.getenv("USE_TEST_DATA") is not None
+if test:
+    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/osmFISH-TEST/experiment.json')
+else:
+    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180924/osmFISH/experiment.json')
 # EPY: END code
 
 # EPY: START markdown

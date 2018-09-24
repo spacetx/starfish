@@ -1,13 +1,22 @@
 Starfish
 ========
 
+.. image:: https://travis-ci.org/spacetx/starfish.svg?branch=master
+    :target: https://travis-ci.org/spacetx/starfish
+    :width: 30%
+.. image:: https://codecov.io/gh/spacetx/starfish/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/spacetx/starfish
+.. image:: https://readthedocs.org/projects/spacetx-starfish/badge/?version=latest
+    :target: https://spacetx-starfish.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 .. ideally we could use the ..include directive here instead of copy and pasting the following
    information
 
 Introduction
 ------------
 
-.. image:: /../../design/logo.png
+.. image:: design/logo.png
     :width: 250px
 
 The goal of *starfish* is to **prototype** a reference pipeline for the analysis of image-based
@@ -40,7 +49,7 @@ associated file manifests that this package plans to standardize and implement.
 
 .. _document: https://docs.google.com/document/d/1IHIngoMKr-Tnft2xOI3Q-5rL3GSX2E3PnJrpsOX5ZWs/edit?usp=sharing
 
-.. image:: /../../design/pipeline-diagram.png
+.. image:: design/pipeline-diagram.png
     :alt: pipeline diagram
 
 Documentation

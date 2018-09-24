@@ -68,6 +68,8 @@ class MeanHighPass(FilterAlgorithmBase):
             2-d or 3-d image data
         size : Number
             width of the kernel
+        rescale : bool
+            If true scales data by max value, if false clips max values to one
 
         Returns
         -------

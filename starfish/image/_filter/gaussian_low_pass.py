@@ -50,6 +50,8 @@ class GaussianLowPass(FilterAlgorithmBase):
         sigma : Union[Number, Tuple[Number]]
             Standard deviation of the Gaussian kernel that will be applied. If a float, an
             isotropic kernel will be assumed, otherwise the dimensions of the kernel give (z, y, x)
+         rescale : bool
+            If true scales data by max value, if false clips max values to one
 
         Returns
         -------

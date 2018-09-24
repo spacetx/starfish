@@ -52,6 +52,8 @@ class GaussianHighPass(FilterAlgorithmBase):
             2-d or 3-d image data
         sigma : Union[Number, Tuple[Number]]
             Standard deviation of gaussian kernel
+        rescale : bool
+            If true scales data by max value, if false clips max values to one
 
         Returns
         -------
@@ -61,7 +63,7 @@ class GaussianHighPass(FilterAlgorithmBase):
 
         """
 
-        blurred = GaussianLowPass.low_pass(image, sigma, True)
+        blurred = GaussianLowPass.low_pass(image, sigma)
         filtered = image - blurred
         filtered = preserve_float_range(filtered, rescale)
 

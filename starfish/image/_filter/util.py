@@ -130,7 +130,6 @@ def preserve_float_range(
     -------
     array : Union[xr.DataArray, np.ndarray]
         Array whose values are in the interval [0, 1].
-        :param clip:
 
     """
     array = array.copy()

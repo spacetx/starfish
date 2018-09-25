@@ -28,22 +28,19 @@ class SpotFinder(PipelineComponent):
         spot_finder_group.add_argument("-i", "--input", type=FsExistsType(), required=True)
         spot_finder_group.add_argument("-o", "--output", required=True)
         spot_finder_group.add_argument(
-            "--blobs-stack", default=None, required=False,
-            help=(
+            "--blobs-stack", default=None, required=False, help=(
                 'ImageStack that contains the blobs. Will be max-projected across imaging round '
                 'and channel to produce the blobs_image'
             )
         )
         spot_finder_group.add_argument(
-            "--reference-image-from-max-projection", default=False, action='store_true',
-            help=(
+            "--reference-image-from-max-projection", default=False, action='store_true', help=(
                 'Construct a reference image by max projecting imaging rounds and channels. Spots '
                 'are found in this image and then measured across all images in the input stack.'
             )
         )
         spot_finder_group.add_argument(
-            "--codebook", default=None, required=False,
-            help=(
+            "--codebook", default=None, required=False, help=(
                 'A spaceTx spec-compliant json file that describes a three dimensional tensor '
                 'whose values are the expected intensity of a spot for each code in each imaging '
                 'round and each color channel.'

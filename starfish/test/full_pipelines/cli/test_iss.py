@@ -6,6 +6,7 @@ together
 """
 import os
 import sys
+import unittest
 
 import numpy as np
 import pandas as pd
@@ -14,8 +15,7 @@ from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 from starfish.types import Features
 
 
-class TestWithIssData(CLITest):
-    __test__ = True
+class TestWithIssData(CLITest, unittest.TestCase):
 
     spots_file = "decoded-spots.nc"
 

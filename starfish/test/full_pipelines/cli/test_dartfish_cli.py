@@ -1,5 +1,6 @@
 import os
 import sys
+import unittest
 
 import numpy as np
 import pandas as pd
@@ -9,8 +10,7 @@ from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 from starfish.types import Features
 
 
-class TestWithDartfishData(CLITest):
-    __test__ = True
+class TestWithDartfishData(CLITest, unittest.TestCase):
 
     SUBDIRS = (
         "registered",

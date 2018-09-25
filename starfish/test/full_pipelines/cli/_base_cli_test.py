@@ -1,22 +1,18 @@
 import os
 import shutil
-import unittest
 from typing import List, Tuple
 
 from starfish.intensity_table import IntensityTable
 from starfish.util import exec
 
 
-class CLITest(unittest.TestCase):
+class CLITest:
     """This is a base class for testing CLI methods. Each stage should correspond
     to a different pipeline step. Running the test will go through each stage and
     run the command line method with given arguments. The last stage should produce
     a file called results containing an IntensityTable. Each cli test should define
     it's own verify_results method.
     """
-    # Since this is a base class we don't want to actually run it as a test.
-    # For classes that inherit CLITest this will need to be set to True.
-    __test__ = False
 
     SUBDIRS = Tuple[str]
     STAGES = Tuple[List]

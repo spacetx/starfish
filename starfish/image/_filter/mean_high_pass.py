@@ -3,7 +3,6 @@ from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
-import xarray as xr
 from scipy.ndimage.filters import uniform_filter
 
 from starfish.imagestack.imagestack import ImageStack
@@ -49,9 +48,7 @@ class MeanHighPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(
-            image: Union[xr.DataArray, np.ndarray], size: Union[Number, Tuple[Number]]
-    ) -> Union[xr.DataArray, np.ndarray]:
+    def high_pass(image: np.ndarray, size: Union[Number, Tuple[Number]]) -> np.ndarray:
         """
         Applies a mean high pass filter to an image
 

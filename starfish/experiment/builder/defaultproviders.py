@@ -39,6 +39,36 @@ class RandomNoiseTile(FetchedTile):
         return np.random.randint(0, 256, size=self.shape, dtype=np.uint8)
 
 
+class OnesTile(FetchedTile):
+    """
+    This is a simple implementation of :class:`.FetchedImage` that simply is entirely all pixels at
+    maximum intensity.
+    """
+    def __init__(self, shape: Tuple[int, int]) -> None:
+        super().__init__()
+        self._shape = shape
+
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return self._shape
+
+    @property
+    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+        return {
+            Coordinates.X: (0.0, 0.0001),
+            Coordinates.Y: (0.0, 0.0001),
+            Coordinates.Z: (0.0, 0.0001),
+        }
+
+    @property
+    def format(self) -> ImageFormat:
+        return ImageFormat.TIFF
+
+    @property
+    def tile_data(self) -> np.ndarray:
+        return np.full(shape=self.shape, fill_value=1.0, dtype=np.float32)
+
+
 def tile_fetcher_factory(
         fetched_tile_cls: Type[FetchedTile],
         pass_tile_indices: bool=False,

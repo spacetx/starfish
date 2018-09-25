@@ -1,4 +1,7 @@
 language: python
+env:
+  global:
+    - STARFISH_STRICT_LOADING=true
 services:
 - docker
 python:

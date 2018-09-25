@@ -135,9 +135,9 @@ class DeconvolvePSF(FilterAlgorithmBase):
         return im_deconv
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose=False,
+            self, stack: ImageStack, in_place: bool=False, verbose=False,
             n_processes: Optional[int]=None
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -153,8 +153,9 @@ class DeconvolvePSF(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in-place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
         func = partial(
@@ -165,6 +166,4 @@ class DeconvolvePSF(FilterAlgorithmBase):
             func,
             in_place=in_place, verbose=verbose, n_processes=n_processes
         )
-        if not in_place:
-            return result
-        return None
+        return result

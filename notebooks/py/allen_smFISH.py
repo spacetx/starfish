@@ -32,7 +32,7 @@ test = os.getenv("USE_TEST_DATA") is not None
 if test:
     experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180919/allen_smFISH-TESE/experiment.json'
 else:
-    experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180919/allen_smFISH/experiment.json'
+    experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180924/allen_smFISH/experiment.json'
 # EPY: END code
 
 # EPY: START markdown
@@ -63,7 +63,7 @@ experiment.codebook
 # EPY: START code
 from starfish.image import Filter
 clip = Filter.Clip(p_min=10, p_max=100)
-clip.run(primary_image, verbose=True)
+clip.run(primary_image, verbose=True, in_place=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -89,13 +89,13 @@ bandpass.run(primary_image, verbose=True)
 # I wasn't sure if this clipping was supposed to be by volume or tile. I've done tile here, but it can be easily
 # switched to volume.
 clip = Filter.Clip(p_min=10, p_max=100, is_volume=False)
-clip.run(primary_image, verbose=True)
+clip.run(primary_image, verbose=True, in_place=True)
 # EPY: END code
 
 # EPY: START code
 sigma=(1, 0, 0)  # filter only in z, do nothing in x, y
 glp = Filter.GaussianLowPass(sigma=sigma, is_volume=True, verbose=True)
-glp.run(primary_image)
+glp.run(primary_image, in_place=True)
 # EPY: END code
 
 # EPY: START markdown

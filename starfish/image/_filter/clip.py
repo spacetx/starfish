@@ -67,9 +67,9 @@ class Clip(FilterAlgorithmBase):
         return image.astype(dtype)
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
             n_processes: Optional[int]=None
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -85,8 +85,9 @@ class Clip(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in-place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
         clip = partial(self.clip, p_min=self.p_min, p_max=self.p_max)
@@ -94,6 +95,4 @@ class Clip(FilterAlgorithmBase):
             clip,
             is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
-        if not in_place:
-            return result
-        return None
+        return result

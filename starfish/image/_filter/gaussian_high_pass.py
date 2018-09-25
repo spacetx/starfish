@@ -67,9 +67,9 @@ class GaussianHighPass(FilterAlgorithmBase):
         return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=True,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=True,
             n_processes: Optional[int]=None
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -85,8 +85,9 @@ class GaussianHighPass(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in-place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
         high_pass: Callable = partial(self.high_pass, sigma=self.sigma)
@@ -94,6 +95,4 @@ class GaussianHighPass(FilterAlgorithmBase):
             high_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place,
             n_processes=n_processes
         )
-        if not in_place:
-            return result
-        return None
+        return result

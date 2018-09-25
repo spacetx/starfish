@@ -52,7 +52,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
     # and the results look bad. #548 addresses this problem.
     @staticmethod
     def richardson_lucy_deconv(
-            image: np.ndarray, iterations: int, psf: np.ndarray, clip: bool=True) -> np.ndarray:
+            image: np.ndarray, iterations: int, psf: np.ndarray, clip: bool) -> np.ndarray:
         """
         Deconvolves input image with a specified point spread function.
 
@@ -65,8 +65,8 @@ class DeconvolvePSF(FilterAlgorithmBase):
         iterations : int
            Number of iterations. This parameter plays the role of
            regularisation.
-        clip : boolean, optional
-           True by default. If true, pixel value of the result above 1 or
+        clip : boolean, required
+            If true, pixel value of the result above 1 or
            under -1 are thresholded for skimage pipeline compatibility.
 
         Returns

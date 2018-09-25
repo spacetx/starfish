@@ -40,9 +40,11 @@ class GaussianHighPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(image: Union[xr.DataArray, np.ndarray],
-                  sigma: Union[Number, Tuple[Number]],
-                  rescale: bool = False) -> Union[xr.DataArray, np.ndarray]:
+    def high_pass(
+            image: Union[xr.DataArray, np.ndarray],
+            sigma: Union[Number, Tuple[Number]],
+            rescale: bool=False
+    ) -> Union[xr.DataArray, np.ndarray]:
         """
         Applies a gaussian high pass filter to an image
 

@@ -16,6 +16,8 @@ class FetchedTile:
     """
     This is the contract for providing the data for constructing a :class:`slicedimage.Tile`.
     """
+    def __init__(self, *args, **kwargs):
+        pass
 
     @property
     def shape(self) -> Tuple[int, ...]:

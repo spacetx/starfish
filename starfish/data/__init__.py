@@ -1,22 +1,35 @@
 from starfish import Experiment
 
 
-def MERFISH():
+def MERFISH(test_data: bool=False):
+    if test_data:
+        return Experiment.from_json(
+            'https://dmf0bdeheu4zf.cloudfront.net/20180919/MERFISH-TEST/experiment.json')
     return Experiment.from_json(
         'https://dmf0bdeheu4zf.cloudfront.net/20180919/MERFISH/experiment.json')
 
-def allen_smFISH():
+
+def allen_smFISH(test_data: bool=False):
     return Experiment.from_json(
         'https://dmf0bdeheu4zf.cloudfront.net/20180919/allen_smFISH/experiment.json')
 
-def DARTFISH():
+
+def DARTFISH(test_data: bool=False):
+    if test_data:
+        return Experiment.from_json(
+            'https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH-TEST/experiment.json')
     return Experiment.from_json(
         'https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/experiment.json')
 
-def ISS():
+
+def ISS(test_data: bool=False):
+    if test_data:
+        return Experiment.from_json(
+            'https://dmf0bdeheu4zf.cloudfront.net/20180919/ISS-TEST/experiment.json')
     return Experiment.from_json(
         'https://dmf0bdeheu4zf.cloudfront.net/20180919/ISS/experiment.json')
 
-def osmFISH():
+
+def osmFISH(test_data: bool=False):
     return Experiment.from_json(
         'https://dmf0bdeheu4zf.cloudfront.net/20180919/osmFISH/experiment.json')

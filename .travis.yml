@@ -14,7 +14,7 @@ jobs:
     - name: Syntax and Tests
       script:
         - make install-src
-        - make fast
+        - make all
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Docker

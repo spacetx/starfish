@@ -49,9 +49,9 @@ class TestWithDartfishData(CLITest, unittest.TestCase):
                 tempdir, "filtered", "zero_filtered.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "results", "spots.nc"),
-            "PixelSpotDetector",
             "--codebook", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "registered", "codebook.json"),
+            tempdir, "registered", "codebook.json"),
+            "PixelSpotDetector",
             "--distance-threshold", "3",
             "--magnitude-threshold", ".5",
             "--min-area", "5",

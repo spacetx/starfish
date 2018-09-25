@@ -10,8 +10,6 @@ from starfish.experiment.builder import FetchedTile, TileFetcher, write_experime
 from starfish.types import Coordinates, Indices, Number
 from starfish.util.argparse import FsExistsType
 
-SHAPE = 1044, 1390
-
 
 class IssCroppedBreastTile(FetchedTile):
     def __init__(self, file_path):
@@ -19,7 +17,7 @@ class IssCroppedBreastTile(FetchedTile):
 
     @property
     def shape(self) -> Tuple[int, ...]:
-        return SHAPE
+        return 1044, 1390
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
@@ -88,12 +86,10 @@ class ISSCroppedBreastAuxTileFetcher(TileFetcher):
         return IssCroppedBreastTile(file_path)
 
 
-def format_data(input_dir, output_dir):
+def format_data(input_dir, output_dir, num_fovs):
     def add_codebook(experiment_json_doc):
         experiment_json_doc['codebook'] = "codebook.json"
         return experiment_json_doc
-
-    num_fovs = 16
 
     hyb_dimensions = {
         Indices.ROUND: 4,
@@ -114,18 +110,19 @@ def format_data(input_dir, output_dir):
         }
     }
 
-    write_experiment_json(output_dir,
-                          num_fovs,
-                          hyb_dimensions,
-                          aux_name_to_dimensions,
-                          primary_tile_fetcher=ISSCroppedBreastPrimaryTileFetcher(input_dir),
-                          aux_tile_fetcher={
-                              'nuclei': ISSCroppedBreastAuxTileFetcher(input_dir, 'nuclei'),
-                              'dots': ISSCroppedBreastAuxTileFetcher(input_dir, 'dots'),
-                          },
-                          postprocess_func=add_codebook,
-                          default_shape=SHAPE
-                          )
+    write_experiment_json(
+        path=output_dir,
+        fov_count=num_fovs,
+        hyb_dimensions=hyb_dimensions,
+        aux_name_to_dimensions=aux_name_to_dimensions,
+        primary_tile_fetcher=ISSCroppedBreastPrimaryTileFetcher(input_dir),
+        aux_tile_fetcher={
+            'nuclei': ISSCroppedBreastAuxTileFetcher(input_dir, 'nuclei'),
+            'dots': ISSCroppedBreastAuxTileFetcher(input_dir, 'dots'),
+        },
+        postprocess_func=add_codebook,
+        default_shape=(1044, 1390)
+    )
 
 
 if __name__ == "__main__":
@@ -133,9 +130,11 @@ if __name__ == "__main__":
     s3_bucket = "s3://czi.starfish.data.public/browse/raw/20180820/iss_breast/"
     input_help_msg = "Path to raw data. Raw data can be downloaded from: {}".format(s3_bucket)
     output_help_msg = "Path to output experment.json and all formatted images it references"
+    fov_help_msg = "The number of fovs that should be extracted from the directory"
     parser = argparse.ArgumentParser()
     parser.add_argument("input_dir", type=FsExistsType(), help=input_help_msg)
     parser.add_argument("output_dir", type=FsExistsType(), help=output_help_msg)
+    parser.add_argument("num_fovs", type=int, help=fov_help_msg)
 
     args = parser.parse_args()
-    format_data(args.input_dir, args.output_dir)
+    format_data(args.input_dir, args.output_dir, args.num_fovs)

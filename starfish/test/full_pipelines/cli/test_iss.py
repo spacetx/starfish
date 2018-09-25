@@ -136,9 +136,9 @@ class TestWithIssData(unittest.TestCase):
                 tempdir, "filtered", "hybridization.json"),
             "--output", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "results", "spots.nc"),
-            "GaussianSpotDetector",
             "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(
                 tempdir, "filtered", "dots.json"),
+            "GaussianSpotDetector",
             "--min-sigma", "4",
             "--max-sigma", "6",
             "--num-sigma", "20",

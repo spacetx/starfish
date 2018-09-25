@@ -130,7 +130,9 @@ class DeconvolvePSF(FilterAlgorithmBase):
                 'too many iterations.')
 
         if clip:
-            im_deconv = preserve_float_range(im_deconv)
+            # Changing to cliping values above 1 here changes test results
+            # so keeping this as rescaling for now
+            im_deconv = preserve_float_range(im_deconv, True)
 
         return im_deconv
 

@@ -12,7 +12,7 @@ from slicedimage import (
 
 from starfish.experiment.version import CURRENT_VERSION
 from starfish.types import Indices
-from .defaultproviders import RandomNoiseTile, RandomNoiseTileFetcher
+from .defaultproviders import RandomNoiseTile, tile_fetcher_factory
 from .providers import FetchedTile, TileFetcher
 
 
@@ -139,7 +139,7 @@ def write_experiment_json(
         Default shape for the tiles in this experiment.
     """
     if primary_tile_fetcher is None:
-        primary_tile_fetcher = RandomNoiseTileFetcher()
+        primary_tile_fetcher = tile_fetcher_factory(RandomNoiseTile)
     if aux_tile_fetcher is None:
         aux_tile_fetcher = {}
     if postprocess_func is None:
@@ -174,7 +174,7 @@ def write_experiment_json(
         auxiliary_image = build_image(
             fov_count,
             aux_dimensions[Indices.ROUND], aux_dimensions[Indices.CH], aux_dimensions[Indices.Z],
-            aux_tile_fetcher.get(aux_name, RandomNoiseTileFetcher()),
+            aux_tile_fetcher.get(aux_name, tile_fetcher_factory(RandomNoiseTile)),
             default_shape=default_shape,
         )
         Writer.write_to_path(

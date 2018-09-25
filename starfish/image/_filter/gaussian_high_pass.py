@@ -41,28 +41,33 @@ class GaussianHighPass(FilterAlgorithmBase):
 
     @staticmethod
     def high_pass(
-            image: Union[xr.DataArray, np.ndarray], sigma: Union[Number, Tuple[Number]]
+            image: Union[xr.DataArray, np.ndarray],
+            sigma: Union[Number, Tuple[Number]],
+            rescale: bool=False
     ) -> Union[xr.DataArray, np.ndarray]:
         """
         Applies a gaussian high pass filter to an image
 
         Parameters
         ----------
-        image : numpy.ndarray[np.uint16]
+        image : numpy.ndarray[np.float32]
             2-d or 3-d image data
         sigma : Union[Number, Tuple[Number]]
             Standard deviation of gaussian kernel
+        rescale : bool
+            If true scales data by max value, if false clips max values to one
 
         Returns
         -------
         np.ndarray :
             filtered image of the same shape as the input image
+            :param rescale:
 
         """
 
         blurred = GaussianLowPass.low_pass(image, sigma)
         filtered = image - blurred
-        filtered = preserve_float_range(filtered)
+        filtered = preserve_float_range(filtered, rescale)
 
         return filtered
 

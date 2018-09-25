@@ -141,8 +141,7 @@ def preserve_float_range(
             array[array < 0] = 0
     if np.any(array > 1):
         if rescale:
-            if np.any(array > 1):
-                array /= array.max()
+            array /= array.max()
         else:
             if is_xr:
                 array.values[array.values > 1] = 1

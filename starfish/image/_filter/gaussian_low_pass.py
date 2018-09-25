@@ -44,7 +44,7 @@ class GaussianLowPass(FilterAlgorithmBase):
 
         Parameters
         ----------
-        image : np.ndarray[np.uint16]
+        image : np.ndarray[np.float32]
             2-d or 3-d image data
         sigma : Union[Number, Tuple[Number]]
             Standard deviation of the Gaussian kernel that will be applied. If a float, an

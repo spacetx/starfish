@@ -17,15 +17,17 @@ if __name__ == "__main__":
     # save image stacks locally
     exp = Experiment.from_json(args.experiment_url + 'experiment.json')
 
-    fov_dir = args.output_dir + '/fov_001/'
-    os.mkdir(fov_dir)
-
-    exp.fov().primary_image.write(fov_dir + 'hybridization.json')
-    for image_type in exp.fov().auxiliary_image_types:
-        exp.fov()[image_type].write(fov_dir + (image_type + '.json'))
+    for fov in exp.fovs():
+        fov_dir = args.output_dir + "/" + fov.name + "/"
+        os.mkdir(fov_dir)
+        fov.primary_image.write(fov_dir + 'hybridization.json')
+        for image_type in fov.auxiliary_image_types:
+            fov[image_type].write(fov_dir + (image_type + '.json'))
 
     # get codebook from url and save locally to tmp dir
     codebook = requests.get(args.experiment_url + 'codebook.json')
     data = codebook.json()
     with open(args.output_dir + '/codebook.json', 'w') as f:
         json.dump(data, f)
+
+    # TODO save exp.json

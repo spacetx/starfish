@@ -34,8 +34,8 @@ starfish filter \
 starfish detect_spots \
     --input /tmp/starfish/filtered/primary_image.json \
     --output /tmp/starfish/results/spots.nc \
-    GaussianSpotDetector \
     --blobs-stack /tmp/starfish/filtered/dots.json \
+    GaussianSpotDetector \
     --min-sigma 4 \
     --max-sigma 6 \
     --num-sigma 20 \

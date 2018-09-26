@@ -10,7 +10,7 @@ from . import image
 # spot detection and manipulation
 from . import spots
 # top-level objects
-from .codebook import Codebook
+from .codebook.codebook import Codebook
 from .experiment.experiment import Experiment
 from .imagestack.imagestack import ImageStack
 from .intensity_table import IntensityTable

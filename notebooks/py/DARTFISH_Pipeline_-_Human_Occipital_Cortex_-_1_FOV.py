@@ -18,10 +18,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
-from starfish import Experiment, ImageStack
+from starfish import data
 from starfish.types import Features, Indices
-
-from starfish.codebook import Codebook
 
 from starfish.intensity_table import IntensityTable
 
@@ -40,10 +38,8 @@ sns.set_style('ticks')
 
 # EPY: START code
 test = os.getenv("USE_TEST_DATA") is not None
-if test:
-    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH-TEST/experiment.json')
-else:
-    exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/experiment.json')
+exp = data.DARTFISH(test_data=test)
+
 stack = exp.fov().primary_image
 # EPY: END code
 

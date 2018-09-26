@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 from scipy.ndimage.filters import gaussian_filter
 
-from starfish.codebook import Codebook
+from starfish.codebook.codebook import Codebook
 from starfish.experiment.experiment import Experiment
 from starfish.image._filter.white_tophat import WhiteTophat
 from starfish.imagestack.imagestack import ImageStack

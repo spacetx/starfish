@@ -119,21 +119,12 @@ install-src:
 install-pypi:
 	pip install -r REQUIREMENTS-NOTEBOOK.txt starfish
 
-install-travis: install-travis-$(TRAVIS_EVENT_TYPE)
-
-install-travis-cron: install-pypi
-install-travis-: install-src
-install-travis-api: install-src
-install-travis-pull_request: install-src
-install-travis-push: install-src
-
 help-install:
 	$(call print_help, install-src, pip install the current directory)
 	$(call print_help, install-pypi, pip install starfish from pypi)
 	$(call print_help, install-travis, chooses between src and pypi based on TRAVIS_EVENT_TYPE)
 
 .PHONY: install-src install-pypi
-.PHONY: install-travis install-cron install
 #
 ###############################################################
 

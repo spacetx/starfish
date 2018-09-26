@@ -17,28 +17,28 @@ jobs:
       script: make docker
     - name: Allen Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-travis run__notebooks/py/allen_smFISH.py
+      script: make install-src run__notebooks/py/allen_smFISH.py
     - name: MERFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-travis run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
+      script: make install-src run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
     - name: Assay Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-travis run__notebooks/py/assay_comparison.py
+      script: make install-src run__notebooks/py/assay_comparison.py
     - name: osmFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-travis run__notebooks/py/osmFISH.py
+      script: make install-src run__notebooks/py/osmFISH.py
     - name: DARTFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-travis run__notebooks/py/DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV.py
+      script: make install-src run__notebooks/py/DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV.py
     - name: Simulation Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-travis run__notebooks/py/Starfish_simulation.py
+      script: make install-src run__notebooks/py/Starfish_simulation.py
     - name: ISS Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-travis run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
+      script: make install-src run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
     - name: Released Notebooks
       if: type = cron and branch =~ /^(master|merge)/
-      script: make check_notebooks install-travis run_notebooks
+      script: make check_notebooks install-pypi run_notebooks
     - name: Check Requirements
       if: type = cron AND branch = /^master$/
       script: make refresh_all_requirements check_requirements

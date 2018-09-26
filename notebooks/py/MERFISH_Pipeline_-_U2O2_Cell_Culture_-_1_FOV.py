@@ -25,17 +25,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from showit import image as show_image
-from starfish import Experiment
+from starfish import data
 from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START code
 # load the data from cloudfront
 test = os.getenv("USE_TEST_DATA") is not None
-if test:
-    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/MERFISH-TEST/experiment.json')
-else:
-    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180924/MERFISH/experiment.json')
+experiment = data.MERFISH(test_data=test)
 # EPY: END code
 
 # EPY: START markdown

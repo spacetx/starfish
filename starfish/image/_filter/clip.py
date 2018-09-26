@@ -60,11 +60,7 @@ class Clip(FilterAlgorithmBase):
         """
         v_min, v_max = np.percentile(image, [p_min, p_max])
 
-        # asking for a float percentile clipping value from an integer image will
-        # convert to float, so store the dtype so it can be restored
-        dtype = image.dtype
-        image = image.clip(min=v_min, max=v_max)
-        return image.astype(dtype)
+        return image.clip(min=v_min, max=v_max)
 
     def run(
             self, stack: ImageStack, in_place: bool=False, verbose: bool=False,

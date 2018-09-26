@@ -15,7 +15,7 @@
 import matplotlib.pyplot as plt
 import os
 
-from starfish import Experiment
+from starfish import data
 from starfish.types import Indices
 # EPY: END code
 
@@ -24,15 +24,6 @@ from starfish.types import Indices
 # # the data from the local disk. If so, uncomment this cell and run this instead of the above.
 # !aws s3 sync s3://czi.starfish.data.public/20180606/allen_smFISH ./allen_smFISH
 # experiment_json = os.path.abspath("./allen_smFISH/fov_001/experiment.json")
-# EPY: END code
-
-# EPY: START code
-# this is a large (1.1GB) FOV, so the download may take some time
-test = os.getenv("USE_TEST_DATA") is not None
-if test:
-    experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180919/allen_smFISH-TESE/experiment.json'
-else:
-    experiment_json = 'https://dmf0bdeheu4zf.cloudfront.net/20180924/allen_smFISH/experiment.json'
 # EPY: END code
 
 # EPY: START markdown
@@ -46,7 +37,8 @@ else:
 # EPY: END markdown
 
 # EPY: START code
-experiment = Experiment.from_json(experiment_json)
+test = os.getenv("USE_TEST_DATA") is not None
+experiment = data.allen_smFISH(test_data=test)
 primary_image = experiment.fov().primary_image
 # EPY: END code
 

@@ -58,7 +58,7 @@ class MeanHighPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(image: np.ndarray, size: Number) -> np.ndarray:
+    def high_pass(image: np.ndarray, size: Number, rescale: bool=False) -> np.ndarray:
         """
         Applies a gaussian high pass filter to an image
 
@@ -68,11 +68,14 @@ class MeanHighPass(FilterAlgorithmBase):
             2-d or 3-d image data
         size : Number
             width of the kernel
+        rescale : bool
+            If true scales data by max value, if false clips max values to one
 
         Returns
         -------
         np.ndarray :
             Filtered image, same shape as input
+            :param clip:
 
         """
         if image.dtype != np.uint16:
@@ -83,7 +86,7 @@ class MeanHighPass(FilterAlgorithmBase):
         blurred: np.ndarray = uniform_filter(image, size)
 
         filtered: np.ndarray = image - blurred
-        filtered = preserve_float_range(filtered)
+        filtered = preserve_float_range(filtered, rescale)
 
         return filtered
 

@@ -111,15 +111,20 @@ def validate_and_broadcast_kernel_size(
     return valid_sigma
 
 
-def preserve_float_range(array: Union[xr.DataArray, np.ndarray]) -> Union[xr.DataArray, np.ndarray]:
+def preserve_float_range(
+        array: Union[xr.DataArray, np.ndarray],
+        rescale: bool=False) -> Union[xr.DataArray, np.ndarray]:
     """
-    Clip values below zero and scale values by the max, but only if sub- or super-maximal values are
-    detected. Otherwise, this function will preserve the dynamic range of the input image.
+    Clip values below zero and and above one or scale values by the max,
+    but only if sub- or super-maximal values are detected.
+    Otherwise, this function will preserve the dynamic range of the input image.
 
     Parameters
     ----------
     array : Union[xr.DataArray, np.ndarray]
         Array whose values should be in the interval [0, 1] but may not be.
+    rescale: bool
+        If true, scale values by the max.
 
     Returns
     -------
@@ -128,11 +133,18 @@ def preserve_float_range(array: Union[xr.DataArray, np.ndarray]) -> Union[xr.Dat
 
     """
     array = array.copy()
+    is_xr = isinstance(array, xr.DataArray)
     if np.any(array < 0):
-        if isinstance(array, xr.DataArray):
+        if is_xr:
             array.values[array.values < 0] = 0
         else:
             array[array < 0] = 0
     if np.any(array > 1):
-        array /= array.max()
+        if rescale:
+            array /= array.max()
+        else:
+            if is_xr:
+                array.values[array.values > 1] = 1
+            else:
+                array[array > 1] = 1
     return array.astype(np.float32)

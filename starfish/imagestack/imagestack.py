@@ -612,7 +612,9 @@ class ImageStack:
         if not in_place:
             image_stack = deepcopy(self)
             return image_stack.apply(
-                func, is_volume=is_volume, in_place=True, verbose=verbose, **kwargs
+                func,
+                is_volume=is_volume, in_place=True, verbose=verbose, n_processes=n_processes,
+                **kwargs
             )
 
         if is_volume:

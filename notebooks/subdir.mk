@@ -18,7 +18,7 @@ $(py_run_targets): run__%.py :
 	[ -e $*.py.skip ] || $(PYTHON) $*.py
 
 $(py_check_targets): check__%.py :
-	grep $*.py .travis.yml
+	grep -q $*.py .travis.yml
 
 $(ipynb_validate_targets): TEMPFILE := $(shell mktemp)
 $(ipynb_validate_targets): validate__notebooks/%.ipynb :

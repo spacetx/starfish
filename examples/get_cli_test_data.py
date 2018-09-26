@@ -31,4 +31,8 @@ if __name__ == "__main__":
     with open(pathlib.Path(args.output_dir, 'codebook.json'), 'w') as f:
         json.dump(data, f)
 
-    # TODO save exp.json
+    # get experiment.json from url and save locally to tmp dir
+    experiment = requests.get(os.path.join(args.experiment_url, "experiment.json"))
+    data = experiment.json()
+    with open(pathlib.Path(args.output_dir, 'experiment.json'), 'w') as f:
+        json.dump(data, f)

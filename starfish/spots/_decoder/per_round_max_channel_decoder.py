@@ -1,4 +1,4 @@
-from starfish.codebook import Codebook
+from starfish.codebook.codebook import Codebook
 from starfish.intensity_table import IntensityTable
 from ._base import DecoderAlgorithmBase
 

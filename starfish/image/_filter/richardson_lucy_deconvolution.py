@@ -65,7 +65,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
         iterations : int
            Number of iterations. This parameter plays the role of
            regularisation.
-        clip : boolean, required
+        clip : boolean
             If true, pixel value of the result above 1 or
            under -1 are thresholded for skimage pipeline compatibility.
 

@@ -49,7 +49,7 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
             "--reference-stack", type=FsExistsType(), required=True,
             help="The image stack to align the input image stack to.")
 
-    def run(self, image: ImageStack, in_place: bool=True) -> Optional[ImageStack]:
+    def run(self, image: ImageStack, in_place: bool=False) -> Optional[ImageStack]:
         """Register an ImageStack against a reference image.
 
         Parameters

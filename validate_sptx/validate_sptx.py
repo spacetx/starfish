@@ -48,7 +48,10 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
 
     # validate experiment.json
     experiment_validator = SpaceTxValidator(_get_absolute_schema_path('experiment.json'))
-    valid &= experiment_validator.validate_object(experiment, name, fuzz=fuzz)
+    if fuzz:
+        experiment_validator.fuzz_object(experiment, name)
+    else:
+        valid &= experiment_validator.validate_object(experiment, name)
 
     # validate manifests that it links to.
     possible_manifests = []
@@ -68,7 +71,10 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     fovs = []
     for manifest, filename in possible_manifests:
         if 'contents' in manifest:  # is a manifest; validate
-            valid &= manifest_validator.validate_object(manifest, filename, fuzz=fuzz)
+            if fuzz:
+                manifest_validator.fuzz_object(manifest, filename)
+            else:
+                valid &= manifest_validator.validate_object(manifest, filename)
 
             # contains fields of view
             for key, fov in manifest['contents'].items():
@@ -82,7 +88,10 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     assert len(fovs) != 0
     fov_validator = SpaceTxValidator(_get_absolute_schema_path('field_of_view/field_of_view.json'))
     for fov, filename in fovs:
-        valid &= fov_validator.validate_object(fov, filename, fuzz=fuzz)
+        if fuzz:
+            fov_validator.fuzz_object(fov, filename)
+        else:
+            valid &= fov_validator.validate_object(fov, filename)
 
     # validate codebook
     codebook_validator = SpaceTxValidator(_get_absolute_schema_path('codebook/codebook.json'))
@@ -91,7 +100,10 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     if codebook_file is not None:
         with backend.read_contextmanager(codebook_file) as fh:
             codebook = json.load(fh)
-    valid &= codebook_validator.validate_object(codebook, codebook_file, fuzz=fuzz)
+    if fuzz:
+        codebook_validator.fuzz_object(codebook, codebook_file)
+    else:
+        valid &= codebook_validator.validate_object(codebook, codebook_file)
 
     return valid
 

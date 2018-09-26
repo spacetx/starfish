@@ -1,7 +1,7 @@
 ## Building Synthetic SpaceTx-specification compliant experiments
 
 starfish provides a tool to construct example datasets that can be used to test software for use with our formats.
-This tool generates spaceTx-specification experiments with tunable sizes and shapes, but the images are randomly generated and do not contain biologically meaningful data. 
+This tool generates spaceTx-specification experiments with tunable sizes and shapes, but the images are randomly generated and do not contain biologically meaningful data.
 
 ### Installation
 
@@ -9,7 +9,7 @@ Please follow instructions to install starfish as outlined in the starfish [READ
 
 ### Usage
 
-starfish build --help will provide instructions on how to use the tool: 
+starfish build --help will provide instructions on how to use the tool:
 ```
 usage: starfish build [-h] --fov-count FOV_COUNT --hybridization-dimensions
                       HYBRIDIZATION_DIMENSIONS
@@ -43,9 +43,9 @@ optional arguments:
 
 ### Examples:
 
-Build a 3-field of view experiment with 2 channels and 8 hybridization rounds per primary image stack that samples z 30 times. 
-The experiment has both a dots image and a nuclei image, but these have only one channel and hybridization round each. 
-The size of the (x,y) tiles cannot be modified at this time. 
+Build a 3-field of view experiment with 2 channels and 8 hybridization rounds per primary image stack that samples z 30 times.
+The experiment has both a dots image and a nuclei image, but these have only one channel and hybridization round each.
+The size of the (x,y) tiles cannot be modified at this time.
 
 ```bash
 mkdir tmp

@@ -51,6 +51,6 @@ class Filter(PipelineComponent):
         print('Filtering images ...')
         stack = ImageStack.from_path_or_url(args.input)
         instance = args.filter_algorithm_class(**vars(args))
-        instance.run(stack)
+        instance.run(stack, in_place=True)
 
         stack.write(args.output)

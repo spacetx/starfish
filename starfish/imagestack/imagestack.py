@@ -19,11 +19,13 @@ from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import scoreatpercentile
 from skimage import exposure
 from skimage import img_as_float32, img_as_uint
-from slicedimage import Reader, Tile, TileSet, Writer
+from slicedimage import Reader, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
 from starfish.errors import DataFormatWarning
+from starfish.experiment.builder import build_image, TileFetcher
+from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
 from starfish.intensity_table import IntensityTable
 from starfish.types import Coordinates, Indices
 
@@ -55,7 +57,7 @@ class ImageStack:
         retrieve a slice of the image tensor
     set_slice(indices, data, axes=None)
         set a slice of the image tensor
-    apply(func, is_volume=False, in_place=True, verbose=False, n_processes=None)
+    apply(func, is_volume=False, in_place=False, verbose=False, n_processes=None)
         apply a 2d or 3d function across all Tiles in the image tensor
     max_proj(*dims)
         return a max projection over one or more axis of the image tensor
@@ -574,7 +576,7 @@ class ImageStack:
             self,
             func,
             is_volume=False,
-            in_place=True,
+            in_place=False,
             verbose: bool=False,
             n_processes: Optional[int]=None,
             **kwargs
@@ -590,7 +592,7 @@ class ImageStack:
         is_volume : bool
             (default False) If True, pass 3d volumes (x, y, z) to func
         in_place : bool
-            (default True) If True, function is executed in place. If n_proc is not 1, the tile or
+            (default False) If True, function is executed in place. If n_proc is not 1, the tile or
             volume will be copied once during execution. If false, a new ImageStack object will be
             produced.
         verbose : bool
@@ -610,7 +612,9 @@ class ImageStack:
         if not in_place:
             image_stack = deepcopy(self)
             return image_stack.apply(
-                func, is_volume=is_volume, in_place=True, verbose=verbose, **kwargs
+                func,
+                is_volume=is_volume, in_place=True, verbose=verbose, n_processes=n_processes,
+                **kwargs
             )
 
         if is_volume:
@@ -874,22 +878,6 @@ class ImageStack:
         max_projection = self._data.max([dim.value for dim in dims]).values
         return max_projection
 
-    @staticmethod
-    def _default_tile_extras_provider(round_: int, ch: int, z: int) -> Any:
-        """
-        Returns None for extras for any given round/ch/z.
-        """
-        return None
-
-    @staticmethod
-    def _default_tile_data_provider(
-            round_: int, ch: int, z: int, height: int, width: int
-    ) -> np.ndarray:
-        """
-        Returns a tile of just ones for any given round/ch/z.
-        """
-        return np.ones((height, width), dtype=np.float32)
-
     @classmethod
     def synthetic_stack(
             cls,
@@ -898,8 +886,7 @@ class ImageStack:
             num_z: int=12,
             tile_height: int=50,
             tile_width: int=40,
-            tile_data_provider: Callable[[int, int, int, int, int], np.ndarray]=None,
-            tile_extras_provider: Callable[[int, int, int], Any]=None,
+            tile_fetcher: TileFetcher=None,
     ) -> "ImageStack":
         """generate a synthetic ImageStack
 
@@ -910,42 +897,23 @@ class ImageStack:
             and whose default values are all 1.
 
         """
-        if tile_data_provider is None:
-            tile_data_provider = cls._default_tile_data_provider
-        if tile_extras_provider is None:
-            tile_extras_provider = cls._default_tile_extras_provider
+        if tile_fetcher is None:
+            tile_fetcher = tile_fetcher_factory(
+                OnesTile,
+                False,
+                (tile_height, tile_width),
+            )
 
-        img = TileSet(
-            {Indices.X, Indices.Y, Indices.ROUND, Indices.CH, Indices.Z},
-            {
-                Indices.ROUND: num_round,
-                Indices.CH: num_ch,
-                Indices.Z: num_z,
-            },
-            default_tile_shape=(tile_height, tile_width),
+        collection = build_image(
+            1,
+            num_round,
+            num_ch,
+            num_z,
+            tile_fetcher,
         )
-        for round_ in range(num_round):
-            for ch in range(num_ch):
-                for z in range(num_z):
-                    tile = Tile(
-                        {
-                            Coordinates.X: (0.0, 0.001),
-                            Coordinates.Y: (0.0, 0.001),
-                            Coordinates.Z: (0.0, 0.001),
-                        },
-                        {
-                            Indices.ROUND: round_,
-                            Indices.CH: ch,
-                            Indices.Z: z,
-                        },
-                        extras=tile_extras_provider(round_, ch, z),
-                    )
-                    tile.numpy_array = tile_data_provider(round_, ch, z, tile_height, tile_width)
+        tileset = list(collection.all_tilesets())[0][1]
 
-                    img.add_tile(tile)
-
-        stack = cls(img)
-        return stack
+        return ImageStack(tileset)
 
     @classmethod
     def synthetic_spots(

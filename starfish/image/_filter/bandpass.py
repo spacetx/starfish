@@ -81,9 +81,9 @@ class Bandpass(FilterAlgorithmBase):
         return bandpassed
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
             n_processes: Optional[int]=None
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -99,8 +99,9 @@ class Bandpass(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in-place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
         bandpass_ = partial(
@@ -111,6 +112,4 @@ class Bandpass(FilterAlgorithmBase):
             bandpass_,
             verbose=verbose, in_place=in_place, is_volume=self.is_volume, n_processes=n_processes
         )
-        if not in_place:
-            return result
-        return None
+        return result

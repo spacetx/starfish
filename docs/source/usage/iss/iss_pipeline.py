@@ -1,4 +1,7 @@
+import os
+
 import starfish
+from starfish import data
 from starfish.image import Filter, Registration, Segmentation
 from starfish.spots import SpotFinder, TargetAssignment
 from starfish.types import Indices
@@ -60,5 +63,9 @@ def process_experiment(experiment: starfish.Experiment):
 
 
 # run the script
+# test = os.getenv("USE_TEST_DATA") is not None
+# if test:
+#     exp = data.ISS(test_data=True)
+# else:
 exp = starfish.Experiment.from_json("iss/formatted/experiment.json")
 decoded_intensities, regions = process_experiment(exp)

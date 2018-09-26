@@ -95,7 +95,7 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        >>> from starfish.codebook import Codebook
+        >>> from starfish import Codebook
         >>> Codebook._empty_codebook(['ACTA', 'ACTB'], n_ch=3, n_round=2)
         <xarray.Codebook (target: 2, c: 3, h: 2)>
         array([[[0, 0],
@@ -146,7 +146,7 @@ class Codebook(xr.DataArray):
         Construct a codebook from some array data in python memory::
 
             >>> from starfish.types import Indices
-            >>> from starfish.codebook import Codebook
+            >>> from starfish import Codebook
             >>> codebook = [
             >>>     {
             >>>         Features.CODEWORD: [
@@ -257,7 +257,7 @@ class Codebook(xr.DataArray):
         Create a codebook from in-memory data::
 
             >>> from starfish.types import Indices
-            >>> from starfish.codebook import Codebook
+            >>> from starfish import Codebook
             >>> import tempfile
             >>> import json
             >>> import os
@@ -591,7 +591,7 @@ class Codebook(xr.DataArray):
         --------
         Create a Codebook with 2 rounds, 3 channels, and 2 codes::
 
-            >>> from starfish.codebook import Codebook
+            >>> from starfish import Codebook
             >>> Codebook.synthetic_one_hot_codebook(n_round=2, n_channel=3, n_codes=2)
             <xarray.Codebook (target: 2, c: 3, h: 2)>
             array([[[0, 1],

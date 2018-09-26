@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from starfish.codebook import Codebook
+from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table import IntensityTable
 from ._base import SpotFinderAlgorithmBase

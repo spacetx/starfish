@@ -1,7 +1,7 @@
 import argparse
 from typing import Type
 
-from starfish.codebook import Codebook
+from starfish.codebook.codebook import Codebook
 from starfish.intensity_table import IntensityTable
 from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.util.argparse import FsExistsType

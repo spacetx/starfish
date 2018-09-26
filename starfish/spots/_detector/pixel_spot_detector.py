@@ -51,7 +51,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         self.crop_z = crop_z
 
     def run(
-            self, stack: ImageStack,
+        self, stack: ImageStack,
     ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """decode pixels and combine them into spots using connected component labeling
 

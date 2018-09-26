@@ -12,52 +12,56 @@ from starfish.types import Features
 
 class TestWithDartfishData(CLITest, unittest.TestCase):
 
-    SUBDIRS = (
-        "registered",
-        "filtered",
-        "results"
-    )
+    @property
+    def subdirs(self):
+        return (
+            "registered",
+            "filtered",
+            "results"
+        )
 
-    STAGES = (
-        [
-            sys.executable,
-            "examples/get_cli_test_data.py",
-            "https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH-TEST/",
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
-        ],
-        [
-            "starfish", "filter",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "registered/fov_001", "hybridization.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "scale_filtered.json"),
-            "ScaleByPercentile",
-            "--p", "100",
-        ],
-        [
-            "starfish", "filter",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "scale_filtered.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "zero_filtered.json"),
-            "ZeroByChannelMagnitude",
-            "--thresh", ".05",
-        ],
-        [
-            "starfish", "detect_spots",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "zero_filtered.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "spots.nc"),
-            "--codebook", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "registered", "codebook.json"),
-            "PixelSpotDetector",
-            "--distance-threshold", "3",
-            "--magnitude-threshold", ".5",
-            "--min-area", "5",
-            "--max-area", "30",
-        ],
-    )
+    @property
+    def stages(self):
+        return (
+            [
+                sys.executable,
+                "examples/get_cli_test_data.py",
+                "https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH-TEST/",
+                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
+            ],
+            [
+                "starfish", "filter",
+                "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "registered/fov_001", "hybridization.json"),
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "scale_filtered.json"),
+                "ScaleByPercentile",
+                "--p", "100",
+            ],
+            [
+                "starfish", "filter",
+                "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "scale_filtered.json"),
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "zero_filtered.json"),
+                "ZeroByChannelMagnitude",
+                "--thresh", ".05",
+            ],
+            [
+                "starfish", "detect_spots",
+                "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "zero_filtered.json"),
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "spots.nc"),
+                "--codebook", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "registered", "codebook.json"),
+                "PixelSpotDetector",
+                "--distance-threshold", "3",
+                "--magnitude-threshold", ".5",
+                "--min-area", "5",
+                "--max-area", "30",
+            ],
+        )
 
     def verify_results(self, intensities):
         assert intensities[Features.PASSES_THRESHOLDS].sum()

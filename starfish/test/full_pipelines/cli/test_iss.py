@@ -17,110 +17,116 @@ from starfish.types import Features
 
 class TestWithIssData(CLITest, unittest.TestCase):
 
-    spots_file = "decoded-spots.nc"
+    @property
+    def spots_file(self):
+        return "decoded-spots.nc"
 
-    SUBDIRS = (
-        "raw",
-        "formatted",
-        "registered",
-        "filtered",
-        "results",
-    )
+    @property
+    def subdirs(self):
+        return (
+            "raw",
+            "formatted",
+            "registered",
+            "filtered",
+            "results",
+        )
 
-    STAGES = (
-        [
-            sys.executable,
-            "examples/get_cli_test_data.py",
-            "https://dmf0bdeheu4zf.cloudfront.net/20180919/ISS-TEST/",
-            lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted")
-        ],
-        [
-            "starfish", "registration",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "formatted/fov_001", "hybridization.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "registered", "hybridization.json"),
-            "FourierShiftRegistration",
-            "--reference-stack", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "formatted/fov_001", "dots.json"),
-            "--upsampling", "1000",
-        ],
-        [
-            "starfish", "filter",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "registered", "hybridization.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "hybridization.json"),
-            "WhiteTophat",
-            "--masking-radius", "15",
-        ],
-        [
-            "starfish", "filter",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "formatted/fov_001", "nuclei.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "nuclei.json"),
-            "WhiteTophat",
-            "--masking-radius", "15",
-        ],
-        [
-            "starfish", "filter",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "formatted/fov_001", "dots.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "dots.json"),
-            "WhiteTophat",
-            "--masking-radius", "15",
-        ],
-        [
-            "starfish", "detect_spots",
-            "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "hybridization.json"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "spots.nc"),
-            "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "dots.json"),
-            "GaussianSpotDetector",
-            "--min-sigma", "4",
-            "--max-sigma", "6",
-            "--num-sigma", "20",
-            "--threshold", "0.01",
-        ],
-        [
-            "starfish", "segment",
-            "--hybridization-stack", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "hybridization.json"),
-            "--nuclei-stack", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "filtered", "nuclei.json"),
-            "-o", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "regions.geojson"),
-            "Watershed",
-            "--dapi-threshold", ".16",
-            "--input-threshold", ".22",
-            "--min-distance", "57",
-        ],
-        [
-            "starfish", "target_assignment",
-            "--coordinates-geojson",
-            lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "regions.geojson"),
-            "--intensities", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "spots.nc"),
-            "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "targeted-spots.nc"),
-            "PointInPoly2D",
-        ],
-        [
-            "starfish", "decode",
-            "-i", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "targeted-spots.nc"),
-            "--codebook", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "formatted", "codebook.json"),
-            "-o", lambda tempdir, *args, **kwargs: os.path.join(
-                tempdir, "results", "decoded-spots.nc"),
-            "PerRoundMaxChannelDecoder",
-        ],
-    )
+    @property
+    def stages(self):
+        return (
+            [
+                sys.executable,
+                "examples/get_cli_test_data.py",
+                "https://dmf0bdeheu4zf.cloudfront.net/20180919/ISS-TEST/",
+                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted")
+            ],
+            [
+                "starfish", "registration",
+                "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted/fov_001", "hybridization.json"),
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "registered", "hybridization.json"),
+                "FourierShiftRegistration",
+                "--reference-stack", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted/fov_001", "dots.json"),
+                "--upsampling", "1000",
+            ],
+            [
+                "starfish", "filter",
+                "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "registered", "hybridization.json"),
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "hybridization.json"),
+                "WhiteTophat",
+                "--masking-radius", "15",
+            ],
+            [
+                "starfish", "filter",
+                "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted/fov_001", "nuclei.json"),
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "nuclei.json"),
+                "WhiteTophat",
+                "--masking-radius", "15",
+            ],
+            [
+                "starfish", "filter",
+                "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted/fov_001", "dots.json"),
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "dots.json"),
+                "WhiteTophat",
+                "--masking-radius", "15",
+            ],
+            [
+                "starfish", "detect_spots",
+                "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "hybridization.json"),
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "spots.nc"),
+                "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "dots.json"),
+                "GaussianSpotDetector",
+                "--min-sigma", "4",
+                "--max-sigma", "6",
+                "--num-sigma", "20",
+                "--threshold", "0.01",
+            ],
+            [
+                "starfish", "segment",
+                "--hybridization-stack", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "hybridization.json"),
+                "--nuclei-stack", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "nuclei.json"),
+                "-o", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "regions.geojson"),
+                "Watershed",
+                "--dapi-threshold", ".16",
+                "--input-threshold", ".22",
+                "--min-distance", "57",
+            ],
+            [
+                "starfish", "target_assignment",
+                "--coordinates-geojson",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "regions.geojson"),
+                "--intensities", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "spots.nc"),
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "targeted-spots.nc"),
+                "PointInPoly2D",
+            ],
+            [
+                "starfish", "decode",
+                "-i", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "targeted-spots.nc"),
+                "--codebook", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted", "codebook.json"),
+                "-o", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "decoded-spots.nc"),
+                "PerRoundMaxChannelDecoder",
+            ],
+        )
 
     def verify_results(self, intensities):
         # TODO make this test stronger

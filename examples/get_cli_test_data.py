@@ -1,6 +1,6 @@
 import argparse
 import json
-import os
+import pathlib
 
 import requests
 
@@ -15,17 +15,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # save image stacks locally
-    exp = Experiment.from_json(args.experiment_url + 'experiment.json')
+    # exp = Experiment.from_json(str(pathlib.PurePosixPath(args.experiment_url, "experiment.json")))
+    exp = Experiment.from_json(args.experiment_url + "experiment.json")
 
     for fov in exp.fovs():
-        fov_dir = args.output_dir + "/" + fov.name + "/"
-        os.mkdir(fov_dir)
-        fov.primary_image.write(fov_dir + 'hybridization.json')
+        fov_dir = pathlib.Path(args.output_dir, fov.name)
+        fov_dir.mkdir()
+        fov.primary_image.write(str(fov_dir / "hybridization.json"))
         for image_type in fov.auxiliary_image_types:
-            fov[image_type].write(fov_dir + (image_type + '.json'))
+            fov[image_type].write(str(fov_dir / f"{image_type}.json"))
 
     # get codebook from url and save locally to tmp dir
-    codebook = requests.get(args.experiment_url + 'codebook.json')
+    codebook = requests.get(args.experiment_url + "codebook.json")
+    # codebook = requests.get(str(pathlib.PurePosixPath(args.experiment_url, "codebook.json")))
     data = codebook.json()
     with open(args.output_dir + '/codebook.json', 'w') as f:
         json.dump(data, f)

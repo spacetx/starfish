@@ -1,6 +1,5 @@
 import os
 import shutil
-from typing import List, Tuple
 
 from starfish.intensity_table import IntensityTable
 from starfish.util import exec
@@ -13,16 +12,23 @@ class CLITest:
     a file called results containing an IntensityTable. Each cli test should define
     it's own verify_results method.
     """
+    @property
+    def subdirs(self):
+        raise NotImplementedError()
 
-    SUBDIRS = Tuple[str]
-    STAGES = Tuple[List]
-    spots_file = "spots.nc"
+    @property
+    def stages(self):
+        raise NotImplementedError()
 
-    def verify_results(self, intensities):
+    @property
+    def spots_file(self):
+        return "spots.nc"
+
+    def verify_results(self, intensities: IntensityTable):
         raise NotImplementedError()
 
     def test_run_pipline(self):
-        tempdir = exec.stages(self.STAGES, self.SUBDIRS, keep_data=True)
+        tempdir = exec.stages(self.stages, self.subdirs, keep_data=True)
         intensities = IntensityTable.load(os.path.join(tempdir, "results", self.spots_file))
         self.verify_results(intensities)
 

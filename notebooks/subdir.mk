@@ -6,7 +6,7 @@ ipynb_regenerate_targets := $(addprefix regenerate__notebooks/, $(addsuffix .ipy
 py_regenerate_targets := $(addprefix regenerate__notebooks/py/, $(addsuffix .py, $(notdir $(basename $(ipynb_files)))))
 PYTHON := python
 
-all: $(ipynb_validate_targets)
+fast: $(ipynb_validate_targets)
 run_notebooks: $(py_run_targets)
 validate_notebooks: $(ipynb_validate_targets)
 regenerate_ipynb: $(ipynb_regenerate_targets)

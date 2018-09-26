@@ -12,7 +12,7 @@ from slicedimage import (
 
 from starfish.experiment.version import CURRENT_VERSION
 from starfish.types import Indices
-from .defaultproviders import RandomNoiseTile, RandomNoiseTileFetcher
+from .defaultproviders import RandomNoiseTile, tile_fetcher_factory
 from .providers import FetchedTile, TileFetcher
 
 
@@ -33,11 +33,6 @@ def _tile_opener(toc_path: str, tile: Tile, file_ext: str) -> BinaryIO:
             ImageFormat.TIFF.file_ext,
         ),
         "wb")
-
-
-def _tile_writer(tile: Tile, fh: BinaryIO) -> ImageFormat:
-    tile.copy(fh)
-    return ImageFormat.TIFF
 
 
 def _fov_path_generator(parent_toc_path: str, toc_name: str) -> str:
@@ -98,7 +93,7 @@ def build_image(
                         image.shape,
                         extras=image.extras,
                     )
-                    tile.set_source_fh_contextmanager(image.tile_data_handle, image.format)
+                    tile.numpy_array = image.tile_data
                     fov_images.add_tile(tile)
         collection.add_partition("fov_{:03}".format(fov_ix), fov_images)
     return collection
@@ -144,7 +139,7 @@ def write_experiment_json(
         Default shape for the tiles in this experiment.
     """
     if primary_tile_fetcher is None:
-        primary_tile_fetcher = RandomNoiseTileFetcher()
+        primary_tile_fetcher = tile_fetcher_factory(RandomNoiseTile)
     if aux_tile_fetcher is None:
         aux_tile_fetcher = {}
     if postprocess_func is None:
@@ -169,7 +164,7 @@ def write_experiment_json(
         pretty=True,
         partition_path_generator=_fov_path_generator,
         tile_opener=_tile_opener,
-        tile_writer=_tile_writer,
+        tile_format=ImageFormat.TIFF,
     )
     experiment_doc['primary_images'] = "primary_image.json"
 
@@ -179,7 +174,7 @@ def write_experiment_json(
         auxiliary_image = build_image(
             fov_count,
             aux_dimensions[Indices.ROUND], aux_dimensions[Indices.CH], aux_dimensions[Indices.Z],
-            aux_tile_fetcher.get(aux_name, RandomNoiseTileFetcher()),
+            aux_tile_fetcher.get(aux_name, tile_fetcher_factory(RandomNoiseTile)),
             default_shape=default_shape,
         )
         Writer.write_to_path(
@@ -188,7 +183,7 @@ def write_experiment_json(
             pretty=True,
             partition_path_generator=_fov_path_generator,
             tile_opener=_tile_opener,
-            tile_writer=_tile_writer,
+            tile_format=ImageFormat.TIFF,
         )
         experiment_doc['auxiliary_images'][aux_name] = "{}.json".format(aux_name)
 

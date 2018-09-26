@@ -35,7 +35,7 @@ test = os.getenv("USE_TEST_DATA") is not None
 if test:
     experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/MERFISH-TEST/experiment.json')
 else:
-    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180919/MERFISH/experiment.json')
+    experiment = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180924/MERFISH/experiment.json')
 # EPY: END code
 
 # EPY: START markdown

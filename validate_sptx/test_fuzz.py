@@ -1,3 +1,5 @@
+import io
+
 from pkg_resources import resource_filename
 
 from .util import Fuzzer, SpaceTxValidator
@@ -75,7 +77,34 @@ def test_fuzz_codebook():
             "target": "SCUBE2"
         }
     ]
-    assert codebook_validator.validate_object(codebook, fuzz=True)
+    out = io.StringIO()
+    codebook_validator.fuzz_object(codebook, out=out)
+    expect = """> Fuzzing unknown...
+A D I S M L	If the letter is present, mutation is valid!
+-----------	--------------------------------------------
+A . . . . .	 - codeword:
+A D I . . .	   - r:
+A D I . . .	        0
+A . I . . .	     c:
+A . I . . .	        0
+A D . . . .	     v:
+A D . . . .	        1
+A D I . . .	   - r:
+A D I . . .	        0
+A . I . . .	     c:
+A . I . . .	        1
+A D . . . .	     v:
+A D . . . .	        1
+A D I . . .	   - r:
+A D I . . .	        1
+A . I . . .	     c:
+A . I . . .	        1
+A D . . . .	     v:
+A D . . . .	        1
+A . . S . .	   target:
+A . . S . .	      SCUBE2
+"""
+    assert expect == out.getvalue()
 
 
 def test_fuzz_experiment():
@@ -96,4 +125,22 @@ def test_fuzz_experiment():
             "is_space_tx_cool": True
         }
     }
-    assert experiment_validator.validate_object(experiment, fuzz=True)
+    out = io.StringIO()
+    experiment_validator.fuzz_object(experiment, out=out)
+    expect = """> Fuzzing unknown...
+A D I S M L	If the letter is present, mutation is valid!
+-----------	--------------------------------------------
+. . . . . .	version:
+. . . . . .	   0.0.0
+. . . . . .	primary_images:
+. . . . . .	   primary_images.json
+. D . . M .	auxiliary_images:
+. D . . . .	   nuclei:
+. D . . . .	      nuclei.json
+. . . . . .	codebook:
+. . . . . .	   codebook.json
+. D I S M L	extras:
+A D I S M L	   is_space_tx_cool:
+A D I S M L	      True
+"""
+    assert expect == out.getvalue()

@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Callable, MutableMapping, MutableSequence, Optional, Sequence, Set, Union
 
 from semantic_version import Version
@@ -8,6 +9,7 @@ from slicedimage.urlpath import pathjoin
 
 from starfish.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
+from validate_sptx import validate_sptx
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
 
@@ -151,7 +153,7 @@ class Experiment:
         return object_repr + fov_repr
 
     @classmethod
-    def from_json(cls, json_url: str) -> "Experiment":
+    def from_json(cls, json_url: str, strict: bool=None) -> "Experiment":
         """
         Construct an `Experiment` from an experiment.json file format specifier
 
@@ -159,13 +161,31 @@ class Experiment:
         ----------
         json_url : str
             file path or web link to an experiment.json file
+        strict : bool
+            if true, then all JSON loaded by this method will be
+            passed to the appropriate validator
 
         Returns
         -------
         Experiment :
             Experiment object serving the requested experiment data
 
+        Environment variables
+        ---------------------
+        STARFISH_STRICT_LOADING :
+             If set, then all JSON loaded by this method will be
+             passed to the appropriate validator. The `strict`
+             parameter to this method has priority over the
+             environment variable.
+
         """
+        if strict is None:
+            strict = "STARFISH_STRICT_LOADING" in os.environ
+        if strict:
+            valid = validate_sptx.validate(json_url)
+            if not valid:
+                raise Exception("validation failed")
+
         backend, name, baseurl = resolve_path_or_url(json_url)
         with backend.read_contextmanager(name) as fh:
             experiment_document = json.load(fh)

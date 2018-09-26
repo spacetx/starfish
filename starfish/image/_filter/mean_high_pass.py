@@ -48,7 +48,7 @@ class MeanHighPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(image: np.ndarray, size: Union[Number, Tuple[Number]]) -> np.ndarray:
+    def high_pass(image: np.ndarray, size: Number, rescale: bool=False) -> np.ndarray:
         """
         Applies a mean high pass filter to an image
 
@@ -58,25 +58,28 @@ class MeanHighPass(FilterAlgorithmBase):
             2-d or 3-d image data
         size : Union[Number, Tuple[Number]]
             width of the kernel
+        rescale : bool
+            If true scales data by max value, if false clips max values to one
 
         Returns
         -------
         np.ndarray [np.float32]:
             Filtered image, same shape as input
+            :param clip:
 
         """
 
         blurred: np.ndarray = uniform_filter(image, size)
 
         filtered: np.ndarray = image - blurred
-        filtered = preserve_float_range(filtered)
+        filtered = preserve_float_range(filtered, rescale)
 
         return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
             n_processes: Optional[int]=None
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -92,8 +95,9 @@ class MeanHighPass(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in_place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
         high_pass: Callable = partial(self.high_pass, size=self.size)
@@ -101,6 +105,4 @@ class MeanHighPass(FilterAlgorithmBase):
             high_pass,
             is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
-        if not in_place:
-            return result
-        return None
+        return result

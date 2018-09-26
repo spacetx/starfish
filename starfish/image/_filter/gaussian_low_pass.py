@@ -38,22 +38,29 @@ class GaussianLowPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def low_pass(image: np.ndarray, sigma: Union[Number, Tuple[Number]]) -> np.ndarray:
+    def low_pass(
+            image: np.ndarray,
+            sigma: Union[Number, Tuple[Number]],
+            rescale: bool=False
+    ) -> np.ndarray:
         """
         Apply a Gaussian blur operation over a multi-dimensional image.
 
         Parameters
         ----------
-        image : np.ndarray[np.uint16]
+        image : np.ndarray[np.float32]
             2-d or 3-d image data
         sigma : Union[Number, Tuple[Number]]
             Standard deviation of the Gaussian kernel that will be applied. If a float, an
             isotropic kernel will be assumed, otherwise the dimensions of the kernel give (z, y, x)
+         rescale : bool
+            If true scales data by max value, if false clips max values to one
 
         Returns
         -------
         np.ndarray :
             Blurred data in same shape as input image, converted to np.uint16 dtype.
+            :param rescale:
 
         """
 
@@ -62,14 +69,14 @@ class GaussianLowPass(FilterAlgorithmBase):
             sigma=sigma, output=None, cval=0, multichannel=False, preserve_range=True, truncate=4.0
         )
 
-        filtered = preserve_float_range(filtered)
+        filtered = preserve_float_range(filtered, rescale)
 
         return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
             n_processes: Optional[int]=None,
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -85,8 +92,9 @@ class GaussianLowPass(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in-place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
         low_pass: Callable = partial(self.low_pass, sigma=self.sigma)
@@ -94,6 +102,4 @@ class GaussianLowPass(FilterAlgorithmBase):
             low_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place,
             n_processes=n_processes
         )
-        if not in_place:
-            return result
-        return None
+        return result

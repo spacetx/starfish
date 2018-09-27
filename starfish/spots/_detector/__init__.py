@@ -18,7 +18,7 @@ class SpotFinder(PipelineComponent):
     spot_finder_group: argparse.ArgumentParser
 
     @classmethod
-    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
+    def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
         return _base.SpotFinderAlgorithmBase
 
     @classmethod
@@ -50,10 +50,10 @@ class SpotFinder(PipelineComponent):
         spot_finder_subparsers = spot_finder_group.add_subparsers(
             dest="spot_finder_algorithm_class")
 
-        for algorithm_cls in cls.algorithm_to_class_map().values():
-            group_parser = spot_finder_subparsers.add_parser(algorithm_cls.get_algorithm_name())
+        for algorithm_cls in cls._algorithm_to_class_map().values():
+            group_parser = spot_finder_subparsers.add_parser(algorithm_cls._get_algorithm_name())
             group_parser.set_defaults(spot_finder_algorithm_class=algorithm_cls)
-            algorithm_cls.add_arguments(group_parser)
+            algorithm_cls._add_arguments(group_parser)
 
         cls.spot_finder_group = spot_finder_group
 

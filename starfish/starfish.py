@@ -33,10 +33,10 @@ def build_parser():
 
     subparsers = parser.add_subparsers(dest="starfish_command")
 
-    Registration.add_to_parser(subparsers)
-    Filter.add_to_parser(subparsers)
+    Registration._add_to_parser(subparsers)
+    Filter._add_to_parser(subparsers)
     SpotFinder.add_to_parser(subparsers)
-    Segmentation.add_to_parser(subparsers)
+    Segmentation._add_to_parser(subparsers)
     TargetAssignment.add_to_parser(subparsers)
     Decoder.add_to_parser(subparsers)
 

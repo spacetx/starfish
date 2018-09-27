@@ -9,7 +9,7 @@ class PerRoundMaxChannelDecoder(DecoderAlgorithmBase):
         pass
 
     @classmethod
-    def add_arguments(cls, group_parser):
+    def _add_arguments(cls, group_parser):
         pass
 
     def run(self, intensities: IntensityTable, codebook: Codebook) -> IntensityTable:

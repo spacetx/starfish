@@ -29,7 +29,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         self.normalize = normalize
 
     @classmethod
-    def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
+    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             '--thresh', type=float,
             help='minimum magnitude threshold for pixels across channels')

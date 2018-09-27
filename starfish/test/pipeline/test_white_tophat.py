@@ -34,7 +34,7 @@ def test_white_tophat(is_volume: bool):
         big_spot_intensity = image[20, 20, 20]
 
         wth = WhiteTophat(masking_radius=2, is_volume=True)
-        filtered = wth.white_tophat(image)
+        filtered = wth._white_tophat(image)
 
         large_ratio = filtered[20, 20, 20] / big_spot_intensity
         small_ratio = filtered[80, 80, 80] / small_spot_intensity
@@ -46,7 +46,7 @@ def test_white_tophat(is_volume: bool):
         big_spot_intensity = image[20, 20]
 
         wth = WhiteTophat(masking_radius=2, is_volume=False)
-        filtered = wth.white_tophat(image)
+        filtered = wth._white_tophat(image)
 
         large_ratio = filtered[20, 20] / big_spot_intensity
         small_ratio = filtered[80, 80] / small_spot_intensity

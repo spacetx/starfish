@@ -14,8 +14,10 @@
       "$ref": "schema/version.json"
     },
     "primary_images": {
-      "$ref": "schema/fov_manifest.json",
-      "description": "Images that measure transcript or protein targets in one or more fields of view."
+      "type": "string",
+      "description": "Images that measure transcript or protein targets in one or more fields of view.",
+      "example": "primary_images.json",
+      "pattern": "^.*?.json$"
     },
     "codebook": {
       "type": "string",

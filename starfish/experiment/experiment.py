@@ -153,7 +153,10 @@ class Experiment:
         return object_repr + fov_repr
 
     @classmethod
-    def from_json(cls, json_url: str, strict: bool=None) -> "Experiment":
+    def from_json(cls,
+                  json_url: str,
+                  strict: bool=None,
+                  allow_caching: bool=None) -> "Experiment":
         """
         Construct an `Experiment` from an experiment.json file format specifier
 
@@ -164,6 +167,9 @@ class Experiment:
         strict : bool
             if true, then all JSON loaded by this method will be
             passed to the appropriate validator
+        allow_caching : bool
+            if true, then all data downloaded by this method will be
+            cached by the backend.
 
         Returns
         -------
@@ -172,6 +178,11 @@ class Experiment:
 
         Environment variables
         ---------------------
+        STARFISH_ALLOW_CACHING :
+             If set, then all data downloaded by this method will be
+             cached by the backend. The `allow_caching`
+             parameter to this method has priority over the
+             environment variable.
         STARFISH_STRICT_LOADING :
              If set, then all JSON loaded by this method will be
              passed to the appropriate validator. The `strict`
@@ -186,13 +197,17 @@ class Experiment:
             if not valid:
                 raise Exception("validation failed")
 
-        backend, name, baseurl = resolve_path_or_url(json_url)
+        if allow_caching is None:
+            allow_caching = bool(os.environ.get("STARFISH_ALLOW_CACHING", "true"))
+
+        backend, name, baseurl = resolve_path_or_url(json_url, allow_caching)
         with backend.read_contextmanager(name) as fh:
             experiment_document = json.load(fh)
 
         cls.verify_version(experiment_document['version'])
 
-        _, codebook_name, codebook_baseurl = resolve_url(experiment_document['codebook'], baseurl)
+        _, codebook_name, codebook_baseurl = resolve_url(experiment_document['codebook'],
+                                                         baseurl, allow_caching)
         codebook_absolute_url = pathjoin(codebook_baseurl, codebook_name)
         codebook = Codebook.from_json(codebook_absolute_url)
 

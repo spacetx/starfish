@@ -1,10 +1,11 @@
 import os
 
 import starfish
-from starfish import data
 from starfish.image import Filter, Registration, Segmentation
 from starfish.spots import SpotFinder, TargetAssignment
 from starfish.types import Indices
+
+test = os.getenv("TESTING") is not None
 
 
 def iss_pipeline(fov, codebook):
@@ -55,17 +56,20 @@ def iss_pipeline(fov, codebook):
 def process_experiment(experiment: starfish.Experiment):
     decoded_intensities = {}
     regions = {}
-    for name_, fov in experiment.items():
+    for i, (name_, fov) in enumerate(experiment.items()):
+        print(i)
         decoded, segmentation_results = iss_pipeline(fov, experiment.codebook)
         decoded_intensities[name_] = decoded
         regions[name_] = segmentation_results
+        if test and i == 1:
+            # only run through 2 fovs for the test
+            break
     return decoded_intensities, regions
 
 
 # run the script
-# test = os.getenv("USE_TEST_DATA") is not None
-# if test:
-#     exp = data.ISS(test_data=True)
-# else:
-exp = starfish.Experiment.from_json("iss/formatted/experiment.json")
+if test:
+    exp = starfish.Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/browse/formatted/20180924/iss_breast/experiment.json")
+else:
+    exp = starfish.Experiment.from_json("iss/formatted/experiment.json")
 decoded_intensities, regions = process_experiment(exp)

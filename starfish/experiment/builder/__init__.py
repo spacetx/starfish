@@ -11,7 +11,7 @@ from slicedimage import (
 )
 
 from starfish.experiment.version import CURRENT_VERSION
-from starfish.types import Indices
+from starfish.types import Coordinates, Indices
 from .defaultproviders import RandomNoiseTile, tile_fetcher_factory
 from .providers import FetchedTile, TileFetcher
 
@@ -73,7 +73,16 @@ def build_image(
     collection = Collection()
     for fov_ix in range(fov_count):
         fov_images = TileSet(
-            [Indices.X, Indices.Y, Indices.Z, Indices.ROUND, Indices.CH],
+            [
+                Coordinates.X,
+                Coordinates.Y,
+                Coordinates.Z,
+                Indices.Z,
+                Indices.ROUND,
+                Indices.CH,
+                Indices.X,
+                Indices.Y,
+            ],
             {Indices.ROUND: round_count, Indices.CH: ch_count, Indices.Z: z_count},
             default_shape,
             ImageFormat.TIFF,

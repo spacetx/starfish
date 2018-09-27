@@ -57,7 +57,6 @@ def process_experiment(experiment: starfish.Experiment):
     decoded_intensities = {}
     regions = {}
     for i, (name_, fov) in enumerate(experiment.items()):
-        print(i)
         decoded, segmentation_results = iss_pipeline(fov, experiment.codebook)
         decoded_intensities[name_] = decoded
         regions[name_] = segmentation_results

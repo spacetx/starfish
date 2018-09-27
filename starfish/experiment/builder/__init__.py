@@ -10,8 +10,9 @@ from slicedimage import (
     Writer,
 )
 
+from starfish.codebook.codebook import Codebook
 from starfish.experiment.version import CURRENT_VERSION
-from starfish.types import Indices
+from starfish.types import Coordinates, Indices
 from .defaultproviders import RandomNoiseTile, tile_fetcher_factory
 from .providers import FetchedTile, TileFetcher
 
@@ -73,7 +74,16 @@ def build_image(
     collection = Collection()
     for fov_ix in range(fov_count):
         fov_images = TileSet(
-            [Indices.X, Indices.Y, Indices.Z, Indices.ROUND, Indices.CH],
+            [
+                Coordinates.X,
+                Coordinates.Y,
+                Coordinates.Z,
+                Indices.Z,
+                Indices.ROUND,
+                Indices.CH,
+                Indices.X,
+                Indices.Y,
+            ],
             {Indices.ROUND: round_count, Indices.CH: ch_count, Indices.Z: z_count},
             default_shape,
             ImageFormat.TIFF,
@@ -192,7 +202,7 @@ def write_experiment_json(
     with open(os.path.join(path, "experiment.json"), "w") as fh:
         json.dump(experiment_doc, fh, indent=4)
 
-    codebook_stub = [
+    codebook_array = [
         {
             "codeword": [
                 {"r": 0, "c": 0, "v": 1},
@@ -200,5 +210,6 @@ def write_experiment_json(
             "target": "PLEASE_REPLACE_ME"
         },
     ]
-    with open(os.path.join(path, "codebook.json"), "w") as fh:
-        json.dump(codebook_stub, fh, indent=4)
+    codebook = Codebook.from_code_array(codebook_array)
+    codebook_json_filename = "codebook.json"
+    codebook.to_json(os.path.join(path, codebook_json_filename))

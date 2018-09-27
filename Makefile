@@ -112,12 +112,12 @@ help-integration:
 ### INSTALL ##################################################
 #
 install-src:
-	pip install --force-reinstall --upgrade -r REQUIREMENTS-DEV.txt -r REQUIREMENTS-NOTEBOOK.txt
+	pip install --force-reinstall --upgrade -r REQUIREMENTS-DEV.txt
 	pip install -e .
 	pip freeze
 
 install-pypi:
-	pip install -r REQUIREMENTS-NOTEBOOK.txt starfish
+	pip install -r REQUIREMENTS-DEV.txt starfish
 
 help-install:
 	$(call print_help, install-src, pip install the current directory)

@@ -31,8 +31,8 @@ from starfish.types import Features, Indices
 
 # EPY: START code
 # load the data from cloudfront
-test = os.getenv("USE_TEST_DATA") is not None
-experiment = data.MERFISH(test_data=test)
+use_test_data = os.getenv("USE_TEST_DATA") is not None
+experiment = data.MERFISH(use_test_data=use_test_data)
 # EPY: END code
 
 # EPY: START markdown
@@ -114,7 +114,7 @@ low_passed = glp.run(deconvolved, in_place=False, verbose=True)
 # EPY: END markdown
 
 # EPY: START code
-if test:
+if use_test_data:
     scale_factors = {
         (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
         for t in experiment.extras['scale_factors']

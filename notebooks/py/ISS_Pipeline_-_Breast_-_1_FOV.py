@@ -28,8 +28,8 @@ from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START code
-test = os.getenv("USE_TEST_DATA") is not None
-experiment = data.ISS(test_data=test)
+use_test_data = os.getenv("USE_TEST_DATA") is not None
+experiment = data.ISS(use_test_data=use_test_data)
 
 
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'

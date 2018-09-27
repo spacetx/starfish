@@ -37,8 +37,8 @@ sns.set_style('ticks')
 # EPY: END markdown
 
 # EPY: START code
-test = os.getenv("USE_TEST_DATA") is not None
-exp = data.DARTFISH(test_data=test)
+use_test_data = os.getenv("USE_TEST_DATA") is not None
+exp = data.DARTFISH(use_test_data=use_test_data)
 
 stack = exp.fov().primary_image
 # EPY: END code

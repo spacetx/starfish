@@ -1,3 +1,5 @@
+import warnings
+
 import pytest
 from pkg_resources import resource_filename
 
@@ -30,3 +32,12 @@ def test_dartfish_example_experiment():
     dartfish_example = resource_filename(
         "validate_sptx", "examples/experiment/dartfish_experiment.json")
     assert validator.validate_file(dartfish_example)
+
+
+# see #614
+def test_no_manifest_example_experiment():
+    no_manifest_example = resource_filename(
+        "validate_sptx", "examples/experiment/no_manifest.json")
+    with warnings.catch_warnings(record=True) as warnings_:
+        assert not validator.validate_file(no_manifest_example)
+        assert len(warnings_) == 1

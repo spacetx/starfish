@@ -91,7 +91,7 @@ def format_data(input_dir, output_dir, num_fovs):
         experiment_json_doc['codebook'] = "codebook.json"
         return experiment_json_doc
 
-    hyb_dimensions = {
+    primary_image_dimensions = {
         Indices.ROUND: 4,
         Indices.CH: 4,
         Indices.Z: 1,
@@ -113,7 +113,7 @@ def format_data(input_dir, output_dir, num_fovs):
     write_experiment_json(
         path=output_dir,
         fov_count=num_fovs,
-        hyb_dimensions=hyb_dimensions,
+        primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions=aux_name_to_dimensions,
         primary_tile_fetcher=ISSCroppedBreastPrimaryTileFetcher(input_dir),
         aux_tile_fetcher={

@@ -7,7 +7,7 @@ from slicedimage import Collection, TileSet
 from slicedimage.io import Reader, resolve_path_or_url, resolve_url
 from slicedimage.urlpath import pathjoin
 
-from starfish.codebook import Codebook
+from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from validate_sptx import validate_sptx
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION

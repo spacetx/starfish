@@ -10,6 +10,7 @@ import requests
 from skimage.io import imread
 from slicedimage import ImageFormat
 
+from starfish import Codebook
 from starfish.experiment.builder import FetchedTile, TileFetcher
 from starfish.experiment.builder import write_experiment_json
 from starfish.types import Coordinates, Features, Indices, Number
@@ -126,7 +127,7 @@ def format_data(input_dir, output_dir, d):
         default_shape=SHAPE
     )
 
-    codebook = [
+    codebook_array = [
         {
             Features.CODEWORD: [
                 {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
@@ -146,8 +147,9 @@ def format_data(input_dir, output_dir, d):
             Features.TARGET: "ACTB_mouse"
         },
     ]
+    codebook = Codebook.from_code_array(codebook_array)
     codebook_json_filename = "codebook.json"
-    write_json(codebook, os.path.join(output_dir, codebook_json_filename))
+    codebook.to_json(os.path.join(output_dir, codebook_json_filename))
 
 
 if __name__ == "__main__":

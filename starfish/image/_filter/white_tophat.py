@@ -35,12 +35,12 @@ class WhiteTophat(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     @classmethod
-    def add_arguments(cls, group_parser) -> None:
+    def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(
             "--masking-radius", default=15, type=int,
             help="diameter of morphological masking disk in pixels")
 
-    def white_tophat(self, image: np.ndarray) -> np.ndarray:
+    def _white_tophat(self, image: np.ndarray) -> np.ndarray:
         if self.is_volume:
             structuring_element = ball(self.masking_radius)
         else:
@@ -72,7 +72,7 @@ class WhiteTophat(FilterAlgorithmBase):
 
         """
         result = stack.apply(
-            self.white_tophat,
+            self._white_tophat,
             is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result

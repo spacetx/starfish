@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from starfish.codebook import Codebook
+from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table import IntensityTable
 from ._base import SpotFinderAlgorithmBase
@@ -83,7 +83,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         return decoded_spots, image_decoding_results
 
     @classmethod
-    def add_arguments(cls, group_parser):
+    def _add_arguments(cls, group_parser):
         group_parser.add_argument("--codebook-input", help="csv file containing a codebook")
         group_parser.add_argument("--metric", type=str, default='euclidean')
         group_parser.add_argument(

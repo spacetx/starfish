@@ -15,7 +15,7 @@ class TargetAssignment(PipelineComponent):
     target_assignment_group: argparse.ArgumentParser
 
     @classmethod
-    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
+    def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
         return TargetAssignmentAlgorithm
 
     @classmethod
@@ -30,10 +30,10 @@ class TargetAssignment(PipelineComponent):
         target_assignment_group = target_assignment_group.add_subparsers(
             dest="target_assignment_algorithm_class")
 
-        for algorithm_cls in cls.algorithm_to_class_map().values():
-            group_parser = target_assignment_group.add_parser(algorithm_cls.get_algorithm_name())
+        for algorithm_cls in cls._algorithm_to_class_map().values():
+            group_parser = target_assignment_group.add_parser(algorithm_cls._get_algorithm_name())
             group_parser.set_defaults(target_assignment_algorithm_class=algorithm_cls)
-            algorithm_cls.add_arguments(group_parser)
+            algorithm_cls._add_arguments(group_parser)
 
         cls.target_assignment_group = target_assignment_group
 

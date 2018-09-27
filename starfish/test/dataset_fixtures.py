@@ -1,6 +1,3 @@
-import json
-import os
-import shutil
 import tempfile
 from copy import deepcopy
 from typing import Generator
@@ -10,7 +7,7 @@ import pandas as pd
 import pytest
 from scipy.ndimage.filters import gaussian_filter
 
-from starfish.codebook import Codebook
+from starfish.codebook.codebook import Codebook
 from starfish.experiment.experiment import Experiment
 from starfish.image._filter.white_tophat import WhiteTophat
 from starfish.imagestack.imagestack import ImageStack
@@ -97,15 +94,11 @@ def simple_codebook_array():
 
 @pytest.fixture(scope='module')
 def simple_codebook_json(simple_codebook_array) -> Generator[str, None, None]:
-    directory = tempfile.mkdtemp()
-    codebook_json = os.path.join(directory, 'simple_codebook.json')
-    with open(codebook_json, 'w') as f:
-        json.dump(simple_codebook_array, f)
+    with tempfile.NamedTemporaryFile() as tf:
+        codebook = Codebook.from_code_array(simple_codebook_array)
+        codebook.to_json(tf.name)
 
-    yield codebook_json
-
-    shutil.rmtree(directory)
-
+        yield tf.name
 
 @pytest.fixture(scope='module')
 def loaded_codebook(simple_codebook_json):

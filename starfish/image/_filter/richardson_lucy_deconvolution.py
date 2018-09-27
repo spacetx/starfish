@@ -39,7 +39,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
         )
 
     @classmethod
-    def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
+    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             '--num-iter', type=int, help='number of iterations to run')
         group_parser.add_argument(
@@ -51,7 +51,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
     # Here be dragons. This algorithm had a bug, but the results looked nice. Now we've "fixed" it
     # and the results look bad. #548 addresses this problem.
     @staticmethod
-    def richardson_lucy_deconv(
+    def _richardson_lucy_deconv(
             image: np.ndarray, iterations: int, psf: np.ndarray, clip: bool) -> np.ndarray:
         """
         Deconvolves input image with a specified point spread function.
@@ -161,7 +161,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
 
         """
         func = partial(
-            self.richardson_lucy_deconv,
+            self._richardson_lucy_deconv,
             iterations=self.num_iter, psf=self.psf, clip=self.clip
         )
         result = stack.apply(

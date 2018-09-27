@@ -61,8 +61,6 @@ class GaussianHighPass(FilterAlgorithmBase):
         -------
         np.ndarray :
             filtered image of the same shape as the input image
-            :param rescale:
-
         """
 
         blurred = GaussianLowPass._low_pass(image, sigma)

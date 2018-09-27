@@ -25,12 +25,12 @@ class ScaleByPercentile(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     @classmethod
-    def add_arguments(cls, group_parser) -> None:
+    def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(
             "--p", default=100, type=int, help="scale images by this percentile")
 
     @staticmethod
-    def scale(image: np.ndarray, p: int) -> np.ndarray:
+    def _scale(image: np.ndarray, p: int) -> np.ndarray:
         """Clip values of img below and above percentiles p_min and p_max
 
         Parameters
@@ -84,7 +84,7 @@ class ScaleByPercentile(FilterAlgorithmBase):
             original stack.
 
         """
-        clip = partial(self.scale, p=self.p)
+        clip = partial(self._scale, p=self.p)
         result = stack.apply(
             clip,
             is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes

@@ -83,7 +83,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         return decoded_spots, image_decoding_results
 
     @classmethod
-    def add_arguments(cls, group_parser):
+    def _add_arguments(cls, group_parser):
         group_parser.add_argument("--codebook-input", help="csv file containing a codebook")
         group_parser.add_argument("--metric", type=str, default='euclidean')
         group_parser.add_argument(

@@ -147,7 +147,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         return intensity_table
 
     @classmethod
-    def add_arguments(cls, group_parser):
+    def _add_arguments(cls, group_parser):
         group_parser.add_argument(
             "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
         group_parser.add_argument(

@@ -30,7 +30,7 @@ class GaussianLowPass(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     @classmethod
-    def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
+    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             "--sigma", type=float, help="standard deviation of gaussian kernel")
         group_parser.add_argument(
@@ -38,7 +38,7 @@ class GaussianLowPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def low_pass(
+    def _low_pass(
             image: np.ndarray,
             sigma: Union[Number, Tuple[Number]],
             rescale: bool=False
@@ -97,7 +97,7 @@ class GaussianLowPass(FilterAlgorithmBase):
             original stack.
 
         """
-        low_pass: Callable = partial(self.low_pass, sigma=self.sigma)
+        low_pass: Callable = partial(self._low_pass, sigma=self.sigma)
         result = stack.apply(
             low_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place,
             n_processes=n_processes

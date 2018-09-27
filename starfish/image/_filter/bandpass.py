@@ -38,7 +38,7 @@ class Bandpass(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     @classmethod
-    def add_arguments(cls, group_parser) -> None:
+    def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(
             "--lshort", type=float, help="filter signals below this frequency")
         group_parser.add_argument(
@@ -50,7 +50,7 @@ class Bandpass(FilterAlgorithmBase):
             help="truncate the filter at this many standard deviations")
 
     @staticmethod
-    def bandpass(
+    def _bandpass(
             image: np.ndarray, lshort: Number, llong: int, threshold: Number, truncate: Number
     ) -> np.ndarray:
         """Apply a bandpass filter to remove noise and background variation
@@ -105,7 +105,7 @@ class Bandpass(FilterAlgorithmBase):
 
         """
         bandpass_ = partial(
-            self.bandpass,
+            self._bandpass,
             lshort=self.lshort, llong=self.llong, threshold=self.threshold, truncate=self.truncate
         )
         result = stack.apply(

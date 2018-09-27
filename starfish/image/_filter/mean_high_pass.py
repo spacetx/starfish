@@ -40,7 +40,7 @@ class MeanHighPass(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     @classmethod
-    def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
+    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             "--size", type=float, help="width of the kernel")
         group_parser.add_argument(
@@ -48,7 +48,7 @@ class MeanHighPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(image: np.ndarray, size: Number, rescale: bool=False) -> np.ndarray:
+    def _high_pass(image: np.ndarray, size: Number, rescale: bool=False) -> np.ndarray:
         """
         Applies a mean high pass filter to an image
 
@@ -100,7 +100,7 @@ class MeanHighPass(FilterAlgorithmBase):
             original stack.
 
         """
-        high_pass: Callable = partial(self.high_pass, size=self.size)
+        high_pass: Callable = partial(self._high_pass, size=self.size)
         result = stack.apply(
             high_pass,
             is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes

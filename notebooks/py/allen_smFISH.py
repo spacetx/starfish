@@ -37,8 +37,8 @@ from starfish.types import Indices
 # EPY: END markdown
 
 # EPY: START code
-test = os.getenv("USE_TEST_DATA") is not None
-experiment = data.allen_smFISH(test_data=test)
+use_test_data = os.getenv("USE_TEST_DATA") is not None
+experiment = data.allen_smFISH(use_test_data=use_test_data)
 primary_image = experiment.fov().primary_image
 # EPY: END code
 

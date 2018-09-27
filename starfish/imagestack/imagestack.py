@@ -26,6 +26,7 @@ from tqdm import tqdm
 from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
+from starfish.image._filter.util import preserve_float_range
 from starfish.intensity_table import IntensityTable
 from starfish.types import Coordinates, Indices
 
@@ -148,18 +149,15 @@ class ImageStack:
             self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
 
     @staticmethod
-    def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
-        """verify that data is of dtype float32 and in range [0, 1]"""
+    def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> Union[np.ndarray, xr.DataArray]:
+        """verify that data is of dtype float32 and in range [0, 1], if not, convert it"""
         if data.dtype != np.float32:
-            raise TypeError(
-                f"ImageStack data must be of type float32, not {data.dtype}. Please convert data "
-                f"using skimage.img_as_float32 prior to calling set_slice."
-            )
+            print(f"ImageStack detected as {data.dtype}. Converting to float32...")
+            data = img_as_float32(data)
         if np.min(data) < 0 or np.max(data) > 1:
-            raise ValueError(
-                f"ImageStack data must be of type float32 and in the range [0, 1]. Please convert "
-                f"data using skimage.img_as_float32 prior to calling set_slice."
-            )
+            data = preserve_float_range(data)
+            print(f"Values detected outside the range [0,1], rescaling...")
+        return data
 
     def __repr__(self):
         shape = ', '.join(f'{k}: {v}' for k, v in self._data.sizes.items())
@@ -222,7 +220,7 @@ class ImageStack:
         """
         if len(array.shape) != 5:
             raise ValueError('a 5-d tensor with shape (n_round, n_ch, n_z, y, x) must be provided.')
-        cls._validate_data_dtype_and_range(array)
+        array = cls._validate_data_dtype_and_range(array)
 
         n_round, n_ch, n_z, height, width = array.shape
         empty = cls.synthetic_stack(

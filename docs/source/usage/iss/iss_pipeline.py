@@ -68,7 +68,7 @@ def process_experiment(experiment: starfish.Experiment):
 
 # run the script
 if test:
-    exp = starfish.Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/browse/formatted/20180924/iss_breast/experiment.json", True)
+    exp = starfish.Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/browse/formatted/20180924/iss_breast/experiment.json", False)
 else:
     exp = starfish.Experiment.from_json("iss/formatted/experiment.json")
 decoded_intensities, regions = process_experiment(exp)

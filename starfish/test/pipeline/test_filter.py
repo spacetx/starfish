@@ -3,8 +3,7 @@ from typing import Tuple, Union
 import numpy as np
 import pytest
 
-from starfish.image._filter import gaussian_high_pass
-from starfish.image._filter import mean_high_pass
+from starfish.image._filter import gaussian_high_pass, mean_high_pass
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 

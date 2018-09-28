@@ -1,16 +1,16 @@
-from typing import Tuple, Union, Dict, Optional, List
+from typing import Tuple, Union, Optional, List
 
 import numpy as np
 import xarray as xr
 from scipy.ndimage import label
 from skimage.feature import peak_local_max
 from skimage.measure import regionprops
-from skimage.measure._regionprops import _RegionProperties
+from sympy import Point, Line
 
 from starfish import ImageStack, IntensityTable
 from starfish.spots._detector._base import SpotFinderAlgorithmBase
 from starfish.spots._detector.detect import detect_spots
-from starfish.types import SpotAttributes, Features, Number
+from starfish.types import SpotAttributes, Number
 
 
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
@@ -25,7 +25,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self.max_obj_area = max_obj_area
 
         if threshold is None:
-            self.threshold = self.calculate_threshold()
+            self.threshold = self._compute_thresholds()
         else:
             self.threshold = threshold
 
@@ -33,7 +33,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             raise ValueError(
                 'LocalMaxPeakFinder only works for 2D data, for 3D data, please use TrackpyLocalMaxPeakFinder')
 
-    def calculate_threshold(self, img: np.ndarray) -> Tuple[List, List]:
+        self.measurement_function = self._get_measurement_function(measurement_type)
+
+    def _compute_thresholds(self, img: np.ndarray) -> Tuple[List, List]:
 
         # thresholds to search over
         thresholds = np.linspace(img.min(), img.max(), num=100)
@@ -41,7 +43,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # number of spots detected at each threshold
         spot_counts = []
 
-        # where we stopped our threshold search
+        # where we stop our threshold search
         stop_threshold = None
 
         for threshold in thresholds:
@@ -65,84 +67,67 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         if stop_threshold is None:
             stop_threshold = thresholds.max()
 
+        # for some reason, np.where returns a tuple of nd.arrays,
+        # hence the [0][0] indexing to get out a numerical value
+        stop_index = np.where(thresholds == stop_threshold)[0][0]
+
+        if len(thresholds > 1):
+            thresholds = thresholds[:stop_index]
+            spot_counts = spot_counts[:stop_index]
+
         return thresholds, spot_counts
 
-    def _calculate_gradient(self, thresholds, spot_counts):
-        if len(spot_counts) > 1:
+    @staticmethod
+    def _select_optimal_threshold(thresholds: List, spot_counts: List, stringency: Number) -> Tuple[Number, Number]:
 
-            # Trim the threshold array in order to match the stopping point
-            # used the [0][0] to get the first number and then take it out from list
-            thresholds = thresholds[:np.where(thresholds == stop_threshold)[0][0]]
+        # calculate the gradient of the number of spots
+        grad = np.gradient(spot_counts)
+        optimal_threshold_index = np.argmin(grad)
 
-            # Calculate the gradient of the number of peaks distribution
-            grad = np.gradient(spot_counts)
+        # only consider thresholds > than optimal threshold
+        thresholds = thresholds[optimal_threshold_index:]
+        grad = grad[optimal_threshold_index:]
 
-            # Restructure the data in order to avoid to consider the min_peak in the
-            # calculations
+        if thresholds.shape > (1,):
 
-            # Coord of the gradient min_peak
-            grad_min_peak_coord = np.argmin(grad)
+            spot_counts = spot_counts[optimal_threshold_index:]
 
-            # Trim the data to remove the peak.
-            trimmed_thr_array = thresholds[grad_min_peak_coord:]
-            trimmed_grad = grad[grad_min_peak_coord:]
+            distances = []
 
-            if trimmed_thr_array.shape > (1,):
+            # Calculate the coords of the end points of the gradient
+            p1 = Point(thresholds[0], grad[0])
+            p2 = Point(thresholds[-1], grad[-1])
 
-                # Trim the coords array in order to maintain the same length of the 
-                # tr and pk
-                trimmed_peaks_coords = spot_indices[grad_min_peak_coord:]
-                trimmed_total_peaks = spot_counts[grad_min_peak_coord:]
+            # Create a line that join the points
+            s = Line(p1, p2)
+            allpoints = np.arange(0, len(thresholds))
 
-                # To determine the threshold we will determine the Thr with the biggest
-                # distance to the segment that join the end points of the calculated
-                # gradient
+            # Calculate the distance between all points and the line
+            for p in allpoints:
+                dst = s.distance(Point(thresholds[p], grad[p]))
+                distances.append(dst.evalf())
 
-                # Distances list
-                distances = []
+            # Remove the end points from the lists
+            thresholds = thresholds[1:-1]
+            trimmed_distances = distances[1:-1]
 
-                # Calculate the coords of the end points of the gradient
-                p1 = Point(trimmed_thr_array[0], trimmed_grad[0])
-                p2 = Point(trimmed_thr_array[-1], trimmed_grad[-1])
+            # Determine the coords of the selected Thr
+            # Converted trimmed_distances to array because it crashed
+            # on Sanger.
+            if trimmed_distances:  # Most efficient way will be to consider the length of Thr list
+                thr_idx = np.argmax(np.array(trimmed_distances))
 
-                # Create a line that join the points
-                s = Line(p1, p2)
-                allpoints = np.arange(0, len(trimmed_thr_array))
+                if thr_idx + stringency < len(thresholds):
+                    selected_thr = thresholds[thr_idx + stringency]
+                    thr_idx = thr_idx + stringency
+                else:
+                    selected_thr = thresholds[thr_idx]
 
-                # Calculate the distance between all points and the line
-                for p in allpoints:
-                    dst = s.distance(Point(trimmed_thr_array[p], trimmed_grad[p]))
-                    distances.append(dst.evalf())
+            else:
+                thr_idx = 0
+                selected_thr = 0
 
-                # Remove the end points from the lists
-                trimmed_thr_array = trimmed_thr_array[1:-1]
-                trimmed_grad = trimmed_grad[1:-1]
-                trimmed_peaks_coords = trimmed_peaks_coords[1:-1]
-                trimmed_total_peaks = trimmed_total_peaks[1:-1]
-                trimmed_distances = distances[1:-1]
-
-                # Determine the coords of the selected Thr
-                # Converted trimmed_distances to array because it crashed
-                # on Sanger.
-                if trimmed_distances:  # Most efficient way will be to consider the length of Thr list
-                    thr_idx = np.argmax(np.array(trimmed_distances))
-                    calculated_thr = trimmed_thr_array[thr_idx]
-                    # The selected threshold usually causes oversampling of the number of dots
-                    # I added a stringency parameter (int n) to use to select the Thr+n 
-                    # for the counting. It selects a stringency only if the trimmed_thr_array
-                    # is long enough
-                    if thr_idx + stringency < len(trimmed_thr_array):
-                        selected_thr = trimmed_thr_array[thr_idx + stringency]
-                        selected_peaks = trimmed_peaks_coords[thr_idx + stringency]
-                        thr_idx = thr_idx + stringency
-                    else:
-                        selected_thr = trimmed_thr_array[thr_idx]
-                        selected_peaks = trimmed_peaks_coords[thr_idx]
-        else:
-            selected_thr = 0
-
-        return selected_thr
-
+        return thr_idx, selected_thr
 
     def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
 
@@ -170,63 +155,6 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
     def compute_threhsold(self):
         return 0.1
-
-    @staticmethod
-    def _single_spot_attributes(
-            spot_property: _RegionProperties,
-            decoded_image: np.ndarray,
-            min_area: Number,
-            max_area: Number,
-    ) -> Tuple[Dict[str, int], int]:
-        """
-        Calculate starfish SpotAttributes from the RegionProperties of a connected component
-        feature.
-
-        Parameters
-        ----------
-        spot_property: _RegionProperties
-            Properties of the connected component. Output of skimage.measure.regionprops
-        decoded_image : np.ndarray
-            Image whose pixels correspond to the targets that the given position in the ImageStack
-            decodes to.
-        target_map : TargetsMap
-            Unique mapping between string target names and int target IDs.
-        min_area :
-            Combined features with area below this value are marked as failing filters
-        max_area : Number
-            Combined features with area above this value are marked as failing filters
-
-        Returns
-        -------
-        Dict[str, Number] :
-            spot attribute dictionary for this connected component, containing the x, y, z position,
-            target name (str) and feature radius.
-        int :
-            1 if spot passes size filters, zero otherwise.
-
-        """
-        # because of the above skimage issue, we need to support both 2d and 3d properties
-        if len(spot_property.centroid) == 3:
-            spot_attrs = {
-                'z': int(spot_property.centroid[0]),
-                'y': int(spot_property.centroid[1]),
-                'x': int(spot_property.centroid[2])
-            }
-        else:  # data is 2d
-            spot_attrs = {
-                'z': 0,
-                'y': int(spot_property.centroid[0]),
-                'x': int(spot_property.centroid[1])
-            }
-
-        # we're back to 3d or fake-3d here
-        target_index = decoded_image[spot_attrs['z'], spot_attrs['y'], spot_attrs['x']]
-        spot_attrs[Features.TARGET] = target_map.target_as_str(target_index)
-        spot_attrs[Features.SPOT_RADIUS] = spot_property.equivalent_diameter / 2
-
-        # filter intensities for which radius is too small
-        passes_area_filter = 1 if min_area <= spot_property.area < max_area else 0
-        return spot_attrs, passes_area_filter
 
     def run(
             self,

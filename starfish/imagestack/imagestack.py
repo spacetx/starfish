@@ -222,7 +222,11 @@ class ImageStack:
         """
         if len(array.shape) != 5:
             raise ValueError('a 5-d tensor with shape (n_round, n_ch, n_z, y, x) must be provided.')
-        cls._validate_data_dtype_and_range(array)
+        try:
+            cls._validate_data_dtype_and_range(array)
+        except TypeError:
+            warnings.warn(f"ImageStack detected as {array.dtype}. Converting to float32...")
+            array = img_as_float32(array)
 
         n_round, n_ch, n_z, height, width = array.shape
         empty = cls.synthetic_stack(

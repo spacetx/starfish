@@ -308,7 +308,7 @@ class Codebook(xr.DataArray):
         backend, name, _ = resolve_path_or_url(json_codebook)
         with backend.read_contextmanager(name) as fh:
             code_array = json.load(fh)
-        return cls.from_code_array(code_array, n_round, n_ch)
+        return cls.from_code_array(code_array['mappings'], n_round, n_ch)
 
     def to_json(self, filename: str) -> None:
         """save a codebook to json

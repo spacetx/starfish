@@ -1,6 +1,7 @@
 from typing import Tuple, Union, Optional, List
 
 import numpy as np
+import pandas as pd
 import xarray as xr
 from scipy.ndimage import label
 from skimage.feature import peak_local_max
@@ -10,24 +11,19 @@ from sympy import Point, Line
 from starfish import ImageStack, IntensityTable
 from starfish.spots._detector._base import SpotFinderAlgorithmBase
 from starfish.spots._detector.detect import detect_spots
-from starfish.types import SpotAttributes, Number
+from starfish.types import SpotAttributes, Number, Indices, Features
 
 
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
     def __init__(
             self, min_distance, stringency, min_obj_area, max_obj_area, threshold=None
-            , measurement_type: str = 'max', is_volume: bool = False,
-            verbose=False, **kwargs) -> None:
+            , measurement_type: str = 'max', is_volume: bool = False, **kwargs) -> None:
 
         self.min_distance = min_distance
         self.stringency = stringency
         self.min_obj_area = min_obj_area
         self.max_obj_area = max_obj_area
-
-        if threshold is None:
-            self.threshold = self._compute_thresholds()
-        else:
-            self.threshold = threshold
+        self.threshold = threshold
 
         if is_volume:
             raise ValueError(
@@ -35,7 +31,12 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
         self.measurement_function = self._get_measurement_function(measurement_type)
 
-    def _compute_thresholds(self, img: np.ndarray) -> Tuple[List, List]:
+    def _compute_threshold(self, img: Union[np.ndarray, xr.DataArray]) -> Number:
+        thresholds, spot_counts = self._compute_num_spots_per_threshold(img)
+        threshold = self._select_optimal_threshold(thresholds, spot_counts)
+        return threshold
+
+    def _compute_num_spots_per_threshold(self, img: np.ndarray) -> Tuple[List, List]:
 
         # thresholds to search over
         thresholds = np.linspace(img.min(), img.max(), num=100)
@@ -77,8 +78,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
         return thresholds, spot_counts
 
-    @staticmethod
-    def _select_optimal_threshold(thresholds: List, spot_counts: List, stringency: Number) -> Tuple[Number, Number]:
+    def _select_optimal_threshold(self, thresholds: List, spot_counts: List) -> Number:
 
         # calculate the gradient of the number of spots
         grad = np.gradient(spot_counts)
@@ -88,73 +88,70 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         thresholds = thresholds[optimal_threshold_index:]
         grad = grad[optimal_threshold_index:]
 
-        if thresholds.shape > (1,):
+        # if all else fails, return 0.
+        selected_thr = 0
 
-            spot_counts = spot_counts[optimal_threshold_index:]
+        # TODO i don't really get what this code does
+        if thresholds.shape > (1,):
 
             distances = []
 
-            # Calculate the coords of the end points of the gradient
-            p1 = Point(thresholds[0], grad[0])
-            p2 = Point(thresholds[-1], grad[-1])
+            start_point = Point(thresholds[0], grad[0])
+            end_point = Point(thresholds[-1], grad[-1])
+            line = Line(start_point, end_point)
 
-            # Create a line that join the points
-            s = Line(p1, p2)
-            allpoints = np.arange(0, len(thresholds))
-
-            # Calculate the distance between all points and the line
-            for p in allpoints:
-                dst = s.distance(Point(thresholds[p], grad[p]))
+            # calculate the distance between all points and the line
+            for k in range(len(thresholds)):
+                p = Point(thresholds[k], grad[k])
+                dst = line.distance(p)
                 distances.append(dst.evalf())
 
-            # Remove the end points from the lists
+            # remove the end points
             thresholds = thresholds[1:-1]
-            trimmed_distances = distances[1:-1]
+            distances = distances[1:-1]
 
-            # Determine the coords of the selected Thr
-            # Converted trimmed_distances to array because it crashed
-            # on Sanger.
-            if trimmed_distances:  # Most efficient way will be to consider the length of Thr list
-                thr_idx = np.argmax(np.array(trimmed_distances))
+            if distances:
+                thr_idx = np.argmax(np.array(distances))
 
-                if thr_idx + stringency < len(thresholds):
-                    selected_thr = thresholds[thr_idx + stringency]
-                    thr_idx = thr_idx + stringency
+                if thr_idx + self.stringency < len(thresholds):
+                    selected_thr = thresholds[thr_idx + self.stringency]
                 else:
                     selected_thr = thresholds[thr_idx]
 
-            else:
-                thr_idx = 0
-                selected_thr = 0
-
-        return thr_idx, selected_thr
+        return selected_thr
 
     def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
 
         if self.threshold is None:
-            self.threshold = self.compute_threshold()
+            self.threshold = self._compute_threshold(data_image)
 
-        spot_coords = peak_local_max(data_image,
+        masked_image = data_image > self.threshold
+        labels = label(masked_image)[0]
+        spot_props = regionprops(labels)
+
+        for spot_prop in spot_props:
+            if spot_prop.area < self.min_obj_area or spot_prop.area > self.max_obj_area:
+                masked_image[spot_prop.coords[:, 0], spot_prop.coords[:, 1]] = 0
+
+        labels = label(masked_image)[0]
+
+        spot_coords = peak_local_max(masked_image,
                                      min_distance=self.min_distance,
                                      threshold_abs=self.threshold,
                                      exclude_border=False,
                                      indices=True,
                                      num_peaks=np.inf,
                                      footprint=None,
-                                     labels=None)
+                                     labels=labels)
 
-        masked_image = data_image > self.threshold
-        labels = label(masked_image)[0]
-        props = regionprops(labels)
+        # TODO how to get the radius?
+        res = {Indices.X.value: spot_coords[:, 1],
+               Indices.Y.value: spot_coords[:, 0],
+               Indices.Z.value: np.zeros(len(spot_coords)),
+               Features.SPOT_RADIUS: 1
+               }
 
-        for prop in props:
-            if prop.area < self.min_obj_area or prop.area > self.max_obj_area:
-                masked_image[prop.coords[:, 0], prop.coords[:, 1]] = 0
-
-        labels = label(masked_image)[0]
-
-    def compute_threhsold(self):
-        return 0.1
+        return SpotAttributes(pd.DataFrame(res))
 
     def run(
             self,
@@ -184,7 +181,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             reference_image=blobs_image,
             reference_image_from_max_projection=reference_image_from_max_projection,
             measurement_function=self.measurement_function,
-            radius_is_gyration=True,
+            radius_is_gyration=False,
         )
 
         return intensity_table

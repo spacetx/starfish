@@ -42,3 +42,5 @@ class Features:
     DISTANCE = 'distance'
     PASSES_THRESHOLDS = 'passes_thresholds'
     CELL_ID = 'cell_id'
+    SPOT_ID = 'spot_id'
+    INTENSITY = 'intensity'

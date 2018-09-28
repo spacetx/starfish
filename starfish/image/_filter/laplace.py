@@ -7,9 +7,9 @@ from typing import Callable, Optional, Tuple, Union
 import numpy as np
 from scipy.ndimage import gaussian_laplace
 
-from starfish.imagestack.imagestack import ImageStack
 from starfish.image._filter._base import FilterAlgorithmBase
 from starfish.image._filter.util import preserve_float_range
+from starfish.imagestack.imagestack import ImageStack
 
 
 class Laplace(FilterAlgorithmBase):

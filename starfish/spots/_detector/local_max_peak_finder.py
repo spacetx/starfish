@@ -1,4 +1,4 @@
-from typing import Tuple, Union, Optional, List
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -6,18 +6,19 @@ import xarray as xr
 from scipy.ndimage import label
 from skimage.feature import peak_local_max
 from skimage.measure import regionprops
-from sympy import Point, Line
+from sympy import Line, Point
 
-from starfish import ImageStack, IntensityTable
+from starfish.imagestack.imagestack import ImageStack
+from starfish.intensity_table import IntensityTable
 from starfish.spots._detector._base import SpotFinderAlgorithmBase
 from starfish.spots._detector.detect import detect_spots
-from starfish.types import SpotAttributes, Number, Indices, Features
+from starfish.types import Features, Indices, Number, SpotAttributes
 
 
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
     def __init__(
-            self, min_distance, stringency, min_obj_area, max_obj_area, threshold=None
-            , measurement_type: str = 'max', is_volume: bool = False, **kwargs) -> None:
+            self, min_distance, stringency, min_obj_area, max_obj_area, threshold=None,
+            measurement_type: str = 'max', is_volume: bool = False) -> None:
 
         self.min_distance = min_distance
         self.stringency = stringency
@@ -26,10 +27,16 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self.threshold = threshold
 
         if is_volume:
-            raise ValueError(
-                'LocalMaxPeakFinder only works for 2D data, for 3D data, please use TrackpyLocalMaxPeakFinder')
+            raise ValueError('LocalMaxPeakFinder only works for 2D data, for 3D data, '
+                             'please use TrackpyLocalMaxPeakFinder')
 
         self.measurement_function = self._get_measurement_function(measurement_type)
+
+        self._thresholds = None
+        self._spot_counts = None
+        self._grad = None
+        self._spot_props = None
+        self._labels = None
 
     def _compute_threshold(self, img: Union[np.ndarray, xr.DataArray]) -> Number:
         thresholds, spot_counts = self._compute_num_spots_per_threshold(img)
@@ -76,12 +83,16 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             thresholds = thresholds[:stop_index]
             spot_counts = spot_counts[:stop_index]
 
+        self._thresholds = thresholds
+        self._spot_counts = spot_counts
+
         return thresholds, spot_counts
 
     def _select_optimal_threshold(self, thresholds: List, spot_counts: List) -> Number:
 
         # calculate the gradient of the number of spots
         grad = np.gradient(spot_counts)
+        self._grad = grad
         optimal_threshold_index = np.argmin(grad)
 
         # only consider thresholds > than optimal threshold
@@ -125,7 +136,8 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         if self.threshold is None:
             self.threshold = self._compute_threshold(data_image)
 
-        masked_image = data_image > self.threshold
+        # TODO @ajc data_image is volumetric, although in his code, we never use it that way
+        masked_image = data_image[0, :, :] > self.threshold
         labels = label(masked_image)[0]
         spot_props = regionprops(labels)
 
@@ -134,6 +146,10 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
                 masked_image[spot_prop.coords[:, 0], spot_prop.coords[:, 1]] = 0
 
         labels = label(masked_image)[0]
+        spot_props = regionprops(labels)
+
+        self._spot_props = spot_props
+        self._labels = labels
 
         spot_coords = peak_local_max(masked_image,
                                      min_distance=self.min_distance,
@@ -148,7 +164,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         res = {Indices.X.value: spot_coords[:, 1],
                Indices.Y.value: spot_coords[:, 0],
                Indices.Z.value: np.zeros(len(spot_coords)),
-               Features.SPOT_RADIUS: 1
+               Features.SPOT_RADIUS: 1,
+               Features.SPOT_ID: np.arange(spot_coords.shape[0]),
+               Features.INTENSITY: data_image[0, spot_coords[:, 0], spot_coords[:, 1]]
                }
 
         return SpotAttributes(pd.DataFrame(res))

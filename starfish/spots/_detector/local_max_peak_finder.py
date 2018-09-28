@@ -151,7 +151,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self._spot_props = spot_props
         self._labels = labels
 
-        spot_coords = peak_local_max(masked_image,
+        spot_coords = peak_local_max(data_image,
                                      min_distance=self.min_distance,
                                      threshold_abs=self.threshold,
                                      exclude_border=False,

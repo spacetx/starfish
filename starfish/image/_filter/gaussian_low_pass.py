@@ -59,8 +59,7 @@ class GaussianLowPass(FilterAlgorithmBase):
         Returns
         -------
         np.ndarray :
-            Blurred data in same shape as input image, converted to np.uint16 dtype.
-            :param rescale:
+            Blurred data in same shape as input image, converted to np.float32 dtype.
 
         """
 

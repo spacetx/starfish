@@ -65,8 +65,6 @@ class MeanHighPass(FilterAlgorithmBase):
         -------
         np.ndarray [np.float32]:
             Filtered image, same shape as input
-            :param clip:
-
         """
 
         blurred: np.ndarray = uniform_filter(image, size)

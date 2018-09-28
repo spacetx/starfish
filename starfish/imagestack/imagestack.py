@@ -225,7 +225,7 @@ class ImageStack:
         try:
             cls._validate_data_dtype_and_range(array)
         except TypeError:
-            print(f"ImageStack detected as {array.dtype}. Converting to float32...")
+            warnings.warn(f"ImageStack detected as {array.dtype}. Converting to float32...")
             array = img_as_float32(array)
 
         n_round, n_ch, n_z, height, width = array.shape

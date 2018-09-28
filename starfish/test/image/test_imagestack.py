@@ -161,7 +161,7 @@ def test_from_numpy_array_raises_error_when_incorrect_dims_passed():
 def test_from_numpy_array_automatically_handles_float_conversions():
     x = np.zeros((1, 1, 1, 20, 20), dtype=np.uint16)
     stack = ImageStack.from_numpy_array(x)
-    assert (stack.numpy_array.dtype == np.float32)
+    assert stack.numpy_array.dtype == np.float32
 
 
 def test_max_projection_preserves_dtype():

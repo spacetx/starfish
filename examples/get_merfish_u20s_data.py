@@ -54,6 +54,7 @@ class MERFISHTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
+    @property
     def tile_data(self) -> IO:
         im = imread(self.file_path)
         return im[self.map[(self.hyb, self.ch)], :, :]
@@ -72,6 +73,7 @@ class MERFISHAuxTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
+    @property
     def tile_data(self) -> np.ndarray:
         return imread(self.file_path)[self.dapi_index, :, :]
 

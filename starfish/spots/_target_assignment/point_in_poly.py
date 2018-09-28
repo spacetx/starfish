@@ -17,7 +17,7 @@ class PointInPoly2D(TargetAssignmentAlgorithm):
         """
 
     @classmethod
-    def add_arguments(cls, parser) -> None:
+    def _add_arguments(cls, parser) -> None:
         pass
 
     @staticmethod

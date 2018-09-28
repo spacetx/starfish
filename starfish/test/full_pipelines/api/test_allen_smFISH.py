@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from starfish import Experiment
+import starfish.data
 from starfish.image._filter.bandpass import Bandpass
 from starfish.image._filter.clip import Clip
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
@@ -15,10 +15,7 @@ def test_allen_smFISH_cropped_data():
     np.random.seed(777)
 
     # load the experiment
-    experiment_json = (
-        "https://dmf0bdeheu4zf.cloudfront.net/20180911/allen_smFISH-TEST/experiment.json"
-    )
-    experiment = Experiment.from_json(experiment_json)
+    experiment = starfish.data.allen_smFISH(use_test_data=True)
 
     primary_image = experiment.fov().primary_image
 

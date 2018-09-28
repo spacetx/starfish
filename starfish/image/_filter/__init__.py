@@ -1,8 +1,8 @@
 import argparse
 from typing import Type
 
+from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
-from starfish.stack import ImageStack
 from starfish.util.argparse import FsExistsType
 from . import _base
 from . import bandpass
@@ -22,11 +22,11 @@ class Filter(PipelineComponent):
     filter_group: argparse.ArgumentParser
 
     @classmethod
-    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
+    def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
         return _base.FilterAlgorithmBase
 
     @classmethod
-    def add_to_parser(cls, subparsers):
+    def _add_to_parser(cls, subparsers):
         """Adds the filter component to the CLI argument parser."""
         filter_group = subparsers.add_parser("filter")
         filter_group.add_argument("-i", "--input", type=FsExistsType(), required=True)
@@ -34,10 +34,10 @@ class Filter(PipelineComponent):
         filter_group.set_defaults(starfish_command=Filter._cli)
         filter_subparsers = filter_group.add_subparsers(dest="filter_algorithm_class")
 
-        for algorithm_cls in cls.algorithm_to_class_map().values():
-            group_parser = filter_subparsers.add_parser(algorithm_cls.get_algorithm_name())
+        for algorithm_cls in cls._algorithm_to_class_map().values():
+            group_parser = filter_subparsers.add_parser(algorithm_cls._get_algorithm_name())
             group_parser.set_defaults(filter_algorithm_class=algorithm_cls)
-            algorithm_cls.add_arguments(group_parser)
+            algorithm_cls._add_arguments(group_parser)
 
         cls.filter_group = filter_group
 
@@ -52,6 +52,5 @@ class Filter(PipelineComponent):
         print('Filtering images ...')
         stack = ImageStack.from_path_or_url(args.input)
         instance = args.filter_algorithm_class(**vars(args))
-        instance.run(stack)
-
-        stack.write(args.output)
+        output = instance.run(stack)
+        output.write(args.output)

@@ -16,15 +16,13 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
-from starfish.experiment import Experiment
+from starfish import data
 from starfish.types import Features, Indices
-
-from starfish.codebook import Codebook
 
 from starfish.intensity_table import IntensityTable
 
-from starfish.stack import ImageStack
 from starfish.image import Filter
 from starfish.spots import SpotFinder
 
@@ -39,12 +37,10 @@ sns.set_style('ticks')
 # EPY: END markdown
 
 # EPY: START code
+use_test_data = os.getenv("USE_TEST_DATA") is not None
+exp = data.DARTFISH(use_test_data=use_test_data)
 
-exp = Experiment.from_json('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/experiment.json')
 stack = exp.fov().primary_image
-
-# TODO the latter will be fixed by https://github.com/spacetx/starfish/issues/316
-stack._data = stack._data.astype(float)
 # EPY: END code
 
 # EPY: START code
@@ -68,8 +64,7 @@ exp.codebook
 # EPY: END markdown
 
 # EPY: START code
-
-cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/fov_001/counts.csv')
+cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 # EPY: END code
 
@@ -81,8 +76,8 @@ cnts_benchmark.head()
 sc_filt = Filter.ScaleByPercentile(p=100)
 z_filt = Filter.ZeroByChannelMagnitude(thresh=.05, normalize=False)
 
-norm_stack = sc_filt.run(stack, in_place=False)
-zero_norm_stack = z_filt.run(norm_stack, in_place=False)
+norm_stack = sc_filt.run(stack)
+zero_norm_stack = z_filt.run(norm_stack)
 # EPY: END code
 
 # EPY: START markdown
@@ -131,11 +126,11 @@ psd = SpotFinder.PixelSpotDetector(
     max_area=area_threshold[1]
 )
 
-spot_intensities, results = psd.run(zero_norm_stack)
+initial_spot_intensities, results = psd.run(zero_norm_stack)
 # EPY: END code
 
 # EPY: START code
-spots_df = spot_intensities.to_features_dataframe()
+spots_df = initial_spot_intensities.to_features_dataframe()
 spots_df['area'] = np.pi*spots_df['radius']**2
 spots_df = spots_df.loc[spots_df[Features.PASSES_THRESHOLDS]]
 spots_df.head()
@@ -269,7 +264,10 @@ pixel_traces_df = pixel_traces.to_features_dataframe()
 pixel_traces_df['area'] = np.pi*pixel_traces_df.radius**2
 
 # pick index of a barcode that was read and decoded from the ImageStack
-ind = 45
+ind = 4
+
+# The test will error here on pixel_traces[ind,:] with an out of index error
+# because we are using the test data.
 
 # get the the corresponding gene this barcode was decoded to
 gene = pixel_traces_df.loc[ind].target

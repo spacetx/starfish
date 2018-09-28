@@ -8,8 +8,7 @@
 # EPY: END markdown
 
 # EPY: START code
-from starfish import ImageStack
-from starfish.experiment import Experiment
+from starfish import data
 from starfish.types import Indices
 import os
 # EPY: END code
@@ -19,7 +18,8 @@ import os
 # EPY: END markdown
 
 # EPY: START code
-experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180911/osmFISH/experiment.json")
+use_test_data = os.getenv("USE_TEST_DATA") is not None
+experiment = data.osmFISH(use_test_data=use_test_data)
 # EPY: END code
 
 # EPY: START markdown

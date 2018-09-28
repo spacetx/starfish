@@ -1,24 +1,55 @@
 language: python
+env:
+  global:
+    - STARFISH_STRICT_LOADING=true
 services:
 - docker
 python:
 - 3.6
 dist: trusty
-install:
-- pip install --force-reinstall --upgrade -r REQUIREMENTS-DEV.txt -r REQUIREMENTS-NOTEBOOK.txt
-- pip install -e .
-- pip freeze
-script:
-- export MPLBACKEND=Agg
-- export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-- set -eo pipefail
-- case "$BRANCH" in
-  master|merge)
-    make slow
-    ;;
-  *)
-    make fast
-    ;;
-  esac
-after_success:
-- bash <(curl -s https://codecov.io/bash)
+stages:
+- test
+jobs:
+  include:
+    - name: Syntax and Tests
+      script: make check_notebooks install-src fast
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+    - name: Docker
+      if: type = push and branch =~ /^(master|merge)/
+      script: make docker
+    - name: Allen Notebook
+      if: type = push and branch =~ /^(master|merge)/
+      script: make install-src run__notebooks/py/allen_smFISH.py
+    - name: MERFISH Notebook
+      if: type = push and branch =~ /^(master|merge)/
+      script: make install-src run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
+    - name: Assay Notebook
+      if: type = push and branch =~ /^(master|merge)/
+      script: make install-src run__notebooks/py/assay_comparison.py
+    - name: osmFISH Notebook
+      if: type = push and branch =~ /^(master|merge)/
+      script: make install-src run__notebooks/py/osmFISH.py
+    - name: DARTFISH Notebook
+      if: type = push and branch =~ /^(master|merge)/
+      script: make install-src run__notebooks/py/DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV.py
+    - name: Simulation Notebook
+      if: type = push and branch =~ /^(master|merge)/
+      script: make install-src run__notebooks/py/Starfish_simulation.py
+    - name: ISS Notebook
+      if: type = push and branch =~ /^(master|merge)/
+      script: make install-src run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
+    - name: Released Notebooks
+      if: type = cron and branch =~ /^(master|merge)/
+      script: make check_notebooks install-pypi run_notebooks
+    - name: Check Requirements
+      if: type = cron AND branch = /^master$/
+      script: make refresh_all_requirements check_requirements
+cache:
+  directories:
+  - $HOME/.cache/pip
+  - $HOME/.starfish-cache
+notifications:
+  slack:
+    secure: Za1Zbbx/SE0qeRZxoRtheMeOmRawhUF0TCM18wU627bEWIPjxKgVETrgu/eLnANi003dToIVDQJ2XMWhNFADbvw0fTnnbekksvOAeWo0LxOlIW6T5rSQJQ3l301dKZ0AmGryM8qonPoztS4MJtDbGvThNI6u4wDSQfqiHk2qkohCNgx1xbMgU704CZ795q/2Gua0G1QABwElbbHhWa4HBN/eXX5+nYNo25JcG+DsnKheHPgTTWzzrXVAsjSa4LmRDmJWNn1hdG9QpVs2jcZjcs2WtFzpJt5N+A6MMtW4StsKh/b8QU7LMDhBOGT0H4fnGA8fu5UV9QNT6W0h8KhSBVtsCBzbLKN/6NzZ8vXZ3a/n+h3nWRw2A+8/txWcIAjlO/GT22UJs5uawmHmAC58PZcDbiD4ha1VUD6MKmqpNThOg4NZSBPcj9NplK1f7hBRkSY2bW9aY1WdY7IbqwV4vmfxm6fHwanAkJpd2tFXOT3pMuaHBaN01BNmrY4lfjL6dn3kErmaPV14Sw55ue/kDBwZ2nBkOWkjfTB72WB1inn2zig81BRmJT7gUEXRnGETVPI+HjqXqtK8nAQGD423hBmnLvk7RZ9PkhC9CClwmLUbXLlFHC48CrsucUAkEFxc6ApNwxu8E9Q7gJZnxFEWKkAPf2sexF9o/iHZPssVtYM=
+    on_success: change

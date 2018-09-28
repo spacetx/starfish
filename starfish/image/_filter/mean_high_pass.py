@@ -4,13 +4,11 @@ from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
 from scipy.ndimage.filters import uniform_filter
-from skimage import img_as_uint
 
-from starfish.errors import DataFormatWarning
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
-from .util import preserve_float_range
+from .util import preserve_float_range, validate_and_broadcast_kernel_size
 
 
 class MeanHighPass(FilterAlgorithmBase):
@@ -38,19 +36,11 @@ class MeanHighPass(FilterAlgorithmBase):
 
         """
 
-        if isinstance(size, tuple):
-            message = ("if passing an anisotropic kernel, the dimensionality must match the data "
-                       "shape ({shape}), not {passed_shape}")
-            if is_volume and len(size) != 3:
-                raise ValueError(message.format(shape=3, passed_shape=len(size)))
-            if not is_volume and len(size) != 2:
-                raise ValueError(message.format(shape=2, passed_shape=len(size)))
-
-        self.size = size
+        self.size = validate_and_broadcast_kernel_size(size, is_volume)
         self.is_volume = is_volume
 
     @classmethod
-    def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
+    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             "--size", type=float, help="width of the kernel")
         group_parser.add_argument(
@@ -58,39 +48,38 @@ class MeanHighPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(image: np.ndarray, size: Number) -> np.ndarray:
+    def _high_pass(image: np.ndarray, size: Number, rescale: bool=False) -> np.ndarray:
         """
-        Applies a gaussian high pass filter to an image
+        Applies a mean high pass filter to an image
 
         Parameters
         ----------
-        image : numpy.ndarray[np.uint16]
+        image : numpy.ndarray[np.float32]
             2-d or 3-d image data
-        size : Number
+        size : Union[Number, Tuple[Number]]
             width of the kernel
+        rescale : bool
+            If true scales data by max value, if false clips max values to one
 
         Returns
         -------
-        np.ndarray :
+        np.ndarray [np.float32]:
             Filtered image, same shape as input
+            :param clip:
 
         """
-        if image.dtype != np.uint16:
-            DataFormatWarning(
-                "Mean filters currently only support uint16 images. Image data will be converted.")
-            image = img_as_uint(image)
 
         blurred: np.ndarray = uniform_filter(image, size)
 
         filtered: np.ndarray = image - blurred
-        filtered = preserve_float_range(filtered)
+        filtered = preserve_float_range(filtered, rescale)
 
         return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
             n_processes: Optional[int]=None
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -106,15 +95,14 @@ class MeanHighPass(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in_place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
-        high_pass: Callable = partial(self.high_pass, size=self.size)
+        high_pass: Callable = partial(self._high_pass, size=self.size)
         result = stack.apply(
             high_pass,
             is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
-        if not in_place:
-            return result
-        return None
+        return result

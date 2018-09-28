@@ -1,7 +1,7 @@
 import argparse
 from typing import Type
 
-from starfish.codebook import Codebook
+from starfish.codebook.codebook import Codebook
 from starfish.intensity_table import IntensityTable
 from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.util.argparse import FsExistsType
@@ -14,7 +14,7 @@ class Decoder(PipelineComponent):
     decoder_group: argparse.ArgumentParser
 
     @classmethod
-    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
+    def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
         return _base.DecoderAlgorithmBase
 
     @classmethod
@@ -27,10 +27,10 @@ class Decoder(PipelineComponent):
         decoder_group.set_defaults(starfish_command=Decoder._cli)
         decoder_subparsers = decoder_group.add_subparsers(dest="decoder_algorithm_class")
 
-        for algorithm_cls in cls.algorithm_to_class_map().values():
-            group_parser = decoder_subparsers.add_parser(algorithm_cls.get_algorithm_name())
+        for algorithm_cls in cls._algorithm_to_class_map().values():
+            group_parser = decoder_subparsers.add_parser(algorithm_cls._get_algorithm_name())
             group_parser.set_defaults(decoder_algorithm_class=algorithm_cls)
-            algorithm_cls.add_arguments(group_parser)
+            algorithm_cls._add_arguments(group_parser)
 
         cls.decoder_group = decoder_group
 

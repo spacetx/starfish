@@ -3,11 +3,14 @@ import io
 import json
 import os
 import zipfile
-from typing import IO, Mapping, Tuple, Union
+from typing import Mapping, Tuple, Union
 
+import numpy as np
 import requests
+from skimage.io import imread
 from slicedimage import ImageFormat
 
+from starfish import Codebook
 from starfish.experiment.builder import FetchedTile, TileFetcher
 from starfish.experiment.builder import write_experiment_json
 from starfish.types import Coordinates, Features, Indices, Number
@@ -38,8 +41,8 @@ class ISSTile(FetchedTile):
         return ImageFormat.TIFF
 
     @property
-    def tile_data_handle(self) -> IO:
-        return open(self.file_path, "rb")
+    def tile_data(self) -> np.ndarray:
+        return imread(self.file_path)
 
 
 class ISSPrimaryTileFetcher(TileFetcher):
@@ -124,7 +127,7 @@ def format_data(input_dir, output_dir, d):
         default_shape=SHAPE
     )
 
-    codebook = [
+    codebook_array = [
         {
             Features.CODEWORD: [
                 {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
@@ -144,8 +147,9 @@ def format_data(input_dir, output_dir, d):
             Features.TARGET: "ACTB_mouse"
         },
     ]
+    codebook = Codebook.from_code_array(codebook_array)
     codebook_json_filename = "codebook.json"
-    write_json(codebook, os.path.join(output_dir, codebook_json_filename))
+    codebook.to_json(os.path.join(output_dir, codebook_json_filename))
 
 
 if __name__ == "__main__":

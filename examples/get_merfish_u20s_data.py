@@ -1,9 +1,9 @@
 import argparse
-import io
 import os
 from typing import IO, Mapping, Tuple, Union
 
-from skimage.io import imread, imsave
+import numpy as np
+from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
@@ -54,13 +54,10 @@ class MERFISHTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    def tile_data_handle(self) -> IO:
+    @property
+    def tile_data(self) -> IO:
         im = imread(self.file_path)
-        im = im[self.map[(self.hyb, self.ch)], :, :]
-        fh = io.BytesIO()
-        imsave(fh, im, plugin='tifffile')
-        fh.seek(0)
-        return fh
+        return im[self.map[(self.hyb, self.ch)], :, :]
 
 
 class MERFISHAuxTile(FetchedTile):
@@ -76,12 +73,9 @@ class MERFISHAuxTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    def tile_data_handle(self) -> IO:
-        im = imread(self.file_path)[self.dapi_index, :, :]
-        fh = io.BytesIO()
-        imsave(fh, im, plugin='tifffile')
-        fh.seek(0)
-        return fh
+    @property
+    def tile_data(self) -> np.ndarray:
+        return imread(self.file_path)[self.dapi_index, :, :]
 
 
 class MERFISHTileFetcher(TileFetcher):

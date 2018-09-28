@@ -1,4 +1,4 @@
-from typing import Tuple, Union, Number, Dict, Optional
+from typing import Tuple, Union, Dict, Optional
 
 import numpy as np
 import xarray as xr
@@ -10,7 +10,7 @@ from skimage.measure._regionprops import _RegionProperties
 from starfish import ImageStack, IntensityTable
 from starfish.spots._detector._base import SpotFinderAlgorithmBase
 from starfish.spots._detector.detect import detect_spots
-from starfish.types import SpotAttributes
+from starfish.types import SpotAttributes, Features, Number
 
 
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
@@ -24,11 +24,17 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self.min_obj_area = min_obj_area
         self.max_obj_area = max_obj_area
 
-        self.threshold = self = threshold
+        if threshold is None:
+            self.threshold = self.calculate_threshold()
+        else:
+            self.threshold = threshold
 
-        if (is_volume):
+        if is_volume:
             raise ValueError(
                 'LocalMaxPeakFinder only works for 2D data, for 3D data, please use TrackpyLocalMaxPeakFinder')
+
+    def calculate_threshold(self):
+        return 1.0
 
     def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
 
@@ -117,8 +123,8 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
     def run(
             self,
             data_stack: ImageStack,
-            blobs_image: Optional[Union[np.ndarray, xr.DataArray]]=None,
-            reference_image_from_max_projection: bool=False,
+            blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
+            reference_image_from_max_projection: bool = False,
     ) -> IntensityTable:
         """
         Find spots.

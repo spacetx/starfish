@@ -4,12 +4,12 @@
   "type": "object",
   "description": "Physical coordinates of the tile.",
   "required": [
-    "x",
-    "y"
+    "xc",
+    "yc"
   ],
   "additionalProperties": false,
   "properties": {
-    "x": {
+    "xc": {
       "type": "array",
       "minItems": 1,
       "maxItems": 2,
@@ -23,7 +23,7 @@
         ]
       }
     },
-    "y": {
+    "yc": {
       "type": "array",
       "minItems": 1,
       "maxItems": 2,
@@ -37,7 +37,7 @@
         ]
       }
     },
-    "z": {
+    "zc": {
       "type": "array",
       "minItems": 1,
       "maxItems": 2,

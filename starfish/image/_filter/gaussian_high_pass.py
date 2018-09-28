@@ -6,7 +6,7 @@ import numpy as np
 import xarray as xr
 
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
 from .util import preserve_float_range, validate_and_broadcast_kernel_size
@@ -32,7 +32,7 @@ class GaussianHighPass(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     @classmethod
-    def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
+    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             "--sigma", type=float, help="standard deviation of gaussian kernel")
         group_parser.add_argument(
@@ -40,36 +40,41 @@ class GaussianHighPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(
-            image: Union[xr.DataArray, np.ndarray], sigma: Union[Number, Tuple[Number]]
+    def _high_pass(
+            image: Union[xr.DataArray, np.ndarray],
+            sigma: Union[Number, Tuple[Number]],
+            rescale: bool=False
     ) -> Union[xr.DataArray, np.ndarray]:
         """
         Applies a gaussian high pass filter to an image
 
         Parameters
         ----------
-        image : numpy.ndarray[np.uint16]
+        image : numpy.ndarray[np.float32]
             2-d or 3-d image data
         sigma : Union[Number, Tuple[Number]]
             Standard deviation of gaussian kernel
+        rescale : bool
+            If true scales data by max value, if false clips max values to one
 
         Returns
         -------
         np.ndarray :
             filtered image of the same shape as the input image
+            :param rescale:
 
         """
 
-        blurred = GaussianLowPass.low_pass(image, sigma)
+        blurred = GaussianLowPass._low_pass(image, sigma)
         filtered = image - blurred
-        filtered = preserve_float_range(filtered)
+        filtered = preserve_float_range(filtered, rescale)
 
         return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=True,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=True,
             n_processes: Optional[int]=None
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -85,15 +90,14 @@ class GaussianHighPass(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in-place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
-        high_pass: Callable = partial(self.high_pass, sigma=self.sigma)
+        high_pass: Callable = partial(self._high_pass, sigma=self.sigma)
         result = stack.apply(
             high_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place,
             n_processes=n_processes
         )
-        if not in_place:
-            return result
-        return None
+        return result

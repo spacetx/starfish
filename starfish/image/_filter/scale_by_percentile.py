@@ -3,7 +3,7 @@ from typing import Optional
 
 import numpy as np
 
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from ._base import FilterAlgorithmBase
 
 
@@ -25,12 +25,12 @@ class ScaleByPercentile(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     @classmethod
-    def add_arguments(cls, group_parser) -> None:
+    def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(
             "--p", default=100, type=int, help="scale images by this percentile")
 
     @staticmethod
-    def scale(image: np.ndarray, p: int) -> np.ndarray:
+    def _scale(image: np.ndarray, p: int) -> np.ndarray:
         """Clip values of img below and above percentiles p_min and p_max
 
         Parameters
@@ -61,9 +61,9 @@ class ScaleByPercentile(FilterAlgorithmBase):
         return image.astype(dtype)
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
             n_processes: Optional[int]=None
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -79,15 +79,14 @@ class ScaleByPercentile(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in-place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
-        clip = partial(self.scale, p=self.p)
+        clip = partial(self._scale, p=self.p)
         result = stack.apply(
             clip,
             is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
-        if not in_place:
-            return result
-        return None
+        return result

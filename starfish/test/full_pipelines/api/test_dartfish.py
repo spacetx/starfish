@@ -1,11 +1,16 @@
+import os
+import sys
+
 import numpy as np
 import pandas as pd
 
-from starfish import Experiment, IntensityTable
-from starfish.image._filter.scale_by_percentile import ScaleByPercentile
-from starfish.image._filter.zero_by_channel_magnitude import ZeroByChannelMagnitude
-from starfish.spots._detector.pixel_spot_detector import PixelSpotDetector
+import starfish
+from starfish import IntensityTable
 from starfish.types import Features
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(starfish.__file__)))
+os.environ["USE_TEST_DATA"] = "1"
+sys.path.append(os.path.join(ROOT_DIR, "notebooks", "py"))
 
 
 def test_dartfish_pipeline_cropped_data():
@@ -13,14 +18,9 @@ def test_dartfish_pipeline_cropped_data():
     # set random seed to errors provoked by optimization functions
     np.random.seed(777)
 
-    # load the experiment
-    experiment_json = (
-        "https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH-TEST/experiment.json"
-    )
-    experiment = Experiment.from_json(experiment_json)
+    dartfish = __import__('DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV')
 
-    primary_image = experiment.fov().primary_image
-    primary_image._data = primary_image._data.astype(np.float32)
+    primary_image = dartfish.stack
 
     expected_primary_image = np.array(
         [[1.52590219e-05, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
@@ -56,13 +56,14 @@ def test_dartfish_pipeline_cropped_data():
         dtype=np.float32
     )
 
+    assert primary_image.numpy_array.dtype == np.float32
+
     assert np.allclose(
         primary_image.numpy_array[0, 0, 0, 50:60, 60:70],
         expected_primary_image
     )
 
-    sc_filt = ScaleByPercentile(p=100)
-    normalized_image = sc_filt.run(primary_image, in_place=False)
+    normalized_image = dartfish.norm_stack
 
     expected_normalized_image = np.array(
         [[0.01960784, 0., 0., 0., 0.,
@@ -87,14 +88,14 @@ def test_dartfish_pipeline_cropped_data():
           0.01960784, 0.01960784, 0., 0., 0.]],
         dtype=np.float32,
     )
+    assert normalized_image.numpy_array.dtype == np.float32
 
     assert np.allclose(
         normalized_image.numpy_array[0, 0, 0, 50:60, 60:70],
         expected_normalized_image
     )
 
-    z_filt = ZeroByChannelMagnitude(thresh=.05, normalize=False)
-    zero_norm_stack = z_filt.run(normalized_image, in_place=False)
+    zero_norm_stack = dartfish.zero_norm_stack
 
     expected_zero_normalized_image = np.array(
         [[0.01960784, 0., 0., 0., 0.,
@@ -125,20 +126,7 @@ def test_dartfish_pipeline_cropped_data():
         zero_norm_stack.numpy_array[0, 0, 0, 50:60, 60:70]
     )
 
-    magnitude_threshold = 0.5
-    area_threshold = (5, 30)
-    distance_threshold = 3
-
-    psd = PixelSpotDetector(
-        codebook=experiment.codebook,
-        metric='euclidean',
-        distance_threshold=distance_threshold,
-        magnitude_threshold=magnitude_threshold,
-        min_area=area_threshold[0],
-        max_area=area_threshold[1],
-    )
-
-    spot_intensities, results = psd.run(zero_norm_stack)
+    spot_intensities = dartfish.initial_spot_intensities
     spots_df = IntensityTable(
         spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True)
     ).to_features_dataframe()
@@ -151,7 +139,7 @@ def test_dartfish_pipeline_cropped_data():
     # compare to benchmark data -- note that this particular part of the dataset appears completely
     # uncorrelated
     cnts_benchmark = pd.read_csv(
-        'https://dmf0bdeheu4zf.cloudfront.net/20180813/DARTFISH/fov_001/counts.csv')
+        'https://dmf0bdeheu4zf.cloudfront.net/20180905/DARTFISH/fov_001/counts.csv')
 
     min_dist = 0.6
     cnts_starfish = spots_df[spots_df.distance <= min_dist].groupby('target').count()['area']

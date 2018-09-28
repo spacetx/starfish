@@ -23,7 +23,7 @@ import tempfile
 # EPY: START code
 # science
 from starfish import IntensityTable, Experiment, ImageStack
-from starfish.plot import histogram, decoded_spots, compare_copy_number
+from starfish.plot import histogram, compare_copy_number
 from starfish.plot.decoded_spots import decoded_spots
 from starfish.types import Features, Indices
 import numpy as np
@@ -74,9 +74,8 @@ datasets = [iss_intensity_table, merfish_intensity_table, dartfish_intensity_tab
 
 # EPY: START code
 # construct background images for each assay
-experiment = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/experiment.json'
-)
+import starfish.data
+experiment = starfish.data.DARTFISH()
 
 dartfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 dartfish_link = os.path.join(data_root, "dartfish_dots_image.npy")
@@ -86,18 +85,14 @@ dartfish_dots = np.load(dartfish_npy)
 # EPY: END code
 
 # EPY: START code
-experiment = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180911/ISS/experiment.json'
-)
+experiment = starfish.data.ISS()
 
 iss_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 iss_dots = experiment.fov()['dots'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 # EPY: END code
 
 # EPY: START code
-stack = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180911/MERFISH/experiment.json'
-)
+experiment = starfish.data.MERFISH()
 merfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 
 # merfish doesn't have a dots image, and some of the channels are stronger than others.
@@ -108,7 +103,7 @@ merfish_background = ImageStack.from_numpy_array(merfish_background)
 
 from starfish.image import Filter
 clip = Filter.Clip(p_max=99.7)
-merfish_dots = clip.run(merfish_background, in_place=False)
+merfish_dots = clip.run(merfish_background)
 
 merfish_dots = merfish_dots.max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 # EPY: END code
@@ -265,7 +260,7 @@ f.tight_layout()
 
 # EPY: START code
 dartfish_copy_number = pd.read_csv(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180911/DARTFISH/fov_001/counts.csv',
+    'https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/fov_001/counts.csv',
     index_col=0,
     squeeze=True
 )

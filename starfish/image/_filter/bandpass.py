@@ -4,7 +4,7 @@ from typing import Optional
 import numpy as np
 from trackpy import bandpass
 
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
 
@@ -38,7 +38,7 @@ class Bandpass(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     @classmethod
-    def add_arguments(cls, group_parser) -> None:
+    def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(
             "--lshort", type=float, help="filter signals below this frequency")
         group_parser.add_argument(
@@ -50,7 +50,7 @@ class Bandpass(FilterAlgorithmBase):
             help="truncate the filter at this many standard deviations")
 
     @staticmethod
-    def bandpass(
+    def _bandpass(
             image: np.ndarray, lshort: Number, llong: int, threshold: Number, truncate: Number
     ) -> np.ndarray:
         """Apply a bandpass filter to remove noise and background variation
@@ -81,9 +81,9 @@ class Bandpass(FilterAlgorithmBase):
         return bandpassed
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
             n_processes: Optional[int]=None
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -99,18 +99,17 @@ class Bandpass(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in-place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
         bandpass_ = partial(
-            self.bandpass,
+            self._bandpass,
             lshort=self.lshort, llong=self.llong, threshold=self.threshold, truncate=self.truncate
         )
         result = stack.apply(
             bandpass_,
             verbose=verbose, in_place=in_place, is_volume=self.is_volume, n_processes=n_processes
         )
-        if not in_place:
-            return result
-        return None
+        return result

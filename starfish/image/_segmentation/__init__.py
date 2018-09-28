@@ -2,8 +2,8 @@ import argparse
 import json
 from typing import Any, Dict, List, Type
 
+from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
-from starfish.stack import ImageStack
 from starfish.util.argparse import FsExistsType
 from . import watershed
 from ._base import SegmentationAlgorithmBase
@@ -14,11 +14,11 @@ class Segmentation(PipelineComponent):
     segmentation_group: argparse.ArgumentParser
 
     @classmethod
-    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
+    def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
         return SegmentationAlgorithmBase
 
     @classmethod
-    def add_to_parser(cls, subparsers) -> None:
+    def _add_to_parser(cls, subparsers) -> None:
         """Adds the segmentation component to the CLI argument parser."""
         segmentation_group = subparsers.add_parser("segment")
         segmentation_group.add_argument("--hybridization-stack", type=FsExistsType(), required=True)
@@ -28,10 +28,10 @@ class Segmentation(PipelineComponent):
         segmentation_subparsers = segmentation_group.add_subparsers(
             dest="segmentation_algorithm_class")
 
-        for algorithm_cls in cls.algorithm_to_class_map().values():
-            group_parser = segmentation_subparsers.add_parser(algorithm_cls.get_algorithm_name())
+        for algorithm_cls in cls._algorithm_to_class_map().values():
+            group_parser = segmentation_subparsers.add_parser(algorithm_cls._get_algorithm_name())
             group_parser.set_defaults(segmentation_algorithm_class=algorithm_cls)
-            algorithm_cls.add_arguments(group_parser)
+            algorithm_cls._add_arguments(group_parser)
 
         cls.segmentation_group = segmentation_group
 

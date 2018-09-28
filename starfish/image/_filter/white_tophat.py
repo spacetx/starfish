@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 from skimage.morphology import ball, disk, white_tophat
 
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from ._base import FilterAlgorithmBase
 
 
@@ -35,12 +35,12 @@ class WhiteTophat(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     @classmethod
-    def add_arguments(cls, group_parser) -> None:
+    def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(
             "--masking-radius", default=15, type=int,
             help="diameter of morphological masking disk in pixels")
 
-    def white_tophat(self, image: np.ndarray) -> np.ndarray:
+    def _white_tophat(self, image: np.ndarray) -> np.ndarray:
         if self.is_volume:
             structuring_element = ball(self.masking_radius)
         else:
@@ -48,9 +48,9 @@ class WhiteTophat(FilterAlgorithmBase):
         return white_tophat(image, selem=structuring_element)
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose: bool=False,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
             n_processes: Optional[int]=None
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -66,14 +66,13 @@ class WhiteTophat(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in-place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
         result = stack.apply(
-            self.white_tophat,
+            self._white_tophat,
             is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
-        if not in_place:
-            return result
-        return None
+        return result

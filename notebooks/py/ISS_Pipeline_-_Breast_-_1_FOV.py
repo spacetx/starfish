@@ -17,18 +17,21 @@
 # EPY: ESCAPE %autoreload 2
 
 import numpy as np
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from showit import image
 import pprint
 
-from starfish.experiment import Experiment
-from starfish.codebook import Codebook
+from starfish import data
 from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START code
-experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180911/ISS/experiment.json")
+use_test_data = os.getenv("USE_TEST_DATA") is not None
+experiment = data.ISS(use_test_data=use_test_data)
+
+
 # s.image.squeeze() simply converts the 4D tensor H*C*X*Y into a list of len(H*C) image planes for rendering by 'tile'
 # EPY: END code
 
@@ -105,7 +108,7 @@ from starfish.image import Filter
 masking_radius = 15
 filt = Filter.WhiteTophat(masking_radius, is_volume=False)
 for img in images:
-    filt.run(img, verbose=True)
+    filt.run(img, verbose=True, in_place=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -128,7 +131,7 @@ registration = Registration.FourierShiftRegistration(
     upsampling=1000,
     reference_stack=dots,
     verbose=True)
-registration.run(primary_image)
+registered_image = registration.run(primary_image, in_place=False)
 # EPY: END code
 
 # EPY: START markdown
@@ -163,26 +166,11 @@ with warnings.catch_warnings():
 
     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
     blobs_image = dots.max_proj(Indices.ROUND, Indices.Z)
-    intensities = p.run(primary_image, blobs_image=blobs_image)
-# EPY: END code
-
-# EPY: START code
-# Verify the spot count is reasonable.
-spot_count = intensities.sizes[Features.AXIS]
-assert 1000 < spot_count < 5000
-spot_count
+    intensities = p.run(registered_image, blobs_image=blobs_image)
 # EPY: END code
 
 # EPY: START markdown
-#This visualizes a single spot (#100) across all imaging rounds and channels. It contains the intensity and bit index, which allow it to be mapped onto the correct barcode.
-# EPY: END markdown
-
-# EPY: START code
-intensities[100]
-# EPY: END code
-
-# EPY: START markdown
-#The Encoder table is the hypothesized standardized file format for the output of a spot detector, and is the first output file format in the pipeline that is not an image or set of images
+# The Encoder table is the hypothesized standardized file format for the output of a spot detector, and is the first output file format in the pipeline that is not an image or set of images
 # EPY: END markdown
 
 # EPY: START markdown
@@ -220,12 +208,6 @@ genes, counts = np.unique(decoded.loc[decoded[Features.PASSES_THRESHOLDS]][Featu
 table = pd.Series(counts, index=genes).sort_values(ascending=False)
 # EPY: END code
 
-# EPY: START code
-assert table.index.get_loc('HER2') < 10
-assert table.index.get_loc('VIM') < 10
-table.head()
-# EPY: END code
-
 # EPY: START markdown
 #### Segment
 # EPY: END markdown
@@ -241,7 +223,7 @@ dapi_thresh = .16  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
 min_dist = 57
 
-stain = np.mean(primary_image.max_proj(Indices.CH, Indices.Z), axis=0)
+stain = np.mean(registered_image.max_proj(Indices.CH, Indices.Z), axis=0)
 stain = stain/stain.max()
 nuclei_projection = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 
@@ -250,7 +232,7 @@ seg = Segmentation.Watershed(
     input_threshold=stain_thresh,
     min_distance=min_dist
 )
-seg.run(primary_image, nuclei)
+regions = seg.run(registered_image, nuclei)
 seg.show()
 # EPY: END code
 
@@ -266,7 +248,7 @@ from skimage.color import rgb2gray
 GENE1 = 'HER2'
 GENE2 = 'VIM'
 
-rgb = np.zeros(primary_image.tile_shape + (3,))
+rgb = np.zeros(registered_image.tile_shape + (3,))
 rgb[:,:,0] = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 rgb[:,:,1] = dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 do = rgb2gray(rgb)

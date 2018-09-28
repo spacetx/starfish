@@ -1,5 +1,5 @@
 {
-  "$id": "https://github.com/spacetx/sptx-format/schema/field_of_view/field_of_view.json",
+  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/field_of_view/field_of_view.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "required": [

@@ -5,7 +5,7 @@ from typing import Optional
 import numpy as np
 from scipy.signal import convolve, fftconvolve
 
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
 from .util import gaussian_kernel, preserve_float_range
@@ -14,7 +14,7 @@ from .util import gaussian_kernel, preserve_float_range
 class DeconvolvePSF(FilterAlgorithmBase):
 
     def __init__(
-            self, num_iter: int, sigma: Number, clip: bool=False, **kwargs) -> None:
+            self, num_iter: int, sigma: Number, clip: bool=True, **kwargs) -> None:
         """Deconvolve a point spread function
 
         Parameters
@@ -39,20 +39,20 @@ class DeconvolvePSF(FilterAlgorithmBase):
         )
 
     @classmethod
-    def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
+    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             '--num-iter', type=int, help='number of iterations to run')
         group_parser.add_argument(
             '--sigma', type=float, help='standard deviation of gaussian kernel')
         group_parser.add_argument(
-            '--clip', action='store_true',
-            help='(default False) if True, clip values below -1 and above 1')
+            '--no-clip', action='store_false',
+            help='(default True) if True, clip values below 0 and above 1')
 
     # Here be dragons. This algorithm had a bug, but the results looked nice. Now we've "fixed" it
     # and the results look bad. #548 addresses this problem.
     @staticmethod
-    def richardson_lucy_deconv(
-            image: np.ndarray, iterations: int, psf: np.ndarray, clip: bool=False) -> np.ndarray:
+    def _richardson_lucy_deconv(
+            image: np.ndarray, iterations: int, psf: np.ndarray, clip: bool) -> np.ndarray:
         """
         Deconvolves input image with a specified point spread function.
 
@@ -65,8 +65,8 @@ class DeconvolvePSF(FilterAlgorithmBase):
         iterations : int
            Number of iterations. This parameter plays the role of
            regularisation.
-        clip : boolean, optional
-           True by default. If true, pixel value of the result above 1 or
+        clip : boolean
+            If true, pixel value of the result above 1 or
            under -1 are thresholded for skimage pipeline compatibility.
 
         Returns
@@ -130,14 +130,16 @@ class DeconvolvePSF(FilterAlgorithmBase):
                 'too many iterations.')
 
         if clip:
-            im_deconv = preserve_float_range(im_deconv)
+            # Changing to cliping values above 1 here changes test results
+            # so keeping this as rescaling for now
+            im_deconv = preserve_float_range(im_deconv, True)
 
         return im_deconv
 
     def run(
-            self, stack: ImageStack, in_place: bool=True, verbose=False,
+            self, stack: ImageStack, in_place: bool=False, verbose=False,
             n_processes: Optional[int]=None
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
 
         Parameters
@@ -153,18 +155,17 @@ class DeconvolvePSF(FilterAlgorithmBase):
 
         Returns
         -------
-        Optional[ImageStack] :
-            if in-place is False, return the results of filter as a new stack
+        ImageStack :
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
 
         """
         func = partial(
-            self.richardson_lucy_deconv,
+            self._richardson_lucy_deconv,
             iterations=self.num_iter, psf=self.psf, clip=self.clip
         )
         result = stack.apply(
             func,
             in_place=in_place, verbose=verbose, n_processes=n_processes
         )
-        if not in_place:
-            return result
-        return None
+        return result

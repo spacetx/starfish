@@ -18,19 +18,21 @@
 # EPY: ESCAPE %matplotlib inline
 
 import pprint
+import os
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 from showit import image as show_image
-from starfish.experiment import Experiment
+from starfish import data
 from starfish.types import Features, Indices
 # EPY: END code
 
 # EPY: START code
 # load the data from cloudfront
-experiment = Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/20180911/MERFISH/experiment.json")
+use_test_data = os.getenv("USE_TEST_DATA") is not None
+experiment = data.MERFISH(use_test_data=use_test_data)
 # EPY: END code
 
 # EPY: START markdown
@@ -112,10 +114,16 @@ low_passed = glp.run(deconvolved, in_place=False, verbose=True)
 # EPY: END markdown
 
 # EPY: START code
-scale_factors = {
-    (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
-    for index, t in primary_image.tile_metadata.iterrows()
-}
+if use_test_data:
+    scale_factors = {
+        (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
+        for t in experiment.extras['scale_factors']
+    }
+else:
+    scale_factors = {
+        (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
+        for index, t in primary_image.tile_metadata.iterrows()
+    }
 # EPY: END code
 
 # EPY: START code
@@ -177,9 +185,9 @@ psd = SpotFinder.PixelSpotDetector(
     crop_size=(0, 40, 40)
 )
 
-spot_intensities, prop_results = psd.run(scaled_image)
-spot_intensities = spot_intensities.loc[spot_intensities[Features.PASSES_THRESHOLDS]]
-spot_intensities
+initial_spot_intensities, prop_results = psd.run(scaled_image)
+
+spot_intensities = initial_spot_intensities.loc[initial_spot_intensities[Features.PASSES_THRESHOLDS]]
 # EPY: END code
 
 # EPY: START markdown

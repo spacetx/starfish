@@ -6,7 +6,7 @@ import xarray as xr
 from trackpy import locate
 
 from starfish.intensity_table import IntensityTable
-from starfish.stack import ImageStack
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import SpotAttributes
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots

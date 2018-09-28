@@ -1,4 +1,4 @@
-from typing import Tuple, Union, Dict, Optional
+from typing import Tuple, Union, Dict, Optional, List
 
 import numpy as np
 import xarray as xr
@@ -33,8 +33,116 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             raise ValueError(
                 'LocalMaxPeakFinder only works for 2D data, for 3D data, please use TrackpyLocalMaxPeakFinder')
 
-    def calculate_threshold(self):
-        return 1.0
+    def calculate_threshold(self, img: np.ndarray) -> Tuple[List, List]:
+
+        # thresholds to search over
+        thresholds = np.linspace(img.min(), img.max(), num=100)
+
+        # number of spots detected at each threshold
+        spot_counts = []
+
+        # where we stopped our threshold search
+        stop_threshold = None
+
+        for threshold in thresholds:
+            spots = peak_local_max(img,
+                                   min_distance=self.min_distance,
+                                   threshold_abs=threshold,
+                                   exclude_border=False,
+                                   indices=True,
+                                   num_peaks=np.inf,
+                                   footprint=None,
+                                   labels=None
+                                   )
+
+            # stop spot finding when the number of detected spots falls below 3
+            if len(spots) <= 3:
+                stop_threshold = threshold
+                break
+            else:
+                spot_counts.append(len(spots))
+
+        if stop_threshold is None:
+            stop_threshold = thresholds.max()
+
+        return thresholds, spot_counts
+
+    def _calculate_gradient(self, thresholds, spot_counts):
+        if len(spot_counts) > 1:
+
+            # Trim the threshold array in order to match the stopping point
+            # used the [0][0] to get the first number and then take it out from list
+            thresholds = thresholds[:np.where(thresholds == stop_threshold)[0][0]]
+
+            # Calculate the gradient of the number of peaks distribution
+            grad = np.gradient(spot_counts)
+
+            # Restructure the data in order to avoid to consider the min_peak in the
+            # calculations
+
+            # Coord of the gradient min_peak
+            grad_min_peak_coord = np.argmin(grad)
+
+            # Trim the data to remove the peak.
+            trimmed_thr_array = thresholds[grad_min_peak_coord:]
+            trimmed_grad = grad[grad_min_peak_coord:]
+
+            if trimmed_thr_array.shape > (1,):
+
+                # Trim the coords array in order to maintain the same length of the 
+                # tr and pk
+                trimmed_peaks_coords = spot_indices[grad_min_peak_coord:]
+                trimmed_total_peaks = spot_counts[grad_min_peak_coord:]
+
+                # To determine the threshold we will determine the Thr with the biggest
+                # distance to the segment that join the end points of the calculated
+                # gradient
+
+                # Distances list
+                distances = []
+
+                # Calculate the coords of the end points of the gradient
+                p1 = Point(trimmed_thr_array[0], trimmed_grad[0])
+                p2 = Point(trimmed_thr_array[-1], trimmed_grad[-1])
+
+                # Create a line that join the points
+                s = Line(p1, p2)
+                allpoints = np.arange(0, len(trimmed_thr_array))
+
+                # Calculate the distance between all points and the line
+                for p in allpoints:
+                    dst = s.distance(Point(trimmed_thr_array[p], trimmed_grad[p]))
+                    distances.append(dst.evalf())
+
+                # Remove the end points from the lists
+                trimmed_thr_array = trimmed_thr_array[1:-1]
+                trimmed_grad = trimmed_grad[1:-1]
+                trimmed_peaks_coords = trimmed_peaks_coords[1:-1]
+                trimmed_total_peaks = trimmed_total_peaks[1:-1]
+                trimmed_distances = distances[1:-1]
+
+                # Determine the coords of the selected Thr
+                # Converted trimmed_distances to array because it crashed
+                # on Sanger.
+                if trimmed_distances:  # Most efficient way will be to consider the length of Thr list
+                    thr_idx = np.argmax(np.array(trimmed_distances))
+                    calculated_thr = trimmed_thr_array[thr_idx]
+                    # The selected threshold usually causes oversampling of the number of dots
+                    # I added a stringency parameter (int n) to use to select the Thr+n 
+                    # for the counting. It selects a stringency only if the trimmed_thr_array
+                    # is long enough
+                    if thr_idx + stringency < len(trimmed_thr_array):
+                        selected_thr = trimmed_thr_array[thr_idx + stringency]
+                        selected_peaks = trimmed_peaks_coords[thr_idx + stringency]
+                        thr_idx = thr_idx + stringency
+                    else:
+                        selected_thr = trimmed_thr_array[thr_idx]
+                        selected_peaks = trimmed_peaks_coords[thr_idx]
+        else:
+            selected_thr = 0
+
+        return selected_thr
+
 
     def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
 

@@ -1,7 +1,7 @@
 import collections
 import json
 import os
-from typing import Dict, Union
+from typing import Any, Dict, Sequence, Union
 
 
 class Config(collections.UserDict):
@@ -45,3 +45,16 @@ class Config(collections.UserDict):
             data = value
 
         collections.UserDict.__init__(self, data)
+
+    def lookup(self, keys: Sequence[str], value: Any=None):
+        data = self.data
+        for key in keys:
+            try:
+                data = data.get(key)
+            except Exception:
+                return value
+        # If we've reached here without exception,
+        # then we've found the value.
+        if data:
+            return data
+        return value

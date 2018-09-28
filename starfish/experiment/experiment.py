@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Callable, MutableMapping, MutableSequence, Optional, Sequence, Set, Union
+from typing import Callable, Dict, MutableMapping, MutableSequence, Optional, Sequence, Set, Union
 
 from semantic_version import Version
 from slicedimage import Collection, TileSet
@@ -9,6 +9,7 @@ from slicedimage.urlpath import pathjoin
 
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
+from starfish.util.config import Config
 from validate_sptx import validate_sptx
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
@@ -156,7 +157,7 @@ class Experiment:
     def from_json(cls,
                   json_url: str,
                   strict: bool=None,
-                  allow_caching: bool=None) -> "Experiment":
+                  config: Optional[Union[str, Dict]]=None) -> "Experiment":
         """
         Construct an `Experiment` from an experiment.json file format specifier
 
@@ -167,9 +168,9 @@ class Experiment:
         strict : bool
             if true, then all JSON loaded by this method will be
             passed to the appropriate validator
-        allow_caching : bool
-            if true, then all data downloaded by this method will be
-            cached by the backend.
+        config : str or dict
+            configuration property that will be passed to
+            starfish.util.config.Config
 
         Returns
         -------
@@ -178,11 +179,6 @@ class Experiment:
 
         Environment variables
         ---------------------
-        STARFISH_ALLOW_CACHING :
-             If set, then all data downloaded by this method will be
-             cached by the backend. The `allow_caching`
-             parameter to this method has priority over the
-             environment variable.
         STARFISH_STRICT_LOADING :
              If set, then all JSON loaded by this method will be
              passed to the appropriate validator. The `strict`
@@ -197,8 +193,8 @@ class Experiment:
             if not valid:
                 raise Exception("validation failed")
 
-        if allow_caching is None:
-            allow_caching = bool(os.environ.get("STARFISH_ALLOW_CACHING", "true"))
+        config = Config(config)  # STARFISH_CONFIG is assumed
+        allow_caching = config.lookup(["cache", "allow_caching"], True)
 
         backend, name, baseurl = resolve_path_or_url(json_url, allow_caching)
         with backend.read_contextmanager(name) as fh:

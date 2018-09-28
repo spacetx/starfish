@@ -193,8 +193,8 @@ class Experiment:
             if not valid:
                 raise Exception("validation failed")
 
-        config = Config(config)  # STARFISH_CONFIG is assumed
-        allow_caching = config.lookup(["cache", "allow_caching"], True)
+        config_obj = Config(config)  # STARFISH_CONFIG is assumed
+        allow_caching = config_obj.lookup(["cache", "allow_caching"], True)
 
         backend, name, baseurl = resolve_path_or_url(json_url, allow_caching)
         with backend.read_contextmanager(name) as fh:

@@ -7,7 +7,7 @@ from typing import Any, Dict, Sequence, Union
 class Config(collections.UserDict):
 
     def __init__(self, value: Union[str, Dict]=None,
-                 key: str="STARFISH_CONFIG"):
+                 key: str="STARFISH_CONFIG")->None:
         """
         Parse user-arguments, environment variables, and
         external files to generate a configuration object.
@@ -46,8 +46,8 @@ class Config(collections.UserDict):
 
         collections.UserDict.__init__(self, data)
 
-    def lookup(self, keys: Sequence[str], value: Any=None):
-        data = self.data
+    def lookup(self, keys: Sequence[str], value: Any=None)->Any:
+        data: Any = self.data
         for key in keys:
             try:
                 data = data.get(key)

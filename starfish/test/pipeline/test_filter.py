@@ -38,4 +38,3 @@ def test_mean_high_pass(size: Union[Number, Tuple[Number]], is_volume: bool) -> 
     mhp = mean_high_pass.MeanHighPass(size=size, is_volume=is_volume)
     result = mhp.run(image_stack)
     assert np.sum(result.numpy_array) < sum_before
-    

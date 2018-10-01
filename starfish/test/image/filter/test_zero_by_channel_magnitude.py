@@ -1,7 +1,7 @@
 import numpy as np
 
-from starfish.image._filter.zero_by_channel_magnitude import ZeroByChannelMagnitude
 from starfish import ImageStack
+from starfish.image._filter.zero_by_channel_magnitude import ZeroByChannelMagnitude
 
 def create_imagestack_with_magnitude_scale():
     """create an imagestack with increasing magnitudes"""
@@ -11,12 +11,11 @@ def create_imagestack_with_magnitude_scale():
     data = data.reshape(1, 2, 1, 11, 1)
     imagestack = ImageStack.from_numpy_array(data)
     return imagestack
-    
-    
+
+
 def test_zero_by_channel_magnitude_produces_accurate_results():
     imagestack = create_imagestack_with_magnitude_scale()
 
-    zcm = ZeroByChannelMagnitude(thresh=0.0, normalize=False, is_volume=False)
+    zcm = ZeroByChannelMagnitude(thresh=np.inf, normalize=False, is_volume=False)
     filtered = zcm.run(imagestack, in_place=False, n_processes=1)
-    assert np.all(filtered == 0)
-    import pdb; pdb.set_trace()
+    assert np.all(filtered.numpy_array == 0)

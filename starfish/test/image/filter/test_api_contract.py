@@ -1,5 +1,5 @@
 """
-This module stores a contract for new Filter algorithms. 
+This module stores a contract for new Filter algorithms.
 
 Contract
 --------
@@ -9,7 +9,7 @@ Contract
 - exposes a `run`() method
 - run accepts an in-place parameter which defaults to True
 - run always returns an ImageStack (if in-place, returns a reference to the modified input data)
-- run accepts an `n_processes` parameter which determines 
+- run accepts an `n_processes` parameter which determines
 - run accepts a `verbose` parameter, which triggers tqdm to print progress
 
 To add a new filter, simply add default
@@ -17,13 +17,16 @@ parameters for the constructor (omit is_volume), and it will be tested against t
 way of registration to the FilterAlgorithmBase
 """
 
+from typing import Dict
+
 import numpy as np
 import pytest
 
 from starfish import ImageStack
 from starfish.image import Filter
 
-methods = Filter.implementing_algorithms()
+# import pdb; pdb.set_trace()
+methods: Dict = Filter._algorithm_to_class_map()
 
 # store some default parameters for testing purposes. New algorithms will have to add parameters to
 # this in order to not fail tests
@@ -45,11 +48,11 @@ def generate_default_data():
     return ImageStack.from_numpy_array(data)
 
 
-@pytest.mark.parametrize('filter_class', methods)
+@pytest.mark.parametrize('filter_class', methods.values())
 def test_all_methods_adhere_to_contract(filter_class):
     """Test that all filter algorithms adhere to the filtering contract"""
 
-    default_kwargs = default_filtering_parameters[filter_class.get_algorithm_name()]
+    default_kwargs = default_filtering_parameters[filter_class._get_algorithm_name()]
 
     # accept boolean is_volume
     instance = filter_class(is_volume=True, **default_kwargs)
@@ -81,6 +84,7 @@ def test_all_methods_adhere_to_contract(filter_class):
         f'{filter_class} should output a new ImageStack when run out-of-place'
 
     # accepts n_processes
+    # TODO shanaxel: verify that this causes more than one process to be generated
     data = generate_default_data()
     try:
         instance.run(data, n_processes=1)

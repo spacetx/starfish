@@ -19,22 +19,26 @@ from starfish.types import Features, Indices, Number, SpotAttributes
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
     def __init__(
             self, min_distance, stringency, min_obj_area, max_obj_area, threshold=None,
-            measurement_type: str = 'max', is_volume: bool = False, verbose: bool = True) -> None:
+            measurement_type: str = 'max', min_num_spots_detected: Number = 3, is_volume: bool = False,
+            verbose: bool = True) -> None:
 
         self.min_distance = min_distance
         self.stringency = stringency
         self.min_obj_area = min_obj_area
         self.max_obj_area = max_obj_area
         self.threshold = threshold
+        self.min_num_spots_detected = min_num_spots_detected
 
         self.measurement_function = self._get_measurement_function(measurement_type)
 
-        if is_volume:
+        self.is_volume = is_volume
+        if self.is_volume:
             raise ValueError('LocalMaxPeakFinder only works for 2D data, for 3D data, '
                              'please use TrackpyLocalMaxPeakFinder')
 
         self.verbose = verbose
 
+        # these parameters are useful for debugging spot-calls
         self._thresholds = None
         self._spot_counts = None
         self._grad = None
@@ -75,9 +79,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
                                    )
 
             # stop spot finding when the number of detected spots falls below 3
-            if len(spots) <= 3:
+            if len(spots) <= self.min_num_spots_detected:
                 stop_threshold = threshold
-                print('.. stopping early -- number of spots fell below 3')
+                print('.. stopping early -- number of spots fell below: {}'.format(self.min_num_spots_detected))
                 break
             else:
                 spot_counts.append(len(spots))
@@ -147,7 +151,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             self.threshold = self._compute_threshold(data_image)
 
         # TODO @ajc data_image is volumetric, although in his code, we never use it that way
-        masked_image = data_image[0, :, :] > self.threshold
+        masked_image = data_image[:, :] > self.threshold
         labels = label(masked_image)[0]
         spot_props = regionprops(labels)
 
@@ -173,16 +177,17 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
                                      footprint=None,
                                      labels=labels)
 
-        print('.. collating results')
         self._spot_coords = spot_coords
 
-        # TODO how to get the radius?
+        # TODO how to get the radius? unlikely that this can be pulled out of
+        # self._spot_props, since the last call to peak_local_max can find multiple
+        # peaks per label
         res = {Indices.X.value: spot_coords[:, 1],
                Indices.Y.value: spot_coords[:, 0],
                Indices.Z.value: np.zeros(len(spot_coords)),
                Features.SPOT_RADIUS: 1,
                Features.SPOT_ID: np.arange(spot_coords.shape[0]),
-               Features.INTENSITY: data_image[0, spot_coords[:, 0], spot_coords[:, 1]]
+               Features.INTENSITY: data_image[spot_coords[:, 0], spot_coords[:, 1]]
                }
 
         return SpotAttributes(pd.DataFrame(res))
@@ -216,6 +221,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             reference_image_from_max_projection=reference_image_from_max_projection,
             measurement_function=self.measurement_function,
             radius_is_gyration=False,
+            is_volume=self.is_volume
         )
 
         return intensity_table

@@ -13,5 +13,5 @@ from . import spots
 from .codebook.codebook import Codebook
 from .experiment.experiment import Experiment
 from .imagestack.imagestack import ImageStack
-from .intensity_table import IntensityTable
+from .intensity_table.intensity_table import IntensityTable
 from .starfish import starfish

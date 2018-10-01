@@ -15,7 +15,7 @@ from starfish.codebook._format import (
     MAX_SUPPORTED_VERSION,
     MIN_SUPPORTED_VERSION,
 )
-from starfish.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number
 
 

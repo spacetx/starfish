@@ -11,16 +11,16 @@ from tqdm import tqdm
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table import IntensityTable
-from starfish.spots._detector._base import SpotFinderAlgorithmBase
-from starfish.spots._detector.detect import detect_spots
+from ._base import SpotFinderAlgorithmBase
+from .detect import detect_spots
 from starfish.types import Features, Indices, Number, SpotAttributes
 
 
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
-    def __init__(
-            self, min_distance, stringency, min_obj_area, max_obj_area, threshold=None,
-            measurement_type: str = 'max', min_num_spots_detected: Number = 3, is_volume: bool = False,
-            verbose: bool = True) -> None:
+    def __init__(self, min_distance: int, stringency: int, min_obj_area: int,
+                 max_obj_area: int, threshold: int = None, measurement_type: str = 'max',
+                 min_num_spots_detected: int = 3, is_volume: bool = False,
+                 verbose: bool = True) -> None:
 
         self.min_distance = min_distance
         self.stringency = stringency
@@ -225,3 +225,27 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         )
 
         return intensity_table
+
+    @classmethod
+    def _add_arguments(cls, group_parser):
+        group_parser.add_argument(
+            "--min-distance", default=4, type=int, help="Minimum spot size (in number of pixels deviation)")
+        group_parser.add_argument(
+            "--min-obj-area", default=6, type=int, help="Maximum spot size (in number of pixels")
+        group_parser.add_argument(
+            "--max_obj_area", default=300, type=int, help="Maximum spot size (in number of pixels)")
+        group_parser.add_argument(
+            "--stringency", default=0, type=int, help="Number of indices in threshold list to look past "
+                                                      "for the threhsold finding algorithm")
+        group_parser.add_argument("--threshold", default=None, type=float,
+                                  help="Threshold on which to threshold image prior to spot detection")
+        group_parser.add_argument(
+            "--min-num-spots-detected", default=3, type=int,
+            help="Minimum number of spots detected at which to stop automatic thresholding algorithm")
+        group_parser.add_argument(
+            "--measurement-type", default='max', type=str,
+            help="Minimum number of spots detected at which to stop automatic thresholding algorithm")
+        group_parser.add_argument(
+            "--is-volume", default=False, action='store_false', help="Find spots in 3D or not")
+        group_parser.add_argument(
+            "--verbose", default=True, action='store_true', help="Verbosity flag")

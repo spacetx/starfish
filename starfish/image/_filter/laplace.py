@@ -84,6 +84,9 @@ class Laplace(FilterAlgorithmBase):
         group_parser.add_argument(
             "--cval", default=0.0,
             help="Value to fill past edges of input if mode is ‘constant")
+        group_parser.add_argument(
+            "--is-volume", action="store_true",
+            help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
     def _gaussian_laplace(image: np.ndarray, sigma: Union[Number, Tuple[Number]],

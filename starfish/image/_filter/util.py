@@ -115,9 +115,9 @@ def preserve_float_range(
         array: Union[xr.DataArray, np.ndarray],
         rescale: bool=False) -> Union[xr.DataArray, np.ndarray]:
     """
-    Clip values below zero and and above one or scale values by the max,
-    but only if sub- or super-maximal values are detected.
-    Otherwise, this function will preserve the dynamic range of the input image.
+    Clips values below zero to zero. If values above one are detected, clips them
+    to 1 unless `rescale` is True, in which case the input is scaled by
+    the max value and the dynamic range is preserved.
 
     Parameters
     ----------

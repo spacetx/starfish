@@ -11,7 +11,7 @@ def MERFISH(use_test_data: bool=False):
 
 def allen_smFISH(use_test_data: bool=False):
     return Experiment.from_json(
-        'https://dmf0bdeheu4zf.cloudfront.net/20180919/allen_smFISH/experiment.json')
+        'https://dmf0bdeheu4zf.cloudfront.net/20180924/allen_smFISH/experiment.json')
 
 
 def DARTFISH(use_test_data: bool=False):

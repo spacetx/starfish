@@ -20,6 +20,24 @@ class Coordinates(AugmentedEnum):
     X = 'xc'
 
 
+PHYSICAL_COORDINATE_DIMENSION = "physical_coordinate"
+"""
+This is the xarray dimension name for the physical coordinates of the tiles.
+"""
+
+
+class PhysicalCoordinateTypes(AugmentedEnum):
+    """
+    These are more accurately the xarray coordinates for the physical coordinates of a tile.
+    """
+    Z_MAX = 'zmax'
+    Z_MIN = 'zmin'
+    Y_MAX = 'ymax'
+    Y_MIN = 'ymin'
+    X_MAX = 'xmax'
+    X_MIN = 'xmin'
+
+
 class Indices(AugmentedEnum):
     ROUND = 'r'
     CH = 'c'

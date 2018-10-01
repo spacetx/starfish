@@ -7,6 +7,7 @@ from scipy.ndimage import label
 from skimage.feature import peak_local_max
 from skimage.measure import regionprops
 from sympy import Line, Point
+from tqdm import tqdm
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table import IntensityTable
@@ -18,7 +19,7 @@ from starfish.types import Features, Indices, Number, SpotAttributes
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
     def __init__(
             self, min_distance, stringency, min_obj_area, max_obj_area, threshold=None,
-            measurement_type: str = 'max', is_volume: bool = False) -> None:
+            measurement_type: str = 'max', is_volume: bool = False, verbose: bool = True) -> None:
 
         self.min_distance = min_distance
         self.stringency = stringency
@@ -26,11 +27,13 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self.max_obj_area = max_obj_area
         self.threshold = threshold
 
+        self.measurement_function = self._get_measurement_function(measurement_type)
+
         if is_volume:
             raise ValueError('LocalMaxPeakFinder only works for 2D data, for 3D data, '
                              'please use TrackpyLocalMaxPeakFinder')
 
-        self.measurement_function = self._get_measurement_function(measurement_type)
+        self.verbose = verbose
 
         self._thresholds = None
         self._spot_counts = None
@@ -54,7 +57,13 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # where we stop our threshold search
         stop_threshold = None
 
-        for threshold in thresholds:
+        if self.verbose:
+            threshold_iter = tqdm(thresholds)
+            print('Determining optimal threshold ...')
+        else:
+            threshold_iter = thresholds
+
+        for threshold in threshold_iter:
             spots = peak_local_max(img,
                                    min_distance=self.min_distance,
                                    threshold_abs=threshold,
@@ -68,6 +77,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             # stop spot finding when the number of detected spots falls below 3
             if len(spots) <= 3:
                 stop_threshold = threshold
+                print('.. stopping early -- number of spots fell below 3')
                 break
             else:
                 spot_counts.append(len(spots))
@@ -151,6 +161,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self._spot_props = spot_props
         self._labels = labels
 
+        if self.verbose:
+            print('computing final spots ...')
+
         spot_coords = peak_local_max(data_image,
                                      min_distance=self.min_distance,
                                      threshold_abs=self.threshold,
@@ -159,6 +172,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
                                      num_peaks=np.inf,
                                      footprint=None,
                                      labels=labels)
+
+        print('.. collating results')
+        self._spot_coords = spot_coords
 
         # TODO how to get the radius?
         res = {Indices.X.value: spot_coords[:, 1],

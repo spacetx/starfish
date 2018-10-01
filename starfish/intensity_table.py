@@ -197,10 +197,16 @@ class IntensityTable(xr.DataArray):
                 'IntensityTable must be decoded before it can be converted to MERMAID input.'
             )
 
-        # construct the MERMAID dataframe
+        # construct the MERMAID dataframe. As MERMAID adds support for non-categorical variables,
+        # additional columns can be added here
         df = self.to_features_dataframe()
-        mermaid_data = df[[Indices.X, Indices.Y, Features.TARGET, Features.TARGET]]
-        mermaid_data.columns = ['x', 'y', 'gene1', 'gene2']
+        column_order = [
+            Indices.X,
+            Indices.Y,
+            Features.TARGET,
+            Features.TARGET,  # added twice to support simultaneous coding
+        ]
+        mermaid_data = df[column_order]
 
         # write to disk
         mermaid_data.to_csv(filename, compression='gzip', index=False)

@@ -260,7 +260,7 @@ f.tight_layout()
 
 # EPY: START code
 dartfish_copy_number = pd.read_csv(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/fov_001/counts.csv',
+    'https://dmf0bdeheu4zf.cloudfront.net/20180926/DARTFISH/fov_001/counts.csv',
     index_col=0,
     squeeze=True
 )

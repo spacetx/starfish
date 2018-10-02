@@ -46,11 +46,11 @@ def test_iss_pipeline_cropped_data():
         dtype=np.float32
     )
 
-    assert white_top_hat_filtered_image.numpy_array.dtype == np.float32
+    assert white_top_hat_filtered_image.xarray.dtype == np.float32
 
     assert np.allclose(
         expected_filtered_values,
-        white_top_hat_filtered_image.numpy_array[2, 2, 0, 40:50, 40:50]
+        white_top_hat_filtered_image.xarray[2, 2, 0, 40:50, 40:50]
     )
 
     registered_image = iss.registered_image
@@ -91,7 +91,7 @@ def test_iss_pipeline_cropped_data():
     )
     assert np.allclose(
         expected_registered_values,
-        registered_image.numpy_array[2, 2, 0, 40:50, 40:50]
+        registered_image.xarray[2, 2, 0, 40:50, 40:50]
     )
 
     intensities = iss.intensities

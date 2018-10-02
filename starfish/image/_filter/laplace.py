@@ -101,7 +101,7 @@ class Laplace(FilterAlgorithmBase):
 
     def run(
             self, stack: ImageStack, in_place: bool = True, verbose: bool = True
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Perform filtering of an image stack
         Parameters
         ----------
@@ -117,9 +117,5 @@ class Laplace(FilterAlgorithmBase):
             if in-place is False, return the results of filter as a new stack
         """
         apply_filtering: Callable = partial(self._gaussian_laplace, sigma=self.sigma)
-        result = stack.apply(
+        return stack.apply(
             apply_filtering, is_volume=self.is_volume, verbose=verbose, in_place=in_place)
-        if not in_place:
-            return result
-
-        return None

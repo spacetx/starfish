@@ -12,7 +12,7 @@ from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
 
 
-class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
+class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
     def __init__(
             self, spot_diameter, min_mass, max_size, separation, percentile=0,

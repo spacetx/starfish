@@ -11,6 +11,7 @@ from typing import (
 )
 
 import matplotlib.pyplot as plt
+import napari_gui
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -21,7 +22,6 @@ from skimage import exposure
 from skimage import img_as_float32, img_as_uint
 from slicedimage import Reader, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
-import napari_gui
 from tqdm import tqdm
 
 from starfish.errors import DataFormatWarning

@@ -25,22 +25,7 @@ import pytest
 from starfish import ImageStack
 from starfish.image import Filter
 
-# import pdb; pdb.set_trace()
 methods: Dict = Filter._algorithm_to_class_map()
-
-# store some default parameters for testing purposes. New algorithms will have to add parameters to
-# this in order to not fail tests
-default_filtering_parameters = {
-    'Bandpass': dict(lshort=1, llong=3, threshold=0.01),
-    'ZeroByChannelMagnitude': dict(thresh=0, normalize=True),
-    'WhiteTophat': dict(masking_radius=3),
-    'ScaleByPercentile': dict(p=0),
-    'DeconvolvePSF': dict(num_iter=1, sigma=1),
-    'MeanHighPass': dict(size=1),
-    'GaussianLowPass': dict(sigma=1),
-    'GaussianHighPass': dict(sigma=3),
-    'Clip': dict(p_min=0, p_max=100),
-}
 
 
 def generate_default_data():
@@ -52,7 +37,7 @@ def generate_default_data():
 def test_all_methods_adhere_to_contract(filter_class):
     """Test that all filter algorithms adhere to the filtering contract"""
 
-    default_kwargs = default_filtering_parameters[filter_class._get_algorithm_name()]
+    default_kwargs = filter_class._DEFAULT_TESTING_PARAMETERS
 
     # accept boolean is_volume
     instance = filter_class(is_volume=True, **default_kwargs)

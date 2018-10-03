@@ -25,6 +25,8 @@ class ScaleByPercentile(FilterAlgorithmBase):
         self.p = p
         self.is_volume = is_volume
 
+    _DEFAULT_TESTING_PARAMETERS = {"p": 0}
+
     @classmethod
     def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(

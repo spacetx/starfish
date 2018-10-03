@@ -29,6 +29,8 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         self.thresh = thresh
         self.normalize = normalize
 
+    _DEFAULT_TESTING_PARAMETERS = {"thresh": 0, "normalize": True}
+
     @classmethod
     def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(

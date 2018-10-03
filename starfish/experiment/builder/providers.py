@@ -63,7 +63,6 @@ class FetchedTile:
         """
         raise NotImplementedError()
 
-    @property
     def tile_data(self) -> np.ndarray:
         """Return the image data representing the tile.
 

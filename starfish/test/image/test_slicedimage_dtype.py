@@ -39,7 +39,6 @@ class OnesTilesByDtype(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
     def tile_data(self) -> np.ndarray:
         return np.ones((HEIGHT, WIDTH), dtype=self._dtype)
 

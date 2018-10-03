@@ -37,7 +37,6 @@ class IssCroppedBreastTile(FetchedTile):
         crp = img[40:1084, 20:1410]
         return crp
 
-    @property
     def tile_data(self) -> np.ndarray:
         return self.crop(imread(self.file_path))
 

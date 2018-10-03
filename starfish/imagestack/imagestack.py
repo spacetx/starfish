@@ -22,6 +22,7 @@ from skimage import img_as_float32, img_as_uint
 from slicedimage import Reader, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
+import napari_gui
 
 from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import build_image, TileFetcher
@@ -379,6 +380,29 @@ class ImageStack:
                 data.shape, self._data[slice_list].shape))
 
         self._data.values[slice_list] = data
+
+    def show_stack_napari(self, indices: Mapping[Indices, Union[int, slice]]):
+        """
+            Displays the image stack using Napari (https://github.com/Napari)
+
+        Parameters
+        ----------
+        indices : Mapping[Indices, Union[int, slice]],
+            Indices to select a volume to visualize. Passed to `Image.get_slice()`.
+            See `Image.get_slice()` for examples.
+
+        Notes
+        -----
+        To use in a Jupyter notebook, use the %gui qt5 magic.
+
+
+        """
+        # Switch axes such that it is indexed [x, y, rnd, c, z]
+        slices, axes = self.get_slice(indices)
+        reordered_array = np.moveaxis(slices, [-2, -1], [0, 1])
+
+        napari_gui.imshow(reordered_array, multichannel=False)
+
 
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],

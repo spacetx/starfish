@@ -27,6 +27,8 @@ class Clip(FilterAlgorithmBase):
         self.p_max = p_max
         self.is_volume = is_volume
 
+    _DEFAULT_TESTING_PARAMETERS = {"p_min": 0, "p_max": 100}
+
     @classmethod
     def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(

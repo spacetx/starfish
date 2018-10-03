@@ -336,8 +336,7 @@ class IntensityTable(xr.DataArray):
         pd.DataFrame
 
         """
-        df = pd.DataFrame(dict(self[Features.AXIS].coords.variables)).drop(Features.AXIS, axis=1)
-        return df
+        return pd.DataFrame(dict(self[Features.AXIS].coords))
 
     def feature_trace_magnitudes(self) -> np.ndarray:
         """Return the magnitudes of each feature across rounds and channels

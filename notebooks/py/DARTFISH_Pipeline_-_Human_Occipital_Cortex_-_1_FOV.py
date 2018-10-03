@@ -64,7 +64,7 @@ exp.codebook
 # EPY: END markdown
 
 # EPY: START code
-cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/fov_001/counts.csv')
+cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180926/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 # EPY: END code
 

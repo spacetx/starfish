@@ -248,7 +248,7 @@ decoded_spots(
     ax=ax5
 )
 
-# ISS doesn't have a decoded image right now, but we can make one! Leave the placeholders open. 
+# ISS doesn't have a decoded image right now, but we can make one! Leave the placeholders open.
 for ax in (ax2, ax4, ax6):
     ax.set_axis_off()
 f.tight_layout()
@@ -305,7 +305,7 @@ axes[0, 2].set_title('DARTFISH', fontsize=20);
 # reset y-axis labels
 for ax in np.ravel(axes):
     ax.set_ylabel('')
-    
+
 # reset titles
 for ax in np.ravel(axes[1:, :]):
     ax.set_title('')
@@ -339,18 +339,18 @@ for ax in (axes[3, 0],):
 # EPY: END code
 
 # EPY: START markdown
-#The histogram can be used to demonstrate parameter thresholding, as well. 
+#The histogram can be used to demonstrate parameter thresholding, as well.
 # EPY: END markdown
 
 # EPY: START code
 f, ax = plt.subplots()
 area = (iss_intensity_table.radius * np.pi) ** 2
 histogram(
-    area, 
-    bins=20, 
-    threshold=1000, 
-    title='fake threshold demonstration', 
-    ylabel='number of spots', 
+    area,
+    bins=20,
+    threshold=1000,
+    title='fake threshold demonstration',
+    ylabel='number of spots',
     xlabel='spot area'
 );
 # EPY: END code

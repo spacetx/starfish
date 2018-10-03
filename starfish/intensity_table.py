@@ -303,12 +303,19 @@ class IntensityTable(xr.DataArray):
         zmax = image_stack.shape['z'] - crop_z
         ymax = image_stack.shape['y'] - crop_y
         xmax = image_stack.shape['x'] - crop_x
-        data = image_stack.numpy_array.transpose(2, 3, 4, 1, 0)  # (z, y, x, ch, round)
+        data = image_stack.xarray.transpose(
+            Indices.Z.value,
+            Indices.Y.value,
+            Indices.X.value,
+            Indices.CH.value,
+            Indices.ROUND.value,
+        )
 
         # crop and reshape imagestack to create IntensityTable data
         cropped_data = data[zmin:zmax, ymin:ymax, xmin:xmax, :, :]
         # (pixels, ch, round)
-        intensity_data = cropped_data.reshape(-1, image_stack.num_chs, image_stack.num_rounds)
+        intensity_data = cropped_data.values.reshape(
+            -1, image_stack.num_chs, image_stack.num_rounds)
 
         # IntensityTable pixel coordinates
         z = np.arange(zmin, zmax)

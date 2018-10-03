@@ -17,7 +17,7 @@ def test_reshaping_between_stack_and_intensities():
     pixel_intensities = IntensityTable.from_image_stack(image, 0, 0, 0)
     image_shape = (image.shape['z'], image.shape['y'], image.shape['x'])
     image_from_pixels = pixel_intensities_to_imagestack(pixel_intensities, image_shape)
-    assert np.array_equal(image.numpy_array, image_from_pixels.numpy_array)
+    assert np.array_equal(image.xarray, image_from_pixels.xarray)
 
 
 def pixel_intensities_to_imagestack(

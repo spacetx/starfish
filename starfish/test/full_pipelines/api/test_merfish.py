@@ -46,7 +46,7 @@ def test_merfish_pipeline_cropped_data():
     )
     assert np.allclose(
         expected_primary_image,
-        primary_image.numpy_array[5, 0, 0, 40:50, 45:55]
+        primary_image.xarray[5, 0, 0, 40:50, 45:55]
     )
 
     high_passed = merfish.high_passed
@@ -87,7 +87,7 @@ def test_merfish_pipeline_cropped_data():
 
     assert np.allclose(
         expected_high_passed,
-        high_passed.numpy_array[5, 0, 0, 40:50, 45:55]
+        high_passed.xarray[5, 0, 0, 40:50, 45:55]
     )
 
     deconvolved = merfish.deconvolved
@@ -129,7 +129,7 @@ def test_merfish_pipeline_cropped_data():
 
     assert np.allclose(
         expected_deconvolved_values,
-        deconvolved.numpy_array[5, 0, 0, 40:50, 45:55]
+        deconvolved.xarray[5, 0, 0, 40:50, 45:55]
     )
 
     low_passed = merfish.low_passed
@@ -169,7 +169,7 @@ def test_merfish_pipeline_cropped_data():
     )
     assert np.allclose(
         expected_low_passed,
-        low_passed.numpy_array[5, 0, 0, 40:50, 45:55]
+        low_passed.xarray[5, 0, 0, 40:50, 45:55]
     )
 
     scaled_image = merfish.scaled_image
@@ -210,7 +210,7 @@ def test_merfish_pipeline_cropped_data():
     )
     assert np.allclose(
         expected_scaled_low_passed,
-        scaled_image.numpy_array[5, 0, 0, 40:50, 45:55]
+        scaled_image.xarray[5, 0, 0, 40:50, 45:55]
     )
 
     spot_intensities = merfish.initial_spot_intensities

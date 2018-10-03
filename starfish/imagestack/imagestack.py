@@ -286,15 +286,9 @@ class ImageStack:
         return empty
 
     @property
-    def numpy_array(self):
-        """Retrieves the image data as a numpy array."""
-        result = self._data.values
-        return result
-
-    @numpy_array.setter
-    def numpy_array(self, data):
-        """Sets the image's data from a numpy array."""
-        self._data.values = data.view()
+    def xarray(self) -> xr.DataArray:
+        """Retrieves the image data as an xarray.DataArray"""
+        return self._data
 
     def get_slice(
             self,
@@ -1126,7 +1120,7 @@ class ImageStack:
         """
         first_dim = self.num_rounds * self.num_chs * self.num_zlayers
         new_shape = (first_dim,) + self.tile_shape
-        new_data = self.numpy_array.reshape(new_shape)
+        new_data = self.xarray.data.reshape(new_shape)
 
         return new_data
 

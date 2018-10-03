@@ -34,7 +34,6 @@ class RandomNoiseTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
     def tile_data(self) -> np.ndarray:
         return np.random.randint(0, 256, size=self.shape, dtype=np.uint8)
 
@@ -64,7 +63,6 @@ class OnesTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
     def tile_data(self) -> np.ndarray:
         return np.full(shape=self.shape, fill_value=1.0, dtype=np.float32)
 

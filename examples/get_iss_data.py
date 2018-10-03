@@ -40,7 +40,6 @@ class ISSTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
     def tile_data(self) -> np.ndarray:
         return imread(self.file_path)
 

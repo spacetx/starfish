@@ -1,137 +1,204 @@
-import warnings
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
+import pandas as pd
 import xarray as xr
-from trackpy import locate
+from scipy.ndimage import label
+from skimage.feature import peak_local_max
+from skimage.measure import regionprops
+from sympy import Line, Point
+from tqdm import tqdm
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table import IntensityTable
-from starfish.types import SpotAttributes
+from starfish.types import Features, Indices, Number, SpotAttributes
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
 
 
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
+    def __init__(self, min_distance: int, stringency: int, min_obj_area: int,
+                 max_obj_area: int, threshold: int = None, measurement_type: str = 'max',
+                 min_num_spots_detected: int = 3, is_volume: bool = False,
+                 verbose: bool = True) -> None:
 
-    def __init__(
-            self, spot_diameter, min_mass, max_size, separation, percentile=0,
-            noise_size: Tuple[int, int, int]=(1, 1, 1), smoothing_size=None, threshold=None,
-            preprocess: bool=False, measurement_type: str='max', is_volume: bool=False,
-            verbose=False, **kwargs) -> None:
-        """Find spots using a local max peak finding algorithm
-
-        This is a wrapper for `trackpy.locate`
-
-        Parameters
-        ----------
-
-        spot_diameter : odd integer or tuple of odd integers.
-            This may be a single number or a tuple giving the feature’s extent in each dimension,
-            useful when the dimensions do not have equal resolution (e.g. confocal microscopy).
-            The tuple order is the same as the image shape, conventionally (z, y, x) or (y, x).
-            The number(s) must be odd integers. When in doubt, round up.
-        min_mass : float, optional
-            The minimum integrated brightness. This is a crucial parameter for eliminating spurious
-            features. Recommended minimum values are 100 for integer images and 1 for float images.
-            Defaults to 0 (no filtering).
-        max_size : float
-            maximum radius-of-gyration of brightness, default None
-        separation : float or tuple
-            Minimum separtion between features. Default is diameter + 1. May be a tuple, see
-            diameter for details.
-        percentile : float
-            Features must have a peak brighter than pixels in this percentile. This helps eliminate
-            spurious peaks.
-        noise_size : float or tuple
-            Width of Gaussian blurring kernel, in pixels Default is 1. May be a tuple, see diameter
-            for details.
-        smoothing_size : float or tuple
-            The size of the sides of the square kernel used in boxcar (rolling average) smoothing,
-            in pixels Default is diameter. May be a tuple, making the kernel rectangular.
-        threshold : float
-            Clip bandpass result below this value. Thresholding is done on the already
-            background-subtracted image. By default, 1 for integer images and 1/255 for float
-            images.
-        measurement_type : str ['max', 'mean']
-            name of the function used to calculate the intensity for each identified spot area
-        preprocess : boolean
-            Set to False to turn off bandpass preprocessing.
-        max_iterations : integer
-            max number of loops to refine the center of mass, default 10
-        is_volume : bool
-            if True, run the algorithm on 3d volumes of the provided stack
-        verbose : bool
-            If True, report the percentage completed (default = False) during processing
-
-
-        See Also
-        --------
-        trackpy locate: http://soft-matter.github.io/trackpy/dev/generated/trackpy.locate.html
-
-        """
-
-        self.diameter = spot_diameter
-        self.minmass = min_mass
-        self.maxsize = max_size
-        self.separation = separation
-        self.noise_size = noise_size
-        self.smoothing_size = smoothing_size
-        self.percentile = percentile
+        self.min_distance = min_distance
+        self.stringency = stringency
+        self.min_obj_area = min_obj_area
+        self.max_obj_area = max_obj_area
         self.threshold = threshold
+        self.min_num_spots_detected = min_num_spots_detected
+
         self.measurement_function = self._get_measurement_function(measurement_type)
-        self.preprocess = preprocess
+
         self.is_volume = is_volume
+        if self.is_volume:
+            raise ValueError('LocalMaxPeakFinder only works for 2D data, for 3D data, '
+                             'please use TrackpyLocalMaxPeakFinder')
+
         self.verbose = verbose
 
-    def image_to_spots(self, image: np.ndarray) -> SpotAttributes:
-        """
+        # these parameters are useful for debugging spot-calls
+        self._thresholds = None
+        self._spot_counts = None
+        self._grad = None
+        self._spot_props = None
+        self._labels = None
 
-        Parameters
-        ----------
-        image : np.ndarray
-            three-dimensional numpy array containing spots to detect
+    def _compute_threshold(self, img: Union[np.ndarray, xr.DataArray]) -> Number:
+        thresholds, spot_counts = self._compute_num_spots_per_threshold(img)
+        threshold = self._select_optimal_threshold(thresholds, spot_counts)
+        return threshold
 
-        Returns
-        -------
-        SpotAttributes :
-            spot attributes table for all detected spots
+    def _compute_num_spots_per_threshold(self, img: np.ndarray) -> Tuple[List, List]:
 
-        """
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', FutureWarning)  # trackpy numpy indexing warning
-            attributes = locate(
-                image,
-                diameter=self.diameter,
-                minmass=self.minmass,
-                maxsize=self.maxsize,
-                separation=self.separation,
-                noise_size=self.noise_size,
-                smoothing_size=self.smoothing_size,
-                threshold=self.threshold,
-                percentile=self.percentile,
-                preprocess=self.preprocess
-            )
+        # thresholds to search over
+        thresholds = np.linspace(img.min(), img.max(), num=100)
 
-        # TODO ambrosejcarr: data should always be at least pseudo-3d, this may not be necessary
-        # TODO ambrosejcarr: this is where max vs. sum vs. mean would be parametrized.
-        # here, total_intensity = sum, intensity = max
-        new_colnames = [
-            'x', 'y', 'total_intensity', 'radius', 'eccentricity', 'intensity', 'raw_mass', 'ep'
-        ]
-        if len(image.shape) == 3:
-            attributes.columns = ['z'] + new_colnames
+        # number of spots detected at each threshold
+        spot_counts = []
+
+        # where we stop our threshold search
+        stop_threshold = None
+
+        if self.verbose:
+            threshold_iter = tqdm(thresholds)
+            print('Determining optimal threshold ...')
         else:
-            attributes.columns = new_colnames
+            threshold_iter = thresholds
 
-        attributes['spot_id'] = np.arange(attributes.shape[0])
-        return SpotAttributes(attributes)
+        for threshold in threshold_iter:
+            spots = peak_local_max(img,
+                                   min_distance=self.min_distance,
+                                   threshold_abs=threshold,
+                                   exclude_border=False,
+                                   indices=True,
+                                   num_peaks=np.inf,
+                                   footprint=None,
+                                   labels=None
+                                   )
+
+            # stop spot finding when the number of detected spots falls below 3
+            if len(spots) <= self.min_num_spots_detected:
+                stop_threshold = threshold
+                msg = '.. stopping early -- number of spots ' \
+                      'fell below: {}'.format(self.min_num_spots_detected)
+                print(msg)
+                break
+            else:
+                spot_counts.append(len(spots))
+
+        if stop_threshold is None:
+            stop_threshold = thresholds.max()
+
+        # for some reason, np.where returns a tuple of nd.arrays,
+        # hence the [0][0] indexing to get out a numerical value
+        stop_index = np.where(thresholds == stop_threshold)[0][0]
+
+        if len(thresholds > 1):
+            thresholds = thresholds[:stop_index]
+            spot_counts = spot_counts[:stop_index]
+
+        self._thresholds = thresholds
+        self._spot_counts = spot_counts
+
+        return thresholds, spot_counts
+
+    def _select_optimal_threshold(self, thresholds: List, spot_counts: List) -> Number:
+
+        # calculate the gradient of the number of spots
+        grad = np.gradient(spot_counts)
+        self._grad = grad
+        optimal_threshold_index = np.argmin(grad)
+
+        # only consider thresholds > than optimal threshold
+        thresholds = thresholds[optimal_threshold_index:]
+        grad = grad[optimal_threshold_index:]
+
+        # if all else fails, return 0.
+        selected_thr = 0
+
+        # TODO i don't really get what this code does
+        if thresholds.shape > (1,):
+
+            distances = []
+
+            start_point = Point(thresholds[0], grad[0])
+            end_point = Point(thresholds[-1], grad[-1])
+            line = Line(start_point, end_point)
+
+            # calculate the distance between all points and the line
+            for k in range(len(thresholds)):
+                p = Point(thresholds[k], grad[k])
+                dst = line.distance(p)
+                distances.append(dst.evalf())
+
+            # remove the end points
+            thresholds = thresholds[1:-1]
+            distances = distances[1:-1]
+
+            if distances:
+                thr_idx = np.argmax(np.array(distances))
+
+                if thr_idx + self.stringency < len(thresholds):
+                    selected_thr = thresholds[thr_idx + self.stringency]
+                else:
+                    selected_thr = thresholds[thr_idx]
+
+        return selected_thr
+
+    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
+
+        if self.threshold is None:
+            self.threshold = self._compute_threshold(data_image)
+
+        # TODO @ajc data_image is volumetric, although in his code, we never use it that way
+        masked_image = data_image[:, :] > self.threshold
+        labels = label(masked_image)[0]
+        spot_props = regionprops(labels)
+
+        for spot_prop in spot_props:
+            if spot_prop.area < self.min_obj_area or spot_prop.area > self.max_obj_area:
+                masked_image[spot_prop.coords[:, 0], spot_prop.coords[:, 1]] = 0
+
+        labels = label(masked_image)[0]
+        spot_props = regionprops(labels)
+
+        self._spot_props = spot_props
+        self._labels = labels
+
+        if self.verbose:
+            print('computing final spots ...')
+
+        spot_coords = peak_local_max(data_image,
+                                     min_distance=self.min_distance,
+                                     threshold_abs=self.threshold,
+                                     exclude_border=False,
+                                     indices=True,
+                                     num_peaks=np.inf,
+                                     footprint=None,
+                                     labels=labels)
+
+        self._spot_coords = spot_coords
+
+        # TODO how to get the radius? unlikely that this can be pulled out of
+        # self._spot_props, since the last call to peak_local_max can find multiple
+        # peaks per label
+        res = {Indices.X.value: spot_coords[:, 1],
+               Indices.Y.value: spot_coords[:, 0],
+               Indices.Z.value: np.zeros(len(spot_coords)),
+               Features.SPOT_RADIUS: 1,
+               Features.SPOT_ID: np.arange(spot_coords.shape[0]),
+               Features.INTENSITY: data_image[spot_coords[:, 0], spot_coords[:, 1]]
+               }
+
+        return SpotAttributes(pd.DataFrame(res))
 
     def run(
             self,
             data_stack: ImageStack,
-            blobs_image: Optional[Union[np.ndarray, xr.DataArray]]=None,
-            reference_image_from_max_projection: bool=False,
+            blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
+            reference_image_from_max_projection: bool = False,
     ) -> IntensityTable:
         """
         Find spots.
@@ -155,37 +222,38 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             reference_image=blobs_image,
             reference_image_from_max_projection=reference_image_from_max_projection,
             measurement_function=self.measurement_function,
-            radius_is_gyration=True,
+            radius_is_gyration=False,
+            is_volume=self.is_volume
         )
 
         return intensity_table
 
     @classmethod
     def _add_arguments(cls, group_parser):
-        group_parser.add_argument("--spot-diameter", type=str, help='expected spot size')
         group_parser.add_argument(
-            "--min-mass", default=4, type=int, help="minimum integrated spot intensity")
+            "--min-distance", default=4, type=int,
+            help="Minimum spot size (in number of pixels deviation)")
         group_parser.add_argument(
-            "--max-size", default=6, type=int, help="maximum radius of gyration of brightness")
+            "--min-obj-area", default=6, type=int,
+            help="Maximum spot size (in number of pixels")
         group_parser.add_argument(
-            "--separation", default=5, type=float, help="minimum distance between spots")
+            "--max_obj_area", default=300, type=int,
+            help="Maximum spot size (in number of pixels)")
         group_parser.add_argument(
-            "--noise-size", default=None, type=int,
-            help="width of gaussian blurring kernel, in pixels")
+            "--stringency", default=0, type=int,
+            help="Number of indices in threshold list to look past "
+                 "for the threhsold finding algorithm")
+        group_parser.add_argument("--threshold", default=None, type=float,
+                                  help="Threshold on which to threshold "
+                                       "image prior to spot detection")
         group_parser.add_argument(
-            "--smoothing-size", default=None, type=int,
-            help="odd integer. Size of boxcar (moving average) filter in pixels. Default is the "
-                 "Diameter"
-        )
+            "--min-num-spots-detected", default=3, type=int,
+            help="Minimum number of spots detected at which to stop a"
+                 "utomatic thresholding algorithm")
         group_parser.add_argument(
-            "--preprocess", action="store_true",
-            help="if passed, gaussian and boxcar filtering are applied")
+            "--measurement-type", default='max', type=str,
+            help="How to aggregate pixel intensities in a spot")
         group_parser.add_argument(
-            "--show", default=False, action='store_true', help="display results visually")
+            "--is-volume", default=False, action='store_false', help="Find spots in 3D or not")
         group_parser.add_argument(
-            "--percentile", default=None, type=float,
-            help="clip bandpass below this value. Thresholding is done on already background-"
-                 "subtracted images. Default 1 for integer images and 1/255 for float")
-        group_parser.add_argument(
-            "--is-volume", action="store_true",
-            help="indicates that the image stack should be filtered in 3d")
+            "--verbose", default=True, action='store_true', help="Verbosity flag")

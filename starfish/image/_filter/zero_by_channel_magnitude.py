@@ -1,5 +1,6 @@
 import argparse
 from copy import deepcopy
+from typing import Optional
 
 import numpy as np
 from tqdm import tqdm
@@ -28,6 +29,8 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         self.thresh = thresh
         self.normalize = normalize
 
+    _DEFAULT_TESTING_PARAMETERS = {"thresh": 0, "normalize": True}
+
     @classmethod
     def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
@@ -38,7 +41,8 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             help='Scales all rounds to have unit L2 norm across channels')
 
     def run(
-            self, stack: ImageStack, in_place: bool=False, verbose=False,
+            self, stack: ImageStack,
+            in_place: bool=False, verbose=False, n_processes: Optional[int]=None
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -50,6 +54,8 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             if True, report on the percentage completed during processing (default = False)
+        n_processes : Optional[int]: None
+            Not implemented. Number of processes to use when applying filter.
 
         Returns
         -------

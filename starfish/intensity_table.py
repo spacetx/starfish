@@ -172,6 +172,45 @@ class IntensityTable(xr.DataArray):
         """
         self.to_netcdf(filename)
 
+    def save_mermaid(self, filename: str) -> pd.DataFrame:
+        """
+        Writes a .csv.gz file in columnar format that is readable by MERMAID visualization
+        software.
+
+        To run MERMAID, follow the installation instructions for that repository and simply
+        replace the data.csv.gz file with the output of this function.
+
+        Parameters
+        ----------
+        filename : str
+            name for compressed-gzipped MERMAID data file. Should end in '.csv.gz'
+
+        See Also
+        --------
+        https://github.com/JEFworks/MERmaid
+
+        """
+
+        # verify the IntensityTable has been decoded
+        if Features.TARGET not in self.coords.keys():
+            raise RuntimeError(
+                'IntensityTable must be decoded before it can be converted to MERMAID input.'
+            )
+
+        # construct the MERMAID dataframe. As MERMAID adds support for non-categorical variables,
+        # additional columns can be added here
+        df = self.to_features_dataframe()
+        column_order = [
+            Indices.X,
+            Indices.Y,
+            Features.TARGET,
+            Features.TARGET,  # added twice to support simultaneous coding
+        ]
+        mermaid_data = df[column_order]
+
+        # write to disk
+        mermaid_data.to_csv(filename, compression='gzip', index=False)
+
     @classmethod
     def load(cls, filename: str) -> "IntensityTable":
         """load an IntensityTable from Netcdf

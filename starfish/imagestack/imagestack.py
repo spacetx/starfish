@@ -21,8 +21,8 @@ from skimage import exposure
 from skimage import img_as_float32, img_as_uint
 from slicedimage import Reader, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
-from tqdm import tqdm
 import napari_gui
+from tqdm import tqdm
 
 from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import build_image, TileFetcher
@@ -402,7 +402,6 @@ class ImageStack:
         reordered_array = np.moveaxis(slices, [-2, -1], [0, 1])
 
         napari_gui.imshow(reordered_array, multichannel=False)
-
 
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],

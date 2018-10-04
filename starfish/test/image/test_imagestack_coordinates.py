@@ -48,7 +48,6 @@ class OffsettedTiles(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
     def tile_data(self) -> np.ndarray:
         return np.ones((HEIGHT, WIDTH), dtype=np.float32)
 
@@ -113,7 +112,6 @@ class OffsettedScalarTiles(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
     def tile_data(self) -> np.ndarray:
         return np.ones((HEIGHT, WIDTH), dtype=np.float32)
 

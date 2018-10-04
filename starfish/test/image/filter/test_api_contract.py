@@ -84,8 +84,8 @@ def test_all_methods_adhere_to_contract(filter_class):
         raise AssertionError(f'{filter_class} must accept verbose parameter')
 
     # output is dtype float and within the expected interval of [0, 1]
-    assert filtered.numpy_array.dtype == np.float32, f'{filter_class} must output float32 data'
-    assert np.all(filtered.numpy_array >= 0), \
+    assert filtered.xarray.dtype == np.float32, f'{filter_class} must output float32 data'
+    assert np.all(filtered.xarray >= 0), \
         f'{filter_class} must output a result where all values are >= 0'
-    assert np.all(filtered.numpy_array <= 1), \
+    assert np.all(filtered.xarray <= 1), \
         f'{filter_class} must output a result where all values are <= 1'

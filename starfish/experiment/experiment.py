@@ -20,12 +20,15 @@ class FieldOfView:
 
     Auxiliary images can be accessed using a key, i.e., FOV[aux_image_type].
 
-    Properties
+    Attributes
     ----------
-    name                   The name of the FOV.  In an experiment with only a single FOV, this may
-                           be None.
-    primary_image          The primary image for this field of view.
-    auxiliary_image_types  A set of all the auxiliary image types.
+    name : str
+        The name of the FOV.  In an experiment with only a single FOV, this may be None.
+    primary_image : ImageStack
+        The primary image for this field of view. Calling this property will load the data into
+        memory
+    auxiliary_image_types : Mapping[str, TileSet]
+        A set of all the auxiliary image types.
 
     """
     def __init__(
@@ -102,24 +105,27 @@ class Experiment:
     This encapsulates an experiment, with one or more fields of view and a codebook.  An individual
     FOV can be retrieved using a key, i.e., experiment[fov_name].
 
-    Constructors
-    ------------
-    from_json     Given a URL or a path to an experiment.json document, return an Experiment object
-                  corresponding to the document.
-
     Methods
     -------
-    fov           Given a callable that accepts a FOV, return the first FOVs that the callable
-                  returns True when passed the FOV.  Because there is no guaranteed sorting for the
-                  FOVs, use this cautiously.
-    fovs          Given a callable that accepts a FOV, return all the FOVs that the callable returns
-                  True when passed the FOV.
-    fovs_by_name  Given one or more FOV names, return the FOVs that match those names.
+    from_json()
+        Given a URL or a path to an experiment.json document, return an Experiment object
+        corresponding to the document.
+    fov()
+        Given a callable that accepts a FOV, return the first FOVs that the callable returns True
+        when passed the FOV.  Because there is no guaranteed sorting for the FOVs, use this
+        cautiously.
+    fovs()
+        Given a callable that accepts a FOV, return all the FOVs that the callable returns True when
+        passed the FOV.
+    fovs_by_name()
+        Given one or more FOV names, return the FOVs that match those names.
 
-    Properties
+    Attributes
     ----------
-    codebook      Returns the codebook associated with this experiment.
-    extras        Returns the extras dictionary associated with this experiment.
+    codebook : Codebook
+        Returns the codebook associated with this experiment.
+    extras : Dict
+        Returns the extras dictionary associated with this experiment.
     """
     def __init__(
             self,
@@ -165,19 +171,15 @@ class Experiment:
         strict : bool
             if true, then all JSON loaded by this method will be
             passed to the appropriate validator
+        STARFISH_STRICT_LOADING :
+             This parameter is read from the environment. If set, then all JSON loaded by this
+             method will be passed to the appropriate validator. The `strict` parameter to this
+             method has priority over the environment variable.
 
         Returns
         -------
         Experiment :
             Experiment object serving the requested experiment data
-
-        Environment variables
-        ---------------------
-        STARFISH_STRICT_LOADING :
-             If set, then all JSON loaded by this method will be
-             passed to the appropriate validator. The `strict`
-             parameter to this method has priority over the
-             environment variable.
 
         """
         if strict is None:

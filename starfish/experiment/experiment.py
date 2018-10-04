@@ -21,11 +21,12 @@ class FieldOfView:
     Auxiliary images can be accessed using a key, i.e., FOV[aux_image_type].
 
     Properties
-    -------
+    ----------
     name                   The name of the FOV.  In an experiment with only a single FOV, this may
                            be None.
     primary_image          The primary image for this field of view.
     auxiliary_image_types  A set of all the auxiliary image types.
+
     """
     def __init__(
             self,
@@ -102,7 +103,7 @@ class Experiment:
     FOV can be retrieved using a key, i.e., experiment[fov_name].
 
     Constructors
-    -------
+    ------------
     from_json     Given a URL or a path to an experiment.json document, return an Experiment object
                   corresponding to the document.
 
@@ -116,7 +117,7 @@ class Experiment:
     fovs_by_name  Given one or more FOV names, return the FOVs that match those names.
 
     Properties
-    -------
+    ----------
     codebook      Returns the codebook associated with this experiment.
     extras        Returns the extras dictionary associated with this experiment.
     """

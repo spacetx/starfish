@@ -166,6 +166,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
         )
         result = stack.apply(
             func,
-            split_by={Indices.Y.value, Indices.X.value}, verbose=verbose, n_processes=n_processes
+            split_by={Indices.Y.value, Indices.X.value}, verbose=verbose, n_processes=n_processes,
+            in_place=in_place
         )
         return result

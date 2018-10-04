@@ -6,8 +6,8 @@ from copy import deepcopy
 from functools import partial
 from itertools import product
 from typing import (
-    Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Set, Sequence,
-    Tuple, Union
+    Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence,
+    Optional, Sequence, Set, Tuple, Union
 )
 
 import matplotlib.pyplot as plt
@@ -580,7 +580,7 @@ class ImageStack:
             self,
             func,
             split_by: Set[Indices]={Indices.X, Indices.Y},
-            in_place=True,
+            in_place=False,
             verbose: bool=False,
             n_processes: Optional[int]=None,
             **kwargs
@@ -621,13 +621,7 @@ class ImageStack:
                 split_by=split_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
             )
 
-        axes = {
-            Indices.ROUND.value,
-            Indices.CH.value,
-            Indices.Z.value,
-            Indices.Y.value,
-            Indices.X.value
-        }
+        axes = set(ind.value for ind in Indices)
         stack_axes = list(axes - set(split_by))
 
         self._data = self._data.stack(tiles=stack_axes)

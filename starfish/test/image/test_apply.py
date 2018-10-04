@@ -23,7 +23,8 @@ def test_apply_3d():
     """test that apply correctly applies a simple function across 3d volumes of a Stack"""
     stack = ImageStack.synthetic_stack()
     assert np.all(stack.numpy_array == 1)
-    stack.apply(divide, value=4, split_by={Indices.Z.value, Indices.Y.value, Indices.X.value})
+    stack.apply(divide, in_place=True, value=4,
+                split_by={Indices.Z.value, Indices.Y.value, Indices.X.value})
     assert (stack.numpy_array == 0.25).all()
 
 

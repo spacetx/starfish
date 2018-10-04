@@ -18,4 +18,4 @@ def test_zero_by_channel_magnitude_produces_accurate_results():
 
     zcm = ZeroByChannelMagnitude(thresh=np.inf, normalize=False, is_volume=False)
     filtered = zcm.run(imagestack, in_place=False, n_processes=1)
-    assert np.all(filtered.numpy_array == 0)
+    assert np.all(filtered.xarray == 0)

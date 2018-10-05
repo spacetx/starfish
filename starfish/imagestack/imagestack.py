@@ -573,14 +573,14 @@ class ImageStack:
 
         return tuple(slice_list), axes
 
-    def _iter_indices(self, is_volume: bool=False) -> Iterator[Mapping[Indices, int]]:
-        """Iterate over indices of image tiles or image volumes if is_volume is True
+    def _iter_indices(self, indices: Set[Indices]={Indices.ROUND, Indices.CH}
+                      ) -> Iterator[Mapping[Indices, int]]:
+        """Iterate over provided indices
 
         Parameters
         ----------
-        is_volume : bool
-            If True, yield indices necessary to extract volumes from self, else return
-            indices for tiles
+        indices : Set[Indices]
+            The set of Indices to be iterated over
 
         Yields
         ------
@@ -588,13 +588,10 @@ class ImageStack:
             Mapping of dimension name to index
 
         """
-        for round_ in np.arange(self.shape[Indices.ROUND]):
-            for ch in np.arange(self.shape[Indices.CH]):
-                if is_volume:
-                    yield {Indices.ROUND: round_, Indices.CH: ch}
-                else:
-                    for z in np.arange(self.shape[Indices.Z]):
-                        yield {Indices.ROUND: round_, Indices.CH: ch, Indices.Z: z}
+        ranges = [np.arange(self.shape[ind]) for ind in indices]
+        for items in product(*ranges):
+            a = zip(indices, items)
+            yield {ind: val for (ind, val) in a}
 
     def _iter_tiles(
             self, indices: Iterable[Mapping[Indices, Union[int, slice]]]
@@ -657,47 +654,21 @@ class ImageStack:
             image_stack = deepcopy(self)
             return image_stack.apply(
                 func,
-                split_by=split_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
+                split_by=split_by, in_place=True, verbose=verbose, **kwargs
             )
 
-        axes = set(ind.value for ind in Indices)
-        stack_axes = list(axes - set(split_by))
+        results = self.transform(func, split_by=split_by, verbose=verbose,
+                                 n_processes=n_processes, **kwargs)
 
-        self._data = self._data.stack(tiles=stack_axes)
-        tile_indices = self._data.tiles
-
-        # set the keyword arguments in the apply function
-        applyfunc: Callable = partial(func, **kwargs)
-
-        # set the progress bar function depending on the verbosity request
-        progress_func = tqdm if verbose else lambda f: f  # pass-through lambda
-
-        # define the iterable to be mapped
-        tiles = (self._data.sel(tiles=t) for t in tile_indices)
-
-        with multiprocessing.Pool(n_processes) as pool:
-            # string all the iterators together
-            results = zip(
-                progress_func(pool.imap(applyfunc, tiles)),
-                tile_indices
-            )
-
-            # execute the combined iterator
-            for result, t in results:
-                self._data.loc[{'tiles': t}] = result
-
-        # unstack the data
-        self._data = self._data.unstack('tiles').transpose(
-            Indices.ROUND.value,
-            Indices.CH.value,
-            Indices.Z.value,
-            Indices.Y.value,
-            Indices.X.value
-        )
-
+        for r, inds in results:
+            self.set_slice(inds, r)
         return self
 
-    def transform(self, func, is_volume=False, verbose=False, **kwargs) -> List[Any]:
+    def transform(self, func,
+                  split_by: Set[Indices]={Indices.X, Indices.Y},
+                  verbose=False,
+                  n_processes: Optional[int] = None,
+                  **kwargs) -> List[Any]:
         """Apply func over all tiles or volumes in self
 
         Parameters
@@ -717,8 +688,11 @@ class ImageStack:
         List[Any] :
             The results of applying func to stored image data
         """
-        mapfunc: Callable = map
-        indices = list(self._iter_indices(is_volume=is_volume))
+        # mapfunc: Callable = map
+        all_axes = set(ind for ind in Indices)
+        axes_to_iterate = set(all_axes - split_by)
+
+        indices = list(self._iter_indices(axes_to_iterate))
 
         if verbose:
             tiles = tqdm(self._iter_tiles(indices))
@@ -726,9 +700,10 @@ class ImageStack:
             tiles = self._iter_tiles(indices)
 
         applyfunc: Callable = partial(func, **kwargs)
-        results = mapfunc(applyfunc, tiles)
 
-        return list(zip(results, indices))
+        with multiprocessing.Pool(n_processes) as pool:
+            results = pool.imap(applyfunc, tiles)
+            return list(zip(results, indices))
 
     @property
     def tile_metadata(self) -> pd.DataFrame:

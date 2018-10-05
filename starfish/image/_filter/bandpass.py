@@ -81,7 +81,7 @@ class Bandpass(FilterAlgorithmBase):
             image, lshort=lshort, llong=llong, threshold=threshold,
             truncate=truncate
         )
-        return bandpassed
+        return bandpassed.astype(np.float32)
 
     def run(
             self, stack: ImageStack, in_place: bool=False, verbose: bool=False,

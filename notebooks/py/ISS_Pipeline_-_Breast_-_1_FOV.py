@@ -60,7 +60,7 @@ images = [primary_image, nuclei, dots]
 
 # EPY: START code
 # round, channel, x, y, z
-primary_image.numpy_array.shape
+primary_image.xarray.shape
 # EPY: END code
 
 # EPY: START markdown

@@ -27,7 +27,12 @@ from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
 from starfish.intensity_table import IntensityTable
-from starfish.types import Coordinates, Indices
+from starfish.types import (
+    Coordinates,
+    Indices,
+    PHYSICAL_COORDINATE_DIMENSION,
+    PhysicalCoordinateTypes,
+)
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
@@ -100,6 +105,8 @@ class ImageStack:
 
         shape: MutableSequence[int] = []
         dims: MutableSequence[str] = []
+        coordinates_shape: MutableSequence[int] = []
+        coordinates_dimensions: MutableSequence[str] = []
         for ix in range(ImageStack.N_AXES):
             size_for_axis: Optional[int] = None
             dim_for_axis: Optional[Indices] = None
@@ -108,6 +115,7 @@ class ImageStack:
                 if ix == axis_data.order:
                     size_for_axis = self._get_dimension_size(axis_name)
                     dim_for_axis = axis_name
+                    break
 
             if size_for_axis is None or dim_for_axis is None:
                 raise ValueError(
@@ -115,10 +123,13 @@ class ImageStack:
 
             shape.append(size_for_axis)
             dims.append(dim_for_axis.value)
+            coordinates_shape.append(size_for_axis)
+            coordinates_dimensions.append(dim_for_axis.value)
 
         shape.extend(self._tile_shape)
         dims.extend([Indices.Y.value, Indices.X.value])
-
+        coordinates_dimensions.append(PHYSICAL_COORDINATE_DIMENSION)
+        coordinates_shape.append(6)
         # now that we know the tile data type (kind and size), we can allocate the data array.
         self._data = xr.DataArray(
             np.zeros(
@@ -126,6 +137,23 @@ class ImageStack:
                 dtype=np.float32,
             ),
             dims=dims,
+        )
+        self._coordinates = xr.DataArray(
+            np.empty(
+                shape=coordinates_shape,
+                dtype=np.float32,
+            ),
+            dims=coordinates_dimensions,
+            coords={
+                PHYSICAL_COORDINATE_DIMENSION: [
+                    PhysicalCoordinateTypes.X_MIN.value,
+                    PhysicalCoordinateTypes.X_MAX.value,
+                    PhysicalCoordinateTypes.Y_MIN.value,
+                    PhysicalCoordinateTypes.Y_MAX.value,
+                    PhysicalCoordinateTypes.Z_MIN.value,
+                    PhysicalCoordinateTypes.Z_MAX.value,
+                ],
+            },
         )
 
         # iterate through the tiles and set the data.
@@ -146,6 +174,23 @@ class ImageStack:
 
             data = img_as_float32(data)
             self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
+            coordinate_selector = {
+                Indices.ROUND.value: h,
+                Indices.CH.value: c,
+                Indices.Z.value: zlayer,
+            }
+            coordinates_values = [
+                tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
+                tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
+            ]
+            if Coordinates.Z in tile.coordinates:
+                coordinates_values.extend([
+                    tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1],
+                ])
+            else:
+                coordinates_values.extend([np.nan, np.nan])
+
+            self._coordinates.loc[coordinate_selector] = np.array(coordinates_values)
 
     @staticmethod
     def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
@@ -241,15 +286,9 @@ class ImageStack:
         return empty
 
     @property
-    def numpy_array(self):
-        """Retrieves the image data as a numpy array."""
-        result = self._data.values
-        return result
-
-    @numpy_array.setter
-    def numpy_array(self, data):
-        """Sets the image's data from a numpy array."""
-        self._data.values = data.view()
+    def xarray(self) -> xr.DataArray:
+        """Retrieves the image data as an xarray.DataArray"""
+        return self._data
 
     def get_slice(
             self,
@@ -771,6 +810,34 @@ class ImageStack:
 
         return result
 
+    def coordinates(
+            self,
+            indices: Mapping[Indices, int],
+            physical_axis: Coordinates) -> Tuple[float, float]:
+        """Given a set of indices that uniquely identify a tile and a physical axis, return the min
+        and the max coordinates for that tile along that axis."""
+        selectors: Mapping[str, Any] = {
+            Indices.ROUND.value: indices[Indices.ROUND],
+            Indices.CH.value: indices[Indices.CH],
+            Indices.Z.value: indices[Indices.Z],
+        }
+        min_selectors = dict(selectors)
+        max_selectors = dict(selectors)
+        if physical_axis == Coordinates.X:
+            min_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.X_MIN
+            max_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.X_MAX
+        elif physical_axis == Coordinates.Y:
+            min_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Y_MIN
+            max_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Y_MAX
+        elif physical_axis == Coordinates.Z:
+            min_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Z_MIN
+            max_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Z_MAX
+
+        return (
+            self._coordinates.loc[min_selectors].item(),
+            self._coordinates.loc[max_selectors].item(),
+        )
+
     def _get_dimension_size(self, dimension: Indices):
         axis_data = ImageStack.AXES_DATA[dimension]
         if dimension in self._image_partition.dimensions or axis_data.required:
@@ -1050,7 +1117,7 @@ class ImageStack:
         """
         first_dim = self.num_rounds * self.num_chs * self.num_zlayers
         new_shape = (first_dim,) + self.tile_shape
-        new_data = self.numpy_array.reshape(new_shape)
+        new_data = self.xarray.data.reshape(new_shape)
 
         return new_data
 

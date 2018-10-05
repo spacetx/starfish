@@ -5,7 +5,7 @@ import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
 from ._base import FilterAlgorithmBase
-from .util import determine_axes_to_split_by
+from .util import determine_axes_to_split_by, preserve_float_range
 
 
 class ScaleByPercentile(FilterAlgorithmBase):
@@ -24,6 +24,8 @@ class ScaleByPercentile(FilterAlgorithmBase):
         """
         self.p = p
         self.is_volume = is_volume
+
+    _DEFAULT_TESTING_PARAMETERS = {"p": 0}
 
     @classmethod
     def _add_arguments(cls, group_parser) -> None:
@@ -55,11 +57,10 @@ class ScaleByPercentile(FilterAlgorithmBase):
         """
         v = np.percentile(image, p)
 
-        # asking for a float percentile clipping value from an integer image will
-        # convert to float, so store the dtype so it can be restored
-        dtype = image.dtype
         image = image / v
-        return image.astype(dtype)
+        image = preserve_float_range(image)
+
+        return image
 
     def run(
             self, stack: ImageStack, in_place: bool=False, verbose: bool=False,

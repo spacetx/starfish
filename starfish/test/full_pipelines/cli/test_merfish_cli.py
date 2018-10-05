@@ -24,7 +24,7 @@ class TestWithMerfishData(CLITest, unittest.TestCase):
             [
                 sys.executable,
                 "examples/get_cli_test_data.py",
-                "https://dmf0bdeheu4zf.cloudfront.net/20180828/MERFISH-TEST/experiment.json",
+                "https://dmf0bdeheu4zf.cloudfront.net/20180926/MERFISH-TEST/experiment.json",
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
             ],
             [

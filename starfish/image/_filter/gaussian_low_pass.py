@@ -33,6 +33,8 @@ class GaussianLowPass(FilterAlgorithmBase):
         self.sigma = validate_and_broadcast_kernel_size(sigma, is_volume)
         self.is_volume = is_volume
 
+    _DEFAULT_TESTING_PARAMETERS = {"sigma": 1}
+
     @classmethod
     def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(

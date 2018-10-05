@@ -172,6 +172,45 @@ class IntensityTable(xr.DataArray):
         """
         self.to_netcdf(filename)
 
+    def save_mermaid(self, filename: str) -> pd.DataFrame:
+        """
+        Writes a .csv.gz file in columnar format that is readable by MERMAID visualization
+        software.
+
+        To run MERMAID, follow the installation instructions for that repository and simply
+        replace the data.csv.gz file with the output of this function.
+
+        Parameters
+        ----------
+        filename : str
+            name for compressed-gzipped MERMAID data file. Should end in '.csv.gz'
+
+        See Also
+        --------
+        https://github.com/JEFworks/MERmaid
+
+        """
+
+        # verify the IntensityTable has been decoded
+        if Features.TARGET not in self.coords.keys():
+            raise RuntimeError(
+                'IntensityTable must be decoded before it can be converted to MERMAID input.'
+            )
+
+        # construct the MERMAID dataframe. As MERMAID adds support for non-categorical variables,
+        # additional columns can be added here
+        df = self.to_features_dataframe()
+        column_order = [
+            Indices.X,
+            Indices.Y,
+            Features.TARGET,
+            Features.TARGET,  # added twice to support simultaneous coding
+        ]
+        mermaid_data = df[column_order]
+
+        # write to disk
+        mermaid_data.to_csv(filename, compression='gzip', index=False)
+
     @classmethod
     def load(cls, filename: str) -> "IntensityTable":
         """load an IntensityTable from Netcdf
@@ -303,12 +342,19 @@ class IntensityTable(xr.DataArray):
         zmax = image_stack.shape['z'] - crop_z
         ymax = image_stack.shape['y'] - crop_y
         xmax = image_stack.shape['x'] - crop_x
-        data = image_stack.numpy_array.transpose(2, 3, 4, 1, 0)  # (z, y, x, ch, round)
+        data = image_stack.xarray.transpose(
+            Indices.Z.value,
+            Indices.Y.value,
+            Indices.X.value,
+            Indices.CH.value,
+            Indices.ROUND.value,
+        )
 
         # crop and reshape imagestack to create IntensityTable data
         cropped_data = data[zmin:zmax, ymin:ymax, xmin:xmax, :, :]
         # (pixels, ch, round)
-        intensity_data = cropped_data.reshape(-1, image_stack.num_chs, image_stack.num_rounds)
+        intensity_data = cropped_data.values.reshape(
+            -1, image_stack.num_chs, image_stack.num_rounds)
 
         # IntensityTable pixel coordinates
         z = np.arange(zmin, zmax)
@@ -336,8 +382,7 @@ class IntensityTable(xr.DataArray):
         pd.DataFrame
 
         """
-        df = pd.DataFrame(dict(self[Features.AXIS].coords.variables)).drop(Features.AXIS, axis=1)
-        return df
+        return pd.DataFrame(dict(self[Features.AXIS].coords))
 
     def feature_trace_magnitudes(self) -> np.ndarray:
         """Return the magnitudes of each feature across rounds and channels

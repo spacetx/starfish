@@ -41,6 +41,8 @@ class MeanHighPass(FilterAlgorithmBase):
         self.size = validate_and_broadcast_kernel_size(size, is_volume)
         self.is_volume = is_volume
 
+    _DEFAULT_TESTING_PARAMETERS = {"size": 1}
+
     @classmethod
     def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(

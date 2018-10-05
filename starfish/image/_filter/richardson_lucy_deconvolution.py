@@ -38,6 +38,8 @@ class DeconvolvePSF(FilterAlgorithmBase):
             sigma=sigma
         )
 
+    _DEFAULT_TESTING_PARAMETERS = {"num_iter": 1, "sigma": 1}
+
     @classmethod
     def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(

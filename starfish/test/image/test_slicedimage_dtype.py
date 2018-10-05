@@ -39,7 +39,6 @@ class OnesTilesByDtype(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
     def tile_data(self) -> np.ndarray:
         return np.ones((HEIGHT, WIDTH), dtype=self._dtype)
 
@@ -90,7 +89,7 @@ def test_multiple_tiles_of_same_dtype():
          NUM_Z,
          HEIGHT,
          WIDTH), dtype=np.uint32)
-    assert np.array_equal(stack.numpy_array, img_as_float32(expected))
+    assert np.array_equal(stack.xarray, img_as_float32(expected))
 
 
 def test_int_type_promotion():
@@ -113,7 +112,7 @@ def test_int_type_promotion():
         (HEIGHT,
          WIDTH), dtype=np.int8))
     expected[0, 0, 0] = corner
-    assert np.array_equal(stack.numpy_array, img_as_float32(expected))
+    assert np.array_equal(stack.xarray, img_as_float32(expected))
 
 
 def test_uint_type_promotion():
@@ -136,7 +135,7 @@ def test_uint_type_promotion():
         (HEIGHT,
          WIDTH), dtype=np.uint8))
     expected[0, 0, 0] = corner
-    assert np.array_equal(stack.numpy_array, img_as_float32(expected))
+    assert np.array_equal(stack.xarray, img_as_float32(expected))
 
 
 def test_float_type_demotion():
@@ -155,4 +154,4 @@ def test_float_type_demotion():
          NUM_Z,
          HEIGHT,
          WIDTH), dtype=np.float64)
-    assert np.array_equal(stack.numpy_array, expected)
+    assert np.array_equal(stack.xarray, expected)

@@ -35,6 +35,8 @@ class WhiteTophat(FilterAlgorithmBase):
         self.masking_radius = masking_radius
         self.is_volume = is_volume
 
+    _DEFAULT_TESTING_PARAMETERS = {"masking_radius": 3}
+
     @classmethod
     def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(

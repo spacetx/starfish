@@ -5,9 +5,16 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 import numpy as np
 import pandas as pd
 import xarray as xr
+from semantic_version import Version
 from sklearn.neighbors import NearestNeighbors
 from slicedimage.io import resolve_path_or_url
 
+from starfish.codebook._format import (
+    CURRENT_VERSION,
+    DocumentKeys,
+    MAX_SUPPORTED_VERSION,
+    MIN_SUPPORTED_VERSION,
+)
 from starfish.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number
 
@@ -125,6 +132,15 @@ class Codebook(xr.DataArray):
                 pd.Index(np.arange(n_round), name=Indices.ROUND.value),
             )
         )
+
+    @classmethod
+    def _verify_version(cls, semantic_version_str: str) -> None:
+        version = Version(semantic_version_str)
+        if not (MIN_SUPPORTED_VERSION <= version <= MAX_SUPPORTED_VERSION):
+            raise ValueError(
+                f"version {version} not supported.  This version of the starfish library only "
+                f"supports codebook formats from {MIN_SUPPORTED_VERSION} to "
+                f"{MAX_SUPPORTED_VERSION}")
 
     @classmethod
     def from_code_array(
@@ -307,8 +323,17 @@ class Codebook(xr.DataArray):
         """
         backend, name, _ = resolve_path_or_url(json_codebook)
         with backend.read_contextmanager(name) as fh:
-            code_array = json.load(fh)
-        return cls.from_code_array(code_array, n_round, n_ch)
+            codebook_doc = json.load(fh)
+
+        if isinstance(codebook_doc, list):
+            raise ValueError(
+                f"codebook is a list and not an dictionary.  It is highly likely that you are using"
+                f"a codebook formatted for a previous version of starfish.")
+
+        version_str = codebook_doc[DocumentKeys.VERSION_KEY]
+        cls._verify_version(version_str)
+
+        return cls.from_code_array(codebook_doc[DocumentKeys.MAPPINGS_KEY], n_round, n_ch)
 
     def to_json(self, filename: str) -> None:
         """save a codebook to json
@@ -342,9 +367,13 @@ class Codebook(xr.DataArray):
                 Features.CODEWORD: codeword,
                 Features.TARGET: str(target.values)
             })
+        codebook_document = {
+            DocumentKeys.VERSION_KEY: str(CURRENT_VERSION),
+            DocumentKeys.MAPPINGS_KEY: code_array,
+        }
 
         with open(filename, 'w') as f:
-            json.dump(code_array, f)
+            json.dump(codebook_document, f)
 
     @staticmethod
     def _normalize_features(

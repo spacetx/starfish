@@ -103,7 +103,7 @@ def build_image(
                         image.shape,
                         extras=image.extras,
                     )
-                    tile.numpy_array = image.tile_data
+                    tile.numpy_array = image.tile_data()
                     fov_images.add_tile(tile)
         collection.add_partition("fov_{:03}".format(fov_ix), fov_images)
     return collection

@@ -38,6 +38,8 @@ class Bandpass(FilterAlgorithmBase):
         self.truncate = truncate
         self.is_volume = is_volume
 
+    _DEFAULT_TESTING_PARAMETERS = {"lshort": 1, "llong": 3, "threshold": 0.01}
+
     @classmethod
     def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(
@@ -116,7 +118,6 @@ class Bandpass(FilterAlgorithmBase):
             bandpass_,
             split_by=split_by,
             in_place=in_place,
-            is_volume=self.is_volume,
             n_processes=n_processes,
         )
         return result

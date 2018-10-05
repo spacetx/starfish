@@ -3,6 +3,7 @@ import copy
 import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
+from starfish.types import Indices
 from starfish.util.synthesize import SyntheticData
 
 
@@ -22,8 +23,9 @@ def test_apply_3d():
     """test that apply correctly applies a simple function across 3d volumes of a Stack"""
     stack = ImageStack.synthetic_stack()
     assert np.all(stack.xarray == 1)
-    output = stack.apply(divide, value=4, is_volume=True)
-    assert (output.xarray == 0.25).all()
+    stack.apply(divide, in_place=True, value=4,
+                split_by={Indices.Z.value, Indices.Y.value, Indices.X.value})
+    assert (stack.xarray == 0.25).all()
 
 
 def test_apply_labeled_dataset():

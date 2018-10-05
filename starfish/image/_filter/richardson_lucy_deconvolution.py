@@ -6,7 +6,7 @@ import numpy as np
 from scipy.signal import convolve, fftconvolve
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Number
+from starfish.types import Indices, Number
 from ._base import FilterAlgorithmBase
 from .util import gaussian_kernel, preserve_float_range
 
@@ -168,6 +168,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
         )
         result = stack.apply(
             func,
-            in_place=in_place, verbose=verbose, n_processes=n_processes
+            split_by={Indices.Y.value, Indices.X.value}, verbose=verbose, n_processes=n_processes,
+            in_place=in_place
         )
         return result

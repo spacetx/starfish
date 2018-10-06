@@ -654,7 +654,7 @@ class ImageStack:
             image_stack = deepcopy(self)
             return image_stack.apply(
                 func,
-                split_by=split_by, in_place=True, verbose=verbose, **kwargs
+                split_by=split_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
             )
 
         results = self.transform(func, split_by=split_by, verbose=verbose,

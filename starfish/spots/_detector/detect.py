@@ -229,7 +229,8 @@ def detect_spots(
         spot_finding_method = partial(spot_finding_method, **spot_finding_kwargs)
         spot_attributes_list = data_stack.transform(
             func=spot_finding_method,
-            is_volume=True  # always use volumetric or pseudo-3d (1, n, m) data
+            # always use volumetric or pseudo-3d (1, n, m) data
+            split_by={Indices.Z.value, Indices.Y.value, Indices.X.value}
         )
         intensity_table = concatenate_spot_attributes_to_intensities(spot_attributes_list)
 

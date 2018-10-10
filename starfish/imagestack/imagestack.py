@@ -295,7 +295,7 @@ class ImageStack:
         a dict of dim:indices"""
         return self._data._item_key_to_dict(key)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> "ImageStack":
         # index xarray (keep dims) and create new stack
         indexed_data = self._index_keep_dimensions(self.xarray, key)
         stack = self.from_numpy_array(indexed_data.data)
@@ -304,8 +304,7 @@ class ImageStack:
         return stack
 
     def _index_keep_dimensions(self, data: xr.DataArray, key) -> xr.DataArray:
-        """Takes an xarray and the dimensions it had before indexing and adds them
-        back in in the correct order"""
+        """Takes an xarray and key to index it. Indexes then adds back in lost dimensions"""
         # store original dims
         original_dims = data.dims
         # index
@@ -318,6 +317,13 @@ class ImageStack:
         return data.transpose(*original_dims)
 
     def _calc_new_coords(self, indexers: dict):
+        """Calculates the resulting coordinates array from indexing on each dimension in indexers
+
+        Parameters
+        ----------
+        indexers : a dictionary of dim:index where index is the value or range to index the dimension
+
+        """
         new_coords = deepcopy(self._coordinates)
         # index by R, CH, V
         key = (indexers[Indices.ROUND.value], indexers[Indices.CH.value], indexers[Indices.Z.value])
@@ -327,7 +333,16 @@ class ImageStack:
             self.rescale_physical_coordinates(indexers, new_coords)
         return new_coords
 
-    def rescale_physical_coordinates(self, indexers, new_coords):
+    def rescale_physical_coordinates(self, indexers: dict, new_coords: xr.DataArray):
+        """Calculates the resulting coordinates array from indexing on each dimension in indexers
+
+        Parameters
+        ----------
+        indexers : a dictionary of dim:index where index is the value or range to index the dimension
+
+        new_coords: the coordinates xarray to modify
+
+        """
         for _round in range(new_coords.sizes[Indices.ROUND]):
             for ch in range(new_coords.sizes[Indices.CH]):
                 for z in range(new_coords.sizes[Indices.Z]):
@@ -353,7 +368,18 @@ class ImageStack:
                     new_coords[indices].loc[dict(
                         physical_coordinate=PhysicalCoordinateTypes.Y_MAX)] = ymax
 
-    def rescale_physical_coordinate(self, coord: Coordinates, indices, key):
+    def rescale_physical_coordinate(self, coord: Coordinates, indices: Mapping[Indices, int], key):
+        """Calculates the resulting coordinates array from indexing on each dimension in indexers
+
+        Parameters
+        ----------
+        coord: The coordinate to rescale. ex. Coordiantes.X
+
+        indices: The (Round, Ch, Z) indices that
+
+        key: a value or range to index on
+
+        """
         # Get original coordinates
         coord_min, coor_max = self.coordinates(indices, coord)
         # Create an array of size of dimension
@@ -371,6 +397,10 @@ class ImageStack:
     def _needs_coords_resacling(self, indexers: dict):
         """
         Takes in a dict of dim:indexes and returns true if indexing on either x or y dimension
+
+        Parameters
+        ----------
+        indexers : a dictionary of dim:index where index is the value or range to index the dimension
         """
         x, y = indexers[Indices.X.value], indexers[Indices.Y.value]
         if (type(x) or type(y)) is int:

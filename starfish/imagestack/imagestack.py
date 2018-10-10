@@ -290,6 +290,60 @@ class ImageStack:
         """Retrieves the image data as an xarray.DataArray"""
         return self._data
 
+    def _item_key_to_dict(self, key):
+        """Stealing an xarray method that takes in a key and parses it into
+        a dict of dim:indices"""
+        return self._data._item_key_to_dict(key)
+
+    def __getitem__(self, key):
+        # index xarray (keep dims) and create new stack
+        indexed_data = self._to_imagestack_format(self.xarray[key])
+        stack = self.from_numpy_array(indexed_data.data)
+        # set coords on new stack
+        stack._coordinates = self._calc_new_coords(indexers=self._item_key_to_dict(key))
+        return stack
+
+    def _to_imagestack_format(self, data: xr.DataArray) -> xr.DataArray:
+        """Adds in any missing dimensions from (r,ch,z,y,x)
+        to given xarary so that it can be transformed to an ImageStack"""
+        # find missing dims
+        missing_dims = set(tuple(ind.value for ind in Indices)) - set(data.dims)
+        # Add back in missing dims
+        data = data.expand_dims(tuple(missing_dims))
+        # Reorder to correct format
+        return data.transpose(*[ind.value for ind in Indices])
+
+    def _calc_new_coords(self, indexers=None):
+        # check if only ch, r, v slice
+        rescale = self._needs_resacling(indexers[Indices.X.value], indexers[Indices.Y.value])
+        if rescale:
+            new_coords = self._coordinates
+            indices = list(self._iter_indices({Indices.ROUND, Indices.CH, Indices.Z}))
+            for ind in indices:
+                # Get coords array
+                # TODO figure out z, clean up 
+                xmin, xmax = self.coordinates(ind, Coordinates.X)
+                ymin, ymax = self.coordinates(ind, Coordinates.Y)
+                x_coords = np.linspace(xmin, xmax, self.xarray.sizes['x'])
+                y_coords = np.linspace(ymin, ymax, self.xarray.sizes['y'])
+                x_coords = x_coords[indexers[Indices.X.value]]
+                xmin, xmax = x_coords[0], x_coords[-1]
+                new_coords[ind][0] = xmin
+                new_coords[ind][1] = xmax
+                y_coords = y_coords[indexers[Indices.y.value]]
+                ymin, ymax = y_coords[0], y_coords[-1]
+                new_coords[ind][2] = ymin
+                new_coords[ind][3] = ymax
+
+            return new_coords[indexers[Indices.ROUND.value], indexers[Indices.CH.value], indexers[Indices.Z.value]]
+        else:
+            return self._coordinates[indexers[Indices.ROUND.value], indexers[Indices.CH.value], indexers[Indices.Z.value]]
+
+    def _needs_resacling(self, x, y):
+        if type(x) or type(y) == int:
+            return True
+        return not (x.start is x.stop is y.start is y.stop is None)
+
     def get_slice(
             self,
             indices: Mapping[Indices, Union[int, slice]]

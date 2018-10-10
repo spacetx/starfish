@@ -34,7 +34,6 @@ from starfish.types import (
     PhysicalCoordinateTypes,
 )
 
-
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
 

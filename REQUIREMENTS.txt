@@ -37,7 +37,7 @@ seaborn==0.9.0
 semantic-version==2.6.0
 showit==1.1.4
 six==1.11.0
-slicedimage==1.0.0
+slicedimage==1.0.1
 toolz==0.9.0
 tqdm==4.26.0
 trackpy==0.4.1

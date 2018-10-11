@@ -117,7 +117,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # TODO ambrosejcarr: this is where max vs. sum vs. mean would be parametrized.
         # here, total_intensity = sum, intensity = max
         new_colnames = [
-            'x', 'y', 'total_intensity', 'radius', 'eccentricity', 'intensity', 'raw_mass', 'ep'
+            'y', 'x', 'total_intensity', 'radius', 'eccentricity', 'intensity', 'raw_mass', 'ep'
         ]
         if len(image.shape) == 3:
             attributes.columns = ['z'] + new_colnames

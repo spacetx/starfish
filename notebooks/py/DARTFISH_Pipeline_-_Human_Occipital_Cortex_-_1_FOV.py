@@ -21,7 +21,7 @@ import os
 from starfish import data
 from starfish.types import Features, Indices
 
-from starfish.intensity_table import IntensityTable
+from starfish import IntensityTable
 
 from starfish.image import Filter
 from starfish.spots import SpotFinder

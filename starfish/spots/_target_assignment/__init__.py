@@ -3,7 +3,7 @@ import json
 import os
 from typing import List, Type
 
-from starfish.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.util.argparse import FsExistsType
 from . import point_in_poly

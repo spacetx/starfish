@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Indices
 
 

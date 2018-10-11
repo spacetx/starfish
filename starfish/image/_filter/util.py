@@ -133,20 +133,17 @@ def preserve_float_range(
 
     """
     array = array.copy()
-    is_xr = isinstance(array, xr.DataArray)
-    if np.any(array < 0):
-        if is_xr:
-            array.values[array.values < 0] = 0
-        else:
-            array[array < 0] = 0
+    if isinstance(array, xr.DataArray):
+        data = array.values
+    else:
+        data = array
+    if np.any(data < 0):
+        data[array < 0] = 0
     if np.any(array > 1):
         if rescale:
-            array /= array.max()
+            data /= data.max()
         else:
-            if is_xr:
-                array.values[array.values > 1] = 1
-            else:
-                array[array > 1] = 1
+            data[array > 1] = 1
     return array.astype(np.float32)
 
 def determine_axes_to_split_by(is_volume: bool):

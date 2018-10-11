@@ -13,7 +13,7 @@ You can find it in a versioned folder, and the version will correspond to the ve
 that it matches.
 
 If you're using your own data with starfish, you may need to re-run your data ingestion workflow
-based on TileFetcher and FetchedTile to generate up-to-date versions of spaceTx-format.
+based on :ref:`TileFetcher` and :ref:`FetchedTile` to generate up-to-date versions of spaceTx-format.
 
 Upgrading to a new version
 --------------------------
@@ -22,7 +22,7 @@ If you've installed from pypi, upgrading is as simple as reinstalling starfish.
 
 .. code-block:: bash
 
-    pip3 install --upgrade starfish
+    pip install --upgrade starfish
 
 If you've installed our development version to take advantage of new features in real time, you'll
 need to fetch changes and reinstall. Assuming you've cloned the respository into ``./starfish``,

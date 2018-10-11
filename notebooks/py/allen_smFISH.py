@@ -57,11 +57,11 @@ clip.run(primary_image, verbose=True, in_place=True)
 # EPY: START markdown
 #If you ever want to visualize the image in the notebook, we've added a widget to do that. The first parameter is an indices dict that specifies which imaging round, channel, z-slice you want to view. The result is a pageable visualization across that arbitrary set of slices. Below I'm visualizing the first channel, which the codebook indicates is Nmnt.
 #
-#The plot uses `rescale` to expand the dynamic range of the data to cover `[0, 1]`. 
+#The plot uses `rescale` to expand the dynamic range of the data to cover `[0, 1]`.
 # EPY: END markdown
 
 # EPY: START code
-_ = primary_image.show_stack({Indices.CH.value: 0, Indices.Z.value: 17}, rescale=True)
+primary_image.show_stack({Indices.CH.value: 0, Indices.Z.value: 17}, rescale=True)
 # EPY: END code
 
 # EPY: START code
@@ -70,7 +70,7 @@ bandpass.run(primary_image, verbose=True, in_place=True)
 # EPY: END code
 
 # EPY: START markdown
-#To see the image, one needs to make the image quite big, but there is definitely signal present. You might need to clean your monitor to differentiate the spots from dust specs. 
+#To see the image, one needs to make the image quite big, but there is definitely signal present. You might need to clean your monitor to differentiate the spots from dust specs.
 # EPY: END markdown
 
 # EPY: START code
@@ -112,14 +112,11 @@ plt.hist(np.ravel(primary_image.get_slice({Indices.CH.value: 0, Indices.Z.value:
 # EPY: END code
 
 # EPY: START code
-# if max radius is 3, and mean intensity is about 0.006, and we can expect spots to have around pi*r^2 integrated intensity... 
-# try half-maximal radius * mean intensity
+# if max radius is 3, and mean intensity is about 0.006, and we can expect spots to have around pi*r^2 integrated intensity...
+# try half-maximal radius * mean intensity -- the calculation below prints that intensity, which
+# can be used for the min_mass parameter in the spot finder.
 (np.pi * 1.5 ** 2) * 0.006
 # EPY: END code
-
-# EPY: START markdown
-#Try 0.003 min_mass to start, work from there. 
-# EPY: END markdown
 
 # EPY: START code
 from starfish.spots import SpotFinder

@@ -164,15 +164,6 @@ lmp_res = lmp.run(stack)
 # EPY: END markdown
 
 # EPY: START code
-plt.plot(lmp._thresholds, lmp._spot_counts, '.')
-plt.plot(lmp._thresholds, lmp._grad)
-plt.vlines(lmp.threshold, ymin = min(lmp._grad), ymax = max(lmp._spot_counts))
-plt.ylabel('threshold')
-plt.legend(['spot counts', 'gradient', 'threshold'])
-sns.despine(offset=20)
-# EPY: END code
-
-# EPY: START code
 lmp_res
 # EPY: END code
 
@@ -211,8 +202,4 @@ plt.legend(['Benchmark: {} spots'.format(num_spots_simone),
 plt.title('osmFISH spot calls');
 
 print("Starfish finds {} fewer spots".format(num_spots_simone-num_spots_starfish))
-# EPY: END code
-
-# EPY: START code
-np.allclose(simone_thresh, lmp.threshold)
 # EPY: END code

@@ -55,19 +55,6 @@ def test_indexing_by_x_y():
                                   Coordinates.Y: (4, 6),
                                   Coordinates.Z: (1, 3)})
 
-    indexed_stack = stack[:, :, :, :100, :100]
-
-    expected_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 2),
-                                  (Indices.Z, 2), (Indices.Y, 100), (Indices.X, 100)])
-    assert indexed_stack.shape == expected_shape
-
-    # indexed on first half of x and y dimensions so we expect:
-    # xmin = 1, xmax = 1.5
-    # ymin = 4, ymax=5
-    expected_coords = {Coordinates.X: (1, 1.505), Coordinates.Y: (4, 5.01), Coordinates.Z: (1, 3)}
-
-    check_coodinate_values(indexed_stack, expected_coords)
-
     # index on single value of y
     indexed_stack = stack[0, 0, 1, 100, :100]
     expected_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 1),
@@ -80,6 +67,20 @@ def test_indexing_by_x_y():
 
     check_coodinate_values(indexed_stack, expected_coords)
 
+    # indexed on first half of x and y dimensions:
+    indexed_stack = stack[:, :, :, :100, :100]
+
+    expected_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 2),
+                                  (Indices.Z, 2), (Indices.Y, 100), (Indices.X, 100)])
+    assert indexed_stack.shape == expected_shape
+
+    # xmin = 1, xmax = 1.505 (+ .005 size of one x physical pixel)
+    # ymin = 4, ymax=5.01 (+ .01 size of one y physical pixel)
+    expected_coords = {Coordinates.X: (1, 1.505), Coordinates.Y: (4, 5.01), Coordinates.Z: (1, 3)}
+
+    check_coodinate_values(indexed_stack, expected_coords)
+
+    # index on single x and y
     indexed_stack = stack[0, 0, 1, 100, 150]
     expected_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 1),
                                   (Indices.Z, 1), (Indices.Y, 1), (Indices.X, 1)])
@@ -92,6 +93,7 @@ def test_indexing_by_x_y():
                        Coordinates.Z: (1, 3)}
     check_coodinate_values(indexed_stack, expected_coords)
 
+    # Negative indexing
     indexed_stack = stack[0, 0, 1, :-10, :-10]
     expected_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 1),
                                   (Indices.Z, 1), (Indices.Y, 190), (Indices.X, 190)])

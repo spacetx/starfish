@@ -64,7 +64,7 @@ def test_indexing_by_x_y():
     # indexed on first half of x and y dimensions so we expect:
     # xmin = 1, xmax = 1.5
     # ymin = 4, ymax=5
-    expected_coords = {Coordinates.X: (1, 1.5), Coordinates.Y: (4, 5), Coordinates.Z: (1, 3)}
+    expected_coords = {Coordinates.X: (1, 1.505), Coordinates.Y: (4, 5.01), Coordinates.Z: (1, 3)}
 
     check_coodinate_values(indexed_stack, expected_coords)
 
@@ -76,7 +76,7 @@ def test_indexing_by_x_y():
 
     # y should be range of one pixel size where pixel size = (ymax-ymin) / size of y dimension
     # (6-4) / 200 = .01
-    expected_coords = {Coordinates.X: (1, 1.5), Coordinates.Y: (5, 5.01), Coordinates.Z: (1, 3)}
+    expected_coords = {Coordinates.X: (1, 1.505), Coordinates.Y: (5, 5.01), Coordinates.Z: (1, 3)}
 
     check_coodinate_values(indexed_stack, expected_coords)
 
@@ -89,6 +89,15 @@ def test_indexing_by_x_y():
     # (2-1) / 200 = .005
     expected_coords = {Coordinates.X: (1.75, 1.755),
                        Coordinates.Y: (5, 5.01),
+                       Coordinates.Z: (1, 3)}
+    check_coodinate_values(indexed_stack, expected_coords)
+
+    indexed_stack = stack[0, 0, 1, :-10, :-10]
+    expected_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 1),
+                                  (Indices.Z, 1), (Indices.Y, 190), (Indices.X, 190)])
+    assert indexed_stack.shape == expected_shape
+    expected_coords = {Coordinates.X: (1, 1.955),
+                       Coordinates.Y: (4, 5.91),
                        Coordinates.Z: (1, 3)}
     check_coodinate_values(indexed_stack, expected_coords)
 

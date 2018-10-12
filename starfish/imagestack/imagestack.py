@@ -290,11 +290,6 @@ class ImageStack:
         """Retrieves the image data as an xarray.DataArray"""
         return self._data
 
-    def _item_key_to_dict(self, key):
-        """Stealing an xarray method that takes in an index value and parses it into
-        a dict of dim:indices"""
-        return self._data._item_key_to_dict(key)
-
     def __getitem__(self, key) -> "ImageStack":
         # index xarray (keep dims) and create new stack
         indexed_data = self._index_keep_dimensions(self.xarray, key)
@@ -302,6 +297,11 @@ class ImageStack:
         # set coords on new stack
         stack._coordinates = self._calc_new_coords(indexers=self._item_key_to_dict(key))
         return stack
+
+    def _item_key_to_dict(self, key):
+        """Stealing an xarray method that takes in an index value and parses it into
+        a dict of dim:indices"""
+        return self._data._item_key_to_dict(key)
 
     def _index_keep_dimensions(self, data: xr.DataArray, key) -> xr.DataArray:
         """Takes an xarray and key to index it. Indexes then adds back in lost dimensions"""
@@ -316,7 +316,7 @@ class ImageStack:
         # Reorder to correct format
         return data.transpose(*original_dims)
 
-    def _calc_new_coords(self, indexers: dict):
+    def _calc_new_coords(self, indexers: dict) -> xr.DataArray:
         """Calculates the resulting coordinates array from indexing on each dimension in indexers
 
         Parameters
@@ -334,7 +334,7 @@ class ImageStack:
             self._rescale_physical_coordinates(indexers, new_coords)
         return new_coords
 
-    def _rescale_physical_coordinates(self, indexers: dict, new_coords: xr.DataArray):
+    def _rescale_physical_coordinates(self, indexers: dict, new_coords: xr.DataArray) -> None:
         """Iterates through coordinates array and rescales x, y physical coordinate values
          based on how the x and y dimensions were indexed
 
@@ -371,7 +371,8 @@ class ImageStack:
                             PhysicalCoordinateTypes.Y_MAX]
                         )] = [xmin, xmax, ymin, ymax]
 
-    def _rescale_physical_coordinate(self, coord: Coordinates, indices: Mapping[Indices, int], key):
+    def _rescale_physical_coordinate(self, coord: Coordinates, indices: Mapping[Indices, int],
+                                     key) -> Tuple:
         """Calculates rescaled coordinates
 
         Parameters
@@ -384,17 +385,23 @@ class ImageStack:
 
         """
         coord_min, coord_max = self.coordinates(indices, coord)
-        physical_pixel_size = (coord_max - coord_min) / self.xarray.sizes[coord.value[0]]
+        dimension_size = self.xarray.sizes[coord.value[0]]
+        physical_pixel_size = (coord_max - coord_min) / dimension_size
         new_min, new_max = coord_min, coord_max
         min_pixel_index = key if type(key) is int else key.start
-        max_pixel_index = key + 1 if type(key) is int else key.stop
+        max_pixel_index = key if type(key) is int else key.stop
         if min_pixel_index:
+            # check for negative index
+            min_pixel_index = min_pixel_index + dimension_size if min_pixel_index < 0 \
+                else min_pixel_index
             new_min = (physical_pixel_size * min_pixel_index) + coord_min
         if max_pixel_index:
-            new_max = (physical_pixel_size * max_pixel_index) + coord_min
+            max_pixel_index = max_pixel_index + dimension_size if max_pixel_index < 0 \
+                else max_pixel_index
+            new_max = (physical_pixel_size * (max_pixel_index+1)) + coord_min
         return new_min, new_max
 
-    def _needs_coords_resacling(self, indexers: dict):
+    def _needs_coords_resacling(self, indexers: dict) -> bool:
         """
         Takes in a dict of dim:indexes and returns true if indexing on either x or y dimension
 

@@ -291,7 +291,7 @@ class ImageStack:
         return self._data
 
     def _item_key_to_dict(self, key):
-        """Stealing an xarray method that takes in a key and parses it into
+        """Stealing an xarray method that takes in an index value and parses it into
         a dict of dim:indices"""
         return self._data._item_key_to_dict(key)
 
@@ -335,7 +335,8 @@ class ImageStack:
         return new_coords
 
     def _rescale_physical_coordinates(self, indexers: dict, new_coords: xr.DataArray):
-        """Calculates the resulting coordinates array from indexing on each dimension in indexers
+        """Iterates through coordinates array and rescales x, y physical coordinate values
+         based on how the x and y dimensions were indexed
 
         Parameters
         ----------

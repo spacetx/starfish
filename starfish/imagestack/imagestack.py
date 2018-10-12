@@ -321,24 +321,26 @@ class ImageStack:
 
         Parameters
         ----------
-        indexers : a dictionary of dim:index where index is the value or range to index the dimension
+        indexers : a dictionary of dim:index where index is the value
+        or range to index the dimension
 
         """
-        new_coords = deepcopy(self._coordinates)
+        new_coords = self._coordinates.copy()
         # index by R, CH, V
         key = (indexers[Indices.ROUND.value], indexers[Indices.CH.value], indexers[Indices.Z.value])
         new_coords = self._index_keep_dimensions(new_coords, key)
         # check if X or Y dimension indexed, if so rescale
         if self._needs_coords_resacling(indexers):
-            self.rescale_physical_coordinates(indexers, new_coords)
+            self._rescale_physical_coordinates(indexers, new_coords)
         return new_coords
 
-    def rescale_physical_coordinates(self, indexers: dict, new_coords: xr.DataArray):
+    def _rescale_physical_coordinates(self, indexers: dict, new_coords: xr.DataArray):
         """Calculates the resulting coordinates array from indexing on each dimension in indexers
 
         Parameters
         ----------
-        indexers : a dictionary of dim:index where index is the value or range to index the dimension
+        indexers : a dictionary of dim:index where index is the value
+        or range to index the dimension
 
         new_coords: the coordinates xarray to modify
 
@@ -351,47 +353,44 @@ class ImageStack:
                         Indices.CH: ch,
                         Indices.Z: z
                     }
-                    xmin, xmax = self.rescale_physical_coordinate(
+                    xmin, xmax = self._rescale_physical_coordinate(
                         Coordinates.X,
                         indices,
                         indexers[Indices.X.value])
-                    ymin, ymax = self.rescale_physical_coordinate(
+                    ymin, ymax = self._rescale_physical_coordinate(
                         Coordinates.Y,
                         indices,
                         indexers[Indices.Y.value])
-                    new_coords[indices].loc[dict(
-                        physical_coordinate=PhysicalCoordinateTypes.X_MIN)] = xmin
-                    new_coords[indices].loc[dict(
-                        physical_coordinate=PhysicalCoordinateTypes.X_MAX)] = xmax
-                    new_coords[indices].loc[dict(
-                        physical_coordinate=PhysicalCoordinateTypes.Y_MIN)] = ymin
-                    new_coords[indices].loc[dict(
-                        physical_coordinate=PhysicalCoordinateTypes.Y_MAX)] = ymax
 
-    def rescale_physical_coordinate(self, coord: Coordinates, indices: Mapping[Indices, int], key):
-        """Calculates the resulting coordinates array from indexing on each dimension in indexers
+                    new_coords[indices].loc[
+                        dict(physical_coordinate=[
+                            PhysicalCoordinateTypes.X_MIN,
+                            PhysicalCoordinateTypes.X_MAX,
+                            PhysicalCoordinateTypes.Y_MIN,
+                            PhysicalCoordinateTypes.Y_MAX]
+                        )] = [xmin, xmax, ymin, ymax]
+
+    def _rescale_physical_coordinate(self, coord: Coordinates, indices: Mapping[Indices, int], key):
+        """Calculates rescaled coordinates
 
         Parameters
         ----------
-        coord: The coordinate to rescale. ex. Coordiantes.X
+        coord: The coordinate to rescale.
 
-        indices: The (Round, Ch, Z) indices that
+        indices: The (Round, Ch, Z) indices that identify which tile's coordinates we're using
 
         key: a value or range to index on
 
         """
-        # Get original coordinates
-        coord_min, coor_max = self.coordinates(indices, coord)
-        # Create an array of size of dimension
-        coord_array = np.linspace(coord_min, coor_max, self.xarray.sizes[coord.value[0]])
-        # Index array
-        coord_range = coord_array[key]
-        # Return new min, max values of coordinates
-        try:
-            new_min, new_max = coord_range[0], coord_range[-1]
-        except IndexError:
-            # selected single value, make min/max that value
-            new_min, new_max = coord_range, coord_range
+        coord_min, coord_max = self.coordinates(indices, coord)
+        physical_pixel_size = (coord_max - coord_min) / self.xarray.sizes[coord.value[0]]
+        new_min, new_max = coord_min, coord_max
+        min_pixel_index = key if type(key) is int else key.start
+        max_pixel_index = key + 1 if type(key) is int else key.stop
+        if min_pixel_index:
+            new_min = (physical_pixel_size * min_pixel_index) + coord_min
+        if max_pixel_index:
+            new_max = (physical_pixel_size * max_pixel_index) + coord_min
         return new_min, new_max
 
     def _needs_coords_resacling(self, indexers: dict):
@@ -400,10 +399,11 @@ class ImageStack:
 
         Parameters
         ----------
-        indexers : a dictionary of dim:index where index is the value or range to index the dimension
+        indexers : a dictionary of dim:index where index is the value
+        or range to index the dimension
         """
         x, y = indexers[Indices.X.value], indexers[Indices.Y.value]
-        if (type(x) or type(y)) is int:
+        if type(x) is int or type(y) is int:
             return True
         return not (x.start is x.stop is y.start is y.stop is None)
 

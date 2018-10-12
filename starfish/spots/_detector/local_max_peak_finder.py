@@ -17,10 +17,37 @@ from .detect import detect_spots
 
 
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
-    def __init__(self, min_distance: int, stringency: int, min_obj_area: int,
-                 max_obj_area: int, threshold: int = None, measurement_type: str = 'max',
-                 min_num_spots_detected: int = 3, is_volume: bool = False,
-                 verbose: bool = True) -> None:
+    def __init__(
+        self, min_distance: int, stringency: int, min_obj_area: int, max_obj_area: int,
+        threshold: Optional[Number]=None, measurement_type: str='max',
+        min_num_spots_detected: int=3, is_volume: bool=False, verbose: bool=True
+    ) -> None:
+        """2-dimensional local-max peak finder that wraps skimage.feature.peak_local_max
+
+        Parameters:
+        min_distance : int
+            Minimum number of pixels separating peaks in a region of 2 * min_distance + 1
+            (i.e. peaks are separated by at least min_distance). To find the maximum number of
+            peaks, use min_distance=1.
+        stringency : int
+        min_obj_area : int
+        max_obj_area : int
+        threshold : Optional[Number]
+        measurement_type : str, {'max', 'mean'}
+            default 'max' calculates the maximum intensity inside the object
+        min_num_spots_detected : int
+            When fewer than this number of spots are detected, spot searching for higher threshold
+            values. (default = 3)
+        is_volume : bool
+            Not supported. For 3d peak detection please use TrackpyLocalMaxPeakFinder.
+            (default=False)
+        verbose : bool
+            If True, report the percentage completed (default = False) during processing
+
+        See Also
+        --------
+        http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.peak_local_max
+        """
 
         self.min_distance = min_distance
         self.stringency = stringency
@@ -39,18 +66,27 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self.verbose = verbose
 
         # these parameters are useful for debugging spot-calls
-        self._thresholds = None
-        self._spot_counts = None
+        self._thresholds: Optional[np.ndarray] = None
+        self._spot_counts: Optional[List[int]] = None
         self._grad = None
         self._spot_props = None
         self._labels = None
 
-    def _compute_threshold(self, img: Union[np.ndarray, xr.DataArray]) -> Number:
-        thresholds, spot_counts = self._compute_num_spots_per_threshold(img)
-        threshold = self._select_optimal_threshold(thresholds, spot_counts)
-        return threshold
+    def _compute_num_spots_per_threshold(self, img: np.ndarray) -> Tuple[np.ndarray, List[int]]:
+        """Computes the number of detected spots for each threshold
 
-    def _compute_num_spots_per_threshold(self, img: np.ndarray) -> Tuple[List, List]:
+        Parameters
+        ----------
+        img : np.ndarray
+            The image in which to count spots
+
+        Returns
+        -------
+        np.ndarray :
+            thresholds
+        List[int] :
+            spot counts
+        """
 
         # thresholds to search over
         thresholds = np.linspace(img.min(), img.max(), num=100)
@@ -68,22 +104,23 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             threshold_iter = thresholds
 
         for threshold in threshold_iter:
-            spots = peak_local_max(img,
-                                   min_distance=self.min_distance,
-                                   threshold_abs=threshold,
-                                   exclude_border=False,
-                                   indices=True,
-                                   num_peaks=np.inf,
-                                   footprint=None,
-                                   labels=None
-                                   )
+            spots = peak_local_max(
+                img,
+                min_distance=self.min_distance,
+                threshold_abs=threshold,
+                exclude_border=False,
+                indices=True,
+                num_peaks=np.inf,
+                footprint=None,
+                labels=None
+            )
 
-            # stop spot finding when the number of detected spots falls below 3
+            # stop spot finding when the number of detected spots falls below min_num_spots_detected
             if len(spots) <= self.min_num_spots_detected:
                 stop_threshold = threshold
-                msg = '.. stopping early -- number of spots ' \
-                      'fell below: {}'.format(self.min_num_spots_detected)
-                print(msg)
+                if self.verbose:
+                    print(f'Stopping early at threshold={threshold}. Number of spots fell below: '
+                          f'{self.min_num_spots_detected}')
                 break
             else:
                 spot_counts.append(len(spots))
@@ -99,12 +136,13 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             thresholds = thresholds[:stop_index]
             spot_counts = spot_counts[:stop_index]
 
+        # TODO ambrosejcarr: these two lists should be a dict
         self._thresholds = thresholds
         self._spot_counts = spot_counts
 
         return thresholds, spot_counts
 
-    def _select_optimal_threshold(self, thresholds: List, spot_counts: List) -> Number:
+    def _select_optimal_threshold(self, thresholds: np.ndarray, spot_counts: List[int]) -> float:
 
         # calculate the gradient of the number of spots
         grad = np.gradient(spot_counts)
@@ -147,7 +185,37 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
         return selected_thr
 
+    def _compute_threshold(self, img: Union[np.ndarray, xr.DataArray]) -> float:
+        """Finds spots on a number of thresholds then selects and returns the optimal threshold
+
+        Parameters
+        ----------
+        img: Union[np.ndarray, xr.DataArray]
+            data array in which spots should be detected and over which to compute different
+            intensity thresholds
+
+        Returns
+        -------
+        Number :  #TODO ambrosejcarr this should probably be a float
+            The intensity threshold
+        """
+        thresholds, spot_counts = self._compute_num_spots_per_threshold(img)
+        threshold = self._select_optimal_threshold(thresholds, spot_counts)
+        return threshold
+
     def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
+        """measure attributes of spots detected by binarizing the image using the selected threshold
+
+        Parameters
+        ----------
+        data_image: Union[np.ndarray, xr.DataArray]
+            2-d image from which spots should be extracted
+
+        Returns
+        -------
+        SpotAttributes
+            Attributes for each detected spot
+        """
 
         if self.threshold is None:
             self.threshold = self._compute_threshold(data_image)
@@ -200,8 +268,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
             reference_image_from_max_projection: bool = False,
     ) -> IntensityTable:
-        """
-        Find spots.
+        """Find spots.
 
         Parameters
         ----------
@@ -215,6 +282,10 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             if True, compute a reference image from the maximum projection of the channels and
             z-planes
 
+        Returns
+        -------
+        IntensityTable :
+            IntensityTable containing decoded spots
         """
         intensity_table = detect_spots(
             data_stack=data_stack,

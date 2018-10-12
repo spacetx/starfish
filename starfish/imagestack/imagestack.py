@@ -330,11 +330,11 @@ class ImageStack:
         key = (indexers[Indices.ROUND.value], indexers[Indices.CH.value], indexers[Indices.Z.value])
         new_coords = self._index_keep_dimensions(new_coords, key)
         # check if X or Y dimension indexed, if so rescale
-        if self._needs_coords_resacling(indexers):
-            self._rescale_physical_coordinates(indexers, new_coords)
+        if self._needs_coords_recalculating(indexers):
+            self._recalculate_physical_coordinates(indexers, new_coords)
         return new_coords
 
-    def _rescale_physical_coordinates(self, indexers: dict, new_coords: xr.DataArray) -> None:
+    def _recalculate_physical_coordinates(self, indexers: dict, new_coords: xr.DataArray) -> None:
         """Iterates through coordinates array and rescales x, y physical coordinate values
          based on how the x and y dimensions were indexed
 
@@ -354,11 +354,11 @@ class ImageStack:
                         Indices.CH: ch,
                         Indices.Z: z
                     }
-                    xmin, xmax = self._rescale_physical_coordinate(
+                    xmin, xmax = self._recalculate_physical_coordinate(
                         Coordinates.X,
                         indices,
                         indexers[Indices.X.value])
-                    ymin, ymax = self._rescale_physical_coordinate(
+                    ymin, ymax = self._recalculate_physical_coordinate(
                         Coordinates.Y,
                         indices,
                         indexers[Indices.Y.value])
@@ -371,8 +371,8 @@ class ImageStack:
                             PhysicalCoordinateTypes.Y_MAX]
                         )] = [xmin, xmax, ymin, ymax]
 
-    def _rescale_physical_coordinate(self, coord: Coordinates, indices: Mapping[Indices, int],
-                                     key) -> Tuple:
+    def _recalculate_physical_coordinate(self, coord: Coordinates, indices: Mapping[Indices, int],
+                                         key) -> Tuple:
         """Calculates rescaled coordinates
 
         Parameters
@@ -401,7 +401,7 @@ class ImageStack:
             new_max = (physical_pixel_size * (max_pixel_index + 1)) + coord_min
         return new_min, new_max
 
-    def _needs_coords_resacling(self, indexers: dict) -> bool:
+    def _needs_coords_recalculating(self, indexers: dict) -> bool:
         """
         Takes in a dict of dim:indexes and returns true if indexing on either x or y dimension
 

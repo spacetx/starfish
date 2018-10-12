@@ -16,6 +16,11 @@ from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
 
 
+# TODO ambrosejcarr, ttung: https://github.com/spacetx/starfish/issues/708
+# Currently, spot finders cannot propagate state, which makes the flow for this
+# spot finder confusing. One would expect to have access to the private parameters
+# however, they are lost due to the memory-space forking induced by multi-processing.
+
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
     def __init__(
         self, min_distance: int, stringency: int, min_obj_area: int, max_obj_area: int,
@@ -103,7 +108,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         else:
             threshold_iter = thresholds
 
-        for threshold in threshold_iter:
+        for stop_index, threshold in enumerate(threshold_iter):
             spots = peak_local_max(
                 img,
                 min_distance=self.min_distance,
@@ -127,10 +132,6 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
         if stop_threshold is None:
             stop_threshold = thresholds.max()
-
-        # for some reason, np.where returns a tuple of nd.arrays,
-        # hence the [0][0] indexing to get out a numerical value
-        stop_index = np.where(thresholds == stop_threshold)[0][0]
 
         if len(thresholds > 1):
             thresholds = thresholds[:stop_index]
@@ -156,11 +157,12 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # if all else fails, return 0.
         selected_thr = 0
 
-        # TODO i don't really get what this code does
-        if thresholds.shape > (1,):
+        if len(thresholds) > 1:
 
             distances = []
 
+            # create a line whose end points are the threshold and and corresponding gradient value
+            # for spot_counts corresponding to the threshold
             start_point = Point(thresholds[0], grad[0])
             end_point = Point(thresholds[-1], grad[-1])
             line = Line(start_point, end_point)
@@ -175,6 +177,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             thresholds = thresholds[1:-1]
             distances = distances[1:-1]
 
+            # select the threshold that has the maximum distance from the line
+            # if stringency is passed, select a threshold that is n steps higher, where n is the
+            # value of stringency
             if distances:
                 thr_idx = np.argmax(np.array(distances))
 
@@ -209,7 +214,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         Parameters
         ----------
         data_image: Union[np.ndarray, xr.DataArray]
-            2-d image from which spots should be extracted
+            image from which spots should be extracted
 
         Returns
         -------
@@ -220,44 +225,43 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         if self.threshold is None:
             self.threshold = self._compute_threshold(data_image)
 
-        # TODO @ajc data_image is volumetric, although in his code, we never use it that way
+        # identify each spot's size by binarizing and calculating regionprops
         masked_image = data_image[:, :] > self.threshold
         labels = label(masked_image)[0]
         spot_props = regionprops(labels)
 
+        # mask spots whose areas are too small or too large
         for spot_prop in spot_props:
             if spot_prop.area < self.min_obj_area or spot_prop.area > self.max_obj_area:
                 masked_image[spot_prop.coords[:, 0], spot_prop.coords[:, 1]] = 0
 
-        labels = label(masked_image)[0]
-        spot_props = regionprops(labels)
-
-        self._spot_props = spot_props
-        self._labels = labels
+        # store re-calculated regionprops and labels based on the area-masked image
+        self._labels = label(masked_image)[0]
+        self._spot_props = regionprops(labels)
 
         if self.verbose:
             print('computing final spots ...')
 
-        spot_coords = peak_local_max(data_image,
-                                     min_distance=self.min_distance,
-                                     threshold_abs=self.threshold,
-                                     exclude_border=False,
-                                     indices=True,
-                                     num_peaks=np.inf,
-                                     footprint=None,
-                                     labels=labels)
-
-        self._spot_coords = spot_coords
+        self._spot_coords = peak_local_max(
+            data_image,
+            min_distance=self.min_distance,
+            threshold_abs=self.threshold,
+            exclude_border=False,
+            indices=True,
+            num_peaks=np.inf,
+            footprint=None,
+            labels=self._labels
+        )
 
         # TODO how to get the radius? unlikely that this can be pulled out of
         # self._spot_props, since the last call to peak_local_max can find multiple
         # peaks per label
-        res = {Indices.X.value: spot_coords[:, 1],
-               Indices.Y.value: spot_coords[:, 0],
-               Indices.Z.value: np.zeros(len(spot_coords)),
+        res = {Indices.X.value: self._spot_coords[:, 1],
+               Indices.Y.value: self._spot_coords[:, 0],
+               Indices.Z.value: np.zeros(len(self._spot_coords)),
                Features.SPOT_RADIUS: 1,
-               Features.SPOT_ID: np.arange(spot_coords.shape[0]),
-               Features.INTENSITY: data_image[spot_coords[:, 0], spot_coords[:, 1]]
+               Features.SPOT_ID: np.arange(self._spot_coords.shape[0]),
+               Features.INTENSITY: data_image[self._spot_coords[:, 0], self._spot_coords[:, 1]]
                }
 
         return SpotAttributes(pd.DataFrame(res))

@@ -11,7 +11,7 @@ to enable fine registration).
 
 Both Primary and Auxiliary Images are referenced by slicedimage_ TileSet_ objects, which map
 two dimensional image tiles stored on disk into a 5-dimensional Image Tensor that labels each
-``(z, y, z)`` tile with the ``round`` and ``channel`` that it corresponds to. When loaded into
+``(z, y, x)`` tile with the ``round`` and ``channel`` that it corresponds to. When loaded into
 memory, these Image Tensors are stored in :ref:`ImageStack` objects. The :ref:`ImageStack` is what
 starfish uses to execute image pre-processing, and serves as the substrate for spot finding.
 

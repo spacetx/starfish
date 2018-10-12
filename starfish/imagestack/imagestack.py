@@ -398,7 +398,7 @@ class ImageStack:
         if max_pixel_index:
             max_pixel_index = max_pixel_index + dimension_size if max_pixel_index < 0 \
                 else max_pixel_index
-            new_max = (physical_pixel_size * (max_pixel_index+1)) + coord_min
+            new_max = (physical_pixel_size * (max_pixel_index + 1)) + coord_min
         return new_min, new_max
 
     def _needs_coords_resacling(self, indexers: dict) -> bool:

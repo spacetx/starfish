@@ -7,7 +7,7 @@ from skimage.morphology import binary_opening, disk
 from starfish.types import Indices, Number
 
 
-def bin_thresh(img: np.ndarray, thresh: int) -> np.ndarray:
+def bin_thresh(img: np.ndarray, thresh: Number) -> np.ndarray:
     """
     Performs binary thresholding of an image
 

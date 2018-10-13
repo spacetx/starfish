@@ -232,7 +232,7 @@ seg = Segmentation.Watershed(
     input_threshold=stain_thresh,
     min_distance=min_dist
 )
-regions = seg.run(registered_image, nuclei)
+label_image = seg.run(registered_image, nuclei)
 seg.show()
 # EPY: END code
 

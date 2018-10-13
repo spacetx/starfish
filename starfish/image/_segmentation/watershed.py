@@ -1,7 +1,6 @@
 from typing import Optional, Tuple
 
 import numpy as np
-import regional
 import scipy.ndimage.measurements as spm
 from scipy.ndimage import distance_transform_edt
 from showit import image
@@ -11,7 +10,6 @@ from skimage.morphology import watershed
 from starfish.image._filter.util import bin_open, bin_thresh
 from starfish.imagestack.imagestack import ImageStack
 from starfish.munge import relabel
-from starfish.stats import label_to_regions
 from starfish.types import Indices, Number
 from ._base import SegmentationAlgorithmBase
 
@@ -61,7 +59,7 @@ class Watershed(SegmentationAlgorithmBase):
         group_parser.add_argument(
             "--min-distance", default=57, type=int, help="Minimum distance between cells")
 
-    def run(self, primary_images: ImageStack, nuclei: ImageStack) -> regional.many:
+    def run(self, primary_images: ImageStack, nuclei: ImageStack) -> np.ndarray:
         """Segments nuclei in 2-d using a nuclei ImageStack
 
         Primary images are used to expand the nuclear mask, but only in cases where there are
@@ -76,8 +74,9 @@ class Watershed(SegmentationAlgorithmBase):
 
         Returns
         -------
-        regional.many :
-            regional object containing segmentation information
+        np.ndarray :
+            label image where each cell is labeled by a different positive integer value. 0
+            implies that a pixel is not part of a cell.
         """
 
         # create a 'stain' for segmentation
@@ -91,14 +90,12 @@ class Watershed(SegmentationAlgorithmBase):
 
         nuclei = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
         self._segmentation_instance = _WatershedSegmenter(nuclei, stain)
-        cells_labels = self._segmentation_instance.segment(
+        label_image = self._segmentation_instance.segment(
             self.nuclei_threshold, self.input_threshold, size_lim, disk_size_markers,
             disk_size_mask, self.min_distance
         )
 
-        regions = label_to_regions(cells_labels)
-
-        return regions
+        return label_image
 
     def show(self, figsize: Tuple[int, int]=(10, 10)) -> None:
         if isinstance(self._segmentation_instance, _WatershedSegmenter):
@@ -326,10 +323,6 @@ class _WatershedSegmenter:
 
         return res
 
-    def to_regions(self):
-        regions = label_to_regions(self.segmented)
-        return regions
-
     def show(self, figsize=(10, 10)):
         import matplotlib.pyplot as plt
         plt.figure(figsize=figsize)
@@ -351,25 +344,11 @@ class _WatershedSegmenter:
         plt.title('Watershed Mask')
 
         plt.subplot(325)
-        marker_regions = label_to_regions(self.markers)
-        im = marker_regions.mask(
-            background=[0.9, 0.9, 0.9],
-            dims=self.markers.shape,
-            stroke=None,
-            cmap='rainbow'
-        )
-        image(im, size=20, ax=plt.gca())
+        image(self.markers, size=20, cmap=plt.cm.nipy_spectral, ax=plt.gca())
         plt.title('Found: {} cells'.format(self.num_cells))
 
         plt.subplot(326)
-        segmented_regions = label_to_regions(self.segmented)
-        im = segmented_regions.mask(
-            background=[0.9, 0.9, 0.9],
-            dims=self.segmented.shape,
-            stroke=None,
-            cmap='rainbow'
-        )
-        image(im, size=20, ax=plt.gca())
+        image(self.segmented, size=20, cmap=plt.cm.nipy_spectral, ax=plt.gca())
         plt.title('Segmented Cells')
 
         return plt.gca()

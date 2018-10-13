@@ -43,13 +43,13 @@ def iss_pipeline(fov, codebook):
         input_threshold=.22,
         min_distance=57,
     )
-    regions = seg.run(primary_image, fov['nuclei'])
+    label_image = seg.run(primary_image, fov['nuclei'])
 
     # assign spots to cells
-    ta = TargetAssignment.PointInPoly2D()
-    assigned = ta.run(decoded, regions)
+    ta = TargetAssignment.Label()
+    assigned = ta.run(label_image, decoded)
 
-    return assigned, regions
+    return assigned, label_image
 
 
 # process all the fields of view, not just one

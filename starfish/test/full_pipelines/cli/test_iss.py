@@ -99,7 +99,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "--nuclei-stack", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "nuclei.json"),
                 "-o", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "regions.geojson"),
+                    tempdir, "results", "label_image.png"),
                 "Watershed",
                 "--nuclei-threshold", ".16",
                 "--input-threshold", ".22",
@@ -107,14 +107,14 @@ class TestWithIssData(CLITest, unittest.TestCase):
             ],
             [
                 "starfish", "target_assignment",
-                "--coordinates-geojson",
+                "--label-image",
                 lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "regions.geojson"),
+                    tempdir, "results", "label_image.png"),
                 "--intensities", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "spots.nc"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "targeted-spots.nc"),
-                "PointInPoly2D",
+                "Label",
             ],
             [
                 "starfish", "decode",

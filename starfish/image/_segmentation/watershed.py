@@ -9,7 +9,6 @@ from skimage.morphology import watershed
 
 from starfish.image._filter.util import bin_open, bin_thresh
 from starfish.imagestack.imagestack import ImageStack
-from starfish.munge import relabel
 from starfish.types import Indices, Number
 from ._base import SegmentationAlgorithmBase
 
@@ -238,7 +237,8 @@ class _WatershedSegmenter:
         markers[area_image <= min_allowed_area] = 0
         markers[area_image >= max_allowed_area] = 0
 
-        markers_reduced, num_objs = relabel(markers)
+        # re-label the image with sequential integers, accounting for exclusion based on size
+        markers_reduced, num_objs = self.relabel_image(markers)
 
         return markers_reduced, num_objs
 
@@ -322,6 +322,28 @@ class _WatershedSegmenter:
                         )
 
         return res
+
+    @staticmethod
+    def relabel_image(image: np.ndarray) -> np.ndarray:
+        """given a label image where some objects have been removed, relabel it with sequential integers
+
+        Parameters
+        ----------
+        image : np.ndarray[np.uint32]
+            image whose values identify which object each pixel corresponds to. the values may
+            not be sequential integers.
+
+        Returns
+        -------
+        image : np.ndarray[np.uint32]
+            same as input, but the values are re-labled as sequential integers
+        num_labels : int
+            number of unique objects
+        """
+        output = np.zeros_like(image)
+        for i, v in enumerate(np.unique(image)):
+            output[np.where(image == v)] = i
+        return output, i
 
     def show(self, figsize=(10, 10)):
         import matplotlib.pyplot as plt

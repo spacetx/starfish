@@ -164,19 +164,15 @@ class Experiment:
         strict : bool
             if true, then all JSON loaded by this method will be
             passed to the appropriate validator
+        STARFISH_STRICT_LOADING :
+             This parameter is read from the environment. If set, then all JSON loaded by this
+             method will be passed to the appropriate validator. The `strict` parameter to this
+             method has priority over the environment variable.
 
         Returns
         -------
         Experiment :
             Experiment object serving the requested experiment data
-
-        Environment variables
-        ---------------------
-        STARFISH_STRICT_LOADING :
-             If set, then all JSON loaded by this method will be
-             passed to the appropriate validator. The `strict`
-             parameter to this method has priority over the
-             environment variable.
 
         """
         if strict is None:

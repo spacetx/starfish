@@ -46,4 +46,5 @@ def test_no_manifest_example_experiment():
     # But our tree walker *does* handle multiple files
     with warnings.catch_warnings(record=True) as warnings_:
         assert not validate(no_manifest_example)
-        assert len(warnings_) == 1
+        messages = "\n".join([str(x.message) for x in warnings_])
+        assert "required property" in messages, f"missing text in '{messages}'"

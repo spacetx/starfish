@@ -38,7 +38,7 @@ def test_dartfish_example_experiment():
 # see #614
 def test_no_manifest_example_experiment():
     no_manifest_example = resource_filename(
-        "validate_sptx", "examples/experiment/no_manifest.json")
+        "validate_sptx", "examples/experiment/no_fov_manifest.json")
 
     # SpaceTxValidator doesn't handle multiple files so this passes
     assert validator.validate_file(no_manifest_example)

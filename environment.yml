@@ -22,6 +22,7 @@ dependencies:
 - semantic_version
 - showit>=1.1.4
 - slicedimage==0.0.4
+- sympy
 - tqdm
 - trackpy
 - validators

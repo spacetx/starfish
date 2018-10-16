@@ -1,5 +1,7 @@
 from json import loads
 
+from pytest import raises
+
 from starfish.util.config import Config
 
 
@@ -34,7 +36,8 @@ def test_simple_config_value_file(tmpdir):
 
 def test_lookup_dne():
     config = Config(simple_str)
-    assert config.lookup(["foo"]) is None
+    with raises(KeyError):
+        config.lookup(["foo"])
     assert config.lookup(["foo"], 1) == 1
     assert config.lookup(["foo", "bar"], 2) == 2
 
@@ -44,5 +47,6 @@ def test_lookup_deep():
     assert config.lookup(["a"]) == {"b": {"c": [1, 2, 3]}}
     assert config.lookup(["a", "b"]) == {"c": [1, 2, 3]}
     assert config.lookup(["a", "b", "c"]) == [1, 2, 3]
-    assert config.lookup(["a", "b", "c", "d"]) is None
+    with raises(AttributeError):
+        config.lookup(["a", "b", "c", "d"])
     assert config.lookup(["a", "b", "c", "d"], "x") == "x"

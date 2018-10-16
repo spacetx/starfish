@@ -1,5 +1,6 @@
 import argparse
 from copy import deepcopy
+from typing import Optional
 
 import numpy as np
 from tqdm import tqdm
@@ -28,13 +29,20 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         self.thresh = thresh
         self.normalize = normalize
 
+    _DEFAULT_TESTING_PARAMETERS = {"thresh": 0, "normalize": True}
+
     @classmethod
-    def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
+    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
-            '--thresh', type=int, help='minimum magnitude threshold for pixels across channels')
+            '--thresh', type=float,
+            help='minimum magnitude threshold for pixels across channels')
+        group_parser.add_argument(
+            '--normalize', action="store_true",
+            help='Scales all rounds to have unit L2 norm across channels')
 
     def run(
-            self, stack: ImageStack, in_place: bool=False, verbose=False,
+            self, stack: ImageStack,
+            in_place: bool=False, verbose=False, n_processes: Optional[int]=None
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -46,6 +54,8 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             if True, report on the percentage completed during processing (default = False)
+        n_processes : Optional[int]: None
+            Not implemented. Number of processes to use when applying filter.
 
         Returns
         -------
@@ -54,7 +64,6 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             original stack.
 
         """
-
         channels_per_round = stack._data.groupby(Indices.ROUND.value)
         channels_per_round = tqdm(channels_per_round) if verbose else channels_per_round
 
@@ -84,5 +93,4 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                                                  ch_magnitude,
                                                  where=magnitude_mask
                                                  )
-
         return stack

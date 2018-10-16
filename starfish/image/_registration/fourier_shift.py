@@ -43,7 +43,7 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
             self.reference_stack = ImageStack.from_path_or_url(reference_stack)
 
     @classmethod
-    def add_arguments(cls, group_parser) -> None:
+    def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument("--upsampling", default=1, type=int, help="Amount of up-sampling")
         group_parser.add_argument(
             "--reference-stack", type=FsExistsType(), required=True,

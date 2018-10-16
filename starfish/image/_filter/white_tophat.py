@@ -5,6 +5,7 @@ from skimage.morphology import ball, disk, white_tophat
 
 from starfish.imagestack.imagestack import ImageStack
 from ._base import FilterAlgorithmBase
+from .util import determine_axes_to_split_by
 
 
 class WhiteTophat(FilterAlgorithmBase):
@@ -34,13 +35,15 @@ class WhiteTophat(FilterAlgorithmBase):
         self.masking_radius = masking_radius
         self.is_volume = is_volume
 
+    _DEFAULT_TESTING_PARAMETERS = {"masking_radius": 3}
+
     @classmethod
-    def add_arguments(cls, group_parser) -> None:
+    def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(
             "--masking-radius", default=15, type=int,
             help="diameter of morphological masking disk in pixels")
 
-    def white_tophat(self, image: np.ndarray) -> np.ndarray:
+    def _white_tophat(self, image: np.ndarray) -> np.ndarray:
         if self.is_volume:
             structuring_element = ball(self.masking_radius)
         else:
@@ -71,8 +74,9 @@ class WhiteTophat(FilterAlgorithmBase):
             original stack.
 
         """
+        split_by = determine_axes_to_split_by(self.is_volume)
         result = stack.apply(
-            self.white_tophat,
-            is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes
+            self._white_tophat,
+            split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result

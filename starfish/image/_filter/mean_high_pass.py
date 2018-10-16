@@ -8,7 +8,9 @@ from scipy.ndimage.filters import uniform_filter
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
-from .util import preserve_float_range, validate_and_broadcast_kernel_size
+from .util import (
+    determine_axes_to_split_by, preserve_float_range, validate_and_broadcast_kernel_size
+)
 
 
 class MeanHighPass(FilterAlgorithmBase):
@@ -39,8 +41,10 @@ class MeanHighPass(FilterAlgorithmBase):
         self.size = validate_and_broadcast_kernel_size(size, is_volume)
         self.is_volume = is_volume
 
+    _DEFAULT_TESTING_PARAMETERS = {"size": 1}
+
     @classmethod
-    def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
+    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             "--size", type=float, help="width of the kernel")
         group_parser.add_argument(
@@ -48,7 +52,7 @@ class MeanHighPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(image: np.ndarray, size: Number, rescale: bool=False) -> np.ndarray:
+    def _high_pass(image: np.ndarray, size: Number, rescale: bool=False) -> np.ndarray:
         """
         Applies a mean high pass filter to an image
 
@@ -65,8 +69,6 @@ class MeanHighPass(FilterAlgorithmBase):
         -------
         np.ndarray [np.float32]:
             Filtered image, same shape as input
-            :param clip:
-
         """
 
         blurred: np.ndarray = uniform_filter(image, size)
@@ -100,9 +102,10 @@ class MeanHighPass(FilterAlgorithmBase):
             original stack.
 
         """
-        high_pass: Callable = partial(self.high_pass, size=self.size)
+        split_by = determine_axes_to_split_by(self.is_volume)
+        high_pass: Callable = partial(self._high_pass, size=self.size)
         result = stack.apply(
             high_pass,
-            is_volume=self.is_volume, verbose=verbose, in_place=in_place, n_processes=n_processes
+            split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result

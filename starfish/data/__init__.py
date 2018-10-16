@@ -1,35 +1,35 @@
 from starfish import Experiment
 
 
-def MERFISH(test_data: bool=False):
-    if test_data:
+def MERFISH(use_test_data: bool=False):
+    if use_test_data:
         return Experiment.from_json(
-            'https://dmf0bdeheu4zf.cloudfront.net/20180919/MERFISH-TEST/experiment.json')
+            'https://dmf0bdeheu4zf.cloudfront.net/20180926/MERFISH-TEST/experiment.json')
     return Experiment.from_json(
-        'https://dmf0bdeheu4zf.cloudfront.net/20180924/MERFISH/experiment.json')
+        'https://dmf0bdeheu4zf.cloudfront.net/20180926/MERFISH/experiment.json')
 
 
-def allen_smFISH(test_data: bool=False):
+def allen_smFISH(use_test_data: bool=False):
     return Experiment.from_json(
-        'https://dmf0bdeheu4zf.cloudfront.net/20180919/allen_smFISH/experiment.json')
+        'https://dmf0bdeheu4zf.cloudfront.net/20180926/allen_smFISH/experiment.json')
 
 
-def DARTFISH(test_data: bool=False):
-    if test_data:
+def DARTFISH(use_test_data: bool=False):
+    if use_test_data:
         return Experiment.from_json(
-            'https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH-TEST/experiment.json')
+            'https://dmf0bdeheu4zf.cloudfront.net/20180926/DARTFISH-TEST/experiment.json')
     return Experiment.from_json(
-        'https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/experiment.json')
+        'https://dmf0bdeheu4zf.cloudfront.net/20180926/DARTFISH/experiment.json')
 
 
-def ISS(test_data: bool=False):
-    if test_data:
+def ISS(use_test_data: bool=False):
+    if use_test_data:
         return Experiment.from_json(
-            'https://dmf0bdeheu4zf.cloudfront.net/20180919/ISS-TEST/experiment.json')
+            'https://dmf0bdeheu4zf.cloudfront.net/20180926/ISS-TEST/experiment.json')
     return Experiment.from_json(
-        'https://dmf0bdeheu4zf.cloudfront.net/20180919/ISS/experiment.json')
+        'https://dmf0bdeheu4zf.cloudfront.net/20180926/ISS/experiment.json')
 
 
-def osmFISH(test_data: bool=False):
+def osmFISH(use_test_data: bool=False):
     return Experiment.from_json(
-        'https://dmf0bdeheu4zf.cloudfront.net/20180924/osmFISH/experiment.json')
+        'https://dmf0bdeheu4zf.cloudfront.net/20180926/osmFISH/experiment.json')

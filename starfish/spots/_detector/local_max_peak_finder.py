@@ -6,7 +6,7 @@ import xarray as xr
 from trackpy import locate
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import SpotAttributes
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
@@ -117,7 +117,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # TODO ambrosejcarr: this is where max vs. sum vs. mean would be parametrized.
         # here, total_intensity = sum, intensity = max
         new_colnames = [
-            'x', 'y', 'total_intensity', 'radius', 'eccentricity', 'intensity', 'raw_mass', 'ep'
+            'y', 'x', 'total_intensity', 'radius', 'eccentricity', 'intensity', 'raw_mass', 'ep'
         ]
         if len(image.shape) == 3:
             attributes.columns = ['z'] + new_colnames
@@ -161,7 +161,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         return intensity_table
 
     @classmethod
-    def add_arguments(cls, group_parser):
+    def _add_arguments(cls, group_parser):
         group_parser.add_argument("--spot-diameter", type=str, help='expected spot size')
         group_parser.add_argument(
             "--min-mass", default=4, type=int, help="minimum integrated spot intensity")
@@ -186,3 +186,6 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             "--percentile", default=None, type=float,
             help="clip bandpass below this value. Thresholding is done on already background-"
                  "subtracted images. Default 1 for integer images and 1/255 for float")
+        group_parser.add_argument(
+            "--is-volume", action="store_true",
+            help="indicates that the image stack should be filtered in 3d")

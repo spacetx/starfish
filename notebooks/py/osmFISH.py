@@ -18,8 +18,8 @@ import os
 # EPY: END markdown
 
 # EPY: START code
-test = os.getenv("USE_TEST_DATA") is not None
-experiment = data.osmFISH(test_data=test)
+use_test_data = os.getenv("USE_TEST_DATA") is not None
+experiment = data.osmFISH(use_test_data=use_test_data)
 # EPY: END code
 
 # EPY: START markdown

@@ -21,7 +21,7 @@ import os
 from starfish import data
 from starfish.types import Features, Indices
 
-from starfish.intensity_table import IntensityTable
+from starfish import IntensityTable
 
 from starfish.image import Filter
 from starfish.spots import SpotFinder
@@ -37,8 +37,8 @@ sns.set_style('ticks')
 # EPY: END markdown
 
 # EPY: START code
-test = os.getenv("USE_TEST_DATA") is not None
-exp = data.DARTFISH(test_data=test)
+use_test_data = os.getenv("USE_TEST_DATA") is not None
+exp = data.DARTFISH(use_test_data=use_test_data)
 
 stack = exp.fov().primary_image
 # EPY: END code
@@ -64,7 +64,7 @@ exp.codebook
 # EPY: END markdown
 
 # EPY: START code
-cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/fov_001/counts.csv')
+cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180926/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 # EPY: END code
 

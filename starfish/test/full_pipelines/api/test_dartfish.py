@@ -56,10 +56,10 @@ def test_dartfish_pipeline_cropped_data():
         dtype=np.float32
     )
 
-    assert primary_image.numpy_array.dtype == np.float32
+    assert primary_image.xarray.dtype == np.float32
 
     assert np.allclose(
-        primary_image.numpy_array[0, 0, 0, 50:60, 60:70],
+        primary_image.xarray[0, 0, 0, 50:60, 60:70],
         expected_primary_image
     )
 
@@ -88,10 +88,10 @@ def test_dartfish_pipeline_cropped_data():
           0.01960784, 0.01960784, 0., 0., 0.]],
         dtype=np.float32,
     )
-    assert normalized_image.numpy_array.dtype == np.float32
+    assert normalized_image.xarray.dtype == np.float32
 
     assert np.allclose(
-        normalized_image.numpy_array[0, 0, 0, 50:60, 60:70],
+        normalized_image.xarray[0, 0, 0, 50:60, 60:70],
         expected_normalized_image
     )
 
@@ -123,7 +123,7 @@ def test_dartfish_pipeline_cropped_data():
 
     assert np.allclose(
         expected_zero_normalized_image,
-        zero_norm_stack.numpy_array[0, 0, 0, 50:60, 60:70]
+        zero_norm_stack.xarray[0, 0, 0, 50:60, 60:70]
     )
 
     spot_intensities = dartfish.initial_spot_intensities

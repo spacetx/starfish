@@ -8,7 +8,11 @@ from skimage.filters import gaussian
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
-from .util import preserve_float_range, validate_and_broadcast_kernel_size
+from .util import (
+    determine_axes_to_split_by,
+    preserve_float_range,
+    validate_and_broadcast_kernel_size,
+)
 
 
 class GaussianLowPass(FilterAlgorithmBase):
@@ -29,8 +33,10 @@ class GaussianLowPass(FilterAlgorithmBase):
         self.sigma = validate_and_broadcast_kernel_size(sigma, is_volume)
         self.is_volume = is_volume
 
+    _DEFAULT_TESTING_PARAMETERS = {"sigma": 1}
+
     @classmethod
-    def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
+    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             "--sigma", type=float, help="standard deviation of gaussian kernel")
         group_parser.add_argument(
@@ -38,7 +44,7 @@ class GaussianLowPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def low_pass(
+    def _low_pass(
             image: np.ndarray,
             sigma: Union[Number, Tuple[Number]],
             rescale: bool=False
@@ -59,8 +65,7 @@ class GaussianLowPass(FilterAlgorithmBase):
         Returns
         -------
         np.ndarray :
-            Blurred data in same shape as input image, converted to np.uint16 dtype.
-            :param rescale:
+            Blurred data in same shape as input image, converted to np.float32 dtype.
 
         """
 
@@ -97,9 +102,10 @@ class GaussianLowPass(FilterAlgorithmBase):
             original stack.
 
         """
-        low_pass: Callable = partial(self.low_pass, sigma=self.sigma)
+        split_by = determine_axes_to_split_by(self.is_volume)
+        low_pass: Callable = partial(self._low_pass, sigma=self.sigma)
         result = stack.apply(
-            low_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place,
-            n_processes=n_processes
+            low_pass,
+            split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result

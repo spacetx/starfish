@@ -4,7 +4,7 @@ import numpy as np
 
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
-from starfish.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table import IntensityTable
 
 
 class SyntheticData:
@@ -114,5 +114,5 @@ class SyntheticData:
             intensities, self.n_z, self.height, self.width, self.n_photons_background,
             self.point_spread_function, self.camera_detection_efficiency,
             self.background_electrons, self.gray_level, self.ad_coversion_bits)
-        assert stack.numpy_array.dtype == np.float32
+        assert stack.xarray.dtype == np.float32
         return stack

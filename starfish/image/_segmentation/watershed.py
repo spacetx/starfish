@@ -27,7 +27,7 @@ class Watershed(SegmentationAlgorithmBase):
         self._segmentation_instance: Optional[_WatershedSegmenter] = None
 
     @classmethod
-    def add_arguments(cls, group_parser) -> None:
+    def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(
             "--dapi-threshold", default=.16, type=float, help="DAPI threshold")
         group_parser.add_argument(

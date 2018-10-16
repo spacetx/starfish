@@ -18,25 +18,25 @@ class PipelineComponentType(type):
 
     @classmethod
     def _ensure_algorithms_setup(mcs, cls):
-        if cls._algorithm_to_class_map is None:
-            cls._algorithm_to_class_map = dict()
+        if cls._algorithm_to_class_map_int is None:
+            cls._algorithm_to_class_map_int = dict()
 
-            queue = collections.deque(cls.get_algorithm_base_class().__subclasses__())
+            queue = collections.deque(cls._get_algorithm_base_class().__subclasses__())
             while len(queue) > 0:
                 algorithm_cls = queue.popleft()
                 queue.extend(algorithm_cls.__subclasses__())
 
-                cls._algorithm_to_class_map[algorithm_cls.__name__] = algorithm_cls
+                cls._algorithm_to_class_map_int[algorithm_cls.__name__] = algorithm_cls
 
-                setattr(cls, algorithm_cls.get_algorithm_name(), algorithm_cls)
+                setattr(cls, algorithm_cls._get_algorithm_name(), algorithm_cls)
 
 
 class PipelineComponent(metaclass=PipelineComponentType):
 
-    _algorithm_to_class_map: Optional[Mapping[str, Type]] = None
+    _algorithm_to_class_map_int: Optional[Mapping[str, Type]] = None
 
     @classmethod
-    def get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
+    def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
         """
         Get the base class that algorithms which implement this pipeline stage must extend.
         Pipeline components must provide this method.
@@ -44,9 +44,9 @@ class PipelineComponent(metaclass=PipelineComponentType):
         raise NotImplementedError()
 
     @classmethod
-    def algorithm_to_class_map(cls):
+    def _algorithm_to_class_map(cls):
         """Returns a mapping from algorithm names to the classes that implement them."""
-        return cls._algorithm_to_class_map
+        return cls._algorithm_to_class_map_int
 
     @classmethod
     def _cli(cls, args: argparse.Namespace):

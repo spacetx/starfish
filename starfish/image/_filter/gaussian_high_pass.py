@@ -9,7 +9,11 @@ from starfish.image._filter.gaussian_low_pass import GaussianLowPass
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
-from .util import preserve_float_range, validate_and_broadcast_kernel_size
+from .util import (
+    determine_axes_to_split_by,
+    preserve_float_range,
+    validate_and_broadcast_kernel_size,
+)
 
 
 class GaussianHighPass(FilterAlgorithmBase):
@@ -31,8 +35,10 @@ class GaussianHighPass(FilterAlgorithmBase):
         self.sigma = validate_and_broadcast_kernel_size(sigma, is_volume)
         self.is_volume = is_volume
 
+    _DEFAULT_TESTING_PARAMETERS = {"sigma": 3}
+
     @classmethod
-    def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
+    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             "--sigma", type=float, help="standard deviation of gaussian kernel")
         group_parser.add_argument(
@@ -40,7 +46,7 @@ class GaussianHighPass(FilterAlgorithmBase):
             help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
-    def high_pass(
+    def _high_pass(
             image: Union[xr.DataArray, np.ndarray],
             sigma: Union[Number, Tuple[Number]],
             rescale: bool=False
@@ -61,11 +67,9 @@ class GaussianHighPass(FilterAlgorithmBase):
         -------
         np.ndarray :
             filtered image of the same shape as the input image
-            :param rescale:
-
         """
 
-        blurred = GaussianLowPass.low_pass(image, sigma)
+        blurred = GaussianLowPass._low_pass(image, sigma)
         filtered = image - blurred
         filtered = preserve_float_range(filtered, rescale)
 
@@ -95,9 +99,10 @@ class GaussianHighPass(FilterAlgorithmBase):
             original stack.
 
         """
-        high_pass: Callable = partial(self.high_pass, sigma=self.sigma)
+        split_by = determine_axes_to_split_by(self.is_volume)
+        high_pass: Callable = partial(self._high_pass, sigma=self.sigma)
         result = stack.apply(
-            high_pass, is_volume=self.is_volume, verbose=verbose, in_place=in_place,
-            n_processes=n_processes
+            high_pass,
+            split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result

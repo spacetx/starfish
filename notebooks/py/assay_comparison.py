@@ -23,7 +23,7 @@ import tempfile
 # EPY: START code
 # science
 from starfish import IntensityTable, Experiment, ImageStack
-from starfish.plot import histogram, decoded_spots, compare_copy_number
+from starfish.plot import histogram, compare_copy_number
 from starfish.plot.decoded_spots import decoded_spots
 from starfish.types import Features, Indices
 import numpy as np
@@ -74,9 +74,8 @@ datasets = [iss_intensity_table, merfish_intensity_table, dartfish_intensity_tab
 
 # EPY: START code
 # construct background images for each assay
-experiment = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/experiment.json'
-)
+import starfish.data
+experiment = starfish.data.DARTFISH()
 
 dartfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 dartfish_link = os.path.join(data_root, "dartfish_dots_image.npy")
@@ -86,18 +85,14 @@ dartfish_dots = np.load(dartfish_npy)
 # EPY: END code
 
 # EPY: START code
-experiment = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180919/ISS/experiment.json'
-)
+experiment = starfish.data.ISS()
 
 iss_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 iss_dots = experiment.fov()['dots'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 # EPY: END code
 
 # EPY: START code
-stack = Experiment.from_json(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180924/MERFISH/experiment.json'
-)
+experiment = starfish.data.MERFISH()
 merfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 
 # merfish doesn't have a dots image, and some of the channels are stronger than others.
@@ -253,7 +248,7 @@ decoded_spots(
     ax=ax5
 )
 
-# ISS doesn't have a decoded image right now, but we can make one! Leave the placeholders open. 
+# ISS doesn't have a decoded image right now, but we can make one! Leave the placeholders open.
 for ax in (ax2, ax4, ax6):
     ax.set_axis_off()
 f.tight_layout()
@@ -265,7 +260,7 @@ f.tight_layout()
 
 # EPY: START code
 dartfish_copy_number = pd.read_csv(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180919/DARTFISH/fov_001/counts.csv',
+    'https://dmf0bdeheu4zf.cloudfront.net/20180926/DARTFISH/fov_001/counts.csv',
     index_col=0,
     squeeze=True
 )
@@ -310,7 +305,7 @@ axes[0, 2].set_title('DARTFISH', fontsize=20);
 # reset y-axis labels
 for ax in np.ravel(axes):
     ax.set_ylabel('')
-    
+
 # reset titles
 for ax in np.ravel(axes[1:, :]):
     ax.set_title('')
@@ -344,18 +339,18 @@ for ax in (axes[3, 0],):
 # EPY: END code
 
 # EPY: START markdown
-#The histogram can be used to demonstrate parameter thresholding, as well. 
+#The histogram can be used to demonstrate parameter thresholding, as well.
 # EPY: END markdown
 
 # EPY: START code
 f, ax = plt.subplots()
 area = (iss_intensity_table.radius * np.pi) ** 2
 histogram(
-    area, 
-    bins=20, 
-    threshold=1000, 
-    title='fake threshold demonstration', 
-    ylabel='number of spots', 
+    area,
+    bins=20,
+    threshold=1000,
+    title='fake threshold demonstration',
+    ylabel='number of spots',
     xlabel='spot area'
 );
 # EPY: END code

@@ -5,7 +5,7 @@ import posixpath
 
 import requests
 
-from starfish import Experiment
+from starfish import Experiment, FieldOfView
 from starfish.util.argparse import FsExistsType
 
 
@@ -21,8 +21,10 @@ if __name__ == "__main__":
     for fov in exp.fovs():
         fov_dir = pathlib.Path(args.output_dir, fov.name)
         fov_dir.mkdir()
-        fov.primary_image.write(str(fov_dir / "hybridization.json"))
-        for image_type in fov.auxiliary_image_types:
+        fov[FieldOfView.PRIMARY_IMAGES].write(str(fov_dir / "hybridization.json"))
+        for image_type in fov.image_types:
+            if image_type == FieldOfView.PRIMARY_IMAGES:
+                continue
             fov[image_type].write(str(fov_dir / f"{image_type}.json"))
 
     # get codebook from url and save locally to tmp dir

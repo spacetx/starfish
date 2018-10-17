@@ -26,7 +26,7 @@ class TestWithDartfishData(CLITest, unittest.TestCase):
             [
                 sys.executable,
                 "examples/get_cli_test_data.py",
-                "https://dmf0bdeheu4zf.cloudfront.net/20180926/DARTFISH-TEST/",
+                "https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH-TEST/",
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
             ],
             [
@@ -78,7 +78,7 @@ class TestWithDartfishData(CLITest, unittest.TestCase):
         # compare to benchmark data -- note that this particular part of the dataset
         # appears completely uncorrelated
         cnts_benchmark = pd.read_csv(
-            'https://dmf0bdeheu4zf.cloudfront.net/20180813/DARTFISH/fov_001/counts.csv')
+            'https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/fov_001/counts.csv')
 
         min_dist = 0.6
         cnts_starfish = spots_df[spots_df.distance <= min_dist].groupby('target').count()['area']

@@ -56,12 +56,10 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     # validate manifests that it links to.
     possible_manifests = []
     manifest_validator = SpaceTxValidator(_get_absolute_schema_path('fov_manifest.json'))
-    with backend.read_contextmanager(experiment['primary_images']) as fh:
-        possible_manifests.append((json.load(fh), experiment['primary_images']))
 
-    # loop over all the manifests that are stored in auxiliary images. Disallowed names will
-    # have already been excluded by experiment validation.
-    for manifest in experiment['auxiliary_images'].values():
+    # loop over all the manifests that are stored in images. Disallowed names will have already been
+    # excluded by experiment validation.
+    for manifest in experiment['images'].values():
         with backend.read_contextmanager(manifest) as fh:
             possible_manifests.append((json.load(fh), manifest))
 

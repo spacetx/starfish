@@ -25,7 +25,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from showit import image as show_image
-from starfish import data
+from starfish import data, FieldOfView
 from starfish.types import Features, Indices
 # EPY: END code
 
@@ -40,7 +40,7 @@ experiment = data.MERFISH(use_test_data=use_test_data)
 # EPY: END markdown
 
 # EPY: START code
-primary_image = experiment.fov().primary_image
+primary_image = experiment.fov()[FieldOfView.PRIMARY_IMAGES]
 # EPY: END code
 
 # EPY: START code
@@ -199,7 +199,7 @@ spot_intensities = initial_spot_intensities.loc[initial_spot_intensities[Feature
 # EPY: END markdown
 
 # EPY: START code
-bench = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/benchmark_results.csv',
+bench = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/MERFISH/benchmark_results.csv',
                     dtype = {'barcode':object})
 
 benchmark_counts = bench.groupby('gene')['gene'].count()

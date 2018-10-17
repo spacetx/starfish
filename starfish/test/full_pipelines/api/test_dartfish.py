@@ -139,7 +139,7 @@ def test_dartfish_pipeline_cropped_data():
     # compare to benchmark data -- note that this particular part of the dataset appears completely
     # uncorrelated
     cnts_benchmark = pd.read_csv(
-        'https://dmf0bdeheu4zf.cloudfront.net/20180905/DARTFISH/fov_001/counts.csv')
+        'https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/fov_001/counts.csv')
 
     min_dist = 0.6
     cnts_starfish = spots_df[spots_df.distance <= min_dist].groupby('target').count()['area']

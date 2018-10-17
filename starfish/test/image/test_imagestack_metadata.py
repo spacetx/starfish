@@ -45,14 +45,14 @@ def test_missing_extras():
     If the extras are not present on some of the tiles, it should still work.
     """
     class OnesTilesWithExtrasMostly(OnesTile):
-        def __init__(self, round, hyb, ch, z, extras: dict) -> None:
+        def __init__(self, fov, r, ch, z, extras: dict) -> None:
             super().__init__((10, 10))
-            self._round = round
+            self.fov = fov
             self._extras = extras
 
         @property
         def extras(self):
-            if self._round == 0:
+            if self.fov == 0:
                 return None
             return self._extras
 

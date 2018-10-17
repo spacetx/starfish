@@ -178,7 +178,7 @@ def detect_spots(
         additional keyword arguments to pass to spot_finding_method
     reference_image : xr.DataArray
         (Optional) a reference image. If provided, spots will be found in this image, and then
-        the locations that correspond to these spots will be measured across each channel and hyb,
+        the locations that correspond to these spots will be measured across each channel and round,
         filling in the values in the IntensityTable
     reference_image_from_max_projection : Tuple[Indices]
         (Optional) if True, create a reference image by max-projecting the channels and imaging

@@ -1,7 +1,7 @@
 {
-  "version": "0.0.0",
-  "primary_images": "primary_images.json",
-  "auxiliary_images": {
+  "version": "5.0.0",
+  "images": {
+    "primary": "primary_images.json",
     "nuclei": "nuclei.json"
   },
   "codebook": "codebook.json",

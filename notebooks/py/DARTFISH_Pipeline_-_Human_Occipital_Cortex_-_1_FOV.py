@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
-from starfish import data
+from starfish import data, FieldOfView
 from starfish.types import Features, Indices
 
 from starfish import IntensityTable
@@ -40,7 +40,7 @@ sns.set_style('ticks')
 use_test_data = os.getenv("USE_TEST_DATA") is not None
 exp = data.DARTFISH(use_test_data=use_test_data)
 
-stack = exp.fov().primary_image
+stack = exp.fov()[FieldOfView.PRIMARY_IMAGES]
 # EPY: END code
 
 # EPY: START code
@@ -64,7 +64,7 @@ exp.codebook
 # EPY: END markdown
 
 # EPY: START code
-cnts_benchmark = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/20180926/DARTFISH/fov_001/counts.csv')
+cnts_benchmark = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 # EPY: END code
 

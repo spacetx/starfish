@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 from showit import image
 import pprint
 
-from starfish import data
+from starfish import data, FieldOfView
 from starfish.types import Features, Indices
 # EPY: END code
 
@@ -52,7 +52,7 @@ pp.pprint(experiment._src_doc)
 
 # EPY: START code
 fov = experiment.fov()
-primary_image = fov.primary_image
+primary_image = fov[FieldOfView.PRIMARY_IMAGES]
 dots = fov['dots']
 nuclei = fov['nuclei']
 images = [primary_image, nuclei, dots]

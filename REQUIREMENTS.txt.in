@@ -15,6 +15,7 @@ seaborn
 showit >= 1.1.4
 slicedimage == 1.0.1
 scikit-learn
+sympy
 tqdm
 trackpy
 validators

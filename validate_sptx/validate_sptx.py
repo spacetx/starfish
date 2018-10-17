@@ -55,7 +55,6 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
 
     # validate manifests that it links to.
     manifests = []
-    manifest_validator = SpaceTxValidator(_get_absolute_schema_path('fov_manifest.json'))
     with backend.read_contextmanager(experiment['primary_images']) as fh:
         manifests.append((json.load(fh), experiment['primary_images']))
 
@@ -66,6 +65,7 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
             manifests.append((json.load(fh), manifest))
 
     fovs = []
+    manifest_validator = SpaceTxValidator(_get_absolute_schema_path('fov_manifest.json'))
     for manifest, filename in manifests:
         if fuzz:
             manifest_validator.fuzz_object(manifest, filename)

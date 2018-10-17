@@ -1,10 +1,9 @@
-import collections
 import json
 import os
 from typing import Any, Dict, Sequence, Union
 
 
-class Config(collections.UserDict):
+class Config(object):
 
     __NO_VALUE_PASSED = object()
 
@@ -50,7 +49,7 @@ class Config(collections.UserDict):
         else:
             data = value
 
-        collections.UserDict.__init__(self, data)
+        self.data = data
 
     def lookup(self, keys: Sequence[str], value: Any=__NO_VALUE_PASSED)->Any:
         """

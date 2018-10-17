@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import xarray as xr
+from slicedimage import ImageFormat
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
@@ -239,3 +240,18 @@ def test_imagestack_to_intensity_table_no_noise(synthetic_spot_pass_through_stac
     pixel_intensities = codebook.metric_decode(
         pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2)
     assert isinstance(pixel_intensities, IntensityTable)
+
+
+@pytest.mark.parametrize("format,ending,count", (
+    (ImageFormat.TIFF, "tiff", 192),
+    (ImageFormat.NUMPY, "npy", 192),
+))
+def test_imagestack_export(tmpdir, format, ending, count, recwarn):
+    """
+    Save a synthetic stack to files and check the results
+    """
+    stack = ImageStack.synthetic_stack()
+    stack_json = tmpdir / "output.json"
+    stack.export(str(stack_json), tile_format=format)
+    assert ImageStack.from_path_or_url(str(stack_json))
+    assert count == len([x for x in tmpdir.listdir() if str(x).endswith(ending)])

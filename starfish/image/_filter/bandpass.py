@@ -7,6 +7,7 @@ from trackpy import bandpass
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
+from .util import determine_axes_to_split_by
 
 
 class Bandpass(FilterAlgorithmBase):
@@ -37,8 +38,10 @@ class Bandpass(FilterAlgorithmBase):
         self.truncate = truncate
         self.is_volume = is_volume
 
+    _DEFAULT_TESTING_PARAMETERS = {"lshort": 1, "llong": 3, "threshold": 0.01}
+
     @classmethod
-    def add_arguments(cls, group_parser) -> None:
+    def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(
             "--lshort", type=float, help="filter signals below this frequency")
         group_parser.add_argument(
@@ -50,7 +53,7 @@ class Bandpass(FilterAlgorithmBase):
             help="truncate the filter at this many standard deviations")
 
     @staticmethod
-    def bandpass(
+    def _bandpass(
             image: np.ndarray, lshort: Number, llong: int, threshold: Number, truncate: Number
     ) -> np.ndarray:
         """Apply a bandpass filter to remove noise and background variation
@@ -78,7 +81,7 @@ class Bandpass(FilterAlgorithmBase):
             image, lshort=lshort, llong=llong, threshold=threshold,
             truncate=truncate
         )
-        return bandpassed
+        return bandpassed.astype(np.float32)
 
     def run(
             self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
@@ -105,11 +108,16 @@ class Bandpass(FilterAlgorithmBase):
 
         """
         bandpass_ = partial(
-            self.bandpass,
+            self._bandpass,
             lshort=self.lshort, llong=self.llong, threshold=self.threshold, truncate=self.truncate
         )
+
+        split_by = determine_axes_to_split_by(self.is_volume)
+
         result = stack.apply(
             bandpass_,
-            verbose=verbose, in_place=in_place, is_volume=self.is_volume, n_processes=n_processes
+            split_by=split_by,
+            in_place=in_place,
+            n_processes=n_processes,
         )
         return result

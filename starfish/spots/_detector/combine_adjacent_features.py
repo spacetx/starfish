@@ -8,7 +8,7 @@ from skimage.measure import label, regionprops
 from skimage.measure._regionprops import _RegionProperties
 from tqdm import tqdm
 
-from starfish.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number, SpotAttributes
 
 

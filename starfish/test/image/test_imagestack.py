@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
+import xarray as xr
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table import IntensityTable
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test.dataset_fixtures import (  # noqa: F401
@@ -158,6 +159,12 @@ def test_from_numpy_array_raises_error_when_incorrect_dims_passed():
         ImageStack.from_numpy_array(array.reshape((1, 1, 1, 1, 2, 2)))
 
 
+def test_from_numpy_array_automatically_handles_float_conversions():
+    x = np.zeros((1, 1, 1, 20, 20), dtype=np.uint16)
+    stack = ImageStack.from_numpy_array(x)
+    assert stack.xarray.dtype == np.float32
+
+
 def test_max_projection_preserves_dtype():
     original_dtype = np.float32
     array = np.ones((2, 2, 2), dtype=original_dtype)
@@ -204,10 +211,16 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
         z[breaks[i]: breaks[i + 1]] = true_intensities.coords[Indices.Z.value][i]
 
     # only 8 values should be set, since there are only 8 locations across the tensor
-    assert np.sum(image.numpy_array != 0) == 8
+    assert np.sum(image.xarray != 0) == 8
 
+    intensities = image.xarray.isel(
+        x=xr.DataArray(x, dims=['intensity']),
+        y=xr.DataArray(y, dims=['intensity']),
+        z=xr.DataArray(z, dims=['intensity']),
+        r=xr.DataArray(r, dims=['intensity']),
+        c=xr.DataArray(c, dims=['intensity']))
     assert np.allclose(
-        image.numpy_array[r, c, z, y, x],
+        intensities,
         true_intensities.values[np.where(true_intensities)])
 
 

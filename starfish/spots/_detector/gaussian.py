@@ -6,7 +6,7 @@ import xarray as xr
 from skimage.feature import blob_log
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number, SpotAttributes
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots, measure_spot_intensity
@@ -147,7 +147,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         return intensity_table
 
     @classmethod
-    def add_arguments(cls, group_parser):
+    def _add_arguments(cls, group_parser):
         group_parser.add_argument(
             "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
         group_parser.add_argument(

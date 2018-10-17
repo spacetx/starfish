@@ -40,7 +40,6 @@ class ISSTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
     def tile_data(self) -> np.ndarray:
         return imread(self.file_path)
 
@@ -49,15 +48,15 @@ class ISSPrimaryTileFetcher(TileFetcher):
     def __init__(self, input_dir):
         self.input_dir = input_dir
 
-    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
-        return ISSTile(os.path.join(self.input_dir, str(hyb + 1), "c{}.TIF".format(ch + 2)))
+    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
+        return ISSTile(os.path.join(self.input_dir, str(r + 1), "c{}.TIF".format(ch + 2)))
 
 
 class ISSAuxTileFetcher(TileFetcher):
     def __init__(self, path):
         self.path = path
 
-    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
         return ISSTile(self.path)
 
 

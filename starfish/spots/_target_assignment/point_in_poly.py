@@ -4,7 +4,7 @@ import regional
 from skimage.measure import points_in_poly
 from tqdm import tqdm
 
-from starfish.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices
 from ._base import TargetAssignmentAlgorithm
 
@@ -17,7 +17,7 @@ class PointInPoly2D(TargetAssignmentAlgorithm):
         """
 
     @classmethod
-    def add_arguments(cls, parser) -> None:
+    def _add_arguments(cls, parser) -> None:
         pass
 
     @staticmethod

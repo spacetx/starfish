@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 #
-# EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
+# EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "starfish", "language": "python", "name": "starfish"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
 ## Reproduce Allen smFISH results with Starfish
@@ -10,20 +10,14 @@
 # EPY: END markdown
 
 # EPY: START code
-# EPY: ESCAPE %matplotlib notebook
+# EPY: ESCAPE %matplotlib inline
 
 import matplotlib.pyplot as plt
+import numpy as np
 import os
 
-from starfish import data
+from starfish import data, FieldOfView
 from starfish.types import Indices
-# EPY: END code
-
-# EPY: START code
-# # developer note: for rapid iteration, it may be better to run this cell, download the data once, and load
-# # the data from the local disk. If so, uncomment this cell and run this instead of the above.
-# !aws s3 sync s3://czi.starfish.data.public/20180606/allen_smFISH ./allen_smFISH
-# experiment_json = os.path.abspath("./allen_smFISH/fov_001/experiment.json")
 # EPY: END code
 
 # EPY: START markdown
@@ -37,9 +31,9 @@ from starfish.types import Indices
 # EPY: END markdown
 
 # EPY: START code
-test = os.getenv("USE_TEST_DATA") is not None
-experiment = data.allen_smFISH(test_data=test)
-primary_image = experiment.fov().primary_image
+use_test_data = os.getenv("USE_TEST_DATA") is not None
+experiment = data.allen_smFISH(use_test_data=use_test_data)
+primary_image = experiment.fov()[FieldOfView.PRIMARY_IMAGES]
 # EPY: END code
 
 # EPY: START code
@@ -50,6 +44,8 @@ experiment.codebook
 #All of our implemented operations leverage the `Stack.image.apply` method to apply a single function over each of the tiles or volumes in the FOV, depending on whether the method accepts a 2d or 3d array. Below, we're clipping each image independently at the 10th percentile. I've placed the imports next to the methods so that you can easily locate the code, should you want to look under the hood and understand what parameters have been chosen.
 #
 #The verbose flag for our apply loops could use a bit more refinement. We should be able to tell it how many images it needs to process from looking at the image stack, but for now it's dumb so just reports the number of tiles or volumes it's processed. This FOV has 102 images over 3 volumes.
+#
+#This data is quite large (2.6 GB in memory) so we're going to run in-place to avoid exploding memory usage
 # EPY: END markdown
 
 # EPY: START code
@@ -59,18 +55,27 @@ clip.run(primary_image, verbose=True, in_place=True)
 # EPY: END code
 
 # EPY: START markdown
-#If you ever want to visualize the image in the notebook, we've added a widget to do that. The first parameter is an indices dict that specifies which imaging round, channel, z-slice you want to view. The result is a pageable visualization across that arbitrary set of slices. Below I'm visualizing the first channel, which your codebook tells me is Nmnt.
+#If you ever want to visualize the image in the notebook, we've added a widget to do that. The first parameter is an indices dict that specifies which imaging round, channel, z-slice you want to view. The result is a pageable visualization across that arbitrary set of slices. Below I'm visualizing the first channel, which the codebook indicates is Nmnt.
 #
-#[N.B. once you click on the slider, you can page with the arrow keys on the keyboard.]
+#The plot uses `rescale` to expand the dynamic range of the data to cover `[0, 1]`.
 # EPY: END markdown
 
 # EPY: START code
-primary_image.show_stack({Indices.CH.value: 0});
+primary_image.show_stack({Indices.CH.value: 0, Indices.Z.value: 17}, rescale=True)
 # EPY: END code
 
 # EPY: START code
 bandpass = Filter.Bandpass(lshort=0.5, llong=7, threshold=None, truncate=4)
-bandpass.run(primary_image, verbose=True)
+bandpass.run(primary_image, verbose=True, in_place=True)
+# EPY: END code
+
+# EPY: START markdown
+#To see the image, one needs to make the image quite big, but there is definitely signal present. You might need to clean your monitor to differentiate the spots from dust specs.
+# EPY: END markdown
+
+# EPY: START code
+from showit import image
+image(primary_image.get_slice({Indices.CH.value: 0, Indices.Z.value: 17})[0][0, :, :], size=20, clim=(0, 0.004))
 # EPY: END code
 
 # EPY: START markdown
@@ -78,53 +83,40 @@ bandpass.run(primary_image, verbose=True)
 # EPY: END markdown
 
 # EPY: START code
-# I wasn't sure if this clipping was supposed to be by volume or tile. I've done tile here, but it can be easily
-# switched to volume.
+# I wasn't sure if this clipping was supposed to be by volume or tile. I've done tile here, but it can be switched
 clip = Filter.Clip(p_min=10, p_max=100, is_volume=False)
 clip.run(primary_image, verbose=True, in_place=True)
 # EPY: END code
 
 # EPY: START code
+from showit import image
+image(primary_image.get_slice({Indices.CH.value: 0, Indices.Z.value: 17})[0][0, :, :], size=20, clim=(0, 0.004))
+# EPY: END code
+
+# EPY: START code
 sigma=(1, 0, 0)  # filter only in z, do nothing in x, y
-glp = Filter.GaussianLowPass(sigma=sigma, is_volume=True, verbose=True)
-glp.run(primary_image, in_place=True)
+glp = Filter.GaussianLowPass(sigma=sigma, is_volume=True)
+glp.run(primary_image, in_place=True, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
 #Below, because spot finding is so slow when single-plex, we'll pilot this on a max projection to show that the parameters work. Here's what trackpy.locate, which we wrap, produces for a z-projection of channel 1. To do use our plotting methods on z-projections we have to expose some of the starfish internals, which will be improved upon.
 # EPY: END markdown
 
-# EPY: START code
-from trackpy import locate
-
-# grab a section from the tensor.
-ch1 = primary_image.max_proj(Indices.Z)[0, 1]
-
-results = locate(ch1, diameter=3, minmass=250, maxsize=3, separation=5, preprocess=False, percentile=10)
-results.columns = ['x', 'y', 'intensity', 'radius', 'eccentricity', 'signal', 'raw_mass', 'ep']
-# EPY: END code
-
-# EPY: START code
-results.head()
-# EPY: END code
-
-# EPY: START code
-#TODO ambrosejcarr: Showing spots is broken right now.
-# EPY: END code
-
-# EPY: START code
-# plot the z-projection
-f, ax = plt.subplots(figsize=(20, 20))
-ax.imshow(ch1, vmin=15, vmax=52, cmap=plt.cm.gray)
-
-# draw called spots on top as red circles
-# scale radius plots the red circle at scale_radius * spot radius
-# image._show_spots(results, ax=plt.gca(), scale_radius=7);
-# EPY: END code
-
 # EPY: START markdown
 #Below spot finding is on the _volumes_ for each channel. This will take about `11m30s`
 # EPY: END markdown
+
+# EPY: START code
+plt.hist(np.ravel(primary_image.get_slice({Indices.CH.value: 0, Indices.Z.value: 17})[0]), bins=25, log=True);
+# EPY: END code
+
+# EPY: START code
+# if max radius is 3, and mean intensity is about 0.006, and we can expect spots to have around pi*r^2 integrated intensity...
+# try half-maximal radius * mean intensity -- the calculation below prints that intensity, which
+# can be used for the min_mass parameter in the spot finder.
+(np.pi * 1.5 ** 2) * 0.006
+# EPY: END code
 
 # EPY: START code
 from starfish.spots import SpotFinder
@@ -134,7 +126,7 @@ from starfish.spots import SpotFinder
 # although we haven't figured out where it fits in the priority list.
 kwargs = dict(
     spot_diameter=3, # must be odd integer
-    min_mass=300,
+    min_mass=0.003,
     max_size=3,  # this is max _radius_
     separation=5,
     noise_size=0.65,  # this is not used because preprocess is False
@@ -148,27 +140,29 @@ spot_attributes = lmpf.run(primary_image)
 # EPY: END code
 
 # EPY: START code
-# save the results to disk as json
-for attrs, (round, ch) in spot_attributes:
-    attrs.save(f'spot_attributes_c{ch}.json')
+decoded = experiment.codebook.decode_per_round_max(spot_attributes)
 # EPY: END code
 
+# EPY: START markdown
+#Count the number of spots detected in each channel
+# EPY: END markdown
+
 # EPY: START code
-# # if you want to load them back in the same shape, here's how:
-# from starfish.pipeline.features.spot_attributes import SpotAttributes
-# spot_attributes = [SpotAttributes.load(attrs) for attrs in glob('spot_attributes_c*.json')]
+spot_attributes.groupby('c').apply(lambda x: np.sum(x > 0))
 # EPY: END code
 
+# EPY: START markdown
+#Display the detected spots across a max projection of channels, rounds, and z, then color by gene type. Since this workflow ran in-place, the raw data would need to be reloaded to check against it. This is possible, but would require a workstation to keep both in-memory. Below, the spots are projected against the filtered data. You will need to squint to see them. Sorry.
+# EPY: END markdown
+
 # EPY: START code
-# this is not a very performant function because of how matplotlib renders circles as individual artists,
-# but I think it's useful for debugging the spot detection.
+import starfish.plot
 
-# Note that in places where spots are "missed" it is often because they've been localized to individual
-# nearby z-planes, whereas most spots exist across several layers of z.
+projection = primary_image.max_proj(Indices.Z, Indices.ROUND)
 
-fig = primary_image.show_stack(
-    {Indices.CH.value: 1, Indices.ROUND.value: 0},
-    show_spots=spot_attributes[1][0],
-    figure_size=(20, 20), p_min=60, p_max=99.9
-)
+# make the radius bigger to be clearer
+decoded['radius'] *= 4
+
+f, ax = plt.subplots(figsize=(20, 20))
+starfish.plot.decoded_spots(decoded, background_image=projection[0], ax=ax, spots_kwargs={'alpha': 0.3, 'cmap': plt.cm.Spectral})
 # EPY: END code

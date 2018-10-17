@@ -103,7 +103,7 @@ def build_image(
                         image.shape,
                         extras=image.extras,
                     )
-                    tile.numpy_array = image.tile_data
+                    tile.set_numpy_array_future(image.tile_data)
                     fov_images.add_tile(tile)
         collection.add_partition("fov_{:03}".format(fov_ix), fov_images)
     return collection
@@ -157,7 +157,7 @@ def write_experiment_json(
 
     experiment_doc: Dict[str, Any] = {
         'version': str(CURRENT_VERSION),
-        'auxiliary_images': {},
+        'images': {},
         'extras': {},
     }
     primary_image = build_image(
@@ -176,7 +176,7 @@ def write_experiment_json(
         tile_opener=_tile_opener,
         tile_format=ImageFormat.TIFF,
     )
-    experiment_doc['primary_images'] = "primary_image.json"
+    experiment_doc['images']['primary'] = "primary_image.json"
 
     for aux_name, aux_dimensions in aux_name_to_dimensions.items():
         if aux_dimensions is None:
@@ -195,7 +195,7 @@ def write_experiment_json(
             tile_opener=_tile_opener,
             tile_format=ImageFormat.TIFF,
         )
-        experiment_doc['auxiliary_images'][aux_name] = "{}.json".format(aux_name)
+        experiment_doc['images'][aux_name] = "{}.json".format(aux_name)
 
     experiment_doc = postprocess_func(experiment_doc)
     experiment_doc["codebook"] = "codebook.json"

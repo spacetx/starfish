@@ -6,8 +6,8 @@ from copy import deepcopy
 from functools import partial
 from itertools import product
 from typing import (
-    Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence, Optional, Sequence, Tuple,
-    Union
+    Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence,
+    Optional, Sequence, Set, Tuple, Union
 )
 
 import matplotlib.pyplot as plt
@@ -26,8 +26,13 @@ from tqdm import tqdm
 from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
-from starfish.intensity_table import IntensityTable
-from starfish.types import Coordinates, Indices
+from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.types import (
+    Coordinates,
+    Indices,
+    PHYSICAL_COORDINATE_DIMENSION,
+    PhysicalCoordinateTypes,
+)
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
@@ -100,6 +105,8 @@ class ImageStack:
 
         shape: MutableSequence[int] = []
         dims: MutableSequence[str] = []
+        coordinates_shape: MutableSequence[int] = []
+        coordinates_dimensions: MutableSequence[str] = []
         for ix in range(ImageStack.N_AXES):
             size_for_axis: Optional[int] = None
             dim_for_axis: Optional[Indices] = None
@@ -108,6 +115,7 @@ class ImageStack:
                 if ix == axis_data.order:
                     size_for_axis = self._get_dimension_size(axis_name)
                     dim_for_axis = axis_name
+                    break
 
             if size_for_axis is None or dim_for_axis is None:
                 raise ValueError(
@@ -115,10 +123,13 @@ class ImageStack:
 
             shape.append(size_for_axis)
             dims.append(dim_for_axis.value)
+            coordinates_shape.append(size_for_axis)
+            coordinates_dimensions.append(dim_for_axis.value)
 
         shape.extend(self._tile_shape)
         dims.extend([Indices.Y.value, Indices.X.value])
-
+        coordinates_dimensions.append(PHYSICAL_COORDINATE_DIMENSION)
+        coordinates_shape.append(6)
         # now that we know the tile data type (kind and size), we can allocate the data array.
         self._data = xr.DataArray(
             np.zeros(
@@ -126,6 +137,23 @@ class ImageStack:
                 dtype=np.float32,
             ),
             dims=dims,
+        )
+        self._coordinates = xr.DataArray(
+            np.empty(
+                shape=coordinates_shape,
+                dtype=np.float32,
+            ),
+            dims=coordinates_dimensions,
+            coords={
+                PHYSICAL_COORDINATE_DIMENSION: [
+                    PhysicalCoordinateTypes.X_MIN.value,
+                    PhysicalCoordinateTypes.X_MAX.value,
+                    PhysicalCoordinateTypes.Y_MIN.value,
+                    PhysicalCoordinateTypes.Y_MAX.value,
+                    PhysicalCoordinateTypes.Z_MIN.value,
+                    PhysicalCoordinateTypes.Z_MAX.value,
+                ],
+            },
         )
 
         # iterate through the tiles and set the data.
@@ -146,6 +174,23 @@ class ImageStack:
 
             data = img_as_float32(data)
             self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
+            coordinate_selector = {
+                Indices.ROUND.value: h,
+                Indices.CH.value: c,
+                Indices.Z.value: zlayer,
+            }
+            coordinates_values = [
+                tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
+                tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
+            ]
+            if Coordinates.Z in tile.coordinates:
+                coordinates_values.extend([
+                    tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1],
+                ])
+            else:
+                coordinates_values.extend([np.nan, np.nan])
+
+            self._coordinates.loc[coordinate_selector] = np.array(coordinates_values)
 
     @staticmethod
     def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
@@ -222,7 +267,11 @@ class ImageStack:
         """
         if len(array.shape) != 5:
             raise ValueError('a 5-d tensor with shape (n_round, n_ch, n_z, y, x) must be provided.')
-        cls._validate_data_dtype_and_range(array)
+        try:
+            cls._validate_data_dtype_and_range(array)
+        except TypeError:
+            warnings.warn(f"ImageStack detected as {array.dtype}. Converting to float32...")
+            array = img_as_float32(array)
 
         n_round, n_ch, n_z, height, width = array.shape
         empty = cls.synthetic_stack(
@@ -237,15 +286,9 @@ class ImageStack:
         return empty
 
     @property
-    def numpy_array(self):
-        """Retrieves the image data as a numpy array."""
-        result = self._data.values
-        return result
-
-    @numpy_array.setter
-    def numpy_array(self, data):
-        """Sets the image's data from a numpy array."""
-        self._data.values = data.view()
+    def xarray(self) -> xr.DataArray:
+        """Retrieves the image data as an xarray.DataArray"""
+        return self._data
 
     def get_slice(
             self,
@@ -530,14 +573,14 @@ class ImageStack:
 
         return tuple(slice_list), axes
 
-    def _iter_indices(self, is_volume: bool=False) -> Iterator[Mapping[Indices, int]]:
-        """Iterate over indices of image tiles or image volumes if is_volume is True
+    def _iter_indices(self, indices: Set[Indices]={Indices.ROUND, Indices.CH}
+                      ) -> Iterator[Mapping[Indices, int]]:
+        """Iterate over provided indices
 
         Parameters
         ----------
-        is_volume : bool
-            If True, yield indices necessary to extract volumes from self, else return
-            indices for tiles
+        indices : Set[Indices]
+            The set of Indices to be iterated over
 
         Yields
         ------
@@ -545,13 +588,10 @@ class ImageStack:
             Mapping of dimension name to index
 
         """
-        for round_ in np.arange(self.shape[Indices.ROUND]):
-            for ch in np.arange(self.shape[Indices.CH]):
-                if is_volume:
-                    yield {Indices.ROUND: round_, Indices.CH: ch}
-                else:
-                    for z in np.arange(self.shape[Indices.Z]):
-                        yield {Indices.ROUND: round_, Indices.CH: ch, Indices.Z: z}
+        ranges = [np.arange(self.shape[ind]) for ind in indices]
+        for items in product(*ranges):
+            a = zip(indices, items)
+            yield {ind: val for (ind, val) in a}
 
     def _iter_tiles(
             self, indices: Iterable[Mapping[Indices, Union[int, slice]]]
@@ -575,7 +615,7 @@ class ImageStack:
     def apply(
             self,
             func,
-            is_volume=False,
+            split_by: Set[Indices]={Indices.X, Indices.Y},
             in_place=False,
             verbose: bool=False,
             n_processes: Optional[int]=None,
@@ -589,10 +629,11 @@ class ImageStack:
             Function to apply. must expect a first argument which is a 2d or 3d numpy array
             (see is_volume) and return a
             np.ndarray. If inplace is True, must return an array of the same shape.
-        is_volume : bool
-            (default False) If True, pass 3d volumes (x, y, z) to func
+        apply_over: Set[Indices, ...]
+            (default {Indices.X, Indices.Y}) By default, apply over X and Y (tiles). Alternatively,
+            One could pass {Indices.X, Indices.Y, Indices.Z} to apply over volumes.
         in_place : bool
-            (default False) If True, function is executed in place. If n_proc is not 1, the tile or
+            (default True) If True, function is executed in place. If n_proc is not 1, the tile or
             volume will be copied once during execution. If false, a new ImageStack object will be
             produced.
         verbose : bool
@@ -613,51 +654,21 @@ class ImageStack:
             image_stack = deepcopy(self)
             return image_stack.apply(
                 func,
-                is_volume=is_volume, in_place=True, verbose=verbose, n_processes=n_processes,
-                **kwargs
+                split_by=split_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
             )
 
-        if is_volume:
-            self._data = self._data.stack(tiles=[Indices.ROUND.value,
-                                                 Indices.CH.value])
-        else:
-            self._data = self._data.stack(tiles=[Indices.ROUND.value,
-                                                 Indices.CH.value,
-                                                 Indices.Z.value])
-        tile_indices = self._data.tiles
+        results = self.transform(func, split_by=split_by, verbose=verbose,
+                                 n_processes=n_processes, **kwargs)
 
-        # set the keyword arguments in the apply function
-        applyfunc: Callable = partial(func, **kwargs)
-
-        # set the progress bar function depending on the verbosity request
-        progress_func = tqdm if verbose else lambda f: f  # pass-through lambda
-
-        # define the iterable to be mapped
-        tiles = (self._data.sel(tiles=t) for t in tile_indices)
-
-        with multiprocessing.Pool(n_processes) as pool:
-            # string all the iterators together
-            results = zip(
-                progress_func(pool.imap(applyfunc, tiles)),
-                tile_indices
-            )
-
-            # execute the combined iterator
-            for result, t in results:
-                self._data.loc[{'tiles': t}] = result
-
-        # unstack the data
-        self._data = self._data.unstack('tiles').transpose(
-            Indices.ROUND.value,
-            Indices.CH.value,
-            Indices.Z.value,
-            'y',
-            'x'
-        )
-
+        for r, inds in results:
+            self.set_slice(inds, r)
         return self
 
-    def transform(self, func, is_volume=False, verbose=False, **kwargs) -> List[Any]:
+    def transform(self, func,
+                  split_by: Set[Indices]={Indices.X, Indices.Y},
+                  verbose=False,
+                  n_processes: Optional[int] = None,
+                  **kwargs) -> List[Any]:
         """Apply func over all tiles or volumes in self
 
         Parameters
@@ -677,8 +688,11 @@ class ImageStack:
         List[Any] :
             The results of applying func to stored image data
         """
-        mapfunc: Callable = map
-        indices = list(self._iter_indices(is_volume=is_volume))
+        # mapfunc: Callable = map
+        all_axes = set(ind for ind in Indices)
+        axes_to_iterate = set(all_axes - split_by)
+
+        indices = list(self._iter_indices(axes_to_iterate))
 
         if verbose:
             tiles = tqdm(self._iter_tiles(indices))
@@ -686,9 +700,10 @@ class ImageStack:
             tiles = self._iter_tiles(indices)
 
         applyfunc: Callable = partial(func, **kwargs)
-        results = mapfunc(applyfunc, tiles)
 
-        return list(zip(results, indices))
+        with multiprocessing.Pool(n_processes) as pool:
+            results = pool.imap(applyfunc, tiles)
+            return list(zip(results, indices))
 
     @property
     def tile_metadata(self) -> pd.DataFrame:
@@ -769,6 +784,34 @@ class ImageStack:
         result['x'] = self._data.shape[-1]
 
         return result
+
+    def coordinates(
+            self,
+            indices: Mapping[Indices, int],
+            physical_axis: Coordinates) -> Tuple[float, float]:
+        """Given a set of indices that uniquely identify a tile and a physical axis, return the min
+        and the max coordinates for that tile along that axis."""
+        selectors: Mapping[str, Any] = {
+            Indices.ROUND.value: indices[Indices.ROUND],
+            Indices.CH.value: indices[Indices.CH],
+            Indices.Z.value: indices[Indices.Z],
+        }
+        min_selectors = dict(selectors)
+        max_selectors = dict(selectors)
+        if physical_axis == Coordinates.X:
+            min_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.X_MIN
+            max_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.X_MAX
+        elif physical_axis == Coordinates.Y:
+            min_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Y_MIN
+            max_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Y_MAX
+        elif physical_axis == Coordinates.Z:
+            min_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Z_MIN
+            max_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Z_MAX
+
+        return (
+            self._coordinates.loc[min_selectors].item(),
+            self._coordinates.loc[max_selectors].item(),
+        )
 
     def _get_dimension_size(self, dimension: Indices):
         axis_data = ImageStack.AXES_DATA[dimension]
@@ -1049,7 +1092,7 @@ class ImageStack:
         """
         first_dim = self.num_rounds * self.num_chs * self.num_zlayers
         new_shape = (first_dim,) + self.tile_shape
-        new_data = self.numpy_array.reshape(new_shape)
+        new_data = self.xarray.data.reshape(new_shape)
 
         return new_data
 

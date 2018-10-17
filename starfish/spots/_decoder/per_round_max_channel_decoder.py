@@ -1,5 +1,5 @@
 from starfish.codebook.codebook import Codebook
-from starfish.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table import IntensityTable
 from ._base import DecoderAlgorithmBase
 
 
@@ -9,7 +9,7 @@ class PerRoundMaxChannelDecoder(DecoderAlgorithmBase):
         pass
 
     @classmethod
-    def add_arguments(cls, group_parser):
+    def _add_arguments(cls, group_parser):
         pass
 
     def run(self, intensities: IntensityTable, codebook: Codebook) -> IntensityTable:

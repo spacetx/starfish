@@ -53,14 +53,10 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     else:
         valid &= experiment_validator.validate_object(experiment, name)
 
-    # validate manifests that it links to.
+    # loop over all the manifests that are stored in images. Disallowed names will have already been
+    # excluded by experiment validation.
     manifests = []
-    with backend.read_contextmanager(experiment['primary_images']) as fh:
-        manifests.append((json.load(fh), experiment['primary_images']))
-
-    # loop over all the manifests that are stored in auxiliary images. Disallowed names will
-    # have already been excluded by experiment validation.
-    for manifest in experiment['auxiliary_images'].values():
+    for manifest in experiment['images'].values():
         with backend.read_contextmanager(manifest) as fh:
             manifests.append((json.load(fh), manifest))
 

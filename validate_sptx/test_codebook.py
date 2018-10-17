@@ -1,6 +1,7 @@
 import pytest
 from pkg_resources import resource_filename
 
+from starfish.codebook._format import DocumentKeys
 from .util import SpaceTxValidator
 
 codebook_schema_path = resource_filename("validate_sptx", "schema/codebook/codebook.json")
@@ -29,6 +30,6 @@ def test_codebook_missing_channel_raises_validation_error():
     codebook_example_path = resource_filename(
         "validate_sptx", "examples/codebook/codebook.json")
     codebook = validator.load_json(codebook_example_path)
-    del codebook[0]['codeword'][0]['c']
+    del codebook[DocumentKeys.MAPPINGS_KEY][0]['codeword'][0]['c']
     with pytest.warns(UserWarning):
         assert not validator.validate_object(codebook)

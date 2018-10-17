@@ -6,7 +6,7 @@ import numpy as np
 from scipy.signal import convolve, fftconvolve
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Number
+from starfish.types import Indices, Number
 from ._base import FilterAlgorithmBase
 from .util import gaussian_kernel, preserve_float_range
 
@@ -38,8 +38,10 @@ class DeconvolvePSF(FilterAlgorithmBase):
             sigma=sigma
         )
 
+    _DEFAULT_TESTING_PARAMETERS = {"num_iter": 1, "sigma": 1}
+
     @classmethod
-    def add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
+    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
         group_parser.add_argument(
             '--num-iter', type=int, help='number of iterations to run')
         group_parser.add_argument(
@@ -51,7 +53,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
     # Here be dragons. This algorithm had a bug, but the results looked nice. Now we've "fixed" it
     # and the results look bad. #548 addresses this problem.
     @staticmethod
-    def richardson_lucy_deconv(
+    def _richardson_lucy_deconv(
             image: np.ndarray, iterations: int, psf: np.ndarray, clip: bool) -> np.ndarray:
         """
         Deconvolves input image with a specified point spread function.
@@ -161,11 +163,12 @@ class DeconvolvePSF(FilterAlgorithmBase):
 
         """
         func = partial(
-            self.richardson_lucy_deconv,
+            self._richardson_lucy_deconv,
             iterations=self.num_iter, psf=self.psf, clip=self.clip
         )
         result = stack.apply(
             func,
-            in_place=in_place, verbose=verbose, n_processes=n_processes
+            split_by={Indices.Y.value, Indices.X.value}, verbose=verbose, n_processes=n_processes,
+            in_place=in_place
         )
         return result

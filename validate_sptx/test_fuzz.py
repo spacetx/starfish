@@ -2,6 +2,7 @@ import io
 
 from pkg_resources import resource_filename
 
+from starfish.codebook._format import CURRENT_VERSION, DocumentKeys
 from .util import Fuzzer, SpaceTxValidator
 
 codebook_schema_path = resource_filename("validate_sptx", "schema/codebook/codebook.json")
@@ -67,42 +68,48 @@ def test_fuzz_codebook():
     The actual values don't matter overly much, but it
     provides a good example of the output.
     """
-    codebook = [
-        {
-            "codeword": [
-                {"r": 0, "c": 0, "v": 1},
-                {"r": 0, "c": 1, "v": 1},
-                {"r": 1, "c": 1, "v": 1}
-            ],
-            "target": "SCUBE2"
-        }
-    ]
+    codebook = {
+        DocumentKeys.VERSION_KEY: str(CURRENT_VERSION),
+        DocumentKeys.MAPPINGS_KEY: [
+            {
+                "codeword": [
+                    {"r": 0, "c": 0, "v": 1},
+                    {"r": 0, "c": 1, "v": 1},
+                    {"r": 1, "c": 1, "v": 1}
+                ],
+                "target": "SCUBE2"
+            }
+        ]
+    }
     out = io.StringIO()
     codebook_validator.fuzz_object(codebook, out=out)
     expect = """> Fuzzing unknown...
 A D I S M L	If the letter is present, mutation is valid!
 -----------	--------------------------------------------
-A . . . . .	 - codeword:
-A D I . . .	   - r:
-A D I . . .	        0
-A . I . . .	     c:
-A . I . . .	        0
-A D . . . .	     v:
-A D . . . .	        1
-A D I . . .	   - r:
-A D I . . .	        0
-A . I . . .	     c:
-A . I . . .	        1
-A D . . . .	     v:
-A D . . . .	        1
-A D I . . .	   - r:
-A D I . . .	        1
-A . I . . .	     c:
-A . I . . .	        1
-A D . . . .	     v:
-A D . . . .	        1
-A . . S . .	   target:
-A . . S . .	      SCUBE2
+. . . . . .	version:
+. . . . . .	   0.0.0
+. . . . . .	mappings:
+A . . . . .	  - codeword:
+A D I . . .	    - r:
+A D I . . .	         0
+A . I . . .	      c:
+A . I . . .	         0
+A D . . . .	      v:
+A D . . . .	         1
+A D I . . .	    - r:
+A D I . . .	         0
+A . I . . .	      c:
+A . I . . .	         1
+A D . . . .	      v:
+A D . . . .	         1
+A D I . . .	    - r:
+A D I . . .	         1
+A . I . . .	      c:
+A . I . . .	         1
+A D . . . .	      v:
+A D . . . .	         1
+A . . S . .	    target:
+A . . S . .	       SCUBE2
 """
     assert expect == out.getvalue()
 
@@ -116,9 +123,9 @@ def test_fuzz_experiment():
     """
     experiment = {
         "version": "0.0.0",
-        "primary_images": "primary_images.json",
-        "auxiliary_images": {
-            "nuclei": "nuclei.json"
+        "images": {
+            "primary": "primary_images.json",
+            "nuclei": "nuclei.json",
         },
         "codebook": "codebook.json",
         "extras": {
@@ -132,9 +139,9 @@ A D I S M L	If the letter is present, mutation is valid!
 -----------	--------------------------------------------
 . . . . . .	version:
 . . . . . .	   0.0.0
-. . . . . .	primary_images:
-. . . . . .	   primary_images.json
-. D . . M .	auxiliary_images:
+. . . . . .	images:
+. . . . . .	   primary:
+. . . . . .	      primary_images.json
 . D . . . .	   nuclei:
 . D . . . .	      nuclei.json
 . . . . . .	codebook:

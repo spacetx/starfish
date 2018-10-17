@@ -37,7 +37,6 @@ class IssCroppedBreastTile(FetchedTile):
         crp = img[40:1084, 20:1410]
         return crp
 
-    @property
     def tile_data(self) -> np.ndarray:
         return self.crop(imread(self.file_path))
 
@@ -52,14 +51,14 @@ class ISSCroppedBreastPrimaryTileFetcher(TileFetcher):
         return ch_dict
 
     @property
-    def hyb_dict(self):
-        hyb_str = ['1st', '2nd', '3rd', '4th']
-        hyb_dict = dict(enumerate(hyb_str))
-        return hyb_dict
+    def round_dict(self):
+        round_str = ['1st', '2nd', '3rd', '4th']
+        round_dict = dict(enumerate(round_str))
+        return round_dict
 
-    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
         filename = 'slideA_{}_{}_{}.TIF'.format(str(fov + 1),
-                                                self.hyb_dict[hyb],
+                                                self.round_dict[r],
                                                 self.ch_dict[ch]
                                                 )
         file_path = os.path.join(self.input_dir, filename)
@@ -71,7 +70,7 @@ class ISSCroppedBreastAuxTileFetcher(TileFetcher):
         self.input_dir = input_dir
         self.aux_type = aux_type
 
-    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
         if self.aux_type == 'nuclei':
             filename = 'slideA_{}_DO_DAPI.TIF'.format(str(fov + 1))
         elif self.aux_type == 'dots':
@@ -91,7 +90,7 @@ def format_data(input_dir, output_dir, num_fovs):
         experiment_json_doc['codebook'] = "codebook.json"
         return experiment_json_doc
 
-    hyb_dimensions = {
+    primary_image_dimensions = {
         Indices.ROUND: 4,
         Indices.CH: 4,
         Indices.Z: 1,
@@ -113,7 +112,7 @@ def format_data(input_dir, output_dir, num_fovs):
     write_experiment_json(
         path=output_dir,
         fov_count=num_fovs,
-        hyb_dimensions=hyb_dimensions,
+        primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions=aux_name_to_dimensions,
         primary_tile_fetcher=ISSCroppedBreastPrimaryTileFetcher(input_dir),
         aux_tile_fetcher={

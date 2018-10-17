@@ -1,11 +1,15 @@
+import os
+
 import starfish
 from starfish.image import Filter, Registration, Segmentation
 from starfish.spots import SpotFinder, TargetAssignment
 from starfish.types import Indices
 
+test = os.getenv("TESTING") is not None
+
 
 def iss_pipeline(fov, codebook):
-    primary_image = fov.primary_image
+    primary_image = fov[starfish.FieldOfView.PRIMARY_IMAGES]
 
     # register the raw images
     registration = Registration.FourierShiftRegistration(
@@ -52,13 +56,24 @@ def iss_pipeline(fov, codebook):
 def process_experiment(experiment: starfish.Experiment):
     decoded_intensities = {}
     regions = {}
-    for name_, fov in experiment.items():
+    for i, (name_, fov) in enumerate(experiment.items()):
         decoded, segmentation_results = iss_pipeline(fov, experiment.codebook)
         decoded_intensities[name_] = decoded
         regions[name_] = segmentation_results
+        if test and i == 1:
+            # only run through 2 fovs for the test
+            break
     return decoded_intensities, regions
 
 
 # run the script
-exp = starfish.Experiment.from_json("iss/formatted/experiment.json")
+if test:
+    # TODO: (ttung) Pending a fix for https://github.com/spacetx/starfish/issues/700, it's not
+    # possible to validate the schema for this experiment.
+    exp = starfish.Experiment.from_json(
+        "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20180926/iss_breast/experiment.json",
+        False,
+    )
+else:
+    exp = starfish.Experiment.from_json("iss/formatted/experiment.json")
 decoded_intensities, regions = process_experiment(exp)

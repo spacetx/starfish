@@ -5,6 +5,7 @@ channels:
 - conda-forge
 dependencies:
 - python>=3.6
+- certifi==2018.8.24
 - click
 - flake8
 - jsonschema
@@ -22,6 +23,7 @@ dependencies:
 - semantic_version
 - showit>=1.1.4
 - slicedimage==0.0.4
+- sympy
 - tqdm
 - trackpy
 - validators

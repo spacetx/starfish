@@ -34,7 +34,6 @@ class RandomNoiseTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
     def tile_data(self) -> np.ndarray:
         return np.random.randint(0, 256, size=self.shape, dtype=np.uint8)
 
@@ -64,7 +63,6 @@ class OnesTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
     def tile_data(self) -> np.ndarray:
         return np.full(shape=self.shape, fill_value=1.0, dtype=np.float32)
 
@@ -82,10 +80,10 @@ def tile_fetcher_factory(
     `fetched_tile_constructor_args` and keyword arguments from `fetched_tile_constructor_kwargs`.
     """
     class ResultingClass(TileFetcher):
-        def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+        def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
             args = list()
             if pass_tile_indices:
-                args.extend([fov, hyb, ch, z])
+                args.extend([fov, r, ch, z])
             args.extend(fetched_tile_constructor_args)
 
             return fetched_tile_cls(*args, **fetched_tile_constructor_kwargs)

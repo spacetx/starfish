@@ -4,7 +4,7 @@ import numpy as np
 import xarray as xr
 from skimage.morphology import binary_opening, disk
 
-from starfish.types import Number
+from starfish.types import Indices, Number
 
 
 def bin_thresh(img: np.ndarray, thresh: int) -> np.ndarray:
@@ -115,9 +115,9 @@ def preserve_float_range(
         array: Union[xr.DataArray, np.ndarray],
         rescale: bool=False) -> Union[xr.DataArray, np.ndarray]:
     """
-    Clip values below zero and and above one or scale values by the max,
-    but only if sub- or super-maximal values are detected.
-    Otherwise, this function will preserve the dynamic range of the input image.
+    Clips values below zero to zero. If values above one are detected, clips them
+    to 1 unless `rescale` is True, in which case the input is scaled by
+    the max value and the dynamic range is preserved.
 
     Parameters
     ----------
@@ -133,18 +133,22 @@ def preserve_float_range(
 
     """
     array = array.copy()
-    is_xr = isinstance(array, xr.DataArray)
-    if np.any(array < 0):
-        if is_xr:
-            array.values[array.values < 0] = 0
-        else:
-            array[array < 0] = 0
+    if isinstance(array, xr.DataArray):
+        data = array.values
+    else:
+        data = array
+    if np.any(data < 0):
+        data[array < 0] = 0
     if np.any(array > 1):
         if rescale:
-            array /= array.max()
+            data /= data.max()
         else:
-            if is_xr:
-                array.values[array.values > 1] = 1
-            else:
-                array[array > 1] = 1
+            data[array > 1] = 1
     return array.astype(np.float32)
+
+def determine_axes_to_split_by(is_volume: bool):
+    """map is_volume to axes to split by when applying a function over an ImageStack"""
+    if is_volume:
+        return {Indices.Z.value, Indices.Y.value, Indices.X.value}
+    else:
+        return {Indices.Y.value, Indices.X.value}

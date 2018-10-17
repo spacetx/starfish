@@ -1,3 +1,4 @@
+import click
 from copy import deepcopy
 from typing import Optional, Tuple, Union
 
@@ -43,11 +44,15 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
             self.reference_stack = ImageStack.from_path_or_url(reference_stack)
 
     @classmethod
-    def _add_arguments(cls, group_parser) -> None:
-        group_parser.add_argument("--upsampling", default=1, type=int, help="Amount of up-sampling")
-        group_parser.add_argument(
-            "--reference-stack", type=FsExistsType(), required=True,
-            help="The image stack to align the input image stack to.")
+    @click.command("FourierShiftRegistration")
+    @click.option("--upsampling", default=1, type=int, help="Amount of up-sampling")
+    @click.option("--reference-stack", required=True, # FIXME
+                  help="The image stack to align the input image stack to.")
+    @click.pass_context
+    def _cli(cls, ctx, upsampling, reference_stack):
+        instance = cls(upsampling, reference_stack)
+        instance.run(ctx.obj)
+        stack.write(ctx.ouput)
 
     def run(self, image: ImageStack, in_place: bool=False) -> Optional[ImageStack]:
         """Register an ImageStack against a reference image.

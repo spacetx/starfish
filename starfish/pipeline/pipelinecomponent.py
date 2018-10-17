@@ -1,4 +1,4 @@
-import argparse
+import click
 import collections
 from typing import Mapping, Optional, Type
 
@@ -49,5 +49,5 @@ class PipelineComponent(metaclass=PipelineComponentType):
         return cls._algorithm_to_class_map_int
 
     @classmethod
-    def _cli(cls, args: argparse.Namespace):
+    def _cli(cls, *args, **kwargs):
         raise NotImplementedError()

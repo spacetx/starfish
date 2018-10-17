@@ -1,4 +1,4 @@
-import argparse
+import click
 from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
@@ -38,12 +38,15 @@ class GaussianHighPass(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"sigma": 3}
 
     @classmethod
-    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
-        group_parser.add_argument(
-            "--sigma", type=float, help="standard deviation of gaussian kernel")
-        group_parser.add_argument(
-            "--is-volume", action="store_true",
-            help="indicates that the image stack should be filtered in 3d")
+    @click.command("GaussianHighPass")
+    @click.option("--sigma", type=float, help="standard deviation of gaussian kernel")
+    @click.option("--is-volume", action="store_true",
+                  help="indicates that the image stack should be filtered in 3d")
+    @click.pass_context
+    def _cli(cls, ctx, sigma, is_volume):
+        instance = cls(sigma, is_volume)
+        instance.run(ctx.obj)
+        stack.write(ctx.ouput)
 
     @staticmethod
     def _high_pass(

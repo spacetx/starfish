@@ -37,7 +37,7 @@ local_max_spot_detector = simple_local_max_spot_detector()
 
 
 def synthetic_two_spot_3d_2round_2ch() -> ImageStack:
-    """produce a 2-channel 2-hyb ImageStack
+    """produce a 2-channel 2-round ImageStack
 
     Notes
     -----

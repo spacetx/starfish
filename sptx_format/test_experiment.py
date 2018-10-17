@@ -1,7 +1,11 @@
+import warnings
+
 import pytest
 from pkg_resources import resource_filename
 
 from .util import SpaceTxValidator
+from .validate_sptx import validate
+
 package_name = "sptx_format"
 experiment_schema_path = resource_filename(package_name, "schema/experiment.json")
 validator = SpaceTxValidator(experiment_schema_path)
@@ -30,3 +34,18 @@ def test_dartfish_example_experiment():
     dartfish_example = resource_filename(
         package_name, "examples/experiment/dartfish_experiment.json")
     assert validator.validate_file(dartfish_example)
+
+
+# see #614
+def test_no_manifest_example_experiment():
+    no_manifest_example = resource_filename(
+        package_name, "examples/experiment/no_fov_manifest.json")
+
+    # SpaceTxValidator doesn't handle multiple files so this passes
+    assert validator.validate_file(no_manifest_example)
+
+    # But our tree walker *does* handle multiple files
+    with warnings.catch_warnings(record=True) as warnings_:
+        assert not validate(no_manifest_example)
+        messages = "\n".join([str(x.message) for x in warnings_])
+        assert "required property" in messages, f"missing text in '{messages}'"

@@ -8,6 +8,8 @@ from typing import Any, Dict, IO, Iterator, List, Optional, Union
 from jsonschema import Draft4Validator, RefResolver, ValidationError
 from pkg_resources import resource_filename
 
+package_name = 'sptx_format'
+
 
 class SpaceTxValidator:
 
@@ -38,7 +40,7 @@ class SpaceTxValidator:
             json-schema validator specific to the supplied schema, with references resolved
 
         """
-        experiment_schema_path = resource_filename("validate_sptx", "schema/experiment.json")
+        experiment_schema_path = resource_filename(package_name, "schema/experiment.json")
         package_root = os.path.dirname(os.path.dirname(experiment_schema_path))
         base_uri = 'file://' + package_root + '/'
         resolver = RefResolver(base_uri, schema)

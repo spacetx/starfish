@@ -1,6 +1,6 @@
 import sys
 
-from validate_sptx.validate_sptx import validate
+from sptx_format.validate_sptx import validate
 
 
 class Cli:

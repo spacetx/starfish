@@ -8,7 +8,7 @@ class Config(object):
     __NO_VALUE_PASSED = object()
 
     def __init__(self, value: Union[str, Dict]=None,
-                 key: str="STARFISH_CONFIG")->None:
+                 key: str="STARFISH_CONFIG") -> None:
         """
         Parse user arguments, environment variables, and external files to
         generate a configuration object.

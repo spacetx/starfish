@@ -24,11 +24,6 @@ class Config(object):
             The name of an environment variable which will be used
             if the value is None. STARFISH_CONFIG will be used if no
             key is provided.
-
-        Environment variables
-        ---------------------
-        STARFISH_CONFIG
-            Default key used to read the config source from os.environ
         """
         # Record the original values
         self.__value = value

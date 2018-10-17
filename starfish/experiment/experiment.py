@@ -174,21 +174,19 @@ class Experiment:
         config : str or dict
             configuration property that will be passed to
             starfish.util.config.Config
-
-        Returns
-        -------
-        Experiment :
-            Experiment object serving the requested experiment data
-
-        Environment variables
-        ---------------------
-        STARFISH_CONFIG :
-             Key used to read the following configuration values from the os.environ:
+        STARISH_CONFIG :
+            This parameter is read from the environment to permit setting configuration
+            values either directly or via a file. Keys read include:
              - cache.allow_caching
         STARFISH_STRICT_LOADING :
              This parameter is read from the environment. If set, then all JSON loaded by this
              method will be passed to the appropriate validator. The `strict` parameter to this
              method has priority over the environment variable.
+
+        Returns
+        -------
+        Experiment :
+            Experiment object serving the requested experiment data
 
         """
         if strict is None:

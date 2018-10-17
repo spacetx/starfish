@@ -25,18 +25,19 @@ class Watershed(SegmentationAlgorithmBase):
         min_distance: int,
         **kwargs
     ) -> None:
-        """Implements watershed segmentation of nuclei from a DAPI image
+        """Implements watershed segmentation of cells seeded from a DAPI image the the point clouds
 
-        Watershed segmentation proceeds by constructing basins from the DAPI image, but filling is
-        restricted by masking only regions that overlap nuclei or points detected in a maximum
-        projection of the primary images.
+        Watershed segmentation proceeds by constructing basins that extend from the DAPI image
+        and the point cloud constructed from a maximum projection across rounds and channels. It
+        constructs a mask that extends from the basins to prevent non-cellular regions from being
+        included.
 
         Parameters
         ----------
         dapi_threshold : Number
             threshold to apply to dapi image
         input_threshold : Number
-            threshold to apply to stain image  # TODO ambrosejcarr verify this
+            threshold to apply to stain image
         min_distance : int
             minimum distance before object centers in a provided dapi image are considered single
             nuclei
@@ -104,11 +105,12 @@ class Watershed(SegmentationAlgorithmBase):
 
 class _WatershedSegmenter:
     def __init__(self, dapi_img: np.ndarray, stain_img: np.ndarray) -> None:
-        """Implements watershed segmentation of nuclei from a DAPI image
+        """Implements watershed segmentation of cells seeded from a DAPI image the the point clouds
 
-        Watershed segmentation proceeds by constructing basins from the DAPI image, but filling is
-        restricted by masking only regions that overlap nuclei or points detected in a maximum
-        projection of the primary images.
+        Watershed segmentation proceeds by constructing basins that extend from the DAPI image
+        and the point cloud constructed from a maximum projection across rounds and channels. It
+        constructs a mask that extends from the basins to prevent non-cellular regions from being
+        included.
 
         Parameters
         ----------
@@ -135,7 +137,7 @@ class _WatershedSegmenter:
             disk_size_mask: Optional[int]=None,  # TODO ambrosejcarr what is this doing?
             min_dist: Optional[Number]=None
     ) -> np.ndarray:
-        """Execute watershed nuclei segmentation.
+        """Execute watershed cell segmentation.
 
         Parameters
         ----------
@@ -194,7 +196,8 @@ class _WatershedSegmenter:
         max_allowed_size: int,
         min_dist: Optional[Number]=None
     ) -> Tuple[np.ndarray, int]:
-        """Construct a labeled nuclei image, which will be used to seed the watershed
+        """Construct a labeled nuclei image, which will be combined with the point cloud to seed
+        the watershed
 
         Parameters
         ----------

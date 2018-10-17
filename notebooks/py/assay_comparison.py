@@ -22,7 +22,7 @@ import tempfile
 
 # EPY: START code
 # science
-from starfish import IntensityTable, Experiment, ImageStack
+from starfish import IntensityTable, Experiment, FieldOfView, ImageStack
 from starfish.plot import histogram, compare_copy_number
 from starfish.plot.decoded_spots import decoded_spots
 from starfish.types import Features, Indices
@@ -39,7 +39,7 @@ from showit import image
 # EPY: START code
 # IntensityTable can't download from directories without list privileges
 
-data_root = "https://dmf0bdeheu4zf.cloudfront.net/assay_comparison/"
+data_root = "https://d2nhj9g34unfro.cloudfront.net/assay_comparison/"
 iss_link = os.path.join(data_root, "iss.nc")
 merfish_link = os.path.join(data_root, "merfish.nc")
 dartfish_link = os.path.join(data_root, "dartfish.nc")
@@ -97,7 +97,7 @@ merfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, 
 
 # merfish doesn't have a dots image, and some of the channels are stronger than others.
 # We can use the scale factors to get the right levels
-merfish_background = experiment.fov().primary_image.max_proj(Indices.CH, Indices.ROUND)
+merfish_background = experiment.fov()[FieldOfView.PRIMARY_IMAGES].max_proj(Indices.CH, Indices.ROUND)
 merfish_background = np.reshape(merfish_background, (1, 1, *merfish_background.shape))
 merfish_background = ImageStack.from_numpy_array(merfish_background)
 
@@ -260,7 +260,7 @@ f.tight_layout()
 
 # EPY: START code
 dartfish_copy_number = pd.read_csv(
-    'https://dmf0bdeheu4zf.cloudfront.net/20180926/DARTFISH/fov_001/counts.csv',
+    'https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/fov_001/counts.csv',
     index_col=0,
     squeeze=True
 )

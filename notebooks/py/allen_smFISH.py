@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-from starfish import data
+from starfish import data, FieldOfView
 from starfish.types import Indices
 # EPY: END code
 
@@ -33,7 +33,7 @@ from starfish.types import Indices
 # EPY: START code
 use_test_data = os.getenv("USE_TEST_DATA") is not None
 experiment = data.allen_smFISH(use_test_data=use_test_data)
-primary_image = experiment.fov().primary_image
+primary_image = experiment.fov()[FieldOfView.PRIMARY_IMAGES]
 # EPY: END code
 
 # EPY: START code

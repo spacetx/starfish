@@ -18,8 +18,8 @@ data that was updated to work post-update:
 
 .. code-block:: diff
 
-    - http://czi.starfish.data.public.s3.amazonaws.com/browse/formatted/20180823/iss_breast/experiment.json
-    + http://czi.starfish.data.public.s3.amazonaws.com/browse/formatted/20180926/iss_breast/experiment.json
+    - http://spacetx.starfish.data.public.s3.amazonaws.com/browse/formatted/20180823/iss_breast/experiment.json
+    + http://spacetx.starfish.data.public.s3.amazonaws.com/browse/formatted/20180926/iss_breast/experiment.json
 
 If you're using your own data with starfish, you may need to re-run your data ingestion workflow
 based on :ref:`TileFetcher` and :ref:`FetchedTile` to generate up-to-date versions of spaceTx-format.

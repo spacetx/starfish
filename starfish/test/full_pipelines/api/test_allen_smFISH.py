@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 import starfish.data
+from starfish import FieldOfView
 from starfish.image._filter.bandpass import Bandpass
 from starfish.image._filter.clip import Clip
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
@@ -17,7 +18,7 @@ def test_allen_smFISH_cropped_data():
     # load the experiment
     experiment = starfish.data.allen_smFISH(use_test_data=True)
 
-    primary_image = experiment.fov().primary_image
+    primary_image = experiment.fov()[FieldOfView.PRIMARY_IMAGES]
 
     clip = Clip(p_min=10, p_max=100)
     clipped_image = clip.run(primary_image, in_place=False)

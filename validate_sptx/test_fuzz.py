@@ -123,9 +123,9 @@ def test_fuzz_experiment():
     """
     experiment = {
         "version": "0.0.0",
-        "primary_images": "primary_images.json",
-        "auxiliary_images": {
-            "nuclei": "nuclei.json"
+        "images": {
+            "primary": "primary_images.json",
+            "nuclei": "nuclei.json",
         },
         "codebook": "codebook.json",
         "extras": {
@@ -139,9 +139,9 @@ A D I S M L	If the letter is present, mutation is valid!
 -----------	--------------------------------------------
 . . . . . .	version:
 . . . . . .	   0.0.0
-. . . . . .	primary_images:
-. . . . . .	   primary_images.json
-. D . . M .	auxiliary_images:
+. . . . . .	images:
+. . . . . .	   primary:
+. . . . . .	      primary_images.json
 . D . . . .	   nuclei:
 . D . . . .	      nuclei.json
 . . . . . .	codebook:

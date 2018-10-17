@@ -1,4 +1,4 @@
-# sptx-format
+# The SpaceTx Image Format Specification
 
 ## Introduction
 

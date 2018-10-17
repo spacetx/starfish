@@ -1,4 +1,4 @@
 .. _specification
 
-The SpaceTx Image Format Specification
-======================================
+.. mdinclude:: ../../../sptx_format/README.md
+

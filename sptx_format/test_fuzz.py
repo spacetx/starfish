@@ -5,8 +5,9 @@ from pkg_resources import resource_filename
 from starfish.codebook._format import CURRENT_VERSION, DocumentKeys
 from .util import Fuzzer, SpaceTxValidator
 
-codebook_schema_path = resource_filename("validate_sptx", "schema/codebook/codebook.json")
-experiment_schema_path = resource_filename("validate_sptx", "schema/experiment.json")
+package_name = "sptx_format"
+codebook_schema_path = resource_filename(package_name, "schema/codebook/codebook.json")
+experiment_schema_path = resource_filename(package_name, "schema/experiment.json")
 codebook_validator = SpaceTxValidator(codebook_schema_path)
 experiment_validator = SpaceTxValidator(experiment_schema_path)
 

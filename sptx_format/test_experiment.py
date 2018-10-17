@@ -6,9 +6,10 @@ from pkg_resources import resource_filename
 from .util import SpaceTxValidator
 from .validate_sptx import validate
 
-experiment_schema_path = resource_filename("validate_sptx", "schema/experiment.json")
+package_name = "sptx_format"
+experiment_schema_path = resource_filename(package_name, "schema/experiment.json")
 validator = SpaceTxValidator(experiment_schema_path)
-example = resource_filename("validate_sptx", "examples/experiment/experiment.json")
+example = resource_filename(package_name, "examples/experiment/experiment.json")
 
 
 def test_fov():
@@ -31,14 +32,14 @@ def test_version_must_be_semantic():
 
 def test_dartfish_example_experiment():
     dartfish_example = resource_filename(
-        "validate_sptx", "examples/experiment/dartfish_experiment.json")
+        package_name, "examples/experiment/dartfish_experiment.json")
     assert validator.validate_file(dartfish_example)
 
 
 # see #614
 def test_no_manifest_example_experiment():
     no_manifest_example = resource_filename(
-        "validate_sptx", "examples/experiment/no_fov_manifest.json")
+        package_name, "examples/experiment/no_fov_manifest.json")
 
     # SpaceTxValidator doesn't handle multiple files so this passes
     assert validator.validate_file(no_manifest_example)

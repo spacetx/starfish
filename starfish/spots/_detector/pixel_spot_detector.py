@@ -124,4 +124,4 @@ def _cli(ctx, metric, distance_threshold, magnitude_threshold,
     ctx.obj["component"]._cli_run(ctx, instance)
 
 
-PixelSpotDetector._cli = _cli
+PixelSpotDetector._cli = _cli  # type: ignore

@@ -39,5 +39,5 @@ def _cli(ctx, input, output, codebook):
     )
 
 
-Decoder._cli = _cli
+Decoder._cli = _cli  # type: ignore
 Decoder._cli_register()

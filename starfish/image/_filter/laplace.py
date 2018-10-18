@@ -135,4 +135,4 @@ def _cli(ctx, sigma, mode, cval, is_volume):
     ctx.obj["component"]._cli_run(ctx, Laplace(sigma, mode, cval, is_volume))
 
 
-Laplace._cli = _cli
+Laplace._cli = _cli  # type: ignore

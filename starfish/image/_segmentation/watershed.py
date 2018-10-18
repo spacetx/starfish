@@ -197,4 +197,4 @@ def _cli(ctx, dapi_threshold, input_threshold, min_distance):
     ctx.obj["component"]._cli_run(ctx, Watershed(dapi_threshold, input_threshold, min_distance))
 
 
-Watershed._cli = _cli
+Watershed._cli = _cli  # type: ignore

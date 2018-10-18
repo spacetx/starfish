@@ -126,4 +126,4 @@ class Bandpass(FilterAlgorithmBase):
 def _cli(ctx, lshort, llong, threshold, truncate):
     ctx.obj["component"]._cli_run(ctx, Bandpass(lshort, llong, threshold, truncate))
 
-Bandpass._cli = _cli
+Bandpass._cli = _cli  # type: ignore

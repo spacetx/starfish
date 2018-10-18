@@ -339,4 +339,4 @@ def _cli(ctx, min_num_spots_detected, measurement_type, is_volume, verbose):
     ctx.obj["component"]._cli_run(ctx, instance)
 
 
-LocalMaxPeakFinder._cli = _cli
+LocalMaxPeakFinder._cli = _cli  # type: ignore

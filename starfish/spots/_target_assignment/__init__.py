@@ -47,5 +47,5 @@ def _cli(ctx, coordinates_geojson, intensities, output):
     ctx.obj["regions"] = munge.geojson_to_region(coordinates)
 
 
-TargetAssignment._cli = _cli
+TargetAssignment._cli = _cli  # type: ignore
 TargetAssignment._cli_register()

@@ -114,4 +114,4 @@ def _cli(ctx, size, is_volume):
     ctx.obj["component"]._cli_run(ctx, MeanHighPass(size, is_volume))
 
 
-MeanHighPass._cli = _cli
+MeanHighPass._cli = _cli  # type: ignore

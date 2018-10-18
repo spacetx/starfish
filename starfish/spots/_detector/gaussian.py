@@ -167,4 +167,4 @@ def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show):
         ctx.obj["component"]._cli_run(ctx, instance)
 
 
-GaussianSpotDetector._cli = _cli
+GaussianSpotDetector._cli = _cli  # type: ignore

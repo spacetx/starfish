@@ -100,4 +100,4 @@ def _cli(ctx, p, is_volume):
     ctx.obj["component"]._cli_run(ctx, ScaleByPercentile(p, is_volume))
 
 
-ScaleByPercentile._cli = _cli
+ScaleByPercentile._cli = _cli  # type: ignore

@@ -101,4 +101,4 @@ class Clip(FilterAlgorithmBase):
 def _cli(ctx, p_min, p_max):
     ctx.obj["component"]._cli_run(ctx, Clip(p_min, p_max))
 
-Clip._cli = _cli
+Clip._cli = _cli  # type: ignore

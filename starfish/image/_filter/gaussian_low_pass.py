@@ -111,4 +111,4 @@ class GaussianLowPass(FilterAlgorithmBase):
 def _cli(ctx, sigma, is_volume):
     ctx.obj["component"]._cli_run(ctx, GaussianLowPass(sigma, is_volume))
 
-GaussianLowPass._cli = _cli
+GaussianLowPass._cli = _cli  # type: ignore

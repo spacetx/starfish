@@ -77,4 +77,4 @@ def _cli(ctx):
     ctx.obj["component"]._cli_run(PointInPoly2D())
 
 
-PointInPoly2D._cli = _cli
+PointInPoly2D._cli = _cli  # type: ignore

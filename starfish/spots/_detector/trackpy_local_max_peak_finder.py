@@ -200,4 +200,4 @@ def _cli(ctx, spot_diameter, min_max, max_size, separation, noise_size, smooth_s
     ctx.obj["component"]._cli_run(ctx, instance)
 
 
-TrackpyLocalMaxPeakFinder._cli = _cli
+TrackpyLocalMaxPeakFinder._cli = _cli  # type: ignore

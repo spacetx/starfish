@@ -177,4 +177,4 @@ def _cli(ctx, num_iter, sigma, no_clip):
     ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, no_clip))
 
 
-DeconvolvePSF._cli = _cli
+DeconvolvePSF._cli = _cli  # type: ignore

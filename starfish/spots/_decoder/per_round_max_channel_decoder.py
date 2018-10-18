@@ -34,4 +34,4 @@ def _cli(ctx):
     ctx.obj["component"]._cli_run(ctx, PerRoundMaxChannelDecoder())
 
 
-PerRoundMaxChannelDecoder._cli = _cli
+PerRoundMaxChannelDecoder._cli = _cli  # type: ignore

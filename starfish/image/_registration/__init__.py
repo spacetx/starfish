@@ -35,5 +35,5 @@ def _cli(ctx, input, output):
     )
 
 
-Registration._cli = _cli
+Registration._cli = _cli  # type: ignore
 Registration._cli_register()

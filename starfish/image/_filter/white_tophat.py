@@ -88,4 +88,4 @@ def _cli(ctx, masking_radius, is_volume):
     ctx.obj["component"]._cli_run(ctx, WhiteTophat(masking_radius, is_volume))
 
 
-WhiteTophat._cli = _cli
+WhiteTophat._cli = _cli  # type: ignore

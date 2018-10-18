@@ -108,4 +108,4 @@ class GaussianHighPass(FilterAlgorithmBase):
 def _cli(ctx, sigma, is_volume):
     ctx.obj["component"]._cli_run(ctx, GaussianHighPass(sigma, is_volume))
 
-GaussianHighPass._cli = _cli
+GaussianHighPass._cli = _cli  # type: ignore

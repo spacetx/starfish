@@ -85,5 +85,5 @@ def _cli(ctx, input, output, blobs_stack, reference_image_from_max_projection, c
     )
 
 
-SpotFinder._cli = _cli
+SpotFinder._cli = _cli  # type: ignore
 SpotFinder._cli_register()

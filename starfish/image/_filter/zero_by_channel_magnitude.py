@@ -99,4 +99,4 @@ def _cli(ctx, thresh, normalize):
     ctx.obj["component"]._cli_run(ctx, ZeroByChannelMagnitude(thresh, normalize))
 
 
-ZeroByChannelMagnitude._cli = _cli
+ZeroByChannelMagnitude._cli = _cli  # type: ignore

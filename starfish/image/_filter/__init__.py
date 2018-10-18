@@ -44,5 +44,5 @@ def _cli(ctx, input, output):
     )
 
 
-Filter._cli = _cli
+Filter._cli = _cli  # type: ignore
 Filter._cli_register()

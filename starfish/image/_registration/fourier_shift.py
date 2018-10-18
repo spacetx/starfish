@@ -129,4 +129,4 @@ def _cli(ctx, upsampling, reference_stack):
     ctx.obj["component"]._cli_run(ctx, FourierShiftRegistration(upsampling, reference_stack))
 
 
-FourierShiftRegistration._cli = _cli
+FourierShiftRegistration._cli = _cli  # type: ignore

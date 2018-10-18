@@ -60,5 +60,5 @@ def regions_to_geojson(r, use_hull=True) -> List[Dict[str, Dict[str, Any]]]:
     return [make_dict(id_, verts) for id_, verts in enumerate(coordinates)]
 
 
-Segmentation._cli = _cli
+Segmentation._cli = _cli  # type: ignore
 Segmentation._cli_register()

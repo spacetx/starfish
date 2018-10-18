@@ -59,7 +59,7 @@ def version():
     import pkg_resources
     version = pkg_resources.require("starfish")[0].version
     print(version)
-version.no_art = True
+version.no_art = True  # type: ignore
 
 
 @starfish.command()
@@ -78,13 +78,13 @@ def show(in_json, sz):
 
 
 # Pipelines
-starfish.add_command(Registration._cli)
-starfish.add_command(Filter._cli)
-starfish.add_command(SpotFinder._cli)
-starfish.add_command(Segmentation._cli)
-starfish.add_command(TargetAssignment._cli)
-starfish.add_command(Decoder._cli)
+starfish.add_command(Registration._cli)  # type: ignore
+starfish.add_command(Filter._cli)  # type: ignore
+starfish.add_command(SpotFinder._cli)  # type: ignore
+starfish.add_command(Segmentation._cli)  # type: ignore
+starfish.add_command(TargetAssignment._cli)  # type: ignore
+starfish.add_command(Decoder._cli)  # type: ignore
 
 # Other
-starfish.add_command(build_cli)
-starfish.add_command(validate_cli)
+starfish.add_command(build_cli)  # type: ignore
+starfish.add_command(validate_cli)  # type: ignore

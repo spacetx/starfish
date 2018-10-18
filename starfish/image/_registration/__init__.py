@@ -24,7 +24,7 @@ class Registration(PipelineComponent):
         ctx.stack = ImageStack.from_path_or_url(input)
 
     @classmethod
-    def _run_cli(cls, ctx, instance):
+    def _cli_run(cls, ctx, instance):
         instance.run(ctx.stack)
         ctx.stack.write(ctx.ouput)
 

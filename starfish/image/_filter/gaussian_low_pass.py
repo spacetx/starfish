@@ -42,7 +42,7 @@ class GaussianLowPass(FilterAlgorithmBase):
                   help="indicates that the image stack should be filtered in 3d")
     @click.pass_context
     def _cli(cls, ctx, sigma, is_volume):
-        cls._run_cli(ctx, cls(sigma, is_volume))
+        cls._cli_run(ctx, cls(sigma, is_volume))
 
     @staticmethod
     def _low_pass(

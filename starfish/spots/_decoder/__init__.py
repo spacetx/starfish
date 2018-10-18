@@ -26,7 +26,7 @@ class Decoder(PipelineComponent):
         ctx.codebook = Codebook.from_json(ctx.codebook)
 
     @classmethod
-    def _cli_run(clx, ctx, instance):
+    def _cli_run(cls, ctx, instance):
         intensities = instance.run(ctx.intensities, ctx.codebook)
         intensities.save(ctx.output)
 

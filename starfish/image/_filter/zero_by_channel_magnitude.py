@@ -41,7 +41,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         help='Scales all rounds to have unit L2 norm across channels')
     @click.pass_context
     def _cli(cls, ctx, thresh, normalize):
-        cls._run_cli(ctx, cls(thresh, normalize))
+        cls._cli_run(ctx, cls(thresh, normalize))
 
     def run(
             self, stack: ImageStack,

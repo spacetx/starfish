@@ -49,7 +49,7 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
                   help="The image stack to align the input image stack to.")
     @click.pass_context
     def _cli(cls, ctx, upsampling, reference_stack):
-        cls._run_cli(ctx, cls(upsampling, reference_stack))
+        cls._cli_run(ctx, cls(upsampling, reference_stack))
 
     def run(self, image: ImageStack, in_place: bool=False) -> Optional[ImageStack]:
         """Register an ImageStack against a reference image.

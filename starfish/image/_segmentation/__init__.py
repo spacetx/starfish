@@ -27,7 +27,7 @@ class Segmentation(PipelineComponent):
         ctx.nuclei_stack = ImageStack.from_path_or_url(nuclei_stack)
 
     @classmethod
-    def _run_cli(cls, ctx, instance):
+    def _cli_run(cls, ctx, instance):
         regions = instance.run(ctx.hybridization_stack, ctx.nuclei_stack)
         geojson = regions_to_geojson(regions, use_hull=False)
 

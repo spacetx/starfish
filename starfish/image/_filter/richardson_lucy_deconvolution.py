@@ -51,7 +51,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
         help='(default True) if True, clip values below 0 and above 1')
     @click.pass_context
     def _cli(cls, ctx, num_iter, sigma, no_clip):
-        cls._run_cli(ctx, cls(num_iter, sigma, no_clip))
+        cls._cli_run(ctx, cls(num_iter, sigma, no_clip))
 
     # Here be dragons. This algorithm had a bug, but the results looked nice. Now we've "fixed" it
     # and the results look bad. #548 addresses this problem.

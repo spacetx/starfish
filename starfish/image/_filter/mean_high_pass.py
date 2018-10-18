@@ -52,7 +52,7 @@ class MeanHighPass(FilterAlgorithmBase):
         help="indicates that the image stack should be filtered in 3d")
     @click.pass_context
     def _cli(cls, ctx, size, is_volume):
-        cls._run_cli(ctx, cls(size, is_volume))
+        cls._cli_run(ctx, cls(size, is_volume))
 
     @staticmethod
     def _high_pass(image: np.ndarray, size: Number, rescale: bool=False) -> np.ndarray:

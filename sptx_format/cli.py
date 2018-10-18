@@ -1,5 +1,5 @@
 import click
-from sptx_format.validate_sptx import validate
+from sptx_format.validate_sptx import validate as validate_
 
 
 @click.command()
@@ -7,13 +7,14 @@ from sptx_format.validate_sptx import validate
               required=True,
               metavar="JSON_FILE_OR_URL")
 @click.option("--fuzz", is_flag=True)
-def validate(experiment_json, fuzz):
+@click.pass_context
+def validate(ctx, experiment_json, fuzz):
     """invokes validate with the parsed commandline arguments"""
     try:
-        valid = validate(experiment_json, fuzz)
+        valid = validate_(experiment_json, fuzz)
         if valid:
-            click.exit(0)
+            ctx.exit(0)
         else:
-            click.exit(1)
+            ctx.exit(1)
     except KeyboardInterrupt:
-        click.exit(3)
+        ctx.exit(3)

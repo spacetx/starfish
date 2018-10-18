@@ -31,7 +31,7 @@ class Segmentation(PipelineComponent):
 @click.group("segmentation")
 @click.option("--hybridization-stack", required=True)  # FIXME: type
 @click.option("--nuclei-stack", required=True)  # FIXME: type
-@click.option("o", "--output", required=True)
+@click.option("-o", "--output", required=True)
 @click.pass_context
 def _cli(ctx, hybridization_stack, nuclei_stack, output):
     print('Segmenting ...')

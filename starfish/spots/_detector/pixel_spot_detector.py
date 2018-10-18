@@ -116,9 +116,11 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
 @click.option('--crop-z', type=int, default=0)
 @click.pass_context
 def _cli(ctx, metric, distance_threshold, magnitude_threshold,
-         min_area, max_ara, norm_order):
-    instance = PixelSpotDetector(metric, distance_threshold, magnitude_threshold,
-                                 min_area, max_ara, norm_order)
+         min_area, max_area, norm_order, crop_x, crop_y, crop_z):
+    codebook = ctx.obj["codebook"]
+    instance = PixelSpotDetector(codebook, metric, distance_threshold, magnitude_threshold,
+                                 min_area, max_area, norm_order,
+                                 crop_x, crop_y, crop_z)
     ctx.obj["component"]._cli_run(ctx, instance)
 
 

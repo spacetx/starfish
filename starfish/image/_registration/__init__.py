@@ -16,18 +16,21 @@ class Registration(PipelineComponent):
 
     @classmethod
     def _cli_run(cls, ctx, instance):
+        output = ctx.obj["output"]
         stack = ctx.obj["stack"]
         instance.run(stack)
-        stack.write(ctx.ouput)
+        stack.write(output)
 
 @click.group("registration")
 @click.option("-i", "--input")  # FIXME
-@click.option("o", "--output", required=True)
+@click.option("-o", "--output", required=True)
 @click.pass_context
 def _cli(ctx, input, output):
     print("Registering...")
     ctx.obj = dict(
         component=Registration,
+        input=input,
+        output=output,
         stack=ImageStack.from_path_or_url(input),
     )
 

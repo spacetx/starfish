@@ -45,9 +45,10 @@ decorators = [
 for image_name in AUX_IMAGE_NAMES:
     decorators.append(dimensions_option(image_name, False))
 
-def build(output_dir, fov_count, hybridization_dimensions):
+def build(output_dir, fov_count, hybridization_dimensions, **kwargs):
     write_experiment_json(
-        output_dir, fov_count, hybridization_dimensions  # FIXME
+        output_dir, fov_count, hybridization_dimensions,
+        kwargs  # FIXME
     )
 
 for decorator in reversed(decorators):

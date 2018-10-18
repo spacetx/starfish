@@ -12,7 +12,7 @@ from .util import SpaceTxValidator
 
 def _get_absolute_schema_path(schema_name: str) -> str:
     """turn the name of the schema into an absolute path by joining it to <package_root>/schema."""
-    return resource_filename("validate_sptx", posixpath.join("schema", schema_name))
+    return resource_filename("sptx_format", posixpath.join("schema", schema_name))
 
 
 @click.command()
@@ -53,45 +53,35 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     else:
         valid &= experiment_validator.validate_object(experiment, name)
 
-    # validate manifests that it links to.
-    possible_manifests = []
-    manifest_validator = SpaceTxValidator(_get_absolute_schema_path('fov_manifest.json'))
-    with backend.read_contextmanager(experiment['primary_images']) as fh:
-        possible_manifests.append((json.load(fh), experiment['primary_images']))
-
-    # loop over all the manifests that are stored in auxiliary images. Disallowed names will
-    # have already been excluded by experiment validation.
-    for manifest in experiment['auxiliary_images'].values():
+    # loop over all the manifests that are stored in images. Disallowed names will have already been
+    # excluded by experiment validation.
+    manifests = []
+    for manifest in experiment['images'].values():
         with backend.read_contextmanager(manifest) as fh:
-            possible_manifests.append((json.load(fh), manifest))
+            manifests.append((json.load(fh), manifest))
 
-    # we allow the objects linked from primary_images and auxiliary images to either be
-    # manifests OR field_of_view files. We distinguish these by checking if they have a `contents`
-    # flag, which indicates it is a manifest.
     fovs = []
-    for manifest, filename in possible_manifests:
-        if 'contents' in manifest:  # is a manifest; validate
-            if fuzz:
-                manifest_validator.fuzz_object(manifest, filename)
-            else:
-                valid &= manifest_validator.validate_object(manifest, filename)
-
-            # contains fields of view
-            for key, fov in manifest['contents'].items():
-                with backend.read_contextmanager(fov) as fh:
-                    fovs.append((json.load(fh), fov))
-
-        else:  # manifest is a field of view
-            fovs.append((manifest, None))
-
-    # validate fovs
-    assert len(fovs) != 0
-    fov_validator = SpaceTxValidator(_get_absolute_schema_path('field_of_view/field_of_view.json'))
-    for fov, filename in fovs:
+    manifest_validator = SpaceTxValidator(_get_absolute_schema_path('fov_manifest.json'))
+    for manifest, filename in manifests:
         if fuzz:
-            fov_validator.fuzz_object(fov, filename)
+            manifest_validator.fuzz_object(manifest, filename)
         else:
-            valid &= fov_validator.validate_object(fov, filename)
+            if not manifest_validator.validate_object(manifest, filename):
+                valid = False
+            else:
+                for key, fov in manifest['contents'].items():
+                    with backend.read_contextmanager(fov) as fh:
+                        fovs.append((json.load(fh), fov))
+
+    # fovs may be empty if the manifests were not valid
+    if fovs:
+        fov_schema = _get_absolute_schema_path('field_of_view/field_of_view.json')
+        fov_validator = SpaceTxValidator(fov_schema)
+        for fov, filename in fovs:
+            if fuzz:
+                fov_validator.fuzz_object(fov, filename)
+            else:
+                valid &= fov_validator.validate_object(fov, filename)
 
     # validate codebook
     codebook_validator = SpaceTxValidator(_get_absolute_schema_path('codebook/codebook.json'))

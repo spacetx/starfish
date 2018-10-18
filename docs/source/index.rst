@@ -22,6 +22,9 @@ Starfish documentation
     contributing/contributing.md
 
 .. toctree::
+    debugging.rst
+
+.. toctree::
     license/license.rst
 
 .. toctree::

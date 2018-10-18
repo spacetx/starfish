@@ -1,5 +1,5 @@
 {
-  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/codebook.json",
+  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/fov-manifest.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "description": "A manifest listing one or more json files that each describe a field of view.",
   "type": "object",

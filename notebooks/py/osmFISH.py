@@ -8,7 +8,7 @@
 # EPY: END markdown
 
 # EPY: START code
-from starfish import data
+from starfish import data, FieldOfView
 from starfish.types import Indices
 import os
 # EPY: END code
@@ -27,6 +27,6 @@ experiment = data.osmFISH(use_test_data=use_test_data)
 # EPY: END markdown
 
 # EPY: START code
-image = experiment.fov().primary_image
+image = experiment.fov()[FieldOfView.PRIMARY_IMAGES]
 image.show_stack({Indices.CH: 0})
 # EPY: END code

@@ -48,17 +48,18 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
+    'm2r',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
-from recommonmark.parser import CommonMarkParser
-
-source_parsers = {
-    '.md': CommonMarkParser,
-}
+# from recommonmark.parser import CommonMarkParser
+#
+# source_parsers = {
+#     '.md': CommonMarkParser,
+# }
 source_suffix = ['.rst', '.md']
 
 # The master toctree document.

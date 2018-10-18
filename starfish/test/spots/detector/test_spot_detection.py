@@ -6,7 +6,7 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.spots._detector._base import SpotFinderAlgorithmBase
 from starfish.spots._detector.detect import detect_spots
 from starfish.spots._detector.gaussian import GaussianSpotDetector
-from starfish.spots._detector.local_max_peak_finder import LocalMaxPeakFinder
+from starfish.spots._detector.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
 from starfish.types import Indices
 
 
@@ -21,9 +21,9 @@ def simple_gaussian_spot_detector() -> GaussianSpotDetector:
     )
 
 
-def simple_local_max_spot_detector() -> LocalMaxPeakFinder:
+def simple_local_max_spot_detector() -> TrackpyLocalMaxPeakFinder:
     """create a basic local max peak finder"""
-    return LocalMaxPeakFinder(
+    return TrackpyLocalMaxPeakFinder(
         spot_diameter=3,
         min_mass=0.01,
         max_size=10,
@@ -37,7 +37,7 @@ local_max_spot_detector = simple_local_max_spot_detector()
 
 
 def synthetic_two_spot_3d_2round_2ch() -> ImageStack:
-    """produce a 2-channel 2-hyb ImageStack
+    """produce a 2-channel 2-round ImageStack
 
     Notes
     -----

@@ -3,13 +3,14 @@ from pkg_resources import resource_filename
 
 from .util import SpaceTxValidator
 
-schema_path = resource_filename("validate_sptx", "schema/fov_manifest.json")
+package_name = "sptx_format"
+schema_path = resource_filename(package_name, "schema/fov_manifest.json")
 validator = SpaceTxValidator(schema_path)
 
 
 def test_fov_manifest():
     fov_manifest_example_path = resource_filename(
-        "validate_sptx", "examples/fov_manifest/fov_manifest.json")
+        package_name, "examples/fov_manifest/fov_manifest.json")
     assert validator.validate_file(fov_manifest_example_path)
 
 

@@ -27,17 +27,15 @@ def stages(commands: Sequence[Sequence[Union[str, Callable]]],
     keep_data : bool
         If not true, shutil.rmtree will be called on the temporary
         directory used by this invocation.
+    STARFISH_COVERAGE :
+        This parameter is read from the environment. If set, then command lists will have
+        `coverage run ...` options prepended before execution.
 
     Return
     ------
     str :
         Path to the temporary directory used by this invocation.
 
-    Environment variables
-    ---------------------
-    STARFISH_COVERAGE :
-         If set, then command lists will have `coverage run ...` options
-         prepended before execution.
     """
 
     if keep_data:
@@ -85,16 +83,14 @@ def prepare_stage(stage: Sequence[Union[str, Callable]],
         of strings will be passed to subprocess.check_call.
     tempdir: str
         Temporary directory that will be used by the invoking method.
+    STARFISH_COVERAGE :
+        This parameter is read from the environment. If set, then command lists will have
+        `coverage run ...` options prepended before execution.
 
     Return
     ------
     Sequence of strings for passing to subprocess.check_call
 
-    Environment variables
-    ---------------------
-    STARFISH_COVERAGE:
-         If set, then command lists will have `coverage run ...` options
-         prepended before execution.
     """
     coverage_enabled = "STARFISH_COVERAGE" in os.environ
     cmdline = [

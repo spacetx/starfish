@@ -5,8 +5,9 @@ from pkg_resources import resource_filename
 from starfish.codebook._format import CURRENT_VERSION, DocumentKeys
 from .util import Fuzzer, SpaceTxValidator
 
-codebook_schema_path = resource_filename("validate_sptx", "schema/codebook/codebook.json")
-experiment_schema_path = resource_filename("validate_sptx", "schema/experiment.json")
+package_name = "sptx_format"
+codebook_schema_path = resource_filename(package_name, "schema/codebook/codebook.json")
+experiment_schema_path = resource_filename(package_name, "schema/experiment.json")
 codebook_validator = SpaceTxValidator(codebook_schema_path)
 experiment_validator = SpaceTxValidator(experiment_schema_path)
 
@@ -123,9 +124,9 @@ def test_fuzz_experiment():
     """
     experiment = {
         "version": "0.0.0",
-        "primary_images": "primary_images.json",
-        "auxiliary_images": {
-            "nuclei": "nuclei.json"
+        "images": {
+            "primary": "primary_images.json",
+            "nuclei": "nuclei.json",
         },
         "codebook": "codebook.json",
         "extras": {
@@ -139,9 +140,9 @@ A D I S M L	If the letter is present, mutation is valid!
 -----------	--------------------------------------------
 . . . . . .	version:
 . . . . . .	   0.0.0
-. . . . . .	primary_images:
-. . . . . .	   primary_images.json
-. D . . M .	auxiliary_images:
+. . . . . .	images:
+. . . . . .	   primary:
+. . . . . .	      primary_images.json
 . D . . . .	   nuclei:
 . D . . . .	      nuclei.json
 . . . . . .	codebook:

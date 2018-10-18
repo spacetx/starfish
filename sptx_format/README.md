@@ -1,15 +1,15 @@
-# sptx-format
+# The SpaceTx Image Format Specification
 
 ## Introduction
 
-This document describes the spaceTx file format specification for image-based biological assays. 
-The spaceTx format is designed to support the construction of a data tensor, which generalizes the approaches taken by sequential single-molecule FISH and assays that identify targets by building codes over multiple imaging rounds. 
+This document describes the spaceTx file format specification for image-based biological assays.
+The spaceTx format is designed to support the construction of a data tensor, which generalizes the approaches taken by sequential single-molecule FISH and assays that identify targets by building codes over multiple imaging rounds.
 Each of theses assays produce images that can form a data tensor.
 The data tensor contains a series of (x, y) planar image planes that represent specific z-planes, imaging channels (c), and imaging rounds (r).
-Together these form a 5-dimensional tensor (r, c, z, y, x) that serves as a general representation of an image-based transcriptomics or proteomics assay, and is the substrate of the starfish package. 
+Together these form a 5-dimensional tensor (r, c, z, y, x) that serves as a general representation of an image-based transcriptomics or proteomics assay, and is the substrate of the starfish package.
 
-The goal of this repository is to define a self-describing data format that specifies how a set of 2-d images form a field of view, and specifies how multiple fields of view interact to form a larger experiment. 
-The spaceTx format accomplishes this by combining these images, stored in 2-dimensional TIFF format, with a series of JSON files that describe how to organize each TIFF file into the 5-dimensional imaging tensor. 
+The goal of this repository is to define a self-describing data format that specifies how a set of 2-d images form a field of view, and specifies how multiple fields of view interact to form a larger experiment.
+The spaceTx format accomplishes this by combining these images, stored in 2-dimensional TIFF format, with a series of JSON files that describe how to organize each TIFF file into the 5-dimensional imaging tensor.
 Combined with imaging metadata and a pipeline recipe, both of which are defined elsewhere, these files enable a pipeline to generate the desired outputs of a spatial assay: a gene expression matrix augmented with spatial locations of transcripts and cells.
 
 ## Format Specification
@@ -24,19 +24,19 @@ Here, we tabulate the minimum set of required json files that can describe the i
 | field_of_view.json   | describes how individual 2-d image planes form an image tensor                                           |
 | codebook.json        | maps patterns of intensity in the channels and rounds of a field of view to target molecules |
 
-Each of these input types and their file formats are described in detail in the following sections. 
+Each of these input types and their file formats are described in detail in the following sections.
 
 ## Experiment
 
-The data manifest is a JSON file that ties together all information about the data images, auxiliary images (like nuclear stains), and the codebook needed to decode the experiment. 
-It is the file read by starfish to load data into the analysis environment. 
+The data manifest is a JSON file that ties together all information about the data images, auxiliary images (like nuclear stains), and the codebook needed to decode the experiment.
+It is the file read by starfish to load data into the analysis environment.
 
 Example:
 ```json
 {
   "version": "0.0.0",
-  "primary_images": "primary_images.json",
-  "auxiliary_images": {
+  "images": {
+    "primary": "primary_images.json",
     "nuclei": "nuclei.json"
   },
   "codebook": "codebook.json",
@@ -48,10 +48,10 @@ Example:
 
 ## Manifest
 
-Both the `primary_images.json` and `nuclei.json` files referenced by the above `experiment.json` may contain links to Field of View Manifests (for simple experiments with only one field of view, these fields may also directly reference a field of view). 
-The Manifest is a simple association of a field of view name with the json file that defines the field of view. 
-In this example, we demonstrate a primary images manifest with three fields of view. 
-Such an experiment would likely also have a nuclei manifest, which would _also_ contain three fields of view. 
+Both the `primary_images.json` and `nuclei.json` files referenced by the above `experiment.json` may contain links to Field of View Manifests (for simple experiments with only one field of view, these fields may also directly reference a field of view).
+The Manifest is a simple association of a field of view name with the json file that defines the field of view.
+In this example, we demonstrate a primary images manifest with three fields of view.
+Such an experiment would likely also have a nuclei manifest, which would _also_ contain three fields of view.
 
 ```json
 {
@@ -67,19 +67,19 @@ Such an experiment would likely also have a nuclei manifest, which would _also_ 
 
 ## Field of View
 
-The field of view is the most complex file in the spaceTx format, and must be created for each data tensor and auxiliary image tensor in an experiment. 
-It provides two key types of information: information about the field of view, and information about each tile contained in it. 
+The field of view is the most complex file in the spaceTx format, and must be created for each data tensor and auxiliary image tensor in an experiment.
+It provides two key types of information: information about the field of view, and information about each tile contained in it.
 
-The field_of_view.json file specifies the shape of the image tensor, including the size of the (X, Y) image in pixels, and the number of z-planes, imaging channels, and imaging rounds in the experiment. 
+The field_of_view.json file specifies the shape of the image tensor, including the size of the (X, Y) image in pixels, and the number of z-planes, imaging channels, and imaging rounds in the experiment.
 Thus, an image tensor has shape (r, c, z, y, x).
 For experiments that do not leverage all of these concepts, the values can simply be set to one, and that dimension of the tensor will be ignored.
 For example, barcoded experiments do not leverage z, and as such, the shape of these experiments will be (r, c, 1, y, x)
-In contrast, smFISH experiments may not leverage multiple imaging rounds, but often take optical sections of the tissue through multiple z-planes, and might have shape (1, c, z, y, z). 
+In contrast, smFISH experiments may not leverage multiple imaging rounds, but often take optical sections of the tissue through multiple z-planes, and might have shape (1, c, z, y, z).
 
 
-For each individual tile, the Field of View specifies the portion of the tensor the tile corresponds to by providing the indicies of the tile in (r, c, z), the location of the tile, and the sha256 hash of the file data, to guard against corruption. 
+For each individual tile, the Field of View specifies the portion of the tensor the tile corresponds to by providing the indicies of the tile in (r, c, z), the location of the tile, and the sha256 hash of the file data, to guard against corruption.
 
-Finally, each tile also specifies the coordinates of the image in physical space, relative to some experiment-wide reference point. 
+Finally, each tile also specifies the coordinates of the image in physical space, relative to some experiment-wide reference point.
 
 The below example describes a 2-channel, 8-round coded experiment that samples a tissue section using 45 discrete z-planes. For conciseness, the tile data is truncated, and shows only the information for two tiles, while in practice there would be 2 * 8 * 45 tiles.
 
@@ -147,11 +147,11 @@ The below example describes a 2-channel, 8-round coded experiment that samples a
 
 ## Codebook
 
-The final part of the spaceTx specification, the codebook describes how intensities detected in the image tensor correspond to the targets of the assay. 
-The codebook is an array, where each object in the array lists a codeword and the target it corresponds to. 
-Each codeword is made up of one or more json objects, each of which describe the expected intensity value for tiles of specific (channel, round) combinations. 
+The final part of the spaceTx specification, the codebook describes how intensities detected in the image tensor correspond to the targets of the assay.
+The codebook is an array, where each object in the array lists a codeword and the target it corresponds to.
+Each codeword is made up of one or more json objects, each of which describe the expected intensity value for tiles of specific (channel, round) combinations.
 
-For smFISH experiments where each channel corresponds to a different target and there is only one imaging round, the codebook is very simple: 
+For smFISH experiments where each channel corresponds to a different target and there is only one imaging round, the codebook is very simple:
 
 ```json
 [
@@ -176,7 +176,7 @@ For smFISH experiments where each channel corresponds to a different target and 
 ]
 ```
 In this example, channels 0, 1, and 2 correspond to `SCUBE2`, `BRCA`, and `ACTB`, respectively.
-In contrast, a coded experiment may have a more complex codebook: 
+In contrast, a coded experiment may have a more complex codebook:
 
 ```json
 [
@@ -204,6 +204,5 @@ In contrast, a coded experiment may have a more complex codebook:
 ]
 ```
 
-The above example describes the coding scheme of an experiment with 2 rounds and 2 channels, where each code expects exactly two images out of four to produce signal for a given target. 
-In the above example, a spot in the image tensor would decode to `SCUBE2` if the spot was detected in (round=0, channel=0) and (round=0, channel=1). 
-
+The above example describes the coding scheme of an experiment with 2 rounds and 2 channels, where each code expects exactly two images out of four to produce signal for a given target.
+In the above example, a spot in the image tensor would decode to `SCUBE2` if the spot was detected in (round=0, channel=0) and (round=0, channel=1).

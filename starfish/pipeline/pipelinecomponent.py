@@ -1,4 +1,3 @@
-import click
 import collections
 from typing import Mapping, Optional, Type
 
@@ -51,3 +50,8 @@ class PipelineComponent(metaclass=PipelineComponentType):
     @classmethod
     def _cli(cls, *args, **kwargs):
         raise NotImplementedError()
+
+    @classmethod
+    def _cli_register(cls):
+        for algorithm_cls in cls._algorithm_to_class_map().values():
+            cls._cli.add_command(algorithm_cls._cli)

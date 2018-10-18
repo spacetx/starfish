@@ -1,7 +1,7 @@
-import argparse
 from functools import partial
 from typing import Optional
 
+import click
 import numpy as np
 from scipy.signal import convolve, fftconvolve
 
@@ -41,14 +41,17 @@ class DeconvolvePSF(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"num_iter": 1, "sigma": 1}
 
     @classmethod
-    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
-        group_parser.add_argument(
-            '--num-iter', type=int, help='number of iterations to run')
-        group_parser.add_argument(
-            '--sigma', type=float, help='standard deviation of gaussian kernel')
-        group_parser.add_argument(
-            '--no-clip', action='store_false',
-            help='(default True) if True, clip values below 0 and above 1')
+    @click.command("DeconvolvePSF")
+    @click.option(
+        '--num-iter', type=int, help='number of iterations to run')
+    @click.option(
+        '--sigma', type=float, help='standard deviation of gaussian kernel')
+    @click.option(
+        '--no-clip', is_flag=True,
+        help='(default True) if True, clip values below 0 and above 1')
+    @click.pass_context
+    def _cli(cls, ctx, num_iter, sigma, no_clip):
+        cls._run_cli(ctx, cls(num_iter, sigma, no_clip))
 
     # Here be dragons. This algorithm had a bug, but the results looked nice. Now we've "fixed" it
     # and the results look bad. #548 addresses this problem.

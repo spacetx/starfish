@@ -1,8 +1,8 @@
 # Definition of the processing class
-import argparse
 from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
+import click
 import numpy as np
 from scipy.ndimage import gaussian_laplace
 
@@ -81,19 +81,22 @@ class Laplace(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"sigma": 0.5}
 
     @classmethod
-    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
-        group_parser.add_argument(
-            "--sigma", type=float,
-            help="Standard deviation of gaussian kernel for spot enhancement")
-        group_parser.add_argument(
-            "--mode", default="reflect",
-            help="How the input array is extended when the filter overlaps a border")
-        group_parser.add_argument(
-            "--cval", default=0.0,
-            help="Value to fill past edges of input if mode is ‘constant")
-        group_parser.add_argument(
-            "--is-volume", action="store_true",
-            help="indicates that the image stack should be filtered in 3d")
+    @click.command("Laplace")
+    @click.option(
+        "--sigma", type=float,
+        help="Standard deviation of gaussian kernel for spot enhancement")
+    @click.option(
+        "--mode", default="reflect",
+        help="How the input array is extended when the filter overlaps a border")
+    @click.option(
+        "--cval", default=0.0,
+        help="Value to fill past edges of input if mode is ‘constant")
+    @click.option(
+        "--is-volume", is_flag=True,
+        help="indicates that the image stack should be filtered in 3d")
+    @click.pass_context
+    def _cli(cls, ctx, sigma, mode, cval, is_volume):
+        cls._run_cli(ctx, cls(sigma, mode, cval, is_volume))
 
     @staticmethod
     def _gaussian_laplace(image: np.ndarray, sigma: Union[Number, Tuple[Number]],

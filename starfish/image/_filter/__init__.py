@@ -1,5 +1,6 @@
-import click
 from typing import Type
+
+import click
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
@@ -22,14 +23,14 @@ class Filter(PipelineComponent):
     def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
         return _base.FilterAlgorithmBase
 
-    @classmethod
-    @click.group(name="filter")
+    @click.group("filter")
     @click.option("-i", "--input")  # FIXME
     @click.option("o", "--output", required=True)
     @click.pass_context
-    def _cli(cls, ctx, input, output):
-        print('Filtering images ...')
-        ctx.obj = ImageStack.from_path_or_url(input)
+    def _cli(ctx, input, output):
+        print("Filtering images...")
+        ctx.stack = ImageStack.from_path_or_url(input)
+
 
 for algorithm_cls in Filter._algorithm_to_class_map().values():
     Filter._cli.add_command(algorithm_cls._cli)

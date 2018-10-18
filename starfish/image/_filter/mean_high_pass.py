@@ -1,7 +1,7 @@
-import argparse
 from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
+import click
 import numpy as np
 from scipy.ndimage.filters import uniform_filter
 
@@ -44,12 +44,15 @@ class MeanHighPass(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"size": 1}
 
     @classmethod
-    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
-        group_parser.add_argument(
-            "--size", type=float, help="width of the kernel")
-        group_parser.add_argument(
-            "--is-volume", action="store_true",
-            help="indicates that the image stack should be filtered in 3d")
+    @click.command("MeanHighPass")
+    @click.option(
+        "--size", type=float, help="width of the kernel")
+    @click.option(
+        "--is-volume", is_flag=True,
+        help="indicates that the image stack should be filtered in 3d")
+    @click.pass_context
+    def _cli(cls, ctx, size, is_volume):
+        cls._run_cli(ctx, cls(size, is_volume))
 
     @staticmethod
     def _high_pass(image: np.ndarray, size: Number, rescale: bool=False) -> np.ndarray:

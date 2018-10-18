@@ -1,9 +1,9 @@
-import click
 from typing import Type
+
+import click
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
-from starfish.util.argparse import FsExistsType
 from . import fourier_shift
 from ._base import RegistrationAlgorithmBase
 
@@ -14,14 +14,18 @@ class Registration(PipelineComponent):
     def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
         return RegistrationAlgorithmBase
 
-    @classmethod
-    @click.group(name="registration")
+    @click.group("registration")
     @click.option("-i", "--input")  # FIXME
     @click.option("o", "--output", required=True)
     @click.pass_context
-    def _cli(cls, ctx, input, output):
-        print('Registering ...')
-        ctx.obj = ImageStack.from_path_or_url(args.input)
+    def _cli(ctx, input, output):
+        print("Registering...")
+        ctx.stack = ImageStack.from_path_or_url(input)
+
+    @classmethod
+    def _run_cli(cls, ctx, instance):
+        instance.run(ctx.stack)
+        ctx.stack.write(ctx.ouput)
 
 
 for algorithm_cls in Registration._algorithm_to_class_map().values():

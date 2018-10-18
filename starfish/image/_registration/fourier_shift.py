@@ -1,7 +1,7 @@
-import click
 from copy import deepcopy
 from typing import Optional, Tuple, Union
 
+import click
 import numpy as np
 from scipy.ndimage import fourier_shift
 from skimage.feature import register_translation
@@ -9,7 +9,6 @@ from skimage.feature import register_translation
 from starfish.image._filter.util import preserve_float_range
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
-from starfish.util.argparse import FsExistsType
 from ._base import RegistrationAlgorithmBase
 
 
@@ -46,13 +45,11 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
     @classmethod
     @click.command("FourierShiftRegistration")
     @click.option("--upsampling", default=1, type=int, help="Amount of up-sampling")
-    @click.option("--reference-stack", required=True, # FIXME
+    @click.option("--reference-stack", required=True,  # FIXME
                   help="The image stack to align the input image stack to.")
     @click.pass_context
     def _cli(cls, ctx, upsampling, reference_stack):
-        instance = cls(upsampling, reference_stack)
-        instance.run(ctx.obj)
-        stack.write(ctx.ouput)
+        cls._run_cli(ctx, cls(upsampling, reference_stack))
 
     def run(self, image: ImageStack, in_place: bool=False) -> Optional[ImageStack]:
         """Register an ImageStack against a reference image.

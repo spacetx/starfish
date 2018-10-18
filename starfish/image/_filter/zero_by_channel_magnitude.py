@@ -1,7 +1,7 @@
-import argparse
 from copy import deepcopy
 from typing import Optional
 
+import click
 import numpy as np
 from tqdm import tqdm
 
@@ -32,13 +32,16 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"thresh": 0, "normalize": True}
 
     @classmethod
-    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
-        group_parser.add_argument(
-            '--thresh', type=float,
-            help='minimum magnitude threshold for pixels across channels')
-        group_parser.add_argument(
-            '--normalize', action="store_true",
-            help='Scales all rounds to have unit L2 norm across channels')
+    @click.command("ZeroByChannelMagnitude")
+    @click.option(
+        '--thresh', type=float,
+        help='minimum magnitude threshold for pixels across channels')
+    @click.option(
+        '--normalize', is_flag=True,
+        help='Scales all rounds to have unit L2 norm across channels')
+    @click.pass_context
+    def _cli(cls, ctx, thresh, normalize):
+        cls._run_cli(ctx, cls(thresh, normalize))
 
     def run(
             self, stack: ImageStack,

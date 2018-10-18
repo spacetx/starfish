@@ -51,7 +51,7 @@ def starfish(ctx, profile):
             stats = Stats(profiler)
             stats.sort_stats('tottime').print_stats(PROFILER_LINES)
 
-        ctx.call_at_close(print_profile)
+        ctx.call_on_close(print_profile)
 
 
 @starfish.command()

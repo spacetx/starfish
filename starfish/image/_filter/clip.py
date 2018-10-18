@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Optional
 
+import click
 import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
@@ -31,11 +32,13 @@ class Clip(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"p_min": 0, "p_max": 100}
 
     @classmethod
-    def _add_arguments(cls, group_parser) -> None:
-        group_parser.add_argument(
-            "--p-min", default=0, type=int, help="clip intensities below this percentile")
-        group_parser.add_argument(
-            "--p-max", default=100, type=int, help="clip intensities above this percentile")
+    @click.command("Clip")
+    @click.option(
+        "--p-min", default=0, type=int, help="clip intensities below this percentile")
+    @click.option(
+        "--p-max", default=100, type=int, help="clip intensities above this percentile")
+    def _cli(cls, ctx, p_min, p_max):
+        cls._cli_run(ctx, cls(p_min, p_max))
 
     @staticmethod
     def _clip(image: np.ndarray, p_min: int, p_max: int) -> np.ndarray:

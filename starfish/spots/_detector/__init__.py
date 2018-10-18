@@ -20,7 +20,7 @@ class SpotFinder(PipelineComponent):
         return _base.SpotFinderAlgorithmBase
 
     @classmethod
-    @click.command("detect_spots")
+    @click.group("detect_spots")
     @click.option("-i", "--input", required=True)  # FIXME: type
     @click.option("-o", "--output", required=True)
     @click.option(
@@ -30,7 +30,7 @@ class SpotFinder(PipelineComponent):
         )
     )
     @click.option(
-        '--reference-image-from-max-projection', default=False, action='store_true', help=(
+        '--reference-image-from-max-projection', default=False, is_flag=True, help=(
             'Construct a reference image by max projecting imaging rounds and channels. Spots '
             'are found in this image and then measured across all images in the input stack.'
         )

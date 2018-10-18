@@ -1,6 +1,7 @@
 import warnings
 from typing import Optional, Tuple, Union
 
+import click
 import numpy as np
 import xarray as xr
 from trackpy import locate
@@ -161,31 +162,36 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
         return intensity_table
 
     @classmethod
-    def _add_arguments(cls, group_parser):
-        group_parser.add_argument("--spot-diameter", type=str, help='expected spot size')
-        group_parser.add_argument(
-            "--min-mass", default=4, type=int, help="minimum integrated spot intensity")
-        group_parser.add_argument(
-            "--max-size", default=6, type=int, help="maximum radius of gyration of brightness")
-        group_parser.add_argument(
-            "--separation", default=5, type=float, help="minimum distance between spots")
-        group_parser.add_argument(
-            "--noise-size", default=None, type=int,
-            help="width of gaussian blurring kernel, in pixels")
-        group_parser.add_argument(
-            "--smoothing-size", default=None, type=int,
-            help="odd integer. Size of boxcar (moving average) filter in pixels. Default is the "
-                 "Diameter"
-        )
-        group_parser.add_argument(
-            "--preprocess", action="store_true",
-            help="if passed, gaussian and boxcar filtering are applied")
-        group_parser.add_argument(
-            "--show", default=False, action='store_true', help="display results visually")
-        group_parser.add_argument(
-            "--percentile", default=None, type=float,
-            help="clip bandpass below this value. Thresholding is done on already background-"
-                 "subtracted images. Default 1 for integer images and 1/255 for float")
-        group_parser.add_argument(
-            "--is-volume", action="store_true",
-            help="indicates that the image stack should be filtered in 3d")
+    @click.command("TrackpyLocalMaxPeakFinder")
+    @click.option("--spot-diameter", type=str, help='expected spot size')
+    @click.option(
+        "--min-mass", default=4, type=int, help="minimum integrated spot intensity")
+    @click.option(
+        "--max-size", default=6, type=int, help="maximum radius of gyration of brightness")
+    @click.option(
+        "--separation", default=5, type=float, help="minimum distance between spots")
+    @click.option(
+        "--noise-size", default=None, type=int,
+        help="width of gaussian blurring kernel, in pixels")
+    @click.option(
+        "--smoothing-size", default=None, type=int,
+        help="odd integer. Size of boxcar (moving average) filter in pixels. Default is the "
+             "Diameter"
+    )
+    @click.option(
+        "--preprocess", is_flag=True,
+        help="if passed, gaussian and boxcar filtering are applied")
+    @click.option(
+        "--show", default=False, is_flag=True, help="display results visually")
+    @click.option(
+        "--percentile", default=None, type=float,
+        help="clip bandpass below this value. Thresholding is done on already background-"
+             "subtracted images. Default 1 for integer images and 1/255 for float")
+    @click.option(
+        "--is-volume", is_flag=True,
+        help="indicates that the image stack should be filtered in 3d")
+    @click.pass_context
+    def _cli(cls, ctx, spot_diameter, min_max, max_size, separation, noise_size, smooth_size,
+             preprocess, show, percentile, is_volume):
+        cls._cli(ctx, cls(spot_diameter, min_max, max_size, separation, noise_size, smooth_size,
+                          preprocess, show, percentile, is_volume))

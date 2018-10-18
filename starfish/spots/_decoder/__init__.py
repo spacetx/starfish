@@ -16,7 +16,7 @@ class Decoder(PipelineComponent):
         return _base.DecoderAlgorithmBase
 
     @classmethod
-    @click.command("decode")
+    @click.group("decode")
     @click.option("-i", "--input", required=True)  # FIXME: type
     @click.option("-o", "--output", required=True)
     @click.option("--codebook", required=True)  # FIXME: type

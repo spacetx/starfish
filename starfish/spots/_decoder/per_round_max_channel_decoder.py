@@ -1,3 +1,5 @@
+import click
+
 from starfish.codebook.codebook import Codebook
 from starfish.intensity_table.intensity_table import IntensityTable
 from ._base import DecoderAlgorithmBase
@@ -9,8 +11,10 @@ class PerRoundMaxChannelDecoder(DecoderAlgorithmBase):
         pass
 
     @classmethod
-    def _add_arguments(cls, group_parser):
-        pass
+    @click.command("PerRoundMaxChannelDecoder")
+    @click.pass_context
+    def _cli(cls, ctx):
+        cls._cli_run(ctx, cls())
 
     def run(self, intensities: IntensityTable, codebook: Codebook) -> IntensityTable:
         """Decode spots by selecting the max-valued channel in each sequencing round

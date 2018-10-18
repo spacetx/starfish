@@ -1,3 +1,4 @@
+import click
 import numpy as np
 import pandas as pd
 import regional
@@ -17,8 +18,10 @@ class PointInPoly2D(TargetAssignmentAlgorithm):
         """
 
     @classmethod
-    def _add_arguments(cls, parser) -> None:
-        pass
+    @click.command("PointInPoly2D")
+    @click.pass_context
+    def _cli(cls, ctx):
+        cls._cli_run(cls())
 
     @staticmethod
     def _assign(

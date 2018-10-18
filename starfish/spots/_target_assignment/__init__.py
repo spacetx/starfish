@@ -17,7 +17,7 @@ class TargetAssignment(PipelineComponent):
         return TargetAssignmentAlgorithm
 
     @classmethod
-    @click.command("target_assignment")
+    @click.group("target_assignment")
     @click.option("--coordinates-geojson", required=True)  # FIXME: type
     @click.option("--intensities", required=True)  # FIXME: type
     @click.option("-o", "--output", required=True)

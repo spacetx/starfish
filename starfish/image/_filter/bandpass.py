@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Optional
 
+import click
 import numpy as np
 from trackpy import bandpass
 
@@ -41,16 +42,19 @@ class Bandpass(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"lshort": 1, "llong": 3, "threshold": 0.01}
 
     @classmethod
-    def _add_arguments(cls, group_parser) -> None:
-        group_parser.add_argument(
-            "--lshort", type=float, help="filter signals below this frequency")
-        group_parser.add_argument(
-            "--llong", type=int, help="filter signals above this frequency")
-        group_parser.add_argument(
-            "--threshold", type=int, help="clip pixels below this intensity value")
-        group_parser.add_argument(
-            "--truncate", default=4, type=float,
-            help="truncate the filter at this many standard deviations")
+    @click.command("Bandpass")
+    @click.option(
+        "--lshort", type=float, help="filter signals below this frequency")
+    @click.option(
+        "--llong", type=int, help="filter signals above this frequency")
+    @click.option(
+        "--threshold", type=int, help="clip pixels below this intensity value")
+    @click.option(
+        "--truncate", default=4, type=float,
+        help="truncate the filter at this many standard deviations")
+    @click.pass_context
+    def _cli(cls, ctx, lshort, llong, threshold, truncate):
+        cls._cli_run(ctx, cls(lshort, llong, threshold, truncate))
 
     @staticmethod
     def _bandpass(

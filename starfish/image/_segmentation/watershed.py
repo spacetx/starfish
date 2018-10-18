@@ -1,5 +1,6 @@
 from typing import Optional, Tuple
 
+import click
 import numpy as np
 import regional
 import scipy.ndimage.measurements as spm
@@ -27,13 +28,16 @@ class Watershed(SegmentationAlgorithmBase):
         self._segmentation_instance: Optional[_WatershedSegmenter] = None
 
     @classmethod
-    def _add_arguments(cls, group_parser) -> None:
-        group_parser.add_argument(
-            "--dapi-threshold", default=.16, type=float, help="DAPI threshold")
-        group_parser.add_argument(
-            "--input-threshold", default=.22, type=float, help="Input threshold")
-        group_parser.add_argument(
-            "--min-distance", default=57, type=int, help="Minimum distance between cells")
+    @click.command("Watershed")
+    @click.option(
+        "--dapi-threshold", default=.16, type=float, help="DAPI threshold")
+    @click.option(
+        "--input-threshold", default=.22, type=float, help="Input threshold")
+    @click.option(
+        "--min-distance", default=57, type=int, help="Minimum distance between cells")
+    @click.pass_context
+    def _cli(cls, ctx, dapi_threshold, input_threshold, min_distance):
+        cls._cli_run(ctx, cls(dapi_threshold, input_threshold, min_distance))
 
     def run(self, hybridization_stack: ImageStack, nuclei_stack: ImageStack) -> regional.many:
 

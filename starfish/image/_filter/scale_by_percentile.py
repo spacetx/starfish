@@ -28,16 +28,6 @@ class ScaleByPercentile(FilterAlgorithmBase):
 
     _DEFAULT_TESTING_PARAMETERS = {"p": 0}
 
-    @classmethod
-    @click.command("ScaleByPercentage")
-    @click.option(
-        "--p", default=100, type=int, help="scale images by this percentile")
-    @click.option(  # FIXME: was this intentionally missed?
-        "--is-volume", is_flag=True, help="filter 3D volumes")
-    @click.pass_context
-    def _cli(cls, ctx, p, is_volume):
-        cls._cli_run(ctx, cls(p, is_volume))
-
     @staticmethod
     def _scale(image: np.ndarray, p: int) -> np.ndarray:
         """Clip values of img below and above percentiles p_min and p_max
@@ -99,3 +89,15 @@ class ScaleByPercentile(FilterAlgorithmBase):
             split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
+
+@click.command("ScaleByPercentile")
+@click.option(
+    "--p", default=100, type=int, help="scale images by this percentile")
+@click.option(  # FIXME: was this intentionally missed?
+    "--is-volume", is_flag=True, help="filter 3D volumes")
+@click.pass_context
+def _cli(ctx, p, is_volume):
+    ctx.obj["component"]._cli_run(ctx, ScaleByPercentile(p, is_volume))
+
+
+ScaleByPercentile._cli = _cli

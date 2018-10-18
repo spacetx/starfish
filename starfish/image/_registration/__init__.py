@@ -15,18 +15,22 @@ class Registration(PipelineComponent):
         return RegistrationAlgorithmBase
 
     @classmethod
-    @click.group("registration")
-    @click.option("-i", "--input")  # FIXME
-    @click.option("o", "--output", required=True)
-    @click.pass_context
-    def _cli(cls, ctx, input, output):
-        print("Registering...")
-        ctx.stack = ImageStack.from_path_or_url(input)
-
-    @classmethod
     def _cli_run(cls, ctx, instance):
-        instance.run(ctx.stack)
-        ctx.stack.write(ctx.ouput)
+        stack = ctx.obj["stack"]
+        instance.run(stack)
+        stack.write(ctx.ouput)
+
+@click.group("registration")
+@click.option("-i", "--input")  # FIXME
+@click.option("o", "--output", required=True)
+@click.pass_context
+def _cli(ctx, input, output):
+    print("Registering...")
+    ctx.obj = dict(
+        component=Registration,
+        stack=ImageStack.from_path_or_url(input),
+    )
 
 
+Registration._cli = _cli
 Registration._cli_register()

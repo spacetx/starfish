@@ -16,24 +16,31 @@ class Segmentation(PipelineComponent):
         return SegmentationAlgorithmBase
 
     @classmethod
-    @click.group("segmentation")
-    @click.option("--hybridization-stack", required=True)  # FIXME: type
-    @click.option("--nuclei-stack", required=True)  # FIXME: type
-    @click.option("o", "--output", required=True)
-    @click.pass_context
-    def _cli(cls, ctx, hybridization_stack, nuclei_stack, output):
-        print('Segmenting ...')
-        ctx.hybridization_stack = ImageStack.from_path_or_url(hybridization_stack)
-        ctx.nuclei_stack = ImageStack.from_path_or_url(nuclei_stack)
-
-    @classmethod
     def _cli_run(cls, ctx, instance):
-        regions = instance.run(ctx.hybridization_stack, ctx.nuclei_stack)
+        output = ctx.obj["output"]
+        hyb_stack = ctx.obj["hybridization_stack"]
+        nuc_stack = ctx.obj["nuclei_stack"]
+        regions = instance.run(hyb_stack, nuc_stack)
         geojson = regions_to_geojson(regions, use_hull=False)
 
-        print("Writing | regions geojson to: {}".format(ctx.output))
-        with open(ctx.output, "w") as f:
+        print("Writing | regions geojson to: {}".format(output))
+        with open(output, "w") as f:
             f.write(json.dumps(geojson))
+
+
+@click.group("segmentation")
+@click.option("--hybridization-stack", required=True)  # FIXME: type
+@click.option("--nuclei-stack", required=True)  # FIXME: type
+@click.option("o", "--output", required=True)
+@click.pass_context
+def _cli(ctx, hybridization_stack, nuclei_stack, output):
+    print('Segmenting ...')
+    ctx.obj = dict(
+        component=Segmentation,
+        output=output,
+        hybridization_stack=ImageStack.from_path_or_url(hybridization_stack),
+        nuclei_stack=ImageStack.from_path_or_url(nuclei_stack),
+    )
 
 
 def regions_to_geojson(r, use_hull=True) -> List[Dict[str, Dict[str, Any]]]:
@@ -53,4 +60,5 @@ def regions_to_geojson(r, use_hull=True) -> List[Dict[str, Dict[str, Any]]]:
     return [make_dict(id_, verts) for id_, verts in enumerate(coordinates)]
 
 
+Segmentation._cli = _cli
 Segmentation._cli_register()

@@ -31,16 +31,6 @@ class Clip(FilterAlgorithmBase):
 
     _DEFAULT_TESTING_PARAMETERS = {"p_min": 0, "p_max": 100}
 
-    @classmethod
-    @click.command("Clip")
-    @click.option(
-        "--p-min", default=0, type=int, help="clip intensities below this percentile")
-    @click.option(
-        "--p-max", default=100, type=int, help="clip intensities above this percentile")
-    @click.pass_context
-    def _cli(cls, ctx, p_min, p_max):
-        cls._cli_run(ctx, cls(p_min, p_max))
-
     @staticmethod
     def _clip(image: np.ndarray, p_min: int, p_max: int) -> np.ndarray:
         """Clip values of img below and above percentiles p_min and p_max
@@ -100,3 +90,15 @@ class Clip(FilterAlgorithmBase):
             split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
+
+
+@click.command("Clip")
+@click.option(
+    "--p-min", default=0, type=int, help="clip intensities below this percentile")
+@click.option(
+    "--p-max", default=100, type=int, help="clip intensities above this percentile")
+@click.pass_context
+def _cli(ctx, p_min, p_max):
+    ctx.obj["component"]._cli_run(ctx, Clip(p_min, p_max))
+
+Clip._cli = _cli

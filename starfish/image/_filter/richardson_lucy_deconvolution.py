@@ -40,19 +40,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
 
     _DEFAULT_TESTING_PARAMETERS = {"num_iter": 1, "sigma": 1}
 
-    @classmethod
-    @click.command("DeconvolvePSF")
-    @click.option(
-        '--num-iter', type=int, help='number of iterations to run')
-    @click.option(
-        '--sigma', type=float, help='standard deviation of gaussian kernel')
-    @click.option(
-        '--no-clip', is_flag=True,
-        help='(default True) if True, clip values below 0 and above 1')
-    @click.pass_context
-    def _cli(cls, ctx, num_iter, sigma, no_clip):
-        cls._cli_run(ctx, cls(num_iter, sigma, no_clip))
-
     # Here be dragons. This algorithm had a bug, but the results looked nice. Now we've "fixed" it
     # and the results look bad. #548 addresses this problem.
     @staticmethod
@@ -175,3 +162,19 @@ class DeconvolvePSF(FilterAlgorithmBase):
             in_place=in_place
         )
         return result
+
+
+@click.command("DeconvolvePSF")
+@click.option(
+    '--num-iter', type=int, help='number of iterations to run')
+@click.option(
+    '--sigma', type=float, help='standard deviation of gaussian kernel')
+@click.option(
+    '--no-clip', is_flag=True,
+    help='(default True) if True, clip values below 0 and above 1')
+@click.pass_context
+def _cli(ctx, num_iter, sigma, no_clip):
+    ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, no_clip))
+
+
+DeconvolvePSF._cli = _cli

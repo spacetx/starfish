@@ -17,12 +17,6 @@ class PointInPoly2D(TargetAssignmentAlgorithm):
         PointInPoly accepts no parameters, but all pipeline components must accept arbitrary kwargs
         """
 
-    @classmethod
-    @click.command("PointInPoly2D")
-    @click.pass_context
-    def _cli(cls, ctx):
-        cls._cli_run(cls())
-
     @staticmethod
     def _assign(
             cells_region: regional.many, intensities: IntensityTable, use_hull: bool=True, verbose:
@@ -75,3 +69,12 @@ class PointInPoly2D(TargetAssignmentAlgorithm):
         """
         # TODO must support filtering on the passes filter column
         return self._assign(regions, intensity_table, use_hull=True, verbose=verbose)
+
+
+@click.command("PointInPoly2D")
+@click.pass_context
+def _cli(ctx):
+    ctx.obj["component"]._cli_run(PointInPoly2D())
+
+
+PointInPoly2D._cli = _cli

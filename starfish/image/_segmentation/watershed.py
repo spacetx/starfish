@@ -27,18 +27,6 @@ class Watershed(SegmentationAlgorithmBase):
         self.min_distance = min_distance
         self._segmentation_instance: Optional[_WatershedSegmenter] = None
 
-    @classmethod
-    @click.command("Watershed")
-    @click.option(
-        "--dapi-threshold", default=.16, type=float, help="DAPI threshold")
-    @click.option(
-        "--input-threshold", default=.22, type=float, help="Input threshold")
-    @click.option(
-        "--min-distance", default=57, type=int, help="Minimum distance between cells")
-    @click.pass_context
-    def _cli(cls, ctx, dapi_threshold, input_threshold, min_distance):
-        cls._cli_run(ctx, cls(dapi_threshold, input_threshold, min_distance))
-
     def run(self, hybridization_stack: ImageStack, nuclei_stack: ImageStack) -> regional.many:
 
         # create a 'stain' for segmentation
@@ -195,3 +183,18 @@ class _WatershedSegmenter:
         plt.title('Segmented Cells')
 
         return plt.gca()
+
+
+@click.command("Watershed")
+@click.option(
+    "--dapi-threshold", default=.16, type=float, help="DAPI threshold")
+@click.option(
+    "--input-threshold", default=.22, type=float, help="Input threshold")
+@click.option(
+    "--min-distance", default=57, type=int, help="Minimum distance between cells")
+@click.pass_context
+def _cli(ctx, dapi_threshold, input_threshold, min_distance):
+    ctx.obj["component"]._cli_run(ctx, Watershed(dapi_threshold, input_threshold, min_distance))
+
+
+Watershed._cli = _cli

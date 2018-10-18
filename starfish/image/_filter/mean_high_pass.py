@@ -43,17 +43,6 @@ class MeanHighPass(FilterAlgorithmBase):
 
     _DEFAULT_TESTING_PARAMETERS = {"size": 1}
 
-    @classmethod
-    @click.command("MeanHighPass")
-    @click.option(
-        "--size", type=float, help="width of the kernel")
-    @click.option(
-        "--is-volume", is_flag=True,
-        help="indicates that the image stack should be filtered in 3d")
-    @click.pass_context
-    def _cli(cls, ctx, size, is_volume):
-        cls._cli_run(ctx, cls(size, is_volume))
-
     @staticmethod
     def _high_pass(image: np.ndarray, size: Number, rescale: bool=False) -> np.ndarray:
         """
@@ -112,3 +101,17 @@ class MeanHighPass(FilterAlgorithmBase):
             split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
+
+
+@click.command("MeanHighPass")
+@click.option(
+    "--size", type=float, help="width of the kernel")
+@click.option(
+    "--is-volume", is_flag=True,
+    help="indicates that the image stack should be filtered in 3d")
+@click.pass_context
+def _cli(ctx, size, is_volume):
+    ctx.obj["component"]._cli_run(ctx, MeanHighPass(size, is_volume))
+
+
+MeanHighPass._cli = _cli

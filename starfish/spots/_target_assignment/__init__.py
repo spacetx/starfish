@@ -17,26 +17,35 @@ class TargetAssignment(PipelineComponent):
         return TargetAssignmentAlgorithm
 
     @classmethod
-    @click.group("target_assignment")
-    @click.option("--coordinates-geojson", required=True)  # FIXME: type
-    @click.option("--intensities", required=True)  # FIXME: type
-    @click.option("-o", "--output", required=True)
-    @click.pass_context
-    def _cli(cls, ctx, coordinates_geojson, intensities, output):
-        from starfish import munge
-
-        with open(coordinates_geojson, "r") as fh:
-            coordinates = json.load(fh)
-        ctx.regions = munge.geojson_to_region(coordinates)
-
-        print('Assigning targets to cells...')
-        ctx.intensity_table = IntensityTable.load(intensities)
-
-    @classmethod
     def _cli_run(cls, ctx, instance):
-        intensities = ctx.instance.run(ctx.intensity_table, ctx.regions)
-        print("Writing intensities, including cell ids to {}".format(ctx.output))
-        intensities.save(os.path.join(ctx.output))
+        output = ctx.obj["output"]
+        intensity_table = ctx.obj["intensity_table"]
+        regions = ctx.obj["regions"]
+        intensities = instance.run(intensity_table, regions)
+        print("Writing intensities, including cell ids to {}".format(output))
+        intensities.save(os.path.join(output))
 
 
+@click.group("target_assignment")
+@click.option("--coordinates-geojson", required=True)  # FIXME: type
+@click.option("--intensities", required=True)  # FIXME: type
+@click.option("-o", "--output", required=True)
+@click.pass_context
+def _cli(ctx, coordinates_geojson, intensities, output):
+
+    print('Assigning targets to cells...')
+    ctx.obj = dict(
+        component=TargetAssignment,
+        output=output,
+        intensity_table=IntensityTable.load(intensities)
+    )
+
+    from starfish import munge
+
+    with open(coordinates_geojson, "r") as fh:
+        coordinates = json.load(fh)
+    ctx.obj["regions"] = munge.geojson_to_region(coordinates)
+
+
+TargetAssignment._cli = _cli
 TargetAssignment._cli_register()

@@ -37,15 +37,6 @@ class GaussianHighPass(FilterAlgorithmBase):
 
     _DEFAULT_TESTING_PARAMETERS = {"sigma": 3}
 
-    @classmethod
-    @click.command("GaussianHighPass")
-    @click.option("--sigma", type=float, help="standard deviation of gaussian kernel")
-    @click.option("--is-volume", is_flag=True,
-                  help="indicates that the image stack should be filtered in 3d")
-    @click.pass_context
-    def _cli(cls, ctx, sigma, is_volume):
-        cls._cli_run(ctx, cls(sigma, is_volume))
-
     @staticmethod
     def _high_pass(
             image: Union[xr.DataArray, np.ndarray],
@@ -107,3 +98,14 @@ class GaussianHighPass(FilterAlgorithmBase):
             split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
+
+
+@click.command("GaussianHighPass")
+@click.option("--sigma", type=float, help="standard deviation of gaussian kernel")
+@click.option("--is-volume", is_flag=True,
+              help="indicates that the image stack should be filtered in 3d")
+@click.pass_context
+def _cli(ctx, sigma, is_volume):
+    ctx.obj["component"]._cli_run(ctx, GaussianHighPass(sigma, is_volume))
+
+GaussianHighPass._cli = _cli

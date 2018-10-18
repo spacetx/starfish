@@ -48,10 +48,6 @@ class PipelineComponent(metaclass=PipelineComponentType):
         return cls._algorithm_to_class_map_int
 
     @classmethod
-    def _cli(cls, ctx, *args, **kwargs):
-        raise NotImplementedError()
-
-    @classmethod
     def _cli_run(cls, ctx, instance, *args, **kwargs):
         raise NotImplementedError()
 

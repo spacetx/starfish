@@ -10,12 +10,6 @@ class PerRoundMaxChannelDecoder(DecoderAlgorithmBase):
     def __init__(self, **kwargs):
         pass
 
-    @classmethod
-    @click.command("PerRoundMaxChannelDecoder")
-    @click.pass_context
-    def _cli(cls, ctx):
-        cls._cli_run(ctx, cls())
-
     def run(self, intensities: IntensityTable, codebook: Codebook) -> IntensityTable:
         """Decode spots by selecting the max-valued channel in each sequencing round
 
@@ -33,3 +27,11 @@ class PerRoundMaxChannelDecoder(DecoderAlgorithmBase):
 
         """
         return codebook.decode_per_round_max(intensities)
+
+@click.command("PerRoundMaxChannelDecoder")
+@click.pass_context
+def _cli(ctx):
+    ctx.obj["component"]._cli_run(ctx, PerRoundMaxChannelDecoder())
+
+
+PerRoundMaxChannelDecoder._cli = _cli

@@ -304,36 +304,39 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
         return intensity_table
 
-    @classmethod
-    @click.command("LocalMaxPeakFinder")
-    @click.option(
-        "--min-distance", default=4, type=int,
-        help="Minimum spot size (in number of pixels deviation)")
-    @click.option(
-        "--min-obj-area", default=6, type=int,
-        help="Maximum spot size (in number of pixels")
-    @click.option(
-        "--max_obj_area", default=300, type=int,
-        help="Maximum spot size (in number of pixels)")
-    @click.option(
-        "--stringency", default=0, type=int,
-        help="Number of indices in threshold list to look past "
-             "for the threhsold finding algorithm")
-    @click.option(
-        "--threshold", default=None, type=float,
-        help="Threshold on which to threshold "
-             "image prior to spot detection")
-    @click.option(
-        "--min-num-spots-detected", default=3, type=int,
-        help="Minimum number of spots detected at which to stop a"
-             "utomatic thresholding algorithm")
-    @click.option(
-        "--measurement-type", default='max', type=str,
-        help="How to aggregate pixel intensities in a spot")
-    @click.option(
-        "--is-volume", default=False, action='store_false', help="Find spots in 3D or not")
-    @click.option(
-        "--verbose", default=True, action='store_true', help="Verbosity flag")
-    @click.pass_context
-    def _cli(cls, ctx, min_num_spots_detected, measurement_type, is_volume, verbose):
-        cls._cli_run(ctx, cls(min_num_spots_detected, measurement_type, is_volume, verbose))
+@click.command("LocalMaxPeakFinder")
+@click.option(
+    "--min-distance", default=4, type=int,
+    help="Minimum spot size (in number of pixels deviation)")
+@click.option(
+    "--min-obj-area", default=6, type=int,
+    help="Maximum spot size (in number of pixels")
+@click.option(
+    "--max_obj_area", default=300, type=int,
+    help="Maximum spot size (in number of pixels)")
+@click.option(
+    "--stringency", default=0, type=int,
+    help="Number of indices in threshold list to look past "
+         "for the threhsold finding algorithm")
+@click.option(
+    "--threshold", default=None, type=float,
+    help="Threshold on which to threshold "
+         "image prior to spot detection")
+@click.option(
+    "--min-num-spots-detected", default=3, type=int,
+    help="Minimum number of spots detected at which to stop a"
+         "utomatic thresholding algorithm")
+@click.option(
+    "--measurement-type", default='max', type=str,
+    help="How to aggregate pixel intensities in a spot")
+@click.option(
+    "--is-volume", default=False, action='store_false', help="Find spots in 3D or not")
+@click.option(
+    "--verbose", default=True, action='store_true', help="Verbosity flag")
+@click.pass_context
+def _cli(ctx, min_num_spots_detected, measurement_type, is_volume, verbose):
+    instance = LocalMaxPeakFinder(min_num_spots_detected, measurement_type, is_volume, verbose)
+    ctx.obj["component"]._cli_run(ctx, instance)
+
+
+LocalMaxPeakFinder._cli = _cli

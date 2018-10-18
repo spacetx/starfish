@@ -23,14 +23,26 @@ class Filter(PipelineComponent):
     def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
         return _base.FilterAlgorithmBase
 
-    @click.group("filter")
-    @click.option("-i", "--input")  # FIXME
-    @click.option("o", "--output", required=True)
-    @click.pass_context
-    def _cli(ctx, input, output):
-        print("Filtering images...")
-        ctx.stack = ImageStack.from_path_or_url(input)
+    @classmethod
+    def _cli_run(cls, ctx, instance):
+        output = ctx.obj["output"]
+        stack = ctx.obj["stack"]
+        instance.run(stack)
+        stack.write(output)
+
+@click.group("filter")
+@click.option("-i", "--input")  # FIXME
+@click.option("-o", "--output", required=True)
+@click.pass_context
+def _cli(ctx, input, output):
+    print("Filtering images...")
+    ctx.obj = dict(
+        component=Filter,
+        input=input,
+        output=output,
+        stack=ImageStack.from_path_or_url(input),
+    )
 
 
-for algorithm_cls in Filter._algorithm_to_class_map().values():
-    Filter._cli.add_command(algorithm_cls._cli)
+Filter._cli = _cli
+Filter._cli_register()

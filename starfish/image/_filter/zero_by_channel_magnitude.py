@@ -31,18 +31,6 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
 
     _DEFAULT_TESTING_PARAMETERS = {"thresh": 0, "normalize": True}
 
-    @classmethod
-    @click.command("ZeroByChannelMagnitude")
-    @click.option(
-        '--thresh', type=float,
-        help='minimum magnitude threshold for pixels across channels')
-    @click.option(
-        '--normalize', is_flag=True,
-        help='Scales all rounds to have unit L2 norm across channels')
-    @click.pass_context
-    def _cli(cls, ctx, thresh, normalize):
-        cls._cli_run(ctx, cls(thresh, normalize))
-
     def run(
             self, stack: ImageStack,
             in_place: bool=False, verbose=False, n_processes: Optional[int]=None
@@ -97,3 +85,18 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                                                  where=magnitude_mask
                                                  )
         return stack
+
+
+@click.command("ZeroByChannelMagnitude")
+@click.option(
+    '--thresh', type=float,
+    help='minimum magnitude threshold for pixels across channels')
+@click.option(
+    '--normalize', is_flag=True,
+    help='Scales all rounds to have unit L2 norm across channels')
+@click.pass_context
+def _cli(ctx, thresh, normalize):
+    ctx.obj["component"]._cli_run(ctx, ZeroByChannelMagnitude(thresh, normalize))
+
+
+ZeroByChannelMagnitude._cli = _cli

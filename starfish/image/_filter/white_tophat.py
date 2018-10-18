@@ -38,17 +38,6 @@ class WhiteTophat(FilterAlgorithmBase):
 
     _DEFAULT_TESTING_PARAMETERS = {"masking_radius": 3}
 
-    @classmethod
-    @click.command("WhiteTophat")
-    @click.option(
-        "--masking-radius", default=15, type=int,
-        help="diameter of morphological masking disk in pixels")
-    @click.option(  # FIXME: was this intentionally missed?
-        "--is-volume", is_flag=True, help="filter 3D volumes")
-    @click.pass_context
-    def _cli(cls, ctx, masking_radius, is_volume):
-        cls._cli_run(ctx, cls(masking_radius, is_volume))
-
     def _white_tophat(self, image: np.ndarray) -> np.ndarray:
         if self.is_volume:
             structuring_element = ball(self.masking_radius)
@@ -86,3 +75,17 @@ class WhiteTophat(FilterAlgorithmBase):
             split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
+
+
+@click.command("WhiteTophat")
+@click.option(
+    "--masking-radius", default=15, type=int,
+    help="diameter of morphological masking disk in pixels")
+@click.option(  # FIXME: was this intentionally missed?
+    "--is-volume", is_flag=True, help="filter 3D volumes")
+@click.pass_context
+def _cli(ctx, masking_radius, is_volume):
+    ctx.obj["component"]._cli_run(ctx, WhiteTophat(masking_radius, is_volume))
+
+
+WhiteTophat._cli = _cli

@@ -16,18 +16,28 @@ class Decoder(PipelineComponent):
         return _base.DecoderAlgorithmBase
 
     @classmethod
-    @click.group("decode")
-    @click.option("-i", "--input", required=True)  # FIXME: type
-    @click.option("-o", "--output", required=True)
-    @click.option("--codebook", required=True)  # FIXME: type
-    @click.pass_context
-    def _cli(cls, ctx, input, output, codebook):
-        ctx.intensities = IntensityTable.load(ctx.input)
-        ctx.codebook = Codebook.from_json(ctx.codebook)
-
-    @classmethod
     def _cli_run(cls, ctx, instance):
-        intensities = instance.run(ctx.intensities, ctx.codebook)
-        intensities.save(ctx.output)
+        table = ctx.obj["intensities"]
+        codes = ctx.obj["codebook"]
+        output = ctx.obj["output"]
+        intensities = instance.run(table, codes)
+        intensities.save(output)
 
+
+@click.group("decode")
+@click.option("-i", "--input", required=True)  # FIXME: type
+@click.option("-o", "--output", required=True)
+@click.option("--codebook", required=True)  # FIXME: type
+@click.pass_context
+def _cli(ctx, input, output, codebook):
+    ctx.obj = dict(
+        component=Decoder,
+        input=input,
+        output=output,
+        intensities=IntensityTable.load(input),
+        codebook=Codebook.from_json(codebook),
+    )
+
+
+Decoder._cli = _cli
 Decoder._cli_register()

@@ -37,6 +37,7 @@ class Clip(FilterAlgorithmBase):
         "--p-min", default=0, type=int, help="clip intensities below this percentile")
     @click.option(
         "--p-max", default=100, type=int, help="clip intensities above this percentile")
+    @click.pass_context
     def _cli(cls, ctx, p_min, p_max):
         cls._cli_run(ctx, cls(p_min, p_max))
 

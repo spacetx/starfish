@@ -15,12 +15,13 @@ class Segmentation(PipelineComponent):
     def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
         return SegmentationAlgorithmBase
 
+    @classmethod
     @click.group("segmentation")
     @click.option("--hybridization-stack", required=True)  # FIXME: type
     @click.option("--nuclei-stack", required=True)  # FIXME: type
     @click.option("o", "--output", required=True)
     @click.pass_context
-    def _cli(ctx, hybridization_stack, nuclei_stack, output):
+    def _cli(cls, ctx, hybridization_stack, nuclei_stack, output):
         print('Segmenting ...')
         ctx.hybridization_stack = ImageStack.from_path_or_url(hybridization_stack)
         ctx.nuclei_stack = ImageStack.from_path_or_url(nuclei_stack)

@@ -14,11 +14,12 @@ class Registration(PipelineComponent):
     def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
         return RegistrationAlgorithmBase
 
+    @classmethod
     @click.group("registration")
     @click.option("-i", "--input")  # FIXME
     @click.option("o", "--output", required=True)
     @click.pass_context
-    def _cli(ctx, input, output):
+    def _cli(cls, ctx, input, output):
         print("Registering...")
         ctx.stack = ImageStack.from_path_or_url(input)
 
@@ -28,5 +29,4 @@ class Registration(PipelineComponent):
         ctx.stack.write(ctx.ouput)
 
 
-for algorithm_cls in Registration._algorithm_to_class_map().values():
-    Registration._cli.add_command(algorithm_cls._cli)
+Registration._cli_register()

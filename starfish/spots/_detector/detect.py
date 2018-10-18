@@ -191,7 +191,8 @@ def detect_spots(
         In this case, the spot's bounding box is rounded up instead of down when measuring
         intensity. (default False)
     is_volume: bool
-        (default True) If True, pass 3d volumes (x, y, z) to func, else pass 2d tiles (x, y) to func
+        If True, pass 3d volumes (x, y, z) to func, else pass 2d tiles (x, y) to func. (default
+        True)
 
     Notes
     -----

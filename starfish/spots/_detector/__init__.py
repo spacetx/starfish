@@ -69,20 +69,15 @@ def _cli(ctx, input, output, blobs_stack, reference_image_from_max_projection, c
     print('Detecting Spots ...')
     ctx.obj = dict(
         component=SpotFinder,
-        input=input,
-        output=output,
         image_stack=ImageStack.from_path_or_url(input),
+        output=output,
+        blobs_stack=blobs_stack,
+        reference_image_from_max_projection=reference_image_from_max_projection,
+        codebook=None,
     )
 
     if codebook is not None:
         ctx.obj["codebook"] = Codebook.from_json(codebook)
-
-    ctx.obj.update(
-        dict(
-            blobs_stack=blobs_stack,
-            reference_image_from_max_projection=reference_image_from_max_projection,
-        )
-    )
 
 
 SpotFinder._cli = _cli  # type: ignore

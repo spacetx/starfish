@@ -1,4 +1,3 @@
-import argparse
 
 
 class AlgorithmBase:
@@ -9,8 +8,3 @@ class AlgorithmBase:
         https://docs.python.org/3/reference/lexical_analysis.html#identifiers
         """
         return cls.__name__
-
-    @classmethod
-    def _add_arguments(cls, group_parser: argparse.ArgumentParser):
-        """Adds the arguments for the algorithm."""
-        raise NotImplementedError()

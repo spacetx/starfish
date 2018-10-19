@@ -1,5 +1,6 @@
 from typing import Optional, Tuple
 
+import click
 import numpy as np
 import scipy.ndimage.measurements as spm
 from scipy.ndimage import distance_transform_edt
@@ -48,15 +49,6 @@ class Watershed(SegmentationAlgorithmBase):
         self.input_threshold = input_threshold
         self.min_distance = min_distance
         self._segmentation_instance: Optional[_WatershedSegmenter] = None
-
-    @classmethod
-    def _add_arguments(cls, group_parser) -> None:
-        group_parser.add_argument(
-            "--nuclei-threshold", default=.16, type=float, help="nuclei threshold")
-        group_parser.add_argument(
-            "--input-threshold", default=.22, type=float, help="Input threshold")
-        group_parser.add_argument(
-            "--min-distance", default=57, type=int, help="Minimum distance between cells")
 
     def run(self, primary_images: ImageStack, nuclei: ImageStack) -> np.ndarray:
         """Segments nuclei in 2-d using a nuclei ImageStack
@@ -374,3 +366,18 @@ class _WatershedSegmenter:
         plt.title('Segmented Cells')
 
         return plt.gca()
+
+
+@click.command("Watershed")
+@click.option(
+    "--dapi-threshold", default=.16, type=float, help="DAPI threshold")
+@click.option(
+    "--input-threshold", default=.22, type=float, help="Input threshold")
+@click.option(
+    "--min-distance", default=57, type=int, help="Minimum distance between cells")
+@click.pass_context
+def _cli(ctx, dapi_threshold, input_threshold, min_distance):
+    ctx.obj["component"]._cli_run(ctx, Watershed(dapi_threshold, input_threshold, min_distance))
+
+
+Watershed._cli = _cli  # type: ignore

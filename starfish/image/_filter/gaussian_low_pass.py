@@ -1,7 +1,7 @@
-import argparse
 from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
+import click
 import numpy as np
 from skimage.filters import gaussian
 
@@ -34,14 +34,6 @@ class GaussianLowPass(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     _DEFAULT_TESTING_PARAMETERS = {"sigma": 1}
-
-    @classmethod
-    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
-        group_parser.add_argument(
-            "--sigma", type=float, help="standard deviation of gaussian kernel")
-        group_parser.add_argument(
-            "--is-volume", action="store_true",
-            help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
     def _low_pass(
@@ -109,3 +101,14 @@ class GaussianLowPass(FilterAlgorithmBase):
             split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
+
+
+@click.command("GaussianLowPass")
+@click.option("--sigma", type=float, help="standard deviation of gaussian kernel")
+@click.option("--is-volume", is_flag=True,
+              help="indicates that the image stack should be filtered in 3d")
+@click.pass_context
+def _cli(ctx, sigma, is_volume):
+    ctx.obj["component"]._cli_run(ctx, GaussianLowPass(sigma, is_volume))
+
+GaussianLowPass._cli = _cli  # type: ignore

@@ -228,7 +228,7 @@ stain = stain/stain.max()
 nuclei_projection = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 
 seg = Segmentation.Watershed(
-    dapi_threshold=dapi_thresh,
+    nuclei_threshold=dapi_thresh,
     input_threshold=stain_thresh,
     min_distance=min_dist
 )

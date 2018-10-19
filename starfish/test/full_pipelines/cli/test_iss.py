@@ -101,7 +101,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "-o", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "regions.geojson"),
                 "Watershed",
-                "--dapi-threshold", ".16",
+                "--nuclei-threshold", ".16",
                 "--input-threshold", ".22",
                 "--min-distance", "57",
             ],

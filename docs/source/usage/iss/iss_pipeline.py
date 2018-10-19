@@ -39,7 +39,7 @@ def iss_pipeline(fov, codebook):
 
     # segment cells
     seg = Segmentation.Watershed(
-        dapi_threshold=.16,
+        nuclei_threshold=.16,
         input_threshold=.22,
         min_distance=57,
     )

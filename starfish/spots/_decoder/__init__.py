@@ -25,9 +25,9 @@ class Decoder(PipelineComponent):
 
 
 @click.group("decode")
-@click.option("-i", "--input", required=True)  # FIXME: type
+@click.option("-i", "--input", required=True, type=click.Path(exists=True))
 @click.option("-o", "--output", required=True)
-@click.option("--codebook", required=True)  # FIXME: type
+@click.option("--codebook", required=True, type=click.Path(exists=True))
 @click.pass_context
 def _cli(ctx, input, output, codebook):
     ctx.obj = dict(

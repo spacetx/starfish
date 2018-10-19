@@ -27,8 +27,8 @@ class TargetAssignment(PipelineComponent):
 
 
 @click.group("target_assignment")
-@click.option("--coordinates-geojson", required=True)  # FIXME: type
-@click.option("--intensities", required=True)  # FIXME: type
+@click.option("--coordinates-geojson", required=True, type=click.Path(exists=True))
+@click.option("--intensities", required=True, type=click.Path(exists=True))
 @click.option("-o", "--output", required=True)
 @click.pass_context
 def _cli(ctx, coordinates_geojson, intensities, output):

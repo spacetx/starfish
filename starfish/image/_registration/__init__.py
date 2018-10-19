@@ -22,7 +22,7 @@ class Registration(PipelineComponent):
         stack.write(output)
 
 @click.group("registration")
-@click.option("-i", "--input")  # FIXME
+@click.option("-i", "--input", type=click.Path(exists=True))
 @click.option("-o", "--output", required=True)
 @click.pass_context
 def _cli(ctx, input, output):

@@ -122,7 +122,7 @@ def shift_im(im: np.ndarray, shift: np.ndarray) -> np.ndarray:
 
 @click.command("FourierShiftRegistration")
 @click.option("--upsampling", default=1, type=int, help="Amount of up-sampling")
-@click.option("--reference-stack", required=True,  # FIXME
+@click.option("--reference-stack", required=True, type=click.Path(exists=True),
               help="The image stack to align the input image stack to.")
 @click.pass_context
 def _cli(ctx, upsampling, reference_stack):

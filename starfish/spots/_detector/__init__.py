@@ -43,7 +43,7 @@ class SpotFinder(PipelineComponent):
 
 
 @click.group("detect_spots")
-@click.option("-i", "--input", required=True)  # FIXME: type
+@click.option("-i", "--input", required=True, type=click.Path(exists=True))
 @click.option("-o", "--output", required=True)
 @click.option(
     '--blobs-stack', default=None, required=False, help=(

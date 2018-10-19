@@ -340,7 +340,7 @@ class _WatershedSegmenter:
         num_labels : int
             number of unique objects
         """
-        output = np.zeros_like(image)
+        output = np.empty_like(image)
         for i, v in enumerate(np.unique(image)):
             output[np.where(image == v)] = i
         return output, i

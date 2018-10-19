@@ -46,7 +46,7 @@ class Config(object):
 
         self.data = data
 
-    def lookup(self, keys: Sequence[str], value: Any=__NO_VALUE_PASSED)->Any:
+    def lookup(self, keys: Sequence[str], value: Any=__NO_VALUE_PASSED) -> Any:
         """
         Parameters
         ----------

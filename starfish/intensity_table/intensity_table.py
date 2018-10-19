@@ -398,7 +398,7 @@ class IntensityTable(xr.DataArray):
 
         Returns
         -------
-        pd.DataFrame :
+        ExpressionMatrix :
             cell x gene expression table
         """
 

@@ -20,30 +20,34 @@ class Watershed(SegmentationAlgorithmBase):
 
     def __init__(
         self,
-        dapi_threshold: Number,
+        nuclei_threshold: Number,
         input_threshold: Number,
         min_distance: int,
         **kwargs
     ) -> None:
-        """Implements watershed segmentation of cells seeded from a DAPI image the the point clouds
+        """Implements watershed segmentation of cells.
 
-        Watershed segmentation proceeds by constructing basins that extend from the DAPI image
-        and the point cloud constructed from a maximum projection across rounds and channels. It
-        constructs a mask that extends from the basins to prevent non-cellular regions from being
-        included.
+        Algorithm is seeded by nuclei image. Binary segmentation mask is computed from a maximum
+        projection of spots across C and R, which is subsequently thresholded.
+
+        This function wraps skimage watershed.
 
         Parameters
         ----------
-        dapi_threshold : Number
-            threshold to apply to dapi image
+        nuclei_threshold : Number
+            threshold to apply to nuclei image
         input_threshold : Number
             threshold to apply to stain image
         min_distance : int
-            minimum distance before object centers in a provided dapi image are considered single
+            minimum distance before object centers in a provided nuclei image are considered single
             nuclei
 
+        See Also
+        --------
+        Watershed: http://scikit-image.org/docs/dev/auto_examples/segmentation/plot_watershed.html
+
         """
-        self.dapi_threshold = dapi_threshold
+        self.nuclei_threshold = nuclei_threshold
         self.input_threshold = input_threshold
         self.min_distance = min_distance
         self._segmentation_instance: Optional[_WatershedSegmenter] = None
@@ -51,7 +55,7 @@ class Watershed(SegmentationAlgorithmBase):
     @classmethod
     def _add_arguments(cls, group_parser) -> None:
         group_parser.add_argument(
-            "--dapi-threshold", default=.16, type=float, help="DAPI threshold")
+            "--nuclei-threshold", default=.16, type=float, help="nuclei threshold")
         group_parser.add_argument(
             "--input-threshold", default=.22, type=float, help="Input threshold")
         group_parser.add_argument(
@@ -88,8 +92,8 @@ class Watershed(SegmentationAlgorithmBase):
         nuclei = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
         self._segmentation_instance = _WatershedSegmenter(nuclei, stain)
         cells_labels = self._segmentation_instance.segment(
-            self.dapi_threshold, self.input_threshold, size_lim, disk_size_markers, disk_size_mask,
-            self.min_distance
+            self.nuclei_threshold, self.input_threshold, size_lim, disk_size_markers,
+            disk_size_mask, self.min_distance
         )
 
         regions = label_to_regions(cells_labels)
@@ -104,25 +108,23 @@ class Watershed(SegmentationAlgorithmBase):
 
 
 class _WatershedSegmenter:
-    def __init__(self, dapi_img: np.ndarray, stain_img: np.ndarray) -> None:
-        """Implements watershed segmentation of cells seeded from a DAPI image the the point clouds
+    def __init__(self, nuclei_img: np.ndarray, stain_img: np.ndarray) -> None:
+        """Implements watershed segmentation of cells seeded from a nuclei image
 
-        Watershed segmentation proceeds by constructing basins that extend from the DAPI image
-        and the point cloud constructed from a maximum projection across rounds and channels. It
-        constructs a mask that extends from the basins to prevent non-cellular regions from being
-        included.
+        Algorithm is seeded by a nuclei image. Binary segmentation mask is computed from a maximum
+        projection of spots across C and R, which is subsequently thresholded.
 
         Parameters
         ----------
-        dapi_img : np.ndarray[np.float32]
+        nuclei_img : np.ndarray[np.float32]
             nuclei image
         stain_img : np.ndarray[np.float32]
             stain image
         """
-        self.dapi = dapi_img / dapi_img.max()
+        self.nuclei = nuclei_img / nuclei_img.max()
         self.stain = stain_img / stain_img.max()
 
-        self.dapi_thresholded: Optional[np.ndarray] = None  # dtype: bool
+        self.nuclei_thresholded: Optional[np.ndarray] = None  # dtype: bool
         self.markers = None
         self.num_cells: Optional[int] = None
         self.mask = None
@@ -130,7 +132,7 @@ class _WatershedSegmenter:
 
     def segment(
             self,
-            dapi_thresh: Number,
+            nuclei_thresh: Number,
             stain_thresh: Number,
             size_lim: Tuple[int, int],
             disk_size_markers: Optional[int]=None,  # TODO ambrosejcarr what is this doing?
@@ -141,11 +143,11 @@ class _WatershedSegmenter:
 
         Parameters
         ----------
-        dapi_thresh, stain_thresh : Number
-            Threshold for the dapi and stain images. All pixels with intensities above this size
+        nuclei_thresh, stain_thresh : Number
+            Threshold for the nuclei and stain images. All pixels with intensities above this size
             will be considered part of the objects in the respective images
         size_lim : Tuple[int, int]
-            min and max allowable size for nuclei objects in the dapi_image
+            min and max allowable size for nuclei objects in the nuclei_image
         disk_size_markers : Optional[int]
             if provided ...
         disk_size_mask : Optional[int]
@@ -157,25 +159,25 @@ class _WatershedSegmenter:
         Returns
         -------
         np.ndarray[int32] :
-            label image with same size and shape as self.dapi_img
+            label image with same size and shape as self.nuclei_img
         """
         min_allowed_size, max_allowed_size = size_lim
-        self.dapi_thresholded = self.filter_dapi(dapi_thresh, disk_size_markers)
+        self.nuclei_thresholded = self.filter_nuclei(nuclei_thresh, disk_size_markers)
         self.markers, self.num_cells = self.label_nuclei(
-            self.dapi_thresholded,
+            self.nuclei_thresholded,
             min_allowed_size, max_allowed_size, min_dist
         )
         self.mask = self.watershed_mask(stain_thresh, self.markers, disk_size_mask)
         self.segmented = self.watershed(self.markers, self.mask)
         return self.segmented
 
-    def filter_dapi(self, dapi_thresh: float, disk_size: Optional[int]) -> np.ndarray:
-        """Threshold the dapi image at dapi_thresh.
+    def filter_nuclei(self, nuclei_thresh: float, disk_size: Optional[int]) -> np.ndarray:
+        """Threshold the nuclei image at nuclei_thresh.
 
         Parameters
         ----------
-        dapi_thresh : float
-            Threshold the dapi image at this value
+        nuclei_thresh : float
+            Threshold the nuclei image at this value
         disk_size : int
             if passed, execute a binary opening of the filtered image
 
@@ -184,14 +186,14 @@ class _WatershedSegmenter:
         np.ndarray[bool] :
             thresholded image
         """
-        dapi_filt = bin_thresh(self.dapi, dapi_thresh)
+        nuclei_filt = bin_thresh(self.nuclei, nuclei_thresh)
         if disk_size is not None:
-            dapi_filt = bin_open(dapi_filt, disk_size)
-        return dapi_filt
+            nuclei_filt = bin_open(nuclei_filt, disk_size)
+        return nuclei_filt
 
     def label_nuclei(
         self,
-        dapi_thresholded: np.ndarray,
+        nuclei_thresholded: np.ndarray,
         min_allowed_size: int,
         max_allowed_size: int,
         min_dist: Optional[Number]=None
@@ -201,8 +203,8 @@ class _WatershedSegmenter:
 
         Parameters
         ----------
-        dapi_thresholded : np.ndarray
-            thresholded dapi image
+        nuclei_thresholded : np.ndarray
+            thresholded nuclei image
         min_allowed_size : int
             minimum allowable thresholded nuclei size
         max_allowed_size : int
@@ -217,7 +219,7 @@ class _WatershedSegmenter:
 
         # label thresholded nuclei image
         if min_dist is None:
-            markers, num_objs = spm.label(dapi_thresholded)
+            markers, num_objs = spm.label(nuclei_thresholded)
         else:
             markers, num_objs = self._unclump(min_dist)
 
@@ -227,7 +229,7 @@ class _WatershedSegmenter:
 
         # spm.sum sums the values of an array by label. This counts the pixels in each object
         areas = spm.sum(
-            np.ones(dapi_thresholded.shape),
+            np.ones(nuclei_thresholded.shape),
             markers,
             np.array(range(0, num_objs + 1), dtype=np.int32)
         )
@@ -247,7 +249,7 @@ class _WatershedSegmenter:
         """
         Run watershed on the thresholded basin image, restricted to basins at least min_dist apart
 
-        Functionally, this reproduces the thresholded dapi image with overlapping nuclei merged.
+        Functionally, this reproduces the thresholded nuclei image with overlapping nuclei merged.
 
         Parameters
         ----------
@@ -255,7 +257,7 @@ class _WatershedSegmenter:
             minimum distance between watershed basins
 
         """
-        im: np.ndarray = self.dapi_thresholded
+        im: np.ndarray = self.nuclei_thresholded
 
         # calculates the distance of every pixel to the nearest background (0) point
         distance: np.ndarray = distance_transform_edt(im)  # dtype: np.float64
@@ -333,16 +335,16 @@ class _WatershedSegmenter:
         plt.figure(figsize=figsize)
 
         plt.subplot(321)
-        image(self.dapi, ax=plt.gca(), size=20, bar=True)
-        plt.title('DAPI')
+        image(self.nuclei, ax=plt.gca(), size=20, bar=True)
+        plt.title('Nuclei')
 
         plt.subplot(322)
         image(self.stain, ax=plt.gca(), size=20, bar=True)
         plt.title('Stain')
 
         plt.subplot(323)
-        image(self.dapi_thresholded, bar=False, ax=plt.gca())
-        plt.title('DAPI Thresholded')
+        image(self.nuclei_thresholded, bar=False, ax=plt.gca())
+        plt.title('Nuclei Thresholded')
 
         plt.subplot(324)
         image(self.mask, bar=False, ax=plt.gca())

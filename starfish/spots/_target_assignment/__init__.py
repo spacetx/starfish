@@ -23,9 +23,9 @@ class TargetAssignment(PipelineComponent):
         output = ctx.obj["output"]
         intensity_table = ctx.obj["intensity_table"]
         label_image = ctx.obj["label_image"]
-        intensities = instance.run(intensity_table, label_image)
+        assigned = instance.run(label_image, intensity_table)
         print(f"Writing intensities, including cell ids to {output}")
-        intensities.save(os.path.join(output))
+        assigned.save(os.path.join(output))
 
 
 @click.group("target_assignment")
@@ -33,13 +33,14 @@ class TargetAssignment(PipelineComponent):
 @click.option("--intensities", required=True, type=click.Path(exists=True))
 @click.option("-o", "--output", required=True)
 @click.pass_context
-def _cli(ctx, coordinates_geojson, intensities, output):
+def _cli(ctx, label_image, intensities, output):
 
     print('Assigning targets to cells...')
     ctx.obj = dict(
         component=TargetAssignment,
         output=output,
-        intensity_table=IntensityTable.load(intensities)
+        intensity_table=IntensityTable.load(intensities),
+        label_image=imread(label_image)
     )
 
 

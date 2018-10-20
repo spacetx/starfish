@@ -19,7 +19,7 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
             self, spot_diameter, min_mass, max_size, separation, percentile=0,
             noise_size: Tuple[int, int, int]=(1, 1, 1), smoothing_size=None, threshold=None,
             preprocess: bool=False, measurement_type: str='max', is_volume: bool=False,
-            verbose=False, **kwargs) -> None:
+            verbose=False) -> None:
         """Find spots using a local max peak finding algorithm
 
         This is a wrapper for `trackpy.locate`

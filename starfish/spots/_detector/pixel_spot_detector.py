@@ -14,7 +14,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
     def __init__(
             self, codebook: Codebook, metric: str, distance_threshold: float,
             magnitude_threshold: int, min_area: int, max_area: int, norm_order: int=2,
-            crop_x: int=0, crop_y: int=0, crop_z: int=0, **kwargs) -> None:
+            crop_x: int=0, crop_y: int=0, crop_z: int=0) -> None:
         """Decode an image by first coding each pixel, then combining the results into spots
 
         Parameters

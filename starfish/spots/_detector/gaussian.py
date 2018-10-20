@@ -23,7 +23,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             threshold: Number,
             overlap: float=0.5,
             measurement_type='max',
-            is_volume: bool=True, **kwargs
+            is_volume: bool=True,
     ) -> None:
         """Multi-dimensional gaussian spot detector
 

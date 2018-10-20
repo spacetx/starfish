@@ -12,11 +12,6 @@ from ._base import TargetAssignmentAlgorithm
 
 class PointInPoly2D(TargetAssignmentAlgorithm):
 
-    def __init__(self, **kwargs) -> None:
-        """
-        PointInPoly accepts no parameters, but all pipeline components must accept arbitrary kwargs
-        """
-
     @staticmethod
     def _assign(
             cells_region: regional.many, intensities: IntensityTable, use_hull: bool=True, verbose:

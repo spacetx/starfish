@@ -34,7 +34,7 @@ class Laplace(FilterAlgorithmBase):
     def __init__(
             self,
             sigma: Union[Number, Tuple[Number]], mode: str='reflect',
-            cval: float=0.0, is_volume: bool=False, **kwargs
+            cval: float=0.0, is_volume: bool=False,
     ) -> None:
         """Multi-dimensional gaussian-laplacian filter used to enhance dots against background
 

@@ -11,7 +11,7 @@ from .util import determine_axes_to_split_by
 
 class Clip(FilterAlgorithmBase):
 
-    def __init__(self, p_min: int=0, p_max: int=100, is_volume: bool=False, **kwargs) -> None:
+    def __init__(self, p_min: int=0, p_max: int=100, is_volume: bool=False) -> None:
         """Image clipping filter
 
         Parameters
@@ -22,8 +22,6 @@ class Clip(FilterAlgorithmBase):
             values above this percentile are set to p_max (default 100)
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) tiles
-
-        kwargs
         """
         self.p_min = p_min
         self.p_max = p_max

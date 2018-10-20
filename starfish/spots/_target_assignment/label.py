@@ -74,5 +74,5 @@ class Label(TargetAssignmentAlgorithm):
 @click.command("Label")
 @click.pass_context
 def _cli(ctx):
-    ctx.obj["component"]._cli_run(Label())
+    ctx.obj["component"]._cli_run(ctx, Label())
 Label._cli = _cli  # type: ignore

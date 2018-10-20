@@ -16,7 +16,7 @@ from .util import (
 class MeanHighPass(FilterAlgorithmBase):
 
     def __init__(
-            self, size: Union[Number, Tuple[Number]], is_volume: bool=False, **kwargs) -> None:
+            self, size: Union[Number, Tuple[Number]], is_volume: bool=False) -> None:
         """Mean high pass filter.
 
         The mean high pass filter reduces low spatial frequency features by subtracting a

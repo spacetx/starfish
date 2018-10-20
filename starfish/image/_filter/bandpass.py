@@ -15,7 +15,7 @@ class Bandpass(FilterAlgorithmBase):
 
     def __init__(
             self, lshort: Number, llong: int, threshold: Number, truncate: Number=4,
-            is_volume: bool=False, **kwargs) -> None:
+            is_volume: bool=False) -> None:
         """
 
         Parameters
@@ -31,7 +31,6 @@ class Bandpass(FilterAlgorithmBase):
             deviations
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
-        kwargs
         """
         self.lshort = lshort
         self.llong = llong

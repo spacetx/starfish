@@ -11,7 +11,7 @@ from .util import determine_axes_to_split_by, preserve_float_range
 
 class ScaleByPercentile(FilterAlgorithmBase):
 
-    def __init__(self, p: int=0, is_volume: bool=False, **kwargs) -> None:
+    def __init__(self, p: int=0, is_volume: bool=False) -> None:
         """Image scaling filter
 
         Parameters
@@ -20,8 +20,6 @@ class ScaleByPercentile(FilterAlgorithmBase):
             each image in the stack is scaled by this percentile. must be in [0, 100]
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) tiles
-
-        kwargs
         """
         self.p = p
         self.is_volume = is_volume

@@ -18,7 +18,7 @@ from .util import (
 class GaussianLowPass(FilterAlgorithmBase):
 
     def __init__(
-            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False, **kwargs) -> None:
+            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False) -> None:
         """Multi-dimensional low-pass gaussian filter.
 
         Parameters

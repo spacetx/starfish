@@ -19,7 +19,7 @@ from .util import (
 class GaussianHighPass(FilterAlgorithmBase):
 
     def __init__(
-            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False, **kwargs
+            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False,
     ) -> None:
         """Gaussian high pass filter
 

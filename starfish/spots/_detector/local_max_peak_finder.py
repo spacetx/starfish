@@ -334,8 +334,10 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 @click.option(
     "--verbose", default=True, action='store_true', help="Verbosity flag")
 @click.pass_context
-def _cli(ctx, min_num_spots_detected, measurement_type, is_volume, verbose):
-    instance = LocalMaxPeakFinder(min_num_spots_detected, measurement_type, is_volume, verbose)
+def _cli(ctx, min_distance, min_obj_area, max_obj_area, stringency, threshold,
+         min_num_spots_detected, measurement_type, is_volume, verbose):
+    instance = LocalMaxPeakFinder(min_distance, min_obj_area, max_obj_area, stringency, threshold,
+                                  min_num_spots_detected, measurement_type, is_volume, verbose)
     ctx.obj["component"]._cli_run(ctx, instance)
 
 

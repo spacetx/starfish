@@ -7,7 +7,7 @@ from ._base import DecoderAlgorithmBase
 
 class PerRoundMaxChannelDecoder(DecoderAlgorithmBase):
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         pass
 
     def run(self, intensities: IntensityTable, codebook: Codebook) -> IntensityTable:

@@ -14,7 +14,7 @@ from .util import gaussian_kernel, preserve_float_range
 class DeconvolvePSF(FilterAlgorithmBase):
 
     def __init__(
-            self, num_iter: int, sigma: Number, clip: bool=True, **kwargs) -> None:
+            self, num_iter: int, sigma: Number, clip: bool=True) -> None:
         """Deconvolve a point spread function
 
         Parameters

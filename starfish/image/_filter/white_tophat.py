@@ -19,7 +19,7 @@ class WhiteTophat(FilterAlgorithmBase):
     https://en.wikipedia.org/wiki/Top-hat_transform
     """
 
-    def __init__(self, masking_radius: int, is_volume: bool=False, **kwargs) -> None:
+    def __init__(self, masking_radius: int, is_volume: bool=False) -> None:
         """
         Instance of a white top hat morphological masking filter which masks objects larger
         than `masking_radius`

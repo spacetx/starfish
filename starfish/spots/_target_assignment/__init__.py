@@ -33,13 +33,14 @@ class TargetAssignment(PipelineComponent):
 @click.option("--intensities", required=True, type=click.Path(exists=True))
 @click.option("-o", "--output", required=True)
 @click.pass_context
-def _cli(ctx, coordinates_geojson, intensities, output):
+def _cli(ctx, label_image, intensities, output):
 
     print('Assigning targets to cells...')
     ctx.obj = dict(
         component=TargetAssignment,
         output=output,
-        intensity_table=IntensityTable.load(intensities)
+        intensity_table=IntensityTable.load(intensities),
+        label_image=label_image,
     )
 
 

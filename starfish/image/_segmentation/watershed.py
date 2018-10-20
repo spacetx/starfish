@@ -370,14 +370,14 @@ class _WatershedSegmenter:
 
 @click.command("Watershed")
 @click.option(
-    "--dapi-threshold", default=.16, type=float, help="DAPI threshold")
+    "--nuclei-threshold", default=.16, type=float, help="Nuclei threshold")
 @click.option(
     "--input-threshold", default=.22, type=float, help="Input threshold")
 @click.option(
     "--min-distance", default=57, type=int, help="Minimum distance between cells")
 @click.pass_context
-def _cli(ctx, dapi_threshold, input_threshold, min_distance):
-    ctx.obj["component"]._cli_run(ctx, Watershed(dapi_threshold, input_threshold, min_distance))
+def _cli(ctx, nuclei_threshold, input_threshold, min_distance):
+    ctx.obj["component"]._cli_run(ctx, Watershed(nuclei_threshold, input_threshold, min_distance))
 
 
 Watershed._cli = _cli  # type: ignore

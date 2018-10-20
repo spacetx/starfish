@@ -136,7 +136,6 @@ class CombineAdjacentFeatures:
         max_y = intensities[Indices.Y.value].values.max() + 1
         max_z = intensities[Indices.Z.value].values.max() + 1
 
-
         int_targets = target_map.targets_as_int(intensities[Features.TARGET].values)
         if mask_filtered_features:
             fails_filters = np.where(~intensities[Features.PASSES_THRESHOLDS])[0]

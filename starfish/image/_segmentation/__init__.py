@@ -28,7 +28,7 @@ class Segmentation(PipelineComponent):
             f.write(json.dumps(geojson))
 
 
-@click.group("segmentation")
+@click.group("segment")
 @click.option("--hybridization-stack", required=True, type=click.Path(exists=True))
 @click.option("--nuclei-stack", required=True, type=click.Path(exists=True))
 @click.option("-o", "--output", required=True)

@@ -191,11 +191,11 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
     "--is-volume", is_flag=True,
     help="indicates that the image stack should be filtered in 3d")
 @click.pass_context
-def _cli(ctx, spot_diameter, min_max, max_size, separation, noise_size, smooth_size,
+def _cli(ctx, spot_diameter, min_max, max_size, separation, noise_size, smoothing_size,
          preprocess, show, percentile, is_volume):
 
     instance = TrackpyLocalMaxPeakFinder(spot_diameter, min_max, max_size,
-                                         separation, noise_size, smooth_size,
+                                         separation, noise_size, smoothing_size,
                                          preprocess, show, percentile, is_volume)
     ctx.obj["component"]._cli_run(ctx, instance)
 

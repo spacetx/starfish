@@ -18,12 +18,12 @@ class Segmentation(PipelineComponent):
     @classmethod
     def _cli_run(cls, ctx, instance):
         output = ctx.obj["output"]
-        hyb_stack = ctx.obj["hybridization_stack"]
-        nuc_stack = ctx.obj["nuclei_stack"]
+        pri_stack = ctx.obj["primary_images"]
+        nuc_stack = ctx.obj["nuclei"]
 
-        label_image = instance.run(hyb_stack, nuc_stack)
+        label_image = instance.run(pri_stack, nuc_stack)
 
-        print(f"Writing label image to {args.output}")
+        print(f"Writing label image to {output}")
         imsave(output, label_image)
 
 
@@ -32,13 +32,13 @@ class Segmentation(PipelineComponent):
 @click.option("--nuclei", required=True, type=click.Path(exists=True))
 @click.option("-o", "--output", required=True)
 @click.pass_context
-def _cli(ctx, hybridization_stack, nuclei_stack, output):
+def _cli(ctx, primary_images, nuclei, output):
     print('Segmenting ...')
     ctx.obj = dict(
         component=Segmentation,
         output=output,
-        primary_images=ImageStack.from_path_or_url(hybridization_stack),
-        nuclei=ImageStack.from_path_or_url(nuclei_stack),
+        primary_images=ImageStack.from_path_or_url(primary_images),
+        nuclei=ImageStack.from_path_or_url(nuclei),
     )
 
 

@@ -27,8 +27,8 @@ class Filter(PipelineComponent):
     def _cli_run(cls, ctx, instance):
         output = ctx.obj["output"]
         stack = ctx.obj["stack"]
-        instance.run(stack)
-        stack.write(output)
+        filtered = instance.run(stack)
+        filtered.write(output)
 
 @click.group("filter")
 @click.option("-i", "--input", type=click.Path(exists=True))

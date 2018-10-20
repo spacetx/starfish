@@ -118,9 +118,18 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
 def _cli(ctx, metric, distance_threshold, magnitude_threshold,
          min_area, max_area, norm_order, crop_x, crop_y, crop_z):
     codebook = ctx.obj["codebook"]
-    instance = PixelSpotDetector(codebook, metric, distance_threshold, magnitude_threshold,
-                                 min_area, max_area, norm_order,
-                                 crop_x, crop_y, crop_z)
+    instance = PixelSpotDetector(
+        codebook=codebook,
+        metric=metric,
+        distance_threshold=distance_threshold,
+        magnitude_threshold=magnitude_threshold,
+        min_area=min_area,
+        max_area=max_area,
+        norm_order=norm_order,
+        crop_x=crop_x,
+        crop_y=crop_y,
+        crop_z=crop_z
+    )
     ctx.obj["component"]._cli_run(ctx, instance)
 
 

@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Tuple, Mapping, Union
+from typing import Mapping, Tuple, Union
 
 import click
 import numpy as np
@@ -12,7 +12,9 @@ from starfish.types import Coordinates, Features, Indices, Number
 
 
 class ImagingMassCytometryTile(FetchedTile):
-    def __init__(self, file_path):
+
+    def __init__(self, file_path: str) -> None:
+        """Initialize a TileFetcher for Imaging Mass Cytometry Data"""
         self.file_path = file_path
         self._tile_data = imread(self.file_path)
 
@@ -22,7 +24,7 @@ class ImagingMassCytometryTile(FetchedTile):
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
-        # TODO ambrosejcarr ask about what these coordinates should correspond to.
+        # TODO ambrosejcarr: ask about what these coordinates should correspond to.
         return {
             Coordinates.X: (0.0, 0.0001),
             Coordinates.Y: (0.0, 0.0001),
@@ -38,7 +40,27 @@ class ImagingMassCytometryTile(FetchedTile):
 
 
 class ImagingMassCytometryTileFetcher(TileFetcher):
-    def __init__(self, input_dir):
+    def __init__(self, input_dir: str) -> None:
+        """Implement a TileFetcher for an Imaging Mass Cytometry Experiment.
+
+        This Tile Fetcher constructs spaceTx format from IMC experiments with a specific directory
+        structure:
+
+        input_dir
+        └── <Fov_name>
+            └── <Fov_name>
+                ├── <target_name1>.tiff
+                ├── ...
+                └── <target_nameN>.tiff
+
+        Notes
+        -----
+        - In Imaging Mass Cytometry, each channel specifies a unique target, so channel == target
+        - Imaging Mass Cytometry experiments have only one imaging round, round is hard coded as 1
+        - The spatial organization of the fields of view are not known to the starfish developers,
+          so they are filled by dummy coordinates
+
+        """
         self.input_dir = input_dir
 
     @property
@@ -107,6 +129,7 @@ class ImagingMassCytometryTileFetcher(TileFetcher):
 @click.option("--input_dir", type=str, help="input directory containing images")
 @click.option("--output_dir", type=str, help="output directory for formatted data")
 def cli(input_dir, output_dir):
+    """CLI entrypoint for spaceTx format construction for Imaging Mass Cytometry"""
 
     os.makedirs(output_dir, exist_ok=True)
 

@@ -291,21 +291,42 @@ class ImageStack:
         """Retrieves the image data as an xarray.DataArray"""
         return self._data
 
-    def __getitem__(self, key) -> "ImageStack":
-        # index xarray (keep dims) and create new stack
-        indexed_data = self._index_keep_dimensions(self.xarray, key)
+    def convert_to_indexers_dict(self, pos_kwargs, kw_kwargs):
+        return_dict = {ind.value: slice(None, None) for ind in Indices}
+        if pos_kwargs is not None:
+            for key, value in pos_kwargs.items():
+                if isinstance(value, tuple):
+                    value = slice(value[0], value[1])
+                return_dict[key] = value
+        else:
+            for key, value in kw_kwargs.items():
+                if isinstance(value, tuple):
+                    value = slice(value[0], value[1])
+                return_dict[key] = value
+        return return_dict
+
+    def sel(self, indexers: Mapping[Indices, Union[int, tuple]]=None, **indexers_kwargs):
+        indexers = self.convert_to_indexers_dict(indexers, indexers_kwargs)
+        indexed_data = self.index_keep_dimensions(self.xarray, indexers)
         stack = self.from_numpy_array(indexed_data.data)
         # set coords on new stack
         stack._coordinates = physical_coordiante_calculator.calc_new_physical_coords(
-            self, indexers=self._data._item_key_to_dict(key))
+            self, indexers)
         return stack
 
-    def _index_keep_dimensions(self, data: xr.DataArray, key) -> xr.DataArray:
+    @property
+    def loc(self):
+        """Attribute for location based indexing like pandas.
+        """
+        return _LocIndexer(self)
+
+    @staticmethod
+    def index_keep_dimensions(data: xr.DataArray, indexers) -> xr.DataArray:
         """Takes an xarray and key to index it. Indexes then adds back in lost dimensions"""
         # store original dims
         original_dims = data.dims
         # index
-        data = data[key]
+        data = data.sel(indexers)
         # find missing dims
         missing_dims = set(original_dims) - set(data.dims)
         # Add back in missing dims
@@ -1126,3 +1147,14 @@ class ImageStack:
         new_shape = (self.num_rounds, self.num_chs, self.num_zlayers) + self.tile_shape
         res = stack.reshape(new_shape)
         return res
+
+
+class _LocIndexer(object):
+    def __init__(self, image_stack):
+        self.image_stack = image_stack
+
+    def __getitem__(self, key) -> ImageStack:
+        return self.image_stack.sel(self.image_stack.xarray._item_key_to_dict(key))
+
+    def __setitem__(self, key, value):
+        self.image_stack[key] = value

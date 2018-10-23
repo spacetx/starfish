@@ -9,23 +9,29 @@ from starfish.types import Coordinates, Indices
 def test_indexing_by_r_ch_z():
     stack = ImageStack.synthetic_stack(num_round=5, num_ch=5, num_z=15,
                                        tile_height=200, tile_width=200)
-    indexed = stack[1:, 0, 0]
+
+    indexed = stack.sel({Indices.ROUND: (1, None), Indices.CH: 0, Indices.Z: 0})
     # assert that the shape changed
     expected_shape = OrderedDict([(Indices.ROUND, 4), (Indices.CH, 1),
                                   (Indices.Z, 1), (Indices.Y, 200), (Indices.X, 200)])
     assert indexed.shape == expected_shape
 
-    indexed = stack[0, 0, 0]
+    indexed = stack.sel(r=0, c=0, z=0)
     expected_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 1),
                                   (Indices.Z, 1), (Indices.Y, 200), (Indices.X, 200)])
     assert indexed.shape == expected_shape
 
-    indexed = stack[1, 3:, :]
+    indexed = stack.sel({Indices.ROUND: 1, Indices.CH: (3, None)})
     expected_shape = OrderedDict(
         [(Indices.ROUND, 1), (Indices.CH, 2), (Indices.Z, 15), (Indices.Y, 200), (Indices.X, 200)])
     assert indexed.shape == expected_shape
 
-    indexed = stack[1, :3, 7:]
+    indexed = stack.sel(r=1, c=(None, 3), z=(7, None))
+    expected_shape = OrderedDict(
+        [(Indices.ROUND, 1), (Indices.CH, 3), (Indices.Z, 8), (Indices.Y, 200), (Indices.X, 200)])
+    assert indexed.shape == expected_shape
+
+    indexed = stack.loc[1, :3, 7:]
     expected_shape = OrderedDict(
         [(Indices.ROUND, 1), (Indices.CH, 3), (Indices.Z, 8), (Indices.Y, 200), (Indices.X, 200)])
     assert indexed.shape == expected_shape
@@ -56,7 +62,7 @@ def test_indexing_by_x_y():
                                   Coordinates.Z: (1, 3)})
 
     # index on single value of y
-    indexed_stack = stack[0, 0, 1, 100, :100]
+    indexed_stack = stack.sel(r=0, c=0, z=1, y=100, x=(None, 100))
     expected_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 1),
                                   (Indices.Z, 1), (Indices.Y, 1), (Indices.X, 100)])
     assert indexed_stack.shape == expected_shape
@@ -68,7 +74,7 @@ def test_indexing_by_x_y():
     check_coodinate_values(indexed_stack, expected_coords)
 
     # indexed on first half of x and y dimensions:
-    indexed_stack = stack[:, :, :, :100, :100]
+    indexed_stack = stack.sel({Indices.Y: (None, 100), Indices.X: (None, 100)})
 
     expected_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 2),
                                   (Indices.Z, 2), (Indices.Y, 100), (Indices.X, 100)])
@@ -81,7 +87,7 @@ def test_indexing_by_x_y():
     check_coodinate_values(indexed_stack, expected_coords)
 
     # index on single x and y
-    indexed_stack = stack[0, 0, 1, 100, 150]
+    indexed_stack = stack.sel(r=0, c=0, z=1, y=100, x=150)
     expected_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 1),
                                   (Indices.Z, 1), (Indices.Y, 1), (Indices.X, 1)])
     assert indexed_stack.shape == expected_shape
@@ -94,7 +100,8 @@ def test_indexing_by_x_y():
     check_coodinate_values(indexed_stack, expected_coords)
 
     # Negative indexing
-    indexed_stack = stack[0, 0, 1, :-10, :-10]
+    indexed_stack = stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1,
+                               Indices.Y: (None, -10), Indices.X: (None, -10)})
     expected_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 1),
                                   (Indices.Z, 1), (Indices.Y, 190), (Indices.X, 190)])
     assert indexed_stack.shape == expected_shape

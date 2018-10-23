@@ -5,8 +5,7 @@ import xarray as xr
 from starfish.types import Coordinates, Indices, PhysicalCoordinateTypes
 
 
-def calc_new_physical_coords(image_stack, indexers: Mapping[str, Union[int, slice]]
-                             ) -> xr.DataArray:
+def calc_new_physical_coords(image_stack, indexers) -> xr.DataArray:
     """Calculates the resulting coordinates array from indexing on each dimension in indexers
 
     Parameters
@@ -17,10 +16,12 @@ def calc_new_physical_coords(image_stack, indexers: Mapping[str, Union[int, slic
     """
     new_coords = image_stack._coordinates.copy()
     # index by R, CH, V
-    key = (indexers[Indices.ROUND.value], indexers[Indices.CH.value], indexers[Indices.Z.value])
-    new_coords = image_stack._index_keep_dimensions(new_coords, key)
+    key = {'r': indexers[Indices.ROUND.value],
+           'c': indexers[Indices.CH.value],
+           'z': indexers[Indices.Z.value]}
+    new_coords = image_stack.index_keep_dimensions(new_coords, key)
     # check if X or Y dimension indexed, if so rescale
-    if _needs_coords_recalculating(indexers):
+    if _needs_coords_recalculating(indexers[Indices.X.value], indexers[Indices.Y.value]):
         _recalculate_physical_coordinates(image_stack, indexers, new_coords)
     return new_coords
 
@@ -99,7 +100,7 @@ def _recalculate_physical_coordinate(image_stack, coord: Coordinates,
     return new_min, new_max
 
 
-def _needs_coords_recalculating(indexers: Mapping[str, Union[int, slice]]) -> bool:
+def _needs_coords_recalculating(x_indexers, y_indexers) -> bool:
     """
     Takes in a dict of dim:indexes and returns true if indexing on either x or y dimension
 
@@ -108,7 +109,6 @@ def _needs_coords_recalculating(indexers: Mapping[str, Union[int, slice]]) -> bo
     indexers : a dictionary of dim:index where index is the value
     or range to index the dimension
     """
-    x, y = indexers[Indices.X.value], indexers[Indices.Y.value]
-    if isinstance(x, int) or isinstance(y, int):
+    if isinstance(x_indexers, int) or isinstance(y_indexers, int):
         return True
-    return not (x.start is x.stop is y.start is y.stop is None)
+    return not (x_indexers.start is x_indexers.stop is y_indexers.start is y_indexers.stop is None)

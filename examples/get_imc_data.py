@@ -129,7 +129,17 @@ class ImagingMassCytometryTileFetcher(TileFetcher):
 @click.option("--input_dir", type=str, help="input directory containing images")
 @click.option("--output_dir", type=str, help="output directory for formatted data")
 def cli(input_dir, output_dir):
-    """CLI entrypoint for spaceTx format construction for Imaging Mass Cytometry"""
+    """CLI entrypoint for spaceTx format construction for Imaging Mass Cytometry
+
+    Raw data (input for this tool) for this experiment can be found at:
+    s3://spacetx.starfish.data.public/browse/raw/20181015/imaging_cytof/\
+        BodenmillerBreastCancerSamples/
+
+    Processed data (output of this tool) can be found at:
+    s3://spacetx.starfish.data.public/browse/formatted/20181023/imaging_cytof/\
+        BodenmillerBreastCancerSamples/
+
+    """
 
     os.makedirs(output_dir, exist_ok=True)
 

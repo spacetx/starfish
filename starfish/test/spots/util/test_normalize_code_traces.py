@@ -70,8 +70,7 @@ def test_normalize_codes(norm_order, expected_size):
     # each non-zero value should be equal to 1 / expected_size of the norm. There are two non-zero
     # values and so the sum of the code should be (1 / expected_size) * 2
     assert np.all(
-        normed_codebook.sum((Indices.CH.value, Indices.ROUND.value)) ==
-        (1 / expected_size) * 2
+        normed_codebook.sum((Indices.CH.value, Indices.ROUND.value)) == (1 / expected_size) * 2
     )
 
 

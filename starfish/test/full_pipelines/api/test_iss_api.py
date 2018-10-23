@@ -4,7 +4,7 @@ import sys
 import numpy as np
 
 import starfish
-from starfish.spots._target_assignment.point_in_poly import PointInPoly2D
+from starfish.spots import TargetAssignment
 from starfish.types import Features
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(starfish.__file__)))
@@ -108,7 +108,7 @@ def test_iss_pipeline_cropped_data():
                                            'HER2', 'MET', 'RAC1', 'TFRC', 'TP53', 'VEGF']))
     assert np.array_equal(gene_counts, [18, 1, 5, 2, 1, 12, 3, 1, 2, 1, 1, 2])
 
-    regions = iss.regions
+    label_image = iss.label_image
 
     seg = iss.seg
 
@@ -116,8 +116,8 @@ def test_iss_pipeline_cropped_data():
     assert seg._segmentation_instance.num_cells == 1
 
     # assign targets
-    pip = PointInPoly2D()
-    pip.run(decoded, regions)
+    lab = TargetAssignment.Label()
+    assigned = lab.run(label_image, decoded)
 
-    # 18 of the spots are assigned to cell 1 (although most spots do not decode!)
-    assert np.sum(decoded['cell_id'] == 0) == 18
+    # 28 of the spots are assigned to cell 1 (although most spots do not decode!)
+    assert np.sum(assigned['cell_id'] == 1) == 28

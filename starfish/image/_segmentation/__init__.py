@@ -1,6 +1,7 @@
 import argparse
-import json
-from typing import Any, Dict, List, Type
+from typing import Type
+
+from skimage.io import imsave
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
@@ -47,26 +48,7 @@ class Segmentation(PipelineComponent):
         print('Segmenting ...')
         hybridization_stack = ImageStack.from_path_or_url(args.hybridization_stack)
         nuclei_stack = ImageStack.from_path_or_url(args.nuclei_stack)
-        regions = instance.run(hybridization_stack, nuclei_stack)
-        geojson = regions_to_geojson(regions, use_hull=False)
+        label_image = instance.run(hybridization_stack, nuclei_stack)
 
-        print("Writing | regions geojson to: {}".format(args.output))
-        with open(args.output, "w") as f:
-            f.write(json.dumps(geojson))
-
-
-def regions_to_geojson(r, use_hull=True) -> List[Dict[str, Dict[str, Any]]]:
-    """Convert region geometrical data to geojson format"""
-
-    def make_dict(id_, verts) -> Dict[str, Dict[str, Any]]:
-        d = dict()
-        c = list(map(lambda x: list(x), list(map(lambda v: [int(v[0]), int(v[1])], verts))))
-        d["properties"] = {"id": id_}
-        d["geometry"] = {"type": "Polygon", "coordinates": c}
-        return d
-
-    if use_hull:
-        coordinates = r.hull
-    else:
-        coordinates = r.coordinates
-    return [make_dict(id_, verts) for id_, verts in enumerate(coordinates)]
+        print(f"Writing label image to {args.output}")
+        imsave(args.output, label_image)

@@ -2,6 +2,7 @@ import json
 import os
 from typing import (
     Callable,
+    Dict,
     MutableMapping,
     MutableSequence,
     MutableSet,
@@ -19,6 +20,7 @@ from sptx_format import validate_sptx
 
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
+from starfish.util.config import Config
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
 
@@ -155,7 +157,10 @@ class Experiment:
         return object_repr + fov_repr
 
     @classmethod
-    def from_json(cls, json_url: str, strict: bool=None) -> "Experiment":
+    def from_json(cls,
+                  json_url: str,
+                  strict: bool=None,
+                  config: Optional[Union[str, Dict]]=None) -> "Experiment":
         """
         Construct an `Experiment` from an experiment.json file format specifier
 
@@ -166,6 +171,13 @@ class Experiment:
         strict : bool
             if true, then all JSON loaded by this method will be
             passed to the appropriate validator
+        config : str or dict
+            configuration property that will be passed to
+            starfish.util.config.Config
+        STARISH_CONFIG :
+            This parameter is read from the environment to permit setting configuration
+            values either directly or via a file. Keys read include:
+             - cache.allow_caching
         STARFISH_STRICT_LOADING :
              This parameter is read from the environment. If set, then all JSON loaded by this
              method will be passed to the appropriate validator. The `strict` parameter to this
@@ -184,13 +196,17 @@ class Experiment:
             if not valid:
                 raise Exception("validation failed")
 
-        backend, name, baseurl = resolve_path_or_url(json_url)
+        config_obj = Config(config)  # STARFISH_CONFIG is assumed
+        allow_caching = config_obj.lookup(["cache", "allow_caching"], True)
+
+        backend, name, baseurl = resolve_path_or_url(json_url, allow_caching)
         with backend.read_contextmanager(name) as fh:
             experiment_document = json.load(fh)
 
         version = cls.verify_version(experiment_document['version'])
 
-        _, codebook_name, codebook_baseurl = resolve_url(experiment_document['codebook'], baseurl)
+        _, codebook_name, codebook_baseurl = resolve_url(experiment_document['codebook'],
+                                                         baseurl, allow_caching)
         codebook_absolute_url = pathjoin(codebook_baseurl, codebook_name)
         codebook = Codebook.from_json(codebook_absolute_url)
 

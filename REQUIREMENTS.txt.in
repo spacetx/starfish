@@ -5,7 +5,6 @@ numpy != 1.13.0
 pandas >= 0.23.4
 pycodestyle<2.4.0
 pytest>=3.6.3
-regional
 requests
 semantic_version
 scikit-image>=0.14.0

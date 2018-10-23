@@ -78,7 +78,7 @@ class FieldOfView:
         )
         return (
             f"<starfish.FieldOfView>\n"
-            f"  Primary Image: {self._image[FieldOfView.PRIMARY_IMAGES]}\n"
+            f"  Primary Image: {self._images[FieldOfView.PRIMARY_IMAGES]}\n"
             f"  Auxiliary Images:\n"
             f"    {images}"
         )

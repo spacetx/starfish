@@ -1,5 +1,6 @@
 from typing import Any, Mapping, Tuple, Union
 
+import numpy as np
 import xarray as xr
 
 from starfish.imagestack import indexing_utils
@@ -171,3 +172,43 @@ def get_coordinates(
         coords_array.loc[min_selectors].item(),
         coords_array.loc[max_selectors].item(),
     )
+
+def _needs_coords_recalculating(x_indexers, y_indexers) -> bool:
+    """
+    Takes in a dict of dim:indexes and returns true if indexing on either x or y dimension
+
+    Parameters
+    ----------
+    indexers : a dictionary of dim:index where index is the value
+    or range to index the dimension
+    """
+    if isinstance(x_indexers, int) or isinstance(y_indexers, int):
+        return True
+    return not (x_indexers.start is x_indexers.stop is y_indexers.start is y_indexers.stop is None)
+
+
+def transfer_physical_coords_to_intensity_table(image_stack, intensity_table):
+    # TODO
+    # Add three new coords to xarray (xc, yc, zc)
+    intensity_table['xc'] = intensity_table.features * 0
+    intensity_table['yc'] = intensity_table.features * 0
+    intensity_table['zc'] = intensity_table.features * 0
+    for ind, feature in intensity_table.groupby('features'):
+        for ch, round in np.ndindex(feature.data.shape):
+            # if non zero value set coords
+            if feature[ch][round].data > 0:
+                # get pixel coords of this tile
+                pixel_x = feature[ch][round].coords.get(Coordinates.X).data
+                pixel_y = feature[ch][round].coords.get(Coordinates.Y).data
+                pixel_z = feature[ch][round].coords.get(Coordinates.Z).data
+                tile_indices = {
+                    Indices.ROUND.value: round,
+                    Indices.CH.value: ch,
+                    Indices.Z.value: pixel_z,
+                }
+                physical_coords = get_physcial_coordinates(tile_indices, pixel_x, pixel_y)
+                intensity_table['xc'][ind] = physical_coords[0]
+                intensity_table['yc'][ind] = physical_coords[1]
+                intensity_table['zc'][ind] = physical_coords[2]
+                break
+

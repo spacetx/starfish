@@ -67,7 +67,7 @@ def test_indexing_by_x_y():
     # (6-4) / 200 = .01
     expected_coords = {Coordinates.X: (1, 1.505), Coordinates.Y: (5, 5.01), Coordinates.Z: (1, 3)}
 
-    check_coodinate_values(indexed_stack, expected_coords)
+    check_coordinate_values(indexed_stack, expected_coords)
 
     # indexed on first half of x and y dimensions:
     indexed_stack = stack.sel({Indices.Y: (None, 100), Indices.X: (None, 100)})
@@ -80,7 +80,7 @@ def test_indexing_by_x_y():
     # ymin = 4, ymax=5.01 (+ .01 size of one y physical pixel)
     expected_coords = {Coordinates.X: (1, 1.505), Coordinates.Y: (4, 5.01), Coordinates.Z: (1, 3)}
 
-    check_coodinate_values(indexed_stack, expected_coords)
+    check_coordinate_values(indexed_stack, expected_coords)
 
     # index on single x and y
     indexed_stack = stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1,
@@ -94,7 +94,7 @@ def test_indexing_by_x_y():
     expected_coords = {Coordinates.X: (1.75, 1.755),
                        Coordinates.Y: (5, 5.01),
                        Coordinates.Z: (1, 3)}
-    check_coodinate_values(indexed_stack, expected_coords)
+    check_coordinate_values(indexed_stack, expected_coords)
 
     # Negative indexing
     indexed_stack = stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1,
@@ -105,10 +105,10 @@ def test_indexing_by_x_y():
     expected_coords = {Coordinates.X: (1, 1.955),
                        Coordinates.Y: (4, 5.91),
                        Coordinates.Z: (1, 3)}
-    check_coodinate_values(indexed_stack, expected_coords)
+    check_coordinate_values(indexed_stack, expected_coords)
 
 
-def check_coodinate_values(stack, expected_coords):
+def check_coordinate_values(stack, expected_coords):
     for _round in range(stack.num_rounds):
         for ch in range(stack.num_chs):
             for z in range(stack.num_zlayers):

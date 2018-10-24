@@ -2,6 +2,7 @@ from typing import Mapping, Tuple, Union
 
 import xarray as xr
 
+from starfish.imagestack import indexing_utils
 from starfish.types import Coordinates, Indices, PhysicalCoordinateTypes
 
 
@@ -19,7 +20,7 @@ def calc_new_physical_coords(image_stack, indexers) -> xr.DataArray:
     key = {'r': indexers[Indices.ROUND.value],
            'c': indexers[Indices.CH.value],
            'z': indexers[Indices.Z.value]}
-    new_coords = image_stack.index_keep_dimensions(new_coords, key)
+    new_coords = indexing_utils.index_keep_dimensions(new_coords, key)
     # check if X or Y dimension indexed, if so rescale
     if _needs_coords_recalculating(indexers[Indices.X.value], indexers[Indices.Y.value]):
         _recalculate_physical_coordinates(image_stack, indexers, new_coords)

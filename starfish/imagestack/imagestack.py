@@ -26,7 +26,8 @@ from tqdm import tqdm
 from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
-from starfish.imagestack import physical_coordiante_calculator
+from starfish.imagestack import indexing_utils
+from starfish.imagestack import physical_coordinate_calculator
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import (
     Coordinates,
@@ -291,36 +292,33 @@ class ImageStack:
         """Retrieves the image data as an xarray.DataArray"""
         return self._data
 
-    def _convert_to_indexers_dict(self, pos_kwargs):
-        return_dict = {ind.value: slice(None, None) for ind in Indices}
-        for key, value in pos_kwargs.items():
-            if isinstance(value, tuple):
-                value = slice(value[0], value[1])
-            return_dict[key] = value
-        return return_dict
-
     def sel(self, indexers: Mapping[Indices, Union[int, tuple]]=None):
-        indexers = self._convert_to_indexers_dict(indexers)
-        indexed_data = self.index_keep_dimensions(self.xarray, indexers)
+        """Given a dictionary mapping the index name to either a value or a slice range, return an
+        Imagestack with each dimension indexed accordingly
+
+        Examples
+        --------
+        Imagestack stack with shape (5, 5, 15, 200, 200)
+        stack.sel({Indices.ROUND: (1, None), Indices.CH: 0, Indices.Z: 0})
+        Result:  Imagestack stack with shape (4, 1, 1, 200, 200)
+
+        Imagestack stack with shape (5, 5, 15, 200, 200) Indices.Y: 100, Indices.X: (None, 100)})
+        Result:  Imagestack stack with shape (1, 1, 1, 1, 100)
+        with the imagestack's physical coordinates xarray also indexed and
+        recalculated according to the slicing.
+
+        Returns
+        -------
+        ImageStack :
+            a new image stack indexed by given value or range.
+        """
+        indexers = indexing_utils.convert_to_indexers_dict(indexers)
+        indexed_data = indexing_utils.index_keep_dimensions(self.xarray, indexers)
         stack = self.from_numpy_array(indexed_data.data)
         # set coords on new stack
-        stack._coordinates = physical_coordiante_calculator.calc_new_physical_coords(
+        stack._coordinates = physical_coordinate_calculator.calc_new_physical_coords(
             self, indexers)
         return stack
-
-    @staticmethod
-    def index_keep_dimensions(data: xr.DataArray, indexers) -> xr.DataArray:
-        """Takes an xarray and key to index it. Indexes then adds back in lost dimensions"""
-        # store original dims
-        original_dims = data.dims
-        # index
-        data = data.sel(indexers)
-        # find missing dims
-        missing_dims = set(original_dims) - set(data.dims)
-        # Add back in missing dims
-        data = data.expand_dims(tuple(missing_dims))
-        # Reorder to correct format
-        return data.transpose(*original_dims)
 
     def get_slice(
             self,

@@ -6,7 +6,7 @@ from starfish.imagestack import indexing_utils
 from starfish.types import Coordinates, Indices, PhysicalCoordinateTypes
 
 
-def calc_new_physical_coords(image_stack, indexers) -> xr.DataArray:
+def calc_new_physical_coords_array(image_stack, indexers) -> xr.DataArray:
     """Calculates the resulting coordinates array from indexing on each dimension in indexers
 
     Parameters

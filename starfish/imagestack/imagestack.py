@@ -302,21 +302,23 @@ class ImageStack:
         stack.sel({Indices.ROUND: (1, None), Indices.CH: 0, Indices.Z: 0})
         Result:  Imagestack stack with shape (4, 1, 1, 200, 200)
 
-        Imagestack stack with shape (5, 5, 15, 200, 200) Indices.Y: 100, Indices.X: (None, 100)})
-        Result:  Imagestack stack with shape (1, 1, 1, 1, 100)
-        with the imagestack's physical coordinates xarray also indexed and
-        recalculated according to the slicing.
+        Imagestack stack with shape (5, 5, 15, 200, 200)
+        stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1, Indices.Y: 100, Indices.X: (None, 100)})
+        Result:  Imagestack stack with shape (1, 1, 1, 1, 100) and the imagestack's physical coordinates
+        xarray also indexed and recalculated according to the x,y slicing.
 
         Returns
         -------
         ImageStack :
             a new image stack indexed by given value or range.
         """
+
+        # convert indexers to dict <str:(int, slice) format
         indexers = indexing_utils.convert_to_indexers_dict(indexers)
         indexed_data = indexing_utils.index_keep_dimensions(self.xarray, indexers)
         stack = self.from_numpy_array(indexed_data.data)
         # set coords on new stack
-        stack._coordinates = physical_coordinate_calculator.calc_new_physical_coords(
+        stack._coordinates = physical_coordinate_calculator.calc_new_physical_coords_array(
             self, indexers)
         return stack
 

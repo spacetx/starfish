@@ -188,11 +188,10 @@ def _needs_coords_recalculating(x_indexers, y_indexers) -> bool:
 
 
 def transfer_physical_coords_to_intensity_table(image_stack, intensity_table):
-    # TODO
     # Add three new coords to xarray (xc, yc, zc)
-    intensity_table['xc'] = intensity_table.features * 0
-    intensity_table['yc'] = intensity_table.features * 0
-    intensity_table['zc'] = intensity_table.features * 0
+    intensity_table[Coordinates.X] = intensity_table.features * 0
+    intensity_table[Coordinates.Y] = intensity_table.features * 0
+    intensity_table[Coordinates.Z] = intensity_table.features * 0
     for ind, feature in intensity_table.groupby('features'):
         for ch, round in np.ndindex(feature.data.shape):
             # if non zero value set coords
@@ -206,9 +205,9 @@ def transfer_physical_coords_to_intensity_table(image_stack, intensity_table):
                     Indices.CH.value: ch,
                     Indices.Z.value: pixel_z,
                 }
-                physical_coords = get_physcial_coordinates(tile_indices, pixel_x, pixel_y)
-                intensity_table['xc'][ind] = physical_coords[0]
-                intensity_table['yc'][ind] = physical_coords[1]
-                intensity_table['zc'][ind] = physical_coords[2]
+                physical_coords = image_stack.get_physcial_coordinates(tile_indices, pixel_x, pixel_y)
+                intensity_table[Coordinates.X][ind] = physical_coords[0]
+                intensity_table[Coordinates.Y][ind] = physical_coords[1]
+                intensity_table[Coordinates.Z][ind] = physical_coords[2]
                 break
 

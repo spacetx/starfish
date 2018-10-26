@@ -296,6 +296,11 @@ class ImageStack:
         """Given a dictionary mapping the index name to either a value or a slice range, return an
         Imagestack with each dimension indexed accordingly
 
+        Parameters
+        ----------
+        indexers : Dict[Indices, (int/tuple)]
+            A dictionary of dim:index where index is the value or range to index the dimension
+
         Examples
         --------
         Imagestack stack with shape (5, 5, 15, 200, 200)
@@ -303,8 +308,10 @@ class ImageStack:
         Result:  Imagestack stack with shape (4, 1, 1, 200, 200)
 
         Imagestack stack with shape (5, 5, 15, 200, 200)
-        stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1, Indices.Y: 100, Indices.X: (None, 100)})
-        Result:  Imagestack stack with shape (1, 1, 1, 1, 100) and the imagestack's physical coordinates
+        stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1,
+         Indices.Y: 100, Indices.X: (None, 100)})
+        Result:  Imagestack stack with shape (1, 1, 1, 1, 100)
+        and the imagestack's physical coordinates
         xarray also indexed and recalculated according to the x,y slicing.
 
         Returns
@@ -319,7 +326,7 @@ class ImageStack:
         stack = self.from_numpy_array(indexed_data.data)
         # set coords on new stack
         stack._coordinates = physical_coordinate_calculator.calc_new_physical_coords_array(
-            self, indexers)
+            self._coordinates, self.shape, indexers)
         return stack
 
     def get_slice(
@@ -816,34 +823,6 @@ class ImageStack:
         result['x'] = self._data.shape[-1]
 
         return result
-
-    def coordinates(
-            self,
-            indices: Mapping[Indices, int],
-            physical_axis: Coordinates) -> Tuple[float, float]:
-        """Given a set of indices that uniquely identify a tile and a physical axis, return the min
-        and the max coordinates for that tile along that axis."""
-        selectors: Mapping[str, Any] = {
-            Indices.ROUND.value: indices[Indices.ROUND],
-            Indices.CH.value: indices[Indices.CH],
-            Indices.Z.value: indices[Indices.Z],
-        }
-        min_selectors = dict(selectors)
-        max_selectors = dict(selectors)
-        if physical_axis == Coordinates.X:
-            min_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.X_MIN
-            max_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.X_MAX
-        elif physical_axis == Coordinates.Y:
-            min_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Y_MIN
-            max_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Y_MAX
-        elif physical_axis == Coordinates.Z:
-            min_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Z_MIN
-            max_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Z_MAX
-
-        return (
-            self._coordinates.loc[min_selectors].item(),
-            self._coordinates.loc[max_selectors].item(),
-        )
 
     def _get_dimension_size(self, dimension: Indices):
         axis_data = ImageStack.AXES_DATA[dimension]

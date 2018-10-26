@@ -4,15 +4,14 @@ from starfish.types import Indices
 
 
 def convert_to_indexers_dict(indexers):
-    """Converts a dict of indexers from <Indices:(int, tuple)> to
-    <str:(int, slice) so that it can be passed into standard xarray
+    """Converts a dict of indexers from Dict[Indices, (int/tuple)] to
+    Dict[str, (int/slice)] so that it can be passed into standard xarray
     indexing methods
 
     Parameters
     ----------
-    indexers : dict
-        <Indices: int or tuple> that describes the dimensions and
-        corresponding value or range to index.
+    indexers : Dict[Indices, (int/tuple)]
+            A dictionary of dim:index where index is the value or range to index the dimension
 
     """
     return_dict = {ind.value: slice(None, None) for ind in Indices}

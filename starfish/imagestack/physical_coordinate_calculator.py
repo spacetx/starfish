@@ -89,6 +89,21 @@ def _recalculate_physical_coordinate_ranges(stack_shape: Mapping[Indices, int],
                     ])] = [xmin, xmax, ymin, ymax]
 
 
+def calculate_physcial_pixel_size(coord_max, coord_min, num_pixels):
+    """Calculate the size of a pixel in physical space"""
+    return (coord_max - coord_min) / num_pixels
+
+
+def calculate_physical_pixel_value(physcial_pixel_size, index, start_of_range):
+    """Calculate the physical pixel value at the given index"""
+    if index:
+        # Check for negative index
+        if index < 0:
+            index = index + start_of_range
+        return (physcial_pixel_size * index) + start_of_range
+    return start_of_range
+
+
 def _recalculate_physical_coordinate_range(coords_array: xr.DataArray,
                                            dimension_size, coord: Coordinates,
                                            tile_indices: Mapping[Indices, int],
@@ -116,19 +131,13 @@ def _recalculate_physical_coordinate_range(coords_array: xr.DataArray,
 
     """
     coord_min, coord_max = get_coordinates(coords_array, tile_indices, coord)
-    physical_pixel_size = (coord_max - coord_min) / dimension_size
-    new_min, new_max = coord_min, coord_max
+    physical_pixel_size = calculate_physcial_pixel_size(coord_max, coord_min, dimension_size)
     min_pixel_index = key if type(key) is int else key.start
     max_pixel_index = key if type(key) is int else key.stop
-    if min_pixel_index:
-        # check for negative index
-        min_pixel_index = min_pixel_index + dimension_size if min_pixel_index < 0 \
-            else min_pixel_index
-        new_min = (physical_pixel_size * min_pixel_index) + coord_min
-    if max_pixel_index:
-        max_pixel_index = max_pixel_index + dimension_size if max_pixel_index < 0 \
-            else max_pixel_index
-        new_max = (physical_pixel_size * (max_pixel_index + 1)) + coord_min
+    # Add one to max pixel index to get end of pixel
+    max_pixel_index = max_pixel_index + 1 if max_pixel_index else None
+    new_min = calculate_physical_pixel_value(physical_pixel_size, min_pixel_index, coord_min)
+    new_max = calculate_physical_pixel_value(physical_pixel_size, max_pixel_index, coord_min)
     return new_min, new_max
 
 

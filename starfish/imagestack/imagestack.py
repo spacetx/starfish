@@ -399,6 +399,10 @@ class ImageStack:
 
 
         """
+        import napari_gui
+
+        # TODO ambrosejcarr: this should use updated imagestack slicing routines when they are added
+        # and indices should be optional to enable full stack viewing.
         # Switch axes such that it is indexed [x, y, round, channel, z]
         slices, axes = self.get_slice(indices)
         reordered_array = np.moveaxis(slices, [-2, -1], [0, 1])

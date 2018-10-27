@@ -11,7 +11,6 @@ from typing import (
 )
 
 import matplotlib.pyplot as plt
-import napari_gui
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -34,6 +33,7 @@ from starfish.types import (
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
 )
+from starfish.util.try_import import try_import
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
@@ -381,9 +381,9 @@ class ImageStack:
 
         self._data.values[slice_list] = data
 
+    @try_import({"napari_gui"})
     def show_stack_napari(self, indices: Mapping[Indices, Union[int, slice]]):
-        """
-            Displays the image stack using Napari (https://github.com/Napari)
+        """Displays the image stack using Napari (https://github.com/Napari)
 
         Parameters
         ----------
@@ -394,10 +394,12 @@ class ImageStack:
         Notes
         -----
         To use in a Jupyter notebook, use the %gui qt5 magic.
+        Axes currently cannot be labeled. Until such a time that they can, this function will
+            order them by Round, Channel, and Z.
 
 
         """
-        # Switch axes such that it is indexed [x, y, rnd, c, z]
+        # Switch axes such that it is indexed [x, y, round, channel, z]
         slices, axes = self.get_slice(indices)
         reordered_array = np.moveaxis(slices, [-2, -1], [0, 1])
 

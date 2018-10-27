@@ -33,6 +33,7 @@ from starfish.types import (
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
 )
+from starfish.util.try_import import try_import
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
@@ -379,6 +380,34 @@ class ImageStack:
                 data.shape, self._data[slice_list].shape))
 
         self._data.values[slice_list] = data
+
+    @try_import({"napari_gui"})
+    def show_stack_napari(self, indices: Mapping[Indices, Union[int, slice]]):
+        """Displays the image stack using Napari (https://github.com/Napari)
+
+        Parameters
+        ----------
+        indices : Mapping[Indices, Union[int, slice]],
+            Indices to select a volume to visualize. Passed to `Image.get_slice()`.
+            See `Image.get_slice()` for examples.
+
+        Notes
+        -----
+        To use in a Jupyter notebook, use the %gui qt5 magic.
+        Axes currently cannot be labeled. Until such a time that they can, this function will
+            order them by Round, Channel, and Z.
+
+
+        """
+        import napari_gui
+
+        # TODO ambrosejcarr: this should use updated imagestack slicing routines when they are added
+        # and indices should be optional to enable full stack viewing.
+        # Switch axes such that it is indexed [x, y, round, channel, z]
+        slices, axes = self.get_slice(indices)
+        reordered_array = np.moveaxis(slices, [-2, -1], [0, 1])
+
+        napari_gui.imshow(reordered_array, multichannel=False)
 
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],

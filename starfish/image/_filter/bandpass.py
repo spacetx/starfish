@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Optional
 
+import click
 import numpy as np
 from trackpy import bandpass
 
@@ -14,7 +15,7 @@ class Bandpass(FilterAlgorithmBase):
 
     def __init__(
             self, lshort: Number, llong: int, threshold: Number, truncate: Number=4,
-            is_volume: bool=False, **kwargs) -> None:
+            is_volume: bool=False) -> None:
         """
 
         Parameters
@@ -30,7 +31,6 @@ class Bandpass(FilterAlgorithmBase):
             deviations
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
-        kwargs
         """
         self.lshort = lshort
         self.llong = llong
@@ -39,18 +39,6 @@ class Bandpass(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     _DEFAULT_TESTING_PARAMETERS = {"lshort": 1, "llong": 3, "threshold": 0.01}
-
-    @classmethod
-    def _add_arguments(cls, group_parser) -> None:
-        group_parser.add_argument(
-            "--lshort", type=float, help="filter signals below this frequency")
-        group_parser.add_argument(
-            "--llong", type=int, help="filter signals above this frequency")
-        group_parser.add_argument(
-            "--threshold", type=int, help="clip pixels below this intensity value")
-        group_parser.add_argument(
-            "--truncate", default=4, type=float,
-            help="truncate the filter at this many standard deviations")
 
     @staticmethod
     def _bandpass(
@@ -121,3 +109,20 @@ class Bandpass(FilterAlgorithmBase):
             n_processes=n_processes,
         )
         return result
+
+
+@click.command("Bandpass")
+@click.option(
+    "--lshort", type=float, help="filter signals below this frequency")
+@click.option(
+    "--llong", type=int, help="filter signals above this frequency")
+@click.option(
+    "--threshold", type=int, help="clip pixels below this intensity value")
+@click.option(
+    "--truncate", default=4, type=float,
+    help="truncate the filter at this many standard deviations")
+@click.pass_context
+def _cli(ctx, lshort, llong, threshold, truncate):
+    ctx.obj["component"]._cli_run(ctx, Bandpass(lshort, llong, threshold, truncate))
+
+Bandpass._cli = _cli  # type: ignore

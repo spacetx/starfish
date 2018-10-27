@@ -36,6 +36,7 @@ class ExpressionMatrix(xr.DataArray):
         """
         self.to_netcdf(filename)
 
+    @try_import({"loompy"})
     def save_loom(self, filename: str) -> None:
         """Save an ExpressionMatrix as a loom file
 
@@ -44,13 +45,14 @@ class ExpressionMatrix(xr.DataArray):
         filename : str
             Name of loom file
         """
-        loompy = try_import("loompy")
+        import loompy
 
         row_attrs = {k: self['cells'][k].values for k in self['cells'].coords}
         col_attrs = {k: self['genes'][k].values for k in self['genes'].coords}
 
         loompy.create(filename, self.data, row_attrs, col_attrs)
 
+    @try_import({"anndata"})
     def save_anndata(self, filename: str) -> None:
         """Save an ExpressionMatrix as an AnnData file
 
@@ -59,7 +61,7 @@ class ExpressionMatrix(xr.DataArray):
         filename : str
             Name of AnnData file
         """
-        anndata = try_import("anndata")
+        import anndata
 
         row_attrs = {k: self['cells'][k].values for k in self['cells'].coords}
         col_attrs = {k: self['genes'][k].values for k in self['genes'].coords}

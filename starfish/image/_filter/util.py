@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Set, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -146,9 +146,10 @@ def preserve_float_range(
             data[array > 1] = 1
     return array.astype(np.float32)
 
-def determine_axes_to_split_by(is_volume: bool):
-    """map is_volume to axes to split by when applying a function over an ImageStack"""
+
+def determine_axes_to_group_by(is_volume: bool) -> Set[Indices]:
+    """map is_volume to axes to group by when applying a function over an ImageStack"""
     if is_volume:
-        return {Indices.Z.value, Indices.Y.value, Indices.X.value}
+        return {Indices.ROUND, Indices.CH}
     else:
-        return {Indices.Y.value, Indices.X.value}
+        return {Indices.ROUND, Indices.CH, Indices.Z}

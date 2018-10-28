@@ -63,14 +63,18 @@ class ImageStack:
         retrieve a slice of the image tensor
     set_slice(indices, data, axes=None)
         set a slice of the image tensor
-    apply(func, split_by={Indices.X, Indices.Y}, in_place=False, verbose=False, n_processes=None)
-        split the image tensor into chunks and apply a function across each of the chunks to yield
-        an image tensor
-    transform(func, split_by={Indices.X, Indices.Y}, verbose=False, n_processes=None)
-        split the image tensor into chunks and apply a function across each of the chunks
+    apply(func, group_by={Indices.ROUND, Indices.CH, Indices.Z}, in_place=False, verbose=False,
+            n_processes=None)
+        split the image tensor along one or more axes and apply a function across each of the
+        components to yield an image tensor
+    transform(func, group_by={Indices.ROUND, Indices.CH, Indices.Z}, verbose=False,
+            n_processes=None)
+        split the image tensor along one or more axes and apply a function across each of the
+        components. Results are returned as a List with length equal to the number of times
+        the image tensor is split.
     max_proj(*dims)
         return a max projection over one or more axis of the image tensor
-    show_stack(indices, color_map='gray', figure_size=(10, 10), rescale=False, p_min=None, \
+    show_stack(indices, color_map='gray', figure_size=(10, 10), rescale=False, p_min=None,
             p_max=None)
         show an interactive, pageable view of the image tensor, or a slice of the image tensor
     write(filepath, tile_opener=None)
@@ -647,23 +651,25 @@ class ImageStack:
     def apply(
             self,
             func: Callable,
-            split_by: Set[Indices]=None,
+            group_by: Set[Indices]=None,
             in_place=False,
             verbose: bool=False,
             n_processes: Optional[int]=None,
             **kwargs
     ) -> "ImageStack":
-        """Apply func over all N-dimensional chunks of this image, yielding identically shaped
-        chunks, which are constituted into an ImageStack and returned.
+        """Split the image along a set of axes and apply a function across all the components.  This
+        function should yield data of the same dimensionality as the input components.  These
+        resulting components are then constituted into an ImageStack and returned.
 
         Parameters
         ----------
         func : Callable
-            Function to apply. must expect a first argument which is a numpy array (see is_volume)
+            Function to apply. must expect a first argument which is a numpy array (see group_by)
             but may return any object type.
-        split_by : Set[Indices]
+        group_by : Set[Indices]
             Axes to split the data along.  For instance, splitting a 2D array (axes: X, Y; size:
-            3, 4) by X results in 4 arrays of size 3.  (default {Indices.X, Indices.Y})
+            3, 4) by X results in 3 arrays of size 4.  (default {Indices.ROUND, Indices.CH,
+            Indices.Z})
         in_place : bool
             (default True) If True, function is executed in place. If n_proc is not 1, the tile or
             volume will be copied once during execution. If false, a new ImageStack object will be
@@ -682,17 +688,17 @@ class ImageStack:
             If inplace is False, return a new ImageStack, otherwise return a reference to the
             original stack with data modified by application of func
         """
-        if split_by is None:
-            split_by = {Indices.X, Indices.Y}
+        if group_by is None:
+            group_by = {Indices.ROUND, Indices.CH, Indices.Z}
 
         if not in_place:
             image_stack = deepcopy(self)
             return image_stack.apply(
                 func,
-                split_by=split_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
+                group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
             )
 
-        results = self.transform(func, split_by=split_by, verbose=verbose,
+        results = self.transform(func, group_by=group_by, verbose=verbose,
                                  n_processes=n_processes, **kwargs)
 
         for r, inds in results:
@@ -702,21 +708,22 @@ class ImageStack:
     def transform(
             self,
             func: Callable,
-            split_by: Set[Indices]=None,
+            group_by: Set[Indices]=None,
             verbose=False,
             n_processes: Optional[int]=None,
             **kwargs
     ) -> List[Any]:
-        """Apply func over all N-dimensional chunks of this image.
+        """Split the image along a set of axes, and apply a function across all the components.
 
         Parameters
         ----------
         func : Callable
-            Function to apply. must expect a first argument which is a numpy array (see is_volume)
+            Function to apply. must expect a first argument which is a numpy array (see group_by)
             but may return any object type.
-        split_by : Set[Indices]
+        group_by : Set[Indices]
             Axes to split the data along.  For instance, splitting a 2D array (axes: X, Y; size:
-            3, 4) by X results in 4 arrays of size 3.  (default {Indices.X, Indices.Y})
+            3, 4) by X results in 3 arrays of size 4.  (default {Indices.ROUND, Indices.CH,
+            Indices.Z})
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
         n_processes : Optional[int]
@@ -730,13 +737,10 @@ class ImageStack:
         List[Any] :
             The results of applying func to stored image data
         """
-        if split_by is None:
-            split_by = {Indices.X, Indices.Y}
+        if group_by is None:
+            group_by = {Indices.X, Indices.Y}
 
-        all_axes = set(ind for ind in Indices)
-        axes_to_iterate = set(all_axes - split_by)
-
-        indices = list(self._iter_indices(axes_to_iterate))
+        indices = list(self._iter_indices(group_by))
 
         if verbose:
             tiles = tqdm(self._iter_tiles(indices))

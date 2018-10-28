@@ -10,7 +10,7 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
 from .util import (
-    determine_axes_to_split_by,
+    determine_axes_to_group_by,
     preserve_float_range,
     validate_and_broadcast_kernel_size,
 )
@@ -99,10 +99,10 @@ class GaussianHighPass(FilterAlgorithmBase):
             original stack.
 
         """
-        split_by = determine_axes_to_split_by(self.is_volume)
+        group_by = determine_axes_to_group_by(self.is_volume)
         high_pass: Callable = partial(self._high_pass, sigma=self.sigma)
         result = stack.apply(
             high_pass,
-            split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result

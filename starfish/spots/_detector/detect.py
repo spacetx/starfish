@@ -222,9 +222,9 @@ def detect_spots(
         reference_image = data_stack.max_proj(Indices.CH, Indices.ROUND)
 
     if is_volume:
-        split_by = {Indices.Z.value, Indices.Y.value, Indices.X.value}
+        group_by = {Indices.ROUND, Indices.CH}
     else:
-        split_by = {Indices.Y.value, Indices.X.value}
+        group_by = {Indices.ROUND, Indices.CH, Indices.Z}
 
     if reference_image is not None:
         reference_spot_locations = spot_finding_method(reference_image, **spot_finding_kwargs)
@@ -238,7 +238,7 @@ def detect_spots(
         spot_finding_method = partial(spot_finding_method, **spot_finding_kwargs)
         spot_attributes_list = data_stack.transform(
             func=spot_finding_method,
-            split_by=split_by
+            group_by=group_by
         )
         intensity_table = concatenate_spot_attributes_to_intensities(spot_attributes_list)
 

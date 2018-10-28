@@ -7,7 +7,7 @@ from trackpy import bandpass
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
-from .util import determine_axes_to_split_by, preserve_float_range
+from .util import determine_axes_to_group_by, preserve_float_range
 
 
 class Bandpass(FilterAlgorithmBase):
@@ -112,11 +112,11 @@ class Bandpass(FilterAlgorithmBase):
             lshort=self.lshort, llong=self.llong, threshold=self.threshold, truncate=self.truncate
         )
 
-        split_by = determine_axes_to_split_by(self.is_volume)
+        group_by = determine_axes_to_group_by(self.is_volume)
 
         result = stack.apply(
             bandpass_,
-            split_by=split_by,
+            group_by=group_by,
             in_place=in_place,
             n_processes=n_processes,
         )

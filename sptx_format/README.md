@@ -154,26 +154,29 @@ Each codeword is made up of one or more json objects, each of which describe the
 For smFISH experiments where each channel corresponds to a different target and there is only one imaging round, the codebook is very simple:
 
 ```json
-[
-  {
-    "codeword": [
-      {"c": 0, "r": 0, "v": 1}
-    ],
-    "target": "SCUBE2"
-  },
-  {
-    "codeword": [
-      {"c": 1, "r": 0, "v": 1}
-    ],
-    "target": "BRCA"
-  },
-  {
-    "codeword": [
-      {"c": 2, "r": 0, "v": 1}
-    ],
-    "target": "ACTB"
-  }
-]
+{
+  "version": "0.0.0",
+  "mappings": [
+    {
+      "codeword": [
+        {"c": 0, "r": 0, "v": 1}
+      ],
+      "target": "SCUBE2"
+    },
+    {
+      "codeword": [
+        {"c": 1, "r": 0, "v": 1}
+      ],
+      "target": "BRCA"
+    },
+    {
+      "codeword": [
+        {"c": 2, "r": 0, "v": 1}
+      ],
+      "target": "ACTB"
+    }
+  ]
+}
 ```
 In this example, channels 0, 1, and 2 correspond to `SCUBE2`, `BRCA`, and `ACTB`, respectively.
 In contrast, a coded experiment may have a more complex codebook:

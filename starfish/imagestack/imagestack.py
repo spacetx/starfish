@@ -63,8 +63,11 @@ class ImageStack:
         retrieve a slice of the image tensor
     set_slice(indices, data, axes=None)
         set a slice of the image tensor
-    apply(func, is_volume=False, in_place=False, verbose=False, n_processes=None)
-        apply a 2d or 3d function across all Tiles in the image tensor
+    apply(func, split_by={Indices.X, Indices.Y}, in_place=False, verbose=False, n_processes=None)
+        split the image tensor into chunks and apply a function across each of the chunks to yield
+        an image tensor
+    transform(func, split_by={Indices.X, Indices.Y}, verbose=False, n_processes=None)
+        split the image tensor into chunks and apply a function across each of the chunks
     max_proj(*dims)
         return a max projection over one or more axis of the image tensor
     show_stack(indices, color_map='gray', figure_size=(10, 10), rescale=False, p_min=None, \
@@ -643,24 +646,24 @@ class ImageStack:
 
     def apply(
             self,
-            func,
-            split_by: Set[Indices]={Indices.X, Indices.Y},
+            func: Callable,
+            split_by: Set[Indices]=None,
             in_place=False,
             verbose: bool=False,
             n_processes: Optional[int]=None,
             **kwargs
     ) -> "ImageStack":
-        """Apply func over all tiles or volumes in self
+        """Apply func over all N-dimensional chunks of this image, yielding identically shaped
+        chunks, which are constituted into an ImageStack and returned.
 
         Parameters
         ----------
         func : Callable
-            Function to apply. must expect a first argument which is a 2d or 3d numpy array
-            (see is_volume) and return a
-            np.ndarray. If inplace is True, must return an array of the same shape.
-        apply_over: Set[Indices, ...]
-            (default {Indices.X, Indices.Y}) By default, apply over X and Y (tiles). Alternatively,
-            One could pass {Indices.X, Indices.Y, Indices.Z} to apply over volumes.
+            Function to apply. must expect a first argument which is a numpy array (see is_volume)
+            but may return any object type.
+        split_by : Set[Indices]
+            Axes to split the data along.  For instance, splitting a 2D array (axes: X, Y; size:
+            3, 4) by X results in 4 arrays of size 3.  (default {Indices.X, Indices.Y})
         in_place : bool
             (default True) If True, function is executed in place. If n_proc is not 1, the tile or
             volume will be copied once during execution. If false, a new ImageStack object will be
@@ -679,6 +682,9 @@ class ImageStack:
             If inplace is False, return a new ImageStack, otherwise return a reference to the
             original stack with data modified by application of func
         """
+        if split_by is None:
+            split_by = {Indices.X, Indices.Y}
+
         if not in_place:
             image_stack = deepcopy(self)
             return image_stack.apply(
@@ -693,22 +699,29 @@ class ImageStack:
             self.set_slice(inds, r)
         return self
 
-    def transform(self, func,
-                  split_by: Set[Indices]={Indices.X, Indices.Y},
-                  verbose=False,
-                  n_processes: Optional[int] = None,
-                  **kwargs) -> List[Any]:
-        """Apply func over all tiles or volumes in self
+    def transform(
+            self,
+            func: Callable,
+            split_by: Set[Indices]=None,
+            verbose=False,
+            n_processes: Optional[int]=None,
+            **kwargs
+    ) -> List[Any]:
+        """Apply func over all N-dimensional chunks of this image.
 
         Parameters
         ----------
         func : Callable
-            Function to apply. must expect a first argument which is a 2d or 3d numpy array
-            (see is_volume) but may return any object type
-        is_volume : bool
-            (default False) If True, pass 3d volumes (x, y, z) to func
+            Function to apply. must expect a first argument which is a numpy array (see is_volume)
+            but may return any object type.
+        split_by : Set[Indices]
+            Axes to split the data along.  For instance, splitting a 2D array (axes: X, Y; size:
+            3, 4) by X results in 4 arrays of size 3.  (default {Indices.X, Indices.Y})
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
+        n_processes : Optional[int]
+            The number of processes to use for apply. If None, uses the output of os.cpu_count()
+            (default = None).
         kwargs : dict
             Additional arguments to pass to func being applied
 
@@ -717,7 +730,9 @@ class ImageStack:
         List[Any] :
             The results of applying func to stored image data
         """
-        # mapfunc: Callable = map
+        if split_by is None:
+            split_by = {Indices.X, Indices.Y}
+
         all_axes = set(ind for ind in Indices)
         axes_to_iterate = set(all_axes - split_by)
 

@@ -4,18 +4,21 @@ processes.  The data is shared such that any process can write to the array and 
 the other processes.  It is up to the developer that uses this mechanism to ensure data integrity is
 maintained.
 """
-
-
+import copy
 import ctypes
 import multiprocessing
+import warnings
 from functools import partial
 # Even though we import multiprocessing, mypy can't find the Array class.  To avoid sprinkling
 # ignore markers all over the file, we explicitly import the symbol and put the ignore marker here.
 from multiprocessing import Array as mp_array  # type: ignore
-from typing import Any, Callable
+from typing import Any, Callable, Tuple
 
 import numpy as np
+import xarray as xr
 
+from starfish import ImageStack
+from starfish.imagestack import _mp_dataarray
 from starfish.multiprocessing import shmem
 
 
@@ -79,6 +82,64 @@ def test_wrapped_shmem_numpy_array(nitems: int=10):
 
 def _decode_wrapped_array_to_numpy_array(wrapped_array):
     return np.frombuffer(wrapped_array.array.get_obj(), dtype=np.uint8)
+
+
+def test_xr_deepcopy(nitems: int=10) -> None:
+    """
+    Instantiate an :py:class:`xarray.DataArray` and run
+    :py:method:`starfish.imagestack.mp_dataarray.xr_deepcopy` on it.  The copy is passed to worker
+    processes.  Worker processes reconstitute a numpy array from the buffer and attempts to writes
+    to the numpy array.  Writes in the worker process should be visible in the parent process in the
+    copy but not the original.
+    """
+    shape = (nitems, )
+    source = np.zeros(shape, dtype=np.uint8)
+    dataarray = xr.DataArray(source)
+    copy, buffer = _mp_dataarray.xr_deepcopy(dataarray)
+    _start_process_to_test_shmem(buffer, _decode_array_to_numpy_array, nitems)
+    for ix in range(nitems):
+        assert dataarray[ix] == 0
+        assert copy[ix] == ix
+
+
+def test_imagestack_deepcopy(nitems: int=10) -> None:
+    """
+    Instantiate an :py:class:`ImageStack` and deepcopy it.  Worker processes reconstitute a numpy
+    array from the buffer and attempts to writes to the numpy array.  Writes in the worker process
+    should be visible in the parent process.
+    """
+    shape = (nitems, 3, 4, 5, 6)
+    dtype = np.float32
+    source = np.zeros(shape, dtype=np.float32)
+    imagestack = ImageStack.from_numpy_array(source)
+    imagestack_copy = copy.deepcopy(imagestack)
+    _start_process_to_test_shmem(
+        imagestack_copy._data._backing_mp_array,
+        partial(_decode_imagestack_array_to_numpy_array, shape, dtype),
+        nitems)
+    for ix in range(nitems):
+        assert (imagestack.xarray[ix] == 0).all()
+        assert np.allclose(imagestack_copy.xarray[ix], ix)
+
+
+def _decode_imagestack_array_to_numpy_array(
+        shape: Tuple[int, ...], dtype, buffer) -> np.ndarray:
+    unshaped_np_array = np.frombuffer(buffer.get_obj(), dtype=dtype)
+    return unshaped_np_array.reshape(shape)
+
+
+def test_imagestack_xarray_deepcopy(nitems: int=10) -> None:
+    """
+    Instantiate an :py:class:`ImageStack` and deepcopy the xarray directly.  This should work, but
+    prompt a warning.
+    """
+    shape = (nitems, 3, 4, 5, 6)
+    dtype = np.float32
+    source = np.zeros(shape, dtype=dtype)
+    imagestack = ImageStack.from_numpy_array(source)
+    with warnings.catch_warnings(record=True) as warnings_:
+        copy.deepcopy(imagestack.xarray)
+        assert len(warnings_) == 1  # type: ignore
 
 
 def _applied_func(decoder: Callable[[Any], np.ndarray], position: int) -> None:

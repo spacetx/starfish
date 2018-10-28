@@ -34,6 +34,7 @@ from starfish.types import (
     PhysicalCoordinateTypes,
 )
 from starfish.util.try_import import try_import
+from ._mp_dataarray import MPDataArray
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
@@ -139,11 +140,10 @@ class ImageStack:
         coordinates_dimensions.append(PHYSICAL_COORDINATE_DIMENSION)
         coordinates_shape.append(6)
         # now that we know the tile data type (kind and size), we can allocate the data array.
-        self._data = xr.DataArray(
-            np.zeros(
-                shape=shape,
-                dtype=np.float32,
-            ),
+        self._data = MPDataArray.from_shape_and_dtype(
+            shape=shape,
+            dtype=np.float32,
+            initial_value=0,
             dims=dims,
         )
         self._coordinates = xr.DataArray(
@@ -296,7 +296,7 @@ class ImageStack:
     @property
     def xarray(self) -> xr.DataArray:
         """Retrieves the image data as an xarray.DataArray"""
-        return self._data
+        return self._data.data
 
     def get_slice(
             self,

@@ -26,21 +26,20 @@ class Segmentation(PipelineComponent):
         print(f"Writing label image to {output}")
         imsave(output, label_image)
 
+    @staticmethod
+    @click.group("segment")
+    @click.option("--primary-images", required=True, type=click.Path(exists=True))
+    @click.option("--nuclei", required=True, type=click.Path(exists=True))
+    @click.option("-o", "--output", required=True)
+    @click.pass_context
+    def _cli(ctx, primary_images, nuclei, output):
+        print('Segmenting ...')
+        ctx.obj = dict(
+            component=Segmentation,
+            output=output,
+            primary_images=ImageStack.from_path_or_url(primary_images),
+            nuclei=ImageStack.from_path_or_url(nuclei),
+        )
 
-@click.group("segment")
-@click.option("--primary-images", required=True, type=click.Path(exists=True))
-@click.option("--nuclei", required=True, type=click.Path(exists=True))
-@click.option("-o", "--output", required=True)
-@click.pass_context
-def _cli(ctx, primary_images, nuclei, output):
-    print('Segmenting ...')
-    ctx.obj = dict(
-        component=Segmentation,
-        output=output,
-        primary_images=ImageStack.from_path_or_url(primary_images),
-        nuclei=ImageStack.from_path_or_url(nuclei),
-    )
 
-
-Segmentation._cli = _cli  # type: ignore
 Segmentation._cli_register()

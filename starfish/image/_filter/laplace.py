@@ -116,23 +116,20 @@ class Laplace(FilterAlgorithmBase):
             split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
         )
 
-
-@click.command("Laplace")
-@click.option(
-    "--sigma", type=float,
-    help="Standard deviation of gaussian kernel for spot enhancement")
-@click.option(
-    "--mode", default="reflect",
-    help="How the input array is extended when the filter overlaps a border")
-@click.option(
-    "--cval", default=0.0,
-    help="Value to fill past edges of input if mode is ‘constant")
-@click.option(
-    "--is-volume", is_flag=True,
-    help="indicates that the image stack should be filtered in 3d")
-@click.pass_context
-def _cli(ctx, sigma, mode, cval, is_volume):
-    ctx.obj["component"]._cli_run(ctx, Laplace(sigma, mode, cval, is_volume))
-
-
-Laplace._cli = _cli  # type: ignore
+    @staticmethod
+    @click.command("Laplace")
+    @click.option(
+        "--sigma", type=float,
+        help="Standard deviation of gaussian kernel for spot enhancement")
+    @click.option(
+        "--mode", default="reflect",
+        help="How the input array is extended when the filter overlaps a border")
+    @click.option(
+        "--cval", default=0.0,
+        help="Value to fill past edges of input if mode is ‘constant")
+    @click.option(
+        "--is-volume", is_flag=True,
+        help="indicates that the image stack should be filtered in 3d")
+    @click.pass_context
+    def _cli(ctx, sigma, mode, cval, is_volume):
+        ctx.obj["component"]._cli_run(ctx, Laplace(sigma, mode, cval, is_volume))

@@ -88,14 +88,12 @@ class ScaleByPercentile(FilterAlgorithmBase):
         )
         return result
 
-@click.command("ScaleByPercentile")
-@click.option(
-    "--p", default=100, type=int, help="scale images by this percentile")
-@click.option(  # FIXME: was this intentionally missed?
-    "--is-volume", is_flag=True, help="filter 3D volumes")
-@click.pass_context
-def _cli(ctx, p, is_volume):
-    ctx.obj["component"]._cli_run(ctx, ScaleByPercentile(p, is_volume))
-
-
-ScaleByPercentile._cli = _cli  # type: ignore
+    @staticmethod
+    @click.command("ScaleByPercentile")
+    @click.option(
+        "--p", default=100, type=int, help="scale images by this percentile")
+    @click.option(  # FIXME: was this intentionally missed?
+        "--is-volume", is_flag=True, help="filter 3D volumes")
+    @click.pass_context
+    def _cli(ctx, p, is_volume):
+        ctx.obj["component"]._cli_run(ctx, ScaleByPercentile(p, is_volume))

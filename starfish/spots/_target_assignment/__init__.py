@@ -26,22 +26,21 @@ class TargetAssignment(PipelineComponent):
         print(f"Writing intensities, including cell ids to {output}")
         assigned.save(os.path.join(output))
 
+    @staticmethod
+    @click.group("target_assignment")
+    @click.option("--label-image", required=True, type=click.Path(exists=True))
+    @click.option("--intensities", required=True, type=click.Path(exists=True))
+    @click.option("-o", "--output", required=True)
+    @click.pass_context
+    def _cli(ctx, label_image, intensities, output):
 
-@click.group("target_assignment")
-@click.option("--label-image", required=True, type=click.Path(exists=True))
-@click.option("--intensities", required=True, type=click.Path(exists=True))
-@click.option("-o", "--output", required=True)
-@click.pass_context
-def _cli(ctx, label_image, intensities, output):
-
-    print('Assigning targets to cells...')
-    ctx.obj = dict(
-        component=TargetAssignment,
-        output=output,
-        intensity_table=IntensityTable.load(intensities),
-        label_image=imread(label_image)
-    )
+        print('Assigning targets to cells...')
+        ctx.obj = dict(
+            component=TargetAssignment,
+            output=output,
+            intensity_table=IntensityTable.load(intensities),
+            label_image=imread(label_image)
+        )
 
 
-TargetAssignment._cli = _cli  # type: ignore
 TargetAssignment._cli_register()

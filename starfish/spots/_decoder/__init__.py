@@ -23,21 +23,20 @@ class Decoder(PipelineComponent):
         intensities = instance.run(table, codes)
         intensities.save(output)
 
+    @staticmethod
+    @click.group("decode")
+    @click.option("-i", "--input", required=True, type=click.Path(exists=True))
+    @click.option("-o", "--output", required=True)
+    @click.option("--codebook", required=True, type=click.Path(exists=True))
+    @click.pass_context
+    def _cli(ctx, input, output, codebook):
+        ctx.obj = dict(
+            component=Decoder,
+            input=input,
+            output=output,
+            intensities=IntensityTable.load(input),
+            codebook=Codebook.from_json(codebook),
+        )
 
-@click.group("decode")
-@click.option("-i", "--input", required=True, type=click.Path(exists=True))
-@click.option("-o", "--output", required=True)
-@click.option("--codebook", required=True, type=click.Path(exists=True))
-@click.pass_context
-def _cli(ctx, input, output, codebook):
-    ctx.obj = dict(
-        component=Decoder,
-        input=input,
-        output=output,
-        intensities=IntensityTable.load(input),
-        codebook=Codebook.from_json(codebook),
-    )
 
-
-Decoder._cli = _cli  # type: ignore
 Decoder._cli_register()

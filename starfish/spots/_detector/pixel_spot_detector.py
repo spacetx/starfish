@@ -87,50 +87,47 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
 
         return decoded_spots, image_decoding_results
 
-
-@click.command("PixelSpotDetector")
-@click.option("--metric", type=str, default='euclidean')
-@click.option(
-    "--distance-threshold", type=float, default=0.5176,
-    help="maximum distance a pixel may be from a codeword before it is filtered"
-)
-@click.option(
-    "--magnitude-threshold", type=float, default=1,
-    help="minimum magnitude of a feature"
-)
-@click.option(
-    "--min-area", type=int, default=2,
-    help="minimum area of a feature"
-)
-@click.option(
-    "--max-area", type=int, default=np.inf,
-    help="maximum area of a feature"
-)
-@click.option(
-    "--norm-order", type=int, default=2,
-    help="order of L_p norm to apply to intensities "
-    "and codes when using metric_decode to pair each intensities to its closest target"
-)
-@click.option('--crop-x', type=int, default=0)
-@click.option('--crop-y', type=int, default=0)
-@click.option('--crop-z', type=int, default=0)
-@click.pass_context
-def _cli(ctx, metric, distance_threshold, magnitude_threshold,
-         min_area, max_area, norm_order, crop_x, crop_y, crop_z):
-    codebook = ctx.obj["codebook"]
-    instance = PixelSpotDetector(
-        codebook=codebook,
-        metric=metric,
-        distance_threshold=distance_threshold,
-        magnitude_threshold=magnitude_threshold,
-        min_area=min_area,
-        max_area=max_area,
-        norm_order=norm_order,
-        crop_x=crop_x,
-        crop_y=crop_y,
-        crop_z=crop_z
+    @staticmethod
+    @click.command("PixelSpotDetector")
+    @click.option("--metric", type=str, default='euclidean')
+    @click.option(
+        "--distance-threshold", type=float, default=0.5176,
+        help="maximum distance a pixel may be from a codeword before it is filtered"
     )
-    ctx.obj["component"]._cli_run(ctx, instance)
-
-
-PixelSpotDetector._cli = _cli  # type: ignore
+    @click.option(
+        "--magnitude-threshold", type=float, default=1,
+        help="minimum magnitude of a feature"
+    )
+    @click.option(
+        "--min-area", type=int, default=2,
+        help="minimum area of a feature"
+    )
+    @click.option(
+        "--max-area", type=int, default=np.inf,
+        help="maximum area of a feature"
+    )
+    @click.option(
+        "--norm-order", type=int, default=2,
+        help="order of L_p norm to apply to intensities "
+        "and codes when using metric_decode to pair each intensities to its closest target"
+    )
+    @click.option('--crop-x', type=int, default=0)
+    @click.option('--crop-y', type=int, default=0)
+    @click.option('--crop-z', type=int, default=0)
+    @click.pass_context
+    def _cli(ctx, metric, distance_threshold, magnitude_threshold,
+             min_area, max_area, norm_order, crop_x, crop_y, crop_z):
+        codebook = ctx.obj["codebook"]
+        instance = PixelSpotDetector(
+            codebook=codebook,
+            metric=metric,
+            distance_threshold=distance_threshold,
+            magnitude_threshold=magnitude_threshold,
+            min_area=min_area,
+            max_area=max_area,
+            norm_order=norm_order,
+            crop_x=crop_x,
+            crop_y=crop_y,
+            crop_z=crop_z
+        )
+        ctx.obj["component"]._cli_run(ctx, instance)

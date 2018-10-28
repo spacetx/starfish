@@ -110,19 +110,17 @@ class Bandpass(FilterAlgorithmBase):
         )
         return result
 
-
-@click.command("Bandpass")
-@click.option(
-    "--lshort", type=float, help="filter signals below this frequency")
-@click.option(
-    "--llong", type=int, help="filter signals above this frequency")
-@click.option(
-    "--threshold", type=int, help="clip pixels below this intensity value")
-@click.option(
-    "--truncate", default=4, type=float,
-    help="truncate the filter at this many standard deviations")
-@click.pass_context
-def _cli(ctx, lshort, llong, threshold, truncate):
-    ctx.obj["component"]._cli_run(ctx, Bandpass(lshort, llong, threshold, truncate))
-
-Bandpass._cli = _cli  # type: ignore
+    @staticmethod
+    @click.command("Bandpass")
+    @click.option(
+        "--lshort", type=float, help="filter signals below this frequency")
+    @click.option(
+        "--llong", type=int, help="filter signals above this frequency")
+    @click.option(
+        "--threshold", type=int, help="clip pixels below this intensity value")
+    @click.option(
+        "--truncate", default=4, type=float,
+        help="truncate the filter at this many standard deviations")
+    @click.pass_context
+    def _cli(ctx, lshort, llong, threshold, truncate):
+        ctx.obj["component"]._cli_run(ctx, Bandpass(lshort, llong, threshold, truncate))

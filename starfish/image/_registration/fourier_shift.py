@@ -87,6 +87,15 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
             return image
         return None
 
+    @staticmethod
+    @click.command("FourierShiftRegistration")
+    @click.option("--upsampling", default=1, type=int, help="Amount of up-sampling")
+    @click.option("--reference-stack", required=True, type=click.Path(exists=True),
+                  help="The image stack to align the input image stack to.")
+    @click.pass_context
+    def _cli(ctx, upsampling, reference_stack):
+        ctx.obj["component"]._cli_run(ctx, FourierShiftRegistration(upsampling, reference_stack))
+
 
 def compute_shift(
         im: np.ndarray, ref: np.ndarray, upsample_factor: int=1
@@ -118,15 +127,3 @@ def shift_im(im: np.ndarray, shift: np.ndarray) -> np.ndarray:
     fim_shift = fourier_shift(np.fft.fftn(im), shift * -1)
     im_shift = np.fft.ifftn(fim_shift)
     return im_shift.real
-
-
-@click.command("FourierShiftRegistration")
-@click.option("--upsampling", default=1, type=int, help="Amount of up-sampling")
-@click.option("--reference-stack", required=True, type=click.Path(exists=True),
-              help="The image stack to align the input image stack to.")
-@click.pass_context
-def _cli(ctx, upsampling, reference_stack):
-    ctx.obj["component"]._cli_run(ctx, FourierShiftRegistration(upsampling, reference_stack))
-
-
-FourierShiftRegistration._cli = _cli  # type: ignore

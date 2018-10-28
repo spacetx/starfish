@@ -147,25 +147,23 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         return intensity_table
 
-@click.command("GaussianSpotDetector")
-@click.option(
-    "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
-@click.option(
-    "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)")
-@click.option(
-    "--num-sigma", default=20, type=int, help="Number of sigmas to try")
-@click.option(
-    "--threshold", default=.01, type=float, help="Dots threshold")
-@click.option(
-    "--overlap", default=0.5, type=float,
-    help="dots with overlap of greater than this fraction are combined")
-@click.option(
-    "--show", default=False, is_flag=True, help="display results visually")
-@click.pass_context
-def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show):
-        instance = GaussianSpotDetector(min_sigma, max_sigma, num_sigma, threshold, overlap)
-        #  FIXME: measurement_type, is_volume missing as options; show missing as ctor args
-        ctx.obj["component"]._cli_run(ctx, instance)
-
-
-GaussianSpotDetector._cli = _cli  # type: ignore
+    @staticmethod
+    @click.command("GaussianSpotDetector")
+    @click.option(
+        "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
+    @click.option(
+        "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)")
+    @click.option(
+        "--num-sigma", default=20, type=int, help="Number of sigmas to try")
+    @click.option(
+        "--threshold", default=.01, type=float, help="Dots threshold")
+    @click.option(
+        "--overlap", default=0.5, type=float,
+        help="dots with overlap of greater than this fraction are combined")
+    @click.option(
+        "--show", default=False, is_flag=True, help="display results visually")
+    @click.pass_context
+    def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show):
+            instance = GaussianSpotDetector(min_sigma, max_sigma, num_sigma, threshold, overlap)
+            #  FIXME: measurement_type, is_volume missing as options; show missing as ctor args
+            ctx.obj["component"]._cli_run(ctx, instance)

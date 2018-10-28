@@ -30,19 +30,19 @@ class Filter(PipelineComponent):
         filtered = instance.run(stack)
         filtered.write(output)
 
-@click.group("filter")
-@click.option("-i", "--input", type=click.Path(exists=True))
-@click.option("-o", "--output", required=True)
-@click.pass_context
-def _cli(ctx, input, output):
-    print("Filtering images...")
-    ctx.obj = dict(
-        component=Filter,
-        input=input,
-        output=output,
-        stack=ImageStack.from_path_or_url(input),
-    )
+    @staticmethod
+    @click.group("filter")
+    @click.option("-i", "--input", type=click.Path(exists=True))
+    @click.option("-o", "--output", required=True)
+    @click.pass_context
+    def _cli(ctx, input, output):
+        print("Filtering images...")
+        ctx.obj = dict(
+            component=Filter,
+            input=input,
+            output=output,
+            stack=ImageStack.from_path_or_url(input),
+        )
 
 
-Filter._cli = _cli  # type: ignore
 Filter._cli_register()

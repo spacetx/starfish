@@ -102,13 +102,11 @@ class GaussianLowPass(FilterAlgorithmBase):
         )
         return result
 
-
-@click.command("GaussianLowPass")
-@click.option("--sigma", type=float, help="standard deviation of gaussian kernel")
-@click.option("--is-volume", is_flag=True,
-              help="indicates that the image stack should be filtered in 3d")
-@click.pass_context
-def _cli(ctx, sigma, is_volume):
-    ctx.obj["component"]._cli_run(ctx, GaussianLowPass(sigma, is_volume))
-
-GaussianLowPass._cli = _cli  # type: ignore
+    @staticmethod
+    @click.command("GaussianLowPass")
+    @click.option("--sigma", type=float, help="standard deviation of gaussian kernel")
+    @click.option("--is-volume", is_flag=True,
+                  help="indicates that the image stack should be filtered in 3d")
+    @click.pass_context
+    def _cli(ctx, sigma, is_volume):
+        ctx.obj["component"]._cli_run(ctx, GaussianLowPass(sigma, is_volume))

@@ -163,18 +163,15 @@ class DeconvolvePSF(FilterAlgorithmBase):
         )
         return result
 
-
-@click.command("DeconvolvePSF")
-@click.option(
-    '--num-iter', type=int, help='number of iterations to run')
-@click.option(
-    '--sigma', type=float, help='standard deviation of gaussian kernel')
-@click.option(
-    '--no-clip', is_flag=True,
-    help='(default True) if True, clip values below 0 and above 1')
-@click.pass_context
-def _cli(ctx, num_iter, sigma, no_clip):
-    ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, no_clip))
-
-
-DeconvolvePSF._cli = _cli  # type: ignore
+    @staticmethod
+    @click.command("DeconvolvePSF")
+    @click.option(
+        '--num-iter', type=int, help='number of iterations to run')
+    @click.option(
+        '--sigma', type=float, help='standard deviation of gaussian kernel')
+    @click.option(
+        '--no-clip', is_flag=True,
+        help='(default True) if True, clip values below 0 and above 1')
+    @click.pass_context
+    def _cli(ctx, num_iter, sigma, no_clip):
+        ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, no_clip))

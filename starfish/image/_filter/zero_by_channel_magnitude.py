@@ -86,17 +86,14 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                                                  )
         return stack
 
-
-@click.command("ZeroByChannelMagnitude")
-@click.option(
-    '--thresh', type=float,
-    help='minimum magnitude threshold for pixels across channels')
-@click.option(
-    '--normalize', is_flag=True,
-    help='Scales all rounds to have unit L2 norm across channels')
-@click.pass_context
-def _cli(ctx, thresh, normalize):
-    ctx.obj["component"]._cli_run(ctx, ZeroByChannelMagnitude(thresh, normalize))
-
-
-ZeroByChannelMagnitude._cli = _cli  # type: ignore
+    @staticmethod
+    @click.command("ZeroByChannelMagnitude")
+    @click.option(
+        '--thresh', type=float,
+        help='minimum magnitude threshold for pixels across channels')
+    @click.option(
+        '--normalize', is_flag=True,
+        help='Scales all rounds to have unit L2 norm across channels')
+    @click.pass_context
+    def _cli(ctx, thresh, normalize):
+        ctx.obj["component"]._cli_run(ctx, ZeroByChannelMagnitude(thresh, normalize))

@@ -94,6 +94,19 @@ class Watershed(SegmentationAlgorithmBase):
         else:
             raise RuntimeError('Run segmentation before attempting to show results.')
 
+    @staticmethod
+    @click.command("Watershed")
+    @click.option(
+        "--nuclei-threshold", default=.16, type=float, help="Nuclei threshold")
+    @click.option(
+        "--input-threshold", default=.22, type=float, help="Input threshold")
+    @click.option(
+        "--min-distance", default=57, type=int, help="Minimum distance between cells")
+    @click.pass_context
+    def _cli(ctx, nuclei_threshold, input_threshold, min_distance):
+        ctx.obj["component"]._cli_run(
+            ctx, Watershed(nuclei_threshold, input_threshold, min_distance))
+
 
 class _WatershedSegmenter:
     def __init__(self, nuclei_img: np.ndarray, stain_img: np.ndarray) -> None:
@@ -366,18 +379,3 @@ class _WatershedSegmenter:
         plt.title('Segmented Cells')
 
         return plt.gca()
-
-
-@click.command("Watershed")
-@click.option(
-    "--nuclei-threshold", default=.16, type=float, help="Nuclei threshold")
-@click.option(
-    "--input-threshold", default=.22, type=float, help="Input threshold")
-@click.option(
-    "--min-distance", default=57, type=int, help="Minimum distance between cells")
-@click.pass_context
-def _cli(ctx, nuclei_threshold, input_threshold, min_distance):
-    ctx.obj["component"]._cli_run(ctx, Watershed(nuclei_threshold, input_threshold, min_distance))
-
-
-Watershed._cli = _cli  # type: ignore

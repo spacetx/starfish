@@ -21,19 +21,19 @@ class Registration(PipelineComponent):
         instance.run(stack)
         stack.write(output)
 
-@click.group("registration")
-@click.option("-i", "--input", type=click.Path(exists=True))
-@click.option("-o", "--output", required=True)
-@click.pass_context
-def _cli(ctx, input, output):
-    print("Registering...")
-    ctx.obj = dict(
-        component=Registration,
-        input=input,
-        output=output,
-        stack=ImageStack.from_path_or_url(input),
-    )
+    @staticmethod
+    @click.group("registration")
+    @click.option("-i", "--input", type=click.Path(exists=True))
+    @click.option("-o", "--output", required=True)
+    @click.pass_context
+    def _cli(ctx, input, output):
+        print("Registering...")
+        ctx.obj = dict(
+            component=Registration,
+            input=input,
+            output=output,
+            stack=ImageStack.from_path_or_url(input),
+        )
 
 
-Registration._cli = _cli  # type: ignore
 Registration._cli_register()

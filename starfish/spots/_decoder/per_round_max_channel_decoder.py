@@ -28,10 +28,8 @@ class PerRoundMaxChannelDecoder(DecoderAlgorithmBase):
         """
         return codebook.decode_per_round_max(intensities)
 
-@click.command("PerRoundMaxChannelDecoder")
-@click.pass_context
-def _cli(ctx):
-    ctx.obj["component"]._cli_run(ctx, PerRoundMaxChannelDecoder())
-
-
-PerRoundMaxChannelDecoder._cli = _cli  # type: ignore
+    @staticmethod
+    @click.command("PerRoundMaxChannelDecoder")
+    @click.pass_context
+    def _cli(ctx):
+        ctx.obj["component"]._cli_run(ctx, PerRoundMaxChannelDecoder())

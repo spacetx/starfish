@@ -102,16 +102,13 @@ class MeanHighPass(FilterAlgorithmBase):
         )
         return result
 
-
-@click.command("MeanHighPass")
-@click.option(
-    "--size", type=float, help="width of the kernel")
-@click.option(
-    "--is-volume", is_flag=True,
-    help="indicates that the image stack should be filtered in 3d")
-@click.pass_context
-def _cli(ctx, size, is_volume):
-    ctx.obj["component"]._cli_run(ctx, MeanHighPass(size, is_volume))
-
-
-MeanHighPass._cli = _cli  # type: ignore
+    @staticmethod
+    @click.command("MeanHighPass")
+    @click.option(
+        "--size", type=float, help="width of the kernel")
+    @click.option(
+        "--is-volume", is_flag=True,
+        help="indicates that the image stack should be filtered in 3d")
+    @click.pass_context
+    def _cli(ctx, size, is_volume):
+        ctx.obj["component"]._cli_run(ctx, MeanHighPass(size, is_volume))

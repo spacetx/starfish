@@ -76,16 +76,13 @@ class WhiteTophat(FilterAlgorithmBase):
         )
         return result
 
-
-@click.command("WhiteTophat")
-@click.option(
-    "--masking-radius", default=15, type=int,
-    help="diameter of morphological masking disk in pixels")
-@click.option(  # FIXME: was this intentionally missed?
-    "--is-volume", is_flag=True, help="filter 3D volumes")
-@click.pass_context
-def _cli(ctx, masking_radius, is_volume):
-    ctx.obj["component"]._cli_run(ctx, WhiteTophat(masking_radius, is_volume))
-
-
-WhiteTophat._cli = _cli  # type: ignore
+    @staticmethod
+    @click.command("WhiteTophat")
+    @click.option(
+        "--masking-radius", default=15, type=int,
+        help="diameter of morphological masking disk in pixels")
+    @click.option(  # FIXME: was this intentionally missed?
+        "--is-volume", is_flag=True, help="filter 3D volumes")
+    @click.pass_context
+    def _cli(ctx, masking_radius, is_volume):
+        ctx.obj["component"]._cli_run(ctx, WhiteTophat(masking_radius, is_volume))

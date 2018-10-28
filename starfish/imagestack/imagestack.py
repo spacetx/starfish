@@ -6,8 +6,18 @@ from copy import deepcopy
 from functools import partial
 from itertools import product
 from typing import (
-    Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence,
-    Optional, Sequence, Set, Tuple, Union
+    Any,
+    Callable,
+    Container,
+    Iterator,
+    List,
+    Mapping,
+    MutableSequence,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
 )
 
 import matplotlib.pyplot as plt
@@ -27,6 +37,7 @@ from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.multiprocessing import shmem
 from starfish.types import (
     Coordinates,
     Indices,
@@ -629,25 +640,6 @@ class ImageStack:
             a = zip(indices, items)
             yield {ind: val for (ind, val) in a}
 
-    def _iter_tiles(
-            self, indices: Iterable[Mapping[Indices, Union[int, slice]]]
-    ) -> Iterable[np.ndarray]:
-        """Given an iterable of indices, return a generator of numpy arrays from self
-
-        Parameters
-        ----------
-        indices, Iterable[Mapping[str, int]]
-            Iterable of indices that map a dimension (str) to a value (int)
-
-        Yields
-        ------
-        np.ndarray
-            Numpy array that corresponds to provided indices
-        """
-        for inds in indices:
-            array, axes = self.get_slice(inds)
-            yield array
-
     def apply(
             self,
             func: Callable,
@@ -711,6 +703,11 @@ class ImageStack:
             group_by: Set[Indices]=None,
             verbose=False,
             n_processes: Optional[int]=None,
+            finalizer_callable: Optional[
+                Callable[[np.ndarray,
+                          Any,
+                          Mapping[Indices, int],
+                          Tuple[Union[int, slice], ...]], Any]]=None,
             **kwargs
     ) -> List[Any]:
         """Split the image along a set of axes, and apply a function across all the components.
@@ -729,6 +726,12 @@ class ImageStack:
         n_processes : Optional[int]
             The number of processes to use for apply. If None, uses the output of os.cpu_count()
             (default = None).
+        finalizer_callable : Callable
+            An optional callable that will be invoked by the child process after `func` has been
+            invoked.  It will be called with the original 5D tensor, the result of `func`, the
+            indices that represent this chunk of the image, and the slice parameters that can be
+            invoked on the original 5D tensor to yield the chunk.  If this callable is None, it is
+            not invoked.
         kwargs : dict
             Additional arguments to pass to func being applied
 
@@ -741,17 +744,52 @@ class ImageStack:
             group_by = {Indices.X, Indices.Y}
 
         indices = list(self._iter_indices(group_by))
+        slice_list = [self._build_slice_list(index)[0]
+                      for index in indices]
 
+        indices_and_slice_list = zip(indices, slice_list)
         if verbose:
-            tiles = tqdm(self._iter_tiles(indices))
-        else:
-            tiles = self._iter_tiles(indices)
+            indices_and_slice_list = tqdm(indices_and_slice_list)
 
-        applyfunc: Callable = partial(func, **kwargs)
+        applyfunc: Callable = partial(
+            self._multiprocessing_workflow,
+            _StripArguments(partial(func, **kwargs), (1, 2)),
+            finalizer_callable,
+        )
 
-        with multiprocessing.Pool(n_processes) as pool:
-            results = pool.imap(applyfunc, tiles)
+        with multiprocessing.Pool(
+                n_processes,
+                initializer=shmem.initializer,
+                initargs=((self._data._backing_mp_array,
+                           self._data._data.shape,
+                           self._data._data.dtype),)) as pool:
+            results = pool.imap(applyfunc, indices_and_slice_list)
             return list(zip(results, indices))
+
+    @staticmethod
+    def _multiprocessing_workflow(
+            worker_callable: Callable[[np.ndarray,
+                                       Mapping[Indices, int],
+                                       Tuple[Union[int, slice], ...]], Any],
+            finalizer_callable: Optional[
+                Callable[[np.ndarray,
+                          Any,
+                          Mapping[Indices, int],
+                          Tuple[Union[int, slice], ...]], Any]],
+            indices_and_slice_list: Tuple[Mapping[Indices, int],
+                                          Tuple[Union[int, slice], ...]],
+    ):
+        backing_mp_array, shape, dtype = shmem.get_payload()
+        unshaped_numpy_array = np.frombuffer(backing_mp_array.get_obj(), dtype=dtype)
+        numpy_array = unshaped_numpy_array.reshape(shape)
+
+        sliced = numpy_array[indices_and_slice_list[1]]
+
+        result = worker_callable(sliced, *indices_and_slice_list)
+        if finalizer_callable:
+            return finalizer_callable(numpy_array, result, *indices_and_slice_list)
+        else:
+            return result
 
     @property
     def tile_metadata(self) -> pd.DataFrame:
@@ -1151,3 +1189,37 @@ class ImageStack:
         new_shape = (self.num_rounds, self.num_chs, self.num_zlayers) + self.tile_shape
         res = stack.reshape(new_shape)
         return res
+
+
+class _StripArguments:
+    """
+    Class to strip out arguments to an argument call.  This is spiritually the opposite of
+    functools.partial.  When this proxy is called, it removes some arguments and passes it to the
+    original callable.
+
+    This is used in scenarios where factory methods and lambdas cannot be used, such as dispatching
+    work with multiprocessing.  Inputs to multiprocessing must be pickle-able, and factory methods
+    and lambdas always generate a lexical scope (i.e., locals()) that cannot be picked.
+
+    This class is initialized with a callable, positional argument positions to remove, and keyword
+    arguments to remove.
+    """
+    def __init__(
+            self,
+            func: Callable,
+            positional_arguments_removed: Optional[Container[int]]=None,
+            keyword_arguments_removed: Container[set]=None,
+    ) -> None:
+        self.func = func
+        self.positional_arguments_removed = positional_arguments_removed or list()
+        self.keyword_arguments_removed = keyword_arguments_removed or set()
+
+    def __call__(self, *args, **kwargs):
+        called_args = [
+            arg
+            for ix, arg in enumerate(args)
+            if ix not in self.positional_arguments_removed
+        ]
+        for keyword_argument_removed in self.keyword_arguments_removed:
+            kwargs.remove(keyword_argument_removed)
+        return self.func(*called_args, **kwargs)

@@ -1,5 +1,5 @@
 import click
-from sptx_format.validate_sptx import validate as validate_
+from sptx_format import validate_sptx
 
 
 @click.command()
@@ -11,7 +11,7 @@ from sptx_format.validate_sptx import validate as validate_
 def validate(ctx, experiment_json, fuzz):
     """invokes validate with the parsed commandline arguments"""
     try:
-        valid = validate_(experiment_json, fuzz)
+        valid = validate_sptx.validate(experiment_json, fuzz)
         if valid:
             ctx.exit(0)
         else:

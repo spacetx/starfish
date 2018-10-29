@@ -25,6 +25,10 @@ def calc_new_physical_coords_array(physical_coordinates: xr.DataArray,
         The shape of the image tensor by categorical index (channels, imaging rounds, z-layers)
     indexers : Dict[str, (int/slice)]
         A dictionary of dim:index where index is the value or range to index the dimension
+
+    Returns
+    -------
+    A coordinates xarray indexed by R, CH, V and values recalculated according to indexing on X/Y
     """
     new_coords = physical_coordinates.copy()
     # index by R, CH, V
@@ -59,6 +63,10 @@ def _recalculate_physical_coordinate_ranges(stack_shape: Mapping[Indices, int],
     coords_array: xarray
         xarray that holds the min/max values of physical coordinates per tile (Round, Ch, Z).
 
+    Returns
+    -------
+    A coordinates xarray with values recalculated according to indexing on X/Y
+
     """
     for _round in range(coords_array.sizes[Indices.ROUND]):
         for ch in range(coords_array.sizes[Indices.CH]):
@@ -92,7 +100,7 @@ def _recalculate_physical_coordinate_ranges(stack_shape: Mapping[Indices, int],
                     ])] = [xmin, xmax, ymin, ymax]
 
 
-def calculate_physcial_pixel_size(coord_max, coord_min, num_pixels):
+def _calculate_physcial_pixel_size(coord_max: float, coord_min: float, num_pixels: int):
     """Calculate the size of a pixel in physical space"""
     return (coord_max - coord_min) / num_pixels
 
@@ -139,8 +147,11 @@ def _recalculate_physical_coordinate_range(coord_min: float,
     key: (int/slice)
         The pixel index or range to calculate.
 
+    Returns
+    -------
+    The new min and max physical coordinate values of the given dimension
     """
-    physical_pixel_size = calculate_physcial_pixel_size(coord_max, coord_min, dimension_size)
+    physical_pixel_size = _calculate_physcial_pixel_size(coord_max, coord_min, dimension_size)
     min_pixel_index = indexer if type(indexer) is int else indexer.start
     max_pixel_index = indexer if type(indexer) is int else indexer.stop
     # Add one to max pixel index to get end of pixel

@@ -97,7 +97,7 @@ def calculate_physcial_pixel_size(coord_max, coord_min, num_pixels):
 
 def calculate_physical_pixel_value(physcial_pixel_size, index, start_of_range):
     """Calculate the physical pixel value at the given index"""
-    if index:
+    if index and index != 0:
         # Check for negative index
         if index < 0:
             index = index + start_of_range
@@ -173,25 +173,32 @@ def get_coordinates(
         coords_array.loc[max_selectors].item(),
     )
 
-def _needs_coords_recalculating(x_indexers, y_indexers) -> bool:
-    """
-    Takes in a dict of dim:indexes and returns true if indexing on either x or y dimension
 
-    Parameters
-    ----------
-    indexers : a dictionary of dim:index where index is the value
-    or range to index the dimension
-    """
-    if isinstance(x_indexers, int) or isinstance(y_indexers, int):
-        return True
-    return not (x_indexers.start is x_indexers.stop is y_indexers.start is y_indexers.stop is None)
+def get_physcial_coordinates_of_spot(coords_array, tile_indices, pixel_x, pixel_y, tile_shape):
+    """Given a set of indices that uniquely identify a tile and the locaation of a spot in pixel space
+    calculate the location in physical space."""
+    x_range = get_coordinates(coords_array, tile_indices, Coordinates.X)
+    physcial_pixel_size_x = calculate_physcial_pixel_size(x_range[1], x_range[0], tile_shape[0])
+    physical_x = calculate_physical_pixel_value(physcial_pixel_size_x, pixel_x, x_range[0])
+
+    y_range = get_coordinates(coords_array, tile_indices, Coordinates.Y)
+    physcial_pixel_size_y = calculate_physcial_pixel_size(y_range[1], y_range[0], tile_shape[0])
+    physical_y = calculate_physical_pixel_value(physcial_pixel_size_y, pixel_y, y_range[0])
+
+    z_range = get_coordinates(coords_array, tile_indices, Coordinates.Z)
+    physical_z = (z_range[1] - z_range[0]) / 2
+
+    return physical_x, physical_y, physical_z
 
 
-def transfer_physical_coords_to_intensity_table(image_stack, intensity_table):
+def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack, intensity_table):
+    """Transfers physical coordinates from an imagestacks coordianates xarray to an intensity table
+
+    Creates three new coords on the intensity table (xc, yc, zc)"""
     # Add three new coords to xarray (xc, yc, zc)
-    intensity_table[Coordinates.X] = intensity_table.features * 0
-    intensity_table[Coordinates.Y] = intensity_table.features * 0
-    intensity_table[Coordinates.Z] = intensity_table.features * 0
+    intensity_table[Coordinates.X.value] = intensity_table.features * 0
+    intensity_table[Coordinates.Y.value] = intensity_table.features * 0
+    intensity_table[Coordinates.Z.value] = intensity_table.features * 0
     for ind, feature in intensity_table.groupby('features'):
         for ch, round in np.ndindex(feature.data.shape):
             # if non zero value set coords
@@ -205,9 +212,14 @@ def transfer_physical_coords_to_intensity_table(image_stack, intensity_table):
                     Indices.CH.value: ch,
                     Indices.Z.value: pixel_z,
                 }
-                physical_coords = image_stack.get_physcial_coordinates(tile_indices, pixel_x, pixel_y)
-                intensity_table[Coordinates.X][ind] = physical_coords[0]
-                intensity_table[Coordinates.Y][ind] = physical_coords[1]
-                intensity_table[Coordinates.Z][ind] = physical_coords[2]
+                physical_coords = get_physcial_coordinates_of_spot(image_stack._coordinates,
+                                                                   tile_indices,
+                                                                   pixel_x,
+                                                                   pixel_y,
+                                                                   image_stack._tile_shape)
+                intensity_table[Coordinates.X.value][ind] = physical_coords[0]
+                intensity_table[Coordinates.Y.value][ind] = physical_coords[1]
+                intensity_table[Coordinates.Z.value][ind] = physical_coords[2]
                 break
+    return intensity_table
 

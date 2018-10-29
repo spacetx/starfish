@@ -50,6 +50,6 @@ def BaristaSeq(use_test_data: bool=False) -> Experiment:
         Experiment containing raw image data
     """
     return Experiment.from_json(
-        "https://s3.amazonaws.com/spacetx.starfish.data.public/browse/formatted/20181028/"
+        "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20181028/"
         "BaristaSeq/cropped_formatted/experiment.json"
     )

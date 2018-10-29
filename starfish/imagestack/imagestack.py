@@ -828,6 +828,17 @@ class ImageStack:
 
         return result
 
+    def coordinates(
+            self,
+            indices: Mapping[Indices, int],
+            physical_axis: Coordinates) -> Tuple[float, float]:
+        """Given a set of indices that uniquely identify a tile and a physical axis, return the min
+        and the max coordinates for that tile along that axis."""
+
+        return physical_coordinate_calculator.get_coordinates(coords_array=self._coordinates,
+                                                              indices=indices,
+                                                              physical_axis=physical_axis)
+
     def _get_dimension_size(self, dimension: Indices):
         axis_data = ImageStack.AXES_DATA[dimension]
         if dimension in self._image_partition.dimensions or axis_data.required:

@@ -48,7 +48,7 @@ for image_name in AUX_IMAGE_NAMES:
 def build(output_dir, fov_count, hybridization_dimensions, **kwargs):
     write_experiment_json(
         output_dir, fov_count, hybridization_dimensions,
-        kwargs  # FIXME
+        kwargs
     )
 
 for decorator in reversed(decorators):

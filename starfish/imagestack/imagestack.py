@@ -292,7 +292,7 @@ class ImageStack:
         """Retrieves the image data as an xarray.DataArray"""
         return self._data
 
-    def sel(self, indexers: Mapping[Indices, Union[int, tuple]]=None):
+    def sel(self, indexers: Mapping[Indices, Union[int]]):
         """Given a dictionary mapping the index name to either a value or a slice range, return an
         Imagestack with each dimension indexed accordingly
 
@@ -303,14 +303,18 @@ class ImageStack:
 
         Examples
         --------
-        Imagestack stack with shape (5, 5, 15, 200, 200)
-        stack.sel({Indices.ROUND: (1, None), Indices.CH: 0, Indices.Z: 0})
-        Result:  Imagestack stack with shape (4, 1, 1, 200, 200)
 
-        Imagestack stack with shape (5, 5, 15, 200, 200)
-        stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1,
-         Indices.Y: 100, Indices.X: (None, 100)})
-        Result:  Imagestack stack with shape (1, 1, 1, 1, 100)
+        Create an Imagestack using the ``synthetic_stack`` method::
+        >>> from starfish import ImageStack
+        >>> from starfish.types import Indices
+        >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
+        >>> stack
+        <starfish.ImageStack (r: 5, c: 5, z: 15, y: 200, x: 200)>
+        >>> stack.sel({Indices.ROUND: (1, None), Indices.CH: 0, Indices.Z: 0})
+        <starfish.ImageStack (r: 4, c: 1, z: 1, y: 200, x: 200)>
+        >>> stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1,
+        ...Indices.Y: 100, Indices.X: (None, 100)})
+        <starfish.ImageStack (r: 1, c: 1, z: 1, y: 1, x: 100)>
         and the imagestack's physical coordinates
         xarray also indexed and recalculated according to the x,y slicing.
 
@@ -320,13 +324,13 @@ class ImageStack:
             a new image stack indexed by given value or range.
         """
 
-        # convert indexers to dict <str:(int, slice) format
-        indexers = indexing_utils.convert_to_indexers_dict(indexers)
-        indexed_data = indexing_utils.index_keep_dimensions(self.xarray, indexers)
+        # convert indexers to Dict[str, (int/slice)] format
+        formatted_indexers = indexing_utils.convert_to_indexers_dict(indexers)
+        indexed_data = indexing_utils.index_keep_dimensions(self.xarray, formatted_indexers)
         stack = self.from_numpy_array(indexed_data.data)
         # set coords on new stack
         stack._coordinates = physical_coordinate_calculator.calc_new_physical_coords_array(
-            self._coordinates, self.shape, indexers)
+            self._coordinates, self.shape, formatted_indexers)
         return stack
 
     def get_slice(

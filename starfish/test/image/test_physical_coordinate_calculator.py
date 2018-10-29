@@ -8,6 +8,18 @@ from starfish.imagestack import physical_coordinate_calculator
 from starfish.types import Indices, PHYSICAL_COORDINATE_DIMENSION, PhysicalCoordinateTypes
 
 
+X_INDEX_0 = 1
+X_INDEX_1 = (.005 * 1) + 1
+X_INDEX_100 = (.005 * 100) + 1
+X_INDEX_101 = (.005 * 101) + 1
+X_INDEX_151 = (.005 * 151) + 1
+Y_INDEX_0 = 4
+Y_INDEX_100 = (.01 * 100) + 4
+Y_INDEX_101 = (.01 * 101) + 4
+Y_INDEX_191 = (.01 * 191) + 4
+Y_INDEX_200 = 6
+
+
 class TestPhysicalCoordinateCalculator(unittest.TestCase):
     """Tests recalculating physical coordinates for an Imagestack with a shape (1, 1, 1, 200, 200)
     and physical coordinates {xmin: 1 , xmax: 2, ymin: 4, ymax: 6, zmin: 1, zmax: 3}"""
@@ -59,20 +71,6 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
                                         (Indices.Z, 1), (Indices.Y, 200), (Indices.X, 200)])
 
     def test_calc_new_physical_coords_array(self):
-        # Calculate physical pixel sizes for x and y
-        physical_pixel_size_x = \
-            physical_coordinate_calculator.\
-            calculate_physcial_pixel_size(
-                coord_max=self.physical_coords[PhysicalCoordinateTypes.X_MAX],
-                coord_min=self.physical_coords[PhysicalCoordinateTypes.X_MIN],
-                num_pixels=self.stack_shape[Indices.X])
-
-        physical_pixel_size_y = \
-            physical_coordinate_calculator.\
-            calculate_physcial_pixel_size(
-                coord_max=self.physical_coords[PhysicalCoordinateTypes.Y_MAX],
-                coord_min=self.physical_coords[PhysicalCoordinateTypes.Y_MIN],
-                num_pixels=self.stack_shape[Indices.Y])
 
         # Index on single value of X, range of y
         self.indexers[Indices.Y], self.indexers[Indices.X] = 100, slice(None, 100)
@@ -81,25 +79,9 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
             stack_shape=self.stack_shape,
             indexers=self.indexers)
 
-        expected_xmin = physical_coordinate_calculator.calculate_physical_pixel_value(
-            physcial_pixel_size=physical_pixel_size_x,
-            index=None,
-            start_of_range=self.physical_coords[PhysicalCoordinateTypes.X_MIN])
+        expected_xmin, expected_xmax = X_INDEX_0, X_INDEX_101
+        expected_ymin, expected_ymax = Y_INDEX_100, Y_INDEX_101
 
-        expected_xmax = physical_coordinate_calculator.calculate_physical_pixel_value(
-            physcial_pixel_size=physical_pixel_size_x,
-            index=101,
-            start_of_range=self.physical_coords[PhysicalCoordinateTypes.X_MIN])
-
-        expected_ymin = physical_coordinate_calculator.calculate_physical_pixel_value(
-            physcial_pixel_size=physical_pixel_size_y,
-            index=100,
-            start_of_range=self.physical_coords[PhysicalCoordinateTypes.Y_MIN])
-
-        expected_ymax = physical_coordinate_calculator.calculate_physical_pixel_value(
-            physcial_pixel_size=physical_pixel_size_y,
-            index=101,
-            start_of_range=self.physical_coords[PhysicalCoordinateTypes.Y_MIN])
         # z range stays the same
         expected_zmin = self.physical_coords[PhysicalCoordinateTypes.Z_MIN]
         expected_zmax = self.physical_coords[PhysicalCoordinateTypes.Z_MAX]
@@ -118,25 +100,8 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
             stack_shape=self.stack_shape,
             indexers=self.indexers)
 
-        expected_xmin = physical_coordinate_calculator.calculate_physical_pixel_value(
-            physcial_pixel_size=physical_pixel_size_x,
-            index=None,
-            start_of_range=self.physical_coords[PhysicalCoordinateTypes.X_MIN])
-
-        expected_xmax = physical_coordinate_calculator.calculate_physical_pixel_value(
-            physcial_pixel_size=physical_pixel_size_x,
-            index=(100 + 1),
-            start_of_range=self.physical_coords[PhysicalCoordinateTypes.X_MIN])
-
-        expected_ymin = physical_coordinate_calculator.calculate_physical_pixel_value(
-            physcial_pixel_size=physical_pixel_size_y,
-            index=100,
-            start_of_range=self.physical_coords[PhysicalCoordinateTypes.Y_MIN])
-
-        expected_ymax = physical_coordinate_calculator.calculate_physical_pixel_value(
-            physcial_pixel_size=physical_pixel_size_y,
-            index=None,
-            start_of_range=self.physical_coords[PhysicalCoordinateTypes.Y_MIN])
+        expected_xmin, expected_xmax = X_INDEX_0, X_INDEX_101
+        expected_ymin, expected_ymax = Y_INDEX_100, Y_INDEX_200
 
         assert np.allclose(new_coords.loc[0, 0, 0], np.array([expected_xmin,
                                                               expected_xmax,
@@ -152,25 +117,8 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
             stack_shape=self.stack_shape,
             indexers=self.indexers)
 
-        expected_xmin = physical_coordinate_calculator.calculate_physical_pixel_value(
-            physcial_pixel_size=physical_pixel_size_x,
-            index=1,
-            start_of_range=self.physical_coords[PhysicalCoordinateTypes.X_MIN])
-
-        expected_xmax = physical_coordinate_calculator.calculate_physical_pixel_value(
-            physcial_pixel_size=physical_pixel_size_x,
-            index=(-50 + 1),
-            start_of_range=self.physical_coords[PhysicalCoordinateTypes.X_MIN])
-
-        expected_ymin = physical_coordinate_calculator.calculate_physical_pixel_value(
-            physcial_pixel_size=physical_pixel_size_y,
-            index=100,
-            start_of_range=self.physical_coords[PhysicalCoordinateTypes.Y_MIN])
-
-        expected_ymax = physical_coordinate_calculator.calculate_physical_pixel_value(
-            physcial_pixel_size=physical_pixel_size_y,
-            index=(-10 + 1),
-            start_of_range=self.physical_coords[PhysicalCoordinateTypes.Y_MIN])
+        expected_xmin, expected_xmax = X_INDEX_1, X_INDEX_151
+        expected_ymin, expected_ymax = Y_INDEX_100, Y_INDEX_191
 
         assert np.allclose(new_coords.loc[0, 0, 0], np.array([expected_xmin,
                                                               expected_xmax,

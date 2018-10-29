@@ -1,9 +1,11 @@
+from typing import Mapping, Union
+
 import xarray as xr
 
 from starfish.types import Indices
 
 
-def convert_to_indexers_dict(indexers):
+def convert_to_indexers_dict(indexers) -> Mapping[str, Union[int, slice]]:
     """Converts a dict of indexers from Dict[Indices, (int/tuple)] to
     Dict[str, (int/slice)] so that it can be passed into standard xarray
     indexing methods

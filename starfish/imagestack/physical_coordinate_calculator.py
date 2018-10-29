@@ -6,6 +6,7 @@ from starfish.imagestack import indexing_utils
 from starfish.types import (
     Coordinates,
     Indices,
+    Number,
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes
 )
@@ -13,7 +14,7 @@ from starfish.types import (
 
 def calc_new_physical_coords_array(physical_coordinates: xr.DataArray,
                                    stack_shape: Mapping[Indices, int],
-                                   indexers) -> xr.DataArray:
+                                   indexers: Mapping[str, Union[int, slice]]) -> xr.DataArray:
     """Calculates the resulting coordinates array from indexing on each dimension in indexers
 
     Parameters
@@ -67,19 +68,21 @@ def _recalculate_physical_coordinate_ranges(stack_shape: Mapping[Indices, int],
                     Indices.CH: ch,
                     Indices.Z: z
                 }
+                xmin, xmax, ymin, ymax = coords_array[indices].loc[
+                    dict(physical_coordinate=[
+                        PhysicalCoordinateTypes.X_MIN,
+                        PhysicalCoordinateTypes.X_MAX,
+                        PhysicalCoordinateTypes.Y_MIN,
+                        PhysicalCoordinateTypes.Y_MAX
+                    ])]
                 xmin, xmax = _recalculate_physical_coordinate_range(
-                    coords_array,
+                    xmin, xmax,
                     stack_shape[Indices.X.value],
-                    Coordinates.X,
-                    indices,
                     indexers[Indices.X.value])
                 ymin, ymax = _recalculate_physical_coordinate_range(
-                    coords_array,
+                    ymin, ymax,
                     stack_shape[Indices.Y.value],
-                    Coordinates.Y,
-                    indices,
                     indexers[Indices.Y.value])
-
                 coords_array[indices].loc[
                     dict(physical_coordinate=[
                         PhysicalCoordinateTypes.X_MIN,
@@ -94,28 +97,35 @@ def calculate_physcial_pixel_size(coord_max, coord_min, num_pixels):
     return (coord_max - coord_min) / num_pixels
 
 
-def calculate_physical_pixel_value(physcial_pixel_size, index, start_of_range):
+def _pixel_offset_to_physical_coordinate(physical_pixel_size: Number,
+                                         pixel_offset: float,
+                                         coordinates_at_pixel_offset_0: Number,
+                                         dimension_size: int
+                                         ) -> Number:
     """Calculate the physical pixel value at the given index"""
-    if index:
+    if pixel_offset:
         # Check for negative index
-        if index < 0:
-            index = index + start_of_range
-        return (physcial_pixel_size * index) + start_of_range
-    return start_of_range
+        if pixel_offset < 0:
+            pixel_offset = pixel_offset + dimension_size
+        return (physical_pixel_size * pixel_offset) + coordinates_at_pixel_offset_0
+    return coordinates_at_pixel_offset_0
 
 
-def _recalculate_physical_coordinate_range(coords_array: xr.DataArray,
-                                           dimension_size, coord: Coordinates,
-                                           tile_indices: Mapping[Indices, int],
-                                           key
-                                           ) -> Tuple:
+def _recalculate_physical_coordinate_range(coord_min: float,
+                                           coord_max: float,
+                                           dimension_size: int,
+                                           indexer
+                                           ) -> Tuple[Number, Number]:
     """Given the dimension size and pixel coordinate indexes calculate the corresponding
     coordinates in physical space
 
     Parameters
     ----------
-    coords_array: xarray
-        xarray that holds the min/max values of physical coordinates per tile (Round, Ch, Z).
+    coord_min: float
+        the minimun physical coordinate value
+
+    coord_max: float
+        the maximum physical coordinate value
 
     coord: Coordinate
         The (X, Y, or Z) coordinate to calculate.
@@ -130,14 +140,15 @@ def _recalculate_physical_coordinate_range(coords_array: xr.DataArray,
         The pixel index or range to calculate.
 
     """
-    coord_min, coord_max = get_coordinates(coords_array, tile_indices, coord)
     physical_pixel_size = calculate_physcial_pixel_size(coord_max, coord_min, dimension_size)
-    min_pixel_index = key if type(key) is int else key.start
-    max_pixel_index = key if type(key) is int else key.stop
+    min_pixel_index = indexer if type(indexer) is int else indexer.start
+    max_pixel_index = indexer if type(indexer) is int else indexer.stop
     # Add one to max pixel index to get end of pixel
-    max_pixel_index = max_pixel_index + 1 if max_pixel_index else None
-    new_min = calculate_physical_pixel_value(physical_pixel_size, min_pixel_index, coord_min)
-    new_max = calculate_physical_pixel_value(physical_pixel_size, max_pixel_index, coord_min)
+    max_pixel_index = max_pixel_index + 1 if max_pixel_index else dimension_size
+    new_min = _pixel_offset_to_physical_coordinate(physical_pixel_size, min_pixel_index,
+                                                   coord_min, dimension_size)
+    new_max = _pixel_offset_to_physical_coordinate(physical_pixel_size, max_pixel_index,
+                                                   coord_min, dimension_size)
     return new_min, new_max
 
 

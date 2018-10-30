@@ -225,35 +225,3 @@ def get_physcial_coordinates_of_spot(coords_array, tile_indices, pixel_x, pixel_
     return physical_x, physical_y, physical_z
 
 
-def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack, intensity_table):
-    """Transfers physical coordinates from an imagestacks coordianates xarray to an intensity table
-
-    Creates three new coords on the intensity table (xc, yc, zc)"""
-    # Add three new coords to xarray (xc, yc, zc)
-    intensity_table[Coordinates.X.value] = xr.DataArray.astype(intensity_table.features * 0, np.float32)
-    intensity_table[Coordinates.Y.value] = xr.DataArray.astype(intensity_table.features * 0, np.float32)
-    intensity_table[Coordinates.Z.value] = xr.DataArray.astype(intensity_table.features * 0, np.float32)
-    for ind, feature in intensity_table.groupby('features'):
-        for ch, round in np.ndindex(feature.data.shape):
-            # if non zero value set coords
-            if feature[ch][round].data > 0:
-                # get pixel coords of this tile
-                pixel_x = feature.coords['x'].data
-                pixel_y = feature.coords['y'].data
-                pixel_z = feature.coords['z'].data
-                tile_indices = {
-                    Indices.ROUND.value: round,
-                    Indices.CH.value: ch,
-                    Indices.Z.value: pixel_z,
-                }
-                physical_coords = get_physcial_coordinates_of_spot(image_stack._coordinates,
-                                                                   tile_indices,
-                                                                   pixel_x,
-                                                                   pixel_y,
-                                                                   image_stack._tile_shape)
-                intensity_table[Coordinates.X.value][ind] = physical_coords[0]
-                intensity_table[Coordinates.Y.value][ind] = physical_coords[1]
-                intensity_table[Coordinates.Z.value][ind] = physical_coords[2]
-                break
-    return intensity_table
-

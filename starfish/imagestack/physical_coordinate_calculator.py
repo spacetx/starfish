@@ -1,6 +1,5 @@
 from typing import Any, Mapping, Tuple, Union
 
-import numpy as np
 import xarray as xr
 
 from starfish.imagestack import indexing_utils
@@ -220,8 +219,6 @@ def get_physcial_coordinates_of_spot(coords_array, tile_indices, pixel_x, pixel_
 
     z_range = get_coordinates(coords_array, tile_indices, Coordinates.Z)
     # As discussed just taking the middle of the z range for this...unless we change pour minds
-    physical_z = (z_range[1] - z_range[0]) / 2
+    physical_z = (z_range[1] - z_range[0]) / 2 + z_range[0]
 
     return physical_x, physical_y, physical_z
-
-

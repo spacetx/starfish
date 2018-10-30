@@ -1,10 +1,10 @@
 import numpy as np
 import xarray as xr
 
-from starfish.types import Coordinates, Indices
 from starfish.imagestack import physical_coordinate_calculator
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.types import Coordinates, Indices
 
 
 def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack: ImageStack,
@@ -13,22 +13,25 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack: Ima
     """Transfers physical coordinates from an imagestacks coordianates xarray to an intensity table
         1.) Creates three new coords on the intensity table (xc, yc, zc)
         2.) For every spot:
-                Get pixel x,y values 
-                Calulate the physical x,y values
-                Assign those values to the coords arrays for this spot 
+                Get pixel x,y values
+                Calculate the physical x,y values
+                Assign those values to the coords arrays for this spot
     """""
     # Add three new coords to xarray (xc, yc, zc)
-    intensity_table[Coordinates.X.value] = xr.DataArray.astype(intensity_table.features * 0, np.float32)
-    intensity_table[Coordinates.Y.value] = xr.DataArray.astype(intensity_table.features * 0, np.float32)
-    intensity_table[Coordinates.Z.value] = xr.DataArray.astype(intensity_table.features * 0, np.float32)
-    for ind, feature in intensity_table.groupby('features'):
-        for ch, round in np.ndindex(feature.data.shape):
+    intensity_table[Coordinates.X.value] = \
+        xr.DataArray.astype(intensity_table.features * 0, np.float32)
+    intensity_table[Coordinates.Y.value] = \
+        xr.DataArray.astype(intensity_table.features * 0, np.float32)
+    intensity_table[Coordinates.Z.value] = \
+        xr.DataArray.astype(intensity_table.features * 0, np.float32)
+    for ind, spot in intensity_table.groupby('features'):
+        for ch, round in np.ndindex(spot.data.shape):
             # if non zero value set coords
-            if feature[ch][round].data > 0:
+            if spot[ch][round].data > 0:
                 # get pixel coords of this tile
-                pixel_x = feature.coords[Indices.X].data
-                pixel_y = feature.coords[Indices.Y].data
-                pixel_z = feature.coords[Indices.Z].data
+                pixel_x = spot.coords[Indices.X].data
+                pixel_y = spot.coords[Indices.Y].data
+                pixel_z = spot.coords[Indices.Z].data
                 tile_indices = {
                     Indices.ROUND.value: round,
                     Indices.CH.value: ch,

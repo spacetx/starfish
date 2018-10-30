@@ -31,8 +31,31 @@ def ISS(use_test_data: bool=False):
 
 
 def osmFISH(use_test_data: bool=False):
+    """Return osmFISH data from Codeluppi et al. 2018
+
+    This function returns a single round of a single field of view from the 16 field of view study
+    if use_test_data is True, or three fields of view containing all rounds of data if use_test_data
+    is False.
+
+    Parameters
+    ----------
+    use_test_data : bool
+        If True, return one round from one field of view, suitable for testing (default False)
+
+    Notes
+    -----
+    - osmFISH fields of view are quite large (14, 2, 45, 2048, 2048) which takes up approximately
+      21 gb in memory. Use the non-test data with care.
+
+    See Also
+    --------
+    Codeluppi et al. 2018: https://www.nature.com/articles/s41592-018-0175-z
+    """
+    if use_test_data:
+        return Experiment.from_json(
+            'https://d2nhj9g34unfro.cloudfront.net/20181005/osmFISH/experiment.json')
     return Experiment.from_json(
-        'https://d2nhj9g34unfro.cloudfront.net/20181005/osmFISH/experiment.json')
+        'https://d2nhj9g34unfro.cloudfront.net/20181031/osmFISH/experiment.json')
 
 
 def BaristaSeq(use_test_data: bool=False) -> Experiment:

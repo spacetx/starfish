@@ -52,12 +52,12 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
                          Indices.Y: slice(None, None),
                          Indices.X: slice(None, None)}
 
-        self.physical_coords = {PhysicalCoordinateTypes.X_MIN: 1,
-                                PhysicalCoordinateTypes.X_MAX: 2,
-                                PhysicalCoordinateTypes.Y_MIN: 4,
-                                PhysicalCoordinateTypes.Y_MAX: 6,
-                                PhysicalCoordinateTypes.Z_MIN: 1,
-                                PhysicalCoordinateTypes.Z_MAX: 3}
+        self.physical_coords = {PhysicalCoordinateTypes.X_MIN: 1.0,
+                                PhysicalCoordinateTypes.X_MAX: 2.0,
+                                PhysicalCoordinateTypes.Y_MIN: 4.0,
+                                PhysicalCoordinateTypes.Y_MAX: 6.0,
+                                PhysicalCoordinateTypes.Z_MIN: 1.0,
+                                PhysicalCoordinateTypes.Z_MAX: 3.0}
 
         self.coords_array.loc[0, 0, 0] = \
             np.array([self.physical_coords[PhysicalCoordinateTypes.X_MIN],
@@ -70,7 +70,7 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
         self.stack_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 1),
                                         (Indices.Z, 1), (Indices.Y, 200), (Indices.X, 200)])
 
-    def test_calc_new_physical_coords_array(self):
+    def test_calc_new_physical_coords_array_single_y_slice_x(self):
 
         # Index on single value of X, range of y
         self.indexers[Indices.Y], self.indexers[Indices.X] = 100, slice(None, 100)
@@ -93,6 +93,7 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
                                                               expected_zmin,
                                                               expected_zmax]))
 
+    def test_calc_new_physical_coords_array_slice_x_y(self):
         # Index on last half of Y, first half of X
         self.indexers[Indices.Y], self.indexers[Indices.X] = slice(100, None), slice(None, 100)
         new_coords = physical_coordinate_calculator.calc_new_physical_coords_array(
@@ -103,6 +104,10 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
         expected_xmin, expected_xmax = X_INDEX_0, X_INDEX_101
         expected_ymin, expected_ymax = Y_INDEX_100, Y_INDEX_200
 
+        # z range stays the same
+        expected_zmin = self.physical_coords[PhysicalCoordinateTypes.Z_MIN]
+        expected_zmax = self.physical_coords[PhysicalCoordinateTypes.Z_MAX]
+
         assert np.allclose(new_coords.loc[0, 0, 0], np.array([expected_xmin,
                                                               expected_xmax,
                                                               expected_ymin,
@@ -110,6 +115,7 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
                                                               expected_zmin,
                                                               expected_zmax]))
 
+    def test_calc_new_physical_coords_array_negative_indexing(self):
         # Negative indexing
         self.indexers[Indices.Y], self.indexers[Indices.X] = slice(100, -10), slice(1, -50)
         new_coords = physical_coordinate_calculator.calc_new_physical_coords_array(
@@ -119,6 +125,10 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
 
         expected_xmin, expected_xmax = X_INDEX_1, X_INDEX_151
         expected_ymin, expected_ymax = Y_INDEX_100, Y_INDEX_191
+
+        # z range stays the same
+        expected_zmin = self.physical_coords[PhysicalCoordinateTypes.Z_MIN]
+        expected_zmax = self.physical_coords[PhysicalCoordinateTypes.Z_MAX]
 
         assert np.allclose(new_coords.loc[0, 0, 0], np.array([expected_xmin,
                                                               expected_xmax,

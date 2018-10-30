@@ -30,7 +30,7 @@ def calc_new_physical_coords_array(physical_coordinates: xr.DataArray,
     -------
     A coordinates xarray indexed by R, CH, V and values recalculated according to indexing on X/Y
     """
-    new_coords = physical_coordinates.copy()
+    new_coords = physical_coordinates.copy(deep=True)
     # index by R, CH, V
     key = {Indices.ROUND.value: indexers[Indices.ROUND.value],
            Indices.CH.value: indexers[Indices.CH.value],
@@ -42,7 +42,8 @@ def calc_new_physical_coords_array(physical_coordinates: xr.DataArray,
     return new_coords
 
 
-def _needs_coords_recalculating(x_indexers, y_indexers) -> bool:
+def _needs_coords_recalculating(x_indexers: Union[int, slice], y_indexers: Union[int, slice]
+                                ) -> bool:
     if isinstance(x_indexers, int) or isinstance(y_indexers, int):
         return True
     return not (x_indexers.start is x_indexers.stop is y_indexers.start is y_indexers.stop is None)
@@ -100,7 +101,8 @@ def _recalculate_physical_coordinate_ranges(stack_shape: Mapping[Indices, int],
                     ])] = [xmin, xmax, ymin, ymax]
 
 
-def _calculate_physcial_pixel_size(coord_max: float, coord_min: float, num_pixels: int):
+def _calculate_physcial_pixel_size(coord_max: Number, coord_min: Number, num_pixels: int
+                                   ) -> Number:
     """Calculate the size of a pixel in physical space"""
     return (coord_max - coord_min) / num_pixels
 
@@ -130,7 +132,7 @@ def _recalculate_physical_coordinate_range(coord_min: float,
     Parameters
     ----------
     coord_min: float
-        the minimun physical coordinate value
+        the minimum physical coordinate value
 
     coord_max: float
         the maximum physical coordinate value

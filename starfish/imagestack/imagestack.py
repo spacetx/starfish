@@ -26,6 +26,8 @@ from tqdm import tqdm
 from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
+from starfish.imagestack import indexing_utils
+from starfish.imagestack import physical_coordinate_calculator
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import (
     Coordinates,
@@ -297,6 +299,47 @@ class ImageStack:
     def xarray(self) -> xr.DataArray:
         """Retrieves the image data as an xarray.DataArray"""
         return self._data.data
+
+    def sel(self, indexers: Mapping[Indices, Union[int]]):
+        """Given a dictionary mapping the index name to either a value or a slice range, return an
+        Imagestack with each dimension indexed accordingly
+
+        Parameters
+        ----------
+        indexers : Dict[Indices, (int/tuple)]
+            A dictionary of dim:index where index is the value or range to index the dimension
+
+        Examples
+        --------
+
+        Create an Imagestack using the ``synthetic_stack`` method::
+        >>> from starfish import ImageStack
+        >>> from starfish.types import Indices
+        >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
+        >>> stack
+        <starfish.ImageStack (r: 5, c: 5, z: 15, y: 200, x: 200)>
+        >>> stack.sel({Indices.ROUND: (1, None), Indices.CH: 0, Indices.Z: 0})
+        <starfish.ImageStack (r: 4, c: 1, z: 1, y: 200, x: 200)>
+        >>> stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1,
+        ...Indices.Y: 100, Indices.X: (None, 100)})
+        <starfish.ImageStack (r: 1, c: 1, z: 1, y: 1, x: 100)>
+        and the imagestack's physical coordinates
+        xarray also indexed and recalculated according to the x,y slicing.
+
+        Returns
+        -------
+        ImageStack :
+            a new image stack indexed by given value or range.
+        """
+
+        # convert indexers to Dict[str, (int/slice)] format
+        formatted_indexers = indexing_utils.convert_to_indexers_dict(indexers)
+        indexed_data = indexing_utils.index_keep_dimensions(self.xarray, formatted_indexers)
+        stack = self.from_numpy_array(indexed_data.data)
+        # set coords on new stack
+        stack._coordinates = physical_coordinate_calculator.calc_new_physical_coords_array(
+            self._coordinates, self.shape, formatted_indexers)
+        return stack
 
     def get_slice(
             self,
@@ -839,27 +882,10 @@ class ImageStack:
             physical_axis: Coordinates) -> Tuple[float, float]:
         """Given a set of indices that uniquely identify a tile and a physical axis, return the min
         and the max coordinates for that tile along that axis."""
-        selectors: Mapping[str, Any] = {
-            Indices.ROUND.value: indices[Indices.ROUND],
-            Indices.CH.value: indices[Indices.CH],
-            Indices.Z.value: indices[Indices.Z],
-        }
-        min_selectors = dict(selectors)
-        max_selectors = dict(selectors)
-        if physical_axis == Coordinates.X:
-            min_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.X_MIN
-            max_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.X_MAX
-        elif physical_axis == Coordinates.Y:
-            min_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Y_MIN
-            max_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Y_MAX
-        elif physical_axis == Coordinates.Z:
-            min_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Z_MIN
-            max_selectors[PHYSICAL_COORDINATE_DIMENSION] = PhysicalCoordinateTypes.Z_MAX
 
-        return (
-            self._coordinates.loc[min_selectors].item(),
-            self._coordinates.loc[max_selectors].item(),
-        )
+        return physical_coordinate_calculator.get_coordinates(coords_array=self._coordinates,
+                                                              indices=indices,
+                                                              physical_axis=physical_axis)
 
     def _get_dimension_size(self, dimension: Indices):
         axis_data = ImageStack.AXES_DATA[dimension]

@@ -1,39 +1,26 @@
-
-import xarray as xr
 import numpy as np
 
-from starfish import Codebook, IntensityTable, ImageStack
+from starfish import Codebook, ImageStack, IntensityTable
 from starfish.imagestack import physical_coordinate_calculator
-from starfish.types import Features, Indices, PHYSICAL_COORDINATE_DIMENSION, PhysicalCoordinateTypes
+from starfish.types import Features, Indices
 
 
-def imagestack_with_coords_factory() -> ImageStack:
-    coords_array = xr.DataArray(
-        np.empty(
-            shape=(3, 2, 1, 6),
-            dtype=np.float32,
-        ),
-        dims=(Indices.ROUND.value,
-              Indices.CH.value,
-              Indices.Z.value,
-              PHYSICAL_COORDINATE_DIMENSION),
-        coords={
-            PHYSICAL_COORDINATE_DIMENSION: [
-                PhysicalCoordinateTypes.X_MIN.value,
-                PhysicalCoordinateTypes.X_MAX.value,
-                PhysicalCoordinateTypes.Y_MIN.value,
-                PhysicalCoordinateTypes.Y_MAX.value,
-                PhysicalCoordinateTypes.Z_MIN.value,
-                PhysicalCoordinateTypes.Z_MAX.value,
-            ],
-        },
-    )
+def imagestack_with_coords_factory(stack_shape, coords) -> ImageStack:
+    """
+    Create an ImageStack and sets the same coords on every tile
+    """
+    stack = ImageStack.synthetic_stack(*stack_shape)
 
-    coords_array.loc[0, 0, 0] = np.array([1, 2, 4, 6, 1, 3])
+    for _round in range(stack.num_rounds):
+        for ch in range(stack.num_chs):
+            for z in range(stack.num_zlayers):
+                coordinate_selector = {
+                    Indices.ROUND.value: _round,
+                    Indices.CH.value: ch,
+                    Indices.Z.value: z,
+                }
 
-    stack = ImageStack.synthetic_stack(3, 2, 1, 50, 40)
-
-    stack._coordinates = coords_array
+                stack._coordinates.loc[coordinate_selector] = np.array(coords)
 
     return stack
 
@@ -63,7 +50,7 @@ def codebook_array_factory() -> Codebook:
 
 
 def test_tranfering_physical_coords_to_intensity_table():
-    stack = imagestack_with_coords_factory()
+    stack = imagestack_with_coords_factory((3, 2, 1, 50, 40), [1, 2, 4, 6, 1, 3])
     codebook = codebook_array_factory()
 
     intensities = IntensityTable.synthetic_intensities(

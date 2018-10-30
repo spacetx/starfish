@@ -112,6 +112,7 @@ def _pixel_offset_to_physical_coordinate(physical_pixel_size: Number,
                                          dimension_size: int
                                          ) -> Number:
     """Calculate the physical pixel value at the given index"""
+
     if pixel_offset and pixel_offset != 0:
         # Check for negative index
         if pixel_offset < 0:

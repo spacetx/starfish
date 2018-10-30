@@ -4,7 +4,6 @@ import numpy as np
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, tile_fetcher_factory
-from starfish.imagestack import physical_coordinate_calculator
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Coordinates, Indices, Number
 
@@ -75,12 +74,9 @@ def test_coordinates():
                     Indices.Z: z
                 }
 
-                xmin, xmax = physical_coordinate_calculator.get_coordinates(
-                    stack._coordinates, indices, Coordinates.X)
-                ymin, ymax = physical_coordinate_calculator.get_coordinates(
-                    stack._coordinates, indices, Coordinates.Y)
-                zmin, zmax = physical_coordinate_calculator.get_coordinates(
-                    stack._coordinates, indices, Coordinates.Z)
+                xmin, xmax = stack.coordinates(indices, Coordinates.X)
+                ymin, ymax = stack.coordinates(indices, Coordinates.Y)
+                zmin, zmax = stack.coordinates(indices, Coordinates.Z)
 
                 expected_xmin, expected_xmax = round_to_x(_round)
                 expected_ymin, expected_ymax = round_to_y(_round)
@@ -143,12 +139,9 @@ def test_scalar_coordinates():
                     Indices.Z: z
                 }
 
-                xmin, xmax = physical_coordinate_calculator.get_coordinates(
-                    stack._coordinates, indices, Coordinates.X)
-                ymin, ymax = physical_coordinate_calculator.get_coordinates(
-                    stack._coordinates, indices, Coordinates.Y)
-                zmin, zmax = physical_coordinate_calculator.get_coordinates(
-                    stack._coordinates, indices, Coordinates.Z)
+                xmin, xmax = stack.coordinates(indices, Coordinates.X)
+                ymin, ymax = stack.coordinates(indices, Coordinates.Y)
+                zmin, zmax = stack.coordinates(indices, Coordinates.Z)
 
                 expected_x = round_to_x(_round)[0]
                 expected_y = round_to_y(_round)[0]

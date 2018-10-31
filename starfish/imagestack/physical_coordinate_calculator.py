@@ -30,7 +30,8 @@ def calc_new_physical_coords_array(physical_coordinates: xr.DataArray,
     -------
     A coordinates xarray indexed by R, CH, V and values recalculated according to indexing on X/Y
     """
-    new_coords = physical_coordinates.copy()
+
+    new_coords = physical_coordinates.copy(deep=True)
     # index by R, CH, V
     key = {Indices.ROUND.value: indexers[Indices.ROUND.value],
            Indices.CH.value: indexers[Indices.CH.value],
@@ -42,7 +43,8 @@ def calc_new_physical_coords_array(physical_coordinates: xr.DataArray,
     return new_coords
 
 
-def _needs_coords_recalculating(x_indexers, y_indexers) -> bool:
+def _needs_coords_recalculating(x_indexers: Union[int, slice], y_indexers: Union[int, slice]
+                                ) -> bool:
     if isinstance(x_indexers, int) or isinstance(y_indexers, int):
         return True
     return not (x_indexers.start is x_indexers.stop is y_indexers.start is y_indexers.stop is None)
@@ -100,7 +102,8 @@ def _recalculate_physical_coordinate_ranges(stack_shape: Mapping[Indices, int],
                     ])] = [xmin, xmax, ymin, ymax]
 
 
-def _calculate_physcial_pixel_size(coord_max: float, coord_min: float, num_pixels: int):
+def _calculate_physcial_pixel_size(coord_max: Number, coord_min: Number, num_pixels: int
+                                   ) -> Number:
     """Calculate the size of a pixel in physical space"""
     return (coord_max - coord_min) / num_pixels
 
@@ -111,7 +114,6 @@ def _pixel_offset_to_physical_coordinate(physical_pixel_size: Number,
                                          dimension_size: int
                                          ) -> Number:
     """Calculate the physical pixel value at the given index"""
-
     if pixel_offset and pixel_offset != 0:
         # Check for negative index
         if pixel_offset < 0:
@@ -131,7 +133,7 @@ def _recalculate_physical_coordinate_range(coord_min: float,
     Parameters
     ----------
     coord_min: float
-        the minimun physical coordinate value
+        the minimum physical coordinate value
 
     coord_max: float
         the maximum physical coordinate value
@@ -202,20 +204,20 @@ def get_physcial_coordinates_of_spot(coords_array, tile_indices, pixel_x, pixel_
     x_range = get_coordinates(coords_array, tile_indices, Coordinates.X)
     physcial_pixel_size_x = _calculate_physcial_pixel_size(coord_max=x_range[1],
                                                            coord_min=x_range[0],
-                                                           num_pixels=tile_shape[0])
+                                                           num_pixels=tile_shape[1])
     physical_x = _pixel_offset_to_physical_coordinate(physical_pixel_size=physcial_pixel_size_x,
                                                       pixel_offset=pixel_x,
                                                       coordinates_at_pixel_offset_0=x_range[0],
-                                                      dimension_size=tile_shape[0])
+                                                      dimension_size=tile_shape[1])
 
     y_range = get_coordinates(coords_array, tile_indices, Coordinates.Y)
     physcial_pixel_size_y = _calculate_physcial_pixel_size(coord_max=y_range[1],
                                                            coord_min=y_range[0],
-                                                           num_pixels=tile_shape[1])
+                                                           num_pixels=tile_shape[0])
     physical_y = _pixel_offset_to_physical_coordinate(physical_pixel_size=physcial_pixel_size_y,
                                                       pixel_offset=pixel_y,
                                                       coordinates_at_pixel_offset_0=y_range[0],
-                                                      dimension_size=tile_shape[1])
+                                                      dimension_size=tile_shape[0])
 
     z_range = get_coordinates(coords_array, tile_indices, Coordinates.Z)
     # As discussed just taking the middle of the z range for this...unless we change pour minds

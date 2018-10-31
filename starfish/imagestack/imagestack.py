@@ -35,6 +35,8 @@ from starfish.types import (
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
 )
+from starfish.util.try_import import try_import
+from ._mp_dataarray import MPDataArray
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
 
@@ -64,11 +66,18 @@ class ImageStack:
         retrieve a slice of the image tensor
     set_slice(indices, data, axes=None)
         set a slice of the image tensor
-    apply(func, is_volume=False, in_place=False, verbose=False, n_processes=None)
-        apply a 2d or 3d function across all Tiles in the image tensor
+    apply(func, group_by={Indices.ROUND, Indices.CH, Indices.Z}, in_place=False, verbose=False,
+            n_processes=None)
+        split the image tensor along one or more axes and apply a function across each of the
+        components to yield an image tensor
+    transform(func, group_by={Indices.ROUND, Indices.CH, Indices.Z}, verbose=False,
+            n_processes=None)
+        split the image tensor along one or more axes and apply a function across each of the
+        components. Results are returned as a List with length equal to the number of times
+        the image tensor is split.
     max_proj(*dims)
         return a max projection over one or more axis of the image tensor
-    show_stack(indices, color_map='gray', figure_size=(10, 10), rescale=False, p_min=None, \
+    show_stack(indices, color_map='gray', figure_size=(10, 10), rescale=False, p_min=None,
             p_max=None)
         show an interactive, pageable view of the image tensor, or a slice of the image tensor
     write(filepath, tile_opener=None)
@@ -133,11 +142,10 @@ class ImageStack:
         coordinates_dimensions.append(PHYSICAL_COORDINATE_DIMENSION)
         coordinates_shape.append(6)
         # now that we know the tile data type (kind and size), we can allocate the data array.
-        self._data = xr.DataArray(
-            np.zeros(
-                shape=shape,
-                dtype=np.float32,
-            ),
+        self._data = MPDataArray.from_shape_and_dtype(
+            shape=shape,
+            dtype=np.float32,
+            initial_value=0,
             dims=dims,
         )
         self._coordinates = xr.DataArray(
@@ -290,7 +298,7 @@ class ImageStack:
     @property
     def xarray(self) -> xr.DataArray:
         """Retrieves the image data as an xarray.DataArray"""
-        return self._data
+        return self._data.data
 
     def sel(self, indexers: Mapping[Indices, Union[int]]):
         """Given a dictionary mapping the index name to either a value or a slice range, return an
@@ -422,6 +430,34 @@ class ImageStack:
                 data.shape, self._data[slice_list].shape))
 
         self._data.values[slice_list] = data
+
+    @try_import({"napari_gui"})
+    def show_stack_napari(self, indices: Mapping[Indices, Union[int, slice]]):
+        """Displays the image stack using Napari (https://github.com/Napari)
+
+        Parameters
+        ----------
+        indices : Mapping[Indices, Union[int, slice]],
+            Indices to select a volume to visualize. Passed to `Image.get_slice()`.
+            See `Image.get_slice()` for examples.
+
+        Notes
+        -----
+        To use in a Jupyter notebook, use the %gui qt5 magic.
+        Axes currently cannot be labeled. Until such a time that they can, this function will
+            order them by Round, Channel, and Z.
+
+
+        """
+        import napari_gui
+
+        # TODO ambrosejcarr: this should use updated imagestack slicing routines when they are added
+        # and indices should be optional to enable full stack viewing.
+        # Switch axes such that it is indexed [x, y, round, channel, z]
+        slices, axes = self.get_slice(indices)
+        reordered_array = np.moveaxis(slices, [-2, -1], [0, 1])
+
+        napari_gui.imshow(reordered_array, multichannel=False)
 
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],
@@ -657,24 +693,26 @@ class ImageStack:
 
     def apply(
             self,
-            func,
-            split_by: Set[Indices]={Indices.X, Indices.Y},
+            func: Callable,
+            group_by: Set[Indices]=None,
             in_place=False,
             verbose: bool=False,
             n_processes: Optional[int]=None,
             **kwargs
     ) -> "ImageStack":
-        """Apply func over all tiles or volumes in self
+        """Split the image along a set of axes and apply a function across all the components.  This
+        function should yield data of the same dimensionality as the input components.  These
+        resulting components are then constituted into an ImageStack and returned.
 
         Parameters
         ----------
         func : Callable
-            Function to apply. must expect a first argument which is a 2d or 3d numpy array
-            (see is_volume) and return a
-            np.ndarray. If inplace is True, must return an array of the same shape.
-        apply_over: Set[Indices, ...]
-            (default {Indices.X, Indices.Y}) By default, apply over X and Y (tiles). Alternatively,
-            One could pass {Indices.X, Indices.Y, Indices.Z} to apply over volumes.
+            Function to apply. must expect a first argument which is a numpy array (see group_by)
+            but may return any object type.
+        group_by : Set[Indices]
+            Axes to split the data along.  For instance, splitting a 2D array (axes: X, Y; size:
+            3, 4) by X results in 3 arrays of size 4.  (default {Indices.ROUND, Indices.CH,
+            Indices.Z})
         in_place : bool
             (default True) If True, function is executed in place. If n_proc is not 1, the tile or
             volume will be copied once during execution. If false, a new ImageStack object will be
@@ -693,36 +731,47 @@ class ImageStack:
             If inplace is False, return a new ImageStack, otherwise return a reference to the
             original stack with data modified by application of func
         """
+        if group_by is None:
+            group_by = {Indices.ROUND, Indices.CH, Indices.Z}
+
         if not in_place:
             image_stack = deepcopy(self)
             return image_stack.apply(
                 func,
-                split_by=split_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
+                group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
             )
 
-        results = self.transform(func, split_by=split_by, verbose=verbose,
+        results = self.transform(func, group_by=group_by, verbose=verbose,
                                  n_processes=n_processes, **kwargs)
 
         for r, inds in results:
             self.set_slice(inds, r)
         return self
 
-    def transform(self, func,
-                  split_by: Set[Indices]={Indices.X, Indices.Y},
-                  verbose=False,
-                  n_processes: Optional[int] = None,
-                  **kwargs) -> List[Any]:
-        """Apply func over all tiles or volumes in self
+    def transform(
+            self,
+            func: Callable,
+            group_by: Set[Indices]=None,
+            verbose=False,
+            n_processes: Optional[int]=None,
+            **kwargs
+    ) -> List[Any]:
+        """Split the image along a set of axes, and apply a function across all the components.
 
         Parameters
         ----------
         func : Callable
-            Function to apply. must expect a first argument which is a 2d or 3d numpy array
-            (see is_volume) but may return any object type
-        is_volume : bool
-            (default False) If True, pass 3d volumes (x, y, z) to func
+            Function to apply. must expect a first argument which is a numpy array (see group_by)
+            but may return any object type.
+        group_by : Set[Indices]
+            Axes to split the data along.  For instance, splitting a 2D array (axes: X, Y; size:
+            3, 4) by X results in 3 arrays of size 4.  (default {Indices.ROUND, Indices.CH,
+            Indices.Z})
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
+        n_processes : Optional[int]
+            The number of processes to use for apply. If None, uses the output of os.cpu_count()
+            (default = None).
         kwargs : dict
             Additional arguments to pass to func being applied
 
@@ -731,11 +780,10 @@ class ImageStack:
         List[Any] :
             The results of applying func to stored image data
         """
-        # mapfunc: Callable = map
-        all_axes = set(ind for ind in Indices)
-        axes_to_iterate = set(all_axes - split_by)
+        if group_by is None:
+            group_by = {Indices.X, Indices.Y}
 
-        indices = list(self._iter_indices(axes_to_iterate))
+        indices = list(self._iter_indices(group_by))
 
         if verbose:
             tiles = tqdm(self._iter_tiles(indices))

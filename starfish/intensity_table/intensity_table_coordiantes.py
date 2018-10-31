@@ -4,7 +4,7 @@ import xarray as xr
 from starfish.imagestack import physical_coordinate_calculator
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.types import Coordinates, Indices
+from starfish.types import Coordinates, Features, Indices
 
 
 def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack: ImageStack,
@@ -24,7 +24,9 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack: Ima
         xr.DataArray.astype(intensity_table.features * 0, np.float32)
     intensity_table[Coordinates.Z.value] = \
         xr.DataArray.astype(intensity_table.features * 0, np.float32)
-    for ind, spot in intensity_table.groupby('features'):
+    # Iterate through spots
+    for ind, spot in intensity_table.groupby(Features.AXIS):
+        # Iterate through r, ch per spot
         for ch, round in np.ndindex(spot.data.shape):
             # if non zero value set coords
             if spot[ch][round].data > 0:
@@ -37,12 +39,14 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack: Ima
                     Indices.CH.value: ch,
                     Indices.Z.value: pixel_z,
                 }
+                # Get cooresponding physical coords
                 physical_coords = physical_coordinate_calculator.\
                     get_physcial_coordinates_of_spot(image_stack._coordinates,
                                                      tile_indices,
                                                      pixel_x,
                                                      pixel_y,
                                                      image_stack._tile_shape)
+                # Assign to coords array
                 intensity_table[Coordinates.X.value][ind] = physical_coords[0]
                 intensity_table[Coordinates.Y.value][ind] = physical_coords[1]
                 intensity_table[Coordinates.Z.value][ind] = physical_coords[2]

@@ -5,7 +5,7 @@ from skimage.morphology import ball, disk, white_tophat
 
 from starfish.imagestack.imagestack import ImageStack
 from ._base import FilterAlgorithmBase
-from .util import determine_axes_to_split_by
+from .util import determine_axes_to_group_by
 
 
 class WhiteTophat(FilterAlgorithmBase):
@@ -74,9 +74,9 @@ class WhiteTophat(FilterAlgorithmBase):
             original stack.
 
         """
-        split_by = determine_axes_to_split_by(self.is_volume)
+        group_by = determine_axes_to_group_by(self.is_volume)
         result = stack.apply(
             self._white_tophat,
-            split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result

@@ -8,7 +8,7 @@ from scipy.ndimage import gaussian_laplace
 
 from starfish.image._filter._base import FilterAlgorithmBase
 from starfish.image._filter.util import (
-    determine_axes_to_split_by,
+    determine_axes_to_group_by,
     preserve_float_range,
     validate_and_broadcast_kernel_size,
 )
@@ -124,9 +124,9 @@ class Laplace(FilterAlgorithmBase):
         ImageStack :
             if in-place is False, return the results of filter as a new stack
         """
-        split_by = determine_axes_to_split_by(self.is_volume)
+        group_by = determine_axes_to_group_by(self.is_volume)
         apply_filtering: Callable = partial(self._gaussian_laplace, sigma=self.sigma)
         return stack.apply(
             apply_filtering,
-            split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
+            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
         )

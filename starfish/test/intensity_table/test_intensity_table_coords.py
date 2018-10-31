@@ -12,7 +12,9 @@ from starfish.types import Coordinates, Indices, PhysicalCoordinateTypes
 NUMBER_SPOTS = 10
 
 
-def physical_cord_to_pixel_value(physical_coord, physical_pixel_size, coordinates_at_pixel_offset_0):
+def physical_cord_to_pixel_value(physical_coord,
+                                 physical_pixel_size,
+                                 coordinates_at_pixel_offset_0):
     return (physical_coord - coordinates_at_pixel_offset_0) / physical_pixel_size
 
 
@@ -65,7 +67,9 @@ def test_tranfering_physical_coords_to_intensity_table():
         physical_x = spot['xc'].data
         calculated_pixel = physical_cord_to_pixel_value(physical_x,
                                                         physical_pixel_size_x,
-                                                        physical_coords[PhysicalCoordinateTypes.X_MIN])
+                                                        physical_coords[
+                                                            PhysicalCoordinateTypes.X_MIN
+                                                        ])
         assert np.isclose(pixel_x, calculated_pixel)
 
     for spot in yc.features:
@@ -73,12 +77,13 @@ def test_tranfering_physical_coords_to_intensity_table():
         physical_y = spot['yc'].data
         calculated_pixel = physical_cord_to_pixel_value(physical_y,
                                                         physical_pixel_size_y,
-                                                        physical_coords[PhysicalCoordinateTypes.Y_MIN])
+                                                        physical_coords[
+                                                            PhysicalCoordinateTypes.Y_MIN
+                                                        ])
         assert np.isclose(pixel_y, calculated_pixel)
 
-
-
-
-
-
-
+    # Assert that zc value is middle of z range
+    for spot in zc.features:
+        physical_z = spot['zc'].data
+        assert physical_coords[PhysicalCoordinateTypes.Z_MAX] == \
+            (physical_z * 2) - physical_coords[PhysicalCoordinateTypes.Z_MIN]

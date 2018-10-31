@@ -27,19 +27,21 @@ We are currently in **pre-alpha**, finishing proof of concept pipelines for each
 contributors that leverage starfish's shared object model. At this time starfish is mature enough to
 support computational developers interested in adapting other assays to starfish's object model.
 
-=============  ==========  ===================  ==================
- assay         loads data  single-fov pipeline  multi-fov pipeline
--------------  ----------  -------------------  ------------------
- MERFISH       [x]         [x]                  in process
- ISS           [x]         [x]                  in process
- osmFISH       [x]         in process           [ ]
- allen_smFISH  [x]         in review            [ ]
- DARTFISH      [x]         in review            [ ]
- dypFISH       [x]         no pipeline          [ ]
- ex-FISH       [x]         no pipeline          [ ]
- FISSEQ        no data     no pipeline          [ ]
- seq-FISH      no data     no pipeline          [ ]
-=============  ==========  ===================  ==================
+====================  ==========  ===================  ==================
+ Assay                Loads Data  Single-FoV Pipeline  Multi-FoV Pipeline
+--------------------  ----------  -------------------  ------------------
+ MERFISH              [x]         [x]                  in process
+ ISS                  [x]         [x]                  in process
+ osmFISH              [x]         in process           [ ]
+ allen_smFISH         [x]         in review            [ ]
+ BaristaSeq           [x]         in process           [ ]
+ DARTFISH             [x]         in review            [ ]
+ ex-FISH              [x]         [ ]                  [ ]
+ StarMAP              [ ]         [ ]                  [ ]
+ FISSEQ               no data     no pipeline          [ ]
+ seq-FISH             [ ]         [ ]                  [ ]
+ Imaging Mass. Cyto.  [x]         [ ]                  [ ]
+====================  ==========  ===================  ==================
 
 Concept
 -------

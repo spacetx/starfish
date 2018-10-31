@@ -978,7 +978,7 @@ class ImageStack:
             pretty=True,
             tile_opener=tile_opener)
 
-    def max_proj(self, *dims: Indices) -> np.ndarray:
+    def max_proj(self, *dims: Indices, return_stack: bool= False) -> "ImageStack":
         """return a max projection over one or more axis of the image tensor
 
         Parameters
@@ -992,8 +992,13 @@ class ImageStack:
             max projection
 
         """
-        max_projection = self._data.max([dim.value for dim in dims]).values
-        return max_projection
+        max_projection = self._data.max([dim.value for dim in dims])
+        if not return_stack:
+            return max_projection.values
+        max_projection = max_projection.expand_dims(tuple(dim.value for dim in dims))
+        max_projection.transpose(*self.xarray.dims)
+        max_proj_stack = self.from_numpy_array(max_projection.values)
+        return max_proj_stack
 
     @classmethod
     def synthetic_stack(

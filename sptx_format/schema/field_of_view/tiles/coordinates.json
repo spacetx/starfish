@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/sptx-format/schema/field_of_view/tiles/coordinates.json",
+  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/field_of_view/tiles/coordinates.json",
   "type": "object",
   "description": "Physical coordinates of the tile.",
   "required": [

@@ -29,7 +29,17 @@ class osmFISHTile(FetchedTile):
             coordinates: Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]],
             z: int
     ) -> None:
-        """Initialize a TileFetcher for osmFISH Data"""
+        """Parser for an osmFISH tile.
+
+        Parameters
+        ----------
+        file_path : str
+            location of the osmFISH tile
+        coordinates : Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]
+            the coordinates for the selected osmFISH tile, extracted from the metadata
+        z : int
+            the z-layer for the selected osmFISH tile
+        """
         self.file_path = file_path
         self.z = z
         self._coordinates = coordinates
@@ -40,7 +50,6 @@ class osmFISHTile(FetchedTile):
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
-        """For this single field of view test experiment, we expose dummy coordinates"""
         return self._coordinates
 
     @property
@@ -96,6 +105,10 @@ class osmFISHTileFetcher(TileFetcher):
         """
         parsed_metadata = {}
         for round_, round_data in self.osmfish_metadata['HybridizationsInfos'].items():
+
+            # the metadata references a larger corpus of data than we use for this example so as we
+            # iterate over the metadata, some rounds will not be found. In those cases, we just
+            # continue through the loop without adding to parsed_metadata
             round_match = re.match("Hybridization(\d{1,2})", round_)
             if round_match is not None:
                 round_id = int(round_match.group(1)) - 1
@@ -108,7 +121,7 @@ class osmFISHTileFetcher(TileFetcher):
 
     @property
     def fov_map(self) -> Mapping[int, str]:
-        """This example dataset has three channels, which we map to sequential integers"""
+        """This example dataset has three channels, which are mapped to sequential integers"""
         return {
             0: "53",
             1: "75",

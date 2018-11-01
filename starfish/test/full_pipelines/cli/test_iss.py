@@ -94,9 +94,9 @@ class TestWithIssData(CLITest, unittest.TestCase):
             ],
             [
                 "starfish", "segment",
-                "--hybridization-stack", lambda tempdir, *args, **kwargs: os.path.join(
+                "--primary-images", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "hybridization.json"),
-                "--nuclei-stack", lambda tempdir, *args, **kwargs: os.path.join(
+                "--nuclei", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "nuclei.json"),
                 "-o", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "label_image.png"),

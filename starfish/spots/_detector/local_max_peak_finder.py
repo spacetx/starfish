@@ -1,5 +1,6 @@
 from typing import List, Optional, Tuple, Union
 
+import click
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -303,32 +304,40 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
         return intensity_table
 
-    @classmethod
-    def _add_arguments(cls, group_parser):
-        group_parser.add_argument(
-            "--min-distance", default=4, type=int,
-            help="Minimum spot size (in number of pixels deviation)")
-        group_parser.add_argument(
-            "--min-obj-area", default=6, type=int,
-            help="Maximum spot size (in number of pixels")
-        group_parser.add_argument(
-            "--max_obj_area", default=300, type=int,
-            help="Maximum spot size (in number of pixels)")
-        group_parser.add_argument(
-            "--stringency", default=0, type=int,
-            help="Number of indices in threshold list to look past "
-                 "for the threhsold finding algorithm")
-        group_parser.add_argument("--threshold", default=None, type=float,
-                                  help="Threshold on which to threshold "
-                                       "image prior to spot detection")
-        group_parser.add_argument(
-            "--min-num-spots-detected", default=3, type=int,
-            help="Minimum number of spots detected at which to stop a"
-                 "utomatic thresholding algorithm")
-        group_parser.add_argument(
-            "--measurement-type", default='max', type=str,
-            help="How to aggregate pixel intensities in a spot")
-        group_parser.add_argument(
-            "--is-volume", default=False, action='store_false', help="Find spots in 3D or not")
-        group_parser.add_argument(
-            "--verbose", default=True, action='store_true', help="Verbosity flag")
+    @staticmethod
+    @click.command("LocalMaxPeakFinder")
+    @click.option(
+        "--min-distance", default=4, type=int,
+        help="Minimum spot size (in number of pixels deviation)")
+    @click.option(
+        "--min-obj-area", default=6, type=int,
+        help="Maximum spot size (in number of pixels")
+    @click.option(
+        "--max_obj_area", default=300, type=int,
+        help="Maximum spot size (in number of pixels)")
+    @click.option(
+        "--stringency", default=0, type=int,
+        help="Number of indices in threshold list to look past "
+             "for the threhsold finding algorithm")
+    @click.option(
+        "--threshold", default=None, type=float,
+        help="Threshold on which to threshold "
+             "image prior to spot detection")
+    @click.option(
+        "--min-num-spots-detected", default=3, type=int,
+        help="Minimum number of spots detected at which to stop a"
+             "utomatic thresholding algorithm")
+    @click.option(
+        "--measurement-type", default='max', type=str,
+        help="How to aggregate pixel intensities in a spot")
+    @click.option(
+        "--is-volume", default=False, action='store_false', help="Find spots in 3D or not")
+    @click.option(
+        "--verbose", default=True, action='store_true', help="Verbosity flag")
+    @click.pass_context
+    def _cli(ctx, min_distance, min_obj_area, max_obj_area, stringency, threshold,
+             min_num_spots_detected, measurement_type, is_volume, verbose):
+        instance = LocalMaxPeakFinder(min_distance, min_obj_area, max_obj_area,
+                                      stringency, threshold,
+                                      min_num_spots_detected, measurement_type, is_volume, verbose)
+        ctx.obj["component"]._cli_run(ctx, instance)

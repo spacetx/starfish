@@ -1,3 +1,4 @@
+import click
 import numpy as np
 
 from starfish.intensity_table.intensity_table import IntensityTable
@@ -68,3 +69,9 @@ class Label(TargetAssignmentAlgorithm):
 
         """
         return self._assign(label_image, intensity_table, in_place=in_place)
+
+    @staticmethod
+    @click.command("Label")
+    @click.pass_context
+    def _cli(ctx):
+        ctx.obj["component"]._cli_run(ctx, Label())

@@ -64,7 +64,7 @@ class ImagingMassCytometryTileFetcher(TileFetcher):
         self.input_dir = input_dir
 
     @property
-    def _ch_dict(self):
+    def _ch_dict(self) -> Mapping[int, str]:
         channels = [
             "CD44(Gd160Di)",
             "CD68(Nd146Di)",

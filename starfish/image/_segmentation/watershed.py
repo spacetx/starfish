@@ -79,7 +79,7 @@ class Watershed(SegmentationAlgorithmBase):
         """
 
         # create a 'stain' for segmentation
-        stain = np.mean(primary_images.max_proj(Indices.CH, Indices.Z), axis=0)
+        stain = np.mean(primary_images.max_proj(Indices.CH, Indices.Z)._squeezed_numpy(), axis=0)
         stain = stain / stain.max()
 
         # TODO make these parameterizable or determine whether they are useful or not
@@ -87,7 +87,7 @@ class Watershed(SegmentationAlgorithmBase):
         disk_size_markers = None
         disk_size_mask = None
 
-        nuclei = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+        nuclei = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)._squeezed_numpy()
         self._segmentation_instance = _WatershedSegmenter(nuclei, stain)
         label_image = self._segmentation_instance.segment(
             self.nuclei_threshold, self.input_threshold, size_lim, disk_size_markers,

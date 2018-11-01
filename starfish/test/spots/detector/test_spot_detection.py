@@ -98,7 +98,7 @@ def test_spot_detection_with_reference_image(
 
     """
     reference_image = data_stack.max_proj(
-        Indices.CH, Indices.ROUND)
+        Indices.CH, Indices.ROUND)._squeezed_numpy()
 
     intensity_table = detect_spots(
         data_stack=data_stack,

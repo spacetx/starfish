@@ -77,7 +77,7 @@ datasets = [iss_intensity_table, merfish_intensity_table, dartfish_intensity_tab
 import starfish.data
 experiment = starfish.data.DARTFISH()
 
-dartfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+dartfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)._squeezed_numpy()
 dartfish_link = os.path.join(data_root, "dartfish_dots_image.npy")
 dartfish_npy = os.path.join(tmp, "dartfish.npy")
 curl(dartfish_npy, dartfish_link)
@@ -87,17 +87,17 @@ dartfish_dots = np.load(dartfish_npy)
 # EPY: START code
 experiment = starfish.data.ISS()
 
-iss_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
-iss_dots = experiment.fov()['dots'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+iss_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)._squeezed_numpy()
+iss_dots = experiment.fov()['dots'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)._squeezed_numpy()
 # EPY: END code
 
 # EPY: START code
 experiment = starfish.data.MERFISH()
-merfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+merfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)._squeezed_numpy()._squeezed_numpy()
 
 # merfish doesn't have a dots image, and some of the channels are stronger than others.
 # We can use the scale factors to get the right levels
-merfish_background = experiment.fov()[FieldOfView.PRIMARY_IMAGES].max_proj(Indices.CH, Indices.ROUND)
+merfish_background = experiment.fov()[FieldOfView.PRIMARY_IMAGES].max_proj(Indices.CH, Indices.ROUND)._squeezed_numpy()
 merfish_background = np.reshape(merfish_background, (1, 1, *merfish_background.shape))
 merfish_background = ImageStack.from_numpy_array(merfish_background)
 
@@ -105,7 +105,7 @@ from starfish.image import Filter
 clip = Filter.Clip(p_max=99.7)
 merfish_dots = clip.run(merfish_background)
 
-merfish_dots = merfish_dots.max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+merfish_dots = merfish_dots.max_proj(Indices.CH, Indices.ROUND, Indices.Z)._squeezed_numpy()
 # EPY: END code
 
 # EPY: START markdown

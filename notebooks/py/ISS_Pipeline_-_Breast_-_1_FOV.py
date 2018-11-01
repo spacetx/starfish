@@ -72,7 +72,7 @@ primary_image.xarray.shape
 # EPY: END markdown
 
 # EPY: START code
-image(dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z))
+image(dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)._squeezed_numpy())
 # EPY: END code
 
 # EPY: START markdown
@@ -80,7 +80,7 @@ image(dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END markdown
 
 # EPY: START code
-image(nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z))
+image(nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)._squeezed_numpy())
 # EPY: END code
 
 # EPY: START markdown
@@ -165,7 +165,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
 
     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    blobs_image = dots.max_proj(Indices.ROUND, Indices.Z)
+    blobs_image = dots.max_proj(Indices.ROUND, Indices.Z)._squeezed_numpy()
     intensities = p.run(registered_image, blobs_image=blobs_image)
 # EPY: END code
 
@@ -223,9 +223,9 @@ dapi_thresh = .16  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
 min_dist = 57
 
-stain = np.mean(registered_image.max_proj(Indices.CH, Indices.Z), axis=0)
+stain = np.mean(registered_image.max_proj(Indices.CH, Indices.Z)._squeezed_numpy(), axis=0)
 stain = stain/stain.max()
-nuclei_projection = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+nuclei_projection = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)._squeezed_numpy()
 
 seg = Segmentation.Watershed(
     nuclei_threshold=dapi_thresh,
@@ -249,8 +249,8 @@ GENE1 = 'HER2'
 GENE2 = 'VIM'
 
 rgb = np.zeros(registered_image.tile_shape + (3,))
-rgb[:,:,0] = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-rgb[:,:,1] = dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+rgb[:,:,0] = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)._squeezed_numpy()
+rgb[:,:,1] = dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)._squeezed_numpy()
 do = rgb2gray(rgb)
 do = do/(do.max())
 

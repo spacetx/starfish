@@ -171,7 +171,7 @@ def test_max_projection_preserves_dtype():
     image = ImageStack.from_numpy_array(array.reshape((1, 1, 2, 2, 2)))
 
     max_projection = image.max_proj(Indices.CH, Indices.ROUND, Indices.Z)
-    assert max_projection.dtype == original_dtype
+    assert max_projection.xarray.dtype == original_dtype
 
 
 def test_synthetic_spot_creation_raises_error_with_coords_too_small(synthetic_intensity_table):

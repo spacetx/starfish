@@ -69,8 +69,9 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
             image = deepcopy(image)
 
         # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in registration?
-        mp = image.max_proj(Indices.CH, Indices.Z)
-        reference_image = self.reference_stack.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+        mp = image.max_proj(Indices.CH, Indices.Z)._squeezed_numpy()
+        reference_image = self.reference_stack.max_proj(Indices.ROUND, Indices.CH, Indices.Z
+                                                        )._squeezed_numpy()
 
         for r in range(image.num_rounds):
             # compute shift between maximum projection (across channels) and dots, for each round

@@ -2,6 +2,8 @@ import argparse
 import os
 from typing import Type
 
+import numpy as np
+
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
@@ -75,7 +77,7 @@ class SpotFinder(PipelineComponent):
 
         if args.blobs_stack is not None:
             blobs_stack = ImageStack.from_path_or_url(args.blobs_stack)  # type: ignore
-            blobs_image = blobs_stack.max_proj(Indices.ROUND, Indices.CH)
+            blobs_image = blobs_stack.max_proj(Indices.ROUND, Indices.CH)._squeezed_numpy()
             intensities = instance.run(
                 image_stack,
                 blobs_image=blobs_image,

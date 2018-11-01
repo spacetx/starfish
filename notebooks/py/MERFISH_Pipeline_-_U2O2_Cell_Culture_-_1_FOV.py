@@ -241,7 +241,7 @@ with warnings.catch_warnings():
     show_image(np.squeeze(prop_results.decoded_image)*(mask > 2), cmap='nipy_spectral', ax=ax1)
     ax1.axes.set_axis_off()
 
-    mp = scaled_image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+    mp = scaled_image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)._squeezed_numpy()
     clim = scoreatpercentile(mp, [0.5, 99.5])
     show_image(mp, clim=clim, ax=ax2)
 

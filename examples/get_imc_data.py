@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Mapping, Tuple, Union
+from typing import List, Mapping, Tuple, Union
 
 import click
 import numpy as np
@@ -86,22 +86,22 @@ class ImagingMassCytometryTileFetcher(TileFetcher):
             "Vimentin(Dy162Di)",
             "b-catenin(Ho165Di)",
         ]
-        mapping = dict(zip(range(len(channels)), channels))
+        mapping = dict(enumerate(channels))
         return mapping
 
-    def ch_dict(self, item):
-        return self._ch_dict[item]
+    def ch_dict(self, ch: int) -> str:
+        return self._ch_dict[ch]
 
     @property
-    def _fov_map(self):
-        fov_names = [
+    def _fov_map(self) -> Mapping[int, str]:
+        fov_names: List[str] = [
             d for d in os.listdir(self.input_dir) if os.path.isdir(os.path.join(self.input_dir, d))
         ]
-        mapping = dict(zip(range(len(fov_names)), fov_names))
+        mapping = dict(enumerate(fov_names))
         return mapping
 
-    def fov_map(self, item):
-        return self._fov_map[item]
+    def fov_map(self, fov: int) -> str:
+        return self._fov_map[fov]
 
     def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
         fov_name = self.fov_map(fov)
@@ -109,7 +109,7 @@ class ImagingMassCytometryTileFetcher(TileFetcher):
         file_path = os.path.join(self.input_dir, fov_name, fov_name, basename)
         return ImagingMassCytometryTile(file_path)
 
-    def generate_codebook(self):
+    def generate_codebook(self) -> Mapping:
         mappings = []
         for idx, target in self._ch_dict.items():
             mappings.append({

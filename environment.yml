@@ -5,7 +5,6 @@ channels:
 - conda-forge
 dependencies:
 - python>=3.6
-- certifi==2018.8.24
 - click
 - flake8
 - jsonschema

@@ -33,7 +33,7 @@ lint-init:
 	flake8 --ignore 'E301, E302, E305, E401, F401, E731, F811' --filename='*__init__.py' $(MODULES)
 
 test:
-	pytest -v -n 8 --cov starfish --cov validate_sptx
+	pytest -v -n 8 --cov starfish --cov sptx_format
 
 mypy:
 	mypy --ignore-missing-imports $(MODULES)

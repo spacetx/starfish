@@ -3,8 +3,8 @@ import cProfile
 from pstats import Stats
 
 import click
-from sptx_format.cli import validate as validate_cli
 
+from sptx_format.cli import validate as validate_cli
 from starfish.experiment.builder.cli import build as build_cli
 from starfish.image import (
     Filter,

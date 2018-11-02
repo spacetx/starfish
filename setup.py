@@ -28,7 +28,6 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             "starfish=starfish.starfish:starfish",
-            "validate-sptx=sptx_format.validate_sptx:validate_sptx",
         ]
     },
     classifiers=CLASSIFIERS,

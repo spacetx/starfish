@@ -1,3 +1,3 @@
 include REQUIREMENTS.txt
-recursive-include validate_sptx/schema/ *.json
-recursive-include validate_sptx/examples/ *.json
+recursive-include sptx_format/schema/ *.json
+recursive-include sptx_format/examples/ *.json

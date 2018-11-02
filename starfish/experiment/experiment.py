@@ -213,7 +213,7 @@ class Experiment:
         extras = experiment_document['extras']
 
         fovs: MutableSequence[FieldOfView] = list()
-        fov_tilesets: MutableMapping[str, TileSet] = dict()
+        fov_tilesets: MutableMapping[str, TileSet]
         if version < Version("5.0.0"):
             primary_image: Collection = Reader.parse_doc(experiment_document['primary_images'],
                                                          baseurl)
@@ -222,6 +222,7 @@ class Experiment:
                 auxiliary_images[aux_image_type] = Reader.parse_doc(aux_image_url, baseurl)
 
             for fov_name, primary_tileset in primary_image.all_tilesets():
+                fov_tilesets = dict()
                 fov_tilesets[FieldOfView.PRIMARY_IMAGES] = primary_tileset
                 for aux_image_type, aux_image_collection in auxiliary_images.items():
                     aux_image_tileset = aux_image_collection.find_tileset(fov_name)
@@ -240,6 +241,7 @@ class Experiment:
                     all_fov_names.add(fov_name)
 
             for fov_name in all_fov_names:
+                fov_tilesets = dict()
                 for image_type, image_collection in images.items():
                     image_tileset = image_collection.find_tileset(fov_name)
                     if image_tileset is not None:

@@ -80,10 +80,10 @@ def tile_fetcher_factory(
     `fetched_tile_constructor_args` and keyword arguments from `fetched_tile_constructor_kwargs`.
     """
     class ResultingClass(TileFetcher):
-        def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+        def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
             args = list()
             if pass_tile_indices:
-                args.extend([fov, hyb, ch, z])
+                args.extend([fov, r, ch, z])
             args.extend(fetched_tile_constructor_args)
 
             return fetched_tile_cls(*args, **fetched_tile_constructor_kwargs)

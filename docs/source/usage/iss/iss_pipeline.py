@@ -9,7 +9,7 @@ test = os.getenv("TESTING") is not None
 
 
 def iss_pipeline(fov, codebook):
-    primary_image = fov.primary_image
+    primary_image = fov[starfish.FieldOfView.PRIMARY_IMAGES]
 
     # register the raw images
     registration = Registration.FourierShiftRegistration(
@@ -39,17 +39,17 @@ def iss_pipeline(fov, codebook):
 
     # segment cells
     seg = Segmentation.Watershed(
-        dapi_threshold=.16,
+        nuclei_threshold=.16,
         input_threshold=.22,
         min_distance=57,
     )
-    regions = seg.run(primary_image, fov['nuclei'])
+    label_image = seg.run(primary_image, fov['nuclei'])
 
     # assign spots to cells
-    ta = TargetAssignment.PointInPoly2D()
-    assigned = ta.run(decoded, regions)
+    ta = TargetAssignment.Label()
+    assigned = ta.run(label_image, decoded)
 
-    return assigned, regions
+    return assigned, label_image
 
 
 # process all the fields of view, not just one
@@ -68,7 +68,12 @@ def process_experiment(experiment: starfish.Experiment):
 
 # run the script
 if test:
-    exp = starfish.Experiment.from_json("https://dmf0bdeheu4zf.cloudfront.net/browse/formatted/20180926/iss_breast/experiment.json", True)
+    # TODO: (ttung) Pending a fix for https://github.com/spacetx/starfish/issues/700, it's not
+    # possible to validate the schema for this experiment.
+    exp = starfish.Experiment.from_json(
+        "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20180926/iss_breast/experiment.json",
+        False,
+    )
 else:
     exp = starfish.Experiment.from_json("iss/formatted/experiment.json")
 decoded_intensities, regions = process_experiment(exp)

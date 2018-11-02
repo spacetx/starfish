@@ -1,4 +1,5 @@
 import argparse
+import functools
 import os
 from typing import IO, Mapping, Tuple, Union
 
@@ -13,8 +14,16 @@ from starfish.util.argparse import FsExistsType
 SHAPE = 2048, 2048
 
 
+# We use this to cache images across tiles.  In the case of the merfish data set, FOVs are saved
+# together in a single file.  To avoid reopening and decoding the TIFF file, we use a single-element
+# cache that maps between file_path and the decoded multipage TIFF.
+@functools.lru_cache(maxsize=1)
+def cached_read_fn(file_path):
+    return imread(file_path)
+
+
 class MERFISHTile(FetchedTile):
-    def __init__(self, file_path, hyb, ch):
+    def __init__(self, file_path, r, ch):
         self.file_path = file_path
         # how to index tiles from indices into multi-page tiff
         # key is a tuple of round, chan. val is the index
@@ -34,7 +43,7 @@ class MERFISHTile(FetchedTile):
                     (6, 1): 13,
                     (7, 0): 15,
                     (7, 1): 14}
-        self.hyb = hyb
+        self.r = r
         self.ch = ch
 
     @property
@@ -55,8 +64,7 @@ class MERFISHTile(FetchedTile):
         return ImageFormat.TIFF
 
     def tile_data(self) -> IO:
-        im = imread(self.file_path)
-        return im[self.map[(self.hyb, self.ch)], :, :]
+        return cached_read_fn(self.file_path)[self.map[(self.r, self.ch)], :, :]
 
 
 class MERFISHAuxTile(FetchedTile):
@@ -69,11 +77,20 @@ class MERFISHAuxTile(FetchedTile):
         return SHAPE
 
     @property
+    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+        # FIXME: (dganguli) please provide proper coordinates here.
+        return {
+            Coordinates.X: (0.0, 0.0001),
+            Coordinates.Y: (0.0, 0.0001),
+            Coordinates.Z: (0.0, 0.0001),
+        }
+
+    @property
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
     def tile_data(self) -> np.ndarray:
-        return imread(self.file_path)[self.dapi_index, :, :]
+        return cached_read_fn(self.file_path)[self.dapi_index, :, :]
 
 
 class MERFISHTileFetcher(TileFetcher):
@@ -81,13 +98,13 @@ class MERFISHTileFetcher(TileFetcher):
         self.input_dir = input_dir
         self.is_dapi = is_dapi
 
-    def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
+    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
         filename = os.path.join(self.input_dir, 'fov_{}.tif'.format(fov))
         file_path = os.path.join(self.input_dir, filename)
         if self.is_dapi:
             return MERFISHAuxTile(file_path)
         else:
-            return MERFISHTile(file_path, hyb, ch)
+            return MERFISHTile(file_path, r, ch)
 
 
 def format_data(input_dir, output_dir):

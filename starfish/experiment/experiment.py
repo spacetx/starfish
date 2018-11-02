@@ -1,15 +1,26 @@
 import json
 import os
-from typing import Callable, MutableMapping, MutableSequence, Optional, Sequence, Set, Union
+from typing import (
+    Callable,
+    Dict,
+    MutableMapping,
+    MutableSequence,
+    MutableSet,
+    Optional,
+    Sequence,
+    Set,
+    Union,
+)
 
 from semantic_version import Version
 from slicedimage import Collection, TileSet
 from slicedimage.io import Reader, resolve_path_or_url, resolve_url
 from slicedimage.urlpath import pathjoin
+from sptx_format import validate_sptx
 
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
-from validate_sptx import validate_sptx
+from starfish.util.config import Config
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
 
@@ -18,26 +29,24 @@ class FieldOfView:
     This encapsulates a field of view.  It contains the primary image and auxiliary images that are
     associated with the field of view.
 
-    Auxiliary images can be accessed using a key, i.e., FOV[aux_image_type].
+    All images can be accessed using a key, i.e., FOV[aux_image_type].  The primary image is
+    accessed using the key :py:attr:`starfish.experiment.experiment.FieldOFView.PRIMARY_IMAGES`.
 
     Attributes
     ----------
     name : str
-        The name of the FOV.  In an experiment with only a single FOV, this may be None.
-    primary_image : ImageStack
-        The primary image for this field of view. Calling this property will load the data into
-        memory
-    auxiliary_image_types : Mapping[str, TileSet]
-        A set of all the auxiliary image types.
-
+        The name of the FOV.
+    image_types : Set[str]
+        A set of all the image types.
     """
+
+    PRIMARY_IMAGES = 'primary'
+
     def __init__(
             self,
             name: str,
-            primary_image: Optional[ImageStack]=None,
-            auxiliary_images: Optional[MutableMapping[str, ImageStack]]=None,
-            primary_image_tileset: Optional[TileSet]=None,
-            auxiliary_image_tilesets: Optional[MutableMapping[str, TileSet]]=None,
+            images: Optional[MutableMapping[str, ImageStack]]=None,
+            image_tilesets: Optional[MutableMapping[str, TileSet]]=None,
     ) -> None:
         """
         Fields of views can obtain their primary image from either an ImageStack or a TileSet (but
@@ -50,34 +59,28 @@ class FieldOfView:
         accessed.
         """
         self._name = name
-        self._primary_image: Union[ImageStack, TileSet]
-        self._auxiliary_images: MutableMapping[str, Union[ImageStack, TileSet]]
-        if primary_image is not None:
-            self._primary_image = primary_image
-            if primary_image_tileset is not None:
+        self._images: MutableMapping[str, Union[ImageStack, TileSet]]
+        if images is not None:
+            self._images = images
+            if image_tilesets is not None:
                 raise ValueError(
-                    "Only one of (primary_image, primary_image_tileset) should be set.")
-        elif primary_image_tileset is not None:
-            self._primary_image = primary_image_tileset
+                    "Only one of (images, image_tilesets) should be set.")
+        elif image_tilesets is not None:
+            self._images = image_tilesets
         else:
-            raise ValueError("Field of view must have a primary image")
-        if auxiliary_images is not None:
-            self._auxiliary_images = auxiliary_images
-            if auxiliary_image_tilesets is not None:
-                raise ValueError(
-                    "Only one of (auxiliary_images, auxiliary_image_tilesets) should be set.")
-        elif auxiliary_image_tilesets is not None:
-            self._auxiliary_images = auxiliary_image_tilesets
-        else:
-            self._auxiliary_images = dict()
+            self._images = dict()
 
     def __repr__(self):
-        auxiliary_images = '\n    '.join(f'{k}: {v}' for k, v in self._auxiliary_images.items())
+        images = '\n    '.join(
+            f'{k}: {v}'
+            for k, v in self._images.items()
+            if k != FieldOfView.PRIMARY_IMAGES
+        )
         return (
             f"<starfish.FieldOfView>\n"
-            f"  Primary Image: {self._primary_image}\n"
+            f"  Primary Image: {self._images[FieldOfView.PRIMARY_IMAGES]}\n"
             f"  Auxiliary Images:\n"
-            f"    {auxiliary_images}"
+            f"    {images}"
         )
 
     @property
@@ -85,19 +88,13 @@ class FieldOfView:
         return self._name
 
     @property
-    def primary_image(self) -> ImageStack:
-        if isinstance(self._primary_image, TileSet):
-            self._primary_image = ImageStack(self._primary_image)
-        return self._primary_image
-
-    @property
-    def auxiliary_image_types(self) -> Set[str]:
-        return set(self._auxiliary_images.keys())
+    def image_types(self) -> Set[str]:
+        return set(self._images.keys())
 
     def __getitem__(self, item) -> ImageStack:
-        if isinstance(self._auxiliary_images[item], TileSet):
-            self._auxiliary_images[item] = ImageStack(self._auxiliary_images[item])
-        return self._auxiliary_images[item]
+        if isinstance(self._images[item], TileSet):
+            self._images[item] = ImageStack(self._images[item])
+        return self._images[item]
 
 
 class Experiment:
@@ -160,7 +157,10 @@ class Experiment:
         return object_repr + fov_repr
 
     @classmethod
-    def from_json(cls, json_url: str, strict: bool=None) -> "Experiment":
+    def from_json(cls,
+                  json_url: str,
+                  strict: bool=None,
+                  config: Optional[Union[str, Dict]]=None) -> "Experiment":
         """
         Construct an `Experiment` from an experiment.json file format specifier
 
@@ -171,6 +171,13 @@ class Experiment:
         strict : bool
             if true, then all JSON loaded by this method will be
             passed to the appropriate validator
+        config : str or dict
+            configuration property that will be passed to
+            starfish.util.config.Config
+        STARISH_CONFIG :
+            This parameter is read from the environment to permit setting configuration
+            values either directly or via a file. Keys read include:
+             - cache.allow_caching
         STARFISH_STRICT_LOADING :
              This parameter is read from the environment. If set, then all JSON loaded by this
              method will be passed to the appropriate validator. The `strict` parameter to this
@@ -189,48 +196,69 @@ class Experiment:
             if not valid:
                 raise Exception("validation failed")
 
-        backend, name, baseurl = resolve_path_or_url(json_url)
+        config_obj = Config(config)  # STARFISH_CONFIG is assumed
+        allow_caching = config_obj.lookup(["cache", "allow_caching"], True)
+
+        backend, name, baseurl = resolve_path_or_url(json_url, allow_caching)
         with backend.read_contextmanager(name) as fh:
             experiment_document = json.load(fh)
 
-        cls.verify_version(experiment_document['version'])
+        version = cls.verify_version(experiment_document['version'])
 
-        _, codebook_name, codebook_baseurl = resolve_url(experiment_document['codebook'], baseurl)
+        _, codebook_name, codebook_baseurl = resolve_url(experiment_document['codebook'],
+                                                         baseurl, allow_caching)
         codebook_absolute_url = pathjoin(codebook_baseurl, codebook_name)
         codebook = Codebook.from_json(codebook_absolute_url)
 
         extras = experiment_document['extras']
 
-        primary_image: Collection = Reader.parse_doc(experiment_document['primary_images'], baseurl)
-        auxiliary_images: MutableMapping[str, Collection] = dict()
-        for aux_image_type, aux_image_url in experiment_document['auxiliary_images'].items():
-            auxiliary_images[aux_image_type] = Reader.parse_doc(aux_image_url, baseurl)
-
         fovs: MutableSequence[FieldOfView] = list()
-        for fov_name, primary_tileset in primary_image.all_tilesets():
-            aux_image_tilesets_for_fov: MutableMapping[str, TileSet] = dict()
-            for aux_image_type, aux_image_collection in auxiliary_images.items():
-                aux_image_tileset = aux_image_collection.find_tileset(fov_name)
-                if aux_image_tileset is not None:
-                    aux_image_tilesets_for_fov[aux_image_type] = aux_image_tileset
+        fov_tilesets: MutableMapping[str, TileSet] = dict()
+        if version < Version("5.0.0"):
+            primary_image: Collection = Reader.parse_doc(experiment_document['primary_images'],
+                                                         baseurl)
+            auxiliary_images: MutableMapping[str, Collection] = dict()
+            for aux_image_type, aux_image_url in experiment_document['auxiliary_images'].items():
+                auxiliary_images[aux_image_type] = Reader.parse_doc(aux_image_url, baseurl)
 
-            fov = FieldOfView(
-                fov_name,
-                primary_image_tileset=primary_tileset,
-                auxiliary_image_tilesets=aux_image_tilesets_for_fov,
-            )
-            fovs.append(fov)
+            for fov_name, primary_tileset in primary_image.all_tilesets():
+                fov_tilesets[FieldOfView.PRIMARY_IMAGES] = primary_tileset
+                for aux_image_type, aux_image_collection in auxiliary_images.items():
+                    aux_image_tileset = aux_image_collection.find_tileset(fov_name)
+                    if aux_image_tileset is not None:
+                        fov_tilesets[aux_image_type] = aux_image_tileset
+
+                fov = FieldOfView(fov_name, image_tilesets=fov_tilesets)
+                fovs.append(fov)
+        else:
+            images: MutableMapping[str, Collection] = dict()
+            all_fov_names: MutableSet[str] = set()
+            for image_type, image_url in experiment_document['images'].items():
+                image = Reader.parse_doc(image_url, baseurl)
+                images[image_type] = image
+                for fov_name, _ in image.all_tilesets():
+                    all_fov_names.add(fov_name)
+
+            for fov_name in all_fov_names:
+                for image_type, image_collection in images.items():
+                    image_tileset = image_collection.find_tileset(fov_name)
+                    if image_tileset is not None:
+                        fov_tilesets[image_type] = image_tileset
+
+                fov = FieldOfView(fov_name, image_tilesets=fov_tilesets)
+                fovs.append(fov)
 
         return Experiment(fovs, codebook, extras, src_doc=experiment_document)
 
     @classmethod
-    def verify_version(cls, semantic_version_str: str) -> None:
+    def verify_version(cls, semantic_version_str: str) -> Version:
         version = Version(semantic_version_str)
         if not (MIN_SUPPORTED_VERSION <= version <= MAX_SUPPORTED_VERSION):
             raise ValueError(
                 f"version {version} not supported.  This version of the starfish library only "
                 f"supports formats from {MIN_SUPPORTED_VERSION} to "
                 f"{MAX_SUPPORTED_VERSION}")
+        return version
 
     def fov(
             self,

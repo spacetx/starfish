@@ -178,7 +178,7 @@ def detect_spots(
         additional keyword arguments to pass to spot_finding_method
     reference_image : xr.DataArray
         (Optional) a reference image. If provided, spots will be found in this image, and then
-        the locations that correspond to these spots will be measured across each channel and hyb,
+        the locations that correspond to these spots will be measured across each channel and round,
         filling in the values in the IntensityTable
     reference_image_from_max_projection : Tuple[Indices]
         (Optional) if True, create a reference image by max-projecting the channels and imaging
@@ -191,7 +191,8 @@ def detect_spots(
         In this case, the spot's bounding box is rounded up instead of down when measuring
         intensity. (default False)
     is_volume: bool
-        (default True) If True, pass 3d volumes (x, y, z) to func, else pass 2d tiles (x, y) to func
+        If True, pass 3d volumes (x, y, z) to func, else pass 2d tiles (x, y) to func. (default
+        True)
 
     Notes
     -----
@@ -221,9 +222,9 @@ def detect_spots(
         reference_image = data_stack.max_proj(Indices.CH, Indices.ROUND)
 
     if is_volume:
-        split_by = {Indices.Z.value, Indices.Y.value, Indices.X.value}
+        group_by = {Indices.ROUND, Indices.CH}
     else:
-        split_by = {Indices.Y.value, Indices.X.value}
+        group_by = {Indices.ROUND, Indices.CH, Indices.Z}
 
     if reference_image is not None:
         reference_spot_locations = spot_finding_method(reference_image, **spot_finding_kwargs)
@@ -237,7 +238,7 @@ def detect_spots(
         spot_finding_method = partial(spot_finding_method, **spot_finding_kwargs)
         spot_attributes_list = data_stack.transform(
             func=spot_finding_method,
-            split_by=split_by
+            group_by=group_by
         )
         intensity_table = concatenate_spot_attributes_to_intensities(spot_attributes_list)
 

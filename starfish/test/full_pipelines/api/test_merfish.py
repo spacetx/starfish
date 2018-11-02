@@ -220,7 +220,7 @@ def test_merfish_pipeline_cropped_data():
     assert spots_passing_filters == 1410
 
     # compare to paper results
-    bench = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/benchmark_results.csv',
+    bench = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/MERFISH/benchmark_results.csv',
                         dtype={'barcode': object})
     benchmark_counts = bench.groupby('gene')['gene'].count()
 

@@ -37,7 +37,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
             [
                 sys.executable,
                 "examples/get_cli_test_data.py",
-                "https://dmf0bdeheu4zf.cloudfront.net/20180926/ISS-TEST/",
+                "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS-TEST/",
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted")
             ],
             [
@@ -94,27 +94,27 @@ class TestWithIssData(CLITest, unittest.TestCase):
             ],
             [
                 "starfish", "segment",
-                "--hybridization-stack", lambda tempdir, *args, **kwargs: os.path.join(
+                "--primary-images", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "hybridization.json"),
-                "--nuclei-stack", lambda tempdir, *args, **kwargs: os.path.join(
+                "--nuclei", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "nuclei.json"),
                 "-o", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "regions.geojson"),
+                    tempdir, "results", "label_image.png"),
                 "Watershed",
-                "--dapi-threshold", ".16",
+                "--nuclei-threshold", ".16",
                 "--input-threshold", ".22",
                 "--min-distance", "57",
             ],
             [
                 "starfish", "target_assignment",
-                "--coordinates-geojson",
+                "--label-image",
                 lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "regions.geojson"),
+                    tempdir, "results", "label_image.png"),
                 "--intensities", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "spots.nc"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "targeted-spots.nc"),
-                "PointInPoly2D",
+                "Label",
             ],
             [
                 "starfish", "decode",

@@ -1,11 +1,12 @@
 from typing import Optional
 
+import click
 import numpy as np
 from skimage.morphology import ball, disk, white_tophat
 
 from starfish.imagestack.imagestack import ImageStack
 from ._base import FilterAlgorithmBase
-from .util import determine_axes_to_split_by
+from .util import determine_axes_to_group_by
 
 
 class WhiteTophat(FilterAlgorithmBase):
@@ -18,7 +19,7 @@ class WhiteTophat(FilterAlgorithmBase):
     https://en.wikipedia.org/wiki/Top-hat_transform
     """
 
-    def __init__(self, masking_radius: int, is_volume: bool=False, **kwargs) -> None:
+    def __init__(self, masking_radius: int, is_volume: bool=False) -> None:
         """
         Instance of a white top hat morphological masking filter which masks objects larger
         than `masking_radius`
@@ -36,12 +37,6 @@ class WhiteTophat(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     _DEFAULT_TESTING_PARAMETERS = {"masking_radius": 3}
-
-    @classmethod
-    def _add_arguments(cls, group_parser) -> None:
-        group_parser.add_argument(
-            "--masking-radius", default=15, type=int,
-            help="diameter of morphological masking disk in pixels")
 
     def _white_tophat(self, image: np.ndarray) -> np.ndarray:
         if self.is_volume:
@@ -74,9 +69,20 @@ class WhiteTophat(FilterAlgorithmBase):
             original stack.
 
         """
-        split_by = determine_axes_to_split_by(self.is_volume)
+        group_by = determine_axes_to_group_by(self.is_volume)
         result = stack.apply(
             self._white_tophat,
-            split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
+
+    @staticmethod
+    @click.command("WhiteTophat")
+    @click.option(
+        "--masking-radius", default=15, type=int,
+        help="diameter of morphological masking disk in pixels")
+    @click.option(  # FIXME: was this intentionally missed?
+        "--is-volume", is_flag=True, help="filter 3D volumes")
+    @click.pass_context
+    def _cli(ctx, masking_radius, is_volume):
+        ctx.obj["component"]._cli_run(ctx, WhiteTophat(masking_radius, is_volume))

@@ -1,5 +1,6 @@
 from typing import Tuple
 
+import click
 import numpy as np
 
 from starfish.codebook.codebook import Codebook
@@ -13,7 +14,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
     def __init__(
             self, codebook: Codebook, metric: str, distance_threshold: float,
             magnitude_threshold: int, min_area: int, max_area: int, norm_order: int=2,
-            crop_x: int=0, crop_y: int=0, crop_z: int=0, **kwargs) -> None:
+            crop_x: int=0, crop_y: int=0, crop_z: int=0) -> None:
         """Decode an image by first coding each pixel, then combining the results into spots
 
         Parameters
@@ -86,30 +87,47 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
 
         return decoded_spots, image_decoding_results
 
-    @classmethod
-    def _add_arguments(cls, group_parser):
-        group_parser.add_argument("--metric", type=str, default='euclidean')
-        group_parser.add_argument(
-            "--distance-threshold", type=float, default=0.5176,
-            help="maximum distance a pixel may be from a codeword before it is filtered"
+    @staticmethod
+    @click.command("PixelSpotDetector")
+    @click.option("--metric", type=str, default='euclidean')
+    @click.option(
+        "--distance-threshold", type=float, default=0.5176,
+        help="maximum distance a pixel may be from a codeword before it is filtered"
+    )
+    @click.option(
+        "--magnitude-threshold", type=float, default=1,
+        help="minimum magnitude of a feature"
+    )
+    @click.option(
+        "--min-area", type=int, default=2,
+        help="minimum area of a feature"
+    )
+    @click.option(
+        "--max-area", type=int, default=np.inf,
+        help="maximum area of a feature"
+    )
+    @click.option(
+        "--norm-order", type=int, default=2,
+        help="order of L_p norm to apply to intensities "
+        "and codes when using metric_decode to pair each intensities to its closest target"
+    )
+    @click.option('--crop-x', type=int, default=0)
+    @click.option('--crop-y', type=int, default=0)
+    @click.option('--crop-z', type=int, default=0)
+    @click.pass_context
+    def _cli(ctx, metric, distance_threshold, magnitude_threshold,
+             min_area, max_area, norm_order, crop_x, crop_y, crop_z):
+        codebook = ctx.obj["codebook"]
+        instance = PixelSpotDetector(
+            codebook=codebook,
+            metric=metric,
+            distance_threshold=distance_threshold,
+            magnitude_threshold=magnitude_threshold,
+            min_area=min_area,
+            max_area=max_area,
+            norm_order=norm_order,
+            crop_x=crop_x,
+            crop_y=crop_y,
+            crop_z=crop_z
         )
-        group_parser.add_argument(
-            "--magnitude-threshold", type=float, default=1,
-            help="minimum magnitude of a feature"
-        )
-        group_parser.add_argument(
-            "--min-area", type=int, default=2,
-            help="minimum area of a feature"
-        )
-        group_parser.add_argument(
-            "--max-area", type=int, default=np.inf,
-            help="maximum area of a feature"
-        )
-        group_parser.add_argument(
-            "--norm-order", type=int, default=2,
-            help="order of L_p norm to apply to intensities "
-            "and codes when using metric_decode to pair each intensities to its closest target"
-        )
-        group_parser.add_argument('--crop-x', type=int, default=0)
-        group_parser.add_argument('--crop-y', type=int, default=0)
-        group_parser.add_argument('--crop-z', type=int, default=0)
+        ctx.obj["component"]._cli_run(ctx, instance)

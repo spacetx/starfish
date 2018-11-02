@@ -1,7 +1,7 @@
-import argparse
 from functools import partial
 from typing import Optional
 
+import click
 import numpy as np
 from scipy.signal import convolve, fftconvolve
 
@@ -14,7 +14,7 @@ from .util import gaussian_kernel, preserve_float_range
 class DeconvolvePSF(FilterAlgorithmBase):
 
     def __init__(
-            self, num_iter: int, sigma: Number, clip: bool=True, **kwargs) -> None:
+            self, num_iter: int, sigma: Number, clip: bool=True) -> None:
         """Deconvolve a point spread function
 
         Parameters
@@ -39,16 +39,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
         )
 
     _DEFAULT_TESTING_PARAMETERS = {"num_iter": 1, "sigma": 1}
-
-    @classmethod
-    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
-        group_parser.add_argument(
-            '--num-iter', type=int, help='number of iterations to run')
-        group_parser.add_argument(
-            '--sigma', type=float, help='standard deviation of gaussian kernel')
-        group_parser.add_argument(
-            '--no-clip', action='store_false',
-            help='(default True) if True, clip values below 0 and above 1')
 
     # Here be dragons. This algorithm had a bug, but the results looked nice. Now we've "fixed" it
     # and the results look bad. #548 addresses this problem.
@@ -168,7 +158,22 @@ class DeconvolvePSF(FilterAlgorithmBase):
         )
         result = stack.apply(
             func,
-            split_by={Indices.Y.value, Indices.X.value}, verbose=verbose, n_processes=n_processes,
-            in_place=in_place
+            group_by={Indices.ROUND, Indices.CH, Indices.Z},
+            verbose=verbose,
+            n_processes=n_processes,
+            in_place=in_place,
         )
         return result
+
+    @staticmethod
+    @click.command("DeconvolvePSF")
+    @click.option(
+        '--num-iter', type=int, help='number of iterations to run')
+    @click.option(
+        '--sigma', type=float, help='standard deviation of gaussian kernel')
+    @click.option(
+        '--no-clip', is_flag=True,
+        help='(default True) if True, clip values below 0 and above 1')
+    @click.pass_context
+    def _cli(ctx, num_iter, sigma, no_clip):
+        ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, no_clip))

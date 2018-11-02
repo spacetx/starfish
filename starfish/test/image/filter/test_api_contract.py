@@ -39,8 +39,8 @@ def test_all_methods_adhere_to_contract(filter_class):
 
     default_kwargs = filter_class._DEFAULT_TESTING_PARAMETERS
 
-    # accept boolean is_volume
-    instance = filter_class(is_volume=True, **default_kwargs)
+    # TODO ambrosejcarr: all filters should accept boolean is_volume
+    instance = filter_class(**default_kwargs)
 
     # TODO ambrosejcarr: all methods should process 3d data
     # # stores is_volume, and is_volume is a bool

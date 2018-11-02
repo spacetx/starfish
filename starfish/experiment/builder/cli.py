@@ -1,18 +1,20 @@
-import argparse
 import json
-from typing import MutableMapping
+
+import click
 
 from starfish.types import Indices
-from starfish.util.argparse import FsExistsType
 from . import AUX_IMAGE_NAMES, write_experiment_json
 
 
-class StarfishIndex:
-    def __call__(self, spec_json):
+class StarfishIndex(click.ParamType):
+
+    name = "starfish-index"
+
+    def convert(self, spec_json, param, ctx):
         try:
             spec = json.loads(spec_json)
         except json.decoder.JSONDecodeError:
-            raise argparse.ArgumentTypeError(
+            self.fail(
                 "Could not parse {} into a valid index specification.".format(spec_json))
 
         return {
@@ -21,54 +23,33 @@ class StarfishIndex:
             Indices.Z: spec.get(Indices.Z, 1),
         }
 
+def dimensions_option(name, required):
+    return click.option(
+        "--{}-dimensions".format(name),
+        type=StarfishIndex(), required=required,
+        help="Dimensions for the {} images.  Should be a json dict, with {}, {}, "
+             "and {} as the possible keys.  The value should be the shape along that "
+             "dimension.  If a key is not present, the value is assumed to be 0."
+             .format(
+             name,
+             Indices.ROUND.value,
+             Indices.CH.value,
+             Indices.Z.value))
 
-class Cli:
-    parser_group = None
+decorators = [
+    click.command(),
+    click.argument("output_dir", type=click.Path(exists=True, file_okay=False, writable=True)),
+    click.option("--fov-count", type=int, required=True, help="Number of FOVs in this experiment."),
+    dimensions_option("hybridization", True),
+]
+for image_name in AUX_IMAGE_NAMES:
+    decorators.append(dimensions_option(image_name, False))
 
-    """
-    Maps the name of an aux image to the name in the parsed arguments object.
-    """
-    name_arg_map: MutableMapping[str, str] = dict()
+def build(output_dir, fov_count, hybridization_dimensions, **kwargs):
+    write_experiment_json(
+        output_dir, fov_count, hybridization_dimensions,
+        kwargs
+    )
 
-    @staticmethod
-    def add_to_parser(parser):
-        parser.add_argument(
-            "output_dir",
-            type=FsExistsType())
-        parser.add_argument(
-            "--fov-count",
-            type=int,
-            required=True,
-            help="Number of FOVs in this experiment.")
-        parser.add_argument(
-            "--hybridization-dimensions",
-            type=StarfishIndex(),
-            required=True,
-            help="Dimensions for the hybridization images.  Should be a json dict, with {}, {}, "
-                 "and {} as the possible keys.  The value should be the shape along that "
-                 "dimension.  If a key is not present, the value is assumed to be 0.".format(
-                Indices.ROUND.value,
-                Indices.CH.value,
-                Indices.Z.value))
-        for aux_image_name in AUX_IMAGE_NAMES:
-            arg = parser.add_argument(
-                "--{}-dimensions".format(aux_image_name),
-                type=StarfishIndex(),
-                help="Dimensions for the {} images.  Should be a json dict, with {}, {}, and {} as "
-                     "the possible keys.  The value should be the shape along that dimension.  If "
-                     "a key is not present, the value is assumed to be 0.".format(
-                    aux_image_name, Indices.ROUND, Indices.CH, Indices.Z))
-            Cli.name_arg_map[aux_image_name] = arg.dest
-        parser.set_defaults(starfish_command=Cli.run)
-
-        Cli.parser_group = parser
-
-    @staticmethod
-    def run(args, print_help=False):
-        write_experiment_json(
-            args.output_dir, args.fov_count, args.hybridization_dimensions,
-            {
-                aux_image_name: getattr(args, Cli.name_arg_map[aux_image_name])
-                for aux_image_name in AUX_IMAGE_NAMES
-            }
-        )
+for decorator in reversed(decorators):
+    build = decorator(build)

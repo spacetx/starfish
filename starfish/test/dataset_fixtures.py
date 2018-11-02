@@ -123,7 +123,8 @@ def synthetic_dataset_with_truth_values_and_called_spots(
 
     wth = WhiteTophat(masking_radius=15)
     filtered = wth.run(image, in_place=False)
-    blobs_image = filtered.max_proj(Indices.CH, Indices.ROUND)._squeezed_numpy()
+    blobs_image = filtered.max_proj(Indices.CH, Indices.ROUND)
+    blobs_image = blobs_image._squeezed_numpy(Indices.CH, Indices.ROUND)
 
     min_sigma = 1.5
     max_sigma = 4

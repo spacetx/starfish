@@ -97,8 +97,8 @@ def test_spot_detection_with_reference_image(
     round. Thus, the total intensity across all channels and round for each spot should be 14.
 
     """
-    reference_image = data_stack.max_proj(
-        Indices.CH, Indices.ROUND)._squeezed_numpy()
+    reference_image = data_stack.max_proj(Indices.CH, Indices.ROUND)
+    reference_image = reference_image._squeezed_numpy(Indices.CH, Indices.ROUND)
 
     intensity_table = detect_spots(
         data_stack=data_stack,

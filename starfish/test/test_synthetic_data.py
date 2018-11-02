@@ -24,7 +24,8 @@ def test_round_trip_synthetic_data():
     codebook = sd.codebook()
     intensities = sd.intensities(codebook=codebook)
     spots = sd.spots(intensities=intensities)
-    blobs_image = spots.max_proj(Indices.CH, Indices.ROUND)._squeezed_numpy()
+    blobs_image = spots.max_proj(Indices.CH, Indices.ROUND)
+    blobs_image = blobs_image._squeezed_numpy(Indices.CH, Indices.ROUND)
     gsd = GaussianSpotDetector(
         min_sigma=1, max_sigma=4, num_sigma=5, threshold=0)
     calculated_intensities = gsd.run(spots, blobs_image=blobs_image)
@@ -87,7 +88,8 @@ def test_medium_synthetic_stack():
     valid_locations = valid_z & valid_y & valid_x
     intensities = intensities[np.where(valid_locations)]
     spots = sd.spots(intensities=intensities)
-    blobs_image = spots.max_proj(Indices.CH, Indices.ROUND)._squeezed_numpy()
+    blobs_image = spots.max_proj(Indices.CH, Indices.ROUND)
+    blobs_image = blobs_image._squeezed_numpy(Indices.CH, Indices.ROUND)
     gsd = GaussianSpotDetector(
         min_sigma=1, max_sigma=4, num_sigma=5, threshold=1e-4)
     calculated_intensities = gsd.run(spots, blobs_image=blobs_image)

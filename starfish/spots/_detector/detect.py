@@ -219,7 +219,8 @@ def detect_spots(
         )
 
     if reference_image_from_max_projection:
-        reference_image = data_stack.max_proj(Indices.CH, Indices.ROUND)._squeezed_numpy()
+        reference_image = data_stack.max_proj(Indices.CH, Indices.ROUND)
+        reference_image = reference_image._squeezed_numpy(Indices.CH, Indices.ROUND)
 
     if is_volume:
         group_by = {Indices.ROUND, Indices.CH}

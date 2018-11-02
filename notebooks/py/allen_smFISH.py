@@ -158,7 +158,8 @@ spot_attributes.groupby('c').apply(lambda x: np.sum(x > 0))
 # EPY: START code
 import starfish.plot
 
-projection = primary_image.max_proj(Indices.Z, Indices.ROUND)._squeezed_numpy()
+projection = primary_image.max_proj(Indices.Z, Indices.ROUND)
+projection = projection._squeezed_numpy(Indices.Z, Indices.ROUND)
 
 # make the radius bigger to be clearer
 decoded['radius'] *= 4

@@ -213,7 +213,7 @@ class Experiment:
         extras = experiment_document['extras']
 
         fovs: MutableSequence[FieldOfView] = list()
-        fov_tilesets: MutableMapping[str, TileSet] = dict()
+        fov_tilesets: MutableMapping[str, TileSet]
         if version < Version("5.0.0"):
             primary_image: Collection = Reader.parse_doc(experiment_document['primary_images'],
                                                          baseurl)

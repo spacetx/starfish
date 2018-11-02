@@ -1,4 +1,5 @@
 import click
+
 from sptx_format import validate_sptx
 
 

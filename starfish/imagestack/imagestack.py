@@ -998,22 +998,6 @@ class ImageStack:
         max_proj_stack = self.from_numpy_array(max_projection.values)
         return max_proj_stack
 
-    def old_max_proj(self, *dims: Indices) -> "ImageStack":
-        """return a max projection over one or more axis of the image tensor
-
-        Parameters
-        ----------
-        dims : Indices
-            one or more axes to project over
-
-        Returns
-        -------
-        np.ndarray :
-            max projection
-
-        """
-        return self._data.max([dim.value for dim in dims]).values
-
     def _squeezed_numpy(self, *dims: Indices):
         """return this ImageStack's data as a squeezed numpy array"""
         return xr.DataArray.squeeze(self.xarray,

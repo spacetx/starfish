@@ -77,7 +77,8 @@ class SpotFinder(PipelineComponent):
 
         if args.blobs_stack is not None:
             blobs_stack = ImageStack.from_path_or_url(args.blobs_stack)  # type: ignore
-            blobs_image = blobs_stack.old_max_proj(Indices.ROUND, Indices.CH)
+            blobs_image_max = blobs_stack.max_proj(Indices.ROUND, Indices.CH)
+            blobs_image = blobs_image_max._squeezed_numpy(Indices.ROUND, Indices.CH)
             intensities = instance.run(
                 image_stack,
                 blobs_image=blobs_image,

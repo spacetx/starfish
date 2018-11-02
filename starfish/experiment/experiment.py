@@ -240,7 +240,7 @@ class Experiment:
                     all_fov_names.add(fov_name)
 
             for fov_name in all_fov_names:
-                fov_tilesets: MutableMapping[str, TileSet] = dict()
+                fov_tilesets = dict()
                 for image_type, image_collection in images.items():
                     image_tileset = image_collection.find_tileset(fov_name)
                     if image_tileset is not None:

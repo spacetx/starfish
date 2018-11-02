@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Set, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -7,7 +7,7 @@ from skimage.morphology import binary_opening, disk
 from starfish.types import Indices, Number
 
 
-def bin_thresh(img: np.ndarray, thresh: int) -> np.ndarray:
+def bin_thresh(img: np.ndarray, thresh: Number) -> np.ndarray:
     """
     Performs binary thresholding of an image
 
@@ -133,25 +133,23 @@ def preserve_float_range(
 
     """
     array = array.copy()
-    is_xr = isinstance(array, xr.DataArray)
-    if np.any(array < 0):
-        if is_xr:
-            array.values[array.values < 0] = 0
-        else:
-            array[array < 0] = 0
+    if isinstance(array, xr.DataArray):
+        data = array.values
+    else:
+        data = array
+    if np.any(data < 0):
+        data[array < 0] = 0
     if np.any(array > 1):
         if rescale:
-            array /= array.max()
+            data /= data.max()
         else:
-            if is_xr:
-                array.values[array.values > 1] = 1
-            else:
-                array[array > 1] = 1
+            data[array > 1] = 1
     return array.astype(np.float32)
 
-def determine_axes_to_split_by(is_volume: bool):
-    """map is_volume to axes to split by when applying a function over an ImageStack"""
+
+def determine_axes_to_group_by(is_volume: bool) -> Set[Indices]:
+    """map is_volume to axes to group by when applying a function over an ImageStack"""
     if is_volume:
-        return {Indices.Z.value, Indices.Y.value, Indices.X.value}
+        return {Indices.ROUND, Indices.CH}
     else:
-        return {Indices.Y.value, Indices.X.value}
+        return {Indices.ROUND, Indices.CH, Indices.Z}

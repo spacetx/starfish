@@ -1,0 +1,11 @@
+{
+  "version": "5.0.0",
+  "images": {
+    "primary": "primary_images.json",
+    "nuclei": "nuclei.json"
+  },
+  "codebook": "codebook.json",
+  "extras": {
+    "is_space_tx_cool": true
+  }
+}

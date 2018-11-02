@@ -22,7 +22,7 @@ class TestAllenData(CLITest, unittest.TestCase):
             [
                 sys.executable,
                 "examples/get_cli_test_data.py",
-                "https://dmf0bdeheu4zf.cloudfront.net/20180828/" +
+                "https://d2nhj9g34unfro.cloudfront.net/20180828/" +
                 "allen_smFISH-TEST/allen_smFISH_test_data.zip",
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
             ],

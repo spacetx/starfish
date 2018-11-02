@@ -1,7 +1,7 @@
-import argparse
 from copy import deepcopy
 from typing import Optional
 
+import click
 import numpy as np
 from tqdm import tqdm
 
@@ -11,7 +11,7 @@ from ._base import FilterAlgorithmBase
 
 
 class ZeroByChannelMagnitude(FilterAlgorithmBase):
-    def __init__(self, thresh: int, normalize: bool, **kwargs) -> None:
+    def __init__(self, thresh: int, normalize: bool) -> None:
         """For assays in which we expect codewords to have explicit zero values,
         e.g., DARTFISH, SEQFISH, etc., this filter allows for the explicit zeroing
         out of pixels, for each round, where there is insufficient signal magnitude across channels.
@@ -30,15 +30,6 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         self.normalize = normalize
 
     _DEFAULT_TESTING_PARAMETERS = {"thresh": 0, "normalize": True}
-
-    @classmethod
-    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
-        group_parser.add_argument(
-            '--thresh', type=float,
-            help='minimum magnitude threshold for pixels across channels')
-        group_parser.add_argument(
-            '--normalize', action="store_true",
-            help='Scales all rounds to have unit L2 norm across channels')
 
     def run(
             self, stack: ImageStack,
@@ -94,3 +85,15 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                                                  where=magnitude_mask
                                                  )
         return stack
+
+    @staticmethod
+    @click.command("ZeroByChannelMagnitude")
+    @click.option(
+        '--thresh', type=float,
+        help='minimum magnitude threshold for pixels across channels')
+    @click.option(
+        '--normalize', is_flag=True,
+        help='Scales all rounds to have unit L2 norm across channels')
+    @click.pass_context
+    def _cli(ctx, thresh, normalize):
+        ctx.obj["component"]._cli_run(ctx, ZeroByChannelMagnitude(thresh, normalize))

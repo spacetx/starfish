@@ -2,10 +2,11 @@ import numpy as np
 import pytest
 
 import starfish.data
+from starfish import FieldOfView
 from starfish.image._filter.bandpass import Bandpass
 from starfish.image._filter.clip import Clip
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
-from starfish.spots._detector.local_max_peak_finder import LocalMaxPeakFinder
+from starfish.spots._detector.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
 
 
 @pytest.mark.skip('issues with checksums prevent this data from working properly')
@@ -17,7 +18,7 @@ def test_allen_smFISH_cropped_data():
     # load the experiment
     experiment = starfish.data.allen_smFISH(use_test_data=True)
 
-    primary_image = experiment.fov().primary_image
+    primary_image = experiment.fov()[FieldOfView.PRIMARY_IMAGES]
 
     clip = Clip(p_min=10, p_max=100)
     clipped_image = clip.run(primary_image, in_place=False)
@@ -32,7 +33,7 @@ def test_allen_smFISH_cropped_data():
     glp = GaussianLowPass(sigma=sigma, is_volume=True)
     z_filtered_image = glp.run(clipped_bandpassed_image, in_place=False)
 
-    lmpf = LocalMaxPeakFinder(
+    lmpf = TrackpyLocalMaxPeakFinder(
         spot_diameter=3,
         min_mass=300,
         max_size=3,

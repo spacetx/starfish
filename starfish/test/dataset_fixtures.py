@@ -9,7 +9,7 @@ from scipy.ndimage.filters import gaussian_filter
 from starfish.codebook.codebook import Codebook
 from starfish.image._filter.white_tophat import WhiteTophat
 from starfish.imagestack.imagestack import ImageStack
-from starfish.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.spots._detector.gaussian import GaussianSpotDetector
 from starfish.types import Features, Indices
 from starfish.util import synthesize
@@ -172,7 +172,7 @@ def synthetic_two_spot_3d():
 
 
 def synthetic_two_spot_3d_2round_2ch() -> ImageStack:
-    """produce a 2-channel 2-hyb ImageStack
+    """produce a 2-round 2-channel ImageStack
 
     Notes
     -----

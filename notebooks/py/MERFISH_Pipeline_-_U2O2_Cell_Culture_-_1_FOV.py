@@ -25,7 +25,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from showit import image as show_image
-from starfish import data
+from starfish import data, FieldOfView
 from starfish.types import Features, Indices
 # EPY: END code
 
@@ -40,7 +40,7 @@ experiment = data.MERFISH(use_test_data=use_test_data)
 # EPY: END markdown
 
 # EPY: START code
-primary_image = experiment.fov().primary_image
+primary_image = experiment.fov()[FieldOfView.PRIMARY_IMAGES]
 # EPY: END code
 
 # EPY: START code
@@ -173,6 +173,7 @@ for indices in primary_image._iter_indices():
 # EPY: END markdown
 
 # EPY: START code
+# TODO this crop should be (x, y) = (40, 40) but it was getting eaten by kwargs
 from starfish.spots import SpotFinder
 psd = SpotFinder.PixelSpotDetector(
     codebook=experiment.codebook,
@@ -182,7 +183,9 @@ psd = SpotFinder.PixelSpotDetector(
     min_area=2,
     max_area=np.inf,
     norm_order=2,
-    crop_size=(0, 40, 40)
+    crop_z=0,
+    crop_y=0,
+    crop_x=0
 )
 
 initial_spot_intensities, prop_results = psd.run(scaled_image)
@@ -199,7 +202,7 @@ spot_intensities = initial_spot_intensities.loc[initial_spot_intensities[Feature
 # EPY: END markdown
 
 # EPY: START code
-bench = pd.read_csv('https://dmf0bdeheu4zf.cloudfront.net/MERFISH/benchmark_results.csv',
+bench = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/MERFISH/benchmark_results.csv',
                     dtype = {'barcode':object})
 
 benchmark_counts = bench.groupby('gene')['gene'].count()

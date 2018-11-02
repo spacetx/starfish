@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from starfish.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.util import exec
 
 

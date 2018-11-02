@@ -1,0 +1,54 @@
+{
+  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/experiment.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "An image-based transcriptomics or proteomics experiment.",
+  "required": [
+    "version",
+    "codebook",
+    "images"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "$ref": "schema/version.json"
+    },
+    "codebook": {
+      "type": "string",
+      "description": "Json file mapping targets the their expected values across imaging channels and rounds.",
+      "example": "codebook.json",
+      "pattern": "^.*?.json$"
+    },
+    "images": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Images of non-target data such as nuclei or morphological structures.",
+      "properties": {
+        "primary": {
+          "type": "string",
+          "description": "An fov_manifest containing primary images.",
+          "example": "primary_images.json",
+          "pattern": "^.*?.json$"
+        },
+        "nuclei": {
+          "type": "string",
+          "description": "An fov_manifest containing nuclei images.",
+          "example": "nuclei.json",
+          "pattern": "^.*?.json$"
+        },
+        "dots": {
+          "type": "string",
+          "description": "An fov_manifest containing images of all spot locations per field of view. Used for spot finding.",
+          "example": "dots.json",
+          "pattern": "^.*?.json$"
+        }
+      },
+      "required": [
+        "primary"
+      ]
+    },
+    "extras": {
+      "$ref": "schema/extras.json"
+    }
+  }
+}

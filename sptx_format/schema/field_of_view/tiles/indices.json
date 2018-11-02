@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/field_of_view/tiles/indices.json",
+  "type": "object",
+  "description": "Describes the categorical indices (channel, round, and z-section) of this tile.",
+  "required": "c",
+  "additionalProperties": false,
+  "properties": {
+    "r": {
+      "type": "integer",
+      "description": "The imaging round of this tile.",
+      "default": 0,
+      "examples": [
+        0, 3, 10
+      ],
+      "minimum": 0
+    },
+    "c": {
+      "type": "integer",
+      "title": "The channel of this tile.",
+      "examples": [
+        0, 2, 5
+      ],
+      "minimum": 0
+    },
+    "z": {
+      "type": "integer",
+      "title": "The relative z-index in pixel space of this tile.",
+      "minimum": 0,
+      "examples": [
+        0, 3, 7
+      ]
+    }
+  }
+}

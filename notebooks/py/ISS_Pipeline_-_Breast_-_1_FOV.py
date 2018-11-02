@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 from showit import image
 import pprint
 
-from starfish import data
+from starfish import data, FieldOfView
 from starfish.types import Features, Indices
 # EPY: END code
 
@@ -52,7 +52,7 @@ pp.pprint(experiment._src_doc)
 
 # EPY: START code
 fov = experiment.fov()
-primary_image = fov.primary_image
+primary_image = fov[FieldOfView.PRIMARY_IMAGES]
 dots = fov['dots']
 nuclei = fov['nuclei']
 images = [primary_image, nuclei, dots]
@@ -228,11 +228,11 @@ stain = stain/stain.max()
 nuclei_projection = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 
 seg = Segmentation.Watershed(
-    dapi_threshold=dapi_thresh,
+    nuclei_threshold=dapi_thresh,
     input_threshold=stain_thresh,
     min_distance=min_dist
 )
-regions = seg.run(registered_image, nuclei)
+label_image = seg.run(registered_image, nuclei)
 seg.show()
 # EPY: END code
 

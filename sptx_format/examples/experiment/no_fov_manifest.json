@@ -1,0 +1,10 @@
+{
+  "version": "0.0.0",
+  "images": {
+    "primary": "../field_of_view/field_of_view.json"
+  },
+  "codebook": "../codebook/codebook.json",
+  "extras": {
+    "is_space_tx_cool": true
+  }
+}

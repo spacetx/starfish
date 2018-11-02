@@ -1,7 +1,7 @@
-import argparse
 from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
+import click
 import numpy as np
 from skimage.filters import gaussian
 
@@ -9,7 +9,7 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from ._base import FilterAlgorithmBase
 from .util import (
-    determine_axes_to_split_by,
+    determine_axes_to_group_by,
     preserve_float_range,
     validate_and_broadcast_kernel_size,
 )
@@ -18,7 +18,7 @@ from .util import (
 class GaussianLowPass(FilterAlgorithmBase):
 
     def __init__(
-            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False, **kwargs) -> None:
+            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False) -> None:
         """Multi-dimensional low-pass gaussian filter.
 
         Parameters
@@ -34,14 +34,6 @@ class GaussianLowPass(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     _DEFAULT_TESTING_PARAMETERS = {"sigma": 1}
-
-    @classmethod
-    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
-        group_parser.add_argument(
-            "--sigma", type=float, help="standard deviation of gaussian kernel")
-        group_parser.add_argument(
-            "--is-volume", action="store_true",
-            help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
     def _low_pass(
@@ -102,10 +94,19 @@ class GaussianLowPass(FilterAlgorithmBase):
             original stack.
 
         """
-        split_by = determine_axes_to_split_by(self.is_volume)
+        group_by = determine_axes_to_group_by(self.is_volume)
         low_pass: Callable = partial(self._low_pass, sigma=self.sigma)
         result = stack.apply(
             low_pass,
-            split_by=split_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
+
+    @staticmethod
+    @click.command("GaussianLowPass")
+    @click.option("--sigma", type=float, help="standard deviation of gaussian kernel")
+    @click.option("--is-volume", is_flag=True,
+                  help="indicates that the image stack should be filtered in 3d")
+    @click.pass_context
+    def _cli(ctx, sigma, is_volume):
+        ctx.obj["component"]._cli_run(ctx, GaussianLowPass(sigma, is_volume))

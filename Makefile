@@ -3,7 +3,7 @@ SHELL := /bin/bash
 MPLBACKEND?=Agg
 export MPLBACKEND
 
-MODULES=starfish examples validate_sptx
+MODULES=starfish examples sptx_format
 
 define print_help
     @printf "    %-24s   $(2)\n" $(1)

@@ -732,13 +732,21 @@ class ImageStack:
                 func,
                 group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
             )
+        bound_func = partial(ImageStack._in_place_apply, func)
 
-        results = self.transform(func, group_by=group_by, verbose=verbose,
-                                 n_processes=n_processes, **kwargs)
+        self.transform(
+            bound_func,
+            group_by=group_by,
+            verbose=verbose,
+            n_processes=n_processes,
+            **kwargs)
 
-        for r, inds in results:
-            self.set_slice(inds, r)
         return self
+
+    @staticmethod
+    def _in_place_apply(apply_func: Callable[..., np.ndarray], data: np.ndarray, **kwargs) -> None:
+        result = apply_func(data, **kwargs)
+        data[:] = result
 
     def transform(
             self,

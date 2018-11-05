@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, BinaryIO, Callable, Dict, Mapping, Optional, Tuple, Union
+from typing import Any, BinaryIO, Callable, Dict, Mapping, Optional, Sequence, Tuple, Union
 
 from slicedimage import (
     Collection,
@@ -11,6 +11,7 @@ from slicedimage import (
 )
 
 from starfish.codebook.codebook import Codebook
+from starfish.experiment.builder.orderediterator import join_dimension_sizes, ordered_iterator
 from starfish.experiment.version import CURRENT_VERSION
 from starfish.types import Coordinates, Indices
 from .defaultproviders import RandomNoiseTile, tile_fetcher_factory
@@ -21,6 +22,7 @@ AUX_IMAGE_NAMES = {
     'nuclei',
     'dots',
 }
+DEFAULT_DIMENSION_ORDER = (Indices.Z, Indices.ROUND, Indices.CH)
 
 
 def _tile_opener(toc_path: str, tile: Tile, file_ext: str) -> BinaryIO:
@@ -48,6 +50,7 @@ def build_image(
         fov_count: int, round_count: int, ch_count: int, z_count: int,
         image_fetcher: TileFetcher,
         default_shape: Optional[Tuple[int, int]]=None,
+        dimension_order: Sequence[Indices]=DEFAULT_DIMENSION_ORDER,
 ) -> Collection:
     """
     Build and returns an image set with the following characteristics:
@@ -66,11 +69,31 @@ def build_image(
         Instance of TileFetcher that provides the data for the tile.
     default_shape : Optional[Tuple[int, int]]
         Default shape of the individual tiles in this image set.
+    dimension_order : Sequence[Indices]
+        Ordering for which dimensions vary, in order of the slowest changing dimension to the
+        fastest.  For instance, if the order is (ROUND, Z, CH) and each dimension has size 2, then
+        the sequence is:
+          (ROUND=0, CH=0, Z=0)
+          (ROUND=0, CH=1, Z=0)
+          (ROUND=0, CH=0, Z=1)
+          (ROUND=0, CH=1, Z=1)
+          (ROUND=1, CH=0, Z=0)
+          (ROUND=1, CH=1, Z=0)
+          (ROUND=1, CH=0, Z=1)
+          (ROUND=1, CH=1, Z=1)
+        (default = (Indices.Z, Indices.ROUND, Indices.CH))
 
     Returns
     -------
     The slicedimage collection representing the image.
     """
+    dimension_sizes = join_dimension_sizes(
+        dimension_order,
+        size_for_round=round_count,
+        size_for_ch=ch_count,
+        size_for_z=z_count,
+    )
+
     collection = Collection()
     for fov_ix in range(fov_count):
         fov_images = TileSet(
@@ -89,22 +112,24 @@ def build_image(
             ImageFormat.TIFF,
         )
 
-        for z_ix in range(z_count):
-            for round_ix in range(round_count):
-                for ch_ix in range(ch_count):
-                    image = image_fetcher.get_tile(fov_ix, round_ix, ch_ix, z_ix)
-                    tile = Tile(
-                        image.coordinates,
-                        {
-                            Indices.Z: z_ix,
-                            Indices.ROUND: round_ix,
-                            Indices.CH: ch_ix,
-                        },
-                        image.shape,
-                        extras=image.extras,
-                    )
-                    tile.set_numpy_array_future(image.tile_data)
-                    fov_images.add_tile(tile)
+        for dimension_indices in ordered_iterator(dimension_sizes):
+            image = image_fetcher.get_tile(
+                fov_ix,
+                dimension_indices[Indices.ROUND],
+                dimension_indices[Indices.CH],
+                dimension_indices[Indices.Z])
+            tile = Tile(
+                image.coordinates,
+                {
+                    Indices.Z: (dimension_indices[Indices.Z]),
+                    Indices.ROUND: (dimension_indices[Indices.ROUND]),
+                    Indices.CH: (dimension_indices[Indices.CH]),
+                },
+                image.shape,
+                extras=image.extras,
+            )
+            tile.set_numpy_array_future(image.tile_data)
+            fov_images.add_tile(tile)
         collection.add_partition("fov_{:03}".format(fov_ix), fov_images)
     return collection
 
@@ -118,6 +143,7 @@ def write_experiment_json(
         aux_tile_fetcher: Optional[Mapping[str, TileFetcher]]=None,
         postprocess_func: Optional[Callable[[dict], dict]]=None,
         default_shape: Optional[Tuple[int, int]]=None,
+        dimension_order: Sequence[Indices]=(Indices.Z, Indices.ROUND, Indices.CH),
 ) -> None:
     """
     Build and returns a top-level experiment description with the following characteristics:
@@ -147,6 +173,19 @@ def write_experiment_json(
         The callable should return what is to be written as the experiment document.
     default_shape : Optional[Tuple[int, int]] (default = None)
         Default shape for the tiles in this experiment.
+    dimension_order : Sequence[Indices]
+        Ordering for which dimensions vary, in order of the slowest changing dimension to the
+        fastest.  For instance, if the order is (ROUND, Z, CH) and each dimension has size 2, then
+        the sequence is:
+          (ROUND=0, CH=0, Z=0)
+          (ROUND=0, CH=1, Z=0)
+          (ROUND=0, CH=0, Z=1)
+          (ROUND=0, CH=1, Z=1)
+          (ROUND=1, CH=0, Z=0)
+          (ROUND=1, CH=1, Z=0)
+          (ROUND=1, CH=0, Z=1)
+          (ROUND=1, CH=1, Z=1)
+        (default = (Indices.Z, Indices.ROUND, Indices.CH))
     """
     if primary_tile_fetcher is None:
         primary_tile_fetcher = tile_fetcher_factory(RandomNoiseTile)
@@ -166,6 +205,7 @@ def write_experiment_json(
         primary_image_dimensions[Indices.CH],
         primary_image_dimensions[Indices.Z],
         primary_tile_fetcher,
+        dimension_order=dimension_order,
         default_shape=default_shape,
     )
     Writer.write_to_path(
@@ -185,6 +225,7 @@ def write_experiment_json(
             fov_count,
             aux_dimensions[Indices.ROUND], aux_dimensions[Indices.CH], aux_dimensions[Indices.Z],
             aux_tile_fetcher.get(aux_name, tile_fetcher_factory(RandomNoiseTile)),
+            dimension_order=dimension_order,
             default_shape=default_shape,
         )
         Writer.write_to_path(

@@ -20,9 +20,12 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack: Ima
     """""
     # Add three new coords to xarray (xc, yc, zc)
     num_features = intensity_table.sizes[Features.AXIS]
-    intensity_table[Coordinates.X.value] = xr.DataArray(np.zeros(num_features, np.float32), dims='features')
-    intensity_table[Coordinates.Y.value] = xr.DataArray(np.zeros(num_features, np.float32), dims='features')
-    intensity_table[Coordinates.Z.value] = xr.DataArray(np.zeros(num_features, np.float32), dims='features')
+    intensity_table[Coordinates.X.value] = xr.DataArray(np.zeros(num_features, np.float32),
+                                                        dims='features')
+    intensity_table[Coordinates.Y.value] = xr.DataArray(np.zeros(num_features, np.float32),
+                                                        dims='features')
+    intensity_table[Coordinates.Z.value] = xr.DataArray(np.zeros(num_features, np.float32),
+                                                        dims='features')
     for ind, spot in intensity_table.groupby(Features.AXIS):
         # Iterate through r, ch per spot
         for ch, _round in np.ndindex(spot.data.shape):

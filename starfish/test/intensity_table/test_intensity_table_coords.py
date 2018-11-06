@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Union
 
 import numpy as np
 
@@ -12,9 +13,10 @@ from starfish.types import Coordinates, Indices, PhysicalCoordinateTypes
 NUMBER_SPOTS = 10
 
 
-def physical_cord_to_pixel_value(physical_coord,
-                                 physical_pixel_size,
-                                 coordinates_at_pixel_offset_0):
+def physical_cord_to_pixel_value(physical_coord: float,
+                                 physical_pixel_size: Union[float, int],
+                                 coordinates_at_pixel_offset_0: int):
+
     return (physical_coord - coordinates_at_pixel_offset_0) / physical_pixel_size
 
 

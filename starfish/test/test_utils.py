@@ -3,7 +3,7 @@ from collections import OrderedDict
 import numpy as np
 
 from starfish import Codebook, ImageStack
-from starfish.types import Features, Indices
+from starfish.types import Features, Indices, PhysicalCoordinateTypes
 
 
 def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict) -> ImageStack:
@@ -14,18 +14,25 @@ def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict
     Parameters
     ----------
     stack_shape: OrderedDict
-        Dict[Indices, int] defining hte size of each dimension for an ImageStack
+        Dict[Indices, int] defining the size of each dimension for an ImageStack
 
     coords: OrderedDict
-        Dict[PhysicalCoordinateTypes, float] defining the mon/max values of physical
+        Dict[PhysicalCoordinateTypes, float] defining the min/max values of physical
         coordinates to assign to each tile of the return ImageStack
     """
 
-    tuple_shape = tuple(t[1] for t in stack_shape.items())
+    stack = ImageStack.synthetic_stack(num_round=stack_shape[Indices.ROUND],
+                                       num_ch=stack_shape[Indices.CH],
+                                       num_z=stack_shape[Indices.Z],
+                                       tile_height=stack_shape[Indices.Y],
+                                       tile_width=stack_shape[Indices.X])
 
-    stack = ImageStack.synthetic_stack(*tuple_shape)
-
-    coords_array = list(t[1] for t in coords.items())
+    coords_array = [coords[PhysicalCoordinateTypes.X_MIN],
+                    coords[PhysicalCoordinateTypes.X_MAX],
+                    coords[PhysicalCoordinateTypes.Y_MIN],
+                    coords[PhysicalCoordinateTypes.Y_MAX],
+                    coords[PhysicalCoordinateTypes.Z_MIN],
+                    coords[PhysicalCoordinateTypes.Z_MAX]]
 
     for _round in range(stack.num_rounds):
         for ch in range(stack.num_chs):

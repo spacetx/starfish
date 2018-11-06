@@ -19,13 +19,10 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack: Ima
                 Assign those values to the coords arrays for this spot
     """""
     # Add three new coords to xarray (xc, yc, zc)
-    intensity_table[Coordinates.X.value] = \
-        xr.DataArray.astype(intensity_table.features * 0, np.float32)
-    intensity_table[Coordinates.Y.value] = \
-        xr.DataArray.astype(intensity_table.features * 0, np.float32)
-    intensity_table[Coordinates.Z.value] = \
-        xr.DataArray.astype(intensity_table.features * 0, np.float32)
-    # Iterate through spots
+    num_features = intensity_table.sizes[Features.AXIS]
+    intensity_table[Coordinates.X.value] = xr.DataArray(np.zeros(num_features, np.float32), dims='features')
+    intensity_table[Coordinates.Y.value] = xr.DataArray(np.zeros(num_features, np.float32), dims='features')
+    intensity_table[Coordinates.Z.value] = xr.DataArray(np.zeros(num_features, np.float32), dims='features')
     for ind, spot in intensity_table.groupby(Features.AXIS):
         # Iterate through r, ch per spot
         for ch, _round in np.ndindex(spot.data.shape):
@@ -41,14 +38,14 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack: Ima
                 Indices.CH.value: ch,
                 Indices.Z.value: pixel_z,
             }
-            # Get corresponding physical coords
+            # Get corresponding physical coordinates
             physical_coords = get_physcial_coordinates_of_spot(
                 image_stack._coordinates,
                 tile_indices,
                 pixel_x,
                 pixel_y,
                 image_stack._tile_shape)
-            # Assign to coords array
+            # Assign to coordinates arrays
             intensity_table[Coordinates.X.value][ind] = physical_coords[0]
             intensity_table[Coordinates.Y.value][ind] = physical_coords[1]
             intensity_table[Coordinates.Z.value][ind] = physical_coords[2]

@@ -1179,26 +1179,3 @@ class ImageStack:
             image = img_as_float32(image)
 
         return cls.from_numpy_array(image)
-
-    def squeeze(self) -> np.ndarray:
-        """return an array that is linear over categorical dimensions and z
-
-        Returns
-        -------
-        np.ndarray :
-            array of shape (num_rounds + num_channels + num_z_layers, x, y).
-
-        """
-        first_dim = self.num_rounds * self.num_chs * self.num_zlayers
-        new_shape = (first_dim,) + self.tile_shape
-        new_data = self.xarray.data.reshape(new_shape)
-
-        return new_data
-
-    def un_squeeze(self, stack):
-        if type(stack) is list:
-            stack = np.array(stack)
-
-        new_shape = (self.num_rounds, self.num_chs, self.num_zlayers) + self.tile_shape
-        res = stack.reshape(new_shape)
-        return res

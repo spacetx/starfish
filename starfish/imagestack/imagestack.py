@@ -871,7 +871,11 @@ class ImageStack:
         return pd.DataFrame(data)
 
     @property
-    def tiles_aligned(self):
+    def tiles_aligned(self) -> bool:
+        """
+        Returns True if all the tiles in this ImageStack have the same physical coordinates
+        and False if not.
+        """
         return self._tiles_aligned
 
     @property

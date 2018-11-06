@@ -65,6 +65,8 @@ def test_coordinates():
         )
     )
 
+    assert stack.tiles_aligned is False
+
     for _round in range(NUM_ROUND):
         for ch in range(NUM_CH):
             for z in range(NUM_Z):
@@ -130,6 +132,8 @@ def test_scalar_coordinates():
         )
     )
 
+    assert stack.tiles_aligned is False
+
     for _round in range(NUM_ROUND):
         for ch in range(NUM_CH):
             for z in range(NUM_Z):
@@ -153,3 +157,44 @@ def test_scalar_coordinates():
                 assert np.isclose(ymax, expected_y)
                 assert np.isclose(zmin, expected_z)
                 assert np.isclose(zmax, expected_z)
+
+
+class AlignedTiles(FetchedTile):
+    """Tiles that all have the same physical coordinates"""
+    def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
+        super().__init__()
+
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return HEIGHT, WIDTH
+
+    @property
+    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+        return {
+            Coordinates.X: 1,
+            Coordinates.Y: 4,
+            Coordinates.Z: 3,
+        }
+
+    @property
+    def format(self) -> ImageFormat:
+        return ImageFormat.TIFF
+
+    def tile_data(self) -> np.ndarray:
+        return np.ones((HEIGHT, WIDTH), dtype=np.float32)
+
+
+def test_aligend_coordinates():
+    """Set up an ImageStack where all the tiles are aligned (have the same physical coordinate values).
+    Assert that the resulting Imagestack's tiles_aligned attribute is True
+    """
+    stack = ImageStack.synthetic_stack(
+        NUM_ROUND, NUM_CH, NUM_Z,
+        HEIGHT, WIDTH,
+        tile_fetcher=tile_fetcher_factory(
+            AlignedTiles,
+            True,
+        )
+    )
+
+    assert stack.tiles_aligned is True

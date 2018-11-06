@@ -178,6 +178,8 @@ class ImageStack:
         )
 
         # iterate through the tiles and set the data.
+        self._tiles_aligned = True
+        starting_coords = self._image_partition.tiles()[0].coordinates
         for tile in self._image_partition.tiles():
             h = tile.indices[Indices.ROUND]
             c = tile.indices[Indices.CH]
@@ -200,6 +202,8 @@ class ImageStack:
                 Indices.CH.value: c,
                 Indices.Z.value: zlayer,
             }
+            if starting_coords != tile.coordinates:
+                self._tiles_aligned = False
             coordinates_values = [
                 tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
                 tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
@@ -865,6 +869,10 @@ class ImageStack:
                 data['barcode_index'].append(barcode_index)
 
         return pd.DataFrame(data)
+
+    @property
+    def tiles_aligned(self):
+        return self._tiles_aligned
 
     @property
     def raw_shape(self) -> Tuple[int, int, int, int, int]:

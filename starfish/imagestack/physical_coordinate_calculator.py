@@ -1,4 +1,4 @@
-from typing import Any, Mapping, Tuple, Union
+from typing import Any, Mapping, Optional, Tuple, Union
 
 import xarray as xr
 
@@ -12,9 +12,11 @@ from starfish.types import (
 )
 
 
-def calc_new_physical_coords_array(physical_coordinates: xr.DataArray,
-                                   stack_shape: Mapping[Indices, int],
-                                   indexers: Mapping[str, Union[int, slice]]) -> xr.DataArray:
+def calc_new_physical_coords_array(
+        physical_coordinates: xr.DataArray,
+        stack_shape: Mapping[Indices, int],
+        indexers: Mapping[str, Union[int, slice]],
+) -> xr.DataArray:
     """Calculates the resulting coordinates array from indexing on each dimension in indexers
 
     Parameters
@@ -42,17 +44,18 @@ def calc_new_physical_coords_array(physical_coordinates: xr.DataArray,
     return new_coords
 
 
-def _needs_coords_recalculating(x_indexers: Union[int, slice], y_indexers: Union[int, slice]
-                                ) -> bool:
+def _needs_coords_recalculating(
+        x_indexers: Union[int, slice], y_indexers: Union[int, slice]) -> bool:
     if isinstance(x_indexers, int) or isinstance(y_indexers, int):
         return True
     return not (x_indexers.start is x_indexers.stop is y_indexers.start is y_indexers.stop is None)
 
 
-def _recalculate_physical_coordinate_ranges(stack_shape: Mapping[Indices, int],
-                                            indexers: Mapping[str, Union[int, slice]],
-                                            coords_array: xr.DataArray
-                                            ) -> None:
+def _recalculate_physical_coordinate_ranges(
+        stack_shape: Mapping[Indices, int],
+        indexers: Mapping[str, Union[int, slice]],
+        coords_array: xr.DataArray,
+) -> None:
     """Iterates through coordinates array and recalculates x, y min/max physical coordinate values
      based on how the x and y dimensions were indexed
 
@@ -101,17 +104,17 @@ def _recalculate_physical_coordinate_ranges(stack_shape: Mapping[Indices, int],
                     ])] = [xmin, xmax, ymin, ymax]
 
 
-def _calculate_physcial_pixel_size(coord_max: Number, coord_min: Number, num_pixels: int
-                                   ) -> Number:
+def _calculate_physical_pixel_size(coord_min: Number, coord_max: Number, num_pixels: int) -> Number:
     """Calculate the size of a pixel in physical space"""
     return (coord_max - coord_min) / num_pixels
 
 
-def _pixel_offset_to_physical_coordinate(physical_pixel_size: Number,
-                                         pixel_offset: float,
-                                         coordinates_at_pixel_offset_0: Number,
-                                         dimension_size: int
-                                         ) -> Number:
+def _pixel_offset_to_physical_coordinate(
+        physical_pixel_size: Number,
+        pixel_offset: Optional[int],
+        coordinates_at_pixel_offset_0: Number,
+        dimension_size: int,
+) -> Number:
     """Calculate the physical pixel value at the given index"""
     if pixel_offset:
         # Check for negative index
@@ -121,11 +124,12 @@ def _pixel_offset_to_physical_coordinate(physical_pixel_size: Number,
     return coordinates_at_pixel_offset_0
 
 
-def _recalculate_physical_coordinate_range(coord_min: float,
-                                           coord_max: float,
-                                           dimension_size: int,
-                                           indexer
-                                           ) -> Tuple[Number, Number]:
+def _recalculate_physical_coordinate_range(
+        coord_min: float,
+        coord_max: float,
+        dimension_size: int,
+        indexer: Union[int, slice],
+) -> Tuple[Number, Number]:
     """Given the dimension size and pixel coordinate indexes calculate the corresponding
     coordinates in physical space
 
@@ -137,38 +141,32 @@ def _recalculate_physical_coordinate_range(coord_min: float,
     coord_max: float
         the maximum physical coordinate value
 
-    coord: Coordinate
-        The (X, Y, or Z) coordinate to calculate.
-
     dimension_size: int
         The size (number of pixels) to use to calculate physical_pixel_size
 
-    tile_indices: Dict[Indices, int]
-        The (Round, Ch, Z) indices that identify which tile's coordinates we're using
-
-    key: (int/slice)
+    indexer: (int/slice)
         The pixel index or range to calculate.
 
     Returns
     -------
     The new min and max physical coordinate values of the given dimension
     """
-    physical_pixel_size = _calculate_physcial_pixel_size(coord_max, coord_min, dimension_size)
-    min_pixel_index = indexer if type(indexer) is int else indexer.start
-    max_pixel_index = indexer if type(indexer) is int else indexer.stop
+    physical_pixel_size = _calculate_physical_pixel_size(coord_min, coord_max, dimension_size)
+    min_pixel_index = indexer if isinstance(indexer, int) else indexer.start
+    max_pixel_index = indexer if isinstance(indexer, int) else indexer.stop
     # Add one to max pixel index to get end of pixel
     max_pixel_index = max_pixel_index + 1 if max_pixel_index else dimension_size
-    new_min = _pixel_offset_to_physical_coordinate(physical_pixel_size, min_pixel_index,
-                                                   coord_min, dimension_size)
-    new_max = _pixel_offset_to_physical_coordinate(physical_pixel_size, max_pixel_index,
-                                                   coord_min, dimension_size)
+    new_min = _pixel_offset_to_physical_coordinate(
+        physical_pixel_size, min_pixel_index, coord_min, dimension_size)
+    new_max = _pixel_offset_to_physical_coordinate(
+        physical_pixel_size, max_pixel_index, coord_min, dimension_size)
     return new_min, new_max
 
 
 def get_coordinates(
         coords_array: xr.DataArray,
         indices: Mapping[Indices, int],
-        physical_axis: Coordinates
+        physical_axis: Coordinates,
 ) -> Tuple[float, float]:
 
     """Given a set of indices that uniquely identify a tile and a physical axis, return the min

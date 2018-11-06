@@ -109,8 +109,8 @@ from starfish.image import Filter
 clip = Filter.Clip(p_max=99.7)
 merfish_dots = clip.run(merfish_background)
 
-merfish_dots = merfish_dots.max_proj(Indices.CH, Indices.ROUND, Indices.Z)
-merfish_dots = merfish_dots._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
+merfish_mp = merfish_dots.max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+merfish_mp_numpy = merfish_mp._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
 # EPY: END code
 
 # EPY: START markdown
@@ -145,13 +145,13 @@ dartfish_decoded_image = np.squeeze(np.load(dartfish_npy))
 f, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(ncols=2, nrows=3, figsize=(30, 45))
 decoded_spots(
     merfish_intensity_table,
-    background_image=np.zeros_like(merfish_dots),
+    background_image=np.zeros_like(merfish_mp_numpy),
     spots_kwargs=dict(alpha=1.),
     ax=ax1
 )
 decoded_spots(
     merfish_intensity_table,
-    background_image=merfish_dots,
+    background_image=merfish_mp_numpy,
     spots_kwargs=dict(alpha=1.),
     ax=ax3
 )
@@ -168,7 +168,7 @@ decoded_spots(
 )
 decoded_spots(
     decoded_image=merfish_decoded_image,
-    background_image=merfish_dots,
+    background_image=merfish_mp_numpy,
     decoded_image_kwargs=dict(alpha=1.),
     ax=ax4
 )

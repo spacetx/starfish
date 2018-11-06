@@ -72,7 +72,8 @@ class Watershed(SegmentationAlgorithmBase):
 
         # create a 'stain' for segmentation
         mp = primary_images.max_proj(Indices.CH, Indices.Z)
-        stain = np.mean(mp._squeezed_numpy(Indices.CH, Indices.Z), axis=0)
+        mp_numpy = mp._squeezed_numpy(Indices.CH, Indices.Z)
+        stain = np.mean(mp_numpy, axis=0)
         stain = stain / stain.max()
 
         # TODO make these parameterizable or determine whether they are useful or not

@@ -229,8 +229,9 @@ dapi_thresh = .16  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
 min_dist = 57
 
-registered_max = registered_image.max_proj(Indices.CH, Indices.Z)
-stain = np.mean(registered_max._squeezed_numpy(Indices.CH, Indices.Z), axis=0)
+registered_mp = registered_image.max_proj(Indices.CH, Indices.Z)
+registered_mp_numpy = registered_mp._squeezed_numpy(Indices.CH, Indices.Z)
+stain = np.mean(registered_mp_numpy, axis=0)
 stain = stain/stain.max()
 nuclei = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
 nuclei_numpy = nuclei._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)

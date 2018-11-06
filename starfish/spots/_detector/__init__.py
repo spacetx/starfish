@@ -27,12 +27,12 @@ class SpotFinder(PipelineComponent):
         ref_image = ctx.obj["reference_image_from_max_projection"]
         if blobs_stack is not None:
             blobs_stack = ImageStack.from_path_or_url(blobs_stack)  # type: ignore
-            blobs_max = blobs_stack.max_proj(Indices.ROUND, Indices.CH)
-            blobs_image = blobs_max._squeezed_numpy(Indices.ROUND, Indices.CH)
+            blobs_mp = blobs_stack.max_proj(Indices.ROUND, Indices.CH)
+            blobs_mp_numpy = blobs_mp._squeezed_numpy(Indices.ROUND, Indices.CH)
             #  TODO: this won't work for PixelSpotDectector
             intensities = instance.run(
                 image_stack,
-                blobs_image=blobs_image,
+                blobs_image=blobs_mp_numpy,
                 reference_image_from_max_projection=ref_image,
             )
         else:

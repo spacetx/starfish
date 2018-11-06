@@ -235,6 +235,12 @@ def detect_spots(
             radius_is_gyration=radius_is_gyration,
         )
     else:  # don't use a reference image, measure each
+        # Throw error here if tiles are not aligned. Trying to do this with unregistered
+        if not data_stack.tiles_aligned:
+            raise ValueError(
+                'Your data appears to be unregistered, using this method'
+                ' will produce nonsense results.'
+            )
         spot_finding_method = partial(spot_finding_method, **spot_finding_kwargs)
         spot_attributes_list = data_stack.transform(
             func=spot_finding_method,

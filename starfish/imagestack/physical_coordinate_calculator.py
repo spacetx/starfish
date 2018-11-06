@@ -114,7 +114,7 @@ def _pixel_offset_to_physical_coordinate(physical_pixel_size: Number,
                                          dimension_size: int
                                          ) -> Number:
     """Calculate the physical pixel value at the given index"""
-    if pixel_offset and pixel_offset != 0:
+    if pixel_offset:
         # Check for negative index
         if pixel_offset < 0:
             pixel_offset = pixel_offset + dimension_size
@@ -198,8 +198,13 @@ def get_coordinates(
     )
 
 
-def get_physcial_coordinates_of_spot(coords_array, tile_indices, pixel_x, pixel_y, tile_shape):
-    """Given a set of indices that uniquely identify a tile and the locaation of a spot in pixel space
+def get_physcial_coordinates_of_spot(
+        coords_array: xr.DataArray,
+        tile_indices: Mapping[Indices, int],
+        pixel_x: int,
+        pixel_y: int,
+        tile_shape: Tuple[int, int]):
+    """Given a set of indices that uniquely identify a tile and the location of a spot in pixel space
     calculate the location in physical space."""
     x_range = get_coordinates(coords_array, tile_indices, Coordinates.X)
     physcial_pixel_size_x = _calculate_physcial_pixel_size(coord_max=x_range[1],
@@ -220,7 +225,7 @@ def get_physcial_coordinates_of_spot(coords_array, tile_indices, pixel_x, pixel_
                                                       dimension_size=tile_shape[0])
 
     z_range = get_coordinates(coords_array, tile_indices, Coordinates.Z)
-    # As discussed just taking the middle of the z range for this...unless we change pour minds
+    # As discussed just taking the middle of the z range for this...unless we change our minds
     physical_z = (z_range[1] - z_range[0]) / 2 + z_range[0]
 
     return physical_x, physical_y, physical_z

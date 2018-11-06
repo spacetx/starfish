@@ -22,7 +22,7 @@ class MaxProj(FilterAlgorithmBase):
 
     @staticmethod
     @click.command("MaxProj")
-    @click.option("-dims", type=str, multiple=True,
+    @click.option("--dims", type=str, multiple=True,
                   help="The dimensions the Imagestack should max project over")
     @click.pass_context
     def _cli(ctx, dims):

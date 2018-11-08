@@ -205,7 +205,7 @@ def get_physcial_coordinates_of_spot(
     """Given a set of indices that uniquely identify a tile and the location of a spot in pixel space
     calculate the location in physical space."""
     x_range = get_coordinates(coords_array, tile_indices, Coordinates.X)
-    physcial_pixel_size_x = _calculate_physcial_pixel_size(coord_max=x_range[1],
+    physcial_pixel_size_x = _calculate_physical_pixel_size(coord_max=x_range[1],
                                                            coord_min=x_range[0],
                                                            num_pixels=tile_shape[1])
     physical_x = _pixel_offset_to_physical_coordinate(physical_pixel_size=physcial_pixel_size_x,
@@ -214,7 +214,7 @@ def get_physcial_coordinates_of_spot(
                                                       dimension_size=tile_shape[1])
 
     y_range = get_coordinates(coords_array, tile_indices, Coordinates.Y)
-    physcial_pixel_size_y = _calculate_physcial_pixel_size(coord_max=y_range[1],
+    physcial_pixel_size_y = _calculate_physical_pixel_size(coord_max=y_range[1],
                                                            coord_min=y_range[0],
                                                            num_pixels=tile_shape[0])
     physical_y = _pixel_offset_to_physical_coordinate(physical_pixel_size=physcial_pixel_size_y,

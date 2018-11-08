@@ -53,12 +53,12 @@ def test_tranfering_physical_coords_to_intensity_table():
     assert yc.size == NUMBER_SPOTS
     assert zc.size == NUMBER_SPOTS
 
-    physical_pixel_size_x = physical_coordinate_calculator._calculate_physcial_pixel_size(
+    physical_pixel_size_x = physical_coordinate_calculator._calculate_physical_pixel_size(
         coord_min=physical_coords[PhysicalCoordinateTypes.X_MIN],
         coord_max=physical_coords[PhysicalCoordinateTypes.X_MAX],
         num_pixels=stack_shape[Indices.X])
 
-    physical_pixel_size_y = physical_coordinate_calculator._calculate_physcial_pixel_size(
+    physical_pixel_size_y = physical_coordinate_calculator._calculate_physical_pixel_size(
         coord_min=physical_coords[PhysicalCoordinateTypes.Y_MIN],
         coord_max=physical_coords[PhysicalCoordinateTypes.Y_MAX],
         num_pixels=stack_shape[Indices.Y])

@@ -14,7 +14,7 @@ from .util import determine_axes_to_group_by, preserve_float_range
 class Bandpass(FilterAlgorithmBase):
 
     def __init__(
-            self, lshort: Number, llong: int, threshold: Number, truncate: Number=4,
+            self, lshort: Number, llong: int, threshold: Number=0, truncate: Number=4,
             is_volume: bool=False) -> None:
         """
 
@@ -34,6 +34,10 @@ class Bandpass(FilterAlgorithmBase):
         """
         self.lshort = lshort
         self.llong = llong
+
+        if threshold is None:
+            raise ValueError("Threshold cannot be None, please pass a float or integer")
+
         self.threshold = threshold
         self.truncate = truncate
         self.is_volume = is_volume

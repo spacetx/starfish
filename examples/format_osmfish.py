@@ -110,13 +110,16 @@ class osmFISHTileFetcher(TileFetcher):
             # iterate over the metadata, some rounds will not be found. In those cases, we just
             # continue through the loop without adding to parsed_metadata
             round_match = re.match("Hybridization(\d{1,2})", round_)
-            if round_match is not None:
-                round_id = int(round_match.group(1)) - 1
-                for target_name, fluorophore in round_data.items():
-                    if fluorophore in {"Dapi", "FITC"}:
-                        continue
-                    channel = self.channel_map[fluorophore]
-                    parsed_metadata[round_id, channel] = target_name
+            if round_match is None:
+                continue
+
+            round_id = int(round_match.group(1)) - 1
+            for target_name, fluorophore in round_data.items():
+                if fluorophore in {"Dapi", "FITC"}:
+                    continue
+                channel = self.channel_map[fluorophore]
+                parsed_metadata[round_id, channel] = target_name
+
         return parsed_metadata
 
     @property

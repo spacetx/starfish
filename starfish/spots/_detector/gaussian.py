@@ -1,5 +1,6 @@
 from typing import Optional, Union
 
+import click
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -22,7 +23,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
             threshold: Number,
             overlap: float=0.5,
             measurement_type='max',
-            is_volume: bool=True, **kwargs
+            is_volume: bool=True,
     ) -> None:
         """Multi-dimensional gaussian spot detector
 
@@ -146,17 +147,23 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         return intensity_table
 
-    @classmethod
-    def _add_arguments(cls, group_parser):
-        group_parser.add_argument(
-            "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
-        group_parser.add_argument(
-            "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)")
-        group_parser.add_argument(
-            "--num-sigma", default=20, type=int, help="Number of sigmas to try")
-        group_parser.add_argument("--threshold", default=.01, type=float, help="Dots threshold")
-        group_parser.add_argument(
-            "--overlap", default=0.5, type=float,
-            help="dots with overlap of greater than this fraction are combined")
-        group_parser.add_argument(
-            "--show", default=False, action='store_true', help="display results visually")
+    @staticmethod
+    @click.command("GaussianSpotDetector")
+    @click.option(
+        "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
+    @click.option(
+        "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)")
+    @click.option(
+        "--num-sigma", default=20, type=int, help="Number of sigmas to try")
+    @click.option(
+        "--threshold", default=.01, type=float, help="Dots threshold")
+    @click.option(
+        "--overlap", default=0.5, type=float,
+        help="dots with overlap of greater than this fraction are combined")
+    @click.option(
+        "--show", default=False, is_flag=True, help="display results visually")
+    @click.pass_context
+    def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show):
+            instance = GaussianSpotDetector(min_sigma, max_sigma, num_sigma, threshold, overlap)
+            #  FIXME: measurement_type, is_volume missing as options; show missing as ctor args
+            ctx.obj["component"]._cli_run(ctx, instance)

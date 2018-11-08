@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Optional
 
+import click
 import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
@@ -10,7 +11,7 @@ from .util import determine_axes_to_group_by, preserve_float_range
 
 class ScaleByPercentile(FilterAlgorithmBase):
 
-    def __init__(self, p: int=0, is_volume: bool=False, **kwargs) -> None:
+    def __init__(self, p: int=0, is_volume: bool=False) -> None:
         """Image scaling filter
 
         Parameters
@@ -19,18 +20,11 @@ class ScaleByPercentile(FilterAlgorithmBase):
             each image in the stack is scaled by this percentile. must be in [0, 100]
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) tiles
-
-        kwargs
         """
         self.p = p
         self.is_volume = is_volume
 
     _DEFAULT_TESTING_PARAMETERS = {"p": 0}
-
-    @classmethod
-    def _add_arguments(cls, group_parser) -> None:
-        group_parser.add_argument(
-            "--p", default=100, type=int, help="scale images by this percentile")
 
     @staticmethod
     def _scale(image: np.ndarray, p: int) -> np.ndarray:
@@ -93,3 +87,13 @@ class ScaleByPercentile(FilterAlgorithmBase):
             group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
+
+    @staticmethod
+    @click.command("ScaleByPercentile")
+    @click.option(
+        "--p", default=100, type=int, help="scale images by this percentile")
+    @click.option(  # FIXME: was this intentionally missed?
+        "--is-volume", is_flag=True, help="filter 3D volumes")
+    @click.pass_context
+    def _cli(ctx, p, is_volume):
+        ctx.obj["component"]._cli_run(ctx, ScaleByPercentile(p, is_volume))

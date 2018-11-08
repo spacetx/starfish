@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/sptx-format/schema/field_of_view/tiles/indices.json",
+  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/field_of_view/tiles/indices.json",
   "type": "object",
   "description": "Describes the categorical indices (channel, round, and z-section) of this tile.",
   "required": "c",

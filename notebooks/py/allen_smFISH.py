@@ -135,8 +135,8 @@ kwargs = dict(
     verbose=True,
     is_volume=True,
 )
-lmpf = SpotFinder.LocalMaxPeakFinder(**kwargs)
-spot_attributes = lmpf.run(primary_image)
+tlmpf = SpotFinder.TrackpyLocalMaxPeakFinder(**kwargs)
+spot_attributes = tlmpf.run(primary_image)
 # EPY: END code
 
 # EPY: START code

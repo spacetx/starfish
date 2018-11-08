@@ -18,7 +18,7 @@ install_requires = [line.rstrip() for line in open(os.path.join(os.path.dirname(
 
 setuptools.setup(
     name="starfish",
-    version="0.0.27",
+    version="0.0.29",
     description="Pipelines and pipeline components for the analysis of image-based transcriptomics data",
     author="Deep Ganguli",
     author_email="dganguli@chanzuckerberg.com",
@@ -28,7 +28,6 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             "starfish=starfish.starfish:starfish",
-            "validate-sptx=sptx_format.validate_sptx:validate_sptx",
         ]
     },
     classifiers=CLASSIFIERS,

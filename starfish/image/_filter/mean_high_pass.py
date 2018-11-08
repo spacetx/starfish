@@ -1,7 +1,7 @@
-import argparse
 from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
+import click
 import numpy as np
 from scipy.ndimage.filters import uniform_filter
 
@@ -16,7 +16,7 @@ from .util import (
 class MeanHighPass(FilterAlgorithmBase):
 
     def __init__(
-            self, size: Union[Number, Tuple[Number]], is_volume: bool=False, **kwargs) -> None:
+            self, size: Union[Number, Tuple[Number]], is_volume: bool=False) -> None:
         """Mean high pass filter.
 
         The mean high pass filter reduces low spatial frequency features by subtracting a
@@ -42,14 +42,6 @@ class MeanHighPass(FilterAlgorithmBase):
         self.is_volume = is_volume
 
     _DEFAULT_TESTING_PARAMETERS = {"size": 1}
-
-    @classmethod
-    def _add_arguments(cls, group_parser: argparse.ArgumentParser) -> None:
-        group_parser.add_argument(
-            "--size", type=float, help="width of the kernel")
-        group_parser.add_argument(
-            "--is-volume", action="store_true",
-            help="indicates that the image stack should be filtered in 3d")
 
     @staticmethod
     def _high_pass(image: np.ndarray, size: Number, rescale: bool=False) -> np.ndarray:
@@ -109,3 +101,14 @@ class MeanHighPass(FilterAlgorithmBase):
             group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
+
+    @staticmethod
+    @click.command("MeanHighPass")
+    @click.option(
+        "--size", type=float, help="width of the kernel")
+    @click.option(
+        "--is-volume", is_flag=True,
+        help="indicates that the image stack should be filtered in 3d")
+    @click.pass_context
+    def _cli(ctx, size, is_volume):
+        ctx.obj["component"]._cli_run(ctx, MeanHighPass(size, is_volume))

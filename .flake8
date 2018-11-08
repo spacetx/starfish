@@ -1,5 +1,5 @@
 [flake8]
 max-line-length=100
 ignore: E301, E302, E305, E731, F811
-application-import-names = starfish, examples, validate_sptx
+application-import-names = starfish, examples, sptx_format
 import-order-style = smarkets

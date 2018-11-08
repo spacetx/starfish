@@ -51,7 +51,7 @@ RUN echo "source activate starfish" >> ~/.bashrc
 ENV PATH /home/starfish/.conda/envs/starfish/bin:$PATH
 
 # Build and configure for running
-RUN pip install -e .
+RUN pip install -e . --ignore-installed
 
 env MPLBACKEND Agg
 ENTRYPOINT ["starfish"]

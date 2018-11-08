@@ -53,3 +53,10 @@ def BaristaSeq(use_test_data: bool=False) -> Experiment:
         "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20181028/"
         "BaristaSeq/cropped_formatted/experiment.json"
     )
+
+
+def ImagingMassCytometry(use_test_data: bool=False):
+    return Experiment.from_json(
+        "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20181023/"
+        "imaging_cytof/BodenmillerBreastCancerSamples/experiment.json"
+    )

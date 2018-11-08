@@ -173,6 +173,7 @@ for indices in primary_image._iter_indices():
 # EPY: END markdown
 
 # EPY: START code
+# TODO this crop should be (x, y) = (40, 40) but it was getting eaten by kwargs
 from starfish.spots import SpotFinder
 psd = SpotFinder.PixelSpotDetector(
     codebook=experiment.codebook,
@@ -182,7 +183,9 @@ psd = SpotFinder.PixelSpotDetector(
     min_area=2,
     max_area=np.inf,
     norm_order=2,
-    crop_size=(0, 40, 40)
+    crop_z=0,
+    crop_y=0,
+    crop_x=0
 )
 
 initial_spot_intensities, prop_results = psd.run(scaled_image)

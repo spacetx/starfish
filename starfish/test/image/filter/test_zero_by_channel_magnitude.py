@@ -16,6 +16,6 @@ def create_imagestack_with_magnitude_scale():
 def test_zero_by_channel_magnitude_produces_accurate_results():
     imagestack = create_imagestack_with_magnitude_scale()
 
-    zcm = ZeroByChannelMagnitude(thresh=np.inf, normalize=False, is_volume=False)
+    zcm = ZeroByChannelMagnitude(thresh=np.inf, normalize=False)
     filtered = zcm.run(imagestack, in_place=False, n_processes=1)
     assert np.all(filtered.xarray == 0)

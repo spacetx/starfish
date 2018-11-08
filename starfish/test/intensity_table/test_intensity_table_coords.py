@@ -65,8 +65,8 @@ def test_tranfering_physical_coords_to_intensity_table():
 
     # Assert that the physical coords align with their corresponding pixel coords
     for spot in xc.features:
-        pixel_x = spot['x'].data
-        physical_x = spot['xc'].data
+        pixel_x = spot[Indices.X.value].data
+        physical_x = spot[Coordinates.X.value].data
         calculated_pixel = physical_cord_to_pixel_value(physical_x,
                                                         physical_pixel_size_x,
                                                         physical_coords[
@@ -75,8 +75,8 @@ def test_tranfering_physical_coords_to_intensity_table():
         assert np.isclose(pixel_x, calculated_pixel)
 
     for spot in yc.features:
-        pixel_y = spot['y'].data
-        physical_y = spot['yc'].data
+        pixel_y = spot[Indices.Y.value].data
+        physical_y = spot[Coordinates.Y.value].data
         calculated_pixel = physical_cord_to_pixel_value(physical_y,
                                                         physical_pixel_size_y,
                                                         physical_coords[
@@ -86,6 +86,6 @@ def test_tranfering_physical_coords_to_intensity_table():
 
     # Assert that zc value is middle of z range
     for spot in zc.features:
-        physical_z = spot['zc'].data
-        assert physical_coords[PhysicalCoordinateTypes.Z_MAX] == \
-            (physical_z * 2) - physical_coords[PhysicalCoordinateTypes.Z_MIN]
+        physical_z = spot[Coordinates.Z.value].data
+        assert np.isclose(physical_coords[PhysicalCoordinateTypes.Z_MAX],
+                          (physical_z * 2) - physical_coords[PhysicalCoordinateTypes.Z_MIN])

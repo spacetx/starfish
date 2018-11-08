@@ -32,6 +32,7 @@ def calc_new_physical_coords_array(
     -------
     A coordinates xarray indexed by R, CH, V and values recalculated according to indexing on X/Y
     """
+
     new_coords = physical_coordinates.copy(deep=True)
     # index by R, CH, V
     key = {Indices.ROUND.value: indexers[Indices.ROUND.value],
@@ -193,3 +194,36 @@ def get_coordinates(
         coords_array.loc[min_selectors].item(),
         coords_array.loc[max_selectors].item(),
     )
+
+
+def get_physcial_coordinates_of_spot(
+        coords_array: xr.DataArray,
+        tile_indices: Mapping[Indices, int],
+        pixel_x: int,
+        pixel_y: int,
+        tile_shape: Tuple[int, int]):
+    """Given a set of indices that uniquely identify a tile and the location of a spot in pixel space
+    calculate the location in physical space."""
+    x_range = get_coordinates(coords_array, tile_indices, Coordinates.X)
+    physcial_pixel_size_x = _calculate_physical_pixel_size(coord_max=x_range[1],
+                                                           coord_min=x_range[0],
+                                                           num_pixels=tile_shape[1])
+    physical_x = _pixel_offset_to_physical_coordinate(physical_pixel_size=physcial_pixel_size_x,
+                                                      pixel_offset=pixel_x,
+                                                      coordinates_at_pixel_offset_0=x_range[0],
+                                                      dimension_size=tile_shape[1])
+
+    y_range = get_coordinates(coords_array, tile_indices, Coordinates.Y)
+    physcial_pixel_size_y = _calculate_physical_pixel_size(coord_max=y_range[1],
+                                                           coord_min=y_range[0],
+                                                           num_pixels=tile_shape[0])
+    physical_y = _pixel_offset_to_physical_coordinate(physical_pixel_size=physcial_pixel_size_y,
+                                                      pixel_offset=pixel_y,
+                                                      coordinates_at_pixel_offset_0=y_range[0],
+                                                      dimension_size=tile_shape[0])
+
+    z_range = get_coordinates(coords_array, tile_indices, Coordinates.Z)
+    # As discussed just taking the middle of the z range for this...unless we change our minds
+    physical_z = (z_range[1] - z_range[0]) / 2 + z_range[0]
+
+    return physical_x, physical_y, physical_z

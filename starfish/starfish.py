@@ -62,21 +62,6 @@ def version():
 version.no_art = True  # type: ignore
 
 
-@starfish.command()
-@click.argument("in_json", type=click.Path(exists=True, dir_okay=False))
-@click.option("--sz", default=10, type=int, help="Figure size")
-def show(in_json, sz):
-    import matplotlib.pyplot as plt
-    from showit import tile
-
-    from .experiment import Experiment
-
-    s = Experiment()
-    s.read(in_json)
-    tile(s.image.squeeze(), size=sz, bar=True)
-    plt.show()
-
-
 # Pipelines
 starfish.add_command(Registration._cli)  # type: ignore
 starfish.add_command(Filter._cli)  # type: ignore

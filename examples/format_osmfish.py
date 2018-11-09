@@ -199,7 +199,7 @@ def cli(input_dir, output_dir, metadata_yaml):
         experiment_json_doc["codebook"] = "codebook.json"
         return experiment_json_doc
 
-    with open(os.path.join(output_dir, "codebook.json"), 'w') as f:
+    with open(os.path.join(output_dir, "codebook.json"), "w") as f:
         codebook = primary_tile_fetcher.generate_codebook()
         json.dump(codebook, f)
 

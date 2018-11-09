@@ -142,7 +142,7 @@ class osmFISHTileFetcher(TileFetcher):
         position_string = (
             self.osmfish_metadata['TilesPositions'][f'Hybridization{round_ + 1}'][z]
         )
-        y_pos, x_pos, z_pos = (float(v) for v in position_string.split(', '))
+        y_pos, x_pos, z_pos = (float(v) for v in position_string.split(", "))
         return {
             Coordinates.X: (x_pos, x_pos + x_size),
             Coordinates.Y: (y_pos, y_pos + y_size),

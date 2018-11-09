@@ -55,7 +55,7 @@ def osmFISH(use_test_data: bool=False):
         return Experiment.from_json(
             'https://d2nhj9g34unfro.cloudfront.net/20181005/osmFISH/experiment.json')
     return Experiment.from_json(
-        'https://d2nhj9g34unfro.cloudfront.net/20181031/osmFISH/experiment.json')
+        "https://d2nhj9g34unfro.cloudfront.net/20181031/osmFISH/experiment.json")
 
 
 def BaristaSeq(use_test_data: bool=False) -> Experiment:

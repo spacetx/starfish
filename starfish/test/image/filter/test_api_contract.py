@@ -56,7 +56,7 @@ def test_all_methods_adhere_to_contract(filter_class):
     data = generate_default_data()
     try:
         filtered = instance.run(data, in_place=True)
-    except TypeError as e:
+    except TypeError:
         raise AssertionError(f'{filter_class} must accept in_place parameter')
     assert isinstance(filtered, ImageStack)
     assert data is filtered, \
@@ -73,14 +73,14 @@ def test_all_methods_adhere_to_contract(filter_class):
     data = generate_default_data()
     try:
         instance.run(data, n_processes=1)
-    except TypeError as e:
+    except TypeError:
         raise AssertionError(f'{filter_class} must accept n_processes parameter')
 
     # accepts verbose, and if passed, prints progress
     data = generate_default_data()
     try:
         instance.run(data, verbose=True)
-    except TypeError as e:
+    except TypeError:
         raise AssertionError(f'{filter_class} must accept verbose parameter')
 
     # output is dtype float and within the expected interval of [0, 1]

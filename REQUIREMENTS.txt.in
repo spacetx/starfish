@@ -3,7 +3,7 @@ jsonschema
 matplotlib
 numpy != 1.13.0
 pandas >= 0.23.4
-pycodestyle<2.4.0
+pycodestyle==2.4.0
 pytest>=3.6.3
 requests
 semantic_version
@@ -19,3 +19,15 @@ tqdm
 trackpy
 validators
 xarray
+flake8
+flake8-import-order
+ipywidgets
+jsonpath_rw
+m2r
+pytest-cov>=2.5.1
+pytest-xdist
+mypy
+nbencdec >= 0.0.5
+recommonmark
+sphinx
+sphinx_rtd_theme

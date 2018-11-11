@@ -2,7 +2,7 @@ import numpy as np
 import xarray as xr
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.imagestack.physical_coordinate_calculator import get_physcial_coordinates_of_spot
+from starfish.imagestack.physical_coordinate_calculator import get_physical_coordinates_of_spot
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Coordinates, Features, Indices
 
@@ -42,7 +42,7 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack: Ima
                 Indices.Z.value: pixel_z,
             }
             # Get corresponding physical coordinates
-            physical_coords = get_physcial_coordinates_of_spot(
+            physical_coords = get_physical_coordinates_of_spot(
                 image_stack._coordinates,
                 tile_indices,
                 pixel_x,

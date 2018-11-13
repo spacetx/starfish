@@ -5,7 +5,7 @@ import numpy as np
 
 from starfish import IntensityTable
 from starfish.imagestack import physical_coordinate_calculator
-from starfish.intensity_table import intensity_table_coordiantes
+from starfish.intensity_table import intensity_table_coordinates
 from starfish.test import test_utils
 from starfish.types import Coordinates, Indices, PhysicalCoordinateTypes
 
@@ -42,7 +42,7 @@ def test_tranfering_physical_coords_to_intensity_table():
         n_spots=NUMBER_SPOTS
     )
 
-    intensities = intensity_table_coordiantes.\
+    intensities = intensity_table_coordinates.\
         transfer_physical_coords_from_imagestack_to_intensity_table(stack, intensities)
 
     # Assert that new cords were added

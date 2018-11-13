@@ -196,7 +196,7 @@ def get_coordinates(
     )
 
 
-def get_physcial_coordinates_of_spot(
+def get_physical_coordinates_of_spot(
         coords_array: xr.DataArray,
         tile_indices: Mapping[Indices, int],
         pixel_x: int,

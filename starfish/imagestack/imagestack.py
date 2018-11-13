@@ -46,7 +46,6 @@ from starfish.types import (
     PhysicalCoordinateTypes,
 )
 from starfish.util import StripArguments
-from starfish.util.try_import import try_import
 from ._mp_dataarray import MPDataArray
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
@@ -442,7 +441,6 @@ class ImageStack:
 
         self._data.values[slice_list] = data
 
-    @try_import({"napari_gui"})
     def show_stack_napari(self, indices: Mapping[Indices, Union[int, slice]]):
         """Displays the image stack using Napari (https://github.com/Napari)
 
@@ -460,8 +458,12 @@ class ImageStack:
 
 
         """
-        import napari_gui
-
+        try:
+            import napari_gui
+        except ImportError:
+            warnings.warn("Cannot find the napari library. "
+                          "Install it by running \"pip install napari\"")
+            return
         # TODO ambrosejcarr: this should use updated imagestack slicing routines when they are added
         # and indices should be optional to enable full stack viewing.
         # Switch axes such that it is indexed [x, y, round, channel, z]

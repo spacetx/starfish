@@ -46,7 +46,6 @@ from starfish.types import (
     PhysicalCoordinateTypes,
 )
 from starfish.util import StripArguments
-from starfish.util.try_import import try_import
 from ._mp_dataarray import MPDataArray
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])

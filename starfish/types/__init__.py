@@ -1,6 +1,7 @@
 from typing import Union
 
 from ._constants import (
+    AugmentedEnum,
     Coordinates,
     Features,
     Indices,

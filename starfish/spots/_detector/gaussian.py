@@ -13,9 +13,12 @@ from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots, measure_spot_intensity
 
 
-
-
 class BlobDetector(SpotFinderAlgorithmBase):
+
+    class BlobDetectors(AugmentedEnum):
+        feature.blob_dog = 'blob_dog'
+        feature.blob_doh = 'blob_doh'
+        feature.blob_log = 'blob_log'
 
     def __init__(self, min_sigma: Number, max_sigma: Number, num_sigma: int, threshold: Number, overlap: float = 0.5,
                  measurement_type='max', is_volume: bool = True, detector_method: str = 'blob_log') -> None:
@@ -64,7 +67,12 @@ class BlobDetector(SpotFinderAlgorithmBase):
         self.overlap = overlap
         self.is_volume = is_volume
         self.measurement_function = self._get_measurement_function(measurement_type)
-        self.detector_method = detector_method
+        try:
+            self.detector_method = BlobDetector(detector_method)
+        except ValueError:
+            "Detecotr method must be one of {blobl_log, blob_dog, blobl}"
+
+
 
     def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
         """

@@ -72,8 +72,9 @@ primary_image.xarray.shape
 # EPY: END markdown
 
 # EPY: START code
-dots_max = dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-image(dots._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z))
+dots_mp = dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+dots_mp_numpy = dots._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+image(dots_mp_numpy)
 # EPY: END code
 
 # EPY: START markdown
@@ -81,8 +82,9 @@ image(dots._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z))
 # EPY: END markdown
 
 # EPY: START code
-nuclei_max = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-image(nuclei_max._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z))
+nuclei_mp = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+nuclei_mp_numpy = nuclei_mp._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+image(nuclei_mp_numpy)
 # EPY: END code
 
 # EPY: START markdown
@@ -167,8 +169,9 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
 
     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    dots_max = dots.max_proj(Indices.ROUND, Indices.Z)
-    blobs_image = dots_max._squeezed_numpy(Indices.ROUND, Indices.Z)
+    dots = dots.max_proj(Indices.ROUND, Indices.Z)
+    dots_numpy = dots._squeezed_numpy(Indices.ROUND, Indices.Z)
+    blobs_image = dots_numpy
     intensities = p.run(registered_image, blobs_image=blobs_image)
 # EPY: END code
 
@@ -226,11 +229,12 @@ dapi_thresh = .16  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
 min_dist = 57
 
-registered_max = registered_image.max_proj(Indices.CH, Indices.Z)
-stain = np.mean(registered_max._squeezed_numpy(Indices.CH, Indices.Z), axis=0)
+registered_mp = registered_image.max_proj(Indices.CH, Indices.Z)
+registered_mp_numpy = registered_mp._squeezed_numpy(Indices.CH, Indices.Z)
+stain = np.mean(registered_mp_numpy, axis=0)
 stain = stain/stain.max()
-nuclei_max = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-nuclei_projection = nuclei_max._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+nuclei = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+nuclei_numpy = nuclei._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
 
 seg = Segmentation.Watershed(
     nuclei_threshold=dapi_thresh,
@@ -254,10 +258,12 @@ GENE1 = 'HER2'
 GENE2 = 'VIM'
 
 rgb = np.zeros(registered_image.tile_shape + (3,))
-nuclei_max = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-rgb[:,:,0] = nuclei_max._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
-dots_max = dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-rgb[:,:,1] = dots_max._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+nuclei_mp = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+nuclei_numpy = nuclei_mp._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+rgb[:,:,0] = nuclei_numpy
+dots_mp = dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
+dots_mp_numpy = dots_mp._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+rgb[:,:,1] = dots_mp_numpy
 do = rgb2gray(rgb)
 do = do/(do.max())
 

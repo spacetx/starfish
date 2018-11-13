@@ -3,8 +3,8 @@ import cProfile
 from pstats import Stats
 
 import click
-from sptx_format.cli import validate as validate_cli
 
+from sptx_format.cli import validate as validate_cli
 from starfish.experiment.builder.cli import build as build_cli
 from starfish.image import (
     Filter,
@@ -36,7 +36,7 @@ def starfish(ctx, profile):
     \__ \ || (_| | |  | | | \__ \ | | |
     |___/\__\__,_|_|  |_| |_|___/_| |_|
 
-    """
+    """  # noqa
     print_art = True
     sub = ctx.command.get_command(ctx, ctx.invoked_subcommand)
     if hasattr(sub, "no_art"):
@@ -60,21 +60,6 @@ def version():
     version = pkg_resources.require("starfish")[0].version
     print(version)
 version.no_art = True  # type: ignore
-
-
-@starfish.command()
-@click.argument("in_json", type=click.Path(exists=True, dir_okay=False))
-@click.option("--sz", default=10, type=int, help="Figure size")
-def show(in_json, sz):
-    import matplotlib.pyplot as plt
-    from showit import tile
-
-    from .experiment import Experiment
-
-    s = Experiment()
-    s.read(in_json)
-    tile(s.image.squeeze(), size=sz, bar=True)
-    plt.show()
 
 
 # Pipelines

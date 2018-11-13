@@ -135,8 +135,8 @@ kwargs = dict(
     verbose=True,
     is_volume=True,
 )
-lmpf = SpotFinder.LocalMaxPeakFinder(**kwargs)
-spot_attributes = lmpf.run(primary_image)
+tlmpf = SpotFinder.TrackpyLocalMaxPeakFinder(**kwargs)
+spot_attributes = tlmpf.run(primary_image)
 # EPY: END code
 
 # EPY: START code
@@ -158,12 +158,12 @@ spot_attributes.groupby('c').apply(lambda x: np.sum(x > 0))
 # EPY: START code
 import starfish.plot
 
-projection = primary_image.max_proj(Indices.Z, Indices.ROUND)
-projection = projection._squeezed_numpy(Indices.Z, Indices.ROUND)
+mp = primary_image.max_proj(Indices.Z, Indices.ROUND)
+mp_numpy = mp._squeezed_numpy(Indices.Z, Indices.ROUND)
 
 # make the radius bigger to be clearer
 decoded['radius'] *= 4
 
 f, ax = plt.subplots(figsize=(20, 20))
-starfish.plot.decoded_spots(decoded, background_image=projection[0], ax=ax, spots_kwargs={'alpha': 0.3, 'cmap': plt.cm.Spectral})
+starfish.plot.decoded_spots(decoded, background_image=mp_numpy[0], ax=ax, spots_kwargs={'alpha': 0.3, 'cmap': plt.cm.Spectral})
 # EPY: END code

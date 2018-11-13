@@ -106,13 +106,4 @@ def prepare_stage(stage: Sequence[Union[str, Callable]],
         ]
         coverage_cmdline.extend(cmdline[1:])
         cmdline = coverage_cmdline
-    elif cmdline[0] == "validate-sptx" and coverage_enabled:
-        coverage_cmdline = [
-            "coverage", "run",
-            "-p",
-            "--source", "validate_sptx",
-            "-m", "validate_sptx",
-        ]
-        coverage_cmdline.extend(cmdline[1:])
-        cmdline = coverage_cmdline
     return cmdline

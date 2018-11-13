@@ -6,8 +6,17 @@ from copy import deepcopy
 from functools import partial
 from itertools import product
 from typing import (
-    Any, Callable, Iterable, Iterator, List, Mapping, MutableSequence,
-    Optional, Sequence, Set, Tuple, Union
+    Any,
+    Callable,
+    Iterator,
+    List,
+    Mapping,
+    MutableSequence,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
 )
 
 import matplotlib.pyplot as plt
@@ -29,13 +38,14 @@ from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_
 from starfish.imagestack import indexing_utils
 from starfish.imagestack import physical_coordinate_calculator
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.multiprocessing.shmem import SharedMemory
 from starfish.types import (
     Coordinates,
     Indices,
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
 )
-from starfish.util.try_import import try_import
+from starfish.util import StripArguments
 from ._mp_dataarray import MPDataArray
 
 _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
@@ -431,7 +441,6 @@ class ImageStack:
 
         self._data.values[slice_list] = data
 
-    @try_import({"napari_gui"})
     def show_stack_napari(self, indices: Mapping[Indices, Union[int, slice]]):
         """Displays the image stack using Napari (https://github.com/Napari)
 
@@ -449,8 +458,12 @@ class ImageStack:
 
 
         """
-        import napari_gui
-
+        try:
+            import napari_gui
+        except ImportError:
+            warnings.warn("Cannot find the napari library. "
+                          "Install it by running \"pip install napari\"")
+            return
         # TODO ambrosejcarr: this should use updated imagestack slicing routines when they are added
         # and indices should be optional to enable full stack viewing.
         # Switch axes such that it is indexed [x, y, round, channel, z]
@@ -672,25 +685,6 @@ class ImageStack:
             a = zip(indices, items)
             yield {ind: val for (ind, val) in a}
 
-    def _iter_tiles(
-            self, indices: Iterable[Mapping[Indices, Union[int, slice]]]
-    ) -> Iterable[np.ndarray]:
-        """Given an iterable of indices, return a generator of numpy arrays from self
-
-        Parameters
-        ----------
-        indices, Iterable[Mapping[str, int]]
-            Iterable of indices that map a dimension (str) to a value (int)
-
-        Yields
-        ------
-        np.ndarray
-            Numpy array that corresponds to provided indices
-        """
-        for inds in indices:
-            array, axes = self.get_slice(inds)
-            yield array
-
     def apply(
             self,
             func: Callable,
@@ -740,13 +734,21 @@ class ImageStack:
                 func,
                 group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
             )
+        bound_func = partial(ImageStack._in_place_apply, func)
 
-        results = self.transform(func, group_by=group_by, verbose=verbose,
-                                 n_processes=n_processes, **kwargs)
+        self.transform(
+            bound_func,
+            group_by=group_by,
+            verbose=verbose,
+            n_processes=n_processes,
+            **kwargs)
 
-        for r, inds in results:
-            self.set_slice(inds, r)
         return self
+
+    @staticmethod
+    def _in_place_apply(apply_func: Callable[..., np.ndarray], data: np.ndarray, **kwargs) -> None:
+        result = apply_func(data, **kwargs)
+        data[:] = result
 
     def transform(
             self,
@@ -784,17 +786,42 @@ class ImageStack:
             group_by = {Indices.X, Indices.Y}
 
         indices = list(self._iter_indices(group_by))
+        slice_list = [self._build_slice_list(index)[0]
+                      for index in indices]
 
+        indices_and_slice_list = zip(indices, slice_list)
         if verbose:
-            tiles = tqdm(self._iter_tiles(indices))
-        else:
-            tiles = self._iter_tiles(indices)
+            indices_and_slice_list = tqdm(indices_and_slice_list)
 
-        applyfunc: Callable = partial(func, **kwargs)
+        applyfunc: Callable = partial(
+            self._multiprocessing_workflow,
+            StripArguments(partial(func, **kwargs), positional_arguments_removed=(1, 2)),
+        )
 
-        with multiprocessing.Pool(n_processes) as pool:
-            results = pool.imap(applyfunc, tiles)
+        with multiprocessing.Pool(
+                n_processes,
+                initializer=SharedMemory.initializer,
+                initargs=((self._data._backing_mp_array,
+                           self._data._data.shape,
+                           self._data._data.dtype),)) as pool:
+            results = pool.imap(applyfunc, indices_and_slice_list)
             return list(zip(results, indices))
+
+    @staticmethod
+    def _multiprocessing_workflow(
+            worker_callable: Callable[[np.ndarray,
+                                       Mapping[Indices, int],
+                                       Tuple[Union[int, slice], ...]], Any],
+            indices_and_slice_list: Tuple[Mapping[Indices, int],
+                                          Tuple[Union[int, slice], ...]],
+    ):
+        backing_mp_array, shape, dtype = SharedMemory.get_payload()
+        unshaped_numpy_array = np.frombuffer(backing_mp_array.get_obj(), dtype=dtype)
+        numpy_array = unshaped_numpy_array.reshape(shape)
+
+        sliced = numpy_array[indices_and_slice_list[1]]
+
+        return worker_callable(sliced, *indices_and_slice_list)
 
     @property
     def tile_metadata(self) -> pd.DataFrame:
@@ -1000,8 +1027,12 @@ class ImageStack:
 
     def _squeezed_numpy(self, *dims: Indices):
         """return this ImageStack's data as a squeezed numpy array"""
+<<<<<<< HEAD
         return xr.DataArray.squeeze(self.xarray,
                                     tuple(dim.value for dim in dims)).values
+=======
+        return self.xarray.squeeze(tuple(dim.value for dim in dims)).values
+>>>>>>> origin/master
 
     @classmethod
     def synthetic_stack(
@@ -1162,26 +1193,3 @@ class ImageStack:
             image = img_as_float32(image)
 
         return cls.from_numpy_array(image)
-
-    def squeeze(self) -> np.ndarray:
-        """return an array that is linear over categorical dimensions and z
-
-        Returns
-        -------
-        np.ndarray :
-            array of shape (num_rounds + num_channels + num_z_layers, x, y).
-
-        """
-        first_dim = self.num_rounds * self.num_chs * self.num_zlayers
-        new_shape = (first_dim,) + self.tile_shape
-        new_data = self.xarray.data.reshape(new_shape)
-
-        return new_data
-
-    def un_squeeze(self, stack):
-        if type(stack) is list:
-            stack = np.array(stack)
-
-        new_shape = (self.num_rounds, self.num_chs, self.num_zlayers) + self.tile_shape
-        res = stack.reshape(new_shape)
-        return res

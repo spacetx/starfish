@@ -78,8 +78,8 @@ def test_get_slice_range():
         for ch in range(stack.shape[Indices.CH]):
             for z in range(zrange.stop - zrange.start):
                 data = np.empty((y, x))
-                data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] +
-                          (z + zrange.start))
+                data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z]
+                          + (z + zrange.start))
 
                 assert data.all() == imageslice[round_, ch, z].all()
 

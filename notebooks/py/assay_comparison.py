@@ -77,8 +77,8 @@ datasets = [iss_intensity_table, merfish_intensity_table, dartfish_intensity_tab
 import starfish.data
 experiment = starfish.data.DARTFISH()
 
-dartfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
-dartfish_nuclei = dartfish_nuclei._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
+dartfish_nuclei_mp = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+dartfish_nuclei_mp_numpy = dartfish_nuclei_mp._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
 dartfish_link = os.path.join(data_root, "dartfish_dots_image.npy")
 dartfish_npy = os.path.join(tmp, "dartfish.npy")
 curl(dartfish_npy, dartfish_link)
@@ -88,29 +88,27 @@ dartfish_dots = np.load(dartfish_npy)
 # EPY: START code
 experiment = starfish.data.ISS()
 
-iss_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
-iss_nuclei = iss_nuclei._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
-iss_dots = experiment.fov()['dots'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
-iss_dots = iss_dots._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
+iss_nuclei_mp = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+iss_nuclei_mp_numpy = iss_nuclei_mp._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
+iss_dots_mp = experiment.fov()['dots'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+iss_dots_mp_numpy = iss_dots_mp._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
 # EPY: END code
 
 # EPY: START code
 experiment = starfish.data.MERFISH()
-merfish_nuclei = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)._squeezed_numpy()
-merfish_nuclei = merfish_nuclei._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
+merfish_nuclei_mp = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)._squeezed_numpy()
+merfish_nuclei__mp_numpy = merfish_nuclei_mp._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
 # merfish doesn't have a dots image, and some of the channels are stronger than others.
 # We can use the scale factors to get the right levels
 merfish_background = experiment.fov()[FieldOfView.PRIMARY_IMAGES].max_proj(Indices.CH, Indices.ROUND)
-merfish_background = merfish_background._squeezed_numpy(Indices.CH, Indices.ROUND)
-merfish_background = np.reshape(merfish_background, (1, 1, *merfish_background.shape))
-merfish_background = ImageStack.from_numpy_array(merfish_background)
+
 
 from starfish.image import Filter
 clip = Filter.Clip(p_max=99.7)
 merfish_dots = clip.run(merfish_background)
 
-merfish_dots = merfish_dots.max_proj(Indices.CH, Indices.ROUND, Indices.Z)
-merfish_dots = merfish_dots._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
+merfish_mp = merfish_dots.max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+merfish_mp_numpy = merfish_mp._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
 # EPY: END code
 
 # EPY: START markdown
@@ -145,19 +143,19 @@ dartfish_decoded_image = np.squeeze(np.load(dartfish_npy))
 f, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(ncols=2, nrows=3, figsize=(30, 45))
 decoded_spots(
     merfish_intensity_table,
-    background_image=np.zeros_like(merfish_dots),
+    background_image=np.zeros_like(merfish_mp_numpy),
     spots_kwargs=dict(alpha=1.),
     ax=ax1
 )
 decoded_spots(
     merfish_intensity_table,
-    background_image=merfish_dots,
+    background_image=merfish_mp_numpy,
     spots_kwargs=dict(alpha=1.),
     ax=ax3
 )
 decoded_spots(
     merfish_intensity_table,
-    background_image=merfish_nuclei,
+    background_image=merfish_nuclei__mp_numpy,
     spots_kwargs=dict(alpha=1.),
     ax=ax5
 )
@@ -168,13 +166,13 @@ decoded_spots(
 )
 decoded_spots(
     decoded_image=merfish_decoded_image,
-    background_image=merfish_dots,
+    background_image=merfish_mp_numpy,
     decoded_image_kwargs=dict(alpha=1.),
     ax=ax4
 )
 decoded_spots(
     decoded_image=merfish_decoded_image,
-    background_image=merfish_nuclei,
+    background_image=merfish_nuclei__mp_numpy,
     decoded_image_kwargs=dict(alpha=1.),
     ax=ax6
 );
@@ -205,7 +203,7 @@ decoded_spots(
 )
 decoded_spots(
     dartfish_intensity_table,
-    background_image=dartfish_nuclei,
+    background_image=dartfish_nuclei_mp_numpy,
     spots_kwargs=dict(alpha=1.),
     ax=ax5
 )
@@ -222,7 +220,7 @@ decoded_spots(
 )
 decoded_spots(
     decoded_image=dartfish_decoded_image,
-    background_image=dartfish_nuclei,
+    background_image=dartfish_nuclei_mp_numpy,
     decoded_image_kwargs=dict(alpha=1.),
     ax=ax6
 );
@@ -236,19 +234,19 @@ decoded_spots(
 f, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(ncols=2, nrows=3, figsize=(30, 40))
 decoded_spots(
     iss_intensity_table,
-    background_image=np.zeros_like(iss_dots),
+    background_image=np.zeros_like(iss_dots_mp_numpy),
     spots_kwargs=dict(alpha=1.),
     ax=ax1
 )
 decoded_spots(
     iss_intensity_table,
-    background_image=iss_dots,
+    background_image=iss_dots_mp_numpy,
     spots_kwargs=dict(alpha=1.),
     ax=ax3
 )
 decoded_spots(
     iss_intensity_table,
-    background_image=iss_nuclei,
+    background_image=iss_nuclei_mp_numpy,
     spots_kwargs=dict(alpha=1.),
     ax=ax5
 )

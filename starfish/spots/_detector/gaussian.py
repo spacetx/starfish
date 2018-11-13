@@ -4,27 +4,21 @@ import click
 import numpy as np
 import pandas as pd
 import xarray as xr
-from skimage.feature import blob_log
+from skimage import feature
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.types import Features, Indices, Number, SpotAttributes
+from starfish.types import AugmentedEnum, Features, Indices, Number, SpotAttributes
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots, measure_spot_intensity
 
 
-class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
-    def __init__(
-            self,
-            min_sigma: Number,
-            max_sigma: Number,
-            num_sigma: int,
-            threshold: Number,
-            overlap: float=0.5,
-            measurement_type='max',
-            is_volume: bool=True,
-    ) -> None:
+
+class BlobDetector(SpotFinderAlgorithmBase):
+
+    def __init__(self, min_sigma: Number, max_sigma: Number, num_sigma: int, threshold: Number, overlap: float = 0.5,
+                 measurement_type='max', is_volume: bool = True, detector_method: str = 'blob_log') -> None:
         """Multi-dimensional gaussian spot detector
 
         This method is a wrapper for skimage.feature.blob_log
@@ -60,6 +54,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         See Also
         --------
         http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.blob_log
+        :param method:
 
         """
         self.min_sigma = min_sigma
@@ -69,6 +64,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         self.overlap = overlap
         self.is_volume = is_volume
         self.measurement_function = self._get_measurement_function(measurement_type)
+        self.detector_method = detector_method
 
     def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
         """
@@ -86,7 +82,7 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         """
 
-        fitted_blobs_array: np.ndarray = blob_log(
+        fitted_blobs_array: np.ndarray = self.detector_method(
             data_image,
             self.min_sigma,
             self.max_sigma,
@@ -164,6 +160,6 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
         "--show", default=False, is_flag=True, help="display results visually")
     @click.pass_context
     def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show):
-            instance = GaussianSpotDetector(min_sigma, max_sigma, num_sigma, threshold, overlap)
+            instance = BlobDetector(min_sigma, max_sigma, num_sigma, threshold, overlap)
             #  FIXME: measurement_type, is_volume missing as options; show missing as ctor args
             ctx.obj["component"]._cli_run(ctx, instance)

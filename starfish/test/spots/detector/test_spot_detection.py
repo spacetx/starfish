@@ -5,20 +5,14 @@ from scipy.ndimage.filters import gaussian_filter
 from starfish.imagestack.imagestack import ImageStack
 from starfish.spots._detector._base import SpotFinderAlgorithmBase
 from starfish.spots._detector.detect import detect_spots
-from starfish.spots._detector.gaussian import GaussianSpotDetector
+from starfish.spots._detector.gaussian import BlobDetector
 from starfish.spots._detector.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
 from starfish.types import Indices
 
 
-def simple_gaussian_spot_detector() -> GaussianSpotDetector:
+def simple_gaussian_spot_detector() -> BlobDetector:
     """create a basic gaussian spot detector"""
-    return GaussianSpotDetector(
-        min_sigma=1,
-        max_sigma=4,
-        num_sigma=5,
-        threshold=0,
-        measurement_type='max',
-    )
+    return BlobDetector(min_sigma=1, max_sigma=4, num_sigma=5, threshold=0, measurement_type='max')
 
 
 def simple_local_max_spot_detector() -> TrackpyLocalMaxPeakFinder:

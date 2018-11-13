@@ -245,8 +245,9 @@ with warnings.catch_warnings():
     ax1.axes.set_axis_off()
 
     mp = scaled_image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-    clim = scoreatpercentile(mp, [0.5, 99.5])
-    show_image(mp, clim=clim, ax=ax2)
+    mp_numpy = mp._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+    clim = scoreatpercentile(mp_numpy, [0.5, 99.5])
+    show_image(mp_numpy, clim=clim, ax=ax2)
 
     f.tight_layout()
 # EPY: END code

@@ -463,7 +463,8 @@ class ImageStack:
         try:
             import napari_gui
         except ImportError:
-            warnings.warn("Cannot find the napari library. Install it by running \"pip install napari\"")
+            warnings.warn("Cannot find the napari library. "
+                          "Install it by running \"pip install napari\"")
             return
         # TODO ambrosejcarr: this should use updated imagestack slicing routines when they are added
         # and indices should be optional to enable full stack viewing.

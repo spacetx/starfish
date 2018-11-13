@@ -3,6 +3,9 @@ SHELL := /bin/bash
 MPLBACKEND?=Agg
 export MPLBACKEND
 
+QT_QPA_PLATFORM=offscreen
+export QT_QPA_PLATFORM
+
 MODULES=starfish examples sptx_format
 
 define print_help

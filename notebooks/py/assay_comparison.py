@@ -101,9 +101,7 @@ merfish_nuclei__mp_numpy = merfish_nuclei_mp._squeezed_numpy(Indices.CH, Indices
 # merfish doesn't have a dots image, and some of the channels are stronger than others.
 # We can use the scale factors to get the right levels
 merfish_background = experiment.fov()[FieldOfView.PRIMARY_IMAGES].max_proj(Indices.CH, Indices.ROUND)
-# merfish_background_numpy = merfish_background._squeezed_numpy(Indices.CH, Indices.ROUND)
-# merfish_background_numpy = np.reshape(merfish_background_numpy, (1, 1, *merfish_background_numpy.shape))
-# merfish_background = ImageStack.from_numpy_array(merfish_background_numpy)
+
 
 from starfish.image import Filter
 clip = Filter.Clip(p_max=99.7)

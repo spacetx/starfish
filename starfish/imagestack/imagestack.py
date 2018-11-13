@@ -442,7 +442,6 @@ class ImageStack:
 
         self._data.values[slice_list] = data
 
-    @try_import({"napari_gui"})
     def show_stack_napari(self, indices: Mapping[Indices, Union[int, slice]]):
         """Displays the image stack using Napari (https://github.com/Napari)
 

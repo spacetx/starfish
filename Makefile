@@ -109,12 +109,12 @@ help-integration:
 ### INSTALL ##################################################
 #
 install-src:
-	pip install --force-reinstall --upgrade -r REQUIREMENTS.txt
+	pip install --force-reinstall --upgrade -r REQUIREMENTS.txt napari-gui
 	pip install -e .
 	pip freeze
 
 install-pypi:
-	pip install -r REQUIREMENTS.txt starfish
+	pip install -r REQUIREMENTS.txt starfish napari-gui
 
 help-install:
 	$(call print_help, install-src, pip install the current directory)

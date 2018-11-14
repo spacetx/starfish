@@ -75,7 +75,8 @@ class SpaceTxValidator:
             fmt += "\tFilename:       \t{filename}\n"
         for error in error_iterator:
             message = fmt.format(
-                stars="***" * level, level=str(level), path="/".join(error.absolute_schema_path),
+                stars="***" * level, level=str(level),
+                path="/".join([str(x)for x in error.absolute_schema_path]),
                 message=error.message, cause=error.cause, schema=error.schema.get("$id", "unknown"),
                 filename=filename,
             )

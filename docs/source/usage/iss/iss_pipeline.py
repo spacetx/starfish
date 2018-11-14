@@ -31,6 +31,7 @@ def iss_pipeline(fov, codebook):
         threshold=0.01,
         measurement_type='mean',
     )
+
     mp = fov['dots'].max_proj(Indices.ROUND, Indices.Z)
     mp_numpy = mp._squeezed_numpy(Indices.ROUND, Indices.Z)
     intensities = p.run(filtered, blobs_image=mp_numpy)

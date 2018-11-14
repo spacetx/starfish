@@ -1027,12 +1027,7 @@ class ImageStack:
 
     def _squeezed_numpy(self, *dims: Indices):
         """return this ImageStack's data as a squeezed numpy array"""
-<<<<<<< HEAD
-        return xr.DataArray.squeeze(self.xarray,
-                                    tuple(dim.value for dim in dims)).values
-=======
         return self.xarray.squeeze(tuple(dim.value for dim in dims)).values
->>>>>>> origin/master
 
     @classmethod
     def synthetic_stack(

@@ -96,7 +96,7 @@ iss_dots_mp_numpy = iss_dots_mp._squeezed_numpy(Indices.CH, Indices.ROUND, Indic
 
 # EPY: START code
 experiment = starfish.data.MERFISH()
-merfish_nuclei_mp = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)._squeezed_numpy()
+merfish_nuclei_mp = experiment.fov()['nuclei'].max_proj(Indices.CH, Indices.ROUND, Indices.Z)
 merfish_nuclei__mp_numpy = merfish_nuclei_mp._squeezed_numpy(Indices.CH, Indices.ROUND, Indices.Z)
 # merfish doesn't have a dots image, and some of the channels are stronger than others.
 # We can use the scale factors to get the right levels

@@ -1,6 +1,6 @@
 import numpy as np
 
-from starfish.spots._detector.gaussian import BlobDetector
+from starfish.spots._detector.blob import BlobDetector
 from starfish.types import Features, Indices
 from starfish.util.synthesize import SyntheticData
 

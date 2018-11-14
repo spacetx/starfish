@@ -4,8 +4,8 @@ from scipy.ndimage.filters import gaussian_filter
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.spots._detector._base import SpotFinderAlgorithmBase
+from starfish.spots._detector.blob import BlobDetector
 from starfish.spots._detector.detect import detect_spots
-from starfish.spots._detector.gaussian import BlobDetector
 from starfish.spots._detector.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
 from starfish.types import Indices
 

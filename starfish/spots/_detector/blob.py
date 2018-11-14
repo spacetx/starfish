@@ -8,20 +8,30 @@ from skimage import feature
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.types import AugmentedEnum, Features, Indices, Number, SpotAttributes
+from starfish.types import Features, Indices, Number, SpotAttributes
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots, measure_spot_intensity
+
+blob_detectors = {
+    'blob_dog': feature.blob_dog,
+    'blob_doh': feature.blob_doh,
+    'blob_log': feature.blob_log
+}
 
 
 class BlobDetector(SpotFinderAlgorithmBase):
 
-    class BlobDetectors(AugmentedEnum):
-        feature.blob_dog = 'blob_dog'
-        feature.blob_doh = 'blob_doh'
-        feature.blob_log = 'blob_log'
-
-    def __init__(self, min_sigma: Number, max_sigma: Number, num_sigma: int, threshold: Number, overlap: float = 0.5,
-                 measurement_type='max', is_volume: bool = True, detector_method: str = 'blob_log') -> None:
+    def __init__(
+            self,
+            min_sigma: Number,
+            max_sigma: Number,
+            num_sigma: int,
+            threshold: Number,
+            overlap: float = 0.5,
+            measurement_type='max',
+            is_volume: bool = True,
+            detector_method: str = 'blob_log'
+    ) -> None:
         """Multi-dimensional gaussian spot detector
 
         This method is a wrapper for skimage.feature.blob_log
@@ -46,6 +56,8 @@ class BlobDetector(SpotFinderAlgorithmBase):
             (default = 0.5)
         measurement_type : str ['max', 'mean']
             name of the function used to calculate the intensity for each identified spot area
+        detector_method: str ['blob_dog', 'blob_doh', 'blob_log']
+            name of the type of detection method used from skimage.feature
 
         Notes
         -----
@@ -56,8 +68,7 @@ class BlobDetector(SpotFinderAlgorithmBase):
 
         See Also
         --------
-        http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.blob_log
-        :param method:
+        http://scikit-image.org/docs/dev/auto_examples/features_detection/plot_blob.html
 
         """
         self.min_sigma = min_sigma
@@ -68,11 +79,9 @@ class BlobDetector(SpotFinderAlgorithmBase):
         self.is_volume = is_volume
         self.measurement_function = self._get_measurement_function(measurement_type)
         try:
-            self.detector_method = BlobDetector(detector_method)
+            self.detector_method = blob_detectors[detector_method]
         except ValueError:
-            "Detecotr method must be one of {blobl_log, blob_dog, blobl}"
-
-
+            "Detector method must be one of {blob_log, blob_dog, blob_doh}"
 
     def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
         """
@@ -152,7 +161,7 @@ class BlobDetector(SpotFinderAlgorithmBase):
         return intensity_table
 
     @staticmethod
-    @click.command("GaussianSpotDetector")
+    @click.command("BlobDetector")
     @click.option(
         "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
     @click.option(
@@ -166,8 +175,14 @@ class BlobDetector(SpotFinderAlgorithmBase):
         help="dots with overlap of greater than this fraction are combined")
     @click.option(
         "--show", default=False, is_flag=True, help="display results visually")
+    @click.option(
+        "--detector_method", default='blob_log',
+        help="str ['blob_dog', 'blob_doh', 'blob_log'] name of the type of "
+             "detection method used from skimage.feature"
+    )
     @click.pass_context
-    def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show):
-            instance = BlobDetector(min_sigma, max_sigma, num_sigma, threshold, overlap)
+    def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show, detector_method):
+            instance = BlobDetector(min_sigma, max_sigma, num_sigma, threshold, overlap,
+                                    detector_method=detector_method)
             #  FIXME: measurement_type, is_volume missing as options; show missing as ctor args
             ctx.obj["component"]._cli_run(ctx, instance)

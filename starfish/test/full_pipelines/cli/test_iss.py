@@ -86,7 +86,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                     tempdir, "results", "spots.nc"),
                 "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "dots.json"),
-                "GaussianSpotDetector",
+                "BlobDetector",
                 "--min-sigma", "4",
                 "--max-sigma", "6",
                 "--num-sigma", "20",

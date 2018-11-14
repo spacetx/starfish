@@ -79,7 +79,7 @@ In contrast, smFISH experiments may not leverage multiple imaging rounds, but of
 
 For each individual tile, the Field of View specifies the portion of the tensor the tile corresponds to by providing the indicies of the tile in (r, c, z), the location of the tile, and the sha256 hash of the file data, to guard against corruption.
 
-Finally, each tile also specifies the coordinates of the image in physical space, relative to some experiment-wide reference point.
+Finally, each tile also specifies the coordinates of the image in physical space, relative to some experiment-wide reference point specified in micrometers.
 
 The below example describes a 2-channel, 8-round coded experiment that samples a tissue section using 45 discrete z-planes. For conciseness, the tile data is truncated, and shows only the information for two tiles, while in practice there would be 2 * 8 * 45 tiles.
 

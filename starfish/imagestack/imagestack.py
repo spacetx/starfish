@@ -48,8 +48,7 @@ from starfish.types import (
 from starfish.util import StripArguments
 from starfish.util.try_import import try_import
 from ._mp_dataarray import MPDataArray
-
-_DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
+from .dataorder import AXES_DATA, N_AXES
 
 
 class ImageStack:
@@ -95,13 +94,6 @@ class ImageStack:
         save the (potentially modified) image tensor to disk
     """
 
-    AXES_DATA: Mapping[Indices, _DimensionMetadata] = {
-        Indices.ROUND: _DimensionMetadata(0, True),
-        Indices.CH: _DimensionMetadata(1, True),
-        Indices.Z: _DimensionMetadata(2, False),
-    }
-    N_AXES = max(data.order for data in AXES_DATA.values()) + 1
-
     def __init__(self, image_partition: TileSet) -> None:
         self._image_partition = image_partition
         self._tile_shape = image_partition.default_tile_shape
@@ -129,11 +121,11 @@ class ImageStack:
         dims: MutableSequence[str] = []
         coordinates_shape: MutableSequence[int] = []
         coordinates_dimensions: MutableSequence[str] = []
-        for ix in range(ImageStack.N_AXES):
+        for ix in range(N_AXES):
             size_for_axis: Optional[int] = None
             dim_for_axis: Optional[Indices] = None
 
-            for axis_name, axis_data in ImageStack.AXES_DATA.items():
+            for axis_name, axis_data in AXES_DATA.items():
                 if ix == axis_data.order:
                     size_for_axis = self._get_dimension_size(axis_name)
                     dim_for_axis = axis_name
@@ -141,7 +133,7 @@ class ImageStack:
 
             if size_for_axis is None or dim_for_axis is None:
                 raise ValueError(
-                    f"Could not find entry for the {ix}th axis in ImageStack.AXES_DATA")
+                    f"Could not find entry for the {ix}th axis in AXES_DATA")
 
             shape.append(size_for_axis)
             dims.append(dim_for_axis.value)
@@ -644,19 +636,19 @@ class ImageStack:
     ) -> Tuple[Tuple[Union[int, slice], ...], Sequence[Indices]]:
         slice_list: MutableSequence[Union[int, slice]] = [
             slice(None, None, None)
-            for _ in range(ImageStack.N_AXES)
+            for _ in range(N_AXES)
         ]
         axes = []
         removed_axes = set()
         for name, value in indices.items():
-            idx = ImageStack.AXES_DATA[name].order
+            idx = AXES_DATA[name].order
             if not isinstance(value, slice):
                 removed_axes.add(name)
             slice_list[idx] = value
 
         for dimension_value, dimension_name in sorted([
             (dimension_value.order, dimension_name)
-            for dimension_name, dimension_value in ImageStack.AXES_DATA.items()
+            for dimension_name, dimension_value in AXES_DATA.items()
         ]):
             if dimension_name not in removed_axes:
                 axes.append(dimension_name)
@@ -894,7 +886,7 @@ class ImageStack:
         # https://stackoverflow.com/questions/41207128/how-do-i-specify-ordereddict-k-v-types-for-\
         # mypy-type-annotation
         result: collections.OrderedDict[Any, str] = collections.OrderedDict()
-        for name, data in ImageStack.AXES_DATA.items():
+        for name, data in AXES_DATA.items():
             result[name] = self._data.shape[data.order]
         result['y'] = self._data.shape[-2]
         result['x'] = self._data.shape[-1]
@@ -913,7 +905,7 @@ class ImageStack:
                                                               physical_axis=physical_axis)
 
     def _get_dimension_size(self, dimension: Indices):
-        axis_data = ImageStack.AXES_DATA[dimension]
+        axis_data = AXES_DATA[dimension]
         if dimension in self._image_partition.dimensions or axis_data.required:
             return self._image_partition.get_dimension_shape(dimension)
         return 1

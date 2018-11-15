@@ -65,10 +65,6 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self.measurement_function = self._get_measurement_function(measurement_type)
 
         self.is_volume = is_volume
-        if self.is_volume:
-            raise ValueError('LocalMaxPeakFinder only works for 2D data, for 3D data, '
-                             'please use TrackpyLocalMaxPeakFinder')
-
         self.verbose = verbose
 
         # these parameters are useful for debugging spot-calls
@@ -145,7 +141,8 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         return thresholds, spot_counts
 
     def _select_optimal_threshold(self, thresholds: np.ndarray, spot_counts: List[int]) -> float:
-
+        if len(spot_counts) == 0:
+            return 0
         # calculate the gradient of the number of spots
         grad = np.gradient(spot_counts)
         self._grad = grad
@@ -331,9 +328,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         "--measurement-type", default='max', type=str,
         help="How to aggregate pixel intensities in a spot")
     @click.option(
-        "--is-volume", default=False, action='store_false', help="Find spots in 3D or not")
+        "--is-volume", default=False,  help="Find spots in 3D or not")
     @click.option(
-        "--verbose", default=True, action='store_true', help="Verbosity flag")
+        "--verbose", default=True, help="Verbosity flag")
     @click.pass_context
     def _cli(ctx, min_distance, min_obj_area, max_obj_area, stringency, threshold,
              min_num_spots_detected, measurement_type, is_volume, verbose):

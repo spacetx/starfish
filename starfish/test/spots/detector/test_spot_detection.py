@@ -36,8 +36,9 @@ def simple_local_max_spot_detector() -> LocalMaxPeakFinder:
     return LocalMaxPeakFinder(
         min_distance=6,
         stringency=0,
-        min_obj_area=6,
-        max_obj_area=600
+        min_obj_area=0,
+        max_obj_area=10,
+        threshold=0
     )
 
 

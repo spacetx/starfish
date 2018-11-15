@@ -178,6 +178,9 @@ class Experiment:
             This parameter is read from the environment to permit setting configuration
             values either directly or via a file. Keys read include:
              - cache.allow_caching
+             - cache.directory
+             - cache.size_limit
+             - validation.strict
         STARFISH_STRICT_LOADING :
              This parameter is read from the environment. If set, then all JSON loaded by this
              method will be passed to the appropriate validator. The `strict` parameter to this
@@ -189,15 +192,23 @@ class Experiment:
             Experiment object serving the requested experiment data
 
         """
+
+        config_obj = Config(config)  # STARFISH_CONFIG is assumed
+        cache_config = config_obj.lookup(["cache"], {})
+        if cache_config.get("allow_caching", True):
+            allow_caching = cache_config
+        else:
+            allow_caching = False
+
+
         if strict is None:
-            strict = "STARFISH_STRICT_LOADING" in os.environ
+            strict = config_obj.lookup(["validation", "strict"],
+                                       os.environ.get("STARFISH_STRICT_LOADING", False))
+
         if strict:
             valid = validate_sptx.validate(json_url)
             if not valid:
                 raise Exception("validation failed")
-
-        config_obj = Config(config)  # STARFISH_CONFIG is assumed
-        allow_caching = config_obj.lookup(["cache", "allow_caching"], True)
 
         backend, name, baseurl = resolve_path_or_url(json_url, allow_caching)
         with backend.read_contextmanager(name) as fh:

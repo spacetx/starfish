@@ -50,3 +50,16 @@ def test_lookup_deep():
     with raises(AttributeError):
         config.lookup(["a", "b", "c", "d"])
     assert config.lookup(["a", "b", "c", "d"], "x") == "x"
+
+
+def test_cache_config():
+    config = Config("""{
+        "cache": {
+             "allow_caching": true,
+             "size_limit": 5e9
+             "directory": "/tmp"
+         }
+    }""")
+    cache_config = config.lookup(["cache"], {})
+    assert cache_config["allow_caching"]
+    assert cache_config["size_limit"] ==5*10**9

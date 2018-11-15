@@ -7,6 +7,7 @@ from starfish.spots._detector._base import SpotFinderAlgorithmBase
 from starfish.spots._detector.blob import BlobDetector
 from starfish.spots._detector.detect import detect_spots
 from starfish.spots._detector.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
+from starfish.spots._detector.local_max_peak_finder import LocalMaxPeakFinder
 from starfish.types import Indices
 
 
@@ -15,7 +16,7 @@ def simple_gaussian_spot_detector() -> BlobDetector:
     return BlobDetector(min_sigma=1, max_sigma=4, num_sigma=5, threshold=0, measurement_type='max')
 
 
-def simple_local_max_spot_detector() -> TrackpyLocalMaxPeakFinder:
+def simple_trackplay_local_max_spot_detector() -> TrackpyLocalMaxPeakFinder:
     """create a basic local max peak finder"""
     return TrackpyLocalMaxPeakFinder(
         spot_diameter=3,
@@ -25,8 +26,18 @@ def simple_local_max_spot_detector() -> TrackpyLocalMaxPeakFinder:
     )
 
 
+def simple_local_max_spot_detector() -> LocalMaxPeakFinder:
+    return LocalMaxPeakFinder(
+        min_distance=6,
+        stringency=0,
+        min_obj_area=6,
+        max_obj_area=600
+    )
+
+
 # initialize spot detectors
 gaussian_spot_detector = simple_gaussian_spot_detector()
+track_play_local_max_spot_detector = simple_trackplay_local_max_spot_detector()
 local_max_spot_detector = simple_local_max_spot_detector()
 
 
@@ -77,7 +88,8 @@ data_stack = synthetic_two_spot_3d_2round_2ch()
 
 @pytest.mark.parametrize('data_stack, spot_detector, radius_is_gyration', [
     (data_stack, gaussian_spot_detector, False),
-    (data_stack, local_max_spot_detector, True)
+    (data_stack, track_play_local_max_spot_detector, True),
+    (data_stack, local_max_spot_detector, False)
 ])
 def test_spot_detection_with_reference_image(
         data_stack: ImageStack,
@@ -109,7 +121,8 @@ def test_spot_detection_with_reference_image(
 
 @pytest.mark.parametrize('data_stack, spot_detector, radius_is_gyration', [
     (data_stack, gaussian_spot_detector, False),
-    (data_stack, local_max_spot_detector, True)
+    (data_stack, track_play_local_max_spot_detector, True),
+    (data_stack, local_max_spot_detector, False)
 ])
 def test_spot_detection_with_reference_image_from_max_projection(
         data_stack: ImageStack,
@@ -137,7 +150,8 @@ def test_spot_detection_with_reference_image_from_max_projection(
 
 @pytest.mark.parametrize('data_stack, spot_detector, radius_is_gyration', [
     (data_stack, gaussian_spot_detector, False),
-    (data_stack, local_max_spot_detector, True)
+    (data_stack, track_play_local_max_spot_detector, True),
+    (data_stack, local_max_spot_detector, False)
 ])
 def test_spot_finding_no_reference_image(
         data_stack: ImageStack,

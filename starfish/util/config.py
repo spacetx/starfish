@@ -35,7 +35,7 @@ class Config(object):
         if not value:
             value = {}
 
-        data = {}
+        data: Dict = {}
         if isinstance(value, str):
             if value.startswith("@"):
                 filename = os.path.expanduser(value[1:])

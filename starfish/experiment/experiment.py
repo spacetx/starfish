@@ -200,7 +200,6 @@ class Experiment:
         else:
             allow_caching = False
 
-
         if strict is None:
             strict = config_obj.lookup(["validation", "strict"],
                                        os.environ.get("STARFISH_STRICT_LOADING", False))

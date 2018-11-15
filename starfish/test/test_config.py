@@ -62,4 +62,4 @@ def test_cache_config():
     }""")
     cache_config = config.lookup(["cache"], {})
     assert cache_config["allow_caching"]
-    assert cache_config["size_limit"] ==5*10**9
+    assert cache_config["size_limit"] == 5 * 10 ** 9

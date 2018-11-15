@@ -141,8 +141,6 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         return thresholds, spot_counts
 
     def _select_optimal_threshold(self, thresholds: np.ndarray, spot_counts: List[int]) -> float:
-        if len(spot_counts) == 0:
-            return 0
         # calculate the gradient of the number of spots
         grad = np.gradient(spot_counts)
         self._grad = grad

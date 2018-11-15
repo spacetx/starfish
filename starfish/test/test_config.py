@@ -56,7 +56,7 @@ def test_cache_config():
     config = Config("""{
         "cache": {
              "allow_caching": true,
-             "size_limit": 5e9
+             "size_limit": 5e9,
              "directory": "/tmp"
          }
     }""")

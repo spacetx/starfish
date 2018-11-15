@@ -6,8 +6,8 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.spots._detector._base import SpotFinderAlgorithmBase
 from starfish.spots._detector.blob import BlobDetector
 from starfish.spots._detector.detect import detect_spots
-from starfish.spots._detector.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
 from starfish.spots._detector.local_max_peak_finder import LocalMaxPeakFinder
+from starfish.spots._detector.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
 from starfish.types import Indices
 
 
@@ -107,8 +107,10 @@ def test_spot_detection_with_reference_image(
     reference_image_mp = data_stack.max_proj(Indices.CH, Indices.ROUND)
     reference_image_mp_numpy = reference_image_mp._squeezed_numpy(Indices.CH, Indices.ROUND)
 
-    intensity_table = detect_spots(data_stack=data_stack, spot_finding_method=spot_detector.image_to_spots,
-                                   reference_image=reference_image_mp_numpy, measurement_function=np.max,
+    intensity_table = detect_spots(data_stack=data_stack,
+                                   spot_finding_method=spot_detector.image_to_spots,
+                                   reference_image=reference_image_mp_numpy,
+                                   measurement_function=np.max,
                                    radius_is_gyration=radius_is_gyration)
     assert intensity_table.shape == (2, 2, 2), "wrong number of spots detected"
     expected = [0.01587425, 0.01587425]
@@ -132,8 +134,10 @@ def test_spot_detection_with_reference_image_from_max_projection(
     method should recognize the 1-hot code used in the testing data, and see one channel "on" per
     round. Thus, the total intensity across all channels and round for each spot should be 14.
     """
-    intensity_table = detect_spots(data_stack=data_stack, spot_finding_method=spot_detector.image_to_spots,
-                                   reference_image_from_max_projection=True, measurement_function=np.max,
+    intensity_table = detect_spots(data_stack=data_stack,
+                                   spot_finding_method=spot_detector.image_to_spots,
+                                   reference_image_from_max_projection=True,
+                                   measurement_function=np.max,
                                    radius_is_gyration=radius_is_gyration)
     assert intensity_table.shape == (2, 2, 2), "wrong number of spots detected"
     expected = [0.01587425, 0.01587425]
@@ -158,8 +162,10 @@ def test_spot_finding_no_reference_image(
     measures a single channel. Thus the total intensity across all rounds and channels for each
     spot should be 7.
     """
-    intensity_table = detect_spots(data_stack=data_stack, spot_finding_method=spot_detector.image_to_spots,
-                                   measurement_function=np.max, radius_is_gyration=radius_is_gyration)
+    intensity_table = detect_spots(data_stack=data_stack,
+                                   spot_finding_method=spot_detector.image_to_spots,
+                                   measurement_function=np.max,
+                                   radius_is_gyration=radius_is_gyration)
     assert intensity_table.shape == (4, 2, 2), "wrong number of spots detected"
     expected = [0.00793712] * 4
     assert np.allclose(intensity_table.sum((Indices.ROUND, Indices.CH)).values, expected), \

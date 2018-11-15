@@ -35,11 +35,13 @@ class Config(object):
         if not value:
             value = {}
 
+        data = {}
         if isinstance(value, str):
             if value.startswith("@"):
                 filename = os.path.expanduser(value[1:])
-                with open(filename, "r") as o:
-                    data = json.loads(o.read())
+                if os.path.exists(filename):
+                    with open(filename, "r") as o:
+                        data = json.loads(o.read())
             else:
                 data = json.loads(value)
         else:

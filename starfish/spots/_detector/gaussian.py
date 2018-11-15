@@ -136,14 +136,10 @@ class GaussianSpotDetector(SpotFinderAlgorithmBase):
 
         """
 
-        intensity_table = detect_spots(
-            data_stack=data_stack,
-            spot_finding_method=self.image_to_spots,
-            reference_image=blobs_image,
-            reference_image_from_max_projection=reference_image_from_max_projection,
-            measurement_function=self.measurement_function,
-            radius_is_gyration=False,
-        )
+        intensity_table = detect_spots(data_stack=data_stack, spot_finding_method=self.image_to_spots,
+                                       reference_image=blobs_image,
+                                       reference_image_from_max_projection=reference_image_from_max_projection,
+                                       measurement_function=self.measurement_function, radius_is_gyration=False)
 
         return intensity_table
 

@@ -254,12 +254,14 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # TODO how to get the radius? unlikely that this can be pulled out of
         # self._spot_props, since the last call to peak_local_max can find multiple
         # peaks per label
-        res = {Indices.X.value: self._spot_coords[:, 1],
-               Indices.Y.value: self._spot_coords[:, 0],
-               Indices.Z.value: np.zeros(len(self._spot_coords)),
+        res = {Indices.X.value: self._spot_coords[:, 2],
+               Indices.Y.value: self._spot_coords[:, 1],
+               Indices.Z.value: self._spot_coords[:, 0],
                Features.SPOT_RADIUS: 1,
                Features.SPOT_ID: np.arange(self._spot_coords.shape[0]),
-               Features.INTENSITY: data_image[self._spot_coords[:, 0], self._spot_coords[:, 1]]
+               Features.INTENSITY: data_image[self._spot_coords[:, 0],
+                                              self._spot_coords[:, 1],
+                                              self._spot_coords[:, 2]]
                }
 
         return SpotAttributes(pd.DataFrame(res))
@@ -289,15 +291,10 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         IntensityTable :
             IntensityTable containing decoded spots
         """
-        intensity_table = detect_spots(
-            data_stack=data_stack,
-            spot_finding_method=self.image_to_spots,
-            reference_image=blobs_image,
-            reference_image_from_max_projection=reference_image_from_max_projection,
-            measurement_function=self.measurement_function,
-            radius_is_gyration=False,
-            is_volume=self.is_volume
-        )
+        intensity_table = detect_spots(data_stack=data_stack, spot_finding_method=self.image_to_spots,
+                                       reference_image=blobs_image,
+                                       reference_image_from_max_projection=reference_image_from_max_projection,
+                                       measurement_function=self.measurement_function, radius_is_gyration=False)
 
         return intensity_table
 

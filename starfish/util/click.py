@@ -1,7 +1,7 @@
 import json
+from functools import update_wrapper
 
 import click
-from functools import update_wrapper
 from click.globals import get_current_context
 
 from starfish.types import Indices
@@ -42,7 +42,7 @@ def dimensions_option(name, required):
 def pass_context_and_log(f):
     def new_func(*args, **kwargs):
         ctx = get_current_context()
-        print(ctx.info_name,":")
+        print(ctx.info_name, ":")
         for k, v in sorted(ctx.params.items()):
             print(f"\t{k}={v}")
         return f(ctx, *args, **kwargs)

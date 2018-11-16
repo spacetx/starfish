@@ -7,7 +7,6 @@ from starfish.util.click import (
 from . import AUX_IMAGE_NAMES, write_experiment_json
 
 
-
 decorators = [
     click.command(),
     click.argument("output_dir", type=click.Path(exists=True, file_okay=False, writable=True)),

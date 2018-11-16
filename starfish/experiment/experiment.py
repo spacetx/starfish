@@ -294,7 +294,7 @@ class Experiment:
                 continue
 
             results.append(fov)
-        results.sort(key=key_fn)
+        results = sorted(results, key=key_fn)
         return results
 
     def fovs_by_name(self, *names):

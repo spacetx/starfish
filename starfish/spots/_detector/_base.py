@@ -7,6 +7,7 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.types import Number, SpotAttributes
+from .spot_detector_results import LocalMaxFinderResults
 from .combine_adjacent_features import ConnectedComponentDecodingResult
 
 
@@ -18,7 +19,10 @@ class SpotFinderAlgorithmBase(AlgorithmBase):
         """Finds spots in an ImageStack"""
         raise NotImplementedError()
 
-    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
+    def image_to_spots(
+            self,
+            data_image: Union[np.ndarray, xr.DataArray]
+    ) -> Union[SpotAttributes, Tuple[SpotAttributes, LocalMaxFinderResults]]:
         """Finds spots in a 3d volume"""
         raise NotImplementedError()
 

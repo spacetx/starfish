@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
+from .spot_detector_results import LocalMaxFinderResults
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number, SpotAttributes
@@ -156,13 +157,16 @@ def concatenate_spot_attributes_to_intensities(
     return intensity_table
 
 
-def detect_spots(data_stack: ImageStack,
-                 spot_finding_method: Callable[..., SpotAttributes],
-                 spot_finding_kwargs: Dict = None,
-                 reference_image: Union[xr.DataArray, np.ndarray] = None,
-                 reference_image_from_max_projection: bool = False,
-                 measurement_function: Callable[[Sequence], Number] = np.max,
-                 radius_is_gyration: bool = False) -> IntensityTable:
+def detect_spots(
+        data_stack: ImageStack,
+        spot_finding_method: Callable[..., Union[SpotAttributes, Tuple[SpotAttributes, LocalMaxFinderResults]]],
+        spot_finding_kwargs: Dict=None,
+        reference_image: Union[xr.DataArray, np.ndarray]=None,
+        reference_image_from_max_projection: bool=False,
+        measurement_function: Callable[[Sequence], Number]=np.max,
+        radius_is_gyration: bool=False
+) -> IntensityTable:
+
     """Apply a spot_finding_method to a ImageStack
 
     Parameters

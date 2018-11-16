@@ -15,12 +15,14 @@ from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number, SpotAttributes
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
+from .spot_detector_results import LocalMaxFinderResults
 
 
 # TODO ambrosejcarr, ttung: https://github.com/spacetx/starfish/issues/708
 # Currently, spot finders cannot propagate state, which makes the flow for this
 # spot finder confusing. One would expect to have access to the private parameters
 # however, they are lost due to the memory-space forking induced by multi-processing.
+
 
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
     def __init__(
@@ -204,7 +206,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         threshold = self._select_optimal_threshold(thresholds, spot_counts)
         return threshold
 
-    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
+    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> Tuple[SpotAttributes, LocalMaxFinderResults]:
         """measure attributes of spots detected by binarizing the image using the selected threshold
 
         Parameters
@@ -262,14 +264,21 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
                                               self._spot_coords[:, 2]]
                }
 
-        return SpotAttributes(pd.DataFrame(res))
+        lmr = LocalMaxFinderResults(
+            self._thresholds,
+            self._spot_counts,
+            self._grad,
+            self._spot_props,
+            self._labels
+        )
+        return SpotAttributes(pd.DataFrame(res)), lmr
 
     def run(
             self,
             data_stack: ImageStack,
             blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
             reference_image_from_max_projection: bool = False,
-    ) -> IntensityTable:
+    ) -> Tuple[IntensityTable, LocalMaxFinderResults]:
         """Find spots.
 
         Parameters
@@ -289,7 +298,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         IntensityTable :
             IntensityTable containing decoded spots
         """
-        intensity_table = detect_spots(
+        intensity_table, image_decoding_results = detect_spots(
             data_stack=data_stack,
             spot_finding_method=self.image_to_spots,
             reference_image=blobs_image,
@@ -297,7 +306,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             measurement_function=self.measurement_function,
             radius_is_gyration=False)
 
-        return intensity_table
+        return intensity_table, image_decoding_results
 
     @staticmethod
     @click.command("LocalMaxPeakFinder")

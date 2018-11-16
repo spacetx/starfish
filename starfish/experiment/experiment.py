@@ -265,6 +265,7 @@ class Experiment:
     def fov(
             self,
             filter_fn: Callable[[FieldOfView], bool]=lambda _: True,
+            key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
     ) -> FieldOfView:
         """
         Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return the first
@@ -273,7 +274,7 @@ class Experiment:
 
         If no FOV matches, raise LookupError.
         """
-        for fov in self._fovs:
+        for fov in sorted(self._fovs, key=key_fn):
             if filter_fn(fov):
                 return fov
         raise LookupError("Cannot find any FOV that the filter allows.")
@@ -281,6 +282,7 @@ class Experiment:
     def fovs(
             self,
             filter_fn: Callable[[FieldOfView], bool]=lambda _: True,
+            key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
     ) -> Sequence[FieldOfView]:
         """
         Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return a list of
@@ -292,6 +294,7 @@ class Experiment:
                 continue
 
             results.append(fov)
+        results.sort(key=key_fn)
         return results
 
     def fovs_by_name(self, *names):

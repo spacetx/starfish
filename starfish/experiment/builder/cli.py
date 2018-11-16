@@ -1,40 +1,12 @@
-import json
-
 import click
 
-from starfish.types import Indices
+from starfish.util.click import (
+    dimensions_option,
+    pass_context_and_log,
+)
 from . import AUX_IMAGE_NAMES, write_experiment_json
 
 
-class StarfishIndex(click.ParamType):
-
-    name = "starfish-index"
-
-    def convert(self, spec_json, param, ctx):
-        try:
-            spec = json.loads(spec_json)
-        except json.decoder.JSONDecodeError:
-            self.fail(
-                "Could not parse {} into a valid index specification.".format(spec_json))
-
-        return {
-            Indices.ROUND: spec.get(Indices.ROUND, 1),
-            Indices.CH: spec.get(Indices.CH, 1),
-            Indices.Z: spec.get(Indices.Z, 1),
-        }
-
-def dimensions_option(name, required):
-    return click.option(
-        "--{}-dimensions".format(name),
-        type=StarfishIndex(), required=required,
-        help="Dimensions for the {} images.  Should be a json dict, with {}, {}, "
-             "and {} as the possible keys.  The value should be the shape along that "
-             "dimension.  If a key is not present, the value is assumed to be 0."
-             .format(
-             name,
-             Indices.ROUND.value,
-             Indices.CH.value,
-             Indices.Z.value))
 
 decorators = [
     click.command(),
@@ -45,7 +17,8 @@ decorators = [
 for image_name in AUX_IMAGE_NAMES:
     decorators.append(dimensions_option(image_name, False))
 
-def build(output_dir, fov_count, hybridization_dimensions, **kwargs):
+@pass_context_and_log
+def build(ctx, output_dir, fov_count, hybridization_dimensions, **kwargs):
     write_experiment_json(
         output_dir, fov_count, hybridization_dimensions,
         kwargs

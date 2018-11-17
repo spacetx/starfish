@@ -206,7 +206,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         threshold = self._select_optimal_threshold(thresholds, spot_counts)
         return threshold
 
-    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> Tuple[SpotAttributes, LocalMaxFinderResults]:
+    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
         """measure attributes of spots detected by binarizing the image using the selected threshold
 
         Parameters
@@ -264,14 +264,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
                                               self._spot_coords[:, 2]]
                }
 
-        lmr = LocalMaxFinderResults(
-            self._thresholds,
-            self._spot_counts,
-            self._grad,
-            self._spot_props,
-            self._labels
-        )
-        return SpotAttributes(pd.DataFrame(res)), lmr
+        return SpotAttributes(pd.DataFrame(res))
 
     def run(
             self,
@@ -298,7 +291,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         IntensityTable :
             IntensityTable containing decoded spots
         """
-        intensity_table, image_decoding_results = detect_spots(
+        intensity_table = detect_spots(
             data_stack=data_stack,
             spot_finding_method=self.image_to_spots,
             reference_image=blobs_image,
@@ -306,7 +299,15 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             measurement_function=self.measurement_function,
             radius_is_gyration=False)
 
-        return intensity_table, image_decoding_results
+        lmr = LocalMaxFinderResults(
+            self._thresholds,
+            self._spot_counts,
+            self._grad,
+            self._spot_props,
+            self._labels
+        )
+
+        return intensity_table, lmr
 
     @staticmethod
     @click.command("LocalMaxPeakFinder")

@@ -6,6 +6,6 @@ import numpy as np
 class LocalMaxFinderResults(NamedTuple):
     thresholds: Optional[np.ndarray]
     spot_count: Optional[List[int]]
-    grad: int
-    spop_props: list
+    grad: Optional[int]
+    spop_props: Optional[list]
     labels: Union[np.ndarray, int]

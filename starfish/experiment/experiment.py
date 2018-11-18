@@ -269,8 +269,8 @@ class Experiment:
     ) -> FieldOfView:
         """
         Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return the first
-        FOV such that filter_fn(FOV) returns True.  Because there is no guaranteed order for the
-        FOVs, use this cautiously.
+        FOV such that filter_fn(FOV) returns True. The order of the filtered FOVs will be determined
+        by the key_fn callable. By default, this matches the order of fov.name.
 
         If no FOV matches, raise LookupError.
         """
@@ -286,7 +286,8 @@ class Experiment:
     ) -> Sequence[FieldOfView]:
         """
         Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return a list of
-        FOVs such that filter_fn(FOV) returns True.
+        FOVs such that filter_fn(FOV) returns True. The returned list is sorted based on the key_fn
+        callable, which by default matches the order of fov.name.
         """
         results: MutableSequence[FieldOfView] = list()
         for fov in self._fovs:
@@ -297,10 +298,13 @@ class Experiment:
         results = sorted(results, key=key_fn)
         return results
 
-    def fovs_by_name(self, *names):
+    def fovs_by_name(self, *names,
+                     key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
+    ) -> Sequence[FieldOfView]:
         """
         Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return a list of
-        FOVs such that filter_fn(FOV) returns True.
+        FOVs such that filter_fn(FOV) returns True.  The returned list is sorted based on the key_fn
+        callable, which by default matches the order of fov.name.
         """
         return self.fovs(filter_fn=lambda fov: fov.name in names)
 

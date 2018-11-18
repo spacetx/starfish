@@ -298,8 +298,10 @@ class Experiment:
         results = sorted(results, key=key_fn)
         return results
 
-    def fovs_by_name(self, *names,
-                     key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
+    def fovs_by_name(
+        self,
+        *names,
+        key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
     ) -> Sequence[FieldOfView]:
         """
         Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return a list of

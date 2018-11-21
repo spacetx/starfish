@@ -7,5 +7,5 @@ class LocalMaxFinderResults(NamedTuple):
     thresholds: Optional[np.ndarray]
     spot_count: Optional[List[int]]
     grad: Optional[int]
-    spop_props: Optional[list]
+    spot_props: Optional[list]
     labels: Union[np.ndarray, int]

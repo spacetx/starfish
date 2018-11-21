@@ -15,10 +15,12 @@ def spot_attribute_factory(n: int) -> SpotAttributes:
     Construct SpotAttributes with n synthetic attributes. Each attribute has radius 1 and
     x, y, z coordinates equal to their index i in [0, n)
     """
-    return SpotAttributes(pd.DataFrame(
-        data=np.array([[i, i, i, 1] for i in np.arange(n)]),
-        columns=[Indices.Z, Indices.Y, Indices.X, Features.SPOT_RADIUS]
-    ))
+    return SpotAttributes(
+        pd.DataFrame(
+            data=np.array([[i, i, i, 1] for i in np.arange(n)]),
+            columns=[Indices.Z, Indices.Y, Indices.X, Features.SPOT_RADIUS]
+        )
+    )
 
 
 def test_intensity_table_can_be_constructed_from_a_numpy_array_and_spot_attributes():

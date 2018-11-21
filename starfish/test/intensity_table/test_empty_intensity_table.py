@@ -17,13 +17,15 @@ def test_intensity_table_can_be_created_from_spot_attributes():
     """
 
     # input has two spots
-    spot_attributes = SpotAttributes(pd.DataFrame(
-        data=np.array(
-            [[1, 1, 1, 1],
-             [2, 2, 2, 1]]
-        ),
-        columns=[Indices.Z, Indices.Y, Indices.X, Features.SPOT_RADIUS]
-    ))
+    spot_attributes = SpotAttributes(
+        pd.DataFrame(
+            data=np.array(
+                [[1, 1, 1, 1],
+                 [2, 2, 2, 1]]
+            ),
+            columns=[Indices.Z, Indices.Y, Indices.X, Features.SPOT_RADIUS]
+        )
+    )
 
     intensities = IntensityTable.empty_intensity_table(
         spot_attributes,

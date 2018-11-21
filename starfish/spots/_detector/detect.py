@@ -158,15 +158,14 @@ def concatenate_spot_attributes_to_intensities(
 
 def detect_spots(
         data_stack: ImageStack,
-        spot_finding_method:
-        Callable[..., SpotAttributes],
+        spot_finding_method: Callable[..., SpotAttributes],
         spot_finding_kwargs: Dict=None,
         reference_image: Union[xr.DataArray, np.ndarray]=None,
         reference_image_from_max_projection: bool=False,
         measurement_function: Callable[[Sequence], Number]=np.max,
-        radius_is_gyration: bool=False
+        radius_is_gyration: bool=False,
+        is_volume: bool=True
 ) -> IntensityTable:
-
     """Apply a spot_finding_method to a ImageStack
 
     Parameters
@@ -223,7 +222,10 @@ def detect_spots(
         reference_image = data_stack.max_proj(Indices.CH, Indices.ROUND)
         reference_image = reference_image._squeezed_numpy(Indices.CH, Indices.ROUND)
 
-    group_by = {Indices.ROUND, Indices.CH}
+    if is_volume:
+        group_by = {Indices.ROUND, Indices.CH}
+    else:
+        group_by = {Indices.ROUND, Indices.CH, Indices.Z}
 
     if reference_image is not None:
         reference_spot_locations = spot_finding_method(reference_image, **spot_finding_kwargs)

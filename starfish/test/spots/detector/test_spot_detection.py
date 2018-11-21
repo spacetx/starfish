@@ -1,3 +1,4 @@
+from functools import partial
 import numpy as np
 import pytest
 from scipy.ndimage.filters import gaussian_filter
@@ -170,3 +171,24 @@ def test_spot_finding_no_reference_image(
     expected = [0.00793712] * 4
     assert np.allclose(intensity_table.sum((Indices.ROUND, Indices.CH)).values, expected), \
         "wrong spot intensities detected"
+
+
+@pytest.mark.parametrize('data_stack, spot_detector, radius_is_gyration', [
+    (data_stack, local_max_spot_detector, False)
+])
+def test_spot_finding_maintains_state_info(
+        data_stack: ImageStack,
+        spot_detector: SpotFinderAlgorithmBase,
+        radius_is_gyration: bool,
+):
+    spot_finding_method = partial(spot_detector.image_to_spots)
+    spot_attributes_list = data_stack.transform(
+        func=spot_finding_method,
+        group_by={Indices.ROUND, Indices.CH}
+    )
+    for spot_attributes, indices in spot_attributes_list:
+        state_info = spot_attributes.extras
+        assert len(state_info.spot_props) > 0
+        assert len(state_info.labels) > 0
+
+

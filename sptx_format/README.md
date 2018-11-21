@@ -71,7 +71,7 @@ The field of view is the most complex file in the spaceTx format, and must be cr
 It provides two key types of information: information about the field of view, and information about each tile contained in it.
 
 The field_of_view.json file specifies the shape of the image tensor, including the size of the (X, Y) image in pixels, and the number of z-planes, imaging channels, and imaging rounds in the experiment.
-Thus, an image tensor has shape (r, c, z, y, x).
+Thus, an image tensor has shape (r, c, z, y, x), though y and x are limited to at most 3000 pixels.
 For experiments that do not leverage all of these concepts, the values can simply be set to one, and that dimension of the tensor will be ignored.
 For example, barcoded experiments do not leverage z, and as such, the shape of these experiments will be (r, c, 1, y, x)
 In contrast, smFISH experiments may not leverage multiple imaging rounds, but often take optical sections of the tissue through multiple z-planes, and might have shape (1, c, z, y, z).

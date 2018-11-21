@@ -1,0 +1,59 @@
+{
+  "version": "0.0.0",
+  "dimensions": [
+      "x",
+      "y",
+      "z",
+      "r",
+      "c"
+  ],
+  "shape": {
+      "z": 45,
+      "r": 8,
+      "c": 2
+  },
+  "default_tile_format": "TIFF",
+  "default_tile_shape": [
+    4096,
+    4096
+  ],
+  "extras": "nothing to see here",
+  "tiles": [
+    {
+      "coordinates": {
+        "xc": [0.0, 0.1],
+        "yc": [0.0, 0.1],
+        "zc": [0.0]
+      },
+      "indices": {
+        "z": 0,
+        "r": 0,
+        "c": 0
+      },
+      "file": "fdaj3902.tiff",
+      "tile_format": "TIFF",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "extras": {
+        "are_we_missing_something":"probably"
+      }
+    },
+    {
+      "coordinates": {
+        "xc": [0.0, 0.1],
+        "yc": [0.0, 0.1],
+        "zc": [0.1]
+      },
+      "indices": {
+        "z": 1,
+        "r": 1,
+        "c": 0
+      },
+      "file": "F_1_Z_1_H_1_C_0.tiff",
+      "tile_format": "TIFF",
+ 	  "sha256": "e3b0c44i98fx1c149afbf4c8996fb924273941e7649b234ca4959a2b7822b855",
+      "extras": {
+        "are_we_missing_something": "probably"
+      }
+    }
+  ]
+}

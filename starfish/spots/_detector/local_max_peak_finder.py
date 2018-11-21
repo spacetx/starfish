@@ -261,17 +261,25 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
                Features.SPOT_ID: np.arange(self._spot_coords.shape[0]),
                Features.INTENSITY: data_image[self._spot_coords[:, 0],
                                               self._spot_coords[:, 1],
-                                              self._spot_coords[:, 2]]
-               }
+                                              self._spot_coords[:, 2]],
 
-        return SpotAttributes(pd.DataFrame(res))
+               }
+        lmr = LocalMaxFinderResults(
+            self._thresholds,
+            self._spot_counts,
+            self._grad,
+            self._spot_props,
+            self._labels
+        )
+
+        return SpotAttributes(pd.DataFrame(res), lmr)
 
     def run(
             self,
             data_stack: ImageStack,
             blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
             reference_image_from_max_projection: bool = False,
-    ) -> Tuple[IntensityTable, LocalMaxFinderResults]:
+    ) -> IntensityTable:
         """Find spots.
 
         Parameters
@@ -299,15 +307,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             measurement_function=self.measurement_function,
             radius_is_gyration=False)
 
-        lmr = LocalMaxFinderResults(
-            self._thresholds,
-            self._spot_counts,
-            self._grad,
-            self._spot_props,
-            self._labels
-        )
-
-        return intensity_table, lmr
+        return intensity_table
 
     @staticmethod
     @click.command("LocalMaxPeakFinder")

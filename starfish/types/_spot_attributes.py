@@ -16,15 +16,17 @@ class SpotAttributes(ValidatedTable):
         Features.SPOT_RADIUS,  # spot radius
     }
 
-    def __init__(self, spot_attributes: pd.DataFrame) -> None:
+    def __init__(self, spot_attributes: pd.DataFrame, extras=None) -> None:
         """Construct a SpotAttributes instance
 
         Parameters
         ----------
         spot_attributes : pd.DataFrame
+        :param extras:
 
         """
         super().__init__(spot_attributes, SpotAttributes.required_fields)
+        self.extras = extras
 
     def save_geojson(self, output_file_name: str) -> None:
         """Save to geojson for web visualization

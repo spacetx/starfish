@@ -275,14 +275,12 @@ class IntensityTable(xr.DataArray):
         x = np.random.randint(0, width, size=n_spots)
         r = np.empty(n_spots)
         r.fill(np.nan)  # radius is a function of the point-spread gaussian size
-        spot_attributes = SpotAttributes(
-            pd.DataFrame(
-                {Indices.Z.value: z,
-                 Indices.Y.value: y,
-                 Indices.X.value: x,
-                 Features.SPOT_RADIUS: r}
-            )
-        )
+        spot_attributes = SpotAttributes(pd.DataFrame(
+            {Indices.Z.value: z,
+             Indices.Y.value: y,
+             Indices.X.value: x,
+             Features.SPOT_RADIUS: r}
+        ))
 
         # empty data tensor
         data = np.zeros(shape=(n_spots, *codebook.shape[1:]))

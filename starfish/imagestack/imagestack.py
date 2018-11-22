@@ -11,6 +11,7 @@ from typing import (
     Iterator,
     List,
     Mapping,
+    MutableMapping,
     MutableSequence,
     Optional,
     Sequence,
@@ -28,7 +29,7 @@ from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import scoreatpercentile
 from skimage import exposure
 from skimage import img_as_float32, img_as_uint
-from slicedimage import Reader, TileSet, Writer
+from slicedimage import Reader, Tile, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
@@ -42,6 +43,7 @@ from starfish.multiprocessing.shmem import SharedMemory
 from starfish.types import (
     Coordinates,
     Indices,
+    Number,
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
 )
@@ -946,22 +948,57 @@ class ImageStack:
         tile_opener : TODO ttung: doc me.
 
         """
-        for tile in self._image_partition.tiles():
-            h = tile.indices[Indices.ROUND]
-            c = tile.indices[Indices.CH]
-            zlayer = tile.indices.get(Indices.Z, 0)
-            tile.numpy_array, axes = self.get_slice(
-                indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}
-            )
-            assert len(axes) == 0
-
+        tileset = TileSet(
+            dimensions={
+                Indices.ROUND,
+                Indices.CH,
+                Indices.Z,
+                Indices.Y,
+                Indices.X,
+            },
+            shape={
+                Indices.ROUND: self.num_rounds,
+                Indices.CH: self.num_chs,
+                Indices.Z: self.num_zlayers,
+            },
+            default_tile_shape=self._tile_shape,
+            extras=self._tile_metadata.extras,
+        )
         seen_x_coords, seen_y_coords, seen_z_coords = set(), set(), set()
-        for tile in self._image_partition.tiles():
-            seen_x_coords.add(tile.coordinates[Coordinates.X])
-            seen_y_coords.add(tile.coordinates[Coordinates.Y])
-            z_coords = tile.coordinates.get(Coordinates.Z, None)
-            if z_coords is not None:
-                seen_z_coords.add(z_coords)
+        for round_ in range(self.num_rounds):
+            for ch in range(self.num_chs):
+                for zlayer in range(self.num_zlayers):
+                    tilekey = TileKey(round=round_, ch=ch, z=zlayer)
+                    extras: dict = self._tile_metadata[tilekey]
+
+                    tile_indices = {
+                        Indices.ROUND: round_,
+                        Indices.CH: ch,
+                        Indices.Z: zlayer,
+                    }
+
+                    coordinates: MutableMapping[Coordinates, Tuple[Number, Number]] = dict()
+                    x_coordinates = self.coordinates(tile_indices, Coordinates.X)
+                    y_coordinates = self.coordinates(tile_indices, Coordinates.Y)
+                    z_coordinates = self.coordinates(tile_indices, Coordinates.Z)
+
+                    seen_x_coords.add(x_coordinates)
+                    coordinates[Coordinates.X] = x_coordinates
+                    seen_y_coords.add(y_coordinates)
+                    coordinates[Coordinates.Y] = y_coordinates
+                    if z_coordinates[0] != np.nan and z_coordinates[1] != np.nan:
+                        coordinates[Coordinates.Z] = z_coordinates
+                        seen_z_coords.add(z_coordinates)
+
+                    tile = Tile(
+                        coordinates=coordinates,
+                        indices=tile_indices,
+                        extras=extras,
+                    )
+                    tile.numpy_array, _ = self.get_slice(
+                        indices={Indices.ROUND: round_, Indices.CH: ch, Indices.Z: zlayer}
+                    )
+                    tileset.add_tile(tile)
 
         sorted_x_coords = sorted(seen_x_coords)
         sorted_y_coords = sorted(seen_y_coords)
@@ -1000,7 +1037,7 @@ class ImageStack:
         if not filepath.endswith('.json'):
             filepath += '.json'
         Writer.write_to_path(
-            self._image_partition,
+            tileset,
             filepath,
             pretty=True,
             tile_opener=tile_opener)

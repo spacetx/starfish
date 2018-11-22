@@ -20,7 +20,7 @@ install_requires = [
 
 setuptools.setup(
     name="starfish",
-    version="0.0.29",
+    version="0.0.30",
     description="Pipelines and pipeline components for the analysis of image-based transcriptomics data",
     author="Deep Ganguli",
     author_email="dganguli@chanzuckerberg.com",

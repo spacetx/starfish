@@ -35,8 +35,8 @@ from tqdm import tqdm
 from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
-from starfish.imagestack import indexing_utils
-from starfish.imagestack import physical_coordinate_calculator
+from starfish.imagestack import indexing_utils, physical_coordinate_calculator
+from starfish.imagestack.tileset import TileKey, TileSetData
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.multiprocessing.shmem import SharedMemory
 from starfish.types import (
@@ -95,6 +95,7 @@ class ImageStack:
 
     def __init__(self, image_partition: TileSet) -> None:
         self._image_partition = image_partition
+        self._tile_metadata = TileSetData(self._image_partition)
         self._tile_shape = image_partition.default_tile_shape
 
         # Examine the tiles to figure out the right kind (int, float, etc.) and size.  We require
@@ -829,14 +830,15 @@ class ImageStack:
         """
 
         data: collections.defaultdict = collections.defaultdict(list)
+        keys = self._tile_metadata.keys()
         index_keys = set(
-            key
-            for tile in self._image_partition.tiles()
-            for key in tile.indices.keys())
+            key.value
+            for key in AXES_DATA.keys()
+        )
         extras_keys = set(
             key
-            for tile in self._image_partition.tiles()
-            for key in tile.extras.keys())
+            for tilekey in keys
+            for key in self._tile_metadata[tilekey].keys())
         duplicate_keys = index_keys.intersection(extras_keys)
         if len(duplicate_keys) > 0:
             duplicate_keys_str = ", ".join([str(key) for key in duplicate_keys])
@@ -844,17 +846,23 @@ class ImageStack:
                 f"keys ({duplicate_keys_str}) was found in both the Tile specification and extras "
                 f"field. Tile specification keys may not be duplicated in the extras field.")
 
-        for tile in self._image_partition.tiles():
-            for k in index_keys:
-                data[k].append(tile.indices.get(k, None))
-            for k in extras_keys:
-                data[k].append(tile.extras.get(k, None))
+        for indices in self._iter_indices({Indices.ROUND, Indices.CH, Indices.Z}):
+            tilekey = TileKey(
+                round=indices[Indices.ROUND],
+                ch=indices[Indices.CH],
+                z=indices[Indices.Z])
+            extras = self._tile_metadata[tilekey]
 
-            if 'barcode_index' not in tile.extras:
-                round_ = tile.indices[Indices.ROUND]
-                ch = tile.indices[Indices.CH]
-                z = tile.indices.get(Indices.Z, 0)
-                barcode_index = (((z * self.num_rounds) + round_) * self.num_chs) + ch
+            for index, index_value in indices.items():
+                data[index.value].append(index_value)
+
+            for k in extras_keys:
+                data[k].append(extras.get(k, None))
+
+            if 'barcode_index' not in extras:
+                barcode_index = ((((indices[Indices.Z]
+                                    * self.num_rounds) + indices[Indices.ROUND])
+                                  * self.num_chs) + indices[Indices.CH])
 
                 data['barcode_index'].append(barcode_index)
 

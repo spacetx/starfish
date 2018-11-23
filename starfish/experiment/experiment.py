@@ -20,6 +20,7 @@ from slicedimage.urlpath import pathjoin
 from sptx_format import validate_sptx
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
+from starfish.imagestack.tileset import parse_tileset
 from starfish.util.config import Config
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
@@ -93,7 +94,8 @@ class FieldOfView:
 
     def __getitem__(self, item) -> ImageStack:
         if isinstance(self._images[item], TileSet):
-            self._images[item] = ImageStack(self._images[item])
+            parsed = parse_tileset(self._images[item])
+            self._images[item] = ImageStack(*parsed)
         return self._images[item]
 
 

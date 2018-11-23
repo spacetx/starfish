@@ -39,7 +39,7 @@ def dimensions_option(name, required):
              Indices.Z.value))
 
 
-def pass_context_and_log(f):
+def pass_context_and_record(f):
     def new_func(*args, **kwargs):
         ctx = get_current_context()
         print(ctx.info_name, ":")

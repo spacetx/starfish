@@ -14,6 +14,7 @@ from starfish.image._filter.util import (
 )
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
+from starfish.util.click import pass_context_and_record
 
 
 class Laplace(FilterAlgorithmBase):
@@ -130,6 +131,6 @@ class Laplace(FilterAlgorithmBase):
     @click.option(
         "--is-volume", is_flag=True,
         help="indicates that the image stack should be filtered in 3d")
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, sigma, mode, cval, is_volume):
         ctx.obj["component"]._cli_run(ctx, Laplace(sigma, mode, cval, is_volume))

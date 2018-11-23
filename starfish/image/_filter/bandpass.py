@@ -7,6 +7,7 @@ from trackpy import bandpass
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
+from starfish.util.click import pass_context_and_record
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by, preserve_float_range
 
@@ -125,6 +126,6 @@ class Bandpass(FilterAlgorithmBase):
     @click.option(
         "--truncate", default=4, type=float,
         help="truncate the filter at this many standard deviations")
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, lshort, llong, threshold, truncate):
         ctx.obj["component"]._cli_run(ctx, Bandpass(lshort, llong, threshold, truncate))

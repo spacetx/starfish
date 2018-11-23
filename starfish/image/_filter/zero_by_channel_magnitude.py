@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
+from starfish.util.click import pass_context_and_record
 from ._base import FilterAlgorithmBase
 
 
@@ -94,6 +95,6 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
     @click.option(
         '--normalize', is_flag=True,
         help='Scales all rounds to have unit L2 norm across channels')
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, thresh, normalize):
         ctx.obj["component"]._cli_run(ctx, ZeroByChannelMagnitude(thresh, normalize))

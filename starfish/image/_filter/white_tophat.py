@@ -5,6 +5,7 @@ import numpy as np
 from skimage.morphology import ball, disk, white_tophat
 
 from starfish.imagestack.imagestack import ImageStack
+from starfish.util.click import pass_context_and_record
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by
 
@@ -83,6 +84,6 @@ class WhiteTophat(FilterAlgorithmBase):
         help="diameter of morphological masking disk in pixels")
     @click.option(  # FIXME: was this intentionally missed?
         "--is-volume", is_flag=True, help="filter 3D volumes")
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, masking_radius, is_volume):
         ctx.obj["component"]._cli_run(ctx, WhiteTophat(masking_radius, is_volume))

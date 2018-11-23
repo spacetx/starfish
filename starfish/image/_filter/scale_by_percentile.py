@@ -5,6 +5,7 @@ import click
 import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
+from starfish.util.click import pass_context_and_record
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by, preserve_float_range
 
@@ -94,6 +95,6 @@ class ScaleByPercentile(FilterAlgorithmBase):
         "--p", default=100, type=int, help="scale images by this percentile")
     @click.option(  # FIXME: was this intentionally missed?
         "--is-volume", is_flag=True, help="filter 3D volumes")
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, p, is_volume):
         ctx.obj["component"]._cli_run(ctx, ScaleByPercentile(p, is_volume))

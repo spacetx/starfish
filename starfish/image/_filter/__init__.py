@@ -4,6 +4,7 @@ import click
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.util.click import pass_context_and_record
 from . import _base
 from . import bandpass
 from . import clip
@@ -35,7 +36,7 @@ class Filter(PipelineComponent):
     @click.group("filter")
     @click.option("-i", "--input", type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, input, output):
         print("Filtering images...")
         ctx.obj = dict(

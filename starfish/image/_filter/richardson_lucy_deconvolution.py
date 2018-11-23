@@ -7,6 +7,7 @@ from scipy.signal import convolve, fftconvolve
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices, Number
+from starfish.util.click import pass_context_and_record
 from ._base import FilterAlgorithmBase
 from .util import gaussian_kernel, preserve_float_range
 
@@ -174,6 +175,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
     @click.option(
         '--no-clip', is_flag=True,
         help='(default True) if True, clip values below 0 and above 1')
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, num_iter, sigma, no_clip):
         ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, no_clip))

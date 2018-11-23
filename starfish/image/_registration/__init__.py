@@ -4,6 +4,7 @@ import click
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.util.click import pass_context_and_record
 from . import fourier_shift
 from ._base import RegistrationAlgorithmBase
 
@@ -25,7 +26,7 @@ class Registration(PipelineComponent):
     @click.group("registration")
     @click.option("-i", "--input", type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, input, output):
         print("Registering...")
         ctx.obj = dict(

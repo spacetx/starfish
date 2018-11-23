@@ -5,6 +5,7 @@ from skimage.io import imsave
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.util.click import pass_context_and_record
 from . import watershed
 from ._base import SegmentationAlgorithmBase
 
@@ -31,7 +32,7 @@ class Segmentation(PipelineComponent):
     @click.option("--primary-images", required=True, type=click.Path(exists=True))
     @click.option("--nuclei", required=True, type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, primary_images, nuclei, output):
         print('Segmenting ...')
         ctx.obj = dict(

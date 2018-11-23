@@ -9,6 +9,7 @@ from skimage.feature import register_translation
 from starfish.image._filter.util import preserve_float_range
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
+from starfish.util.click import pass_context_and_record
 from ._base import RegistrationAlgorithmBase
 
 
@@ -96,7 +97,7 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
     @click.option("--upsampling", default=1, type=int, help="Amount of up-sampling")
     @click.option("--reference-stack", required=True, type=click.Path(exists=True),
                   help="The image stack to align the input image stack to.")
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, upsampling, reference_stack):
         ctx.obj["component"]._cli_run(ctx, FourierShiftRegistration(upsampling, reference_stack))
 

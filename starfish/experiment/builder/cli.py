@@ -2,7 +2,7 @@ import click
 
 from starfish.util.click import (
     dimensions_option,
-    pass_context_and_log,
+    pass_context_and_record,
 )
 from . import AUX_IMAGE_NAMES, write_experiment_json
 
@@ -16,7 +16,7 @@ decorators = [
 for image_name in AUX_IMAGE_NAMES:
     decorators.append(dimensions_option(image_name, False))
 
-@pass_context_and_log
+@pass_context_and_record
 def build(ctx, output_dir, fov_count, hybridization_dimensions, **kwargs):
     write_experiment_json(
         output_dir, fov_count, hybridization_dimensions,

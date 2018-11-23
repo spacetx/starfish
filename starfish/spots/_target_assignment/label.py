@@ -3,6 +3,7 @@ import numpy as np
 
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices
+from starfish.util.click import pass_context_and_record
 from ._base import TargetAssignmentAlgorithm
 
 
@@ -72,6 +73,6 @@ class Label(TargetAssignmentAlgorithm):
 
     @staticmethod
     @click.command("Label")
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx):
         ctx.obj["component"]._cli_run(ctx, Label())

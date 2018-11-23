@@ -4,6 +4,7 @@ import click
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
+from starfish.util.click import pass_context_and_record
 from ._base import FilterAlgorithmBase
 
 
@@ -26,6 +27,6 @@ class MaxProj(FilterAlgorithmBase):
                   help="The dimensions the Imagestack should max project over. Options:"
                        "(r, c, z, y, or x) For multiple dimensions add multiple --dims. Ex."
                        "--dims r --dims c")
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, dims):
         ctx.obj["component"]._cli_run(ctx, MaxProj(dims))

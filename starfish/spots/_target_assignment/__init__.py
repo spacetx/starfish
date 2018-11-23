@@ -7,6 +7,7 @@ from skimage.io import imread
 
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.util.click import pass_context_and_record
 from . import label
 from ._base import TargetAssignmentAlgorithm
 
@@ -31,7 +32,7 @@ class TargetAssignment(PipelineComponent):
     @click.option("--label-image", required=True, type=click.Path(exists=True))
     @click.option("--intensities", required=True, type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, label_image, intensities, output):
 
         print('Assigning targets to cells...')

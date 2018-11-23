@@ -5,6 +5,7 @@ import click
 import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
+from starfish.util.click import pass_context_and_record
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by
 
@@ -95,6 +96,6 @@ class Clip(FilterAlgorithmBase):
         "--p-min", default=0, type=int, help="clip intensities below this percentile")
     @click.option(
         "--p-max", default=100, type=int, help="clip intensities above this percentile")
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, p_min, p_max):
         ctx.obj["component"]._cli_run(ctx, Clip(p_min, p_max))

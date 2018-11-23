@@ -9,6 +9,7 @@ from trackpy import locate
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import SpotAttributes
+from starfish.util.click import pass_context_and_record
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
 
@@ -190,7 +191,7 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
     @click.option(
         "--is-volume", is_flag=True,
         help="indicates that the image stack should be filtered in 3d")
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, spot_diameter, min_max, max_size, separation, noise_size, smoothing_size,
              preprocess, show, percentile, is_volume):
 

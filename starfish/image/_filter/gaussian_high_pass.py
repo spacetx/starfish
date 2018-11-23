@@ -8,6 +8,7 @@ import xarray as xr
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
+from starfish.util.click import pass_context_and_record
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by,
@@ -104,6 +105,6 @@ class GaussianHighPass(FilterAlgorithmBase):
     @click.option("--sigma", type=float, help="standard deviation of gaussian kernel")
     @click.option("--is-volume", is_flag=True,
                   help="indicates that the image stack should be filtered in 3d")
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, sigma, is_volume):
         ctx.obj["component"]._cli_run(ctx, GaussianHighPass(sigma, is_volume))

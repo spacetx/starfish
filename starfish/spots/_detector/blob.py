@@ -9,6 +9,7 @@ from skimage.feature import blob_dog, blob_doh, blob_log
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number, SpotAttributes
+from starfish.util.click import pass_context_and_record
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots, measure_spot_intensity
 
@@ -180,7 +181,7 @@ class BlobDetector(SpotFinderAlgorithmBase):
         help="str ['blob_dog', 'blob_doh', 'blob_log'] name of the type of "
              "detection method used from skimage.feature"
     )
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show, detector_method):
             instance = BlobDetector(min_sigma, max_sigma, num_sigma, threshold, overlap,
                                     detector_method=detector_method)

@@ -13,6 +13,7 @@ from tqdm import tqdm
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number, SpotAttributes
+from starfish.util.click import pass_context_and_record
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
 
@@ -334,7 +335,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         "--is-volume", default=False, action='store_false', help="Find spots in 3D or not")
     @click.option(
         "--verbose", default=True, action='store_true', help="Verbosity flag")
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, min_distance, min_obj_area, max_obj_area, stringency, threshold,
              min_num_spots_detected, measurement_type, is_volume, verbose):
         instance = LocalMaxPeakFinder(min_distance, min_obj_area, max_obj_area,

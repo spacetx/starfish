@@ -11,6 +11,7 @@ from skimage.morphology import watershed
 from starfish.image._filter.util import bin_open, bin_thresh
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices, Number
+from starfish.util.click import pass_context_and_record
 from ._base import SegmentationAlgorithmBase
 
 
@@ -105,7 +106,7 @@ class Watershed(SegmentationAlgorithmBase):
         "--input-threshold", default=.22, type=float, help="Input threshold")
     @click.option(
         "--min-distance", default=57, type=int, help="Minimum distance between cells")
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, nuclei_threshold, input_threshold, min_distance):
         ctx.obj["component"]._cli_run(
             ctx, Watershed(nuclei_threshold, input_threshold, min_distance))

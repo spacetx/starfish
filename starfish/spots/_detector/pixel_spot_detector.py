@@ -6,6 +6,7 @@ import numpy as np
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.util.click import pass_context_and_record
 from ._base import SpotFinderAlgorithmBase
 from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedComponentDecodingResult
 
@@ -114,7 +115,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
     @click.option('--crop-x', type=int, default=0)
     @click.option('--crop-y', type=int, default=0)
     @click.option('--crop-z', type=int, default=0)
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, metric, distance_threshold, magnitude_threshold,
              min_area, max_area, norm_order, crop_x, crop_y, crop_z):
         codebook = ctx.obj["codebook"]

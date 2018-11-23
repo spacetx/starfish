@@ -7,6 +7,7 @@ from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.types import Indices
+from starfish.util.click import pass_context_and_record
 from . import _base
 from . import blob
 from . import pixel_spot_detector
@@ -66,7 +67,7 @@ class SpotFinder(PipelineComponent):
             'round and each color channel.'
         )
     )
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, input, output, blobs_stack, reference_image_from_max_projection, codebook):
         print('Detecting Spots ...')
         ctx.obj = dict(

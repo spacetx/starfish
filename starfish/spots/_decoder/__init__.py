@@ -5,6 +5,7 @@ import click
 from starfish.codebook.codebook import Codebook
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.util.click import pass_context_and_record
 from . import _base
 from . import per_round_max_channel_decoder
 
@@ -28,7 +29,7 @@ class Decoder(PipelineComponent):
     @click.option("-i", "--input", required=True, type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
     @click.option("--codebook", required=True, type=click.Path(exists=True))
-    @click.pass_context
+    @pass_context_and_record
     def _cli(ctx, input, output, codebook):
         ctx.obj = dict(
             component=Decoder,

@@ -42,8 +42,9 @@ def dimensions_option(name, required):
 def pass_context_and_record(f):
     def new_func(*args, **kwargs):
         ctx = get_current_context()
-        print(ctx.info_name, ":")
-        for k, v in sorted(ctx.params.items()):
-            print(f"\t{k}={v}")
+        record = ctx.obj.get("record", None)
+        if record is not None:
+            data = {ctx.info_name: {"params": ctx.params}}
+            record.append(data)
         return f(ctx, *args, **kwargs)
     return update_wrapper(new_func, f)

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import cProfile
+import json
+import sys
 from pstats import Stats
 
 import click
@@ -16,6 +18,7 @@ from starfish.spots import (
     SpotFinder,
     TargetAssignment,
 )
+from starfish.util.config import Config
 
 
 PROFILER_KEY = "profiler"
@@ -26,8 +29,11 @@ PROFILER_LINES = 15
 
 @click.group()
 @click.option("--profile", is_flag=True)
+@click.option("--quiet", is_flag=True)
+@click.option("--record", type=click.Path(writable=True, allow_dash=True))
 @click.pass_context
-def starfish(ctx, profile):
+def starfish(ctx, profile, quiet=False, record=None):
+    config = Config()
     art = """
          _              __ _     _
         | |            / _(_)   | |
@@ -39,10 +45,13 @@ def starfish(ctx, profile):
     """  # noqa
     print_art = True
     sub = ctx.command.get_command(ctx, ctx.invoked_subcommand)
-    if hasattr(sub, "no_art"):
+    if config.lookup(["cli", "quiet"], False) or quiet:
+        print_art = False
+    elif hasattr(sub, "no_art"):
         print_art = not sub.no_art
     if print_art:
         print(art)
+
     if profile:
         profiler = cProfile.Profile()
         profiler.enable()
@@ -52,6 +61,22 @@ def starfish(ctx, profile):
             stats.sort_stats('tottime').print_stats(PROFILER_LINES)
 
         ctx.call_on_close(print_profile)
+
+    ctx.obj = {"record": None}
+    if record is None:
+        record = config.lookup(["cli", "record"], None)
+    if record:
+        v = []
+        ctx.obj["record"] = v
+
+        def write_record():
+            if "-" == record:
+                json.dump(v, sys.stdout)
+            else:
+                with open(record, "a") as o:
+                    json.dump(v, o)
+
+        ctx.call_on_close(write_record)
 
 
 @starfish.command()

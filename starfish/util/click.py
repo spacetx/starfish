@@ -19,9 +19,9 @@ class StarfishIndex(click.ParamType):
                 "Could not parse {} into a valid index specification.".format(spec_json))
 
         return {
-            Indices.ROUND: spec.get(Indices.ROUND, 1),
-            Indices.CH: spec.get(Indices.CH, 1),
-            Indices.Z: spec.get(Indices.Z, 1),
+            str(Indices.ROUND): spec.get(Indices.ROUND, 1),
+            str(Indices.CH): spec.get(Indices.CH, 1),
+            str(Indices.Z): spec.get(Indices.Z, 1),
         }
 
 

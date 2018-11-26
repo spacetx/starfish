@@ -1,4 +1,5 @@
 from functools import partial
+
 import numpy as np
 import pytest
 from scipy.ndimage.filters import gaussian_filter
@@ -183,11 +184,10 @@ def test_spot_finding_maintains_state_info(
 ):
     spot_finding_method = partial(spot_detector.image_to_spots)
     spot_attributes_list = data_stack.transform(
+        group_by={Indices.ROUND, Indices.CH},
         func=spot_finding_method
     )
     for spot_attributes, indices in spot_attributes_list:
         state_info = spot_attributes.extras
         assert len(state_info.spot_props) > 0
         assert len(state_info.labels) > 0
-
-

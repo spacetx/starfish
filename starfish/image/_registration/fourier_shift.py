@@ -86,7 +86,7 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
                     result = preserve_float_range(result)
 
                     image.set_slice(indices=indices, data=result)
-
+        image.log(self)
         if not in_place:
             return image
         return None

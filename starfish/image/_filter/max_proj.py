@@ -18,6 +18,7 @@ class MaxProj(FilterAlgorithmBase):
             self, stack: ImageStack, in_place: bool = False, verbose: bool = False,
             n_processes: Optional[int] = None
     ) -> ImageStack:
+        stack.log(self)
         return stack.max_proj(*tuple(Indices(dim) for dim in self.dims))
 
     @staticmethod

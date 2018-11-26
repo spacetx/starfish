@@ -96,6 +96,7 @@ class ImageStack:
     def __init__(self, image_partition: TileSet) -> None:
         self._image_partition = image_partition
         self._tile_shape = image_partition.default_tile_shape
+        self._log: collections.OrderedDict = collections.OrderedDict()
 
         # Examine the tiles to figure out the right kind (int, float, etc.) and size.  We require
         # that all the tiles have the same kind of data type, but we do not require that they all
@@ -859,6 +860,13 @@ class ImageStack:
                 data['barcode_index'].append(barcode_index)
 
         return pd.DataFrame(data)
+
+    @property
+    def get_log(self) -> collections.OrderedDict:
+        return self._log
+
+    def log(self, cls):
+        self._log[cls.__class__.__name__] = cls.__dict__
 
     @property
     def raw_shape(self) -> Tuple[int, int, int, int, int]:

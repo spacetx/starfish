@@ -112,6 +112,7 @@ class Bandpass(FilterAlgorithmBase):
             in_place=in_place,
             n_processes=n_processes,
         )
+        result.log(self)
         return result
 
     @staticmethod

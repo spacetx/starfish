@@ -89,6 +89,7 @@ class Watershed(SegmentationAlgorithmBase):
             disk_size_mask, self.min_distance
         )
 
+        primary_images.log(self)
         return label_image
 
     def show(self, figsize: Tuple[int, int]=(10, 10)) -> None:

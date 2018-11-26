@@ -57,7 +57,7 @@ class BlobDetector(SpotFinderAlgorithmBase):
         measurement_type : str ['max', 'mean']
             name of the function used to calculate the intensity for each identified spot area
         detector_method: str ['blob_dog', 'blob_doh', 'blob_log']
-            name of the type of detection method used from skimage.feature
+            name of the type of detection method used from skimage.feature, default: blob_log
 
         Notes
         -----
@@ -81,7 +81,7 @@ class BlobDetector(SpotFinderAlgorithmBase):
         try:
             self.detector_method = blob_detectors[detector_method]
         except ValueError:
-            "Detector method must be one of {blob_log, blob_dog, blob_doh}"
+            raise ValueError("Detector method must be one of {blob_log, blob_dog, blob_doh}")
 
     def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
         """
@@ -178,7 +178,7 @@ class BlobDetector(SpotFinderAlgorithmBase):
     @click.option(
         "--detector_method", default='blob_log',
         help="str ['blob_dog', 'blob_doh', 'blob_log'] name of the type of "
-             "detection method used from skimage.feature"
+             "detection method used from skimage.feature. Default: blob_log"
     )
     @click.pass_context
     def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show, detector_method):

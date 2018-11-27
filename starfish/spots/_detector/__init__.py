@@ -7,7 +7,10 @@ from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.types import Indices
-from starfish.util.click import pass_context_and_record
+from starfish.util.click import (
+    pass_context_and_record,
+    RequiredParentOption
+)
 from . import _base
 from . import blob
 from . import pixel_spot_detector
@@ -46,8 +49,9 @@ class SpotFinder(PipelineComponent):
 
     @staticmethod
     @click.group("detect_spots")
-    @click.option("-i", "--input", required=True, type=click.Path(exists=True))
-    @click.option("-o", "--output", required=True)
+    @click.option("-i", "--input", required=True, cls=RequiredParentOption,
+                  type=click.Path(exists=True))
+    @click.option("-o", "--output", required=True, cls=RequiredParentOption)
     @click.option(
         '--blobs-stack', default=None, required=False, help=(
             'ImageStack that contains the blobs. Will be max-projected across imaging round '

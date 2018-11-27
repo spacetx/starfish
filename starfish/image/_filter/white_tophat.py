@@ -74,7 +74,7 @@ class WhiteTophat(FilterAlgorithmBase):
             self._white_tophat,
             group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
-        result.log(self)
+        result.update_log(self)
         return result
 
     @staticmethod

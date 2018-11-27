@@ -84,7 +84,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                                                  ch_magnitude,
                                                  where=magnitude_mask
                                                  )
-        stack.log(self)
+        stack.update_log(self)
         return stack
 
     @staticmethod

@@ -163,7 +163,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
             n_processes=n_processes,
             in_place=in_place,
         )
-        result.log(self)
+        result.update_log(self)
         return result
 
     @staticmethod

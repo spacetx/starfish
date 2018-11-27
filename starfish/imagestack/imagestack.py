@@ -862,10 +862,34 @@ class ImageStack:
         return pd.DataFrame(data)
 
     @property
-    def get_log(self) -> collections.OrderedDict:
+    def log(self) -> collections.OrderedDict:
+        """
+        Returns an ordered dict of functions that have been applied to this imagestack
+        as well as there corresponding runtime parameters.
+
+        ex.
+        OrderedDict([('GaussianHighPass', {'sigma': (3, 3), 'is_volume': False}),
+                    ('GaussianLowPass', {'sigma': (1, 1), 'is_volume': False}])])
+
+        Means that this imagestack was created by applying a GaussianHighPass Filter then
+        a GaussianLowPass Filter to a starting imagestack
+
+
+        Returns
+        -------
+        OrderedDict
+        """
         return self._log
 
-    def log(self, cls):
+    def update_log(self, cls):
+        """
+        Adds a new entry to the log ordered dict.
+
+        Parameters
+        ----------
+        cls: The instance of a class being applied to the imagestack
+
+        """
         self._log[cls.__class__.__name__] = cls.__dict__
 
     @property

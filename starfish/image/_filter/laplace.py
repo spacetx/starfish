@@ -111,7 +111,7 @@ class Laplace(FilterAlgorithmBase):
         """
         group_by = determine_axes_to_group_by(self.is_volume)
         apply_filtering: Callable = partial(self._gaussian_laplace, sigma=self.sigma)
-        stack.log(self)
+        stack.update_log(self)
         return stack.apply(
             apply_filtering,
             group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,

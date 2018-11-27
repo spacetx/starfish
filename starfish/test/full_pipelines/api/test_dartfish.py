@@ -127,7 +127,7 @@ def test_dartfish_pipeline_cropped_data():
         zero_norm_stack.xarray[0, 0, 0, 50:60, 60:70]
     )
 
-    assert zero_norm_stack.get_log() == OrderedDict(
+    assert zero_norm_stack.log == OrderedDict(
         [('ScaleByPercentile', {'p': 100, 'is_volume': False}),
          ('ZeroByChannelMagnitude', {'thresh': 0.05, 'normalize': False})])
 

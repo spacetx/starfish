@@ -865,7 +865,7 @@ class ImageStack:
     def log(self) -> collections.OrderedDict:
         """
         Returns an ordered dict of functions that have been applied to this imagestack
-        as well as there corresponding runtime parameters.
+        as well as their corresponding runtime parameters.
 
         ex.
         OrderedDict([('GaussianHighPass', {'sigma': (3, 3), 'is_volume': False}),

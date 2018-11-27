@@ -8,7 +8,7 @@ from scipy.signal import convolve, fftconvolve
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices, Number
 from ._base import FilterAlgorithmBase
-from .util import gaussian_kernel, preserve_float_range
+from .util import gaussian_kernel, log_to_stack, preserve_float_range
 
 
 class DeconvolvePSF(FilterAlgorithmBase):
@@ -128,6 +128,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
 
         return im_deconv
 
+    @log_to_stack
     def run(
             self, stack: ImageStack, in_place: bool=False, verbose=False,
             n_processes: Optional[int]=None
@@ -163,7 +164,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
             n_processes=n_processes,
             in_place=in_place,
         )
-        result.update_log(self)
         return result
 
     @staticmethod

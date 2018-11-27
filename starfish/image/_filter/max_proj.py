@@ -5,6 +5,7 @@ import click
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
 from ._base import FilterAlgorithmBase
+from .util import log_to_stack
 
 
 class MaxProj(FilterAlgorithmBase):
@@ -14,11 +15,11 @@ class MaxProj(FilterAlgorithmBase):
 
     _DEFAULT_TESTING_PARAMETERS = {"dims": 'r'}
 
+    @log_to_stack
     def run(
             self, stack: ImageStack, in_place: bool = False, verbose: bool = False,
             n_processes: Optional[int] = None
     ) -> ImageStack:
-        stack.update_log(self)
         return stack.max_proj(*tuple(Indices(dim) for dim in self.dims))
 
     @staticmethod

@@ -153,3 +153,11 @@ def determine_axes_to_group_by(is_volume: bool) -> Set[Indices]:
         return {Indices.ROUND, Indices.CH}
     else:
         return {Indices.ROUND, Indices.CH, Indices.Z}
+
+
+def log_to_stack(func):
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        result.update_log(args[0])
+        return result
+    return wrapper

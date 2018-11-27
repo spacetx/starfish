@@ -11,6 +11,7 @@ from starfish.types import Number
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by,
+    log_to_stack,
     preserve_float_range,
     validate_and_broadcast_kernel_size,
 )
@@ -67,6 +68,7 @@ class GaussianHighPass(FilterAlgorithmBase):
 
         return filtered
 
+    @log_to_stack
     def run(
             self, stack: ImageStack, in_place: bool=False, verbose: bool=True,
             n_processes: Optional[int]=None
@@ -97,7 +99,6 @@ class GaussianHighPass(FilterAlgorithmBase):
             high_pass,
             group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
-        result.update_log(self)
         return result
 
     @staticmethod

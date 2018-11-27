@@ -96,7 +96,7 @@ class ImageStack:
     def __init__(self, image_partition: TileSet) -> None:
         self._image_partition = image_partition
         self._tile_shape = image_partition.default_tile_shape
-        self._log: collections.OrderedDict = collections.OrderedDict()
+        self._log: List[Tuple] = list()
 
         # Examine the tiles to figure out the right kind (int, float, etc.) and size.  We require
         # that all the tiles have the same kind of data type, but we do not require that they all
@@ -862,14 +862,14 @@ class ImageStack:
         return pd.DataFrame(data)
 
     @property
-    def log(self) -> collections.OrderedDict:
+    def log(self) -> List[Tuple]:
         """
-        Returns an ordered dict of functions that have been applied to this imagestack
+        Returns a list of functions that have been applied to this imagestack
         as well as their corresponding runtime parameters.
 
         ex.
-        OrderedDict([('GaussianHighPass', {'sigma': (3, 3), 'is_volume': False}),
-                    ('GaussianLowPass', {'sigma': (1, 1), 'is_volume': False}])])
+        [('GaussianHighPass', {'sigma': (3, 3), 'is_volume': False}),
+        ('GaussianLowPass', {'sigma': (1, 1), 'is_volume': False}]
 
         Means that this imagestack was created by applying a GaussianHighPass Filter then
         a GaussianLowPass Filter to a starting imagestack
@@ -881,16 +881,17 @@ class ImageStack:
         """
         return self._log
 
-    def update_log(self, cls):
+    def update_log(self, class_instance) -> None:
         """
         Adds a new entry to the log ordered dict.
 
         Parameters
         ----------
-        cls: The instance of a class being applied to the imagestack
+        class_instance: The instance of a class being applied to the imagestack
 
         """
-        self._log[cls.__class__.__name__] = cls.__dict__
+        entry = (class_instance.__class__.__name__, class_instance.__dict__)
+        self.log.append(entry)
 
     @property
     def raw_shape(self) -> Tuple[int, int, int, int, int]:

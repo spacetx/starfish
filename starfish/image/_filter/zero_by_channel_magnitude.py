@@ -8,6 +8,7 @@ from tqdm import tqdm
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
 from ._base import FilterAlgorithmBase
+from.util import log_to_stack
 
 
 class ZeroByChannelMagnitude(FilterAlgorithmBase):
@@ -31,6 +32,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
 
     _DEFAULT_TESTING_PARAMETERS = {"thresh": 0, "normalize": True}
 
+    @log_to_stack
     def run(
             self, stack: ImageStack,
             in_place: bool=False, verbose=False, n_processes: Optional[int]=None
@@ -84,7 +86,6 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                                                  ch_magnitude,
                                                  where=magnitude_mask
                                                  )
-        stack.update_log(self)
         return stack
 
     @staticmethod

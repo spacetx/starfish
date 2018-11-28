@@ -71,7 +71,8 @@ Commands:
 
     def test_second(self):
         actual = subprocess.check_output(["starfish", "detect_spots", "--help"])
-        expected = """%sUsage: starfish detect_spots [OPTIONS] COMMAND [ARGS]...
+        expected = """%s
+Usage: starfish detect_spots [OPTIONS] COMMAND [ARGS]...
 
 Options:
   -i, --input PATH                [required]
@@ -96,13 +97,13 @@ Commands:
   BlobDetector
   PixelSpotDetector
   TrackpyLocalMaxPeakFinder
-"""
+""" % art_string()
         actual = actual.decode("utf-8")
         assert_diff(actual, expected)
 
     def test_third(self):
         actual = subprocess.check_output(["starfish", "detect_spots", "BlobDetector", "--help"])
-        expected = """%sUsage: starfish detect_spots BlobDetector [OPTIONS]
+        expected = """Usage: starfish detect_spots BlobDetector [OPTIONS]
 
 Options:
   --min-sigma INTEGER     Minimum spot size (in standard deviation)
@@ -115,5 +116,5 @@ Options:
   --detector_method TEXT  str ['blob_dog', 'blob_doh', 'blob_log'] name of the
                           type of detection method used from skimage.feature
   --help                  Show this message and exit.
-""" % art_string()
+"""
         assert_diff(actual, expected)

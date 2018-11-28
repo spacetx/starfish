@@ -659,14 +659,13 @@ class ImageStack:
 
         return tuple(slice_list), axes
 
-    def _iter_indices(self, indices: Set[Indices]={Indices.ROUND, Indices.CH}
-                      ) -> Iterator[Mapping[Indices, int]]:
+    def _iter_indices(self, indices: Set[Indices]=None) -> Iterator[Mapping[Indices, int]]:
         """Iterate over provided indices
 
         Parameters
         ----------
         indices : Set[Indices]
-            The set of Indices to be iterated over
+            The set of Indices to be iterated over (default={Indices.ROUND, Indices.CH}).
 
         Yields
         ------
@@ -674,9 +673,12 @@ class ImageStack:
             Mapping of dimension name to index
 
         """
-        ranges = [np.arange(self.shape[ind]) for ind in indices]
+        if indices is None:
+            indices = {Indices.ROUND, Indices.CH}
+        ordered_indices = list(indices)
+        ranges = [np.arange(self.shape[ind]) for ind in ordered_indices]
         for items in product(*ranges):
-            a = zip(indices, items)
+            a = zip(ordered_indices, items)
             yield {ind: val for (ind, val) in a}
 
     def apply(

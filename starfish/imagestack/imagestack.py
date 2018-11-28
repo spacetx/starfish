@@ -864,20 +864,30 @@ class ImageStack:
     @property
     def log(self) -> List[Tuple]:
         """
-        Returns an ordered dict of functions that have been applied to this imagestack
+        Returns a list of pipeline components that have been applied to this imagestack
         as well as their corresponding runtime parameters.
+
          ex.
-        OrderedDict([('GaussianHighPass', {'sigma': (3, 3), 'is_volume': False}),
-                    ('GaussianLowPass', {'sigma': (1, 1), 'is_volume': False}])])
-         Means that this imagestack was created by applying a GaussianHighPass Filter then
+            [('GaussianHighPass', {'sigma': (3, 3), 'is_volume': False}),
+            ('GaussianLowPass', {'sigma': (1, 1), 'is_volume': False}])]
+
+        Means that this imagestack was created by applying a GaussianHighPass Filter then
         a GaussianLowPass Filter to a starting imagestack
-         Returns
+
+        Returns
         -------
-        OrderedDict
+        List[Tuple[str, dict]]
         """
         return self._log
 
     def update_log(self, class_instance):
+        """
+        Adds a new entry to the log list.
+
+        Parameters
+        ----------
+        class_instance: The instance of a class being applied to the imagestack
+        """
         entry = class_instance.__class__.__name__, class_instance.__dict__
         self._log.append(entry)
 

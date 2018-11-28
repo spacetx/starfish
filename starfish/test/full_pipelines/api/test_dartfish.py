@@ -126,6 +126,9 @@ def test_dartfish_pipeline_cropped_data():
         zero_norm_stack.xarray[0, 0, 0, 50:60, 60:70]
     )
 
+    assert zero_norm_stack.log == [('ScaleByPercentile', {'p': 100, 'is_volume': False}),
+                                   ('ZeroByChannelMagnitude', {'thresh': 0.05, 'normalize': False})]
+
     spot_intensities = dartfish.initial_spot_intensities
     spots_df = IntensityTable(
         spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True)

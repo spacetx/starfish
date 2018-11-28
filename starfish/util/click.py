@@ -3,9 +3,8 @@ import click
 
 class RequiredParentOption(click.Option):
     """
-    For any required option in a parent group, use this type
-    so that --help works for the parent command as well as the
-    sub-command.
+    For any required option in a parent group, use this type so that --help works
+    for the parent command as well as the sub-command.
     """
 
     def handle_parse_result(self, ctx, opts, args):

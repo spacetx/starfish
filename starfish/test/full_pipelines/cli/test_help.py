@@ -1,18 +1,21 @@
+import difflib
 import subprocess
 import unittest
 
+from starfish.starfish import art_string
 from starfish.util import exec
 
-# Could be imported
-art = """
-         _              __ _     _
-        | |            / _(_)   | |
-     ___| |_ __ _ _ __| |_ _ ___| |__
-    / __| __/ _` | '__|  _| / __| '_  `
-    \\__ \\ || (_| | |  | | | \\__ \\ | | |
-    |___/\\__\\__,_|_|  |_| |_|___/_| |_|
 
-    """  # noqa
+def assert_diff(actual, expected):
+    if isinstance(actual, bytes):
+        actual = actual.decode("utf-8")
+    if actual != expected:
+        diff = difflib.ndiff(expected.splitlines(keepends=True),
+                             actual.splitlines(keepends=True))
+        diff = list(diff)
+        for line in diff:
+            print(line, end="")
+        raise Exception("help mismatch!")
 
 
 class TestHelpReturnCode(unittest.TestCase):
@@ -44,8 +47,10 @@ class TestHelpStandardOut(unittest.TestCase):
     """
     Tests that the calls to CLI's help produce the output that users expect.
     """
-    actual = subprocess.check_output(["starfish", "--help"])
-    expected = b"""Usage: starfish [OPTIONS] COMMAND [ARGS]...
+
+    def test_first(self):
+        actual = subprocess.check_output(["starfish", "--help"])
+        expected = """Usage: starfish [OPTIONS] COMMAND [ARGS]...
 
 Options:
   --profile
@@ -62,11 +67,11 @@ Commands:
   validate           invokes validate with the parsed commandline...
   version
 """
-    assert actual == expected
+        assert_diff(actual, expected)
 
-    actual = subprocess.check_output(["starfish", "detect_spots", "--help"])
-    expected = """%s
-Usage: starfish detect_spots [OPTIONS] COMMAND [ARGS]...
+    def test_second(self):
+        actual = subprocess.check_output(["starfish", "detect_spots", "--help"])
+        expected = """%sUsage: starfish detect_spots [OPTIONS] COMMAND [ARGS]...
 
 Options:
   -i, --input PATH                [required]
@@ -91,13 +96,13 @@ Commands:
   BlobDetector
   PixelSpotDetector
   TrackpyLocalMaxPeakFinder
-""" % art
-    actual = actual.decode("utf-8")
-    assert actual == expected
+"""
+        actual = actual.decode("utf-8")
+        assert_diff(actual, expected)
 
-    actual = subprocess.check_output(["starfish", "detect_spots", "BlobDetector", "--help"])
-    expected = """%s
-Usage: starfish detect_spots BlobDetector [OPTIONS]
+    def test_third(self):
+        actual = subprocess.check_output(["starfish", "detect_spots", "BlobDetector", "--help"])
+        expected = """%sUsage: starfish detect_spots BlobDetector [OPTIONS]
 
 Options:
   --min-sigma INTEGER     Minimum spot size (in standard deviation)
@@ -110,6 +115,5 @@ Options:
   --detector_method TEXT  str ['blob_dog', 'blob_doh', 'blob_log'] name of the
                           type of detection method used from skimage.feature
   --help                  Show this message and exit.
-""" % art
-    actual = actual.decode("utf-8")
-    assert actual == expected
+""" % art_string()
+        assert_diff(actual, expected)

@@ -7,6 +7,7 @@ from skimage.io import imread
 
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.util.click import option as click_option
 from . import label
 from ._base import TargetAssignmentAlgorithm
 
@@ -28,9 +29,9 @@ class TargetAssignment(PipelineComponent):
 
     @staticmethod
     @click.group("target_assignment")
-    @click.option("--label-image", required=True, type=click.Path(exists=True))
-    @click.option("--intensities", required=True, type=click.Path(exists=True))
-    @click.option("-o", "--output", required=True)
+    @click_option("--label-image", required=True, type=click.Path(exists=True))
+    @click_option("--intensities", required=True, type=click.Path(exists=True))
+    @click_option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, label_image, intensities, output):
 

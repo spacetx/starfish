@@ -16,6 +16,7 @@ from starfish.spots import (
     SpotFinder,
     TargetAssignment,
 )
+from starfish.util.click import option as click_option
 
 
 PROFILER_KEY = "profiler"
@@ -24,11 +25,8 @@ PROFILER_LINES = 15
 """This is the number of profiling rows to dump when --profile is enabled."""
 
 
-@click.group()
-@click.option("--profile", is_flag=True)
-@click.pass_context
-def starfish(ctx, profile):
-    art = """
+def art_string():
+    return """
          _              __ _     _
         | |            / _(_)   | |
      ___| |_ __ _ _ __| |_ _ ___| |__
@@ -37,6 +35,13 @@ def starfish(ctx, profile):
     |___/\__\__,_|_|  |_| |_|___/_| |_|
 
     """  # noqa
+
+
+@click.group()
+@click_option("--profile", is_flag=True)
+@click.pass_context
+def starfish(ctx, profile):
+    art = art_string()
     print_art = True
     sub = ctx.command.get_command(ctx, ctx.invoked_subcommand)
     if hasattr(sub, "no_art"):

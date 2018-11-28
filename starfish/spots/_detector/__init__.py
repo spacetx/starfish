@@ -7,7 +7,7 @@ from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.types import Indices
-from starfish.util.click import RequiredParentOption
+from starfish.util.click import option as click_option
 from . import _base
 from . import blob
 from . import pixel_spot_detector
@@ -46,22 +46,21 @@ class SpotFinder(PipelineComponent):
 
     @staticmethod
     @click.group("detect_spots")
-    @click.option("-i", "--input", required=True, cls=RequiredParentOption,
-                  type=click.Path(exists=True))
-    @click.option("-o", "--output", required=True, cls=RequiredParentOption)
-    @click.option(
+    @click_option("-i", "--input", required=True, type=click.Path(exists=True))
+    @click_option("-o", "--output", required=True)
+    @click_option(
         '--blobs-stack', default=None, required=False, help=(
             'ImageStack that contains the blobs. Will be max-projected across imaging round '
             'and channel to produce the blobs_image'
         )
     )
-    @click.option(
+    @click_option(
         '--reference-image-from-max-projection', default=False, is_flag=True, help=(
             'Construct a reference image by max projecting imaging rounds and channels. Spots '
             'are found in this image and then measured across all images in the input stack.'
         )
     )
-    @click.option(
+    @click_option(
         '--codebook', default=None, required=False, help=(
             'A spaceTx spec-compliant json file that describes a three dimensional tensor '
             'whose values are the expected intensity of a spot for each code in each imaging '

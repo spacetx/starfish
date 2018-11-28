@@ -11,6 +11,7 @@ from typing import (
     Iterator,
     List,
     Mapping,
+    MutableMapping,
     MutableSequence,
     Optional,
     Sequence,
@@ -120,6 +121,7 @@ class ImageStack:
         dims: MutableSequence[str] = []
         coordinates_shape: MutableSequence[int] = []
         coordinates_dimensions: MutableSequence[str] = []
+        coordinates_tick_marks: MutableMapping[str, Sequence[Union[int, str]]] = dict()
         for ix in range(N_AXES):
             size_for_axis: Optional[int] = None
             dim_for_axis: Optional[Indices] = None
@@ -138,11 +140,20 @@ class ImageStack:
             dims.append(dim_for_axis.value)
             coordinates_shape.append(size_for_axis)
             coordinates_dimensions.append(dim_for_axis.value)
+            coordinates_tick_marks[dim_for_axis.value] = list(range(size_for_axis))
 
         shape.extend(self._tile_shape)
         dims.extend([Indices.Y.value, Indices.X.value])
-        coordinates_dimensions.append(PHYSICAL_COORDINATE_DIMENSION)
         coordinates_shape.append(6)
+        coordinates_dimensions.append(PHYSICAL_COORDINATE_DIMENSION)
+        coordinates_tick_marks[PHYSICAL_COORDINATE_DIMENSION] = [
+            PhysicalCoordinateTypes.X_MIN.value,
+            PhysicalCoordinateTypes.X_MAX.value,
+            PhysicalCoordinateTypes.Y_MIN.value,
+            PhysicalCoordinateTypes.Y_MAX.value,
+            PhysicalCoordinateTypes.Z_MIN.value,
+            PhysicalCoordinateTypes.Z_MAX.value,
+        ]
         # now that we know the tile data type (kind and size), we can allocate the data array.
         self._data = MPDataArray.from_shape_and_dtype(
             shape=shape,
@@ -156,16 +167,7 @@ class ImageStack:
                 dtype=np.float32,
             ),
             dims=coordinates_dimensions,
-            coords={
-                PHYSICAL_COORDINATE_DIMENSION: [
-                    PhysicalCoordinateTypes.X_MIN.value,
-                    PhysicalCoordinateTypes.X_MAX.value,
-                    PhysicalCoordinateTypes.Y_MIN.value,
-                    PhysicalCoordinateTypes.Y_MAX.value,
-                    PhysicalCoordinateTypes.Z_MIN.value,
-                    PhysicalCoordinateTypes.Z_MAX.value,
-                ],
-            },
+            coords=coordinates_tick_marks,
         )
 
         # iterate through the tiles and set the data.

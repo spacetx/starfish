@@ -382,13 +382,11 @@ class ImageStack:
     def set_slice(
             self,
             indices: Mapping[Indices, Union[int, slice]],
-            data: np.ndarray,
-            axes: Sequence[Indices]=None):
+            data: np.ndarray):
         """
         Given a dictionary mapping the index name to either a value or a slice range and a source
         numpy array, set the slice of the array of this ImageStack to the values in the source
-        numpy array. If the optional parameter axes is provided, that represents the axes of the
-        numpy array beyond the x-y tile.
+        numpy array.
 
         Examples
         --------
@@ -408,26 +406,6 @@ class ImageStack:
         self._validate_data_dtype_and_range(data)
 
         slice_list, expected_axes = self._build_slice_list(indices)
-
-        if axes is not None:
-            if len(axes) != len(data.shape) - 2:
-                raise ValueError(
-                    "data shape ({}) should be the axes ({}) and (x,y).".format(data.shape, axes))
-            move_src = list()
-            move_dst = list()
-            for src_idx, axis in enumerate(axes):
-                try:
-                    dst_idx = expected_axes.index(axis)
-                except ValueError:
-                    raise ValueError(
-                        "Unexpected axis {}.  Expecting only {}.".format(axis, expected_axes))
-                if src_idx != dst_idx:
-                    move_src.append(src_idx)
-                    move_dst.append(dst_idx)
-
-            if len(move_src) != 0:
-                data = data.view()
-                np.moveaxis(data, move_src, move_dst)
 
         if self._data[slice_list].shape != data.shape:
             raise ValueError("source shape {} mismatches destination shape {}".format(

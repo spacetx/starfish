@@ -19,7 +19,12 @@ class RequiredParentOption(click.Option):
                     # subcommand
                     cmd = ctx.command.commands[arg]
                     with click.Context(cmd) as sub_ctx:
-                        click.echo(cmd.get_help(sub_ctx))
+                        # Workaround to include the command in the help
+                        parent = ctx.info_name
+                        help = cmd.get_help(sub_ctx)
+                        fix = "Usage: starfish %s %s" % (parent, cmd.name)
+                        help = help.replace("Usage: ", fix)
+                        click.echo(help)
                         sub_ctx.exit()
 
         return super(RequiredParentOption, self).handle_parse_result(

@@ -97,7 +97,7 @@ Commands:
 
     actual = subprocess.check_output(["starfish", "detect_spots", "BlobDetector", "--help"])
     expected = """%s
-Usage:  [OPTIONS]
+Usage: starfish detect_spots BlobDetector [OPTIONS]
 
 Options:
   --min-sigma INTEGER     Minimum spot size (in standard deviation)

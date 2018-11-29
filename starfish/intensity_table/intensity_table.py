@@ -239,6 +239,10 @@ class IntensityTable(xr.DataArray):
         """show spots on a background image"""
         raise NotImplementedError
 
+    def update_log(self, class_instance):
+        entry = {class_instance.__class__.__name__: class_instance.__dict__}
+        self.attrs.update(entry)
+
     @classmethod
     def synthetic_intensities(
             cls, codebook, num_z: int=12, height: int=50, width: int=40, n_spots=10,

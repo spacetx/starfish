@@ -119,5 +119,10 @@ def test_iss_pipeline_cropped_data():
     lab = TargetAssignment.Label()
     assigned = lab.run(label_image, decoded)
 
+    intensity_table_log = assigned.attrs
+    assert intensity_table_log['WhiteTophat']
+    assert intensity_table_log['FourierShiftRegistration']
+    assert intensity_table_log['BlobDetector']
+
     # 28 of the spots are assigned to cell 1 (although most spots do not decode!)
     assert np.sum(assigned['cell_id'] == 1) == 28

@@ -16,9 +16,7 @@ class AlgorithmBaseType(type):
             # Spot detection returns a tuple, filtering returns an Imagestack
             if isinstance(result, ImageStack):
                 # Only run on second run of function if in_place is True
-                in_place = kwargs.get('in_place', False)
-                if not in_place:
-                    result.update_log(args[0])
+                result.update_log(args[0])
             return result
         return helper
 

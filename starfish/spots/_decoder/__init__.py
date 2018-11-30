@@ -1,11 +1,9 @@
 from typing import Type
 
-import click
-
 from starfish.codebook.codebook import Codebook
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline import AlgorithmBase, PipelineComponent
-from starfish.util.click import option as click_option
+from starfish.util import click
 from . import _base
 from . import per_round_max_channel_decoder
 
@@ -26,9 +24,9 @@ class Decoder(PipelineComponent):
 
     @staticmethod
     @click.group("decode")
-    @click_option("-i", "--input", required=True, type=click.Path(exists=True))
-    @click_option("-o", "--output", required=True)
-    @click_option("--codebook", required=True, type=click.Path(exists=True))
+    @click.option("-i", "--input", required=True, type=click.Path(exists=True))
+    @click.option("-o", "--output", required=True)
+    @click.option("--codebook", required=True, type=click.Path(exists=True))
     @click.pass_context
     def _cli(ctx, input, output, codebook):
         ctx.obj = dict(

@@ -2,7 +2,6 @@
 from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
-import click
 import numpy as np
 from scipy.ndimage import gaussian_laplace
 
@@ -14,6 +13,7 @@ from starfish.image._filter.util import (
 )
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
+from starfish.util import click
 
 
 class Laplace(FilterAlgorithmBase):

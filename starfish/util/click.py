@@ -1,7 +1,27 @@
-import click
+from typing import Any, Sequence
+
+from click import (
+    argument,
+    command,
+    Context,
+    echo,
+    group,
+    Option,
+    ParamType,
+    pass_context,
+    Path,
+)
+from click import option as _click_option
 
 
-class RequiredParentOption(click.Option):
+# Workaround for F401
+__click_imports: Sequence[Any] = [
+    argument, command, Context, echo, group,
+    Option, _click_option, ParamType, pass_context, Path
+]
+
+
+class RequiredParentOption(Option):
     """
     For any required option in a parent group, use this type so that --help works
     for the parent command as well as the sub-command.
@@ -21,7 +41,7 @@ class RequiredParentOption(click.Option):
                     # present, let's assume the user wants help for the
                     # subcommand or a subsubcommand
                     cmd = ctx.command.commands[arg]
-                    with click.Context(cmd) as sub_ctx:
+                    with Context(cmd) as sub_ctx:
                         # The following may exit
                         if not self.handle_parse_result(sub_ctx, opts, args):
                             help = cmd.get_help(sub_ctx)
@@ -35,7 +55,7 @@ class RequiredParentOption(click.Option):
                             else:
                                 fix = "Usage: starfish %s %s" % (parent, name)
                             help = help.replace("Usage: ", fix)
-                            click.echo(help)
+                            echo(help)
                             sub_ctx.exit()
 
         return super(RequiredParentOption, self).handle_parse_result(
@@ -44,4 +64,4 @@ class RequiredParentOption(click.Option):
 
 def option(*args, **kwargs):
     kwargs["cls"] = RequiredParentOption
-    return click.option(*args, **kwargs)
+    return _click_option(*args, **kwargs)

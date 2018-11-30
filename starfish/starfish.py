@@ -2,8 +2,6 @@
 import cProfile
 from pstats import Stats
 
-import click
-
 from sptx_format.cli import validate as validate_cli
 from starfish.experiment.builder.cli import build as build_cli
 from starfish.image import (
@@ -16,7 +14,7 @@ from starfish.spots import (
     SpotFinder,
     TargetAssignment,
 )
-from starfish.util.click import option as click_option
+from starfish.util import click
 
 
 PROFILER_KEY = "profiler"
@@ -38,7 +36,7 @@ def art_string():
 
 
 @click.group()
-@click_option("--profile", is_flag=True)
+@click.option("--profile", is_flag=True)
 @click.pass_context
 def starfish(ctx, profile):
     art = art_string()

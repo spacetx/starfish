@@ -1,10 +1,8 @@
 from typing import Type
 
-import click
-
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
-from starfish.util.click import option as click_option
+from starfish.util import click
 from . import _base
 from . import bandpass
 from . import clip
@@ -34,8 +32,8 @@ class Filter(PipelineComponent):
 
     @staticmethod
     @click.group("filter")
-    @click_option("-i", "--input", type=click.Path(exists=True))
-    @click_option("-o", "--output", required=True)
+    @click.option("-i", "--input", type=click.Path(exists=True))
+    @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, input, output):
         print("Filtering images...")

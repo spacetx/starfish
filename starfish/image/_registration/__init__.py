@@ -1,10 +1,8 @@
 from typing import Type
 
-import click
-
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
-from starfish.util.click import option as click_option
+from starfish.util import click
 from . import fourier_shift
 from ._base import RegistrationAlgorithmBase
 
@@ -24,8 +22,8 @@ class Registration(PipelineComponent):
 
     @staticmethod
     @click.group("registration")
-    @click_option("-i", "--input", type=click.Path(exists=True))
-    @click_option("-o", "--output", required=True)
+    @click.option("-i", "--input", type=click.Path(exists=True))
+    @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, input, output):
         print("Registering...")

@@ -1,12 +1,12 @@
 from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
-import click
 import numpy as np
 from scipy.ndimage.filters import uniform_filter
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
+from starfish.util import click
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by, preserve_float_range, validate_and_broadcast_kernel_size

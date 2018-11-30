@@ -1,12 +1,12 @@
 from copy import deepcopy
 from typing import Optional
 
-import click
 import numpy as np
 from tqdm import tqdm
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
+from starfish.util import click
 from ._base import FilterAlgorithmBase
 
 

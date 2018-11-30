@@ -1,7 +1,6 @@
 import warnings
 from typing import Optional, Tuple, Union
 
-import click
 import numpy as np
 import xarray as xr
 from trackpy import locate
@@ -9,6 +8,7 @@ from trackpy import locate
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import SpotAttributes
+from starfish.util import click
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
 

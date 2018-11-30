@@ -1,11 +1,10 @@
 from typing import Any, Dict, List, Type
 
-import click
 from skimage.io import imsave
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, PipelineComponent
-from starfish.util.click import option as click_option
+from starfish.util import click
 from . import watershed
 from ._base import SegmentationAlgorithmBase
 
@@ -29,9 +28,9 @@ class Segmentation(PipelineComponent):
 
     @staticmethod
     @click.group("segment")
-    @click_option("--primary-images", required=True, type=click.Path(exists=True))
-    @click_option("--nuclei", required=True, type=click.Path(exists=True))
-    @click_option("-o", "--output", required=True)
+    @click.option("--primary-images", required=True, type=click.Path(exists=True))
+    @click.option("--nuclei", required=True, type=click.Path(exists=True))
+    @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, primary_images, nuclei, output):
         print('Segmenting ...')

@@ -1,10 +1,10 @@
 from functools import partial
 from typing import Optional
 
-import click
 import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
+from starfish.util import click
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by, preserve_float_range
 

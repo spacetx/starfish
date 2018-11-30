@@ -1,6 +1,5 @@
 from typing import List, Optional, Tuple, Union
 
-import click
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -13,6 +12,7 @@ from tqdm import tqdm
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number, SpotAttributes
+from starfish.util import click
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
 

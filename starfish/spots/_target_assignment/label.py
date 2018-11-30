@@ -1,8 +1,8 @@
-import click
 import numpy as np
 
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices
+from starfish.util import click
 from ._base import TargetAssignmentAlgorithm
 
 

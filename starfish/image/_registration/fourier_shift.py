@@ -1,7 +1,6 @@
 from copy import deepcopy
 from typing import Optional, Tuple, Union
 
-import click
 import numpy as np
 from scipy.ndimage import fourier_shift
 from skimage.feature import register_translation
@@ -9,6 +8,7 @@ from skimage.feature import register_translation
 from starfish.image._filter.util import preserve_float_range
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
+from starfish.util import click
 from ._base import RegistrationAlgorithmBase
 
 

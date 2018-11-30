@@ -126,17 +126,17 @@ def test_dartfish_pipeline_cropped_data():
         zero_norm_stack.xarray[0, 0, 0, 50:60, 60:70]
     )
 
-    log_dict = dict(zero_norm_stack.log)
-    assert log_dict['ScaleByPercentile']
-    assert log_dict['ZeroByChannelMagnitude']
-    assert log_dict['PixelSpotDetector']
+    pipeline_log = zero_norm_stack.log
+
+    assert pipeline_log[0]['method'] == 'ScaleByPercentile'
+    assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
 
     spot_intensities = dartfish.initial_spot_intensities
 
-    log_dict_from_it = spot_intensities.attrs
-    assert log_dict_from_it['ScaleByPercentile']
-    assert log_dict_from_it['ZeroByChannelMagnitude']
-    assert log_dict_from_it['PixelSpotDetector']
+    pipeline_log = spot_intensities.attrs['log']
+
+    assert pipeline_log[0]['method'] == 'ScaleByPercentile'
+    assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
 
     spots_df = IntensityTable(
         spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True)

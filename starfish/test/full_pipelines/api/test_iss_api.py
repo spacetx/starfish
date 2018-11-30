@@ -94,6 +94,12 @@ def test_iss_pipeline_cropped_data():
         registered_image.xarray[2, 2, 0, 40:50, 40:50]
     )
 
+    pipeline_log = registered_image.log
+
+    assert pipeline_log[0]['method'] == 'WhiteTophat'
+    assert pipeline_log[1]['method'] == 'FourierShiftRegistration'
+    assert pipeline_log[2]['method'] == 'BlobDetector'
+
     intensities = iss.intensities
 
     # assert that the number of spots detected is 99
@@ -119,10 +125,11 @@ def test_iss_pipeline_cropped_data():
     lab = TargetAssignment.Label()
     assigned = lab.run(label_image, decoded)
 
-    intensity_table_log = assigned.attrs
-    assert intensity_table_log['WhiteTophat']
-    assert intensity_table_log['FourierShiftRegistration']
-    assert intensity_table_log['BlobDetector']
+    pipeline_log = assigned.attrs['log']
+
+    assert pipeline_log[0]['method'] == 'WhiteTophat'
+    assert pipeline_log[1]['method'] == 'FourierShiftRegistration'
+    assert pipeline_log[2]['method'] == 'BlobDetector'
 
     # 28 of the spots are assigned to cell 1 (although most spots do not decode!)
     assert np.sum(assigned['cell_id'] == 1) == 28

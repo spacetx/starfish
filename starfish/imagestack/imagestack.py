@@ -96,7 +96,7 @@ class ImageStack:
     def __init__(self, image_partition: TileSet) -> None:
         self._image_partition = image_partition
         self._tile_shape = image_partition.default_tile_shape
-        self._log: List[Tuple] = list()
+        self._log: List[dict] = list()
 
         # Examine the tiles to figure out the right kind (int, float, etc.) and size.  We require
         # that all the tiles have the same kind of data type, but we do not require that they all
@@ -862,7 +862,7 @@ class ImageStack:
         return pd.DataFrame(data)
 
     @property
-    def log(self) -> List[Tuple]:
+    def log(self) -> List[dict]:
         """
         Returns a list of pipeline components that have been applied to this imagestack
         as well as their corresponding runtime parameters.
@@ -888,7 +888,7 @@ class ImageStack:
         ----------
         class_instance: The instance of a class being applied to the imagestack
         """
-        entry = class_instance.__class__.__name__, class_instance.__dict__
+        entry = {"method": class_instance.__class__.__name__, "arguments": class_instance.__dict__}
         self._log.append(entry)
 
     @property

@@ -27,7 +27,7 @@ class AlgorithmBaseType(type):
                     it = result
                     if isinstance(result, tuple):
                         it = result[0]
-                    it.attrs.update(stack.log)
+                    it.attrs.update({'log': stack.log})
             return result
         return helper
 

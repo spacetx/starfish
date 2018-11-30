@@ -473,7 +473,7 @@ class ImageStack:
             import napari_gui
         except ImportError:
             warnings.warn("Cannot find the napari library. "
-                          "Install it by running \"pip install napari\"")
+                          "Install it by running \"pip install napari-gui\"")
             return
         # TODO ambrosejcarr: this should use updated imagestack slicing routines when they are added
         # and indices should be optional to enable full stack viewing.
@@ -481,7 +481,9 @@ class ImageStack:
         slices, axes = self.get_slice(indices)
         reordered_array = np.moveaxis(slices, [-2, -1], [0, 1])
 
-        napari_gui.imshow(reordered_array, multichannel=False)
+        viewer = napari_gui.imshow(reordered_array, multichannel=False)
+
+        return viewer, axes
 
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],

@@ -2,7 +2,6 @@ import difflib
 import subprocess
 import unittest
 
-from starfish.starfish import art_string
 from starfish.util import exec
 
 
@@ -71,8 +70,7 @@ Commands:
 
     def test_second(self):
         actual = subprocess.check_output(["starfish", "detect_spots", "--help"])
-        expected = """%s
-Usage: starfish detect_spots [OPTIONS] COMMAND [ARGS]...
+        expected = """Usage: starfish detect_spots [OPTIONS] COMMAND [ARGS]...
 
 Options:
   -i, --input PATH                [required]
@@ -97,7 +95,7 @@ Commands:
   BlobDetector
   PixelSpotDetector
   TrackpyLocalMaxPeakFinder
-""" % art_string()
+"""
         actual = actual.decode("utf-8")
         assert_diff(actual, expected)
 

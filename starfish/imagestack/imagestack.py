@@ -968,7 +968,6 @@ class ImageStack:
             default_tile_shape=self._tile_shape,
             extras=self._tile_metadata.extras,
         )
-        seen_x_coords, seen_y_coords, seen_z_coords = set(), set(), set()
         for round_ in range(self.num_rounds):
             for ch in range(self.num_chs):
                 for zlayer in range(self.num_zlayers):
@@ -986,13 +985,10 @@ class ImageStack:
                     y_coordinates = self.coordinates(tile_indices, Coordinates.Y)
                     z_coordinates = self.coordinates(tile_indices, Coordinates.Z)
 
-                    seen_x_coords.add(x_coordinates)
                     coordinates[Coordinates.X] = x_coordinates
-                    seen_y_coords.add(y_coordinates)
                     coordinates[Coordinates.Y] = y_coordinates
                     if z_coordinates[0] != np.nan and z_coordinates[1] != np.nan:
                         coordinates[Coordinates.Z] = z_coordinates
-                        seen_z_coords.add(z_coordinates)
 
                     tile = Tile(
                         coordinates=coordinates,
@@ -1004,36 +1000,20 @@ class ImageStack:
                     )
                     tileset.add_tile(tile)
 
-        sorted_x_coords = sorted(seen_x_coords)
-        sorted_y_coords = sorted(seen_y_coords)
-        sorted_z_coords = sorted(seen_z_coords)
-        x_coords_to_idx = {coords: idx for idx, coords in enumerate(sorted_x_coords)}
-        y_coords_to_idx = {coords: idx for idx, coords in enumerate(sorted_y_coords)}
-        z_coords_to_idx = {coords: idx for idx, coords in enumerate(sorted_z_coords)}
-
         if tile_opener is None:
             def tile_opener(tileset_path, tile, ext):
                 tile_basename = os.path.splitext(tileset_path)[0]
-                xcoord = tile.coordinates[Coordinates.X]
-                ycoord = tile.coordinates[Coordinates.Y]
-                zcoord = tile.coordinates.get(Coordinates.Z, None)
-                xcoord = tuple(xcoord) if isinstance(xcoord, list) else xcoord
-                ycoord = tuple(ycoord) if isinstance(ycoord, list) else ycoord
-                xval = x_coords_to_idx[xcoord]
-                yval = y_coords_to_idx[ycoord]
-                if zcoord is not None:
-                    zval = z_coords_to_idx[zcoord]
+                if Indices.Z in tile.indices:
+                    zval = tile.indices[Indices.Z]
                     zstr = "-Z{}".format(zval)
                 else:
                     zstr = ""
                 return open(
-                    "{}-X{}-Y{}{}-H{}-C{}.{}".format(
+                    "{}-H{}-C{}{}.{}".format(
                         tile_basename,
-                        xval,
-                        yval,
-                        zstr,
                         tile.indices[Indices.ROUND],
                         tile.indices[Indices.CH],
+                        zstr,
                         ext,
                     ),
                     "wb")

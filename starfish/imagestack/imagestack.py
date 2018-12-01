@@ -96,17 +96,19 @@ class ImageStack:
         save the (potentially modified) image tensor to disk
     """
 
-    def __init__(self, image_partition: TileSet) -> None:
-        self._image_partition = image_partition
-        self._tile_metadata = TileSetData(self._image_partition)
-        self._tile_shape = image_partition.default_tile_shape
+    def __init__(self, tileset: TileSet) -> None:
+        self._num_rounds = ImageStack._get_dimension_size(tileset, Indices.ROUND)
+        self._num_chs = ImageStack._get_dimension_size(tileset, Indices.CH)
+        self._num_zlayers = ImageStack._get_dimension_size(tileset, Indices.Z)
+        self._tile_metadata = TileSetData(tileset)
+        self._tile_shape = tileset.default_tile_shape
 
         # Examine the tiles to figure out the right kind (int, float, etc.) and size.  We require
         # that all the tiles have the same kind of data type, but we do not require that they all
         # have the same size of data type. The # allocated array is the highest size we encounter.
         kind = None
         max_size = 0
-        for tile in tqdm(self._image_partition.tiles()):
+        for tile in tqdm(tileset.tiles()):
             dtype = tile.numpy_array.dtype
             if kind is None:
                 kind = dtype.kind
@@ -131,7 +133,7 @@ class ImageStack:
 
             for axis_name, axis_data in AXES_DATA.items():
                 if ix == axis_data.order:
-                    size_for_axis = self._get_dimension_size(axis_name)
+                    size_for_axis = ImageStack._get_dimension_size(tileset, axis_name)
                     dim_for_axis = axis_name
                     break
 
@@ -174,7 +176,7 @@ class ImageStack:
         )
 
         # iterate through the tiles and set the data.
-        for tile in self._image_partition.tiles():
+        for tile in tileset.tiles():
             h = tile.indices[Indices.ROUND]
             c = tile.indices[Indices.CH]
             zlayer = tile.indices.get(Indices.Z, 0)
@@ -920,23 +922,24 @@ class ImageStack:
                                                               indices=indices,
                                                               physical_axis=physical_axis)
 
-    def _get_dimension_size(self, dimension: Indices):
+    @staticmethod
+    def _get_dimension_size(tileset: TileSet, dimension: Indices):
         axis_data = AXES_DATA[dimension]
-        if dimension in self._image_partition.dimensions or axis_data.required:
-            return self._image_partition.get_dimension_shape(dimension)
+        if dimension in tileset.dimensions or axis_data.required:
+            return tileset.get_dimension_shape(dimension)
         return 1
 
     @property
     def num_rounds(self):
-        return self._get_dimension_size(Indices.ROUND)
+        return self._num_rounds
 
     @property
     def num_chs(self):
-        return self._get_dimension_size(Indices.CH)
+        return self._num_chs
 
     @property
     def num_zlayers(self):
-        return self._get_dimension_size(Indices.Z)
+        return self._num_zlayers
 
     @property
     def tile_shape(self):

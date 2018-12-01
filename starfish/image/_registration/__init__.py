@@ -19,7 +19,7 @@ class Registration(PipelineComponent):
         output = ctx.obj["output"]
         stack = ctx.obj["stack"]
         instance.run(stack)
-        stack.write(output)
+        stack.export(output)
 
     @staticmethod
     @click.group("registration")

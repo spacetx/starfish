@@ -29,7 +29,7 @@ class Filter(PipelineComponent):
         output = ctx.obj["output"]
         stack = ctx.obj["stack"]
         filtered = instance.run(stack)
-        filtered.write(output)
+        filtered.export(output)
 
     @staticmethod
     @click.group("filter")

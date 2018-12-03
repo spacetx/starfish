@@ -97,8 +97,8 @@ class ImageStack:
         still a prototype, but does offer more performant viewing of multi-dimensional images.
         pip install napari-gui (requires 0.0.4)
     sel(indexers)
-        return an ImageStack (coordinates preserved) that is the subset of tiles described
-        by the indexers.
+        return an ImageStack (coordinates preserved) that is the subset described
+        by the indexers. The indexers can slice all 5 dimensions of the image tensor.
     export(filepath, tile_opener=None)
         save the (potentially modified) image tensor to disk
     """

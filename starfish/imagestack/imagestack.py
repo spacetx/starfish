@@ -92,7 +92,14 @@ class ImageStack:
     show_stack(indices, color_map='gray', figure_size=(10, 10), rescale=False, p_min=None,
             p_max=None)
         show an interactive, pageable view of the image tensor, or a slice of the image tensor
-    write(filepath, tile_opener=None)
+    show_stack_napari(indices)
+        view the selected indices of the image tensor with Napari. Note that Napari is
+        still a prototype, but does offer more performant viewing of multi-dimensional images
+        pip install napari-gui (requires 0.0.4)
+    sel(indexers)
+        return an ImageStack (coordinates preserved) that is the subset of tiles described
+        by the indexers.
+    export(filepath, tile_opener=None)
         save the (potentially modified) image tensor to disk
     """
 

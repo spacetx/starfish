@@ -15,6 +15,7 @@ from .experiment.experiment import Experiment, FieldOfView
 from .imagestack.imagestack import ImageStack
 from .intensity_table.intensity_table import IntensityTable
 from .starfish import starfish
+from .starfishEncoder import StarfishJSONEncoder
 
 if __name__ == "__main__":
     starfish()

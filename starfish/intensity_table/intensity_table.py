@@ -6,6 +6,7 @@ import pandas as pd
 import regional
 import xarray as xr
 
+from starfish import StarfishJSONEncoder
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.image._filter.util import preserve_float_range
 from starfish.types import Features, Indices, SpotAttributes
@@ -172,6 +173,9 @@ class IntensityTable(xr.DataArray):
             Name of Netcdf file
 
         """
+        if self.attrs['log']:
+            # if log info, json encode it
+            self.attrs['log'] = StarfishJSONEncoder().encode(self.attrs['log'])
         self.to_netcdf(filename)
 
     def save_mermaid(self, filename: str) -> pd.DataFrame:
@@ -233,15 +237,14 @@ class IntensityTable(xr.DataArray):
             loaded.coords,
             loaded.dims
         )
+        # maintain log
+        if loaded.attrs['log']:
+            intensity_table.attrs['log'] = loaded.attrs['log']
         return intensity_table
 
     def show(self, background_image: np.ndarray) -> None:
         """show spots on a background image"""
         raise NotImplementedError
-
-    def update_log(self, class_instance):
-        entry = {class_instance.__class__.__name__: class_instance.__dict__}
-        self.attrs.update(entry)
 
     @classmethod
     def synthetic_intensities(

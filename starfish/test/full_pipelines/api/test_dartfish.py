@@ -1,6 +1,7 @@
 import os
 import sys
 
+from starfish import starfishEncoder
 import numpy as np
 import pandas as pd
 

@@ -1,4 +1,5 @@
 from itertools import product
+from json import JSONEncoder
 from typing import Dict, Optional, Union
 
 import numpy as np
@@ -6,11 +7,24 @@ import pandas as pd
 import regional
 import xarray as xr
 
-from starfish import StarfishJSONEncoder
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.image._filter.util import preserve_float_range
 from starfish.types import Features, Indices, SpotAttributes
 
+
+class StarfishJSONEncoder(JSONEncoder):
+
+    def default(self, o):
+        try:
+            # if the object has a custom to_json method
+            return o.to_json()
+        except:
+            try:
+                # Use regular
+                return super(StarfishJSONEncoder, self).default(o)
+            except:
+                # If all else fails just log the class name
+                return o.__class__.__name__
 
 class IntensityTable(xr.DataArray):
     """Container for spot/pixel features extracted from image data

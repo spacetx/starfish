@@ -335,7 +335,7 @@ class Codebook(xr.DataArray):
 
         return cls.from_code_array(codebook_doc[DocumentKeys.MAPPINGS_KEY], n_round, n_ch)
 
-    def to_json(self) -> None:
+    def to_json(self) -> dict:
         """save a codebook to json
 
         Notes
@@ -373,9 +373,10 @@ class Codebook(xr.DataArray):
         }
         return codebook_document
 
-        # with open(filename, 'w') as f:
-        #     json.dump(codebook_document, f)
-
+    def write_json(self, filename: str):
+        codebook_document = self. to_json()
+        with open(filename, 'w') as f:
+            json.dump(codebook_document, f)
 
     @staticmethod
     def _normalize_features(

@@ -1,6 +1,7 @@
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 
+
 class AlgorithmBaseType(type):
 
     def __init__(cls, name, bases, namespace):

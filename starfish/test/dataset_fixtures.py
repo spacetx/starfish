@@ -73,7 +73,7 @@ def simple_codebook_array():
 def simple_codebook_json(simple_codebook_array) -> Generator[str, None, None]:
     with tempfile.NamedTemporaryFile() as tf:
         codebook = Codebook.from_code_array(simple_codebook_array)
-        codebook.to_json(tf.name)
+        codebook.write_json(tf.name)
 
         yield tf.name
 

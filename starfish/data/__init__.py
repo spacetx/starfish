@@ -83,3 +83,9 @@ def ImagingMassCytometry(use_test_data: bool=False):
         "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20181023/"
         "imaging_cytof/BodenmillerBreastCancerSamples/experiment.json"
     )
+
+
+def SeqFISH(use_test_data: bool=False):
+    return Experiment.from_json(
+        "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20181211/seqfish/experiment.json"
+    )

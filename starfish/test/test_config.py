@@ -1,10 +1,10 @@
-from json import loads, dump
 import os
+from json import dump, loads
 
 from pytest import mark, raises
 
-from starfish.util.config import Config
 from starfish import data
+from starfish.util.config import Config
 
 
 simple_str = '{"a": 1}'
@@ -91,7 +91,7 @@ def test_cache_osmFISH(tmpdir, name, config, monkeypatch):
     assert config["expected"] == get_size(tmpdir / "cache")
 
 
-def get_size(start_path = '.'):
+def get_size(start_path='.'):
     total_size = 0
     for dirpath, dirnames, filenames in os.walk(start_path):
         for f in filenames:

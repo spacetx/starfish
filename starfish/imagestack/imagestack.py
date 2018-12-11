@@ -29,7 +29,13 @@ from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import scoreatpercentile
 from skimage import exposure
 from skimage import img_as_float32, img_as_uint
-from slicedimage import Reader, Tile, TileSet, Writer
+from slicedimage import (
+    ImageFormat,
+    Reader,
+    Tile,
+    TileSet,
+    Writer,
+)
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
@@ -952,7 +958,10 @@ class ImageStack:
     def tile_shape(self):
         return self._tile_shape
 
-    def export(self, filepath: str, tile_opener=None) -> None:
+    def export(self,
+               filepath: str,
+               tile_opener=None,
+               tile_format: ImageFormat=ImageFormat.NUMPY) -> None:
         """write the image tensor to disk in spaceTx format
 
         Parameters
@@ -960,6 +969,8 @@ class ImageStack:
         filepath : str
             Path + prefix for the images and primary_images.json written by this function
         tile_opener : TODO ttung: doc me.
+        tile_format : ImageFormat
+            Format in which each 2D plane should be written.
 
         """
         tileset = TileSet(
@@ -1034,7 +1045,8 @@ class ImageStack:
             tileset,
             filepath,
             pretty=True,
-            tile_opener=tile_opener)
+            tile_opener=tile_opener,
+            tile_format=tile_format)
 
     def max_proj(self, *dims: Indices) -> "ImageStack":
         """return a max projection over one or more axis of the image tensor

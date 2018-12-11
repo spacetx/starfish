@@ -1,8 +1,10 @@
-from json import loads
+from json import loads, dump
+import os
 
-from pytest import raises
+from pytest import mark, raises
 
 from starfish.util.config import Config
+from starfish import data
 
 
 simple_str = '{"a": 1}'
@@ -63,3 +65,36 @@ def test_cache_config():
     cache_config = config.lookup(["cache"], {})
     assert cache_config["enabled"]
     assert cache_config["size_limit"] == 5 * 10 ** 9
+
+
+@mark.parametrize("name,config", (
+    ("enabled", {
+        "expected": 69688,
+        "backend": {
+            "cache": {
+                "enabled": True,
+            }}}),
+    ("disabled", {
+        "expected": 0,
+        "backend": {
+            "cache": {
+                "enabled": False,
+            }}}),
+))
+def test_cache_osmFISH(tmpdir, name, config, monkeypatch):
+    config["backend"]["cache"]["directory"] = str(tmpdir / "cache")
+    config_file = tmpdir / "config"
+    with open(config_file, "w") as o:
+        dump(config, o)
+    monkeypatch.setitem(os.environ, "STARFISH_CONFIG", f"@{config_file}")
+    data.osmFISH(use_test_data=True)
+    assert config["expected"] == get_size(tmpdir / "cache")
+
+
+def get_size(start_path = '.'):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(start_path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            total_size += os.path.getsize(fp)
+    return total_size

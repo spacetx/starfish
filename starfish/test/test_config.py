@@ -55,11 +55,11 @@ def test_lookup_deep():
 def test_cache_config():
     config = Config("""{
         "cache": {
-             "allow_caching": true,
+             "enabled": true,
              "size_limit": 5e9,
              "directory": "/tmp"
          }
     }""")
     cache_config = config.lookup(["cache"], {})
-    assert cache_config["allow_caching"]
+    assert cache_config["enabled"]
     assert cache_config["size_limit"] == 5 * 10 ** 9

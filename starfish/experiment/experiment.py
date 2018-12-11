@@ -177,7 +177,7 @@ class Experiment:
         STARISH_CONFIG :
             This parameter is read from the environment to permit setting configuration
             values either directly or via a file. Keys read include:
-             - cache.allow_caching
+             - cache.enabled
              - cache.directory
              - cache.size_limit
              - validation.strict
@@ -194,11 +194,7 @@ class Experiment:
         """
 
         config_obj = Config(config)  # STARFISH_CONFIG is assumed
-        cache_config = config_obj.lookup(["cache"], {})
-        if cache_config.get("allow_caching", True):
-            allow_caching = cache_config
-        else:
-            allow_caching = False
+        backend_config = config_obj.lookup(["backend"], {})
 
         if strict is None:
             strict = config_obj.lookup(["validation", "strict"],
@@ -209,14 +205,14 @@ class Experiment:
             if not valid:
                 raise Exception("validation failed")
 
-        backend, name, baseurl = resolve_path_or_url(json_url, allow_caching)
+        backend, name, baseurl = resolve_path_or_url(json_url, backend_config)
         with backend.read_contextmanager(name) as fh:
             experiment_document = json.load(fh)
 
         version = cls.verify_version(experiment_document['version'])
 
         _, codebook_name, codebook_baseurl = resolve_url(experiment_document['codebook'],
-                                                         baseurl, allow_caching)
+                                                         baseurl, backend_config)
         codebook_absolute_url = pathjoin(codebook_baseurl, codebook_name)
         codebook = Codebook.from_json(codebook_absolute_url)
 

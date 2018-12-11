@@ -242,16 +242,19 @@ def test_imagestack_to_intensity_table_no_noise(synthetic_spot_pass_through_stac
     assert isinstance(pixel_intensities, IntensityTable)
 
 
-@pytest.mark.parametrize("format,ending,count", (
-    (ImageFormat.TIFF, "tiff", 192),
-    (ImageFormat.NUMPY, "npy", 192),
+@pytest.mark.parametrize("format,count", (
+    (ImageFormat.TIFF, 192),
+    (ImageFormat.NUMPY, 192),
 ))
-def test_imagestack_export(tmpdir, format, ending, count, recwarn):
+def test_imagestack_export(tmpdir, format, count, recwarn):
     """
     Save a synthetic stack to files and check the results
     """
     stack = ImageStack.synthetic_stack()
     stack_json = tmpdir / "output.json"
     stack.export(str(stack_json), tile_format=format)
+    files = list([x for x in tmpdir.listdir() if str(x).endswith(format.file_ext)])
     assert ImageStack.from_path_or_url(str(stack_json))
-    assert count == len([x for x in tmpdir.listdir() if str(x).endswith(ending)])
+    assert count == len(files)
+    with open(files[0], "rb") as fh:
+        format.reader_func(fh)

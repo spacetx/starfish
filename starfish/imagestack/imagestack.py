@@ -1045,8 +1045,8 @@ class ImageStack:
             tileset,
             filepath,
             pretty=True,
-            tile_format=tile_format,
-            tile_opener=tile_opener)
+            tile_opener=tile_opener,
+            tile_format=tile_format)
 
     def max_proj(self, *dims: Indices) -> "ImageStack":
         """return a max projection over one or more axis of the image tensor

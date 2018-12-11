@@ -130,6 +130,7 @@ def parse_codebook(codebook_csv: str) -> Mapping:
 @click.command()
 @click.option("--input-dir", type=str, help="input directory containing images")
 @click.option("--output-dir", type=str, help="output directory for formatted data")
+@click.option("--codebook-csv", type=str, help="csv file containing barcode:target mapping")
 def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
     """CLI entrypoint for spaceTx format construction for SeqFISH data
 
@@ -140,7 +141,7 @@ def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
         the imaging round they were acquired in and named <1-index round>.tif
     output_dir : str
         directory containing output files. Will be created if it does not exist.
-    codebook : str
+    codebook_csv : str
         name of the codebook csv file containing barcode information for this field of view.
 
     Notes
@@ -169,13 +170,9 @@ def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
         Indices.Z: 29,
     }
 
-    def post_process_func(experiment_json_doc):
-        experiment_json_doc["codebook"] = "codebook.json"
-        return experiment_json_doc
-
-    with open(os.path.join(output_dir, "codebook.json"), "w") as f:
-        codebook = parse_codebook(codebook_csv)
-        json.dump(codebook, f)
+    # def post_process_func(experiment_json_doc):
+    #     experiment_json_doc["codebook"] = "codebook.json"
+    #     return experiment_json_doc
 
     write_experiment_json(
         path=output_dir,
@@ -183,9 +180,13 @@ def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
         primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions={},
         primary_tile_fetcher=primary_tile_fetcher,
-        postprocess_func=post_process_func,
+        # postprocess_func=post_process_func,
         dimension_order=(Indices.ROUND, Indices.CH, Indices.Z)
     )
+
+    with open(os.path.join(output_dir, "codebook.json"), "w") as f:
+        codebook = parse_codebook(codebook_csv)
+        json.dump(codebook, f)
 
     return 0
 

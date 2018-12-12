@@ -992,7 +992,11 @@ class ImageStack:
                 Indices.CH.value,
                 Indices.Y.value,
                 Indices.X.value)
-            skimage.io.imsave(filepath, data.values, imagej=True)
+
+            # catch warnings about low-contrast images.
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", UserWarning)
+                skimage.io.imsave(filepath, data.values, imagej=True)
 
     def export(self,
                filepath: str,

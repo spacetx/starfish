@@ -924,7 +924,15 @@ class ImageStack:
 
         return result
 
-    def coordinates(
+    @property
+    def coordinates(self):
+        """
+        Returns an xarray where the row labels are the indices (R, C, Z) and the column labels are
+        the min and max for each type of coordinate (X, Y, Z).
+        """
+        return self._coordinates
+
+    def tile_coordinates(
             self,
             indices: Mapping[Indices, int],
             physical_axis: Coordinates) -> Tuple[float, float]:
@@ -937,9 +945,10 @@ class ImageStack:
             Retrieves the xmin, xmax for the tile identified by round=4, ch=3, z=2
         """
 
-        return physical_coordinate_calculator.get_coordinates(coords_array=self._coordinates,
-                                                              indices=indices,
-                                                              physical_axis=physical_axis)
+        return physical_coordinate_calculator.get_coordinates(
+            coords_array=self._coordinates,
+            indices=indices,
+            physical_axis=physical_axis)
 
     @staticmethod
     def _get_dimension_size(tileset: TileSet, dimension: Indices):
@@ -1008,9 +1017,9 @@ class ImageStack:
                     }
 
                     coordinates: MutableMapping[Coordinates, Tuple[Number, Number]] = dict()
-                    x_coordinates = self.coordinates(tile_indices, Coordinates.X)
-                    y_coordinates = self.coordinates(tile_indices, Coordinates.Y)
-                    z_coordinates = self.coordinates(tile_indices, Coordinates.Z)
+                    x_coordinates = self.tile_coordinates(tile_indices, Coordinates.X)
+                    y_coordinates = self.tile_coordinates(tile_indices, Coordinates.Y)
+                    z_coordinates = self.tile_coordinates(tile_indices, Coordinates.Z)
 
                     coordinates[Coordinates.X] = x_coordinates
                     coordinates[Coordinates.Y] = y_coordinates

@@ -929,7 +929,13 @@ class ImageStack:
             indices: Mapping[Indices, int],
             physical_axis: Coordinates) -> Tuple[float, float]:
         """Given a set of indices that uniquely identify a tile and a physical axis, return the min
-        and the max coordinates for that tile along that axis."""
+        and the max coordinates for that tile along that axis.
+
+        Examples:
+        ---------
+        stack.coordinates({Indices.ROUND: 4, Indices.CH: 3, Indices.Z: 2}, Coordinates.X)
+            Retrieves the xmin, xmax for the tile identified by round=4, ch=3, z=2
+        """
 
         return physical_coordinate_calculator.get_coordinates(coords_array=self._coordinates,
                                                               indices=indices,

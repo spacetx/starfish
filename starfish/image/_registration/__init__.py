@@ -3,16 +3,16 @@ from typing import Type
 import click
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.pipeline import AlgorithmBase, PipelineComponent
-from . import fourier_shift
-from ._base import RegistrationAlgorithmBase
+from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
+from . import _base
+import_all_submodules(__file__, __package__)
 
 
 class Registration(PipelineComponent):
 
     @classmethod
     def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
-        return RegistrationAlgorithmBase
+        return _base.RegistrationAlgorithmBase
 
     @classmethod
     def _cli_run(cls, ctx, instance):

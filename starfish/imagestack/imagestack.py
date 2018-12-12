@@ -23,6 +23,7 @@ from typing import (
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import skimage.io
 import xarray as xr
 from matplotlib import get_backend as get_matplotlib_backend
 from scipy.ndimage.filters import gaussian_filter
@@ -957,6 +958,27 @@ class ImageStack:
     @property
     def tile_shape(self):
         return self._tile_shape
+
+    def to_multipage_tiff(self, filepath: str) -> None:
+            """save the ImageStack as a FIJI-compatible multi-page TIFF file
+
+            Parameters
+            ----------
+            filepath : str
+                filepath for a tiff FILE. "TIFF" suffix will be added if the provided path does not
+                end with .TIFF
+
+            """
+            if not filepath.upper().endswith(".TIFF"):
+                filepath += ".TIFF"
+
+            data = self.xarray.transpose(
+                Indices.ROUND.value,
+                Indices.Z.value,
+                Indices.CH.value,
+                Indices.Y.value,
+                Indices.X.value)
+            skimage.io.imsave(filepath, data.values, imagej=True)
 
     def export(self,
                filepath: str,

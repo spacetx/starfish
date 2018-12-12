@@ -1,4 +1,5 @@
 import os
+import time
 from json import dump, loads
 
 from pytest import mark, raises
@@ -56,13 +57,13 @@ def test_lookup_deep():
 
 def test_cache_config():
     config = Config("""{
-        "cache": {
+        "caching": {
              "enabled": true,
              "size_limit": 5e9,
              "directory": "/tmp"
          }
     }""")
-    cache_config = config.lookup(["cache"], {})
+    cache_config = config.lookup(("caching",), {})
     assert cache_config["enabled"]
     assert cache_config["size_limit"] == 5 * 10 ** 9
 
@@ -70,28 +71,52 @@ def test_cache_config():
 @mark.parametrize("name,config", (
     ("enabled", {
         "expected": 69688,
+        "validation": {"strict": True},
         "backend": {
-            "cache": {
-                "enabled": True,
+            "caching": {
+                "directory": "REPLACEME",
             }}}),
     ("disabled", {
         "expected": 0,
+        "validation": {"strict": True},
         "backend": {
-            "cache": {
-                "enabled": False,
+            "caching": {
+                # No directory, ergo disabled.
+            }}}),
+    ("limited", {
+        "expected": 0,
+        "validation": {"strict": True},
+        "backend": {
+            "caching": {
+                "directory": "REPLACEME",
+                "size_limit": 9e5,
             }}}),
 ))
-def test_cache_osmFISH(tmpdir, name, config, monkeypatch):
-    config["backend"]["cache"]["directory"] = str(tmpdir / "cache")
+def test_cache_merfish(tmpdir, name, config, monkeypatch):
+
+    if "directory" in config["backend"]["caching"]:
+        # If not present, then this cache is disabled.
+        config["backend"]["caching"]["directory"] = str(tmpdir / "caching")
+
     config_file = tmpdir / "config"
     with open(config_file, "w") as o:
         dump(config, o)
     monkeypatch.setitem(os.environ, "STARFISH_CONFIG", f"@{config_file}")
-    data.osmFISH(use_test_data=True)
-    assert config["expected"] == get_size(tmpdir / "cache")
+
+    start_1 = time.time()
+    fish = data.MERFISH(use_test_data=True)
+    stop_1 = time.time()
+    cache_size = get_size(tmpdir / "caching")
+    assert config["expected"] == cache_size
+    start_2 = time.time()
+    fish = data.MERFISH(use_test_data=True)
+    stop_2 = time.time()
+    assert config["expected"] == cache_size
+    assert (stop_2-start_2) < (stop_1-start_1)
 
 
-def get_size(start_path='.'):
+def get_size(start_path = '.'):
+    """helper method for listing file sizes in a directory"""
     total_size = 0
     for dirpath, dirnames, filenames in os.walk(start_path):
         for f in filenames:

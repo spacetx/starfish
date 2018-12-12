@@ -239,9 +239,6 @@ def write_experiment_json(
         experiment_doc['images'][aux_name] = "{}.json".format(aux_name)
 
     experiment_doc["codebook"] = "codebook.json"
-    with open(os.path.join(path, "experiment.json"), "w") as fh:
-        json.dump(experiment_doc, fh, indent=4)
-
     codebook_array = [
         {
             "codeword": [
@@ -255,3 +252,6 @@ def write_experiment_json(
     codebook.write_json(os.path.join(path, codebook_json_filename))
 
     experiment_doc = postprocess_func(experiment_doc)
+
+    with open(os.path.join(path, "experiment.json"), "w") as fh:
+        json.dump(experiment_doc, fh, indent=4)

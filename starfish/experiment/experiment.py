@@ -177,10 +177,9 @@ class Experiment:
         STARISH_CONFIG :
             This parameter is read from the environment to permit setting configuration
             values either directly or via a file. Keys read include:
-             - cache.enabled
-             - cache.directory
-             - cache.size_limit
-             - validation.strict
+             - backend.cache.directory (default: ~/.starfish-cache, enabling caching)
+             - backend.cache.size_limit (default: None)
+             - validation.strict (default: False)
         STARFISH_STRICT_LOADING :
              This parameter is read from the environment. If set, then all JSON loaded by this
              method will be passed to the appropriate validator. The `strict` parameter to this
@@ -194,7 +193,7 @@ class Experiment:
         """
 
         config_obj = Config(config)  # STARFISH_CONFIG is assumed
-        backend_config = config_obj.lookup(["backend"], {})
+        backend_config = config_obj.lookup(("backend",), {'directory': "~/.starfish-cache"})
 
         if strict is None:
             strict = config_obj.lookup(["validation", "strict"],

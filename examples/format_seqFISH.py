@@ -116,7 +116,7 @@ def parse_codebook(codebook_csv: str) -> Mapping:
     for gene, channel_series in csv.iterrows():
         mappings.append({
             Features.CODEWORD: [{
-                Indices.ROUND.value: r, Indices.CH.value: c, Features.CODE_VALUE: 1
+                Indices.ROUND.value: r, Indices.CH.value: c - 1, Features.CODE_VALUE: 1
             } for r, c in channel_series.items()],
             Features.TARGET: gene
         })

@@ -1,4 +1,3 @@
-import os
 from typing import Type
 
 import click
@@ -9,6 +8,7 @@ from starfish.pipeline import AlgorithmBase, PipelineComponent
 from starfish.types import Indices
 from . import _base
 from . import blob
+from . import local_max_peak_finder
 from . import pixel_spot_detector
 from . import trackpy_local_max_peak_finder
 

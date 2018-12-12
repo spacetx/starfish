@@ -105,7 +105,7 @@ class osmFISHTileFetcher(TileFetcher):
             # the metadata references a larger corpus of data than we use for this example so as we
             # iterate over the metadata, some rounds will not be found. In those cases, we just
             # continue through the loop without adding to parsed_metadata
-            round_match = re.match("Hybridization(\d{1,2})", round_)
+            round_match = re.match(r"Hybridization(\d{1,2})", round_)
             if round_match is None:
                 continue
 

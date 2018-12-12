@@ -36,10 +36,6 @@ class ISSTile(FetchedTile):
             Coordinates.Z: (0.0, 0.0001),
         }
 
-    @property
-    def format(self) -> ImageFormat:
-        return ImageFormat.TIFF
-
     def tile_data(self) -> np.ndarray:
         return imread(self.file_path)
 
@@ -100,12 +96,13 @@ def format_data(input_dir, output_dir, d):
     write_experiment_json(
         output_dir,
         1,
-        {
+        ImageFormat.TIFF,
+        primary_image_dimensions={
             Indices.ROUND: 4,
             Indices.CH: 4,
             Indices.Z: 1,
         },
-        {
+        aux_name_to_dimensions={
             'nuclei': {
                 Indices.ROUND: 1,
                 Indices.CH: 1,

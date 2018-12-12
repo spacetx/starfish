@@ -5,9 +5,6 @@ This module describes the contracts to provide data to the experiment builder.
 from typing import Mapping, Tuple, Union
 
 import numpy as np
-from slicedimage import (
-    ImageFormat,
-)
 
 from starfish.types import Coordinates, Number
 
@@ -51,17 +48,6 @@ class FetchedTile:
             Maps from a key to its value.
         """
         return {}
-
-    @property
-    def format(self) -> ImageFormat:
-        """Return the Tile's format
-
-        Returns
-        -------
-        ImageFormat :
-            a slicedimage format type, e.g. ImageFormat.TIFF
-        """
-        raise NotImplementedError()
 
     def tile_data(self) -> np.ndarray:
         """Return the image data representing the tile.

@@ -1,5 +1,4 @@
 import json
-import os
 import uuid
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 
@@ -18,9 +17,9 @@ from starfish.codebook._format import (
     MAX_SUPPORTED_VERSION,
     MIN_SUPPORTED_VERSION,
 )
+from starfish.config import StarfishConfig
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number
-from starfish.util.config import Config
 
 
 class Codebook(xr.DataArray):
@@ -262,9 +261,9 @@ class Codebook(xr.DataArray):
             cls, json_codebook: str,
             n_round: Optional[int]=None,
             n_ch: Optional[int]=None,
-            config: Optional[Union[str, Dict]]=None,
     ) -> "Codebook":
         """Load a codebook from a spaceTx spec-compliant json file or a url pointing to such a file
+        Loads configuration from StarfishConfig.
 
         Parameters
         ----------
@@ -274,19 +273,6 @@ class Codebook(xr.DataArray):
             The number of imaging rounds used in the codes. Will be inferred if not provided
         n_ch : Optional[int]
             The number of channels used in the codes. Will be inferred if not provided
-        config : str or dict
-            configuration property that will be passed to
-            starfish.util.config.Config
-        STARISH_CONFIG :
-            This parameter is read from the environment to permit setting configuration
-            values either directly or via a file. Keys read include:
-             - ["backend"]["caching"]["directory"]   (default: ~/.starfish-cache, enabling caching)
-             - ["backend"]["caching"]["size_limit"]  (default: None)
-             - ["validation"]["strict"]              (default: False)
-        STARFISH_STRICT_LOADING :
-             This parameter is read from the environment. If set, then all JSON loaded by this
-             method will be passed to the appropriate validator. The `strict` parameter to this
-             method has priority over the environment variable.
 
         Examples
         --------
@@ -342,19 +328,13 @@ class Codebook(xr.DataArray):
 
         """
 
-        # TODO: Needs refactoring by Josh
-        config_obj = Config(config)  # STARFISH_CONFIG is assumed
-        backend_config = config_obj.lookup(("backend",),
-                                           {'caching': {'directory': "~/.starfish-cache"}})
+        config = StarfishConfig()
 
-        strict = config_obj.lookup(("validation", "strict"),
-                                   os.environ.get("STARFISH_STRICT_LOADING", False))
-
-        backend, name, _ = resolve_path_or_url(json_codebook, backend_config=backend_config)
+        backend, name, _ = resolve_path_or_url(json_codebook, backend_config=config.backend)
         with backend.read_contextmanager(name) as fh:
             codebook_doc = json.load(fh)
 
-            if strict:
+            if config.strict():
                 codebook_validator = SpaceTxValidator(
                     _get_absolute_schema_path('codebook/codebook.json'))
                 if not codebook_validator.validate_object(codebook_doc):

@@ -2,6 +2,7 @@ import os
 import time
 from json import dump, loads
 
+from diskcache import Cache
 from pytest import mark, raises
 
 from starfish import data
@@ -58,7 +59,7 @@ def test_lookup_deep():
 def test_cache_config():
     config = Config("""{
         "caching": {
-             "enabled": true,
+             "enabled": True,
              "size_limit": 5e9,
              "directory": "/tmp"
          }
@@ -70,32 +71,32 @@ def test_cache_config():
 
 @mark.parametrize("name,config", (
     ("enabled", {
-        "expected": 69688,
+        "expected": (3e6, 4e6),
         "validation": {"strict": True},
         "backend": {
             "caching": {
                 "directory": "REPLACEME",
             }}}),
     ("disabled", {
-        "expected": 0,
+        "expected": (0, 0),
         "validation": {"strict": True},
         "backend": {
             "caching": {
                 # No directory, ergo disabled.
             }}}),
     ("limited", {
-        "expected": 0,
+        "expected": (1e5, 3e6),
         "validation": {"strict": True},
         "backend": {
             "caching": {
                 "directory": "REPLACEME",
-                "size_limit": 9e5,
+                "size_limit": 1e5,
             }}}),
 ))
 def test_cache_merfish(tmpdir, name, config, monkeypatch):
 
-    if "directory" in config["backend"]["caching"]:
-        # If not present, then this cache is disabled.
+    cache_enabled = "directory" in config["backend"]["caching"]
+    if cache_enabled:
         config["backend"]["caching"]["directory"] = str(tmpdir / "caching")
 
     config_file = tmpdir / "config"
@@ -103,16 +104,22 @@ def test_cache_merfish(tmpdir, name, config, monkeypatch):
         dump(config, o)
     monkeypatch.setitem(os.environ, "STARFISH_CONFIG", f"@{config_file}")
 
-    start_1 = time.time()
-    fish = data.MERFISH(use_test_data=True)
-    stop_1 = time.time()
+    # Run 1
+    data.MERFISH(use_test_data=True).fov()["primary"]
+
+    # Run 2
+    if cache_enabled:
+        data.MERFISH(use_test_data=True).fov()["primary"]
+
+    # Check constraints
+    if cache_enabled:
+        # Enforce smallest size
+        cache = Cache(str(tmpdir / "caching"))
+        cache.cull()
+
     cache_size = get_size(tmpdir / "caching")
-    assert config["expected"] == cache_size
-    start_2 = time.time()
-    fish = data.MERFISH(use_test_data=True)
-    stop_2 = time.time()
-    assert config["expected"] == cache_size
-    assert (stop_2-start_2) < (stop_1-start_1)
+    min, max = config["expected"]
+    assert (min <= cache_size) and (cache_size <= max)
 
 
 def get_size(start_path = '.'):

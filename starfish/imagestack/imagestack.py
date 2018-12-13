@@ -32,6 +32,7 @@ from slicedimage import Reader, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
+from starfish.config import StarfishConfig
 from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
@@ -54,6 +55,7 @@ _DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'req
 class ImageStack:
     """
     Container for a TileSet (field of view)
+    Loads configuration from StarfishConfig.
 
     Attributes
     ----------
@@ -249,7 +251,8 @@ class ImageStack:
             If url is a relative URL, then this must be provided.  If url is an absolute URL, then
             this parameter is ignored.
         """
-        image_partition = Reader.parse_doc(url, baseurl)
+        config = StarfishConfig()
+        image_partition = Reader.parse_doc(url, baseurl, backend_config=config.backend)
 
         return cls(image_partition)
 
@@ -267,7 +270,8 @@ class ImageStack:
         url_or_path : str
             Either an absolute URL or a filesystem path to an imagestack.
         """
-        _, relativeurl, baseurl = resolve_path_or_url(url_or_path)
+        config = StarfishConfig()
+        _, relativeurl, baseurl = resolve_path_or_url(url_or_path, backend_config=config.backend)
         return cls.from_url(relativeurl, baseurl)
 
     @classmethod

@@ -7,6 +7,7 @@ import click
 from pkg_resources import resource_filename
 from slicedimage.io import resolve_path_or_url
 
+from starfish.config import StarfishConfig
 from .util import SpaceTxValidator
 
 
@@ -23,6 +24,7 @@ def validate_sptx(experiment_json: str, fuzz: bool=False) -> bool:
 def validate(experiment_json: str, fuzz: bool=False) -> bool:
     """validate a spaceTx formatted experiment.
     Accepts local filepaths or files hosted at http links.
+    Loads configuration from StarfishConfig.
 
     Parameters
     ----------
@@ -39,10 +41,11 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
         True, if object valid or fuzz=True, else False
     """
 
+    config = StarfishConfig()
     valid = True
 
     # use slicedimage to read the top-level experiment json file passed by the user
-    backend, name, baseurl = resolve_path_or_url(experiment_json)
+    backend, name, baseurl = resolve_path_or_url(experiment_json, backend_config=config.backend)
     with backend.read_contextmanager(name) as fh:
         experiment = json.load(fh)
 

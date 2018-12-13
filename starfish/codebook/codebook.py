@@ -1,4 +1,5 @@
 import json
+import os
 import uuid
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 
@@ -17,6 +18,9 @@ from starfish.codebook._format import (
 )
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number
+from starfish.util.config import Config
+from sptx_format.util import SpaceTxValidator
+from sptx_format.validate_sptx import _get_absolute_schema_path
 
 
 class Codebook(xr.DataArray):
@@ -255,7 +259,10 @@ class Codebook(xr.DataArray):
 
     @classmethod
     def from_json(
-            cls, json_codebook: str, n_round: Optional[int]=None, n_ch: Optional[int]=None
+            cls, json_codebook: str,
+            n_round: Optional[int]=None,
+            n_ch: Optional[int]=None,
+            config: Optional[Union[str, Dict]]=None,
     ) -> "Codebook":
         """Load a codebook from a spaceTx spec-compliant json file or a url pointing to such a file
 
@@ -267,6 +274,19 @@ class Codebook(xr.DataArray):
             The number of imaging rounds used in the codes. Will be inferred if not provided
         n_ch : Optional[int]
             The number of channels used in the codes. Will be inferred if not provided
+        config : str or dict
+            configuration property that will be passed to
+            starfish.util.config.Config
+        STARISH_CONFIG :
+            This parameter is read from the environment to permit setting configuration
+            values either directly or via a file. Keys read include:
+             - ["backend"]["caching"]["directory"]   (default: ~/.starfish-cache, enabling caching)
+             - ["backend"]["caching"]["size_limit"]  (default: None)
+             - ["validation"]["strict"]              (default: False)
+        STARFISH_STRICT_LOADING :
+             This parameter is read from the environment. If set, then all JSON loaded by this
+             method will be passed to the appropriate validator. The `strict` parameter to this
+             method has priority over the environment variable.
 
         Examples
         --------
@@ -321,9 +341,22 @@ class Codebook(xr.DataArray):
             Codebook with shape (targets, channels, imaging_rounds)
 
         """
-        backend, name, _ = resolve_path_or_url(json_codebook)
+
+        # TODO: Needs refactoring by Josh
+        config_obj = Config(config)  # STARFISH_CONFIG is assumed
+        backend_config = config_obj.lookup(("backend",), {'caching': {'directory': "~/.starfish-cache"}})
+
+        strict = config_obj.lookup(("validation", "strict"),
+                                   os.environ.get("STARFISH_STRICT_LOADING", False))
+
+        backend, name, _ = resolve_path_or_url(json_codebook, backend_config=backend_config)
         with backend.read_contextmanager(name) as fh:
             codebook_doc = json.load(fh)
+
+            if strict:
+                codebook_validator = SpaceTxValidator(_get_absolute_schema_path('codebook/codebook.json'))
+                if not codebook_validator.validate_object(codebook_doc):
+                    raise Exception("validation failed")
 
         if isinstance(codebook_doc, list):
             raise ValueError(

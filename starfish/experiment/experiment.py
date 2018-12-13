@@ -213,7 +213,7 @@ class Experiment:
         _, codebook_name, codebook_baseurl = resolve_url(experiment_document['codebook'],
                                                          baseurl, backend_config)
         codebook_absolute_url = pathjoin(codebook_baseurl, codebook_name)
-        codebook = Codebook.from_json(codebook_absolute_url)
+        codebook = Codebook.from_json(codebook_absolute_url, config)
 
         extras = experiment_document['extras']
 

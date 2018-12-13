@@ -148,7 +148,7 @@ def format_data(input_dir, output_dir, d):
     ]
     codebook = Codebook.from_code_array(codebook_array)
     codebook_json_filename = "codebook.json"
-    codebook.write_json(os.path.join(output_dir, codebook_json_filename))
+    codebook.to_json(os.path.join(output_dir, codebook_json_filename))
 
 
 if __name__ == "__main__":

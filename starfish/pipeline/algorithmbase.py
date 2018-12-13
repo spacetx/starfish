@@ -1,5 +1,6 @@
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.types import LOG
 
 
 class AlgorithmBaseType(type):
@@ -27,7 +28,7 @@ class AlgorithmBaseType(type):
                     it = result
                     if isinstance(result, tuple):
                         it = result[0]
-                    it.attrs.update({'log': stack.log})
+                    it.attrs.update({LOG: stack.log})
             return result
         return helper
 

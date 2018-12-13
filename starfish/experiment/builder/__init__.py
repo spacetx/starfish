@@ -249,7 +249,7 @@ def write_experiment_json(
     ]
     codebook = Codebook.from_code_array(codebook_array)
     codebook_json_filename = "codebook.json"
-    codebook.write_json(os.path.join(path, codebook_json_filename))
+    codebook.to_json(os.path.join(path, codebook_json_filename))
 
     experiment_doc = postprocess_func(experiment_doc)
 

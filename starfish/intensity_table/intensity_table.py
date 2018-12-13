@@ -1,5 +1,4 @@
 from itertools import product
-from json import JSONEncoder
 from typing import Dict, Optional, Union
 
 import numpy as np
@@ -9,22 +8,9 @@ import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.image._filter.util import preserve_float_range
-from starfish.types import Features, Indices, SpotAttributes
+from starfish.types import Features, Indices, LOG, SpotAttributes
+from starfish.util.JSONenocder import LogEncoder
 
-
-class StarfishJSONEncoder(JSONEncoder):
-
-    def default(self, o):
-        try:
-            # if the object has a custom to_json method
-            return o.to_json()
-        except:
-            try:
-                # Use regular
-                return super(StarfishJSONEncoder, self).default(o)
-            except:
-                # If all else fails just log the class name
-                return o.__class__.__name__
 
 class IntensityTable(xr.DataArray):
     """Container for spot/pixel features extracted from image data
@@ -187,9 +173,9 @@ class IntensityTable(xr.DataArray):
             Name of Netcdf file
 
         """
-        if self.attrs['log']:
+        if LOG in self.attrs:
             # if log info, json encode it
-            self.attrs['log'] = StarfishJSONEncoder().encode(self.attrs['log'])
+            self.attrs[LOG] = LogEncoder().encode(self.attrs[LOG])
         self.to_netcdf(filename)
 
     def save_mermaid(self, filename: str) -> pd.DataFrame:
@@ -252,8 +238,8 @@ class IntensityTable(xr.DataArray):
             loaded.dims
         )
         # maintain log
-        if loaded.attrs['log']:
-            intensity_table.attrs['log'] = loaded.attrs['log']
+        if LOG in loaded.attrs:
+            intensity_table.attrs[LOG] = loaded.attrs[LOG]
         return intensity_table
 
     def show(self, background_image: np.ndarray) -> None:

@@ -58,7 +58,7 @@ def test_lookup_deep():
 def test_cache_config():
     config = Config("""{
         "caching": {
-             "enabled": True,
+             "enabled": true,
              "size_limit": 5e9,
              "directory": "/tmp"
          }

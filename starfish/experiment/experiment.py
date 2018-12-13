@@ -221,10 +221,10 @@ class Experiment:
         fov_tilesets: MutableMapping[str, TileSet]
         if version < Version("5.0.0"):
             primary_image: Collection = Reader.parse_doc(experiment_document['primary_images'],
-                                                         baseurl)
+                                                         baseurl, backend_config)
             auxiliary_images: MutableMapping[str, Collection] = dict()
             for aux_image_type, aux_image_url in experiment_document['auxiliary_images'].items():
-                auxiliary_images[aux_image_type] = Reader.parse_doc(aux_image_url, baseurl)
+                auxiliary_images[aux_image_type] = Reader.parse_doc(aux_image_url, baseurl, backend_config)
 
             for fov_name, primary_tileset in primary_image.all_tilesets():
                 fov_tilesets = dict()
@@ -240,7 +240,7 @@ class Experiment:
             images: MutableMapping[str, Collection] = dict()
             all_fov_names: MutableSet[str] = set()
             for image_type, image_url in experiment_document['images'].items():
-                image = Reader.parse_doc(image_url, baseurl)
+                image = Reader.parse_doc(image_url, baseurl, backend_config)
                 images[image_type] = image
                 for fov_name, _ in image.all_tilesets():
                     all_fov_names.add(fov_name)

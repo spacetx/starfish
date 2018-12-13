@@ -193,7 +193,8 @@ class Experiment:
         """
 
         config_obj = Config(config)  # STARFISH_CONFIG is assumed
-        backend_config = config_obj.lookup(("backend",), {'caching': {'directory': "~/.starfish-cache"}})
+        backend_config = config_obj.lookup(("backend",),
+                                           {'caching': {'directory': "~/.starfish-cache"}})
 
         if strict is None:
             strict = config_obj.lookup(("validation", "strict"),
@@ -224,7 +225,8 @@ class Experiment:
                                                          baseurl, backend_config)
             auxiliary_images: MutableMapping[str, Collection] = dict()
             for aux_image_type, aux_image_url in experiment_document['auxiliary_images'].items():
-                auxiliary_images[aux_image_type] = Reader.parse_doc(aux_image_url, baseurl, backend_config)
+                auxiliary_images[aux_image_type] = Reader.parse_doc(
+                    aux_image_url, baseurl, backend_config)
 
             for fov_name, primary_tileset in primary_image.all_tilesets():
                 fov_tilesets = dict()

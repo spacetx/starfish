@@ -10,6 +10,8 @@ from semantic_version import Version
 from sklearn.neighbors import NearestNeighbors
 from slicedimage.io import resolve_path_or_url
 
+from sptx_format.util import SpaceTxValidator
+from sptx_format.validate_sptx import _get_absolute_schema_path
 from starfish.codebook._format import (
     CURRENT_VERSION,
     DocumentKeys,
@@ -19,8 +21,6 @@ from starfish.codebook._format import (
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number
 from starfish.util.config import Config
-from sptx_format.util import SpaceTxValidator
-from sptx_format.validate_sptx import _get_absolute_schema_path
 
 
 class Codebook(xr.DataArray):
@@ -344,7 +344,8 @@ class Codebook(xr.DataArray):
 
         # TODO: Needs refactoring by Josh
         config_obj = Config(config)  # STARFISH_CONFIG is assumed
-        backend_config = config_obj.lookup(("backend",), {'caching': {'directory': "~/.starfish-cache"}})
+        backend_config = config_obj.lookup(("backend",),
+                                           {'caching': {'directory': "~/.starfish-cache"}})
 
         strict = config_obj.lookup(("validation", "strict"),
                                    os.environ.get("STARFISH_STRICT_LOADING", False))
@@ -354,7 +355,8 @@ class Codebook(xr.DataArray):
             codebook_doc = json.load(fh)
 
             if strict:
-                codebook_validator = SpaceTxValidator(_get_absolute_schema_path('codebook/codebook.json'))
+                codebook_validator = SpaceTxValidator(
+                    _get_absolute_schema_path('codebook/codebook.json'))
                 if not codebook_validator.validate_object(codebook_doc):
                     raise Exception("validation failed")
 

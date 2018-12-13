@@ -1,5 +1,4 @@
 import os
-import time
 from json import dump, loads
 
 from diskcache import Cache
@@ -122,7 +121,7 @@ def test_cache_merfish(tmpdir, name, config, monkeypatch):
     assert (min <= cache_size) and (cache_size <= max)
 
 
-def get_size(start_path = '.'):
+def get_size(start_path='.'):
     """helper method for listing file sizes in a directory"""
     total_size = 0
     for dirpath, dirnames, filenames in os.walk(start_path):

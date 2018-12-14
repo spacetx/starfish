@@ -92,7 +92,7 @@ def test_cache_config():
         "validation": {"strict": True},
         "backend": {
             "caching": {
-                # No directory, ergo disabled.
+                "size_limit": 0,
             }}}),
     ("limited", {
         "expected": (1e5, 3e6),
@@ -105,7 +105,7 @@ def test_cache_config():
 ))
 def test_cache_merfish(tmpdir, name, config, monkeypatch):
 
-    cache_enabled = "directory" in config["backend"]["caching"]
+    cache_enabled = (0 != config["backend"]["caching"].get("size_limit", None))
     if cache_enabled:
         config["backend"]["caching"]["directory"] = str(tmpdir / "caching")
 

@@ -62,16 +62,19 @@ class StarfishConfig(object):
             This parameter is read from the environment to permit setting configuration
             values either directly or via a file. Keys read include:
 
-             - ["backend"]["caching"]["directory"]   (default: ~/.starfish-cache, enabling caching)
-             - ["backend"]["caching"]["size_limit"]  (default: None)
+             - ["backend"]["caching"]["directory"]   (default: ~/.starfish-cache)
+             - ["backend"]["caching"]["size_limit"]  (default: None; 0 disables caching)
              - ["validation"]["strict"]              (default: False)
 
             Note: all keys can also be set by and environment variable constructed from the
             key parts and prefixed with STARFISH, e.g. STARFISH_VALIDATION_STRICT.
         """
         self._config_obj = Config()  # STARFISH_CONFIG is assumed
-        self._backend = self._config_obj.lookup(
-            ("backend",), {'caching': {'directory': "~/.starfish-cache"}})
+
+        # If no directory is set, then force the default
+        self._backend = self._config_obj.lookup(("backend",), NestedDict())
+        if not self._backend["caching"]["directory"]:
+            self._backend["caching"]["directory"] = "~/.starfish-cache"
         self._backend_update(('caching', 'directory'))
         self._backend_update(('caching', 'size_limit'), int)
 

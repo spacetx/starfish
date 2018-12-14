@@ -6,7 +6,7 @@ from starfish.util.config import Config, NestedDict
 
 @contextmanager
 def environ(**kwargs):
-    """Overrides environment variables (prefixed with "STARFISH_")
+    """Overrides Environment variables (prefixed with ``STARFISH_``)
     for the duration of the call.
 
     Examples

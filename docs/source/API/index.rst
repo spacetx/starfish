@@ -27,3 +27,5 @@ API
 .. toctree::
    plot/plot.rst
 
+.. toctree::
+   utils/index.rst

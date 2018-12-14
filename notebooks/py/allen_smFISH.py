@@ -65,7 +65,7 @@ primary_image.show_stack({Indices.CH.value: 0, Indices.Z.value: 17}, rescale=Tru
 # EPY: END code
 
 # EPY: START code
-bandpass = Filter.Bandpass(lshort=0.5, llong=7, threshold=None, truncate=4)
+bandpass = Filter.Bandpass(lshort=0.5, llong=7, truncate=4)
 bandpass.run(primary_image, verbose=True, in_place=True)
 # EPY: END code
 

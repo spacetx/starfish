@@ -156,7 +156,7 @@ max_sigma = 10
 num_sigma = 30
 threshold = 0.01
 
-p = SpotFinder.GaussianSpotDetector(
+p = SpotFinder.BlobDetector(
     min_sigma=min_sigma,
     max_sigma=max_sigma,
     num_sigma=num_sigma,

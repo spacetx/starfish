@@ -331,9 +331,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         "--measurement-type", default='max', type=str,
         help="How to aggregate pixel intensities in a spot")
     @click.option(
-        "--is-volume", default=False, action='store_false', help="Find spots in 3D or not")
+        "--is-volume", default=False, help="Find spots in 3D or not")
     @click.option(
-        "--verbose", default=True, action='store_true', help="Verbosity flag")
+        "--verbose", default=True, help="Verbosity flag")
     @click.pass_context
     def _cli(ctx, min_distance, min_obj_area, max_obj_area, stringency, threshold,
              min_num_spots_detected, measurement_type, is_volume, verbose):

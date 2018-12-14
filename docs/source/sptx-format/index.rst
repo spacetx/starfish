@@ -1,8 +1,8 @@
-.. _sptx_format
+.. _sptx_format:
 
 
-sptx-format
-===========
+SpaceTx Format
+==============
 
 .. toctree::
    :maxdepth: 2

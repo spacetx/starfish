@@ -10,7 +10,7 @@ from starfish.codebook.codebook import Codebook
 from starfish.image._filter.white_tophat import WhiteTophat
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.spots._detector.gaussian import GaussianSpotDetector
+from starfish.spots._detector.blob import BlobDetector
 from starfish.types import Features, Indices
 from starfish.util import synthesize
 
@@ -130,16 +130,13 @@ def synthetic_dataset_with_truth_values_and_called_spots(
     max_sigma = 4
     num_sigma = 10
     threshold = 1e-4
-    gsd = GaussianSpotDetector(
-        min_sigma=min_sigma,
-        max_sigma=max_sigma,
-        num_sigma=num_sigma,
-        threshold=threshold,
-        blobs_image=filtered_mp_numpy,
-        measurement_type='max',
-    )
+    gsd = BlobDetector(min_sigma=min_sigma,
+                       max_sigma=max_sigma,
+                       num_sigma=num_sigma,
+                       threshold=threshold,
+                       measurement_type='max')
 
-    intensities = gsd.run(data_stack=filtered)
+    intensities = gsd.run(data_stack=filtered, blobs_image=filtered_mp_numpy)
     assert intensities.shape[0] == 5
 
     codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm_order=2)

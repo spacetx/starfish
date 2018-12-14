@@ -8,7 +8,7 @@ Each of theses assays produce images that can form a data tensor.
 The data tensor contains a series of (x, y) planar image planes that represent specific z-planes, imaging channels (c), and imaging rounds (r).
 Together these form a 5-dimensional tensor (r, c, z, y, x) that serves as a general representation of an image-based transcriptomics or proteomics assay, and is the substrate of the starfish package.
 
-The goal of this repository is to define a self-describing data format that specifies how a set of 2-d images form a field of view, and specifies how multiple fields of view interact to form a larger experiment.
+This format should be self-describing and it should specify both how a set of 2-d images form a field of view and how multiple fields of view interact to form a larger experiment.
 The spaceTx format accomplishes this by combining these images, stored in 2-dimensional TIFF format, with a series of JSON files that describe how to organize each TIFF file into the 5-dimensional imaging tensor.
 Combined with imaging metadata and a pipeline recipe, both of which are defined elsewhere, these files enable a pipeline to generate the desired outputs of a spatial assay: a gene expression matrix augmented with spatial locations of transcripts and cells.
 
@@ -182,29 +182,32 @@ In this example, channels 0, 1, and 2 correspond to `SCUBE2`, `BRCA`, and `ACTB`
 In contrast, a coded experiment may have a more complex codebook:
 
 ```json
-[
-  {
-    "codeword": [
-      {"r": 0, "c": 0, "v": 1},
-      {"r": 0, "c": 1, "v": 1}
-    ],
-    "target": "SCUBE2"
-  },
-  {
-    "codeword": [
-      {"r": 0, "c": 0, "v": 1},
-      {"r": 1, "c": 1, "v": 1}
-    ],
-    "target": "BRCA"
-  },
-  {
-    "codeword": [
-      {"r": 0, "c": 1, "v": 1},
-      {"r": 1, "c": 0, "v": 1}
-    ],
-    "target": "ACTB"
-  }
-]
+{
+  "version": "0.0.0",
+  "mappings": [
+    {
+      "codeword": [
+        {"r": 0, "c": 0, "v": 1},
+        {"r": 0, "c": 1, "v": 1}
+      ],
+      "target": "SCUBE2"
+    },
+    {
+      "codeword": [
+        {"r": 0, "c": 0, "v": 1},
+        {"r": 1, "c": 1, "v": 1}
+      ],
+      "target": "BRCA"
+    },
+    {
+      "codeword": [
+        {"r": 0, "c": 1, "v": 1},
+        {"r": 1, "c": 0, "v": 1}
+      ],
+      "target": "ACTB"
+    }
+  ]
+}
 ```
 
 The above example describes the coding scheme of an experiment with 2 rounds and 2 channels, where each code expects exactly two images out of four to produce signal for a given target.

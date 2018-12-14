@@ -24,7 +24,7 @@ def iss_pipeline(fov, codebook):
     filtered = filt.run(registered, verbose=True, in_place=False)
 
     # detect spots using laplacian of gaussians approach
-    p = SpotFinder.GaussianSpotDetector(
+    p = SpotFinder.BlobDetector(
         min_sigma=1,
         max_sigma=10,
         num_sigma=30,

@@ -3,6 +3,22 @@ import os
 from typing import Any, Dict, Sequence, Union
 
 
+class NestedDict(dict):
+
+    def __missing__(self, key):
+        self[key] = NestedDict()
+        return self[key]
+
+    def update(self, source):
+        for k, v in source.items():
+            if isinstance(v, dict):
+                # Doesn't handle recursion
+                self[k] = NestedDict()
+                self[k].update(v)
+            else:
+                self[k] = v
+
+
 class Config(object):
 
     __NO_VALUE_PASSED = object()
@@ -35,17 +51,17 @@ class Config(object):
         if not value:
             value = {}
 
-        data: Dict
+        data = NestedDict()
         if isinstance(value, str):
             if value.startswith("@"):
                 filename = os.path.expanduser(value[1:])
                 if os.path.exists(filename):
                     with open(filename, "r") as o:
-                        data = json.loads(o.read())
+                        data.update(json.loads(o.read()))
             else:
-                data = json.loads(value)
+                data.update(json.loads(value))
         else:
-            data = value
+            data.update(value)
 
         self.data = data
 

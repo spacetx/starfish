@@ -6,7 +6,17 @@ from pytest import mark, raises
 
 from starfish import data
 from starfish.config import StarfishConfig
-from starfish.util.config import Config
+from starfish.util.config import Config, NestedDict
+
+
+def test_nested_dict():
+    rd = dict()
+    nd = NestedDict()
+    rd[1] = {2: None}
+    nd[3][4][5][6] = 7
+    nd.update(rd)
+    nd[1][2] = 9
+    nd[1][8] = 10
 
 
 simple_str = '{"a": 1}'
@@ -119,6 +129,12 @@ def test_cache_merfish(tmpdir, name, config, monkeypatch):
     assert (min <= cache_size) and (cache_size <= max)
 
 def test_starfish_config(tmpdir, monkeypatch):
+
+    config = {"backend": {"caching": {"size_limit": 0}}}
+    setup_config(config, tmpdir, monkeypatch,
+                 STARFISH_BACKEND_CACHING_SIZE_LIMIT="1")
+    assert 1 == StarfishConfig().backend["caching"]["size_limit"]
+
     config = {"validation": {"strict": True}}
     setup_config(config, tmpdir, monkeypatch)
     assert StarfishConfig().strict

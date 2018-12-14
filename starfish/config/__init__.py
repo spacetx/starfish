@@ -36,9 +36,22 @@ class StarfishConfig(object):
         self._config_obj = Config()  # STARFISH_CONFIG is assumed
         self._backend = self._config_obj.lookup(
             ("backend",), {'caching': {'directory': "~/.starfish-cache"}})
+        self._backend_update(('caching', 'directory'))
+        self._backend_update(('caching', 'size_limit'), int)
 
         self._strict = self._config_obj.lookup(
             ("validation", "strict"), self.flag("STARFISH_VALIDATION_STRICT"))
+
+    def _backend_update(self, lookup, parse=lambda x: x):
+        name = "STARFISH_BACKEND_" + "_".join([x.upper() for x in lookup])
+        if name not in os.environ:
+            return
+        value = parse(os.environ[name])
+
+        v = self._backend
+        for k in lookup[:-1]:
+            v = v[k]
+        v[lookup[-1]] = value
 
     @staticmethod
     def flag(name, default_value=""):

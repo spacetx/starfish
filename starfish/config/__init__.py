@@ -1,12 +1,10 @@
 import os
-from contextlib import contextmanager
 
 from starfish.util.config import Config, NestedDict
 
 
-@contextmanager
-def environ(**kwargs):
-    """Overrides Environment variables (prefixed with ``STARFISH_``)
+class environ(object):
+    """Overrides environment variables (prefixed with ``STARFISH_``)
     for the duration of the call.
 
     Examples
@@ -19,20 +17,24 @@ def environ(**kwargs):
         >>>     Experiment.from_json(URL)
 
     """
-    orig = dict()
-    try:
-        for k, newval in kwargs.items():
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+
+    def __enter__(self):
+        self.orig = dict()
+        for k, newval in self.kwargs.items():
             if not k.startswith("STARFISH_"):
                 k = "STARFISH_%s" % k
             old = os.environ.get(k, None)
             try:
                 os.environ[k] = newval
-                orig[k] = old  # Only store if successful
+                self.orig[k] = old  # Only store if successful
             except TypeError:
                 raise
-        yield
-    finally:
-        for k, oldval in orig.items():
+        return self
+
+    def __exit__(self, *args):
+        for k, oldval in self.orig.items():
             if oldval is None:
                 del os.environ[k]
             else:

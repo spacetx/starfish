@@ -1,24 +1,24 @@
 from typing import Type
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
 from starfish.util import click
-from . import fourier_shift
-from ._base import RegistrationAlgorithmBase
+from . import _base
+import_all_submodules(__file__, __package__)
 
 
 class Registration(PipelineComponent):
 
     @classmethod
     def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
-        return RegistrationAlgorithmBase
+        return _base.RegistrationAlgorithmBase
 
     @classmethod
     def _cli_run(cls, ctx, instance):
         output = ctx.obj["output"]
         stack = ctx.obj["stack"]
         instance.run(stack)
-        stack.write(output)
+        stack.export(output)
 
     @staticmethod
     @click.group("registration")

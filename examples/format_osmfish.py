@@ -52,10 +52,6 @@ class osmFISHTile(FetchedTile):
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return self._coordinates
 
-    @property
-    def format(self) -> ImageFormat:
-        return ImageFormat.NUMPY
-
     def tile_data(self) -> np.ndarray:
         return cached_read_fn(self.file_path)[self.z]  # slice out the correct z-plane
 
@@ -109,7 +105,7 @@ class osmFISHTileFetcher(TileFetcher):
             # the metadata references a larger corpus of data than we use for this example so as we
             # iterate over the metadata, some rounds will not be found. In those cases, we just
             # continue through the loop without adding to parsed_metadata
-            round_match = re.match("Hybridization(\d{1,2})", round_)
+            round_match = re.match(r"Hybridization(\d{1,2})", round_)
             if round_match is None:
                 continue
 
@@ -206,6 +202,7 @@ def cli(input_dir, output_dir, metadata_yaml):
     write_experiment_json(
         path=output_dir,
         fov_count=len(primary_tile_fetcher.fov_map),
+        tile_format=ImageFormat.NUMPY,
         primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions={},
         primary_tile_fetcher=primary_tile_fetcher,

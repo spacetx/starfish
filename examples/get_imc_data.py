@@ -31,10 +31,6 @@ class ImagingMassCytometryTile(FetchedTile):
             Coordinates.Z: (0.0, 0.0001),
         }
 
-    @property
-    def format(self) -> ImageFormat:
-        return ImageFormat.TIFF
-
     def tile_data(self) -> np.ndarray:
         return self._tile_data
 
@@ -161,6 +157,7 @@ def cli(input_dir, output_dir):
     write_experiment_json(
         path=output_dir,
         fov_count=len(primary_tile_fetcher._fov_map),
+        tile_format=ImageFormat.TIFF,
         primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions={},
         primary_tile_fetcher=primary_tile_fetcher,

@@ -26,8 +26,6 @@ For example, `--foo-bar` would convert to `foo_bar` and init must accept such an
 
 5. `NewFilter.__init__()` must have a `**kwargs` parameter to accept arbitrary CLI args.
 
-6. Finally, add a line that imports your new filter in `starfish/pipeline/filter/__init__.py`. This will make your new algorithm available for registration
-
 That's it! your `NewFilter` algoritm will automatically register and be available under `starfish filter` in the CLI.
 If at any point something gets confusing, it should be possible to look at existing pipeline components of the same category for guidance on implementation.
 

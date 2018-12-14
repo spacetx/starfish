@@ -5,6 +5,7 @@ from diskcache import Cache
 from pytest import mark, raises
 
 from starfish import data
+from starfish.config import StarfishConfig
 from starfish.util.config import Config
 
 
@@ -98,10 +99,7 @@ def test_cache_merfish(tmpdir, name, config, monkeypatch):
     if cache_enabled:
         config["backend"]["caching"]["directory"] = str(tmpdir / "caching")
 
-    config_file = tmpdir / "config"
-    with open(config_file, "w") as o:
-        dump(config, o)
-    monkeypatch.setitem(os.environ, "STARFISH_CONFIG", f"@{config_file}")
+    setup_config(config, tmpdir, monkeypatch)
 
     # Run 1
     data.MERFISH(use_test_data=True).fov()["primary"]
@@ -120,6 +118,26 @@ def test_cache_merfish(tmpdir, name, config, monkeypatch):
     min, max = config["expected"]
     assert (min <= cache_size) and (cache_size <= max)
 
+def test_starfish_config(tmpdir, monkeypatch):
+    config = {"validation": {"strict": True}}
+    setup_config(config, tmpdir, monkeypatch)
+    assert StarfishConfig().strict
+
+    config = {"validation": {"strict": False}}
+    setup_config(config, tmpdir, monkeypatch)
+    assert not StarfishConfig().strict
+
+    setup_config({}, tmpdir, monkeypatch,
+                 STARFISH_VALIDATION_STRICT="true")
+    assert StarfishConfig().strict
+
+    setup_config({}, tmpdir, monkeypatch,
+                 STARFISH_VALIDATION_STRICT="false")
+    assert not StarfishConfig().strict
+
+#
+# HELPERS
+#
 
 def get_size(start_path='.'):
     """helper method for listing file sizes in a directory"""
@@ -129,3 +147,11 @@ def get_size(start_path='.'):
             fp = os.path.join(dirpath, f)
             total_size += os.path.getsize(fp)
     return total_size
+
+def setup_config(config, tmpdir, monkeypatch, **environment_variables):
+    config_file = tmpdir / "config"
+    with open(config_file, "w") as o:
+        dump(config, o)
+    monkeypatch.setitem(os.environ, "STARFISH_CONFIG", f"@{config_file}")
+    for k, v in environment_variables.items():
+        monkeypatch.setitem(os.environ, k, v)

@@ -155,7 +155,7 @@ class Experiment:
         return object_repr + fov_repr
 
     @classmethod
-    def from_json(cls, json_url: str, strict: bool=None) -> "Experiment":
+    def from_json(cls, json_url: str) -> "Experiment":
         """
         Construct an `Experiment` from an experiment.json file format specifier.
         Loads configuration from StarfishConfig.
@@ -164,9 +164,6 @@ class Experiment:
         ----------
         json_url : str
             file path or web link to an experiment.json file
-        strict : bool
-            if true, then all JSON loaded by this method will be
-            passed to the appropriate validator
 
         Returns
         -------
@@ -177,7 +174,7 @@ class Experiment:
 
         config = StarfishConfig()
 
-        if config.strict(strict):
+        if config.strict:
             valid = validate_sptx.validate(json_url)
             if not valid:
                 raise Exception("validation failed")

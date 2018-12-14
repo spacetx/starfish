@@ -1,7 +1,7 @@
 language: python
 env:
   global:
-    - STARFISH_STRICT_LOADING=true
+    - STARFISH_VALIDATION_STRICT=true
 services:
 - docker
 python:

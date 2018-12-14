@@ -334,7 +334,7 @@ class Codebook(xr.DataArray):
         with backend.read_contextmanager(name) as fh:
             codebook_doc = json.load(fh)
 
-            if config.strict():
+            if config.strict:
                 codebook_validator = SpaceTxValidator(
                     _get_absolute_schema_path('codebook/codebook.json'))
                 if not codebook_validator.validate_object(codebook_doc):

@@ -25,27 +25,32 @@ class StarfishConfig(object):
         STARISH_CONFIG :
             This parameter is read from the environment to permit setting configuration
             values either directly or via a file. Keys read include:
+
              - ["backend"]["caching"]["directory"]   (default: ~/.starfish-cache, enabling caching)
              - ["backend"]["caching"]["size_limit"]  (default: None)
              - ["validation"]["strict"]              (default: False)
-        STARFISH_STRICT_LOADING :
-             This parameter is read from the environment. If set, then all JSON loaded by this
-             method will be passed to the appropriate validator. The `strict` parameter to this
-             method has priority over the environment variable.
+
+            Note: all keys can also be set by and environment variable constructed from the
+            key parts and prefixed with STARFISH, e.g. STARFISH_VALIDATION_STRICT.
         """
         self._config_obj = Config()  # STARFISH_CONFIG is assumed
         self._backend = self._config_obj.lookup(
             ("backend",), {'caching': {'directory': "~/.starfish-cache"}})
 
         self._strict = self._config_obj.lookup(
-            ("validation", "strict"), os.environ.get("STARFISH_STRICT_LOADING", None))
+            ("validation", "strict"), self.flag("STARFISH_VALIDATION_STRICT"))
+
+    @staticmethod
+    def flag(name, default_value=""):
+        value = os.environ.get(name, default_value)
+        if isinstance(value, str):
+            value = value.lower()
+            return value in ("true", "1", "yes", "y", "on", "active", "enabled")
 
     @property
     def backend(self):
         return dict(self._backend)
 
-    # TODO: remove all strict arguments in favor of a property here
-    def strict(self, strict=False):
-        if self._strict is None:
-            return strict
+    @property
+    def strict(self):
         return self._strict

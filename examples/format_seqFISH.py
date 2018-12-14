@@ -130,7 +130,7 @@ def parse_codebook(codebook_csv: str) -> Mapping:
 @click.command()
 @click.option("--input-dir", type=str, required=True, help="input directory containing images")
 @click.option("--output-dir", type=str, required=True, help="output directory for formatted data")
-@click.option("--codebook-csv", type=str, required=False, help="csv file containing barcode:target mapping")
+@click.option("--codebook-csv", type=str, help="csv file containing barcode:target mapping")
 def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
     """CLI entrypoint for spaceTx format construction for SeqFISH data
 

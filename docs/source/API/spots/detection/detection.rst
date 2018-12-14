@@ -12,8 +12,8 @@ subclass ``SpotFinderAlgorithmBase``:
 
 .. contents::
 
-Gaussian Spot Detector
-----------------------
+Blob Detector
+-------------
 
 .. autoclass:: starfish.spots._detector.blob.BlobDetector
     :members:

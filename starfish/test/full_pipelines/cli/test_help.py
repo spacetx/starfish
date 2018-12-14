@@ -93,6 +93,7 @@ Options:
 
 Commands:
   BlobDetector
+  LocalMaxPeakFinder
   PixelSpotDetector
   TrackpyLocalMaxPeakFinder
 """
@@ -112,7 +113,8 @@ Options:
                           combined
   --show                  display results visually
   --detector_method TEXT  str ['blob_dog', 'blob_doh', 'blob_log'] name of the
-                          type of detection method used from skimage.feature
+                          type of detection method used from skimage.feature.
+                          Default: blob_log
   --help                  Show this message and exit.
 """
         assert_diff(actual, expected)

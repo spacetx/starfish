@@ -156,8 +156,7 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
             reference_image=blobs_image,
             reference_image_from_max_projection=reference_image_from_max_projection,
             measurement_function=self.measurement_function,
-            radius_is_gyration=True,
-        )
+            radius_is_gyration=True)
 
         return intensity_table
 

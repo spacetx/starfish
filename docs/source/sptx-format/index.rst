@@ -1,4 +1,4 @@
-.. _sptx_format
+.. _sptx_format:
 
 
 SpaceTx Format

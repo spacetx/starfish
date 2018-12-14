@@ -1,4 +1,4 @@
-.. _spots
+.. _spots:
 
 Spots
 =====

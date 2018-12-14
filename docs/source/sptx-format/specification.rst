@@ -1,4 +1,4 @@
-.. _specification
+.. _specification:
 
 .. mdinclude:: ../../../sptx_format/README.md
 

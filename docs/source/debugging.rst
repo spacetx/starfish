@@ -22,7 +22,8 @@ data that was updated to work post-update:
     + http://spacetx.starfish.data.public.s3.amazonaws.com/browse/formatted/20180926/iss_breast/experiment.json
 
 If you're using your own data with starfish, you may need to re-run your data ingestion workflow
-based on ``TileFetcher`` and ``FetchedTile`` to generate up-to-date versions of spaceTx-format.
+based on :py:class:`starfish.experiment.builder.providers.TileFetcher` and
+:py:class:`starfish.experiment.builder.providers.FetchedTile` to generate up-to-date versions of spaceTx-format.
 
 Upgrading to a new version
 --------------------------

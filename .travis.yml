@@ -2,6 +2,7 @@ language: python
 env:
   global:
     - STARFISH_STRICT_LOADING=true
+    - SPHINXOPTS=-W
 services:
 - docker
 python:

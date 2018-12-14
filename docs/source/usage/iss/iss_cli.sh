@@ -54,7 +54,7 @@ starfish target_assignment \
     --coordinates-geojson /tmp/starfish/results/regions.geojson \
     --intensities /tmp/starfish/results/spots.nc \
     --output /tmp/starfish/results/targeted-spots.nc \
-    PointInPoly2D
+    Label
 
 starfish decode \
     -i /tmp/starfish/results/targeted-spots.nc \

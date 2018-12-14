@@ -1,4 +1,4 @@
-.. _validation
+.. _validation:
 
 Validating SpaceTx Format Files
 ===============================

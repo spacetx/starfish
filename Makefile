@@ -22,7 +22,7 @@ all:	fast
 
 ### UNIT #####################################################
 #
-fast:	lint mypy test
+fast:	lint mypy test docs-html
 
 lint:   lint-non-init lint-init
 

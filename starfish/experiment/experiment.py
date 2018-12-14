@@ -177,11 +177,11 @@ class Experiment:
         STARISH_CONFIG :
             This parameter is read from the environment to permit setting configuration
             values either directly or via a file. Keys read include:
-             - cache.allow_caching
+            - cache.allow_caching
         STARFISH_STRICT_LOADING :
-             This parameter is read from the environment. If set, then all JSON loaded by this
-             method will be passed to the appropriate validator. The `strict` parameter to this
-             method has priority over the environment variable.
+            This parameter is read from the environment. If set, then all JSON loaded by this
+            method will be passed to the appropriate validator. The `strict` parameter to this
+            method has priority over the environment variable.
 
         Returns
         -------

@@ -50,6 +50,41 @@ class StarfishConfig(object):
         Subdictionary that can be passed to the IO backend, e.g. slicedimage.
     strict : bool
         Whether or not loaded json should be validated.
+
+    Examples
+    --------
+    Check strict property
+
+        >>> from starfish.config import StarfishConfig
+        >>> config = StarfishConfig()
+        >>> if config.strict:
+        >>>     validate(json)
+
+    Default starfish configuration equivalent:
+
+        >>> {
+        >>>     "backend": {
+        >>>         "caching": {
+        >>>             "debug": false,
+        >>>             "directory": "~/.starfish-cache",
+        >>>             "size_limit": 5e9
+        >>>         },
+        >>>     },
+        >>>     "validation": {
+        >>>         "strict": false
+        >>>     }
+        >>> }
+
+    Example of a ~/.starfish.config file to disable caching:
+
+        >>> {
+        >>>     "backend": {
+        >>>         "caching": {
+        >>>             "size_limit": 0
+        >>>         }
+        >>>     }
+        >>> }
+
     """
 
     def __init__(self) -> None:

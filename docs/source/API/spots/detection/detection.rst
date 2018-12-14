@@ -1,4 +1,4 @@
-.. _detection
+.. _detection:
 
 Detecting
 =========
@@ -15,7 +15,7 @@ subclass ``SpotFinderAlgorithmBase``:
 Gaussian Spot Detector
 ----------------------
 
-.. autoclass:: starfish.spots._detector.gaussian.GaussianSpotDetector
+.. autoclass:: starfish.spots._detector.blob.BlobDetector
     :members:
 
 Local Max Peak Finder

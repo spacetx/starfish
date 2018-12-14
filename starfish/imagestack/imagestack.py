@@ -84,19 +84,19 @@ class ImageStack:
         retrieve a slice of the image tensor
     set_slice(indices, data, axes=None)
         set a slice of the image tensor
-    apply(func, group_by={Indices.ROUND, Indices.CH, Indices.Z}, in_place=False, verbose=False,
-            n_processes=None)
+    apply(func, group_by={Indices.ROUND, Indices.CH, Indices.Z},
+        in_place=False, verbose=False, n_processes=None)
         split the image tensor along one or more axes and apply a function across each of the
         components to yield an image tensor
     transform(func, group_by={Indices.ROUND, Indices.CH, Indices.Z}, verbose=False,
-            n_processes=None)
+        n_processes=None)
         split the image tensor along one or more axes and apply a function across each of the
         components. Results are returned as a List with length equal to the number of times
         the image tensor is split.
     max_proj(*dims)
         return a max projection over one or more axis of the image tensor
     show_stack(indices, color_map='gray', figure_size=(10, 10), rescale=False, p_min=None,
-            p_max=None)
+        p_max=None)
         show an interactive, pageable view of the image tensor, or a slice of the image tensor
     show_stack_napari(indices)
         view the selected indices of the image tensor with Napari. Note that Napari is
@@ -466,8 +466,7 @@ class ImageStack:
         -----
         To use in a Jupyter notebook, use the %gui qt5 magic.
         Axes currently cannot be labeled. Until such a time that they can, this function will
-            order them by Round, Channel, and Z.
-
+        order them by Round, Channel, and Z.
 
         """
         try:
@@ -939,8 +938,8 @@ class ImageStack:
         """Given a set of indices that uniquely identify a tile and a physical axis, return the min
         and the max coordinates for that tile along that axis.
 
-        Examples:
-        ---------
+        Examples
+        --------
         stack.coordinates({Indices.ROUND: 4, Indices.CH: 3, Indices.Z: 2}, Coordinates.X)
             Retrieves the xmin, xmax for the tile identified by round=4, ch=3, z=2
         """

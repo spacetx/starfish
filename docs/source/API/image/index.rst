@@ -1,4 +1,4 @@
-.. _image
+.. _image:
 
 Image Manipulation
 ==================

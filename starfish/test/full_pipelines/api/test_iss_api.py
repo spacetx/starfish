@@ -5,7 +5,7 @@ import numpy as np
 
 import starfish
 from starfish.spots import TargetAssignment
-from starfish.types import Features
+from starfish.types import Features, LOG
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(starfish.__file__)))
 os.environ["USE_TEST_DATA"] = "1"
@@ -125,7 +125,7 @@ def test_iss_pipeline_cropped_data():
     lab = TargetAssignment.Label()
     assigned = lab.run(label_image, decoded)
 
-    pipeline_log = assigned.attrs['log']
+    pipeline_log = assigned.attrs[LOG]
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'FourierShiftRegistration'

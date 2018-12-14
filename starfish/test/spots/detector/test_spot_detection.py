@@ -16,7 +16,7 @@ def simple_gaussian_spot_detector() -> BlobDetector:
     return BlobDetector(min_sigma=1, max_sigma=4, num_sigma=5, threshold=0, measurement_type='max')
 
 
-def simple_trackplay_local_max_spot_detector() -> TrackpyLocalMaxPeakFinder:
+def simple_trackpy_local_max_spot_detector() -> TrackpyLocalMaxPeakFinder:
     """create a basic local max peak finder"""
     return TrackpyLocalMaxPeakFinder(
         spot_diameter=3,
@@ -38,7 +38,7 @@ def simple_local_max_spot_detector() -> LocalMaxPeakFinder:
 
 # initialize spot detectors
 gaussian_spot_detector = simple_gaussian_spot_detector()
-trackpy_local_max_spot_detector = simple_trackplay_local_max_spot_detector()
+trackpy_local_max_spot_detector = simple_trackpy_local_max_spot_detector()
 local_max_spot_detector = simple_local_max_spot_detector()
 
 

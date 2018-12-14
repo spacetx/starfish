@@ -72,10 +72,9 @@ def process_experiment(experiment: starfish.Experiment):
 if test:
     # TODO: (ttung) Pending a fix for https://github.com/spacetx/starfish/issues/700, it's not
     # possible to validate the schema for this experiment.
-    exp = starfish.Experiment.from_json(
-        "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20180926/iss_breast/experiment.json",
-        False,
-    )
+    with starfish.config.environ(VALIDATION_STRICT="false"):
+        exp = starfish.Experiment.from_json(
+            "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20180926/iss_breast/experiment.json")
 else:
     exp = starfish.Experiment.from_json("iss/formatted/experiment.json")
 decoded_intensities, regions = process_experiment(exp)

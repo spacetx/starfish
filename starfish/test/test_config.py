@@ -5,7 +5,7 @@ from diskcache import Cache
 from pytest import mark, raises
 
 from starfish import data
-from starfish.config import StarfishConfig
+from starfish.config import environ, StarfishConfig
 from starfish.util.config import Config, NestedDict
 
 
@@ -150,6 +150,11 @@ def test_starfish_config(tmpdir, monkeypatch):
     setup_config({}, tmpdir, monkeypatch,
                  STARFISH_VALIDATION_STRICT="false")
     assert not StarfishConfig().strict
+
+def test_starfish_environ():
+    assert not StarfishConfig().strict
+    with environ(VALIDATION_STRICT="true"):
+        assert StarfishConfig().strict
 
 #
 # HELPERS

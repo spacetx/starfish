@@ -81,7 +81,7 @@ def test_cache_config():
 
 @mark.parametrize("name,config", (
     ("enabled", {
-        "expected": (3e6, 4e6),
+        "expected": (2841272, 4e6),
         "validation": {"strict": True},
         "backend": {
             "caching": {
@@ -140,7 +140,8 @@ def test_starfish_config(tmpdir, monkeypatch):
     assert StarfishConfig().strict
 
     config = {"validation": {"strict": False}}
-    setup_config(config, tmpdir, monkeypatch)
+    setup_config(config, tmpdir, monkeypatch,
+                 STARFISH_VALIDATION_STRICT=None)  # Disable from travis
     assert not StarfishConfig().strict
 
     setup_config({}, tmpdir, monkeypatch,
@@ -151,7 +152,8 @@ def test_starfish_config(tmpdir, monkeypatch):
                  STARFISH_VALIDATION_STRICT="false")
     assert not StarfishConfig().strict
 
-def test_starfish_environ():
+def test_starfish_environ(monkeypatch):
+    monkeypatch.delitem(os.environ, "STARFISH_VALIDATION_STRICT", raising=False)
     assert not StarfishConfig().strict
     with environ(VALIDATION_STRICT="true"):
         assert StarfishConfig().strict
@@ -175,4 +177,7 @@ def setup_config(config, tmpdir, monkeypatch, **environment_variables):
         dump(config, o)
     monkeypatch.setitem(os.environ, "STARFISH_CONFIG", f"@{config_file}")
     for k, v in environment_variables.items():
-        monkeypatch.setitem(os.environ, k, v)
+        if v is None:
+            monkeypatch.delitem(os.environ, k, raising=False)
+        else:
+            monkeypatch.setitem(os.environ, k, v)

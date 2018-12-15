@@ -52,6 +52,8 @@ class StarfishConfig(object):
         Subdictionary that can be passed to slicedimage.io methods.
     strict : bool
         Whether or not loaded json should be validated.
+    verbose : bool
+        Controls output like from tqdm
 
     Examples
     --------
@@ -74,7 +76,8 @@ class StarfishConfig(object):
         >>>     },
         >>>     "validation": {
         >>>         "strict": false
-        >>>     }
+        >>>     },
+        >>>     "verbose": true
         >>> }
 
     Example of a ~/.starfish.config file to disable caching:
@@ -101,7 +104,8 @@ class StarfishConfig(object):
 
              - ["slicedimage"]["caching"]["directory"]   (default: ~/.starfish/cache)
              - ["slicedimage"]["caching"]["size_limit"]  (default: None; 0 disables caching)
-             - ["validation"]["strict"]              (default: False)
+             - ["validation"]["strict"]                  (default: False)
+             - ["verbose"]                               (default: True)
 
             Note: all keys can also be set by and environment variable constructed from the
             key parts and prefixed with STARFISH, e.g. STARFISH_VALIDATION_STRICT.
@@ -117,7 +121,10 @@ class StarfishConfig(object):
         self._slicedimage_update(('caching', 'size_limit'), int)
 
         self._strict = self._config_obj.lookup(
-            ("validation", "strict"), self.flag("STARFISH_VALIDATION_STRICT"))
+            ("validation", "strict"), self.flag("STARFISH_VALIDATION_STRICT", "false"))
+
+        self._verbose = self._config_obj.lookup(
+            ("verbose",), self.flag("STARFISH_VERBOSE", "true"))
 
     def _slicedimage_update(self, lookup, parse=lambda x: x):
         """ accept STARFISH_SLICEDIMAGE_ or SLICEDIMAGE_ prefixes"""
@@ -147,3 +154,7 @@ class StarfishConfig(object):
     @property
     def strict(self):
         return self._strict
+
+    @property
+    def verbose(self):
+        return self._verbose

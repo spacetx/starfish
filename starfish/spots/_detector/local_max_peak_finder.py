@@ -10,6 +10,7 @@ from skimage.measure import regionprops
 from sympy import Line, Point
 from tqdm import tqdm
 
+from starfish.config import StarfishConfig
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number, SpotAttributes
@@ -103,7 +104,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # where we stop our threshold search
         stop_threshold = None
 
-        if self.verbose:
+        if self.verbose and StarfishConfig().verbose:
             threshold_iter = tqdm(thresholds)
             print('Determining optimal threshold ...')
         else:

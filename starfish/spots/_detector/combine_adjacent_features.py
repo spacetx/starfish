@@ -8,6 +8,7 @@ from skimage.measure import label, regionprops
 from skimage.measure._regionprops import _RegionProperties
 from tqdm import tqdm
 
+from starfish.config import StarfishConfig
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number, SpotAttributes
 
@@ -283,7 +284,7 @@ class CombineAdjacentFeatures:
             max_area=self._max_area
         )
 
-        iterable = tqdm(region_properties)
+        iterable = tqdm(region_properties, disable=(not StarfishConfig().verbose))
         results = mapfunc(applyfunc, iterable)
         spot_attrs, passes_area_filter = zip(*results)
 

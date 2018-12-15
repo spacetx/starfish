@@ -123,7 +123,7 @@ class ImageStack:
         # have the same size of data type. The # allocated array is the highest size we encounter.
         kind = None
         max_size = 0
-        for tile in tqdm(tileset.tiles()):
+        for tile in tqdm(tileset.tiles(), disable=(not StarfishConfig().verbose)):
             dtype = tile.numpy_array.dtype
             if kind is None:
                 kind = dtype.kind
@@ -264,7 +264,8 @@ class ImageStack:
             this parameter is ignored.
         """
         config = StarfishConfig()
-        image_partition = Reader.parse_doc(url, baseurl, backend_config=config.backend)
+        image_partition = Reader.parse_doc(url, baseurl,
+                                           backend_config=config.slicedimage)
 
         return cls(image_partition)
 
@@ -283,7 +284,8 @@ class ImageStack:
             Either an absolute URL or a filesystem path to an imagestack.
         """
         config = StarfishConfig()
-        _, relativeurl, baseurl = resolve_path_or_url(url_or_path, backend_config=config.backend)
+        _, relativeurl, baseurl = resolve_path_or_url(url_or_path,
+                                                      backend_config=config.slicedimage)
         return cls.from_url(relativeurl, baseurl)
 
     @classmethod
@@ -807,7 +809,7 @@ class ImageStack:
                       for index in indices]
 
         indices_and_slice_list = zip(indices, slice_list)
-        if verbose:
+        if verbose and StarfishConfig().verbose:
             indices_and_slice_list = tqdm(indices_and_slice_list)
 
         applyfunc: Callable = partial(

@@ -25,6 +25,7 @@ simple_map = loads(simple_str)
 deep_str = '{"a": {"b": {"c": [1, 2, 3]}}}'
 deep_map = loads(deep_str)
 
+
 def test_simple_config_value_str():
     config = Config(simple_str)
     assert config.data["a"] == 1
@@ -32,12 +33,6 @@ def test_simple_config_value_str():
 
 def test_simple_config_value_map():
     config = Config(simple_map)
-    assert config.data["a"] == 1
-
-
-def test_simple_config_value_default_key(monkeypatch):
-    monkeypatch.setenv("STARFISH_CONFIG", simple_str)
-    config = Config()
     assert config.data["a"] == 1
 
 
@@ -77,6 +72,12 @@ def test_cache_config():
     cache_config = config.lookup(("caching",), {})
     assert cache_config["enabled"]
     assert cache_config["size_limit"] == 5 * 10 ** 9
+
+
+def test_starfish_config_value_default_key(monkeypatch):
+    monkeypatch.setenv("STARFISH_CONFIG", simple_str)
+    config = StarfishConfig()._config_obj
+    assert config.data["a"] == 1
 
 
 @mark.parametrize("name,config", (

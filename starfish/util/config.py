@@ -23,11 +23,10 @@ class Config(object):
 
     __NO_VALUE_PASSED = object()
 
-    def __init__(self, value: Union[str, Dict]=None,
-                 key: str="STARFISH_CONFIG") -> None:
+    def __init__(self, value: Union[str, Dict]=None) -> None:
         """
         Parse user arguments, environment variables, and external files to
-        generate a configuration object.
+        generate a nested configuration object.
 
         Parameters
         ----------
@@ -36,17 +35,9 @@ class Config(object):
             Config constructor, or a string which will be used to build such a structure. If
             the string starts with an "@", then it will be interpreted as the filename of a
             json file which should be read. Otherwise, it will be parsed as a json string.
-        key: str
-            The name of an environment variable which will be used
-            if the value is None. STARFISH_CONFIG will be used if no
-            key is provided.
         """
         # Record the original values
         self.__value = value
-        self.__key = key
-
-        if value is None:
-            value = os.environ.get(key)
 
         if not value:
             value = {}

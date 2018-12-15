@@ -106,7 +106,8 @@ class StarfishConfig(object):
             Note: all keys can also be set by and environment variable constructed from the
             key parts and prefixed with STARFISH, e.g. STARFISH_VALIDATION_STRICT.
         """
-        self._config_obj = Config()  # STARFISH_CONFIG is assumed
+        config = os.environ.get("STARFISH_CONFIG", "@~/.starfish/config")
+        self._config_obj = Config(config)
 
         # If no directory is set, then force the default
         self._backend = self._config_obj.lookup(("backend",), NestedDict())

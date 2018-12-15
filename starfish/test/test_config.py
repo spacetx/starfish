@@ -84,21 +84,21 @@ def test_starfish_config_value_default_key(monkeypatch):
     ("enabled", {
         "expected": (2841272, 4e6),
         "validation": {"strict": True},
-        "backend": {
+        "slicedimage": {
             "caching": {
                 "directory": "REPLACEME",
             }}}),
     ("disabled", {
         "expected": (0, 0),
         "validation": {"strict": True},
-        "backend": {
+        "slicedimage": {
             "caching": {
                 "size_limit": 0,
             }}}),
     ("limited", {
         "expected": (1e5, 3e6),
         "validation": {"strict": True},
-        "backend": {
+        "slicedimage": {
             "caching": {
                 "directory": "REPLACEME",
                 "size_limit": 1e5,
@@ -106,9 +106,9 @@ def test_starfish_config_value_default_key(monkeypatch):
 ))
 def test_cache_merfish(tmpdir, name, config, monkeypatch):
 
-    cache_enabled = (0 != config["backend"]["caching"].get("size_limit", None))
+    cache_enabled = (0 != config["slicedimage"]["caching"].get("size_limit", None))
     if cache_enabled:
-        config["backend"]["caching"]["directory"] = str(tmpdir / "caching")
+        config["slicedimage"]["caching"]["directory"] = str(tmpdir / "caching")
 
     setup_config(config, tmpdir, monkeypatch)
 
@@ -131,10 +131,15 @@ def test_cache_merfish(tmpdir, name, config, monkeypatch):
 
 def test_starfish_config(tmpdir, monkeypatch):
 
-    config = {"backend": {"caching": {"size_limit": 0}}}
+    config = {"slicedimage": {"caching": {"size_limit": 0}}}
     setup_config(config, tmpdir, monkeypatch,
-                 STARFISH_BACKEND_CACHING_SIZE_LIMIT="1")
-    assert 1 == StarfishConfig().backend["caching"]["size_limit"]
+                 STARFISH_SLICEDIMAGE_CACHING_SIZE_LIMIT="1")
+    assert 1 == StarfishConfig().slicedimage["caching"]["size_limit"]
+
+    config = {"slicedimage": {"caching": {"size_limit": 0}}}
+    setup_config(config, tmpdir, monkeypatch,
+                 SLICEDIMAGE_CACHING_SIZE_LIMIT="1")
+    assert 1 == StarfishConfig().slicedimage["caching"]["size_limit"]
 
     config = {"validation": {"strict": True}}
     setup_config(config, tmpdir, monkeypatch)

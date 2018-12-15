@@ -330,7 +330,7 @@ class Codebook(xr.DataArray):
 
         config = StarfishConfig()
 
-        backend, name, _ = resolve_path_or_url(json_codebook, backend_config=config.backend)
+        backend, name, _ = resolve_path_or_url(json_codebook, backend_config=config.slicedimage)
         with backend.read_contextmanager(name) as fh:
             codebook_doc = json.load(fh)
 

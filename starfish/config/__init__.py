@@ -48,8 +48,8 @@ class StarfishConfig(object):
 
     Attributes
     ----------
-    backend : dictionary
-        Subdictionary that can be passed to the IO backend, e.g. slicedimage.
+    slicedimage : dictionary
+        Subdictionary that can be passed to slicedimage.io methods.
     strict : bool
         Whether or not loaded json should be validated.
 
@@ -65,7 +65,7 @@ class StarfishConfig(object):
     Default starfish configuration equivalent:
 
         >>> {
-        >>>     "backend": {
+        >>>     "slicedimage": {
         >>>         "caching": {
         >>>             "debug": false,
         >>>             "directory": "~/.starfish/cache",
@@ -80,7 +80,7 @@ class StarfishConfig(object):
     Example of a ~/.starfish.config file to disable caching:
 
         >>> {
-        >>>     "backend": {
+        >>>     "slicedimage": {
         >>>         "caching": {
         >>>             "size_limit": 0
         >>>         }
@@ -99,8 +99,8 @@ class StarfishConfig(object):
             This parameter is read from the environment to permit setting configuration
             values either directly or via a file. Keys read include:
 
-             - ["backend"]["caching"]["directory"]   (default: ~/.starfish/cache)
-             - ["backend"]["caching"]["size_limit"]  (default: None; 0 disables caching)
+             - ["slicedimage"]["caching"]["directory"]   (default: ~/.starfish/cache)
+             - ["slicedimage"]["caching"]["size_limit"]  (default: None; 0 disables caching)
              - ["validation"]["strict"]              (default: False)
 
             Note: all keys can also be set by and environment variable constructed from the
@@ -110,22 +110,25 @@ class StarfishConfig(object):
         self._config_obj = Config(config)
 
         # If no directory is set, then force the default
-        self._backend = self._config_obj.lookup(("backend",), NestedDict())
-        if not self._backend["caching"]["directory"]:
-            self._backend["caching"]["directory"] = "~/.starfish/cache"
-        self._backend_update(('caching', 'directory'))
-        self._backend_update(('caching', 'size_limit'), int)
+        self._slicedimage = self._config_obj.lookup(("slicedimage",), NestedDict())
+        if not self._slicedimage["caching"]["directory"]:
+            self._slicedimage["caching"]["directory"] = "~/.starfish/cache"
+        self._slicedimage_update(('caching', 'directory'))
+        self._slicedimage_update(('caching', 'size_limit'), int)
 
         self._strict = self._config_obj.lookup(
             ("validation", "strict"), self.flag("STARFISH_VALIDATION_STRICT"))
 
-    def _backend_update(self, lookup, parse=lambda x: x):
-        name = "STARFISH_BACKEND_" + "_".join([x.upper() for x in lookup])
+    def _slicedimage_update(self, lookup, parse=lambda x: x):
+        """ accept STARFISH_SLICEDIMAGE_ or SLICEDIMAGE_ prefixes"""
+        name = "SLICEDIMAGE_" + "_".join([x.upper() for x in lookup])
         if name not in os.environ:
-            return
+            name = "STARFISH_" + name
+            if name not in os.environ:
+                return
         value = parse(os.environ[name])
 
-        v = self._backend
+        v = self._slicedimage
         for k in lookup[:-1]:
             v = v[k]
         v[lookup[-1]] = value
@@ -138,8 +141,8 @@ class StarfishConfig(object):
             return value in ("true", "1", "yes", "y", "on", "active", "enabled")
 
     @property
-    def backend(self):
-        return dict(self._backend)
+    def slicedimage(self):
+        return dict(self._slicedimage)
 
     @property
     def strict(self):

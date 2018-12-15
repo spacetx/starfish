@@ -45,7 +45,7 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     valid = True
 
     # use slicedimage to read the top-level experiment json file passed by the user
-    backend, name, baseurl = resolve_path_or_url(experiment_json, backend_config=config.backend)
+    backend, name, baseurl = resolve_path_or_url(experiment_json, backend_config=config.slicedimage)
     with backend.read_contextmanager(name) as fh:
         experiment = json.load(fh)
 

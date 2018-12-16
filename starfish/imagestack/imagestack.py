@@ -986,6 +986,7 @@ class ImageStack:
             if not filepath.upper().endswith(".TIFF"):
                 filepath += ".TIFF"
 
+            # RZCYX is the order expected by FIJI
             data = self.xarray.transpose(
                 Indices.ROUND.value,
                 Indices.Z.value,
@@ -993,7 +994,8 @@ class ImageStack:
                 Indices.Y.value,
                 Indices.X.value)
 
-            # catch warnings about low-contrast images.
+            # Any float32 image with low dynamic range will provoke a warning that the image is
+            # low contrast because the data must be converted to uint16 for compatibility with FIJI.
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", UserWarning)
                 skimage.io.imsave(filepath, data.values, imagej=True)

@@ -74,9 +74,9 @@ def test_coordinates():
                     Indices.Z: z
                 }
 
-                xmin, xmax = stack.coordinates(indices, Coordinates.X)
-                ymin, ymax = stack.coordinates(indices, Coordinates.Y)
-                zmin, zmax = stack.coordinates(indices, Coordinates.Z)
+                xmin, xmax = stack.tile_coordinates(indices, Coordinates.X)
+                ymin, ymax = stack.tile_coordinates(indices, Coordinates.Y)
+                zmin, zmax = stack.tile_coordinates(indices, Coordinates.Z)
 
                 expected_xmin, expected_xmax = round_to_x(_round)
                 expected_ymin, expected_ymax = round_to_y(_round)
@@ -139,9 +139,9 @@ def test_scalar_coordinates():
                     Indices.Z: z
                 }
 
-                xmin, xmax = stack.coordinates(indices, Coordinates.X)
-                ymin, ymax = stack.coordinates(indices, Coordinates.Y)
-                zmin, zmax = stack.coordinates(indices, Coordinates.Z)
+                xmin, xmax = stack.tile_coordinates(indices, Coordinates.X)
+                ymin, ymax = stack.tile_coordinates(indices, Coordinates.Y)
+                zmin, zmax = stack.tile_coordinates(indices, Coordinates.Z)
 
                 expected_x = round_to_x(_round)[0]
                 expected_y = round_to_y(_round)[0]

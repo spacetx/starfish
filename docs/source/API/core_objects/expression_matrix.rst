@@ -1,3 +1,5 @@
+.. _ExpressionMatrix:
+
 ExpressionMatrix
 ================
 

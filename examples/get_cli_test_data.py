@@ -21,11 +21,11 @@ if __name__ == "__main__":
     for fov in exp.fovs():
         fov_dir = pathlib.Path(args.output_dir, fov.name)
         fov_dir.mkdir()
-        fov[FieldOfView.PRIMARY_IMAGES].write(str(fov_dir / "hybridization.json"))
+        fov[FieldOfView.PRIMARY_IMAGES].export(str(fov_dir / "hybridization.json"))
         for image_type in fov.image_types:
             if image_type == FieldOfView.PRIMARY_IMAGES:
                 continue
-            fov[image_type].write(str(fov_dir / f"{image_type}.json"))
+            fov[image_type].export(str(fov_dir / f"{image_type}.json"))
 
     # get codebook from url and save locally to tmp dir
     codebook = requests.get(posixpath.join(args.experiment_url, "codebook.json"))

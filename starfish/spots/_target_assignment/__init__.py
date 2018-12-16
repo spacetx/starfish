@@ -2,7 +2,6 @@ import os
 from typing import Type
 
 import click
-import numpy as np
 from skimage.io import imread
 
 from starfish.intensity_table.intensity_table import IntensityTable

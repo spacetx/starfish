@@ -137,6 +137,8 @@ def build_image(
 def write_experiment_json(
         path: str,
         fov_count: int,
+        tile_format: ImageFormat,
+        *,
         primary_image_dimensions: Mapping[Union[str, Indices], int],
         aux_name_to_dimensions: Mapping[str, Mapping[Union[str, Indices], int]],
         primary_tile_fetcher: Optional[TileFetcher]=None,
@@ -214,7 +216,7 @@ def write_experiment_json(
         pretty=True,
         partition_path_generator=_fov_path_generator,
         tile_opener=_tile_opener,
-        tile_format=ImageFormat.TIFF,
+        tile_format=tile_format,
     )
     experiment_doc['images']['primary'] = "primary_image.json"
 
@@ -234,7 +236,7 @@ def write_experiment_json(
             pretty=True,
             partition_path_generator=_fov_path_generator,
             tile_opener=_tile_opener,
-            tile_format=ImageFormat.TIFF,
+            tile_format=tile_format,
         )
         experiment_doc['images'][aux_name] = "{}.json".format(aux_name)
 

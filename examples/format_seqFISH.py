@@ -180,6 +180,7 @@ def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
         primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions={},
         primary_tile_fetcher=primary_tile_fetcher,
+        tile_format=ImageFormat.TIFF,
         # postprocess_func=post_process_func,
         dimension_order=(Indices.ROUND, Indices.CH, Indices.Z)
     )

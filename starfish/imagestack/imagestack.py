@@ -401,7 +401,7 @@ class ImageStack:
             self,
             indices: Mapping[Indices, Union[int, slice]],
             data: np.ndarray,
-            axes: Sequence[Indices]=None):
+            axes: Sequence[Indices] = None):
         """
         Given a dictionary mapping the index name to either a value or a slice range and a source
         numpy array, set the slice of the array of this ImageStack to the values in the source
@@ -454,9 +454,9 @@ class ImageStack:
         self._data.values[slice_list] = data
 
     def show_stack_napari(
-                        self, indices: Mapping[Indices, Union[int, slice]],
-                        spots: Union[IntensityTable, None]=None,
-                        radius_multiplier: int=30):
+                    self, indices: Mapping[Indices, Union[int, slice]],
+                    spots: Union[IntensityTable, None] = None,
+                    radius_multiplier: int = 30):
         """Displays the image stack using Napari (https://github.com/Napari).
         Can optionally overlay detected spots if the corresponding IntensityTable
         is provided.
@@ -467,8 +467,8 @@ class ImageStack:
             Indices to select a volume to visualize. Passed to `Image.get_slice()`.
             See `Image.get_slice()` for examples.
         spots : IntensityTable
-            IntensityTable containing spot information. Will be projected to match the coordinates of
-            the background image, if provided.
+            IntensityTable containing spot information. Will be projected to match
+            the coordinates of the background image, if provided.
         radius_multiplier : int
             Multiplies the radius of the displayed spots (default 30)
 
@@ -500,9 +500,9 @@ class ImageStack:
         viewer._index = [0, 0, 0, 0, 0]
 
         if spots is not None:
-            
+
             c_r = np.zeros(len(spots.y.values))
-            
+
             # Detect if the image stack is z-projected and project the spots accordingly
             if slices.shape[2] == 1:
                 coords = np.array([spots.x.values, spots.y.values, c_r, c_r, c_r]).T
@@ -522,8 +522,8 @@ class ImageStack:
 
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],
-            color_map: str= 'gray', figure_size: Tuple[int, int]=(10, 10),
-            rescale: bool=False, p_min: Optional[float]=None, p_max: Optional[float]=None, **kwargs
+            color_map: str = 'gray', figure_size: Tuple[int, int]=(10, 10),
+            rescale: bool = False, p_min: Optional[float] = None, p_max: Optional[float] = None, **kwargs
     ):
         """Create an interactive visualization of an image stack
 

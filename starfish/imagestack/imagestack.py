@@ -453,20 +453,32 @@ class ImageStack:
 
         self._data.values[slice_list] = data
 
-    def show_stack_napari(self, indices: Mapping[Indices, Union[int, slice]]):
-        """Displays the image stack using Napari (https://github.com/Napari)
+    def show_stack_napari(
+                        self, indices: Mapping[Indices, Union[int, slice]],
+                        spots: Union[IntensityTable, None]=None,
+                        radius_multiplier: int=30):
+        """Displays the image stack using Napari (https://github.com/Napari).
+        Can optionally overlay detected spots if the corresponding IntensityTable
+        is provided.
 
         Parameters
         ----------
         indices : Mapping[Indices, Union[int, slice]],
             Indices to select a volume to visualize. Passed to `Image.get_slice()`.
             See `Image.get_slice()` for examples.
+        spots : IntensityTable
+            IntensityTable containing spot information. Will be projected to match the coordinates of
+            the background image, if provided.
+        radius_multiplier : int
+            Multiplies the radius of the displayed spots (default 30)
 
         Notes
         -----
         To use in a Jupyter notebook, use the %gui qt5 magic.
         Axes currently cannot be labeled. Until such a time that they can, this function will
         order them by Round, Channel, and Z.
+
+        Requires napari 0.0.5.1: pip install napari-gui==0.0.5.1
 
         """
         try:
@@ -482,6 +494,29 @@ class ImageStack:
         reordered_array = np.moveaxis(slices, [-2, -1], [0, 1])
 
         viewer = napari_gui.imshow(reordered_array, multichannel=False)
+
+        # This initializes an index for the status bar
+        # Should be fixed in Napari in the future - KY
+        viewer._index = [0, 0, 0, 0, 0]
+
+        if spots is not None:
+            
+            c_r = np.zeros(len(spots.y.values))
+            
+            # Detect if the image stack is z-projected and project the spots accordingly
+            if slices.shape[2] == 1:
+                coords = np.array([spots.x.values, spots.y.values, c_r, c_r, c_r]).T
+
+            else:
+                coords = np.array([spots.x.values, spots.y.values, c_r, c_r, spots.z.values]).T
+
+            # Get the sizes
+            sizes = spots.radius.values * radius_multiplier
+
+            viewer.add_markers(
+                coords=coords, face_color='white', edge_color='white', symbol='ring',
+                size=sizes
+            )
 
         return viewer, axes
 

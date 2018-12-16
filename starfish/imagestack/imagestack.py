@@ -454,9 +454,9 @@ class ImageStack:
         self._data.values[slice_list] = data
 
     def show_stack_napari(
-                    self, indices: Mapping[Indices, Union[int, slice]],
-                    spots: Union[IntensityTable, None] = None,
-                    radius_multiplier: int = 30):
+            self, indices: Mapping[Indices, Union[int, slice]],
+            spots: Union[IntensityTable, None] = None,
+            radius_multiplier: int = 30):
         """Displays the image stack using Napari (https://github.com/Napari).
         Can optionally overlay detected spots if the corresponding IntensityTable
         is provided.
@@ -523,7 +523,8 @@ class ImageStack:
     def show_stack(
             self, indices: Mapping[Indices, Union[int, slice]],
             color_map: str = 'gray', figure_size: Tuple[int, int]=(10, 10),
-            rescale: bool = False, p_min: Optional[float] = None, p_max: Optional[float] = None, **kwargs
+            rescale: bool = False, p_min: Optional[float] = None,
+            p_max: Optional[float] = None, **kwargs
     ):
         """Create an interactive visualization of an image stack
 

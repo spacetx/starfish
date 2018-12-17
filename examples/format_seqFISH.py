@@ -61,7 +61,7 @@ class SeqFISHTileFetcher(TileFetcher):
         self.input_dir = input_dir
 
     @property
-    def coordinates(self) -> Mapping[Coordinates, Tuple[float, float]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         """Returns dummy coordinates for this single-FoV TileFetcher"""
         return {
             Coordinates.X: (0., 0.),
@@ -164,7 +164,7 @@ def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
     primary_tile_fetcher = SeqFISHTileFetcher(os.path.expanduser(input_dir))
 
     # This is hardcoded for this example data set
-    primary_image_dimensions = {
+    primary_image_dimensions:Mapping[Union[str, Indices], int] = {
         Indices.ROUND: 5,
         Indices.CH: 12,
         Indices.Z: 29,

@@ -37,6 +37,9 @@ Starfish documentation
     glossary/glossary.md
 
 .. toctree::
+    roadmap.md
+
+.. toctree::
     citation.rst
 
 

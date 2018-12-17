@@ -1,7 +1,7 @@
 # Starfish 2019 H1 Roadmap
 This document describes the features required for SpaceTx groups to use starfish to analyze their data. These users will generate feedback on Starfish, enabling work to be tailored towards the most valuable feature set.
 
-The long-term high level key deliverables for Starfish are enumerated elsewhere and are not repeated here. The purpose of this document is to arrive at a detailed list of short-term key deliverables. To accomplish this, we first outline our primary use cases. With these to guide us, we then outline what we need to build, what we do not need to build, and why.
+The long-term high level key deliverables for Starfish are enumerated elsewhere and are not repeated here. The purpose of this document is to arrive at a detailed list of short-term key deliverables. To accomplish this, we first outline our primary use cases. With these to guide us, we then outline [**what we need to build**](#what-we-need-to-build:-the-starfish-mvp), [**what we can build later**](what-we-can-build-later:-post-mvp-work), and why.
 
 ## Primary use cases
 To support the SpaceTx groups and the Chan Zuckerberg Biohub in the initial phase, starfish needs to support the following use cases.
@@ -87,9 +87,9 @@ Each deliverable above can be broken up into a set of milestones
 3. Cell x Gene table can be easily imported by computational biologists (outside of starfish) to determine cell type or cluster membership for each cell.  This cluster membership can include probabilistic membership to multiple clusters and is added to the Cell x Gene table as metadata
 
 ### A tool to convert image data into SpaceTx Format
-1. CLI and API (Java) can parse supported file formats into SpaceTx-formatted datasets<sup>[5](#fn5)</sup>
+1. CLI and API (Java) can parse [supported file formats](https://docs.openmicroscopy.org/bio-formats/6.0.0-m3/supported-formats.html) into SpaceTx-formatted datasets<sup>[5](#fn5)</sup>
 2. Installation of the tool can be accomplished by downloading an archive with a launcher script or by using pre-built docker images
-3. Users and/or data wranglers can point the tool at one of the stated files for each FOV to generate 2D TIFFs as well as the necessary SpaceTX JSON files
+3. Users and/or data wranglers can point the tool at one of the [stated files](https://docs.openmicroscopy.org/bio-formats/6.0.0-m3/formats/dataset-table.html) for each FOV to generate 2D TIFFs as well as the necessary SpaceTX JSON files
 4. In the case that multiple “series” are present in a single dataset, the user must specify which series to use
 5. The index of the field of view (0-based) must be passed during creation
 6. If a codebook exists at the time of creation, it can be passed to the tool for inclusion in the JSON. Otherwise, a dummy codebook will be created
@@ -206,7 +206,7 @@ SeqFISH implements a decoder that carries out a local search of adjacent pixels 
 - [ ] CC-by licensing
 - [ ] Documented upload procedures to s3
 
-## What we do not need to build (Post-MVP work)
+## What we can build later: Post-MVP work
 
 ### Hardware- and Acquisition-related corrections
 Data generators understand their hardware, chemistry, and samples much better than we do. For now, it's difficult for the Starfish team to solve image pre-processing problems that are specific to the signal acquisition challenges each data generator faces. Furthermore, proper image pre-processing is critical to the success of the downstream pipeline components that we're building in the roadmap defined above. Instead of relying on data generators to provide us with image-pre-processing pipeline component implementations, we're requesting that data generators pre-process their images before uploading. This will accelerate progress towards the project's goal of comparing the results from all the methods using standard file formats, and scalable, reproducible image processing workflows. There are three categories of pre-processing that we ask data generators to apply:

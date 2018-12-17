@@ -5,36 +5,44 @@
 
 # EPY: START code
 import os
-import pickle
-from glob import glob
-import requests
-from tempfile import TemporaryDirectory
+# import pickle
+# from glob import glob
+# import requests
+# from tempfile import TemporaryDirectory
 
 import matplotlib.pyplot as plt
 import numpy as np
-from showit import image
-from skimage import img_as_float32
-import seaborn as sns
-from skimage.feature import peak_local_max
-from sympy import Point, Line, Segment
-import pandas as pd
+# from showit import image
+# from skimage import img_as_float32
+# import seaborn as sns
+# from skimage.feature import peak_local_max
+# from sympy import Point, Line, Segment
+# import pandas as pd
 
-from starfish import ImageStack
+# from starfish import ImageStack
 from starfish.types import Indices
 from starfish.image import Filter
-from starfish.types._spot_attributes import SpotAttributes
+# from starfish.types._spot_attributes import SpotAttributes
 from starfish.spots import SpotFinder
+import starfish.data
 
 # EPY: ESCAPE %matplotlib inline
 # EPY: ESCAPE %load_ext autoreload
 # EPY: ESCAPE %autoreload 2
+# EPY: END code
 
-aws_data_path = 's3://czi.starfish.data.public/browse/raw/20180912/osmFISH/'
-_im_path = os.path.join(aws_data_path, 'images')
-_res_path = os.path.join(aws_data_path, 'results')
-fov_num = 33
-im_path = 'images'
-res_path = 'results'
+# EPY: START code
+# test data delivers a single round, and for fov_001 -- we want fov 33, should redo this. Can generalize later. 
+# TODO swap starfish.data to generate a single ch/round for test data, and to use fov_33
+stack = starfish.data.osmFISH(use_test_data=True)
+# EPY: END code
+
+# EPY: START code
+stack
+# EPY: END code
+
+# EPY: START code
+stack = stack['fov_001']['primary']
 # EPY: END code
 
 # EPY: START markdown
@@ -42,23 +50,23 @@ res_path = 'results'
 # EPY: END markdown
 
 # EPY: START code
-# EPY: ESCAPE !aws s3 cp $_im_path/ ./images --exclude "*" --include "*$fov_num*" --recursive 2>&1 > /dev/null
+aws_data_path = 's3://czi.starfish.data.public/browse/raw/20180912/osmFISH/'
+_im_path = os.path.join(aws_data_path, 'images')
+_res_path = os.path.join(aws_data_path, 'results')
+fov_num = 1
+im_path = 'images'
+res_path = 'results'
 # EPY: END code
 
 # EPY: START code
-# EPY: ESCAPE !aws s3 cp $_res_path/ ./results --exclude "*" --include "*$fov_num*" --recursive 2>&1 > /dev/null
+# EPY: ESCAPE !aws s3 cp $_im_path/ ./images --exclude "*" --include "*${fov_num}*" --recursive 2>&1 > /dev/null
 # EPY: END code
 
 # EPY: START code
-def load_image_stack(fov_num):
-    ims = glob(os.path.join(im_path, '*.npy'))
-    im = np.load([i for i in ims if str(fov_num) in i][0])
-    stack = np.zeros((1, 1, 45, 2048, 2048))
-    stack[0,0,:,:,:] = img_as_float32(im)
-    stack = img_as_float32(stack)
+# EPY: ESCAPE !aws s3 cp $_res_path/ ./results --exclude "*" --include "*${fov_num}*" --recursive 2>&1 > /dev/null
+# EPY: END code
 
-    return ImageStack.from_numpy_array(stack)
-
+# EPY: START code
 def load_results(fov_num):
     pkls = glob(os.path.join(res_path, '*.pkl'))
     pkl = [p for p in pkls if str(fov_num) in p][0]
@@ -103,11 +111,16 @@ psymFISH_thresh = res['selected_thr']
 # EPY: END code
 
 # EPY: START code
-stack = load_image_stack(fov_num)
-# EPY: END code
+# def load_image_stack(fov_num):
+#     ims = glob(os.path.join(im_path, '*.npy'))
+#     im = np.load([i for i in ims if str(fov_num) in i][0])
+#     stack = np.zeros((1, 1, 45, 2048, 2048))
+#     stack[0,0,:,:,:] = img_as_float32(im)
+#     stack = img_as_float32(stack)
 
-# EPY: START code
-stack.show_stack({Indices.ROUND: 0}, rescale=True)
+#     return ImageStack.from_numpy_array(stack)
+
+# stack = load_image_stack(fov_num)
 # EPY: END code
 
 # EPY: START markdown
@@ -119,8 +132,6 @@ stack.show_stack({Indices.ROUND: 0}, rescale=True)
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image import Filter
-
 ghp = Filter.GaussianHighPass(sigma=(1,8,8), is_volume=True)
 lp = Filter.Laplace(sigma=(0.2, 0.5, 0.5), is_volume=True)
 
@@ -129,10 +140,18 @@ stack_hp_lap = lp.run(stack_hp, in_place=False)
 # EPY: END code
 
 # EPY: START code
-mp = stack_hp_lap.max_proj(Indices.Z)[0,0,:,:]
+# mp = stack_hp_lap.max_proj(Indices.Z)[0,0,:,:]
+mp = stack_hp_lap.max_proj(Indices.Z)
+# EPY: END code
 
+# EPY: START code
+mp = stack_hp_lap.max_proj(Indices.Z)
+for_vis = mp.xarray.sel({Indices.CH: 0}).squeeze()
+# EPY: END code
+
+# EPY: START code
 plt.figure(figsize=(10,10))
-plt.imshow(mp, cmap = 'gray', vmin=np.percentile(mp, 98), vmax=np.percentile(mp, 99.9))
+plt.imshow(for_vis, cmap = 'gray', vmin=np.percentile(for_vis, 98), vmax=np.percentile(for_vis, 99.9))
 plt.title('Filtered max projection')
 plt.axis('off');
 # EPY: END code
@@ -148,7 +167,7 @@ min_obj_area = 6
 max_obj_area = 600
 
 # TODO this will go away once ImageStack.max_proj returns an ImageStack
-stack = ImageStack.from_numpy_array(np.expand_dims(np.expand_dims(np.expand_dims(mp, 0), 0), 0))
+# stack = ImageStack.from_numpy_array(np.expand_dims(np.expand_dims(np.expand_dims(mp, 0), 0), 0))
 
 lmp = SpotFinder.LocalMaxPeakFinder(
     min_distance=min_distance,
@@ -156,7 +175,7 @@ lmp = SpotFinder.LocalMaxPeakFinder(
     min_obj_area=min_obj_area,
     max_obj_area=max_obj_area
 )
-lmp_res = lmp.run(stack)
+lmp_res = lmp.run(mp)
 # EPY: END code
 
 # EPY: START markdown
@@ -176,7 +195,9 @@ plt.ylabel('Number of spots');
 # EPY: END code
 
 # EPY: START code
-mp = stack_hp_lap.max_proj(Indices.Z)[0,0,:,:]
+# mp = stack_hp_lap.max_proj(Indices.Z)[0,0,:,:]
+mp = stack_hp_lap.max_proj(Indices.Z)
+mp = mp.sel({Indices.CH: 0, Indices.R: 0}).xarray.squeeze()
 
 plt.figure(figsize=(10,10))
 plt.imshow(mp, cmap = 'gray', vmin=np.percentile(mp, 98), vmax=np.percentile(mp, 99.9))

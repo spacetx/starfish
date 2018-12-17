@@ -6,11 +6,6 @@ from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComp
 from starfish.types import Indices
 from starfish.util import click
 from . import _base
-from . import gaussian
-from . import local_max_peak_finder
-from . import pixel_spot_detector
-from . import trackpy_local_max_peak_finder
-
 import_all_submodules(__file__, __package__)
 
 

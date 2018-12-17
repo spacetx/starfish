@@ -17,34 +17,34 @@ jobs:
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Docker
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and branch =~ /^(fixing-allen|merge)/
       script: make docker
     - name: Allen Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and branch =~ /^(fixing-allen|merge)/
       script: make install-src run__notebooks/py/allen_smFISH.py
     - name: MERFISH Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and branch =~ /^(fixing-allen|merge)/
       script: make install-src run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
     - name: Assay Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and branch =~ /^(fixing-allen|merge)/
       script: make install-src run__notebooks/py/assay_comparison.py
     - name: osmFISH Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and branch =~ /^(fixing-allen|merge)/
       script: make install-src run__notebooks/py/osmFISH.py
     - name: DARTFISH Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and branch =~ /^(fixing-allen|merge)/
       script: make install-src run__notebooks/py/DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV.py
     - name: Simulation Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and branch =~ /^(fixing-allen|merge)/
       script: make install-src run__notebooks/py/Starfish_simulation.py
     - name: ISS Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and branch =~ /^(fixing-allen|merge)/
       script: make install-src run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
     - name: Released Notebooks
-      if: type = cron and branch =~ /^(master|merge)/
+      if: type = cron and branch =~ /^(fixing-allen|merge)/
       script: make check_notebooks install-pypi run_notebooks
     - name: Check Requirements
-      if: type = cron AND branch = /^master$/
+      if: type = cron AND branch = /^fixing-allen$/
       script: make refresh_all_requirements check_requirements
 cache:
   directories:

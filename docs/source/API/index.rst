@@ -26,3 +26,6 @@ API
 
 .. toctree::
    plot/index.rst
+
+.. toctree::
+   validation/index.rst

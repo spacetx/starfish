@@ -16,18 +16,5 @@ from .imagestack.imagestack import ImageStack
 from .intensity_table.intensity_table import IntensityTable
 from .starfish import starfish
 
-import mmap
-from multiprocessing.heap import Arena
-
-
-def anonymous_arena_init(self, size, fd=-1):
-    "Create Arena using an anonymous memory mapping."
-    self.size = size
-    self.fd = fd  # still kept but is not used !
-    self.buffer = mmap.mmap(-1, self.size)
-
-
-Arena.__init__ = anonymous_arena_init
-
 if __name__ == "__main__":
     starfish()

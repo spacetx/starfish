@@ -31,3 +31,4 @@ nbencdec >= 0.0.5
 recommonmark
 sphinx
 sphinx_rtd_theme
+sphinxcontrib-programoutput

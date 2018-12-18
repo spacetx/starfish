@@ -22,10 +22,13 @@ API
    spots/index.rst
 
 .. toctree::
-   types/types.rst
+   types/index.rst
 
 .. toctree::
-   plot/plot.rst
+   plot/index.rst
+
+.. toctree::
+   validation/index.rst
 
 .. toctree::
    utils/index.rst

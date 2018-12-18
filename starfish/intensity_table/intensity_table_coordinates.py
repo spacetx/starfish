@@ -12,11 +12,12 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack: Ima
                                                                 ) -> IntensityTable:
     """
     Transfers physical coordinates from an Imagestack's coordinates xarray to an intensity table
-        1.) Creates three new coords on the intensity table (xc, yc, zc)
-        2.) For every spot:
-                Get pixel x,y values
-                Calculate the physical x,y values
-                Assign those values to the coords arrays for this spot
+
+    1. Creates three new coords on the intensity table (xc, yc, zc)
+    2. For every spot:
+        - Get pixel x,y values
+        - Calculate the physical x,y values
+        - Assign those values to the coords arrays for this spot
     """
     # Add three new coords to xarray (xc, yc, zc)
     num_features = intensity_table.sizes[Features.AXIS]

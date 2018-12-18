@@ -39,6 +39,14 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     -------
     bool :
         True, if object valid or fuzz=True, else False
+
+    Examples
+    --------
+    The following will read the experiment json file provided, downloading it if necessary,
+    and begin recursively validating it and all referenced json files (e.g. codebook.json):
+
+        >>> from sptx_format import validate_sptx
+        >>> valid = validate_sptx.validate(json_url)
     """
 
     config = StarfishConfig()

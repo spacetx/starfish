@@ -98,6 +98,17 @@ class SpaceTxValidator:
         bool :
             True, if object valid, else False
 
+        Examples
+        --------
+        Validate a codebook file::
+
+            >>> from pkg_resources import resource_filename
+            >>> from sptx_format.util import SpaceTxValidator
+            >>> schema_path = resource_filename("sptx_format", "schema/codebook/codebook.json")
+            >>> validator = SpaceTxValidator(schema_path)
+            >>> if not validator.validate_file(your_codebook_filename):
+            >>>     raise Exception("invalid")
+
         """
         target_object = self.load_json(target_file)
         return self.validate_object(target_object, target_file)
@@ -121,6 +132,17 @@ class SpaceTxValidator:
         -------
         bool :
             True, if object valid, else False
+
+        Examples
+        --------
+        Validate an experiment json string ::
+
+            >>> from pkg_resources import resource_filename
+            >>> from sptx_format.util import SpaceTxValidator
+            >>> schema_path = resource_filename("sptx_format", "schema/experiment.json")
+            >>> validator = SpaceTxValidator(schema_path)
+            >>> if not validator.validate_object(your_experiment_object):
+            >>>     raise Exception("invalid")
 
         """
 

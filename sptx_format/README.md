@@ -1,4 +1,4 @@
-# The SpaceTx Image Format Specification
+# SpaceTx Image Format Specification
 
 ## Introduction
 

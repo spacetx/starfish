@@ -19,22 +19,22 @@ Starfish documentation
     API/index.rst
 
 .. toctree::
-    contributing/contributing.md
-
-.. toctree::
-    debugging.rst
-
-.. toctree::
-    license/license.rst
+    usage/index.rst
 
 .. toctree::
     sptx-format/index.rst
 
 .. toctree::
-    usage/index.rst
+    contributing.rst
+
+.. toctree::
+    debugging.rst
 
 .. toctree::
     glossary/glossary.md
+
+.. toctree::
+    license/index.rst
 
 .. toctree::
     citation.rst

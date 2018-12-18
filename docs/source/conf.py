@@ -16,6 +16,7 @@ import sys
 dir_, _ = os.path.split(__file__)
 root_dir = os.path.abspath(os.path.join(dir_, '..', '..'))
 sys.path.insert(0, root_dir)
+print(sys.path)
 
 # needed to build on readthedocs, avoids Tk invocation
 import matplotlib
@@ -48,6 +49,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
+    'sphinx.ext.napoleon',
+    'sphinxcontrib.programoutput',
     'm2r',
 ]
 

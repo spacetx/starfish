@@ -34,7 +34,7 @@ Starfish documentation
     glossary/glossary.md
 
 .. toctree::
-    license/license.rst
+    license/index.rst
 
 .. toctree::
     citation.rst

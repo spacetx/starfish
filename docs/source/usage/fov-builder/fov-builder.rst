@@ -14,7 +14,7 @@ Usage
 
 starfish build --help will provide instructions on how to use the tool:
 
-.. program-output:: starfish build --help
+.. program-output:: env MPLBACKEND=Agg starfish build --help
 
 Examples
 --------

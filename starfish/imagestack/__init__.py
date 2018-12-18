@@ -1,5 +1,6 @@
 import mmap
 from multiprocessing.heap import Arena
+from sys import platform
 
 
 def anonymous_arena_init(self, size, fd=-1):
@@ -14,4 +15,6 @@ def anonymous_arena_init(self, size, fd=-1):
     self.buffer = mmap.mmap(-1, self.size)
 
 
-Arena.__init__ = anonymous_arena_init
+if platform.startswith("darwin"):
+    # Only do in Mac env.
+    Arena.__init__ = anonymous_arena_init

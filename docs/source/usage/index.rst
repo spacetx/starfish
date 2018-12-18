@@ -19,3 +19,6 @@ transcriptomics data. The first vignette provides an example of using starfish t
 
 .. toctree::
    fov-builder/fov-builder.rst
+
+.. toctree::
+   validation/index.rst

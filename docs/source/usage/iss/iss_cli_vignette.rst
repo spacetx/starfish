@@ -1,6 +1,6 @@
 
-Command Line Usage
-------------------
+ISS Command Line Usage
+----------------------
 
 Starfish provides several notebook vignettes that demonstrate the starfish API. Starfish has a
 fully-featured CLI that mimics the API such that one does not need to write python code to use

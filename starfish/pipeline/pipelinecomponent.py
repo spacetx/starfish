@@ -64,8 +64,8 @@ def import_all_submodules(path_str: str, package: str, excluded: Optional[Set[st
     Given a path of a __init__.py file, find all the .py files in that directory and import them
     relatively to a package.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     path_str : str
         The path of a __init__.py file.
     package : str

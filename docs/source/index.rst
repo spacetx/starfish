@@ -25,7 +25,7 @@ Starfish documentation
     sptx-format/index.rst
 
 .. toctree::
-    contributing/contributing.md
+    contributing.rst
 
 .. toctree::
     debugging.rst

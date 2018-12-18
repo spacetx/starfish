@@ -41,6 +41,7 @@ For example:
       warnings.warn(message)
 
 
-This message tells you which schema has failed validation (fov-manifest.json), what type of error
-has been encountered (a required field is missing), and the name of the file which is invalid
-(field_of_view.json) if it has been provided. Validation of json objects will not provide a filename.
+This message tells you which schema has failed validation (``fov-manifest.json``), what type of error
+has been encountered (``a required field is missing``), and the name of the file which is invalid
+(``field_of_view.json``) if it has been provided. Validation of a json object will simply omit the
+``Filename:`` field.

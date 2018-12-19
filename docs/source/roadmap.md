@@ -1,7 +1,7 @@
-# Starfish 2019 H1 Roadmap
+# Starfish 0.1.0 Roadmap
 This document describes the features required for SpaceTx groups to use starfish to analyze their data. These users will generate feedback on Starfish, enabling work to be tailored towards the most valuable feature set.
 
-The long-term high level key deliverables for Starfish are enumerated elsewhere and are not repeated here. The purpose of this document is to arrive at a detailed list of short-term key deliverables. To accomplish this, we first outline our primary use cases. With these to guide us, we then outline [**what we need to build**](#what-we-need-to-build:-the-starfish-mvp), [**what we can build later**](what-we-can-build-later:-post-mvp-work), and why.
+The purpose of this document is to arrive at a detailed list of short-term key deliverables. To accomplish this, we first outline our primary use cases. With these to guide us, we then outline [**what we need to build**](#what-we-need-to-build:-starfish-0.1.0), [**what we can build later**](candidates-features-for-0.2.0+), and why.
 
 ## Primary use cases
 To support the SpaceTx groups and the Chan Zuckerberg Biohub in the initial phase, starfish needs to support the following use cases.
@@ -26,7 +26,7 @@ This capability will allow straightforward creation of highly compressed dataset
 Finally, with a standard format to save and load Cell x Gene tables, visualization of this data will be relatively straightforward for analysts in contributor labs and Working Group 6 members.
 
 ## Key Deliverables
-Providing the following deliverables will allow us to support our MVP users
+We believe that delivering the following features will enable the above use cases.
 
 1. Data is easily converted into SpaceTx format from common imaging formats
 2. Library that can be used to reproduce collaborator's results for single fields of view
@@ -94,7 +94,7 @@ Each deliverable above can be broken up into a set of milestones
 5. The index of the field of view (0-based) must be passed during creation
 6. If a codebook exists at the time of creation, it can be passed to the tool for inclusion in the JSON. Otherwise, a dummy codebook will be created
 
-## What we need to build: The Starfish MVP
+## What we need to build: Starfish 0.1.0
 In general, we aim for starfish to be a comprehensive platform for the processing of image-based transcriptomics experiments. It should be intuitive to use, fast, and should not require extensive experience with python programming. However, at least during the initial development period, Starfish will require domain experience in image processing, as our target users are experts in image generation and processing.
 
 ### A General Format and Object Model for Image-based Transcriptomics
@@ -139,12 +139,12 @@ There are many existing distributed pipeline runners that are designed for parti
 
 The diversity of infrastructures leveraged by SpaceTx labs and institutes have caused them to make different decisions about which workflow runner to use (EBI: HPC+Nextflow, UCSC: ?+Toil, Broad: GCP+Cromwell, Allen: HCP+Grid Engine, Zhuang: HCP+Grid Engine+SnakeMake, etc.). Because institutional users tend to be heavily committed to their infrastructure of choice, it is unlikely that we will convert them. However, by implementing a library that can be leveraged by each workflow runner, we enable Starfish to be used across these groups.
 
-Nevertheless, to demonstrate Starfish's scale, we will implement workflows on one or more existing pipeline runner and keep this work distinct from the underlying library. This pipeline runner will be capable of processing a complete experiment consisting of arbitrary numbers of fields of view for any SpaceTx lab and will leverage cloud-based parallelism to accomplish the processing of any SpaceTx experiment in under 2 hours. We will consider the HCA use case when designing our MVP workflows in order to maximize initial compatibility.
+Nevertheless, to demonstrate Starfish's scale, we will implement workflows on one or more existing pipeline runner and keep this work distinct from the underlying library. This pipeline runner will be capable of processing a complete experiment consisting of arbitrary numbers of fields of view for any SpaceTx lab and will leverage cloud-based parallelism to accomplish the processing of any SpaceTx experiment in under 2 hours. We will consider the HCA use case when designing our version 0.1.0 workflows in order to maximize initial compatibility.
 
 ### A Developer Focus Point
 Two key aims of Starfish and SpaceTx are to (1) encourage convergence of the community onto a single object model for processing of image-based transcriptomics data and (2) make it easier to develop pipelines by providing a high-performance platform. To facilitate this, we must encourage developers to work on starfish through active outreach and by being encouraging and helpful.
 
-## Outstanding work to complete the MVP
+## Outstanding work to complete 0.1.0
 
 ### A General Format and Object Model for Image-based Transcriptomics
 
@@ -206,7 +206,9 @@ SeqFISH implements a decoder that carries out a local search of adjacent pixels 
 - [ ] CC-by licensing
 - [ ] Documented upload procedures to s3
 
-## What we can build later: Post-MVP work
+## Candidate features for 0.2.0+
+
+There are many other features that are good candidates for future releases. We discuss these features, and why we believe they can be built after release 0.1.0.
 
 ### Hardware- and Acquisition-related corrections
 Data generators understand their hardware, chemistry, and samples much better than we do. For now, it's difficult for the Starfish team to solve image pre-processing problems that are specific to the signal acquisition challenges each data generator faces. Furthermore, proper image pre-processing is critical to the success of the downstream pipeline components that we're building in the roadmap defined above. Instead of relying on data generators to provide us with image-pre-processing pipeline component implementations, we're requesting that data generators pre-process their images before uploading. This will accelerate progress towards the project's goal of comparing the results from all the methods using standard file formats, and scalable, reproducible image processing workflows. There are three categories of pre-processing that we ask data generators to apply:
@@ -218,7 +220,7 @@ For the SpaceTx pilot project, it is adequate to apply pre-computed transformati
 Non-Affine registration approaches are very specific to the types of deformations that the tissue suffers, and have variable forms. We should investigate defining some kind of API for arbitrary transformations that could allow users to add approaches that they require, but we won't do the work to implement these as they don't have broad applicability.
 
 #### Fixing Chromatic Aberration
-Chromatic aberrations, including differences in illumination, cross-talk between channels, and channel drift tend to be specific to the assay and microscope, making creation of a general solution complicated. Additionally, these problems are often fixed early in pipelines so it is easy to extricate this step from the pipeline. For these reasons, we will ask the groups to generate data that has already been corrected for the MVP.
+Chromatic aberrations, including differences in illumination, cross-talk between channels, and channel drift tend to be specific to the assay and microscope, making creation of a general solution complicated. Additionally, these problems are often fixed early in pipelines so it is easy to extricate this step from the pipeline. For these reasons, we will ask the groups to generate data that has already been corrected for release 0.1.0.
 
 ### Updating proof-of-concept pipelines with new modules
 For example, as work is completed on channel scaling and registration, we would have an opportunity to update the MERFISH pipeline. This work should be done by the users who are requesting the features.

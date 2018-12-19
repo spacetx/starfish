@@ -29,3 +29,6 @@ API
 
 .. toctree::
    validation/index.rst
+
+.. toctree::
+   utils/index.rst

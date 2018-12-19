@@ -88,7 +88,7 @@ semantic-version==2.6.0
 Send2Trash==1.5.0
 showit==1.1.4
 six==1.11.0
-slicedimage==1.0.2
+slicedimage==1.0.3
 snowballstemmer==1.2.1
 Sphinx==1.8.1
 sphinx-rtd-theme==0.4.2

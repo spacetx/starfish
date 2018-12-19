@@ -14,8 +14,8 @@
   },
   "default_tile_format": "TIFF",
   "default_tile_shape": [
-    2048,
-    2048
+    4096,
+    4096
   ],
   "extras": "nothing to see here",
   "tiles": [
@@ -23,7 +23,7 @@
       "coordinates": {
         "xc": [0.0, 0.1],
         "yc": [0.0, 0.1],
-        "zc": 0.0
+        "zc": [0.0]
       },
       "indices": {
         "z": 0,
@@ -41,7 +41,7 @@
       "coordinates": {
         "xc": [0.0, 0.1],
         "yc": [0.0, 0.1],
-        "zc": 0.1
+        "zc": [0.1]
       },
       "indices": {
         "z": 1,

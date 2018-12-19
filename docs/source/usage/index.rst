@@ -8,7 +8,7 @@ Getting started with the CLI
 
 The simplest way to get started with starfish for most users will be to try out the
 command-line interface (CLI). After following the :ref:`installation <installation>`
-instructions, there will be a new ``starfish`` available. Running ``starfish --help``
+instructions, a ``starfish`` command will be available. Running ``starfish --help``
 will print out the subcommands that are available.
 
 .. program-output:: env MPLBACKEND=Agg starfish --help

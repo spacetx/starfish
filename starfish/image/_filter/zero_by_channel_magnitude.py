@@ -12,7 +12,7 @@ from ._base import FilterAlgorithmBase
 
 
 class ZeroByChannelMagnitude(FilterAlgorithmBase):
-    def __init__(self, thresh: int, normalize: bool, is_volume: bool = False) -> None:
+    def __init__(self, thresh: int, normalize: bool) -> None:
         """For assays in which we expect codewords to have explicit zero values,
         e.g., DARTFISH, SEQFISH, etc., this filter allows for the explicit zeroing
         out of pixels, for each round, where there is insufficient signal magnitude across channels.
@@ -29,7 +29,6 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         """
         self.thresh = thresh
         self.normalize = normalize
-        self.is_volume = is_volume
 
     _DEFAULT_TESTING_PARAMETERS = {"thresh": 0, "normalize": True}
 

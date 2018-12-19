@@ -17,12 +17,8 @@ from .util import (
 
 class DeconvolvePSF(FilterAlgorithmBase):
 
-    def __init__(
-            self,
-            num_iter: int,
-            sigma: Number,
-            clip: bool = True,
-            is_volume: bool = False) -> None:
+    def __init__(self, num_iter: int, sigma: Number, clip: bool = True, is_volume: bool = False
+                 ) -> None:
         """Deconvolve a point spread function
 
         Parameters
@@ -35,7 +31,9 @@ class DeconvolvePSF(FilterAlgorithmBase):
         clip : bool (default = False)
             if True, pixel values below -1 and above 1 are clipped for skimage pipeline
             compatibility
-            :param is_volume:
+        is_volume: bool
+            If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
+            independently.
 
         """
         self.num_iter = num_iter

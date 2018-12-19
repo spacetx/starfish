@@ -71,7 +71,6 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
                                         (Indices.Z, 1), (Indices.Y, 200), (Indices.X, 200)])
 
     def test_calc_new_physical_coords_array_single_y_slice_x(self):
-
         # Index on single value of X, range of y
         self.indexers[Indices.Y], self.indexers[Indices.X] = 100, slice(None, 100)
         new_coords = physical_coordinate_calculator.calc_new_physical_coords_array(

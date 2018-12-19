@@ -1,16 +1,14 @@
-import os
 from typing import Type
 
 import click
 
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
-from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
 from starfish.types import Indices
 from . import _base
-from . import gaussian
-from . import pixel_spot_detector
-from . import trackpy_local_max_peak_finder
+
+import_all_submodules(__file__, __package__)
 
 
 class SpotFinder(PipelineComponent):
@@ -27,11 +25,12 @@ class SpotFinder(PipelineComponent):
         ref_image = ctx.obj["reference_image_from_max_projection"]
         if blobs_stack is not None:
             blobs_stack = ImageStack.from_path_or_url(blobs_stack)  # type: ignore
-            blobs_image = blobs_stack.max_proj(Indices.ROUND, Indices.CH)
+            mp = blobs_stack.max_proj(Indices.ROUND, Indices.CH)
+            mp_numpy = mp._squeezed_numpy(Indices.ROUND, Indices.CH)
             #  TODO: this won't work for PixelSpotDectector
             intensities = instance.run(
                 image_stack,
-                blobs_image=blobs_image,
+                blobs_image=mp_numpy,
                 reference_image_from_max_projection=ref_image,
             )
         else:

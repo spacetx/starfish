@@ -4,32 +4,9 @@ Tests for IntensityTable.synthetic_intensities method.
 
 import numpy as np
 
-from starfish import Codebook, IntensityTable
+from starfish import IntensityTable
+from starfish.test import test_utils
 from starfish.types import Features, Indices
-
-
-def codebook_array_factory() -> Codebook:
-    """
-    Codebook with two codewords describing an experiment with three channels and two imaging rounds.
-    Both codes have two "on" channels.
-    """
-    data = [
-        {
-            Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 0, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
-            ],
-            Features.TARGET: "GENE_A"
-        },
-        {
-            Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 2, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
-            ],
-            Features.TARGET: "GENE_B"
-        },
-    ]
-    return Codebook.from_code_array(data)
 
 
 def test_synthetic_intensity_generation():
@@ -42,7 +19,7 @@ def test_synthetic_intensity_generation():
     """
     # set seed to check that codebook is matched. This seed generates 2 instances of GENE_B
     np.random.seed(1)
-    codebook = codebook_array_factory()
+    codebook = test_utils.codebook_array_factory()
     num_z, height, width = 3, 4, 5
     intensities = IntensityTable.synthetic_intensities(
         codebook,

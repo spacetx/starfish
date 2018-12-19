@@ -32,7 +32,7 @@ class MPDataArray:
             cls, shape: Sequence[int], dtype, initial_value: Number=None, *args, **kwargs
     ) -> "MPDataArray":
         np_array, backing_mp_array = np_array_backed_by_mp_array(shape, dtype)
-        if initial_value is not None:
+        if initial_value is not None and initial_value != 0:
             np_array.fill(initial_value)
         xarray = xr.DataArray(np_array, *args, **kwargs)
         xarray.copy = functools.partial(replacement_copy, xarray.copy)

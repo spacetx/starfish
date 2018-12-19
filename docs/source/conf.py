@@ -48,6 +48,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
+    'sphinx.ext.napoleon',
+    'sphinxcontrib.programoutput',
     'm2r',
 ]
 

@@ -126,6 +126,10 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
             attributes.columns = new_colnames
 
         attributes['spot_id'] = np.arange(attributes.shape[0])
+        # convert these to int so it can be used to index
+        attributes.x = attributes.x.astype(int)
+        attributes.y = attributes.y.astype(int)
+        attributes.z = attributes.z.astype(int)
         return SpotAttributes(attributes)
 
     def run(
@@ -156,8 +160,7 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
             reference_image=blobs_image,
             reference_image_from_max_projection=reference_image_from_max_projection,
             measurement_function=self.measurement_function,
-            radius_is_gyration=True,
-        )
+            radius_is_gyration=True)
 
         return intensity_table
 

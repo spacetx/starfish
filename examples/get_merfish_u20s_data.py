@@ -59,10 +59,6 @@ class MERFISHTile(FetchedTile):
             Coordinates.Z: (0.0, 0.0001),
         }
 
-    @property
-    def format(self) -> ImageFormat:
-        return ImageFormat.TIFF
-
     def tile_data(self) -> IO:
         return cached_read_fn(self.file_path)[self.map[(self.r, self.ch)], :, :]
 
@@ -84,10 +80,6 @@ class MERFISHAuxTile(FetchedTile):
             Coordinates.Y: (0.0, 0.0001),
             Coordinates.Z: (0.0, 0.0001),
         }
-
-    @property
-    def format(self) -> ImageFormat:
-        return ImageFormat.TIFF
 
     def tile_data(self) -> np.ndarray:
         return cached_read_fn(self.file_path)[self.dapi_index, :, :]
@@ -130,8 +122,9 @@ def format_data(input_dir, output_dir):
 
     write_experiment_json(output_dir,
                           num_fovs,
-                          hyb_dimensions,
-                          aux_name_to_dimensions,
+                          tile_format=ImageFormat.TIFF,
+                          primary_image_dimensions=hyb_dimensions,
+                          aux_name_to_dimensions=aux_name_to_dimensions,
                           primary_tile_fetcher=MERFISHTileFetcher(input_dir, is_dapi=False),
                           aux_tile_fetcher={
                               'nuclei': MERFISHTileFetcher(input_dir, is_dapi=True),

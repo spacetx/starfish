@@ -1,19 +1,19 @@
-from typing import Any, Dict, List, Type
+from typing import Type
 
 import click
 from skimage.io import imsave
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.pipeline import AlgorithmBase, PipelineComponent
-from . import watershed
-from ._base import SegmentationAlgorithmBase
+from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
+from . import _base
+import_all_submodules(__file__, __package__)
 
 
 class Segmentation(PipelineComponent):
 
     @classmethod
     def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
-        return SegmentationAlgorithmBase
+        return _base.SegmentationAlgorithmBase
 
     @classmethod
     def _cli_run(cls, ctx, instance):

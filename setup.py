@@ -14,11 +14,13 @@ CLASSIFIERS = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 
-install_requires = [line.rstrip() for line in open(os.path.join(os.path.dirname(__file__), "REQUIREMENTS.txt"))]
+install_requires = [
+    line.rstrip() for line in open(os.path.join(os.path.dirname(__file__), "REQUIREMENTS.txt"))
+]
 
 setuptools.setup(
     name="starfish",
-    version="0.0.29",
+    version="0.0.31",
     description="Pipelines and pipeline components for the analysis of image-based transcriptomics data",
     author="Deep Ganguli",
     author_email="dganguli@chanzuckerberg.com",

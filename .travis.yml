@@ -1,7 +1,8 @@
 language: python
 env:
   global:
-    - STARFISH_STRICT_LOADING=true
+    - STARFISH_VALIDATION_STRICT=true
+    - SPHINXOPTS=-W
 services:
 - docker
 python:
@@ -48,7 +49,7 @@ jobs:
 cache:
   directories:
   - $HOME/.cache/pip
-  - $HOME/.starfish-cache
+  - $HOME/.starfish/cache
 notifications:
   slack:
     secure: Za1Zbbx/SE0qeRZxoRtheMeOmRawhUF0TCM18wU627bEWIPjxKgVETrgu/eLnANi003dToIVDQJ2XMWhNFADbvw0fTnnbekksvOAeWo0LxOlIW6T5rSQJQ3l301dKZ0AmGryM8qonPoztS4MJtDbGvThNI6u4wDSQfqiHk2qkohCNgx1xbMgU704CZ795q/2Gua0G1QABwElbbHhWa4HBN/eXX5+nYNo25JcG+DsnKheHPgTTWzzrXVAsjSa4LmRDmJWNn1hdG9QpVs2jcZjcs2WtFzpJt5N+A6MMtW4StsKh/b8QU7LMDhBOGT0H4fnGA8fu5UV9QNT6W0h8KhSBVtsCBzbLKN/6NzZ8vXZ3a/n+h3nWRw2A+8/txWcIAjlO/GT22UJs5uawmHmAC58PZcDbiD4ha1VUD6MKmqpNThOg4NZSBPcj9NplK1f7hBRkSY2bW9aY1WdY7IbqwV4vmfxm6fHwanAkJpd2tFXOT3pMuaHBaN01BNmrY4lfjL6dn3kErmaPV14Sw55ue/kDBwZ2nBkOWkjfTB72WB1inn2zig81BRmJT7gUEXRnGETVPI+HjqXqtK8nAQGD423hBmnLvk7RZ9PkhC9CClwmLUbXLlFHC48CrsucUAkEFxc6ApNwxu8E9Q7gJZnxFEWKkAPf2sexF9o/iHZPssVtYM=

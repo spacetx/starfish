@@ -81,7 +81,8 @@
         "type": "integer",
         "description": "The default tile shape (x, y) of the tiles in this field of view.",
         "example": 2048,
-        "minimum": 0
+        "minimum": 0,
+        "maximum": 3000
       }
     },
     "default_tile_format": {

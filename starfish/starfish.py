@@ -28,7 +28,7 @@ PROFILER_LINES = 15
 @click.option("--profile", is_flag=True)
 @click.pass_context
 def starfish(ctx, profile):
-    art = """
+    art = r"""
          _              __ _     _
         | |            / _(_)   | |
      ___| |_ __ _ _ __| |_ _ ___| |__
@@ -60,21 +60,6 @@ def version():
     version = pkg_resources.require("starfish")[0].version
     print(version)
 version.no_art = True  # type: ignore
-
-
-@starfish.command()
-@click.argument("in_json", type=click.Path(exists=True, dir_okay=False))
-@click.option("--sz", default=10, type=int, help="Figure size")
-def show(in_json, sz):
-    import matplotlib.pyplot as plt
-    from showit import tile
-
-    from .experiment import Experiment
-
-    s = Experiment()
-    s.read(in_json)
-    tile(s.image.squeeze(), size=sz, bar=True)
-    plt.show()
 
 
 # Pipelines

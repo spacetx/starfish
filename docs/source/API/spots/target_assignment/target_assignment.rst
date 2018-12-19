@@ -1,4 +1,4 @@
-.. _assignment
+.. _assignment:
 
 Target Assignment
 =================
@@ -12,8 +12,8 @@ classes that subclass ``TargetAssignmentAlgorithmBase``:
 
 .. contents::
 
-Point In Poly 2D
-----------------
+Label
+-----
 
-.. autoclass:: starfish.spots._target_assignment.point_in_poly.PointInPoly2D
+.. autoclass:: starfish.spots._target_assignment.label.Label
     :members:

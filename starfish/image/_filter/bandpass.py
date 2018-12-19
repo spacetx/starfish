@@ -14,7 +14,7 @@ from .util import determine_axes_to_group_by, preserve_float_range
 class Bandpass(FilterAlgorithmBase):
 
     def __init__(
-            self, lshort: Number, llong: int, threshold: Number, truncate: Number=4,
+            self, lshort: Number, llong: int, threshold: Number=0, truncate: Number=4,
             is_volume: bool=False) -> None:
         """
 
@@ -25,15 +25,19 @@ class Bandpass(FilterAlgorithmBase):
         llong : int
             filter frequencies above this odd integer value
         threshold : float
-            zero any pixels below this intensity value
+            zero any spots below this intensity value after background subtraction (default 0)
         truncate : float
             truncate the gaussian kernel, used by the gaussian filter, at this many standard
-            deviations
+            deviations (default 4)
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
         """
         self.lshort = lshort
         self.llong = llong
+
+        if threshold is None:
+            raise ValueError("Threshold cannot be None, please pass a float or integer")
+
         self.threshold = threshold
         self.truncate = truncate
         self.is_volume = is_volume
@@ -54,7 +58,7 @@ class Bandpass(FilterAlgorithmBase):
         llong : int
             filter frequencies above this odd integer value
         threshold : float
-            zero any pixels below this intensity value
+            zero any spots below this intensity value after background subtraction (default 0)
         truncate : float
             truncate the gaussian kernel, used by the gaussian filter, at this many standard
             deviations
@@ -72,8 +76,8 @@ class Bandpass(FilterAlgorithmBase):
         return preserve_float_range(bandpassed)
 
     def run(
-            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
-            n_processes: Optional[int]=None
+            self, stack: ImageStack, in_place: bool = False, verbose: bool = False,
+            n_processes: Optional[int] = None
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -117,7 +121,7 @@ class Bandpass(FilterAlgorithmBase):
     @click.option(
         "--llong", type=int, help="filter signals above this frequency")
     @click.option(
-        "--threshold", type=int, help="clip pixels below this intensity value")
+        "--threshold", default=0, type=float, help="zero pixels below this intensity value")
     @click.option(
         "--truncate", default=4, type=float,
         help="truncate the filter at this many standard deviations")

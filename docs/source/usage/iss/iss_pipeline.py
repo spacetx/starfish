@@ -24,15 +24,17 @@ def iss_pipeline(fov, codebook):
     filtered = filt.run(registered, verbose=True, in_place=False)
 
     # detect spots using laplacian of gaussians approach
-    p = SpotFinder.GaussianSpotDetector(
+    p = SpotFinder.BlobDetector(
         min_sigma=1,
         max_sigma=10,
         num_sigma=30,
         threshold=0.01,
         measurement_type='mean',
     )
-    blobs_image = fov['dots'].max_proj(Indices.ROUND, Indices.Z)
-    intensities = p.run(filtered, blobs_image=blobs_image)
+
+    mp = fov['dots'].max_proj(Indices.ROUND, Indices.Z)
+    mp_numpy = mp._squeezed_numpy(Indices.ROUND, Indices.Z)
+    intensities = p.run(filtered, blobs_image=mp_numpy)
 
     # decode the pixel traces using the codebook
     decoded = codebook.decode_per_round_max(intensities)
@@ -70,10 +72,9 @@ def process_experiment(experiment: starfish.Experiment):
 if test:
     # TODO: (ttung) Pending a fix for https://github.com/spacetx/starfish/issues/700, it's not
     # possible to validate the schema for this experiment.
-    exp = starfish.Experiment.from_json(
-        "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20180926/iss_breast/experiment.json",
-        False,
-    )
+    with starfish.config.environ(VALIDATION_STRICT="false"):
+        exp = starfish.Experiment.from_json(
+            "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20180926/iss_breast/experiment.json")
 else:
     exp = starfish.Experiment.from_json("iss/formatted/experiment.json")
 decoded_intensities, regions = process_experiment(exp)

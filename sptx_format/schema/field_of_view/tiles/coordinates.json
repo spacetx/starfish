@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/spacetx/starfish/sptx-format/schema/field_of_view/tiles/coordinates.json",
   "type": "object",
-  "description": "Physical coordinates of the tile.",
+  "description": "Physical coordinates of the tile measured in micrometers.",
   "required": [
     "xc",
     "yc"
@@ -11,11 +11,11 @@
   "properties": {
     "xc": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 2,
       "maxItems": 2,
       "items": {
         "type": "number",
-        "description": "Minimum and maximum physical x coordinate of this tile.",
+        "description": "Minimum and maximum physical x coordinate of this tile in micrometers.",
         "examples": [
           [0, 0.00009999999747378752],
           [4, 6],
@@ -25,11 +25,11 @@
     },
     "yc": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 2,
       "maxItems": 2,
       "items": {
         "type": "number",
-        "description": "Minimum and maximum physical y-coordinate of this tile.",
+        "description": "Minimum and maximum physical y coordinate of this tile in micrometers.",
         "examples": [
           [0, 0.00009999999747378752],
           [4, 6],
@@ -38,19 +38,31 @@
       }
     },
     "zc": {
-      "type": "array",
-      "minItems": 1,
-      "maxItems": 2,
-      "items": {
-        "type": "number",
-        "title": "Minimum and maximum physical z-coordinate of this tile.",
-        "default": 0,
-        "examples": [
-          [0, 0.00009999999747378752],
-          [4, 6],
-          [-5]
-        ]
-      }
+      "oneOf": [
+        {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "description": "Minimum and maximum physical z coordinate of this tile in micrometers.",
+            "examples": [
+              [0, 0.00009999999747378752],
+              [4, 6],
+              [-5, -3.2]
+            ]
+          }
+        },
+        {
+          "type": "number",
+          "description": "Physical z coordinate of this tile in micrometers.",
+            "examples": [
+              0,
+              4,
+              -5
+            ]
+        }
+      ]
     }
   }
 }

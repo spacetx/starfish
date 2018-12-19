@@ -43,7 +43,8 @@
       "items": {
         "type": "integer",
         "description": "The shape (x, y) of this tile.",
-        "minimum": 0
+        "minimum": 0,
+        "maximum": 3000
       }
     },
     "extras": {

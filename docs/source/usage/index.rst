@@ -1,4 +1,4 @@
-.. _usage
+.. _usage:
 
 Starfish Usage
 ==============
@@ -15,4 +15,10 @@ transcriptomics data. The first vignette provides an example of using starfish t
    iss/iss_vignette.rst
 
 .. toctree::
+   iss/iss_cli_vignette.rst
+
+.. toctree::
    fov-builder/fov-builder.rst
+
+.. toctree::
+   validation/index.rst

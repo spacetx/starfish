@@ -28,10 +28,6 @@ class IssCroppedBreastTile(FetchedTile):
             Coordinates.Z: (0.0, 0.0001),
         }
 
-    @property
-    def format(self) -> ImageFormat:
-        return ImageFormat.TIFF
-
     @staticmethod
     def crop(img):
         crp = img[40:1084, 20:1410]
@@ -112,6 +108,7 @@ def format_data(input_dir, output_dir, num_fovs):
     write_experiment_json(
         path=output_dir,
         fov_count=num_fovs,
+        tile_format=ImageFormat.TIFF,
         primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions=aux_name_to_dimensions,
         primary_tile_fetcher=ISSCroppedBreastPrimaryTileFetcher(input_dir),

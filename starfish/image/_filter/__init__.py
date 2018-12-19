@@ -3,18 +3,9 @@ from typing import Type
 import click
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
 from . import _base
-from . import bandpass
-from . import clip
-from . import gaussian_high_pass
-from . import gaussian_low_pass
-from . import laplace
-from . import mean_high_pass
-from . import richardson_lucy_deconvolution
-from . import scale_by_percentile
-from . import white_tophat
-from . import zero_by_channel_magnitude
+import_all_submodules(__file__, __package__)
 
 
 class Filter(PipelineComponent):
@@ -28,7 +19,7 @@ class Filter(PipelineComponent):
         output = ctx.obj["output"]
         stack = ctx.obj["stack"]
         filtered = instance.run(stack)
-        filtered.write(output)
+        filtered.export(output)
 
     @staticmethod
     @click.group("filter")

@@ -9,12 +9,15 @@ from semantic_version import Version
 from sklearn.neighbors import NearestNeighbors
 from slicedimage.io import resolve_path_or_url
 
+from sptx_format.util import SpaceTxValidator
+from sptx_format.validate_sptx import _get_absolute_schema_path
 from starfish.codebook._format import (
     CURRENT_VERSION,
     DocumentKeys,
     MAX_SUPPORTED_VERSION,
     MIN_SUPPORTED_VERSION,
 )
+from starfish.config import StarfishConfig
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number
 
@@ -255,9 +258,12 @@ class Codebook(xr.DataArray):
 
     @classmethod
     def from_json(
-            cls, json_codebook: str, n_round: Optional[int]=None, n_ch: Optional[int]=None
+            cls, json_codebook: str,
+            n_round: Optional[int]=None,
+            n_ch: Optional[int]=None,
     ) -> "Codebook":
         """Load a codebook from a spaceTx spec-compliant json file or a url pointing to such a file
+        Loads configuration from StarfishConfig.
 
         Parameters
         ----------
@@ -321,9 +327,18 @@ class Codebook(xr.DataArray):
             Codebook with shape (targets, channels, imaging_rounds)
 
         """
-        backend, name, _ = resolve_path_or_url(json_codebook)
+
+        config = StarfishConfig()
+
+        backend, name, _ = resolve_path_or_url(json_codebook, backend_config=config.slicedimage)
         with backend.read_contextmanager(name) as fh:
             codebook_doc = json.load(fh)
+
+            if config.strict:
+                codebook_validator = SpaceTxValidator(
+                    _get_absolute_schema_path('codebook/codebook.json'))
+                if not codebook_validator.validate_object(codebook_doc):
+                    raise Exception("validation failed")
 
         if isinstance(codebook_doc, list):
             raise ValueError(

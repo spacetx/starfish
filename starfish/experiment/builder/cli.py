@@ -1,6 +1,7 @@
 import json
 
 import click
+from slicedimage import ImageFormat
 
 from starfish.types import Indices
 from . import AUX_IMAGE_NAMES, write_experiment_json
@@ -47,8 +48,9 @@ for image_name in AUX_IMAGE_NAMES:
 
 def build(output_dir, fov_count, hybridization_dimensions, **kwargs):
     write_experiment_json(
-        output_dir, fov_count, hybridization_dimensions,
-        kwargs
+        output_dir, fov_count, ImageFormat.TIFF,
+        primary_image_dimensions=hybridization_dimensions,
+        aux_name_to_dimensions=kwargs,
     )
 
 for decorator in reversed(decorators):

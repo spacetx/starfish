@@ -14,7 +14,7 @@ will print out the subcommands that are available.
 .. program-output:: env MPLBACKEND=Agg starfish --help
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: CLI:
 
 .. toctree::

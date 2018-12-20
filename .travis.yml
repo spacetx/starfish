@@ -2,7 +2,6 @@ language: python
 env:
   global:
     - STARFISH_VALIDATION_STRICT=true
-    - SPHINXOPTS=-W
 services:
 - docker
 python:

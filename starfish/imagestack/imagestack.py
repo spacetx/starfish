@@ -1206,7 +1206,7 @@ class ImageStack:
         # make sure requested dimensions are large enough to support intensity values
         indices = zip((Indices.Z.value, Indices.Y.value, Indices.X.value), (num_z, height, width))
         for index, requested_size in indices:
-            required_size = intensities.coords[index].values.max()
+            required_size = intensities.coords[index].values.max() + 1
             if required_size > requested_size:
                 raise ValueError(
                     f'locations of intensities contained in table exceed the size of requested '

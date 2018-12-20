@@ -1,6 +1,5 @@
 from typing import Optional, Union
 
-import click
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -9,6 +8,7 @@ from skimage.feature import blob_dog, blob_doh, blob_log
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number, SpotAttributes
+from starfish.util import click
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots, measure_spot_intensity
 

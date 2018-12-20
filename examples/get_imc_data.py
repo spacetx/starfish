@@ -2,13 +2,13 @@ import json
 import os
 from typing import List, Mapping, Tuple, Union
 
-import click
 import numpy as np
 from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.types import Coordinates, Features, Indices, Number
+from starfish.util import click
 
 
 class ImagingMassCytometryTile(FetchedTile):

@@ -1,10 +1,9 @@
 from typing import Type
 
-import click
-
 from starfish.codebook.codebook import Codebook
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
+from starfish.util import click
 from . import _base
 
 import_all_submodules(__file__, __package__)

@@ -1,9 +1,9 @@
 import json
 
-import click
 from slicedimage import ImageFormat
 
 from starfish.types import Indices
+from starfish.util import click
 from . import AUX_IMAGE_NAMES, write_experiment_json
 
 

@@ -1,11 +1,11 @@
 import os
 from typing import Type
 
-import click
 from skimage.io import imread
 
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.util import click
 from . import label
 from ._base import TargetAssignmentAlgorithm
 

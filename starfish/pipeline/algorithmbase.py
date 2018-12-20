@@ -24,11 +24,12 @@ class AlgorithmBase:
 
     `$> starfish segmentation watershed`
 
-    To create an entirely new algorithm class, like `Segmentation`, a new subclass of both
-    `AlgorithmBase` and `PipelineComponent` must be created.
+    To create an entirely new group of related algorithms, like `Segmentation`, a new subclass of
+    both `AlgorithmBase` and `PipelineComponent` must be created.
 
-    To add to an existing class, an algorithm implementation must subclass the corresponding
-    subclass of `AlgorithmBase`. In this case, `SegmentationAlgorithmBase`.
+    To add to an existing group of algorithms like "Segmentation", an algorithm implementation must
+    subclass the corresponding subclass of `AlgorithmBase`. In this case,
+    `SegmentationAlgorithmBase`.
 
     See Also
     --------

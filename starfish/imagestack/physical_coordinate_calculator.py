@@ -88,11 +88,11 @@ def _recalculate_physical_coordinate_ranges(
                         PhysicalCoordinateTypes.Y_MIN,
                         PhysicalCoordinateTypes.Y_MAX
                     ])]
-                xmin, xmax = _recalculate_physical_coordinate_range(
+                xmin, xmax = recalculate_physical_coordinate_range(
                     xmin, xmax,
                     stack_shape[Indices.X.value],
                     indexers[Indices.X.value])
-                ymin, ymax = _recalculate_physical_coordinate_range(
+                ymin, ymax = recalculate_physical_coordinate_range(
                     ymin, ymax,
                     stack_shape[Indices.Y.value],
                     indexers[Indices.Y.value])
@@ -125,7 +125,7 @@ def _pixel_offset_to_physical_coordinate(
     return coordinates_at_pixel_offset_0
 
 
-def _recalculate_physical_coordinate_range(
+def recalculate_physical_coordinate_range(
         coord_min: float,
         coord_max: float,
         dimension_size: int,

@@ -3,7 +3,7 @@
 Synthetic experiments
 =====================
 
-Building Synthetic SpaceTx-specification compliant experiments
+Building synthetic SpaceTx-specification compliant experiments
 --------------------------------------------------------------
 
 starfish provides a tool to construct example datasets that can be used to test software for use with our formats.

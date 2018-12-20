@@ -6,6 +6,7 @@ from slicedimage import ImageFormat
 from starfish.experiment.builder import FetchedTile, tile_fetcher_factory
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Coordinates, Indices, Number
+from .imagestack_test_utils import verify_physical_coordinates
 
 NUM_ROUND = 8
 NUM_CH = 1
@@ -65,29 +66,14 @@ def test_coordinates():
         )
     )
 
-    for _round in range(NUM_ROUND):
-        for ch in range(NUM_CH):
-            for z in range(NUM_Z):
-                indices = {
-                    Indices.ROUND: _round,
-                    Indices.CH: ch,
-                    Indices.Z: z
-                }
-
-                xmin, xmax = stack.tile_coordinates(indices, Coordinates.X)
-                ymin, ymax = stack.tile_coordinates(indices, Coordinates.Y)
-                zmin, zmax = stack.tile_coordinates(indices, Coordinates.Z)
-
-                expected_xmin, expected_xmax = round_to_x(_round)
-                expected_ymin, expected_ymax = round_to_y(_round)
-                expected_zmin, expected_zmax = round_to_z(_round)
-
-                assert np.isclose(xmin, expected_xmin)
-                assert np.isclose(xmax, expected_xmax)
-                assert np.isclose(ymin, expected_ymin)
-                assert np.isclose(ymax, expected_ymax)
-                assert np.isclose(zmin, expected_zmin)
-                assert np.isclose(zmax, expected_zmax)
+    for selectors in stack._iter_indices({Indices.ROUND, Indices.CH, Indices.Z}):
+        verify_physical_coordinates(
+            stack,
+            selectors,
+            round_to_x(selectors[Indices.ROUND]),
+            round_to_y(selectors[Indices.ROUND]),
+            round_to_z(selectors[Indices.ROUND]),
+        )
 
 
 class OffsettedScalarTiles(FetchedTile):
@@ -130,26 +116,15 @@ def test_scalar_coordinates():
         )
     )
 
-    for _round in range(NUM_ROUND):
-        for ch in range(NUM_CH):
-            for z in range(NUM_Z):
-                indices = {
-                    Indices.ROUND: _round,
-                    Indices.CH: ch,
-                    Indices.Z: z
-                }
+    for selectors in stack._iter_indices({Indices.ROUND, Indices.CH, Indices.Z}):
+        expected_x = round_to_x(selectors[Indices.ROUND])[0]
+        expected_y = round_to_y(selectors[Indices.ROUND])[0]
+        expected_z = round_to_z(selectors[Indices.ROUND])[0]
 
-                xmin, xmax = stack.tile_coordinates(indices, Coordinates.X)
-                ymin, ymax = stack.tile_coordinates(indices, Coordinates.Y)
-                zmin, zmax = stack.tile_coordinates(indices, Coordinates.Z)
-
-                expected_x = round_to_x(_round)[0]
-                expected_y = round_to_y(_round)[0]
-                expected_z = round_to_z(_round)[0]
-
-                assert np.isclose(xmin, expected_x)
-                assert np.isclose(xmax, expected_x)
-                assert np.isclose(ymin, expected_y)
-                assert np.isclose(ymax, expected_y)
-                assert np.isclose(zmin, expected_z)
-                assert np.isclose(zmax, expected_z)
+        verify_physical_coordinates(
+            stack,
+            selectors,
+            (expected_x, expected_x),
+            (expected_y, expected_y),
+            (expected_z, expected_z),
+        )

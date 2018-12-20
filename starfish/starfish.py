@@ -34,11 +34,14 @@ def art_string():
 
     """
 
-
 @click.group()
 @click.option("--profile", is_flag=True)
 @click.pass_context
 def starfish(ctx, profile):
+    """
+    standardized analysis pipeline for image-based transcriptomics
+    see: https://spacetx-starfish.readthedocs.io for more information.
+    """
     art = art_string()
     print_art = True
     sub = ctx.command.get_command(ctx, ctx.invoked_subcommand)

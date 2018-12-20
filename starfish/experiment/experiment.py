@@ -1,8 +1,6 @@
 import json
-import os
 from typing import (
     Callable,
-    Dict,
     MutableMapping,
     MutableSequence,
     MutableSet,
@@ -19,8 +17,8 @@ from slicedimage.urlpath import pathjoin
 
 from sptx_format import validate_sptx
 from starfish.codebook.codebook import Codebook
+from starfish.config import StarfishConfig
 from starfish.imagestack.imagestack import ImageStack
-from starfish.util.config import Config
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
 
@@ -93,7 +91,7 @@ class FieldOfView:
 
     def __getitem__(self, item) -> ImageStack:
         if isinstance(self._images[item], TileSet):
-            self._images[item] = ImageStack(self._images[item])
+            self._images[item] = ImageStack.from_tileset(self._images[item])
         return self._images[item]
 
 
@@ -157,31 +155,15 @@ class Experiment:
         return object_repr + fov_repr
 
     @classmethod
-    def from_json(cls,
-                  json_url: str,
-                  strict: bool=None,
-                  config: Optional[Union[str, Dict]]=None) -> "Experiment":
+    def from_json(cls, json_url: str) -> "Experiment":
         """
-        Construct an `Experiment` from an experiment.json file format specifier
+        Construct an `Experiment` from an experiment.json file format specifier.
+        Loads configuration from StarfishConfig.
 
         Parameters
         ----------
         json_url : str
             file path or web link to an experiment.json file
-        strict : bool
-            if true, then all JSON loaded by this method will be
-            passed to the appropriate validator
-        config : str or dict
-            configuration property that will be passed to
-            starfish.util.config.Config
-        STARISH_CONFIG :
-            This parameter is read from the environment to permit setting configuration
-            values either directly or via a file. Keys read include:
-             - cache.allow_caching
-        STARFISH_STRICT_LOADING :
-             This parameter is read from the environment. If set, then all JSON loaded by this
-             method will be passed to the appropriate validator. The `strict` parameter to this
-             method has priority over the environment variable.
 
         Returns
         -------
@@ -189,24 +171,22 @@ class Experiment:
             Experiment object serving the requested experiment data
 
         """
-        if strict is None:
-            strict = "STARFISH_STRICT_LOADING" in os.environ
-        if strict:
+
+        config = StarfishConfig()
+
+        if config.strict:
             valid = validate_sptx.validate(json_url)
             if not valid:
                 raise Exception("validation failed")
 
-        config_obj = Config(config)  # STARFISH_CONFIG is assumed
-        allow_caching = config_obj.lookup(["cache", "allow_caching"], True)
-
-        backend, name, baseurl = resolve_path_or_url(json_url, allow_caching)
+        backend, name, baseurl = resolve_path_or_url(json_url, config.slicedimage)
         with backend.read_contextmanager(name) as fh:
             experiment_document = json.load(fh)
 
         version = cls.verify_version(experiment_document['version'])
 
         _, codebook_name, codebook_baseurl = resolve_url(experiment_document['codebook'],
-                                                         baseurl, allow_caching)
+                                                         baseurl, config.slicedimage)
         codebook_absolute_url = pathjoin(codebook_baseurl, codebook_name)
         codebook = Codebook.from_json(codebook_absolute_url)
 
@@ -216,10 +196,11 @@ class Experiment:
         fov_tilesets: MutableMapping[str, TileSet]
         if version < Version("5.0.0"):
             primary_image: Collection = Reader.parse_doc(experiment_document['primary_images'],
-                                                         baseurl)
+                                                         baseurl, config.slicedimage)
             auxiliary_images: MutableMapping[str, Collection] = dict()
             for aux_image_type, aux_image_url in experiment_document['auxiliary_images'].items():
-                auxiliary_images[aux_image_type] = Reader.parse_doc(aux_image_url, baseurl)
+                auxiliary_images[aux_image_type] = Reader.parse_doc(
+                    aux_image_url, baseurl, config.slicedimage)
 
             for fov_name, primary_tileset in primary_image.all_tilesets():
                 fov_tilesets = dict()
@@ -235,7 +216,7 @@ class Experiment:
             images: MutableMapping[str, Collection] = dict()
             all_fov_names: MutableSet[str] = set()
             for image_type, image_url in experiment_document['images'].items():
-                image = Reader.parse_doc(image_url, baseurl)
+                image = Reader.parse_doc(image_url, baseurl, config.slicedimage)
                 images[image_type] = image
                 for fov_name, _ in image.all_tilesets():
                     all_fov_names.add(fov_name)

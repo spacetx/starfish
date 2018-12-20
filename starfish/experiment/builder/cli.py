@@ -47,6 +47,7 @@ for image_name in AUX_IMAGE_NAMES:
     decorators.append(dimensions_option(image_name, False))
 
 def build(output_dir, fov_count, hybridization_dimensions, **kwargs):
+    """generate synthetic experiments"""
     write_experiment_json(
         output_dir, fov_count, ImageFormat.TIFF,
         primary_image_dimensions=hybridization_dimensions,

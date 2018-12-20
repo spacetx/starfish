@@ -1,4 +1,4 @@
-.. _registration
+.. _registration:
 
 Registration
 ============

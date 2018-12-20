@@ -4,6 +4,7 @@ from typing import Optional
 import numpy as np
 from tqdm import tqdm
 
+from starfish.config import StarfishConfig
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
 from starfish.util import click
@@ -55,6 +56,8 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             original stack.
 
         """
+        # The default is False, so even if code requests True require config to be True as well
+        verbose = verbose and StarfishConfig().verbose
         channels_per_round = stack._data.groupby(Indices.ROUND.value)
         channels_per_round = tqdm(channels_per_round) if verbose else channels_per_round
 

@@ -65,6 +65,7 @@ class SpotFinder(PipelineComponent):
     )
     @click.pass_context
     def _cli(ctx, input, output, blobs_stack, reference_image_from_max_projection, codebook):
+        """assign spots to regions"""
         print('Detecting Spots ...')
         ctx.obj = dict(
             component=SpotFinder,

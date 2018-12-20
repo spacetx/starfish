@@ -1,5 +1,5 @@
-In-Situ Sequencing
-==================
+In-Situ Sequencing (ISS)
+========================
 
 This in-situ sequencing (ISS) experiment has 16 fields of view that measure 4 channels on 4 separate
 imaging rounds.

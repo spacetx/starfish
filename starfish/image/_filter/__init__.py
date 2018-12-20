@@ -26,6 +26,7 @@ class Filter(PipelineComponent):
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, input, output):
+        """smooth, sharpen, denoise, etc"""
         print("Filtering images...")
         ctx.obj = dict(
             component=Filter,

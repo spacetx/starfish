@@ -30,6 +30,7 @@ class Decoder(PipelineComponent):
     @click.option("--codebook", required=True, type=click.Path(exists=True))
     @click.pass_context
     def _cli(ctx, input, output, codebook):
+        """assign genes to spots"""
         ctx.obj = dict(
             component=Decoder,
             input=input,

@@ -33,6 +33,7 @@ class Segmentation(PipelineComponent):
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, primary_images, nuclei, output):
+        """define polygons for cell boundaries and assign spots"""
         print('Segmenting ...')
         ctx.obj = dict(
             component=Segmentation,

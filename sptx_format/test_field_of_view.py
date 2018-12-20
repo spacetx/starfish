@@ -7,6 +7,7 @@ package_name = "sptx_format"
 fov_schema_path = resource_filename(package_name, "schema/field_of_view/field_of_view.json")
 validator = SpaceTxValidator(fov_schema_path)
 example = resource_filename(package_name, "examples/field_of_view/field_of_view.json")
+too_large = resource_filename(package_name, "examples/field_of_view/too_large.json")
 
 
 def test_field_of_view():
@@ -38,3 +39,9 @@ def test_round_must_be_present():
     mangled_round['tiles'][0]['indices']['h'] = 0
     with pytest.warns(UserWarning):
         assert not validator.validate_object(mangled_round)
+
+
+def test_too_large():
+    big = validator.load_json(too_large)
+    with pytest.warns(UserWarning):
+        assert not validator.validate_object(big)

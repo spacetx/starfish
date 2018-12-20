@@ -11,7 +11,7 @@ Usage
 
 starfish validate --help will provide instructions on how to use the tool:
 
-.. program-output:: starfish validate --help
+.. program-output:: env MPLBACKEND=Agg starfish validate --help
 
 
 Examples

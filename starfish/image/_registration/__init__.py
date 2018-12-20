@@ -27,6 +27,7 @@ class Registration(PipelineComponent):
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, input, output):
+        """translation correction of image stacks"""
         print("Registering...")
         ctx.obj = dict(
             component=Registration,

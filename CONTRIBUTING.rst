@@ -19,19 +19,20 @@ Creating a new algorithm for an existing `pipeline_component`
 For example, to add a new image filter, one would:
 
 1. Create a new python file `new_filter.py` in the `starfish/pipeline/filter/` directory.
-
-2. Find the corresponding `AlgorithmBase` for your component. For filters, this is `FilterAlgorithmBase`, which is found in `starfish/pipeline/filter/_base.py`.
-Import that base into `new_filter.py`, and have your new algorithm subclass it, e.g. create `class NewFilter(FilterAlgorithmBase)`
-
+2. Find the corresponding `AlgorithmBase` for your component.
+   For filters, this is `FilterAlgorithmBase`, which is found in `starfish/pipeline/filter/_base.py`.
+   Import that base into `new_filter.py`, and have your new algorithm subclass it,
+   e.g. create `class NewFilter(FilterAlgorithmBase)`
 3. Implement all required methods from the base class.
-
-4. For the command line arguments to mimic the API, the arguments passed to the CLI must exactly match the names of the parameters for `NewFilter.__init__`, after dashes are automatically converted by argparse.
-For example, `--foo-bar` would convert to `foo_bar` and init must accept such an argument: `NewFilter.__init__(foo_bar, ..., **kwargs)`
-
+4. For the command line arguments to mimic the API, the arguments passed to the CLI must exactly
+   match the names of the parameters for `NewFilter.__init__`, after dashes are automatically converted by argparse.
+   For example, `--foo-bar` would convert to `foo_bar` and init must accept such an argument:
+   `NewFilter.__init__(foo_bar, ..., **kwargs)`
 5. `NewFilter.__init__()` must have a `**kwargs` parameter to accept arbitrary CLI args.
 
-That's it! your `NewFilter` algoritm will automatically register and be available under `starfish filter` in the CLI.
-If at any point something gets confusing, it should be possible to look at existing pipeline components of the same category for guidance on implementation.
+That's it! Your `NewFilter` algoritm will automatically register and be available under `starfish filter` in the CLI.
+If at any point something gets confusing, it should be possible to look at existing pipeline components of the same
+category for guidance on implementation.
 
 Reporting bugs
 --------------
@@ -50,11 +51,12 @@ Code contributions
   You can run those checks locally by running `make all` in starfish repository root.
 - All Pull Request comments must be addressed, even after merge.
 - All code must be reviewed by at least 1 other team member.
-- All code must have typed parameters, and when possible, typed return calls (see [PEP484](https://www.python.org/dev/peps/pep-0484)).
+- All code must have typed parameters, and when possible, typed return calls (see
+  `PEP484 <https://www.python.org/dev/peps/pep-0484>`_).
   We also encourage rational use of in-line variable annotation when the type of a newly defined object is not clear
-  (see [PEP526](https://www.python.org/dev/peps/pep-0526/).
-- All code must be documented according to [numpydoc](https://numpydoc.readthedocs.io/en/latest/) style guidelines.
-- Numpy provides an excellent [development workflow](https://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html)
+  (see `PEP526 <https://www.python.org/dev/peps/pep-0526/>`_.
+- All code must be documented according to `numpydoc <https://numpydoc.readthedocs.io/en/latest/>`_ style guidelines.
+- Numpy provides an excellent `development workflow <https://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html>`_
   that we encourage you to follow when developing features for starfish!
 - All commits must have informative summaries; try to think about what will still make sense looking back on them next year.
 - All pull requests should describe your testing plan.  
@@ -66,6 +68,6 @@ Notebook contributions
 ----------------------
 
 - All `.ipynb` files should have a corresponding `.py` file.
-  Use [nbencdec](https://github.com/ttung/nbencdec) to generate the corresponding `.py` file.
+  Use `nbencdec <https://github.com/ttung/nbencdec>`_ to generate the corresponding `.py` file.
 - The `.py` files allow refactor commands in the codebase to find code in the `.py` files,
   which is an important to keep the notebooks working as starfish evolves.

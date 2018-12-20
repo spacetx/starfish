@@ -28,6 +28,10 @@ PROFILER_LINES = 15
 @click.option("--profile", is_flag=True)
 @click.pass_context
 def starfish(ctx, profile):
+    """
+    standardized analysis pipeline for image-based transcriptomics
+    see: https://spacetx-starfish.readthedocs.io for more information.
+    """
     art = r"""
          _              __ _     _
         | |            / _(_)   | |

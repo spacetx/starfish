@@ -32,6 +32,7 @@ class TargetAssignment(PipelineComponent):
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, label_image, intensities, output):
+        """assign targets to cells"""
 
         print('Assigning targets to cells...')
         ctx.obj = dict(

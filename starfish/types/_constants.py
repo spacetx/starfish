@@ -22,10 +22,13 @@ class Coordinates(AugmentedEnum):
 
 PHYSICAL_COORDINATE_DIMENSION = "physical_coordinate"
 
-LOG = 'log'
-
 """
 This is the xarray dimension name for the physical coordinates of the tiles.
+"""
+
+LOG = "log"
+"""
+This is name of the provenance log attribute stored on the IntensityTable
 """
 
 

@@ -335,19 +335,19 @@ class ImageStack:
         Examples
         --------
 
-        Create an Imagestack using the ``synthetic_stack`` method::
-        >>> from starfish import ImageStack
-        >>> from starfish.types import Indices
-        >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
-        >>> stack
-        <starfish.ImageStack (r: 5, c: 5, z: 15, y: 200, x: 200)>
-        >>> stack.sel({Indices.ROUND: (1, None), Indices.CH: 0, Indices.Z: 0})
-        <starfish.ImageStack (r: 4, c: 1, z: 1, y: 200, x: 200)>
-        >>> stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1,
-        ...Indices.Y: 100, Indices.X: (None, 100)})
-        <starfish.ImageStack (r: 1, c: 1, z: 1, y: 1, x: 100)>
-        and the imagestack's physical coordinates
-        xarray also indexed and recalculated according to the x,y slicing.
+        Create an Imagestack using the ``synthetic_stack`` method
+            >>> from starfish import ImageStack
+            >>> from starfish.types import Indices
+            >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
+            >>> stack
+            <starfish.ImageStack (r: 5, c: 5, z: 15, y: 200, x: 200)>
+            >>> stack.sel({Indices.ROUND: (1, None), Indices.CH: 0, Indices.Z: 0})
+            <starfish.ImageStack (r: 4, c: 1, z: 1, y: 200, x: 200)>
+            >>> stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1,
+            ...Indices.Y: 100, Indices.X: (None, 100)})
+            <starfish.ImageStack (r: 1, c: 1, z: 1, y: 1, x: 100)>
+            and the imagestack's physical coordinates
+            xarray also indexed and recalculated according to the x,y slicing.
 
         Returns
         -------

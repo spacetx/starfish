@@ -1,23 +1,34 @@
 class AlgorithmBase:
     """
-    This is the base class of any algorithm that starfish exposes. This base class is retrieved by
-    the PipelineComponent class to register the Algorithm to the CLI and API.
+    This is the base class of any algorithm that starfish exposes.
 
-    New algorithm classes, like "segmentation" must subclass AlgorithmBase. See, e.g.
-    starfish.image._segmentation._base.SegmentationAlgorithmBase
+    Subclasses of this base class are paired with subclasses of PipelineComponent. The subclasses of
+    PipelineComponent retrieve subclasses of the paired AlgorithmBase. Together, the two classes
+    enable starfish to expose a paired API and CLI.
 
-    All algorithm implementations, like "Watershed", must then subclass their AlgorithmBase. In this
-    case, SegmentationAlgorithmBase. See, e.g.
-    starfish.image._segmentation.watershed.Watershed
+    Examples
+    --------
 
-    This pattern combines with a PipelineComponent, in this case named "Segmentation" to enable
-    any implementing methods to be accessed from the API as:
+    PipelineComponent: `starfish.image._segmentation.Segmentation(PipelineComponent)`
 
-    starfish.image.Segmentation.<implementing algorithm (Watershed)>
+    AlgorithmBase: `starfish.image._segmentation._base.SegmentationAlgorithmBase(AlgorithmBase)`
 
-    and from the CLI as:
+    Implementing Algorithms:
+    - `starfish.image._segmentation.watershed.Watershed(SegmentationAlgorithmBase)`
 
-    $> starfish segmentation watershed
+    This pattern exposes the API as follows:
+
+    `starfish.image.Segmentation.<implementing algorithm (Watershed)>`
+
+    and the CLI as:
+
+    `$> starfish segmentation watershed`
+
+    To create an entirely new algorithm class, like `Segmentation`, a new subclass of both
+    `AlgorithmBase` and `PipelineComponent` must be created.
+
+    To add to an existing class, an algorithm implementation must subclass the corresponding
+    subclass of `AlgorithmBase`. In this case, `SegmentationAlgorithmBase`.
     """
     @classmethod
     def _get_algorithm_name(cls):

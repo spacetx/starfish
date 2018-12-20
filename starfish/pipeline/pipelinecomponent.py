@@ -41,7 +41,7 @@ class PipelineComponent(metaclass=PipelineComponentType):
 
     Methods
     -------
-    _get_algorithm_bas_class()
+    _get_algorithm_base_class()
         should simply return an instance of the AlgorithmBase. See, e.g.
         starfish.image.segmentation.Segmentation
     _cli_run(ctx, instance, *args, **kwargs)

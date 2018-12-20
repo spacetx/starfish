@@ -55,7 +55,6 @@ from starfish.types import (
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
 )
-from starfish.util import StripArguments
 from ._mp_dataarray import MPDataArray
 from .dataorder import AXES_DATA, N_AXES
 
@@ -807,10 +806,7 @@ class ImageStack:
         if verbose and StarfishConfig().verbose:
             indices_and_slice_list = tqdm(indices_and_slice_list)
 
-        applyfunc: Callable = partial(
-            self._multiprocessing_workflow,
-            StripArguments(partial(func, **kwargs), positional_arguments_removed=(1, 2)),
-        )
+        applyfunc: Callable = partial(self._multiprocessing_workflow, partial(func, **kwargs))
 
         with multiprocessing.Pool(
                 n_processes,
@@ -823,9 +819,7 @@ class ImageStack:
 
     @staticmethod
     def _multiprocessing_workflow(
-            worker_callable: Callable[[np.ndarray,
-                                       Mapping[Indices, int],
-                                       Tuple[Union[int, slice], ...]], Any],
+            worker_callable: Callable[[np.ndarray], Any],
             indices_and_slice_list: Tuple[Mapping[Indices, int],
                                           Tuple[Union[int, slice], ...]],
     ):
@@ -835,7 +829,7 @@ class ImageStack:
 
         sliced = numpy_array[indices_and_slice_list[1]]
 
-        return worker_callable(sliced, *indices_and_slice_list)
+        return worker_callable(sliced)
 
     @property
     def tile_metadata(self) -> pd.DataFrame:

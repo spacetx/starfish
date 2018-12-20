@@ -24,8 +24,8 @@ def convert_to_indexers_dict(indexers) -> Mapping[str, Union[int, slice]]:
     return return_dict
 
 
-def index_keep_dimensions(data: xr.DataArray, indexers: Mapping[str, Union[int, slice]]
-                          ) -> xr.DataArray:
+def index_keep_dimensions(
+        data: xr.DataArray, indexers: Mapping[str, Union[int, slice]]) -> xr.DataArray:
     """Takes an xarray and key to index it. Indexes then adds back in lost dimensions"""
     # store original dims
     original_dims = data.dims

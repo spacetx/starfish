@@ -126,6 +126,7 @@ class ImageStack:
 
         data_shape: MutableSequence[int] = []
         data_dimensions: MutableSequence[str] = []
+        data_tick_marks: MutableMapping[str, Sequence[int]] = dict()
         coordinates_shape: MutableSequence[int] = []
         coordinates_dimensions: MutableSequence[str] = []
         coordinates_tick_marks: MutableMapping[str, Sequence[Union[int, str]]] = dict()
@@ -145,6 +146,7 @@ class ImageStack:
 
             data_shape.append(size_for_axis)
             data_dimensions.append(dim_for_axis.value)
+            data_tick_marks[dim_for_axis.value] = list(range(size_for_axis))
             coordinates_shape.append(size_for_axis)
             coordinates_dimensions.append(dim_for_axis.value)
             coordinates_tick_marks[dim_for_axis.value] = list(range(size_for_axis))
@@ -167,6 +169,7 @@ class ImageStack:
             dtype=np.float32,
             initial_value=0,
             dims=data_dimensions,
+            coords=data_tick_marks,
         )
         self._coordinates = xr.DataArray(
             np.empty(

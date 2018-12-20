@@ -36,7 +36,7 @@ def test_imagestack_indexing():
     # index on single round and range of ch and Z
     indexed = stack.sel({Indices.ROUND: 1, Indices.CH: (None, 3), Indices.Z: (7, None)})
     expected_shape = OrderedDict(
-        [(Indices.ROUND, 1), (Indices.CH, 3), (Indices.Z, 8), (Indices.Y, 200), (Indices.X, 200)])
+        [(Indices.ROUND, 1), (Indices.CH, 4), (Indices.Z, 8), (Indices.Y, 200), (Indices.X, 200)])
     assert indexed.shape == expected_shape
 
     # index on first half of X and single value of Y

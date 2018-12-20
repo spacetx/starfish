@@ -183,3 +183,6 @@ napoleon_use_admonition_for_references = False
 napoleon_use_ivar = False
 napoleon_use_param = True
 napoleon_use_rtype = True
+
+# See https://stackoverflow.com/a/45565445/56887
+autodoc_mock_imports = ['_tkinter']

@@ -1,11 +1,11 @@
 import os
 from typing import Type
 
-import click
 from skimage.io import imread
 
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.util import click
 from . import label
 from ._base import TargetAssignmentAlgorithm
 
@@ -32,6 +32,7 @@ class TargetAssignment(PipelineComponent):
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, label_image, intensities, output):
+        """assign targets to cells"""
 
         print('Assigning targets to cells...')
         ctx.obj = dict(

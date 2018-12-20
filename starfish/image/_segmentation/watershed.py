@@ -1,6 +1,5 @@
 from typing import Optional, Tuple
 
-import click
 import numpy as np
 import scipy.ndimage.measurements as spm
 from scipy.ndimage import distance_transform_edt
@@ -11,6 +10,7 @@ from skimage.morphology import watershed
 from starfish.image._filter.util import bin_open, bin_thresh
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices, Number
+from starfish.util import click
 from ._base import SegmentationAlgorithmBase
 
 

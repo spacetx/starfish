@@ -1,10 +1,10 @@
 from typing import Type
 
-import click
 from skimage.io import imsave
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
+from starfish.util import click
 from . import _base
 import_all_submodules(__file__, __package__)
 
@@ -33,6 +33,7 @@ class Segmentation(PipelineComponent):
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, primary_images, nuclei, output):
+        """define polygons for cell boundaries and assign spots"""
         print('Segmenting ...')
         ctx.obj = dict(
             component=Segmentation,

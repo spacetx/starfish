@@ -91,7 +91,7 @@ class FieldOfView:
 
     def __getitem__(self, item) -> ImageStack:
         if isinstance(self._images[item], TileSet):
-            self._images[item] = ImageStack(self._images[item])
+            self._images[item] = ImageStack.from_tileset(self._images[item])
         return self._images[item]
 
 

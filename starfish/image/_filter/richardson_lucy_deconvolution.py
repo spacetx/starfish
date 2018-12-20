@@ -1,12 +1,13 @@
 from functools import partial
 from typing import Optional
 
-import click
 import numpy as np
 from scipy.signal import convolve, fftconvolve
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
+from starfish.util import click
+
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by,

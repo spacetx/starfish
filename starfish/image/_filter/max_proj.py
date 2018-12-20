@@ -1,9 +1,8 @@
 from typing import Optional
 
-import click
-
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Indices
+from starfish.util import click
 from ._base import FilterAlgorithmBase
 
 

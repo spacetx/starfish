@@ -49,6 +49,9 @@ class PipelineComponent(metaclass=PipelineComponentType):
         evoked from the CLI. This often includes loading serialized objects into memory and
         passing them to the API's run command.
 
+    See Also
+    --------
+    starfish.pipeline.algorithmbase.py
     """
 
     _algorithm_to_class_map_int: Optional[Mapping[str, Type]] = None

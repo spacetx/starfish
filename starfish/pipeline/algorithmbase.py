@@ -29,6 +29,10 @@ class AlgorithmBase:
 
     To add to an existing class, an algorithm implementation must subclass the corresponding
     subclass of `AlgorithmBase`. In this case, `SegmentationAlgorithmBase`.
+
+    See Also
+    --------
+    starfish.pipeline.pipelinecomponent.py
     """
     @classmethod
     def _get_algorithm_name(cls):

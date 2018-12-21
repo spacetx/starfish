@@ -13,12 +13,23 @@ class AlgorithmBaseType(type):
 
     @staticmethod
     def run_with_logging(func):
+        """
+        This method extends each pipeline component.run() method to also log itself and
+        runtime parameters to the IntensityTable and Imagestack objects. There are two
+        scenarios for this method:
+            1.) Filtering:
+                    Imagestack -> Imagestack
+            2.) Spot Detection:
+                    Imagestack -> IntensityTable
+                    Imagestack -> [IntenistyTable, ConnectedComponentDecodingResult]
+            TODO segmentation and decoding
+        """
         def helper(*args, **kwargs):
             result = func(*args, **kwargs)
-            # Spot detection returns a tuple or IntensityTable, filtering returns an Imagestack
+            # Scenario 1, Filtering
             if isinstance(result, ImageStack):
                 result.update_log(args[0])
-            # Spot detection
+            # Scenario 2, Spot detection
             elif isinstance(result, tuple) or isinstance(result, IntensityTable):
                 if isinstance(args[1], ImageStack):
                     stack = args[1]

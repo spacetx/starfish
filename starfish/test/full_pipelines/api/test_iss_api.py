@@ -1,9 +1,11 @@
 import os
 import sys
+import tempfile
 
 import numpy as np
 
 import starfish
+from starfish import IntensityTable
 from starfish.spots import TargetAssignment
 from starfish.types import Features, LOG
 
@@ -126,6 +128,16 @@ def test_iss_pipeline_cropped_data():
     assigned = lab.run(label_image, decoded)
 
     pipeline_log = assigned.attrs[LOG]
+
+    assert pipeline_log[0]['method'] == 'WhiteTophat'
+    assert pipeline_log[1]['method'] == 'FourierShiftRegistration'
+    assert pipeline_log[2]['method'] == 'BlobDetector'
+
+    # Test serialization / deserialization of IntensityTable log
+    fp = tempfile.NamedTemporaryFile()
+    assigned.save(fp.name)
+    loaded_intensities = IntensityTable.load(fp.name)
+    pipeline_log = loaded_intensities.attrs['log']
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'FourierShiftRegistration'

@@ -2,8 +2,6 @@
 import cProfile
 from pstats import Stats
 
-import click
-
 from sptx_format.cli import validate as validate_cli
 from starfish.experiment.builder.cli import build as build_cli
 from starfish.image import (
@@ -16,6 +14,7 @@ from starfish.spots import (
     SpotFinder,
     TargetAssignment,
 )
+from starfish.util import click
 
 
 PROFILER_KEY = "profiler"
@@ -24,11 +23,8 @@ PROFILER_LINES = 15
 """This is the number of profiling rows to dump when --profile is enabled."""
 
 
-@click.group()
-@click.option("--profile", is_flag=True)
-@click.pass_context
-def starfish(ctx, profile):
-    art = """
+def art_string():
+    return r"""
          _              __ _     _
         | |            / _(_)   | |
      ___| |_ __ _ _ __| |_ _ ___| |__
@@ -36,7 +32,17 @@ def starfish(ctx, profile):
     \__ \ || (_| | |  | | | \__ \ | | |
     |___/\__\__,_|_|  |_| |_|___/_| |_|
 
-    """  # noqa
+    """
+
+@click.group()
+@click.option("--profile", is_flag=True)
+@click.pass_context
+def starfish(ctx, profile):
+    """
+    standardized analysis pipeline for image-based transcriptomics
+    see: https://spacetx-starfish.readthedocs.io for more information.
+    """
+    art = art_string()
     print_art = True
     sub = ctx.command.get_command(ctx, ctx.invoked_subcommand)
     if hasattr(sub, "no_art"):

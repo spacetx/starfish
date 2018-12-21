@@ -2,13 +2,13 @@ import json
 import os
 from typing import List, Mapping, Tuple, Union
 
-import click
 import numpy as np
 from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.types import Coordinates, Features, Indices, Number
+from starfish.util import click
 
 
 class ImagingMassCytometryTile(FetchedTile):
@@ -30,10 +30,6 @@ class ImagingMassCytometryTile(FetchedTile):
             Coordinates.Y: (0.0, 0.0001),
             Coordinates.Z: (0.0, 0.0001),
         }
-
-    @property
-    def format(self) -> ImageFormat:
-        return ImageFormat.TIFF
 
     def tile_data(self) -> np.ndarray:
         return self._tile_data
@@ -161,6 +157,7 @@ def cli(input_dir, output_dir):
     write_experiment_json(
         path=output_dir,
         fov_count=len(primary_tile_fetcher._fov_map),
+        tile_format=ImageFormat.TIFF,
         primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions={},
         primary_tile_fetcher=primary_tile_fetcher,

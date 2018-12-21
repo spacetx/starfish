@@ -1,20 +1,7 @@
-.. _sptx_format
+.. _sptx_format:
 
+.. mdinclude:: ../../../sptx_format/README.md
 
-SpaceTx Format
-==============
+.. _schema:
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-.. toctree::
-   data_conversion/data_conversion.rst
-
-
-.. toctree::
-   specification.rst
-
-
-.. toctree::
-   validation.rst
+.. mdinclude:: ../../../sptx_format/schema/README.md

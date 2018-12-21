@@ -1,1 +1,1 @@
-from ._parser import TileSetData
+from ._parser import parse_tileset, TileSetData

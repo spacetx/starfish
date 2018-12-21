@@ -1,11 +1,10 @@
 from typing import Type
 
-import click
-
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
 from starfish.types import Indices
+from starfish.util import click
 from . import _base
 
 import_all_submodules(__file__, __package__)
@@ -66,6 +65,7 @@ class SpotFinder(PipelineComponent):
     )
     @click.pass_context
     def _cli(ctx, input, output, blobs_stack, reference_image_from_max_projection, codebook):
+        """assign spots to regions"""
         print('Detecting Spots ...')
         ctx.obj = dict(
             component=SpotFinder,

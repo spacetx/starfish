@@ -1,10 +1,10 @@
 from typing import Optional
 
-import click
 import numpy as np
 from skimage.morphology import ball, disk, white_tophat
 
 from starfish.imagestack.imagestack import ImageStack
+from starfish.util import click
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by
 

@@ -1,4 +1,4 @@
-.. _filtering
+.. _filtering:
 
 Filtering
 =========

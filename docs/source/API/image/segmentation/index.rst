@@ -1,4 +1,4 @@
-.. _segmentation
+.. _segmentation:
 
 Segmentation
 ============

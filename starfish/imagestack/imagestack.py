@@ -23,6 +23,7 @@ from typing import (
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import skimage.io
 import xarray as xr
 from matplotlib import get_backend as get_matplotlib_backend
 from scipy.ndimage.filters import gaussian_filter
@@ -39,12 +40,12 @@ from slicedimage import (
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
-from starfish.errors import DataFormatWarning
+from starfish.config import StarfishConfig
 from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
 from starfish.imagestack import indexing_utils, physical_coordinate_calculator
 from starfish.imagestack.parser import TileKey
-from starfish.imagestack.parser.tileset import TileSetData
+from starfish.imagestack.parser.tileset import parse_tileset, TileSetData
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.multiprocessing.shmem import SharedMemory
 from starfish.types import (
@@ -62,6 +63,7 @@ from .dataorder import AXES_DATA, N_AXES
 class ImageStack:
     """
     Container for a TileSet (field of view)
+    Loads configuration from StarfishConfig.
 
     Attributes
     ----------
@@ -84,19 +86,19 @@ class ImageStack:
         retrieve a slice of the image tensor
     set_slice(indices, data, axes=None)
         set a slice of the image tensor
-    apply(func, group_by={Indices.ROUND, Indices.CH, Indices.Z}, in_place=False, verbose=False,
-            n_processes=None)
+    apply(func, group_by={Indices.ROUND, Indices.CH, Indices.Z},
+        in_place=False, verbose=False, n_processes=None)
         split the image tensor along one or more axes and apply a function across each of the
         components to yield an image tensor
     transform(func, group_by={Indices.ROUND, Indices.CH, Indices.Z}, verbose=False,
-            n_processes=None)
+        n_processes=None)
         split the image tensor along one or more axes and apply a function across each of the
         components. Results are returned as a List with length equal to the number of times
         the image tensor is split.
     max_proj(*dims)
         return a max projection over one or more axis of the image tensor
     show_stack(indices, color_map='gray', figure_size=(10, 10), rescale=False, p_min=None,
-            p_max=None)
+        p_max=None)
         show an interactive, pageable view of the image tensor, or a slice of the image tensor
     show_stack_napari(indices)
         view the selected indices of the image tensor with Napari. Note that Napari is
@@ -109,35 +111,23 @@ class ImageStack:
         save the (potentially modified) image tensor to disk
     """
 
-    def __init__(self, tileset: TileSet) -> None:
-        self._num_rounds = ImageStack._get_dimension_size(tileset, Indices.ROUND)
-        self._num_chs = ImageStack._get_dimension_size(tileset, Indices.CH)
-        self._num_zlayers = ImageStack._get_dimension_size(tileset, Indices.Z)
-        self._tile_metadata = TileSetData(tileset)
-        self._tile_shape = tileset.default_tile_shape
+    def __init__(
+            self,
+            tile_shape: Tuple[int, int],
+            tile_data: TileSetData,
+    ) -> None:
+        self._axes_sizes = {
+            Indices.ROUND: len(set(tilekey.round for tilekey in tile_data.keys())),
+            Indices.CH: len(set(tilekey.ch for tilekey in tile_data.keys())),
+            Indices.Z: len(set(tilekey.z for tilekey in tile_data.keys())),
+        }
+        self._tile_shape = tile_shape
+        self._tile_data = tile_data
         self._log: List[dict] = list()
 
-        # Examine the tiles to figure out the right kind (int, float, etc.) and size.  We require
-        # that all the tiles have the same kind of data type, but we do not require that they all
-        # have the same size of data type. The # allocated array is the highest size we encounter.
-        kind = None
-        max_size = 0
-        for tile in tqdm(tileset.tiles()):
-            dtype = tile.numpy_array.dtype
-            if kind is None:
-                kind = dtype.kind
-            else:
-                if kind != dtype.kind:
-                    raise TypeError("All tiles should have the same kind of dtype")
-            if dtype.itemsize > max_size:
-                max_size = dtype.itemsize
-            if self._tile_shape is None:
-                self._tile_shape = tile.tile_shape
-            elif tile.tile_shape is not None and self._tile_shape != tile.tile_shape:
-                raise ValueError("Starfish does not support tiles that are not identical in shape")
-
-        shape: MutableSequence[int] = []
-        dims: MutableSequence[str] = []
+        data_shape: MutableSequence[int] = []
+        data_dimensions: MutableSequence[str] = []
+        data_tick_marks: MutableMapping[str, Sequence[int]] = dict()
         coordinates_shape: MutableSequence[int] = []
         coordinates_dimensions: MutableSequence[str] = []
         coordinates_tick_marks: MutableMapping[str, Sequence[Union[int, str]]] = dict()
@@ -147,7 +137,7 @@ class ImageStack:
 
             for axis_name, axis_data in AXES_DATA.items():
                 if ix == axis_data.order:
-                    size_for_axis = ImageStack._get_dimension_size(tileset, axis_name)
+                    size_for_axis = self._axes_sizes[axis_name]
                     dim_for_axis = axis_name
                     break
 
@@ -155,14 +145,15 @@ class ImageStack:
                 raise ValueError(
                     f"Could not find entry for the {ix}th axis in AXES_DATA")
 
-            shape.append(size_for_axis)
-            dims.append(dim_for_axis.value)
+            data_shape.append(size_for_axis)
+            data_dimensions.append(dim_for_axis.value)
+            data_tick_marks[dim_for_axis.value] = list(range(size_for_axis))
             coordinates_shape.append(size_for_axis)
             coordinates_dimensions.append(dim_for_axis.value)
             coordinates_tick_marks[dim_for_axis.value] = list(range(size_for_axis))
 
-        shape.extend(self._tile_shape)
-        dims.extend([Indices.Y.value, Indices.X.value])
+        data_shape.extend(self._tile_shape)
+        data_dimensions.extend([Indices.Y.value, Indices.X.value])
         coordinates_shape.append(6)
         coordinates_dimensions.append(PHYSICAL_COORDINATE_DIMENSION)
         coordinates_tick_marks[PHYSICAL_COORDINATE_DIMENSION] = [
@@ -175,10 +166,11 @@ class ImageStack:
         ]
         # now that we know the tile data type (kind and size), we can allocate the data array.
         self._data = MPDataArray.from_shape_and_dtype(
-            shape=shape,
+            shape=data_shape,
             dtype=np.float32,
             initial_value=0,
-            dims=dims,
+            dims=data_dimensions,
+            coords=data_tick_marks,
         )
         self._coordinates = xr.DataArray(
             np.empty(
@@ -189,28 +181,16 @@ class ImageStack:
             coords=coordinates_tick_marks,
         )
 
-        # iterate through the tiles and set the data.
-        for tile in tileset.tiles():
-            h = tile.indices[Indices.ROUND]
-            c = tile.indices[Indices.CH]
-            zlayer = tile.indices.get(Indices.Z, 0)
-            data = tile.numpy_array
+        all_indices = list(self._iter_indices({Indices.ROUND, Indices.CH, Indices.Z}))
+        for indices in tqdm(all_indices):
+            tile = tile_data.get_tile(
+                r=indices[Indices.ROUND], ch=indices[Indices.CH], z=indices[Indices.Z])
 
-            if max_size != data.dtype.itemsize:
-                warnings.warn(
-                    f"Tile "
-                    f"(R: {tile.indices[Indices.ROUND]} C: {tile.indices[Indices.CH]} "
-                    f"Z: {tile.indices[Indices.Z]}) has "
-                    f"dtype {data.dtype}.  One or more tiles is of a larger dtype "
-                    f"{self._data.dtype}.",
-                    DataFormatWarning)
-
-            data = img_as_float32(data)
-            self.set_slice(indices={Indices.ROUND: h, Indices.CH: c, Indices.Z: zlayer}, data=data)
+            data = img_as_float32(tile.numpy_array)
+            self.set_slice(indices=indices, data=data)
             coordinate_selector = {
-                Indices.ROUND.value: h,
-                Indices.CH.value: c,
-                Indices.Z.value: zlayer,
+                index.value: index_value
+                for index, index_value in indices.items()
             }
             coordinates_values = [
                 tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
@@ -244,6 +224,24 @@ class ImageStack:
         return f"<starfish.ImageStack ({shape})>"
 
     @classmethod
+    def from_tileset(cls, tileset: TileSet) -> "ImageStack":
+        """
+        Parse a :py:class:`slicedimage.TileSet` into an ImageStack.
+
+        Parameters
+        ----------
+        tileset : TileSet
+            The tileset to parse.
+
+        Returns
+        -------
+        ImageStack :
+            An ImageStack representing encapsulating the data from the TileSet.
+        """
+        parsed = parse_tileset(tileset)
+        return cls(*parsed)
+
+    @classmethod
     def from_url(cls, url: str, baseurl: Optional[str]):
         """
         Constructs an ImageStack object from a URL and a base URL.
@@ -262,9 +260,10 @@ class ImageStack:
             If url is a relative URL, then this must be provided.  If url is an absolute URL, then
             this parameter is ignored.
         """
-        image_partition = Reader.parse_doc(url, baseurl)
+        config = StarfishConfig()
+        tileset = Reader.parse_doc(url, baseurl, backend_config=config.slicedimage)
 
-        return cls(image_partition)
+        return cls.from_tileset(tileset)
 
     @classmethod
     def from_path_or_url(cls, url_or_path: str) -> "ImageStack":
@@ -280,7 +279,9 @@ class ImageStack:
         url_or_path : str
             Either an absolute URL or a filesystem path to an imagestack.
         """
-        _, relativeurl, baseurl = resolve_path_or_url(url_or_path)
+        config = StarfishConfig()
+        _, relativeurl, baseurl = resolve_path_or_url(url_or_path,
+                                                      backend_config=config.slicedimage)
         return cls.from_url(relativeurl, baseurl)
 
     @classmethod
@@ -335,19 +336,19 @@ class ImageStack:
         Examples
         --------
 
-        Create an Imagestack using the ``synthetic_stack`` method::
-        >>> from starfish import ImageStack
-        >>> from starfish.types import Indices
-        >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
-        >>> stack
-        <starfish.ImageStack (r: 5, c: 5, z: 15, y: 200, x: 200)>
-        >>> stack.sel({Indices.ROUND: (1, None), Indices.CH: 0, Indices.Z: 0})
-        <starfish.ImageStack (r: 4, c: 1, z: 1, y: 200, x: 200)>
-        >>> stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1,
-        ...Indices.Y: 100, Indices.X: (None, 100)})
-        <starfish.ImageStack (r: 1, c: 1, z: 1, y: 1, x: 100)>
-        and the imagestack's physical coordinates
-        xarray also indexed and recalculated according to the x,y slicing.
+        Create an Imagestack using the ``synthetic_stack`` method
+            >>> from starfish import ImageStack
+            >>> from starfish.types import Indices
+            >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
+            >>> stack
+            <starfish.ImageStack (r: 5, c: 5, z: 15, y: 200, x: 200)>
+            >>> stack.sel({Indices.ROUND: (1, None), Indices.CH: 0, Indices.Z: 0})
+            <starfish.ImageStack (r: 4, c: 1, z: 1, y: 200, x: 200)>
+            >>> stack.sel({Indices.ROUND: 0, Indices.CH: 0, Indices.Z: 1,
+            ...Indices.Y: 100, Indices.X: (None, 100)})
+            <starfish.ImageStack (r: 1, c: 1, z: 1, y: 1, x: 100)>
+            and the imagestack's physical coordinates
+            xarray also indexed and recalculated according to the x,y slicing.
 
         Returns
         -------
@@ -467,8 +468,7 @@ class ImageStack:
         -----
         To use in a Jupyter notebook, use the %gui qt5 magic.
         Axes currently cannot be labeled. Until such a time that they can, this function will
-            order them by Round, Channel, and Z.
-
+        order them by Round, Channel, and Z.
 
         """
         try:
@@ -805,7 +805,7 @@ class ImageStack:
                       for index in indices]
 
         indices_and_slice_list = zip(indices, slice_list)
-        if verbose:
+        if verbose and StarfishConfig().verbose:
             indices_and_slice_list = tqdm(indices_and_slice_list)
 
         applyfunc: Callable = partial(
@@ -852,7 +852,7 @@ class ImageStack:
         """
 
         data: collections.defaultdict = collections.defaultdict(list)
-        keys = self._tile_metadata.keys()
+        keys = self._tile_data.keys()
         index_keys = set(
             key.value
             for key in AXES_DATA.keys()
@@ -860,7 +860,7 @@ class ImageStack:
         extras_keys = set(
             key
             for tilekey in keys
-            for key in self._tile_metadata[tilekey].keys())
+            for key in self._tile_data[tilekey].keys())
         duplicate_keys = index_keys.intersection(extras_keys)
         if len(duplicate_keys) > 0:
             duplicate_keys_str = ", ".join([str(key) for key in duplicate_keys])
@@ -873,7 +873,7 @@ class ImageStack:
                 round=indices[Indices.ROUND],
                 ch=indices[Indices.CH],
                 z=indices[Indices.Z])
-            extras = self._tile_metadata[tilekey]
+            extras = self._tile_data[tilekey]
 
             for index, index_value in indices.items():
                 data[index.value].append(index_value)
@@ -955,39 +955,74 @@ class ImageStack:
 
         return result
 
-    def coordinates(
+    @property
+    def coordinates(self):
+        """
+        Returns an xarray where the row labels are the indices (R, C, Z) and the column labels are
+        the min and max for each type of coordinate (X, Y, Z).
+        """
+        return self._coordinates
+
+    def tile_coordinates(
             self,
             indices: Mapping[Indices, int],
             physical_axis: Coordinates) -> Tuple[float, float]:
         """Given a set of indices that uniquely identify a tile and a physical axis, return the min
-        and the max coordinates for that tile along that axis."""
+        and the max coordinates for that tile along that axis.
 
-        return physical_coordinate_calculator.get_coordinates(coords_array=self._coordinates,
-                                                              indices=indices,
-                                                              physical_axis=physical_axis)
+        Examples
+        --------
+        stack.coordinates({Indices.ROUND: 4, Indices.CH: 3, Indices.Z: 2}, Coordinates.X)
+            Retrieves the xmin, xmax for the tile identified by round=4, ch=3, z=2
+        """
 
-    @staticmethod
-    def _get_dimension_size(tileset: TileSet, dimension: Indices):
-        axis_data = AXES_DATA[dimension]
-        if dimension in tileset.dimensions or axis_data.required:
-            return tileset.get_dimension_shape(dimension)
-        return 1
+        return physical_coordinate_calculator.get_coordinates(
+            coords_array=self._coordinates,
+            indices=indices,
+            physical_axis=physical_axis)
 
     @property
     def num_rounds(self):
-        return self._num_rounds
+        return self._axes_sizes[Indices.ROUND]
 
     @property
     def num_chs(self):
-        return self._num_chs
+        return self._axes_sizes[Indices.CH]
 
     @property
     def num_zlayers(self):
-        return self._num_zlayers
+        return self._axes_sizes[Indices.Z]
 
     @property
     def tile_shape(self):
         return self._tile_shape
+
+    def to_multipage_tiff(self, filepath: str) -> None:
+            """save the ImageStack as a FIJI-compatible multi-page TIFF file
+
+            Parameters
+            ----------
+            filepath : str
+                filepath for a tiff FILE. "TIFF" suffix will be added if the provided path does not
+                end with .TIFF
+
+            """
+            if not filepath.upper().endswith(".TIFF"):
+                filepath += ".TIFF"
+
+            # RZCYX is the order expected by FIJI
+            data = self.xarray.transpose(
+                Indices.ROUND.value,
+                Indices.Z.value,
+                Indices.CH.value,
+                Indices.Y.value,
+                Indices.X.value)
+
+            # Any float32 image with low dynamic range will provoke a warning that the image is
+            # low contrast because the data must be converted to uint16 for compatibility with FIJI.
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", UserWarning)
+                skimage.io.imsave(filepath, data.values, imagej=True)
 
     def export(self,
                filepath: str,
@@ -1018,13 +1053,13 @@ class ImageStack:
                 Indices.Z: self.num_zlayers,
             },
             default_tile_shape=self._tile_shape,
-            extras=self._tile_metadata.extras,
+            extras=self._tile_data.extras,
         )
         for round_ in range(self.num_rounds):
             for ch in range(self.num_chs):
                 for zlayer in range(self.num_zlayers):
                     tilekey = TileKey(round=round_, ch=ch, z=zlayer)
-                    extras: dict = self._tile_metadata[tilekey]
+                    extras: dict = self._tile_data[tilekey]
 
                     tile_indices = {
                         Indices.ROUND: round_,
@@ -1033,9 +1068,9 @@ class ImageStack:
                     }
 
                     coordinates: MutableMapping[Coordinates, Tuple[Number, Number]] = dict()
-                    x_coordinates = self.coordinates(tile_indices, Coordinates.X)
-                    y_coordinates = self.coordinates(tile_indices, Coordinates.Y)
-                    z_coordinates = self.coordinates(tile_indices, Coordinates.Z)
+                    x_coordinates = self.tile_coordinates(tile_indices, Coordinates.X)
+                    y_coordinates = self.tile_coordinates(tile_indices, Coordinates.Y)
+                    z_coordinates = self.tile_coordinates(tile_indices, Coordinates.Z)
 
                     coordinates[Coordinates.X] = x_coordinates
                     coordinates[Coordinates.Y] = y_coordinates
@@ -1138,7 +1173,7 @@ class ImageStack:
         )
         tileset = list(collection.all_tilesets())[0][1]
 
-        return ImageStack(tileset)
+        return cls.from_tileset(tileset)
 
     @classmethod
     def synthetic_spots(
@@ -1202,7 +1237,7 @@ class ImageStack:
         # make sure requested dimensions are large enough to support intensity values
         indices = zip((Indices.Z.value, Indices.Y.value, Indices.X.value), (num_z, height, width))
         for index, requested_size in indices:
-            required_size = intensities.coords[index].values.max()
+            required_size = intensities.coords[index].values.max() + 1
             if required_size > requested_size:
                 raise ValueError(
                     f'locations of intensities contained in table exceed the size of requested '

@@ -1,4 +1,4 @@
-.. _image
+.. _image:
 
 Image Manipulation
 ==================
@@ -8,10 +8,10 @@ Image Manipulation
    :caption: Contents:
 
 .. toctree::
-   filtering/filtering.rst
+   filtering/index.rst
 
 .. toctree::
-   registration/registration.rst
+   registration/index.rst
 
 .. toctree::
-   segmentation/segmentation.rst
+   segmentation/index.rst

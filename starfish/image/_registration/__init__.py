@@ -1,9 +1,8 @@
 from typing import Type
 
-import click
-
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
+from starfish.util import click
 from . import _base
 import_all_submodules(__file__, __package__)
 
@@ -27,6 +26,7 @@ class Registration(PipelineComponent):
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, input, output):
+        """translation correction of image stacks"""
         print("Registering...")
         ctx.obj = dict(
             component=Registration,

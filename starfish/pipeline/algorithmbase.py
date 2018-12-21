@@ -46,12 +46,12 @@ class AlgorithmBaseType(type):
 class AlgorithmBase(metaclass=AlgorithmBaseType):
 
     """
-     This is the base class of any algorithm that starfish exposes.
+    This is the base class of any algorithm that starfish exposes.
 
     Subclasses of this base class are paired with subclasses of PipelineComponent. The subclasses of
     PipelineComponent retrieve subclasses of the paired AlgorithmBase. Together, the two classes
     enable starfish to expose a paired API and CLI.
-    
+
     Examples
     --------
 

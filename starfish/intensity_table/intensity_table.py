@@ -1,4 +1,5 @@
 from itertools import product
+from json import loads
 from typing import Dict, Optional, Union
 
 import numpy as np
@@ -239,7 +240,7 @@ class IntensityTable(xr.DataArray):
         )
         # maintain log
         if LOG in loaded.attrs:
-            intensity_table.attrs[LOG] = loaded.attrs[LOG]
+            intensity_table.attrs[LOG] = loads(loaded.attrs[LOG])
         return intensity_table
 
     def show(self, background_image: np.ndarray) -> None:

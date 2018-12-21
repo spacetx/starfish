@@ -6,4 +6,4 @@ class LogEncoder(JSONEncoder):
         try:
             return super(LogEncoder, self).default(o)
         except TypeError:
-            return repr(o)
+            return JSONEncoder().encode(repr(o))

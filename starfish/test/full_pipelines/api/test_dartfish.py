@@ -138,6 +138,8 @@ def test_dartfish_pipeline_cropped_data():
     assert pipeline_log[0]['method'] == 'ScaleByPercentile'
     assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
 
+    spot_intensities.save("/Users/shannonaxelrod/Desktop/test2")
+
     spots_df = IntensityTable(
         spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True)
     ).to_features_dataframe()

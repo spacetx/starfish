@@ -33,6 +33,28 @@ class PipelineComponentType(type):
 
 
 class PipelineComponent(metaclass=PipelineComponentType):
+    """
+    This is the base class for any method executed by the CLI.
+
+    PipelineComponent is an Abstract Class that exposes two private methods to link any subclassing
+    method to the CLI, _algorithm_to_class_map, which fetches all the algorithms that extend this
+    base class at run time, and _cli_register, which registers those methods to the CLI. It exposes
+    two additional abstract private methods that must be extended by subclasses:
+
+    Methods
+    -------
+    _get_algorithm_base_class()
+        should simply return an instance of the AlgorithmBase. See, e.g.
+        starfish.image.segmentation.Segmentation
+    _cli_run(ctx, instance, *args, **kwargs)
+        implements the behavior of the pipeline component that must occur when this component is
+        evoked from the CLI. This often includes loading serialized objects into memory and
+        passing them to the API's run command.
+
+    See Also
+    --------
+    starfish.pipeline.algorithmbase.py
+    """
 
     _algorithm_to_class_map_int: Optional[Mapping[str, Type]] = None
 

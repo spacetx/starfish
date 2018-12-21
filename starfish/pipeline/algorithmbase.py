@@ -2,7 +2,6 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import LOG
 
-
 class AlgorithmBaseType(type):
 
     def __init__(cls, name, bases, namespace):
@@ -52,6 +51,7 @@ class AlgorithmBase(metaclass=AlgorithmBaseType):
     Subclasses of this base class are paired with subclasses of PipelineComponent. The subclasses of
     PipelineComponent retrieve subclasses of the paired AlgorithmBase. Together, the two classes
     enable starfish to expose a paired API and CLI.
+    
     Examples
     --------
 

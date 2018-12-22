@@ -5,24 +5,17 @@
 
 # EPY: START code
 import os
-# import pickle
-# from glob import glob
-# import requests
-# from tempfile import TemporaryDirectory
+import pickle
+from glob import glob
 
 import matplotlib.pyplot as plt
 import numpy as np
-# from showit import image
-# from skimage import img_as_float32
-# import seaborn as sns
-# from skimage.feature import peak_local_max
-# from sympy import Point, Line, Segment
-# import pandas as pd
+from skimage import img_as_float32
+import pandas as pd
 
-# from starfish import ImageStack
+from starfish import ImageStack
 from starfish.types import Indices
 from starfish.image import Filter
-# from starfish.types._spot_attributes import SpotAttributes
 from starfish.spots import SpotFinder
 import starfish.data
 
@@ -32,39 +25,25 @@ import starfish.data
 # EPY: END code
 
 # EPY: START code
-# test data delivers a single round, and for fov_001 -- we want fov 33, should redo this. Can generalize later. 
-# TODO swap starfish.data to generate a single ch/round for test data, and to use fov_33
-stack = starfish.data.osmFISH(use_test_data=True)
+import starfish.data
 # EPY: END code
 
 # EPY: START code
-stack
-# EPY: END code
-
-# EPY: START code
-stack = stack['fov_001']['primary']
+experiment = starfish.data.osmFISH(use_test_data=True)
+stack = experiment['fov_000']['primary']
 # EPY: END code
 
 # EPY: START markdown
 ### Load pysmFISH results
 # EPY: END markdown
 
-# EPY: START code
-aws_data_path = 's3://czi.starfish.data.public/browse/raw/20180912/osmFISH/'
-_im_path = os.path.join(aws_data_path, 'images')
-_res_path = os.path.join(aws_data_path, 'results')
-fov_num = 1
-im_path = 'images'
-res_path = 'results'
-# EPY: END code
+# EPY: START markdown
+#The Field of view that we've used for the test data corresponds to Aldoc, imaged in round one, in position 33. We've also packaged the results from the osmFISH publication for this target to demonstrate that starfish is capable of recovering the same results. 
+# EPY: END markdown
 
-# EPY: START code
-# EPY: ESCAPE !aws s3 cp $_im_path/ ./images --exclude "*" --include "*${fov_num}*" --recursive 2>&1 > /dev/null
-# EPY: END code
-
-# EPY: START code
-# EPY: ESCAPE !aws s3 cp $_res_path/ ./results --exclude "*" --include "*${fov_num}*" --recursive 2>&1 > /dev/null
-# EPY: END code
+# EPY: START markdown
+#The below commands parse and load the results from this file. 
+# EPY: END markdown
 
 # EPY: START code
 def load_results(fov_num):
@@ -101,26 +80,12 @@ def peaks(res):
              })
     return p
 
+fov_num = 33
+res_path = 'data'
 res = load_results(fov_num)
 sp = selected_peaks(res, redo_flag=False)
 p = peaks(res)
-# EPY: END code
-
-# EPY: START code
 psymFISH_thresh = res['selected_thr']
-# EPY: END code
-
-# EPY: START code
-# def load_image_stack(fov_num):
-#     ims = glob(os.path.join(im_path, '*.npy'))
-#     im = np.load([i for i in ims if str(fov_num) in i][0])
-#     stack = np.zeros((1, 1, 45, 2048, 2048))
-#     stack[0,0,:,:,:] = img_as_float32(im)
-#     stack = img_as_float32(stack)
-
-#     return ImageStack.from_numpy_array(stack)
-
-# stack = load_image_stack(fov_num)
 # EPY: END code
 
 # EPY: START markdown
@@ -137,11 +102,6 @@ lp = Filter.Laplace(sigma=(0.2, 0.5, 0.5), is_volume=True)
 
 stack_hp = ghp.run(stack, in_place=False)
 stack_hp_lap = lp.run(stack_hp, in_place=False)
-# EPY: END code
-
-# EPY: START code
-# mp = stack_hp_lap.max_proj(Indices.Z)[0,0,:,:]
-mp = stack_hp_lap.max_proj(Indices.Z)
 # EPY: END code
 
 # EPY: START code
@@ -183,21 +143,15 @@ lmp_res = lmp.run(mp)
 # EPY: END markdown
 
 # EPY: START code
-lmp_res
-# EPY: END code
-
-# EPY: START code
 plt.hist(lmp_res.data[:,0,0], bins=20)
-sns.despine(offset=2)
 plt.yscale('log')
 plt.xlabel('Intensity')
 plt.ylabel('Number of spots');
 # EPY: END code
 
 # EPY: START code
-# mp = stack_hp_lap.max_proj(Indices.Z)[0,0,:,:]
 mp = stack_hp_lap.max_proj(Indices.Z)
-mp = mp.sel({Indices.CH: 0, Indices.R: 0}).xarray.squeeze()
+mp = mp.sel({Indices.CH: 0, Indices.ROUND: 0}).xarray.squeeze()
 
 plt.figure(figsize=(10,10))
 plt.imshow(mp, cmap = 'gray', vmin=np.percentile(mp, 98), vmax=np.percentile(mp, 99.9))
@@ -215,12 +169,11 @@ num_spots_starfish = len(lmp_res)
 
 plt.figure(figsize=(10,10))
 plt.plot(sp.x, -sp.y, 'o')
-sns.despine(offset=20)
 plt.plot(lmp_res.x, -lmp_res.y, 'x')
 
 plt.legend(['Benchmark: {} spots'.format(num_spots_simone),
             'Starfish: {} spots'.format(num_spots_starfish)])
-plt.title('osmFISH spot calls');
+plt.title('osmFISH spot calls')
 
 print("Starfish finds {} fewer spots".format(num_spots_simone-num_spots_starfish))
 # EPY: END code

@@ -53,7 +53,7 @@ def load_results(fov_num):
         res = pickle.load(f)
 
     for k, v in res.items():
-        if type(v) is np.float64 or type(v) is np.int64 or type(v) is np.int:
+        if type(v) in (np.float64, np.int64, np.int):
             print(k, v)
 
     return res

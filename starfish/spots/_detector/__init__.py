@@ -6,6 +6,7 @@ from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComp
 from starfish.types import Indices
 from starfish.util import click
 from . import _base
+
 import_all_submodules(__file__, __package__)
 
 

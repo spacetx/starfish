@@ -46,3 +46,11 @@ def test_apply_in_place():
     original = copy.deepcopy(image)
     image.apply(divide, value=2, in_place=True)
     assert np.all(image.xarray == original.xarray / 2)
+
+
+def test_apply_single_process():
+    """test that apply correctly applies a simple function across 2d tiles of a Stack"""
+    stack = ImageStack.synthetic_stack()
+    assert (stack.xarray == 1).all()
+    output = stack.apply(divide, value=2, n_processes=1)
+    assert (output.xarray == 0.5).all()

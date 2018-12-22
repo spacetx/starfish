@@ -799,23 +799,48 @@ class ImageStack:
             group_by = {Indices.X, Indices.Y}
 
         indices = list(self._iter_indices(group_by))
-        slice_list = [self._build_slice_list(index)[0]
-                      for index in indices]
+        slice_lists = [self._build_slice_list(index)[0]
+                       for index in indices]
 
-        indices_and_slice_list = zip(indices, slice_list)
+        indices_and_slice_list = zip(indices, slice_lists)
         if verbose and StarfishConfig().verbose:
             indices_and_slice_list = tqdm(indices_and_slice_list)
 
-        applyfunc: Callable = partial(self._multiprocessing_workflow, partial(func, **kwargs))
+        if n_processes == 1:
+            sp_applyfunc: Callable = partial(
+                self._singleprocessing_workflow,
+                partial(func, **kwargs),
+                self._data.data.values,
+            )
 
-        with multiprocessing.Pool(
-                n_processes,
-                initializer=SharedMemory.initializer,
-                initargs=((self._data._backing_mp_array,
-                           self._data._data.shape,
-                           self._data._data.dtype),)) as pool:
-            results = pool.imap(applyfunc, indices_and_slice_list)
-            return list(zip(results, indices))
+            sp_results = []
+            for selector, slice_list in indices_and_slice_list:
+                result = sp_applyfunc((selector, slice_list))
+                sp_results.append((result, selector))
+            return sp_results
+        else:
+            mp_applyfunc: Callable = partial(
+                self._multiprocessing_workflow, partial(func, **kwargs))
+
+            with multiprocessing.Pool(
+                    n_processes,
+                    initializer=SharedMemory.initializer,
+                    initargs=((self._data._backing_mp_array,
+                               self._data._data.shape,
+                               self._data._data.dtype),)) as pool:
+                mp_results = pool.imap(mp_applyfunc, indices_and_slice_list)
+                return list(zip(mp_results, indices))
+
+    @staticmethod
+    def _singleprocessing_workflow(
+            worker_callable: Callable[[np.ndarray], Any],
+            numpy_array: np.ndarray,
+            indices_and_slice_list: Tuple[Mapping[Indices, int],
+                                          Tuple[Union[int, slice], ...]],
+    ):
+        sliced = numpy_array[indices_and_slice_list[1]]
+
+        return worker_callable(sliced)
 
     @staticmethod
     def _multiprocessing_workflow(

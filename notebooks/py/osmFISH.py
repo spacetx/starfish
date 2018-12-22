@@ -4,28 +4,19 @@
 # EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "starfish", "language": "python", "name": "starfish"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START code
-import os
 import pickle
-from glob import glob
 
 import matplotlib.pyplot as plt
 import numpy as np
-from skimage import img_as_float32
 import pandas as pd
 
-from starfish import ImageStack
-from starfish.types import Indices
-from starfish.image import Filter
-from starfish.spots import SpotFinder
+import starfish
 import starfish.data
+from starfish.types import Indices
 
 # EPY: ESCAPE %matplotlib inline
 # EPY: ESCAPE %load_ext autoreload
 # EPY: ESCAPE %autoreload 2
-# EPY: END code
-
-# EPY: START code
-import starfish.data
 # EPY: END code
 
 # EPY: START code
@@ -46,46 +37,30 @@ stack = experiment['fov_000']['primary']
 # EPY: END markdown
 
 # EPY: START code
-def load_results(fov_num):
-    pkls = glob(os.path.join(res_path, '*.pkl'))
-    pkl = [p for p in pkls if str(fov_num) in p][0]
-    with open(pkl, 'rb') as f:
-        res = pickle.load(f)
+def load_results(pickle_file):
+    with open(pickle_file, 'rb') as f:
+        return pickle.load(f)
 
-    for k, v in res.items():
-        if type(v) in (np.float64, np.int64, np.int):
-            print(k, v)
-
-    return res
-
-def selected_peaks(res, redo_flag = False):
+def get_benchmark_peaks(loaded_results, redo_flag=False):
 
     if not redo_flag:
-        sp = pd.DataFrame({'y':res['selected_peaks'][:,0],
-                           'x':res['selected_peaks'][:,1],
-                           'selected_peaks_int': res['selected_peaks_int']
-                          })
+        sp = pd.DataFrame(
+            {
+                'y':loaded_results['selected_peaks'][:,0],
+                'x':loaded_results['selected_peaks'][:,1],
+                'selected_peaks_int': loaded_results['selected_peaks_int'],
+            }
+        )
     else:
-        p = peaks(res)
-        coords = p[p.thr_array==res['selected_thr']].peaks_coords
+        p = peaks(loaded_results)
+        coords = p[p.thr_array==loaded_results['selected_thr']].peaks_coords
         coords = coords.values[0]
         sp = pd.DataFrame({'x':coords[:,0], 'y':coords[:,1]})
 
     return sp
 
-def peaks(res):
-    p = pd.DataFrame({'thr_array':res['thr_array'],
-              'peaks_coords':res['peaks_coords'],
-              'total_peaks':res['total_peaks']
-             })
-    return p
-
-fov_num = 33
-res_path = 'data'
-res = load_results(fov_num)
-sp = selected_peaks(res, redo_flag=False)
-p = peaks(res)
-psymFISH_thresh = res['selected_thr']
+benchmark_results = load_results('./data/EXP-17-BP3597_hyb1_Aldoc_pos_33.pkl')
+benchmark_peaks = get_benchmark_peaks(benchmark_results, redo_flag=False)
 # EPY: END code
 
 # EPY: START markdown
@@ -96,22 +71,35 @@ psymFISH_thresh = res['selected_thr']
 ### Filtering code
 # EPY: END markdown
 
-# EPY: START code
-ghp = Filter.GaussianHighPass(sigma=(1,8,8), is_volume=True)
-lp = Filter.Laplace(sigma=(0.2, 0.5, 0.5), is_volume=True)
+# EPY: START markdown
+#Remove background using a gaussian high-pass filter, then enhance spots with a Laplacian filter.
+# EPY: END markdown
 
-stack_hp = ghp.run(stack, in_place=False)
-stack_hp_lap = lp.run(stack_hp, in_place=False)
+# EPY: START code
+filter_ghp = starfish.image.Filter.GaussianHighPass(sigma=(1,8,8), is_volume=True)
+filter_laplace = starfish.image.Filter.Laplace(sigma=(0.2, 0.5, 0.5), is_volume=True)
+
+stack_ghp = filter_ghp.run(stack, in_place=False)
+stack_ghp_laplace = filter_laplace.run(stack_ghp, in_place=False)
+# EPY: END code
+
+# EPY: START markdown
+#Max project over Z, then select the 1st `(0)` channel for visualization in the notebook to demonstrate the effect of background removal using these filters. 
+# EPY: END markdown
+
+# EPY: START code
+mp = stack_ghp_laplace.max_proj(Indices.Z)
+array_for_visualization = mp.xarray.sel({Indices.CH: 0}).squeeze()
 # EPY: END code
 
 # EPY: START code
-mp = stack_hp_lap.max_proj(Indices.Z)
-for_vis = mp.xarray.sel({Indices.CH: 0}).squeeze()
-# EPY: END code
-
-# EPY: START code
-plt.figure(figsize=(10,10))
-plt.imshow(for_vis, cmap = 'gray', vmin=np.percentile(for_vis, 98), vmax=np.percentile(for_vis, 99.9))
+plt.figure(figsize=(10, 10))
+plt.imshow(
+    array_for_visualization, 
+    cmap='gray', 
+    vmin=np.percentile(array_for_visualization, 98), 
+    vmax=np.percentile(array_for_visualization, 99.9),
+)
 plt.title('Filtered max projection')
 plt.axis('off');
 # EPY: END code
@@ -120,42 +108,61 @@ plt.axis('off');
 #### Spot Finding
 # EPY: END markdown
 
+# EPY: START markdown
+#osmFISH uses a peak finder that distinguishes local maxima from their surroundings whose absolute intensities exceed a threshold value. It tests a number of different thresholds, building a curve from the number of peaks detected at each threshold. A threshold in the _stable region_ of the curve is selected, and final peaks are called with that threshold. 
+#
+#This process is repeated independently for each round and channel. Here we show this process on a single round and channel to demonstrate the procedure. 
+# EPY: END markdown
+
 # EPY: START code
-min_distance = 6
-stringency = 0
-min_obj_area = 6
-max_obj_area = 600
-
-# TODO this will go away once ImageStack.max_proj returns an ImageStack
-# stack = ImageStack.from_numpy_array(np.expand_dims(np.expand_dims(np.expand_dims(mp, 0), 0), 0))
-
-lmp = SpotFinder.LocalMaxPeakFinder(
-    min_distance=min_distance,
-    stringency=stringency,
-    min_obj_area=min_obj_area,
-    max_obj_area=max_obj_area
+lmp = starfish.spots.SpotFinder.LocalMaxPeakFinder(
+    min_distance=6,
+    stringency=0,
+    min_obj_area=6, 
+    max_obj_area=600,
 )
-lmp_res = lmp.run(mp)
+spot_intensities = lmp.run(mp)
 # EPY: END code
 
 # EPY: START markdown
 #### Spot finding QA
 # EPY: END markdown
 
+# EPY: START markdown
+#Select spots in the first round and channel and plot their intensities
+# EPY: END markdown
+
 # EPY: START code
-plt.hist(lmp_res.data[:,0,0], bins=20)
+aldoc_spot_intensities = spot_intensities.sel({Indices.ROUND.value: 0, Indices.CH.value: 0})
+
+plt.hist(aldoc_spot_intensities, bins=20)
 plt.yscale('log')
 plt.xlabel('Intensity')
 plt.ylabel('Number of spots');
 # EPY: END code
 
-# EPY: START code
-mp = stack_hp_lap.max_proj(Indices.Z)
-mp = mp.sel({Indices.CH: 0, Indices.ROUND: 0}).xarray.squeeze()
+# EPY: START markdown
+#Starfish enables maximum projection and slicing of the ImageStack object. However, these projections will maintain the 5d shape, leaving one-length dimensions for any array that has been projected over. Here the maximum projection of the z-plane of the ImageStack is calculated. From it, the first channel and round are selected, and `squeeze` is used to eliminate any dimensions with only one value, yielding a two-dimension `(x, y)` tile that can be plotted. 
+# EPY: END markdown
 
+# EPY: START code
+maximum_projection_5d = stack_ghp_laplace.max_proj(Indices.Z)
+maximum_projection_2d = mp.sel({Indices.CH: 0, Indices.ROUND: 0}).xarray.squeeze()
+# EPY: END code
+
+# EPY: START markdown
+#Use the maximum projection to plot all spots detected by starfish:
+# EPY: END markdown
+
+# EPY: START code
 plt.figure(figsize=(10,10))
-plt.imshow(mp, cmap = 'gray', vmin=np.percentile(mp, 98), vmax=np.percentile(mp, 99.9))
-plt.plot(lmp_res.x, lmp_res.y, 'or')
+plt.imshow(
+    maximum_projection_2d, 
+    cmap = 'gray', 
+    vmin=np.percentile(maximum_projection_2d, 98), 
+    vmax=np.percentile(maximum_projection_2d, 99.9),
+)
+plt.plot(spot_intensities[Indices.X.value], spot_intensities[Indices.Y.value], 'or')
 plt.axis('off');
 # EPY: END code
 
@@ -163,17 +170,23 @@ plt.axis('off');
 ### Compare to pySMFISH peak calls
 # EPY: END markdown
 
+# EPY: START markdown
+#Plot spots detected in the benchmark as blue spots, and overlay spots from starfish as orange x's. Starfish detects the same spot positions, but 41 fewer spots in total. 
+# EPY: END markdown
+
 # EPY: START code
-num_spots_simone = len(sp)
-num_spots_starfish = len(lmp_res)
+benchmark_spot_count = len(benchmark_peaks)
+starfish_spot_count = len(spot_intensities)
 
 plt.figure(figsize=(10,10))
-plt.plot(sp.x, -sp.y, 'o')
-plt.plot(lmp_res.x, -lmp_res.y, 'x')
+plt.plot(benchmark_peaks.x, -benchmark_peaks.y, 'o')
+plt.plot(spot_intensities[Indices.X.value], -spot_intensities[Indices.Y.value], 'x')
 
-plt.legend(['Benchmark: {} spots'.format(num_spots_simone),
-            'Starfish: {} spots'.format(num_spots_starfish)])
-plt.title('osmFISH spot calls')
+plt.legend(['Benchmark: {} spots'.format(benchmark_spot_count),
+            'Starfish: {} spots'.format(starfish_spot_count)])
+plt.title('Starfish x osmFISH Benchmark Comparison');
+# EPY: END code
 
-print("Starfish finds {} fewer spots".format(num_spots_simone-num_spots_starfish))
+# EPY: START code
+print("Starfish finds {} fewer spots".format(benchmark_spot_count - starfish_spot_count))
 # EPY: END code

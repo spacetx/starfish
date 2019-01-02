@@ -174,10 +174,14 @@ class IntensityTable(xr.DataArray):
             Name of Netcdf file
 
         """
+
+        # make a copy of the IT for saving so that we can JSON encode the Log
+        # without modifying the original table.
+        copy = self.copy(True)
         if LOG in self.attrs:
             # if log info, json encode it
-            self.attrs[LOG] = LogEncoder().encode(self.attrs[LOG])
-        self.to_netcdf(filename)
+            copy.attrs[LOG] = LogEncoder().encode(copy.attrs[LOG])
+        copy.to_netcdf(filename)
 
     def save_mermaid(self, filename: str) -> pd.DataFrame:
         """

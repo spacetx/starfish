@@ -21,7 +21,7 @@ The SpaceTx consortium Working Group 5 is devoted to mapping the cells in Cell x
 ### Scientific assessment of analyzed SpaceTx data: methods comparison and meta analysis
 The SpaceTx consortium Working Group 6 is devoted to comparing the results of each method and assessing their relative strengths and weaknesses. These are largely scientific analyses enabled by the standardization of each assay's outputs by _starfish_.  Because each assay outputs an IntensityTable, Segmentation Mask, and Expression Matrix, it will be simple to label cells or spots with anatomical information represented as named 2D polygons.
 
-This capability will allow straightforward creation of highly compressed datasets that will enable working Group 6 to ask questions across all methods like "how many cells/mm2 belonging to the Sst-Chodl cluster were found in layer 4 of mouse primary visual cortex?"  or "Within the inhibitory cell class, what is the abundance and distribution of Pvalb+ and VIP+ cells in human cortex?"
+By enabling the creation of standardized, highly compressed outputs that are compatible with both R and Python, _starfish_ will enable working Group 6 to ask questions across all methods like "how many cells/mm2 belonging to the Sst-Chodl cluster were found in layer 4 of mouse primary visual cortex?"  or "Within the inhibitory cell class, what is the abundance and distribution of Pvalb+ and VIP+ cells in human cortex?"
 
 Finally, with a standard format to save and load Cell x Gene tables, visualization of this data will be relatively straightforward for analysts in contributor labs and Working Group 6 members.
 
@@ -36,6 +36,7 @@ We believe that delivering the following features will enable the above use case
 6. _starfish_ facilitates easy interaction with external visualization software (Napari, FIJI) to enable users to tune image processing parameters
 7. Experiment-scale output formats can be loaded on local computers and are adequately expressive to enable QC workflows and specified by our users.
 8. _starfish_ output formats enable external annotation to place the data in anatomical and cell type context and allows comparison across methods
+9. _starfish_ references example data for each supported assay that can be used by researchers to learn starfish and for scientific comparison of supported assays.
 
 Each deliverable above can be broken up into a set of milestones
 ### Library that can be used to reproduce collaborator's results for single fields of view
@@ -164,7 +165,7 @@ We lack solutions for registration that fulfill requirements for ISS (the Harris
 _starfish_'s API documentation is minimal. We need to add basic documentation that describes how to use each component, and how to fit parameters. This should be adequate for a skilled computational user (Brian Long, Kenneth Harris) to pick up _starfish_ and use it to make a pipeline. _starfish_ should also clearly document how a developer can contribute code they need for their analyses to the project. We will need to source feedback from users on what parts of the documentation provoke confusion.
 
 #### Image re-scaling & normalization
-Several approaches normalize images to overcome different channel intensities or round biases. We should implement a pipeline component to support this that samples from images within or across fields of view. Determine the minimum necessary sampling level to achieve needed normalization.
+Several approaches normalize images to overcome different channel intensities or round biases. We should implement a pipeline component to support this that samples from images within or across fields of view. Determine the minimum amount of data to sample from images across the experiment to equalize their intensities.
 
 #### Stitching
 Decide on and Implement a simple solution for stitching IntensityTables created from tiles that overlap in physical space. This could be as simple as "clobber-left".

@@ -135,7 +135,7 @@ scaled_image = deepcopy(low_passed)
 for indices in primary_image._iter_indices():
     data = scaled_image.get_slice(indices)[0]
     scaled = data / scale_factors[indices[Indices.ROUND.value], indices[Indices.CH.value]]
-    scaled_image.set_slice(indices, scaled)
+    scaled_image.set_slice(indices, scaled, [Indices.Z])
 # EPY: END code
 
 # EPY: START markdown

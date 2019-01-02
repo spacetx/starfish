@@ -182,11 +182,14 @@ class ImageStack:
         self._tiles_aligned = True
         all_indices = list(self._iter_indices({Indices.ROUND, Indices.CH, Indices.Z}))
         first_indices = all_indices[0]
-        tile = tile_data.get_tile(first_indices[Indices.ROUND], ch=first_indices[Indices.CH], z=first_indices[Indices.Z])
+        tile = tile_data.get_tile(r=first_indices[Indices.ROUND],
+                                  ch=first_indices[Indices.CH],
+                                  z=first_indices[Indices.Z])
+        # only compare X,Y coords
         starting_coords = [
-                tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
-                tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
-            ]
+            tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
+            tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
+        ]
         for indices in tqdm(all_indices):
             tile = tile_data.get_tile(
                 r=indices[Indices.ROUND], ch=indices[Indices.CH], z=indices[Indices.Z])

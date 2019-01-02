@@ -1,20 +1,24 @@
 from functools import partial
 from typing import Optional
 
-import click
 import numpy as np
 from scipy.signal import convolve, fftconvolve
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Indices, Number
+from starfish.types import Number
+from starfish.util import click
 from ._base import FilterAlgorithmBase
-from .util import gaussian_kernel, preserve_float_range
+from .util import (
+    determine_axes_to_group_by,
+    gaussian_kernel,
+    preserve_float_range
+)
 
 
 class DeconvolvePSF(FilterAlgorithmBase):
 
-    def __init__(
-            self, num_iter: int, sigma: Number, clip: bool=True) -> None:
+    def __init__(self, num_iter: int, sigma: Number, clip: bool = True, is_volume: bool = False
+                 ) -> None:
         """Deconvolve a point spread function
 
         Parameters
@@ -27,6 +31,9 @@ class DeconvolvePSF(FilterAlgorithmBase):
         clip : bool (default = False)
             if True, pixel values below -1 and above 1 are clipped for skimage pipeline
             compatibility
+        is_volume: bool
+            If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
+            independently.
 
         """
         self.num_iter = num_iter
@@ -37,6 +44,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
             shape=(self.kernel_size, self.kernel_size),
             sigma=sigma
         )
+        self.is_volume = is_volume
 
     _DEFAULT_TESTING_PARAMETERS = {"num_iter": 1, "sigma": 1}
 
@@ -152,13 +160,14 @@ class DeconvolvePSF(FilterAlgorithmBase):
             original stack.
 
         """
+        group_by = determine_axes_to_group_by(self.is_volume)
         func = partial(
             self._richardson_lucy_deconv,
             iterations=self.num_iter, psf=self.psf, clip=self.clip
         )
         result = stack.apply(
             func,
-            group_by={Indices.ROUND, Indices.CH, Indices.Z},
+            group_by=group_by,
             verbose=verbose,
             n_processes=n_processes,
             in_place=in_place,

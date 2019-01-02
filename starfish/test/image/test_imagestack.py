@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import xarray as xr
+from slicedimage import ImageFormat
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
@@ -78,8 +79,8 @@ def test_get_slice_range():
         for ch in range(stack.shape[Indices.CH]):
             for z in range(zrange.stop - zrange.start):
                 data = np.empty((y, x))
-                data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] +
-                          (z + zrange.start))
+                data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z]
+                          + (z + zrange.start))
 
                 assert data.all() == imageslice[round_, ch, z].all()
 
@@ -171,7 +172,7 @@ def test_max_projection_preserves_dtype():
     image = ImageStack.from_numpy_array(array.reshape((1, 1, 2, 2, 2)))
 
     max_projection = image.max_proj(Indices.CH, Indices.ROUND, Indices.Z)
-    assert max_projection.dtype == original_dtype
+    assert max_projection.xarray.dtype == original_dtype
 
 
 def test_synthetic_spot_creation_raises_error_with_coords_too_small(synthetic_intensity_table):
@@ -239,3 +240,21 @@ def test_imagestack_to_intensity_table_no_noise(synthetic_spot_pass_through_stac
     pixel_intensities = codebook.metric_decode(
         pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2)
     assert isinstance(pixel_intensities, IntensityTable)
+
+
+@pytest.mark.parametrize("format,count", (
+    (ImageFormat.TIFF, 192),
+    (ImageFormat.NUMPY, 192),
+))
+def test_imagestack_export(tmpdir, format, count, recwarn):
+    """
+    Save a synthetic stack to files and check the results
+    """
+    stack = ImageStack.synthetic_stack()
+    stack_json = tmpdir / "output.json"
+    stack.export(str(stack_json), tile_format=format)
+    files = list([x for x in tmpdir.listdir() if str(x).endswith(format.file_ext)])
+    assert ImageStack.from_path_or_url(str(stack_json))
+    assert count == len(files)
+    with open(files[0], "rb") as fh:
+        format.reader_func(fh)

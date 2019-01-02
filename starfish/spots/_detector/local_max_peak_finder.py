@@ -1,6 +1,5 @@
 from typing import List, Optional, Tuple, Union
 
-import click
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -10,9 +9,11 @@ from skimage.measure import regionprops
 from sympy import Line, Point
 from tqdm import tqdm
 
+from starfish.config import StarfishConfig
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Features, Indices, Number, SpotAttributes
+from starfish.util import click
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
 
@@ -65,10 +66,6 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self.measurement_function = self._get_measurement_function(measurement_type)
 
         self.is_volume = is_volume
-        if self.is_volume:
-            raise ValueError('LocalMaxPeakFinder only works for 2D data, for 3D data, '
-                             'please use TrackpyLocalMaxPeakFinder')
-
         self.verbose = verbose
 
         # these parameters are useful for debugging spot-calls
@@ -103,7 +100,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # where we stop our threshold search
         stop_threshold = None
 
-        if self.verbose:
+        if self.verbose and StarfishConfig().verbose:
             threshold_iter = tqdm(thresholds)
             print('Determining optimal threshold ...')
         else:
@@ -145,7 +142,6 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         return thresholds, spot_counts
 
     def _select_optimal_threshold(self, thresholds: np.ndarray, spot_counts: List[int]) -> float:
-
         # calculate the gradient of the number of spots
         grad = np.gradient(spot_counts)
         self._grad = grad
@@ -234,7 +230,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # mask spots whose areas are too small or too large
         for spot_prop in spot_props:
             if spot_prop.area < self.min_obj_area or spot_prop.area > self.max_obj_area:
-                masked_image[spot_prop.coords[:, 0], spot_prop.coords[:, 1]] = 0
+                masked_image[0, spot_prop.coords[:, 0], spot_prop.coords[:, 1]] = 0
 
         # store re-calculated regionprops and labels based on the area-masked image
         self._labels = label(masked_image)[0]
@@ -257,12 +253,14 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # TODO how to get the radius? unlikely that this can be pulled out of
         # self._spot_props, since the last call to peak_local_max can find multiple
         # peaks per label
-        res = {Indices.X.value: self._spot_coords[:, 1],
-               Indices.Y.value: self._spot_coords[:, 0],
-               Indices.Z.value: np.zeros(len(self._spot_coords)),
+        res = {Indices.X.value: self._spot_coords[:, 2],
+               Indices.Y.value: self._spot_coords[:, 1],
+               Indices.Z.value: self._spot_coords[:, 0],
                Features.SPOT_RADIUS: 1,
                Features.SPOT_ID: np.arange(self._spot_coords.shape[0]),
-               Features.INTENSITY: data_image[self._spot_coords[:, 0], self._spot_coords[:, 1]]
+               Features.INTENSITY: data_image[self._spot_coords[:, 0],
+                                              self._spot_coords[:, 1],
+                                              self._spot_coords[:, 2]]
                }
 
         return SpotAttributes(pd.DataFrame(res))
@@ -298,9 +296,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             reference_image=blobs_image,
             reference_image_from_max_projection=reference_image_from_max_projection,
             measurement_function=self.measurement_function,
-            radius_is_gyration=False,
-            is_volume=self.is_volume
-        )
+            radius_is_gyration=False)
 
         return intensity_table
 
@@ -331,9 +327,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         "--measurement-type", default='max', type=str,
         help="How to aggregate pixel intensities in a spot")
     @click.option(
-        "--is-volume", default=False, action='store_false', help="Find spots in 3D or not")
+        "--is-volume", default=False, help="Find spots in 3D or not")
     @click.option(
-        "--verbose", default=True, action='store_true', help="Verbosity flag")
+        "--verbose", default=True, help="Verbosity flag")
     @click.pass_context
     def _cli(ctx, min_distance, min_obj_area, max_obj_area, stringency, threshold,
              min_num_spots_detected, measurement_type, is_volume, verbose):

@@ -65,7 +65,7 @@ primary_image.show_stack({Indices.CH.value: 0, Indices.Z.value: 17}, rescale=Tru
 # EPY: END code
 
 # EPY: START code
-bandpass = Filter.Bandpass(lshort=0.5, llong=7, threshold=None, truncate=4)
+bandpass = Filter.Bandpass(lshort=0.5, llong=7, truncate=4)
 bandpass.run(primary_image, verbose=True, in_place=True)
 # EPY: END code
 
@@ -158,11 +158,12 @@ spot_attributes.groupby('c').apply(lambda x: np.sum(x > 0))
 # EPY: START code
 import starfish.plot
 
-projection = primary_image.max_proj(Indices.Z, Indices.ROUND)
+mp = primary_image.max_proj(Indices.Z, Indices.ROUND)
+mp_numpy = mp._squeezed_numpy(Indices.Z, Indices.ROUND)
 
 # make the radius bigger to be clearer
 decoded['radius'] *= 4
 
 f, ax = plt.subplots(figsize=(20, 20))
-starfish.plot.decoded_spots(decoded, background_image=projection[0], ax=ax, spots_kwargs={'alpha': 0.3, 'cmap': plt.cm.Spectral})
+starfish.plot.decoded_spots(decoded, background_image=mp_numpy[0], ax=ax, spots_kwargs={'alpha': 0.3, 'cmap': plt.cm.Spectral})
 # EPY: END code

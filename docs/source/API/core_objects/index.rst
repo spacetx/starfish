@@ -50,6 +50,9 @@ serialization for use in single-cell analysis environments such as Seurat_ and S
    codebook.rst
 
 .. toctree::
+   expression_matrix.rst
+
+.. toctree::
    intensity_table.rst
 
 .. toctree::

@@ -1,12 +1,12 @@
 from typing import Type
 
-import click
-
 from starfish.codebook.codebook import Codebook
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
+from starfish.util import click
 from . import _base
-from . import per_round_max_channel_decoder
+
+import_all_submodules(__file__, __package__)
 
 
 class Decoder(PipelineComponent):
@@ -30,6 +30,7 @@ class Decoder(PipelineComponent):
     @click.option("--codebook", required=True, type=click.Path(exists=True))
     @click.pass_context
     def _cli(ctx, input, output, codebook):
+        """assign genes to spots"""
         ctx.obj = dict(
             component=Decoder,
             input=input,

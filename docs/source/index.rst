@@ -16,25 +16,25 @@ Starfish documentation
     installation/installation.rst
 
 .. toctree::
-    API/index.rst
-
-.. toctree::
-    contributing/contributing.md
-
-.. toctree::
-    debugging.rst
-
-.. toctree::
-    license/license.rst
+    usage/index.rst
 
 .. toctree::
     sptx-format/index.rst
 
 .. toctree::
-    usage/index.rst
+    API/index.rst
+
+.. toctree::
+    debugging.rst
+
+.. toctree::
+    contributing.rst
 
 .. toctree::
     glossary/glossary.md
+
+.. toctree::
+    license/index.rst
 
 .. toctree::
     citation.rst

@@ -216,12 +216,28 @@ def detect_spots(data_stack: ImageStack,
         )
 
     if reference_image_from_max_projection:
+        # Throw error here if tiles are not aligned. Trying to do this with unregistered
+        if not data_stack.tiles_aligned:
+            raise ValueError(
+                '"Detected tiles in the image stack that correspond to different positions '
+                'in coordinate space. Please make sure your data are '
+                'pre {pick one of "re-sliced" or "aligned"}, as per our spaceTx file format '
+                'specification [link to it]'
+            )
         reference_image = data_stack.max_proj(Indices.CH, Indices.ROUND)
         reference_image = reference_image._squeezed_numpy(Indices.CH, Indices.ROUND)
 
     group_by = {Indices.ROUND, Indices.CH}
 
     if reference_image is not None:
+        # Throw error here if tiles are not aligned. Trying to do this with unregistered
+        if not data_stack.tiles_aligned:
+            raise ValueError(
+                '"Detected tiles in the image stack that correspond to different positions '
+                'in coordinate space. Please make sure your data are '
+                'pre {pick one of "re-sliced" or "aligned"}, as per our spaceTx file format '
+                'specification [link to it]'
+            )
         reference_spot_locations = spot_finding_method(reference_image, **spot_finding_kwargs)
         intensity_table = measure_spot_intensities(
             data_image=data_stack,
@@ -230,12 +246,6 @@ def detect_spots(data_stack: ImageStack,
             radius_is_gyration=radius_is_gyration,
         )
     else:  # don't use a reference image, measure each
-        # Throw error here if tiles are not aligned. Trying to do this with unregistered
-        if not data_stack.tiles_aligned:
-            raise ValueError(
-                'Your data appears to be unregistered, using this method'
-                ' will produce nonsense results.'
-            )
         spot_finding_method = partial(spot_finding_method, **spot_finding_kwargs)
         spot_attributes_list = data_stack.transform(
             func=spot_finding_method,

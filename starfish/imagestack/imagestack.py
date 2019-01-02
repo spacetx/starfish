@@ -427,6 +427,7 @@ class ImageStack:
         Examples
         --------
         Setting a slice indicated by scalars.
+
             >>> import numpy as np
             >>> from starfish import ImageStack
             >>> from starfish.types import Indices
@@ -442,6 +443,7 @@ class ImageStack:
 
         Setting a slice indicated by scalars.  The data presented has a different axis order than
         the previous example.
+
             >>> import numpy as np
             >>> from starfish import ImageStack
             >>> from starfish.types import Indices
@@ -456,6 +458,7 @@ class ImageStack:
             >>> stack.set_slice(new_data, axes=[Indices.CH, Indices.ROUND]
 
         Setting a slice indicated by a range.
+
             >>> from starfish import ImageStack
             >>> from starfish.types import Indices
             >>> stack = ImageStack.synthetic_stack(3, 4, 5, 20, 10)

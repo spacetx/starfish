@@ -1,4 +1,5 @@
 from itertools import product
+from json import loads
 from typing import Dict, Optional, Union
 
 import numpy as np
@@ -8,7 +9,7 @@ import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.image._filter.util import preserve_float_range
-from starfish.types import Features, Indices, SpotAttributes
+from starfish.types import Features, Indices, LOG, SpotAttributes
 
 
 class IntensityTable(xr.DataArray):
@@ -163,6 +164,11 @@ class IntensityTable(xr.DataArray):
         intensities = cls(intensities, coords, dims, *args, **kwargs)
         return intensities
 
+    def get_log(self):
+        """Deserialize and return a list of pipeline components that have been applied
+         throughout a starfish session to create this Intensity Table"""
+        return loads(self.attrs[LOG])
+
     def save(self, filename: str) -> None:
         """Save an IntensityTable as a Netcdf File
 
@@ -233,6 +239,9 @@ class IntensityTable(xr.DataArray):
             loaded.coords,
             loaded.dims
         )
+        # maintain log
+        if LOG in loaded.attrs:
+            intensity_table.attrs[LOG] = loaded.attrs[LOG]
         return intensity_table
 
     def show(self, background_image: np.ndarray) -> None:

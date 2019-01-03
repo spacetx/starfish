@@ -122,6 +122,7 @@ class ImageStack:
         }
         self._tile_shape = tile_shape
         self._tile_data = tile_data
+        self._log: List[dict] = list()
 
         data_shape: MutableSequence[int] = []
         data_dimensions: MutableSequence[str] = []
@@ -956,6 +957,36 @@ class ImageStack:
                 data['barcode_index'].append(barcode_index)
 
         return pd.DataFrame(data)
+
+    @property
+    def log(self) -> List[dict]:
+        """
+        Returns a list of pipeline components that have been applied to this imagestack
+        as well as their corresponding runtime parameters.
+
+         ex.
+            [('GaussianHighPass', {'sigma': (3, 3), 'is_volume': False}),
+            ('GaussianLowPass', {'sigma': (1, 1), 'is_volume': False}])]
+
+        Means that this imagestack was created by applying a GaussianHighPass Filter then
+        a GaussianLowPass Filter to a starting imagestack
+
+        Returns
+        -------
+        List[Tuple[str, dict]]
+        """
+        return self._log
+
+    def update_log(self, class_instance):
+        """
+        Adds a new entry to the log list.
+
+        Parameters
+        ----------
+        class_instance: The instance of a class being applied to the imagestack
+        """
+        entry = {"method": class_instance.__class__.__name__, "arguments": class_instance.__dict__}
+        self._log.append(entry)
 
     @property
     def raw_shape(self) -> Tuple[int, int, int, int, int]:

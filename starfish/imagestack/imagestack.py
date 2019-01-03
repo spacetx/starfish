@@ -5,6 +5,7 @@ import warnings
 from copy import deepcopy
 from functools import partial
 from itertools import product
+from json import loads
 from typing import (
     Any,
     Callable,
@@ -51,11 +52,13 @@ from starfish.multiprocessing.shmem import SharedMemory
 from starfish.types import (
     Coordinates,
     Indices,
+    LOG,
     Number,
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
 )
 from starfish.util import StripArguments
+from starfish.util.JSONenocder import LogEncoder
 from ._mp_dataarray import MPDataArray
 from .dataorder import AXES_DATA, N_AXES
 
@@ -123,8 +126,11 @@ class ImageStack:
         }
         self._tile_shape = tile_shape
         self._tile_data = tile_data
-        self._log: List[dict] = list()
-
+        # check for existing log info
+        if LOG in tile_data.extras:
+            self._log = loads(tile_data.extras[LOG])
+        else:
+            self._log: List[dict] = list()
         data_shape: MutableSequence[int] = []
         data_dimensions: MutableSequence[str] = []
         data_tick_marks: MutableMapping[str, Sequence[int]] = dict()
@@ -1039,6 +1045,8 @@ class ImageStack:
             Format in which each 2D plane should be written.
 
         """
+        # Add log data to extras
+        self._tile_data.extras[LOG] = LogEncoder().encode(self.log)
         tileset = TileSet(
             dimensions={
                 Indices.ROUND,

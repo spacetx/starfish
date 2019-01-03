@@ -1202,10 +1202,10 @@ class ImageStack:
             )
 
         collection = build_image(
-            1,
-            num_round,
-            num_ch,
-            num_z,
+            range(1),
+            range(num_round),
+            range(num_ch),
+            range(num_z),
             tile_fetcher,
         )
         tileset = list(collection.all_tilesets())[0][1]

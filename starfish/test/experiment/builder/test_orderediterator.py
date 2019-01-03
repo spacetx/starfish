@@ -3,7 +3,7 @@ from starfish.types import Indices
 
 
 def test_round_then_ch():
-    results = list(ordered_iterator(((Indices.ROUND, 3), (Indices.CH, 2))))
+    results = list(ordered_iterator(((Indices.ROUND, range(3)), (Indices.CH, range(2)))))
     for ix in (0, 1):
         assert results[ix][Indices.ROUND] == 0
     for ix in (2, 3):
@@ -18,7 +18,7 @@ def test_round_then_ch():
 
 
 def test_ch_then_round():
-    results = list(ordered_iterator(((Indices.CH, 2), (Indices.ROUND, 3))))
+    results = list(ordered_iterator(((Indices.CH, range(2)), (Indices.ROUND, range(3)))))
     for ix in (0, 3):
         assert results[ix][Indices.ROUND] == 0
     for ix in (1, 4):

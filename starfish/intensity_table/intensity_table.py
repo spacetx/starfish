@@ -10,7 +10,6 @@ import xarray as xr
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.image._filter.util import preserve_float_range
 from starfish.types import Features, Indices, LOG, SpotAttributes
-from starfish.util.JSONenocder import LogEncoder
 
 
 class IntensityTable(xr.DataArray):
@@ -165,6 +164,11 @@ class IntensityTable(xr.DataArray):
         intensities = cls(intensities, coords, dims, *args, **kwargs)
         return intensities
 
+    def get_log(self):
+        """Deserialize and return a list of pipeline components that have been applied
+         throughout a starfish session to create this Intensity Table"""
+        return loads(self.attrs[LOG])
+
     def save(self, filename: str) -> None:
         """Save an IntensityTable as a Netcdf File
 
@@ -174,14 +178,7 @@ class IntensityTable(xr.DataArray):
             Name of Netcdf file
 
         """
-
-        # make a copy of the IT for saving so that we can JSON encode the Log
-        # without modifying the original table.
-        copy = self.copy(True)
-        if LOG in self.attrs:
-            # if log info, json encode it
-            copy.attrs[LOG] = LogEncoder().encode(copy.attrs[LOG])
-        copy.to_netcdf(filename)
+        self.to_netcdf(filename)
 
     def save_mermaid(self, filename: str) -> pd.DataFrame:
         """
@@ -244,7 +241,7 @@ class IntensityTable(xr.DataArray):
         )
         # maintain log
         if LOG in loaded.attrs:
-            intensity_table.attrs[LOG] = loads(loaded.attrs[LOG])
+            intensity_table.attrs[LOG] = loaded.attrs[LOG]
         return intensity_table
 
     def show(self, background_image: np.ndarray) -> None:

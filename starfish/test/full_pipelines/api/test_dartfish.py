@@ -134,7 +134,7 @@ def test_dartfish_pipeline_cropped_data():
 
     spot_intensities = dartfish.initial_spot_intensities
 
-    pipeline_log = spot_intensities.attrs['log']
+    pipeline_log = spot_intensities.get_log()
 
     assert pipeline_log[0]['method'] == 'ScaleByPercentile'
     assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
@@ -144,12 +144,8 @@ def test_dartfish_pipeline_cropped_data():
     fp = tempfile.NamedTemporaryFile()
     spot_intensities.save(fp.name)
 
-    pipeline_log = spot_intensities.attrs['log']
-    assert pipeline_log[0]['method'] == 'ScaleByPercentile'
-    assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
-
     loaded_intensities = IntensityTable.load(fp.name)
-    pipeline_log = loaded_intensities.attrs['log']
+    pipeline_log = loaded_intensities.get_log()
 
     assert pipeline_log[0]['method'] == 'ScaleByPercentile'
     assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'

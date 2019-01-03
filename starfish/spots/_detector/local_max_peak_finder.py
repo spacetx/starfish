@@ -230,7 +230,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # mask spots whose areas are too small or too large
         for spot_prop in spot_props:
             if spot_prop.area < self.min_obj_area or spot_prop.area > self.max_obj_area:
-                masked_image[spot_prop.coords[:, 0], spot_prop.coords[:, 1]] = 0
+                masked_image[0, spot_prop.coords[:, 0], spot_prop.coords[:, 1]] = 0
 
         # store re-calculated regionprops and labels based on the area-masked image
         self._labels = label(masked_image)[0]

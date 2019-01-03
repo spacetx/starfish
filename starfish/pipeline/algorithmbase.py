@@ -1,6 +1,8 @@
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import LOG
+from starfish.util.JSONenocder import LogEncoder
+
 
 class AlgorithmBaseType(type):
 
@@ -38,7 +40,7 @@ class AlgorithmBaseType(type):
                     it = result
                     if isinstance(result, tuple):
                         it = result[0]
-                    it.attrs.update({LOG: stack.log})
+                    it.attrs.update({LOG: LogEncoder().encode(stack.log)})
             return result
         return helper
 

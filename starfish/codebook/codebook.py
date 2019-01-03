@@ -244,17 +244,24 @@ class Codebook(xr.DataArray):
                     f'{missing_fields}')
 
         target_names = [w[Features.TARGET] for w in code_array]
-        code_data = cls._empty_codebook(target_names, n_ch, n_round)
 
+        # Copied from _empty_codebook
+        codes_index = pd.Index(target_names, name=Features.TARGET)
+        data = np.zeros((codes_index.shape[0], n_ch, n_round), dtype=np.uint8)
         # fill the codebook
-        for code_dict in code_array:
-            codeword = code_dict[Features.CODEWORD]
-            target = code_dict[Features.TARGET]
-            for entry in codeword:
-                code_data.loc[target, entry[Indices.CH], entry[Indices.ROUND]] = entry[
-                    Features.CODE_VALUE]
-
-        return code_data
+        for i, code_dict in enumerate(code_array):
+            for bit in code_dict[Features.CODEWORD]:
+                ch = int(bit[Indices.CH])
+                r = int(bit[Indices.ROUND])
+                data[i, ch, r] = int(bit[Features.CODE_VALUE])
+        return cls(
+            data=data,
+            coords=(
+                codes_index,
+                pd.Index(np.arange(n_ch), name=Indices.CH.value),
+                pd.Index(np.arange(n_round), name=Indices.ROUND.value),
+            )
+        )
 
     @classmethod
     def from_json(

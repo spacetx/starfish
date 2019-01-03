@@ -7,7 +7,7 @@ import numpy as np
 import starfish
 from starfish import IntensityTable
 from starfish.spots import TargetAssignment
-from starfish.types import Features, LOG
+from starfish.types import Features
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(starfish.__file__)))
 os.environ["USE_TEST_DATA"] = "1"
@@ -127,7 +127,7 @@ def test_iss_pipeline_cropped_data():
     lab = TargetAssignment.Label()
     assigned = lab.run(label_image, decoded)
 
-    pipeline_log = assigned.attrs[LOG]
+    pipeline_log = assigned.get_log()
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'FourierShiftRegistration'
@@ -137,7 +137,7 @@ def test_iss_pipeline_cropped_data():
     fp = tempfile.NamedTemporaryFile()
     assigned.save(fp.name)
     loaded_intensities = IntensityTable.load(fp.name)
-    pipeline_log = loaded_intensities.attrs['log']
+    pipeline_log = loaded_intensities.get_log()
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'FourierShiftRegistration'

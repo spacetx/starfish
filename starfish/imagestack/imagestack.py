@@ -180,7 +180,17 @@ class ImageStack:
             coords=coordinates_tick_marks,
         )
 
+        self._tiles_aligned = True
         all_indices = list(self._iter_indices({Indices.ROUND, Indices.CH, Indices.Z}))
+        first_indices = all_indices[0]
+        tile = tile_data.get_tile(r=first_indices[Indices.ROUND],
+                                  ch=first_indices[Indices.CH],
+                                  z=first_indices[Indices.Z])
+        # only compare X,Y coords
+        starting_coords = [
+            tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
+            tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
+        ]
         for indices in tqdm(all_indices):
             tile = tile_data.get_tile(
                 r=indices[Indices.ROUND], ch=indices[Indices.CH], z=indices[Indices.Z])
@@ -195,6 +205,8 @@ class ImageStack:
                 tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
                 tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
             ]
+            if starting_coords != coordinates_values:
+                self._tiles_aligned = False
             if Coordinates.Z in tile.coordinates:
                 coordinates_values.extend([
                     tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1],
@@ -957,6 +969,14 @@ class ImageStack:
                 data['barcode_index'].append(barcode_index)
 
         return pd.DataFrame(data)
+
+    @property
+    def tiles_aligned(self) -> bool:
+        """
+        Returns True if all the tiles in this ImageStack have the same physical coordinates
+        and False if not.
+        """
+        return self._tiles_aligned
 
     @property
     def log(self) -> List[dict]:

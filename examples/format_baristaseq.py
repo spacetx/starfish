@@ -5,7 +5,8 @@ docstring for `format_data`
 """
 
 import os
-from typing import Callable, Mapping, Tuple, Union
+import shutil
+from typing import Mapping, Tuple, Union
 
 import click
 import numpy as np
@@ -40,11 +41,8 @@ class BaristaSeqTile(FetchedTile):
     def format(self) -> ImageFormat:
         return ImageFormat.TIFF
 
-    @property
-    def tile_data(self) -> Callable[[], np.ndarray]:
-        def future():
-            return imread(self.file_path)
-        return future
+    def tile_data(self) -> np.ndarray:
+        return imread(self.file_path)
 
 
 class BaristaSeqTileFetcher(TileFetcher):
@@ -52,12 +50,12 @@ class BaristaSeqTileFetcher(TileFetcher):
         self.input_dir = input_dir
 
     def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
-        subdir = 'primary'
-        round_dir = f'r{hyb}'
+        subdir = "primary"
+        round_dir = f"r{hyb}"
         if hyb == 0:
-            filename = f'T{fov+1:05}C{ch+1:02}Z{z+1:03}.tif'
+            filename = f"T{fov+1:05}C{ch+1:02}Z{z+1:03}.tif"
         else:
-            filename = f'alignedT{fov+1:05}C{ch+1:02}Z{z+1:03}.tif'
+            filename = f"alignedT{fov+1:05}C{ch+1:02}Z{z+1:03}.tif"
         file_path = os.path.join(self.input_dir, subdir, round_dir, filename)
         return BaristaSeqTile(file_path)
 
@@ -67,11 +65,12 @@ class BaristaSeqNucleiTileFetcher(TileFetcher):
         self.input_dir = input_dir
 
     def get_tile(self, fov: int, hyb: int, ch: int, z: int) -> FetchedTile:
-        subdir = 'nissl'
-        filename = f'T00001C05Z{z+1:03}.tif'
+        subdir = "nissl"
+        filename = f"T00001C05Z{z+1:03}.tif"
         file_path = os.path.join(self.input_dir, subdir, filename)
 
         return BaristaSeqTile(file_path)
+
 
 @click.command()
 @click.option("--input-dir", type=str, required=True, help="input directory containing images")
@@ -91,11 +90,6 @@ def format_data(input_dir, output_dir) -> None:
         BaristaSeq/cropped_formatted/experiment.json"
     """
 
-    def add_codebook(experiment_json_doc):
-        # this just needs to be copied over, but here we make the link
-        experiment_json_doc['codebook'] = "codebook.json"
-        return experiment_json_doc
-
     num_fovs = 1
 
     primary_image_dimensions: Mapping[Union[str, Indices], int] = {
@@ -105,7 +99,7 @@ def format_data(input_dir, output_dir) -> None:
     }
 
     aux_name_to_dimensions: Mapping[str, Mapping[Union[str, Indices], int]] = {
-        'nuclei': {
+        "nuclei": {
             Indices.ROUND: 1,
             Indices.CH: 1,
             Indices.Z: 17,
@@ -121,12 +115,17 @@ def format_data(input_dir, output_dir) -> None:
         aux_name_to_dimensions=aux_name_to_dimensions,
         primary_tile_fetcher=BaristaSeqTileFetcher(input_dir),
         aux_tile_fetcher={
-            'nuclei': BaristaSeqNucleiTileFetcher(input_dir, 'nuclei'),
+            "nuclei": BaristaSeqNucleiTileFetcher(input_dir, "nuclei"),
         },
         tile_format=ImageFormat.TIFF,
-        postprocess_func=add_codebook,
         default_shape=DEFAULT_TILE_SHAPE
     )
+
+    shutil.copyfile(
+        src=os.path.join(input_dir, "codebook.json"),
+        dst=os.path.join(output_dir, "codebook.json")
+    )
+
 
 if __name__ == "__main__":
     format_data()

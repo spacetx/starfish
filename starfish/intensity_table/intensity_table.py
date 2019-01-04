@@ -9,8 +9,7 @@ import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.image._filter.util import preserve_float_range
-from starfish.types import Features, Indices, LOG, SpotAttributes
-from starfish.types._constants import STARFISH
+from starfish.types import Features, Indices, LOG, SpotAttributes, STARFISH
 
 
 class IntensityTable(xr.DataArray):

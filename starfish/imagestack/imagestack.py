@@ -56,8 +56,8 @@ from starfish.types import (
     Number,
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
+    STARFISH
 )
-from starfish.types._constants import STARFISH
 from starfish.util.JSONenocder import LogEncoder
 from ._mp_dataarray import MPDataArray
 from .dataorder import AXES_DATA, N_AXES

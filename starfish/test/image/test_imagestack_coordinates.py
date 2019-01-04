@@ -138,6 +138,7 @@ class AlignedTiles(FetchedTile):
     """Tiles that all have the same physical coordinates"""
     def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
         super().__init__()
+        self._round = _round
 
     @property
     def shape(self) -> Tuple[int, ...]:
@@ -148,7 +149,7 @@ class AlignedTiles(FetchedTile):
         return {
             Coordinates.X: 1,
             Coordinates.Y: 4,
-            Coordinates.Z: 3,
+            Coordinates.Z: round_to_z(self._round)[0],
         }
 
     @property
@@ -159,7 +160,7 @@ class AlignedTiles(FetchedTile):
         return np.ones((HEIGHT, WIDTH), dtype=np.float32)
 
 
-def test_aligend_coordinates():
+def test_aligned_coordinates():
     """Set up an ImageStack where all the tiles are aligned (have the same physical coordinate values).
     Assert that the resulting Imagestack's tiles_aligned attribute is True
     """

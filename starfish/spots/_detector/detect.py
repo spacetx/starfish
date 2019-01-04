@@ -216,14 +216,6 @@ def detect_spots(data_stack: ImageStack,
         )
 
     if reference_image_from_max_projection:
-        # Throw error here if tiles are not aligned. Trying to do this with unregistered
-        if not data_stack.tiles_aligned:
-            raise ValueError(
-                '"Detected tiles in the image stack that correspond to different positions '
-                'in coordinate space. Please make sure your data are '
-                'pre {pick one of "re-sliced" or "aligned"}, as per our spaceTx file format '
-                'specification [link to it]'
-            )
         reference_image = data_stack.max_proj(Indices.CH, Indices.ROUND)
         reference_image = reference_image._squeezed_numpy(Indices.CH, Indices.ROUND)
 
@@ -233,10 +225,9 @@ def detect_spots(data_stack: ImageStack,
         # Throw error here if tiles are not aligned. Trying to do this with unregistered
         if not data_stack.tiles_aligned:
             raise ValueError(
-                '"Detected tiles in the image stack that correspond to different positions '
-                'in coordinate space. Please make sure your data are '
-                'pre {pick one of "re-sliced" or "aligned"}, as per our spaceTx file format '
-                'specification [link to it]'
+                'Detected tiles in the image stack that correspond to different positions '
+                'in coordinate space. Please make sure your data are'
+                'pre aligned, as per our spaceTx file format specification'
             )
         reference_spot_locations = spot_finding_method(reference_image, **spot_finding_kwargs)
         intensity_table = measure_spot_intensities(

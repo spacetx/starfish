@@ -168,13 +168,6 @@ def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
         Indices.Z: 29,
     }
 
-    codebook = parse_codebook(codebook_csv)
-    codebook.to_json("codebook.json")
-
-    def post_process_func(experiment_json_doc):
-        experiment_json_doc["codebook"] = "codebook.json"
-        return experiment_json_doc
-
     write_experiment_json(
         path=output_dir,
         fov_count=1,
@@ -182,9 +175,13 @@ def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
         aux_name_to_dimensions={},
         primary_tile_fetcher=primary_tile_fetcher,
         tile_format=ImageFormat.TIFF,
-        postprocess_func=post_process_func,
         dimension_order=(Indices.ROUND, Indices.CH, Indices.Z)
     )
+
+    # Note: this must trigger AFTER write_experiment_json, as it will clobber the codebook with
+    # a placeholder.
+    codebook = parse_codebook(codebook_csv)
+    codebook.to_json("codebook.json")
 
     return 0
 

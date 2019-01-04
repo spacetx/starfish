@@ -39,16 +39,16 @@ The data manifest is a file that includes the locations of all fields of view fo
 
 ### Field of View (FOV)
 A collection of Image Tiles corresponding to a specific volume or plane of the sample, under which the signal for all channels and all imaging rounds were acquired. All tiles within this FOV are the same size, but the manifest allows for different spatial coordinates for different imaging rounds or channels (to accommodate slight movement between rounds, for example).
-In microscopy, a field of view corresponds to the area of the camera sensor, and many such fields of view are expected to be taken per tissue slice.
+In microscopy, a field of view corresponds to the camera sensor mapped to the sample plane, and many such fields of view are expected to be taken per tissue slice.
 
 ### Indices (Field of View):
 Indices are used to navigate within a field of view, and comprise the physical dimensions of pixel space (X, Y), the z-plane, channel (C) and imaging round (R) of a field of view.
 
 ### Image Tile
-A single plane, single channel 2D image. In the manifest, each tile has information about it’s (X,Y,Z) coordinates in space, and information about which imaging round (R) and/or fluorescence channel (C) it was acquired under.
+A single plane, single channel, single round 2D image. In the manifest, each tile has information about it’s (X,Y,Z) coordinates in space, and information about which imaging round (R) and/or fluorescence channel (C) it was acquired under.
 
 ### Coordinates (Tile):
-Coordinates refer to the physical location of a Tile with respect to some independent reference.
+Coordinates refer to the physical location of a Tile with respect to some independent reference.  If a pair of values are provided, it corresponds to the physical coordinates of the edges.  If a single value is provided, it corresponds to the center of the tile.  For x and y, two values are required.  For z, both a single value and a pair of values are valid.
 
 ### Indices (Tile):
 Indices indicate which round, channel, and z-plane a given (x, y) Tile corresponds to.

@@ -1,5 +1,4 @@
 import functools
-import json
 import os
 from typing import Mapping, Tuple, Union
 
@@ -9,6 +8,7 @@ import pandas as pd
 import skimage.io
 from slicedimage import ImageFormat
 
+from starfish import Codebook
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.types import Coordinates, Features, Indices, Number
 
@@ -64,9 +64,9 @@ class SeqFISHTileFetcher(TileFetcher):
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         """Returns dummy coordinates for this single-FoV TileFetcher"""
         return {
-            Coordinates.X: (0., 0.),
-            Coordinates.Y: (0., 0.),
-            Coordinates.Z: (0., 0.),
+            Coordinates.X: (0., 1.),
+            Coordinates.Y: (0., 1.),
+            Coordinates.Z: (0., 0.1),
         }
 
     def get_tile(self, fov: int, r: int, ch: int, z: int) -> SeqFISHTile:
@@ -92,7 +92,7 @@ class SeqFISHTileFetcher(TileFetcher):
         return SeqFISHTile(file_path, self.coordinates, z, ch)
 
 
-def parse_codebook(codebook_csv: str) -> Mapping:
+def parse_codebook(codebook_csv: str) -> Codebook:
     """Parses a codebook csv file provided by SeqFISH developers.
 
     Parameters
@@ -104,8 +104,8 @@ def parse_codebook(codebook_csv: str) -> Mapping:
 
     Returns
     -------
-    Mapping :
-        Dictionary representation of a Codebook object that adheres to SpaceTx format.
+    Codebook :
+        Codebook object in SpaceTx format.
     """
     csv: pd.DataFrame = pd.read_csv(codebook_csv, index_col=0)
     integer_round_ids = range(csv.shape[1])
@@ -121,16 +121,14 @@ def parse_codebook(codebook_csv: str) -> Mapping:
             Features.TARGET: gene
         })
 
-    return {
-        "version": "0.0.0",
-        "mappings": mappings
-    }
+    return Codebook.from_code_array(mappings)
 
 
 @click.command()
 @click.option("--input-dir", type=str, required=True, help="input directory containing images")
 @click.option("--output-dir", type=str, required=True, help="output directory for formatted data")
-@click.option("--codebook-csv", type=str, help="csv file containing barcode:target mapping")
+@click.option("--codebook-csv", type=str, required=True,
+              help="csv file containing barcode:target mapping")
 def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
     """CLI entrypoint for spaceTx format construction for SeqFISH data
 
@@ -170,9 +168,12 @@ def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
         Indices.Z: 29,
     }
 
-    # def post_process_func(experiment_json_doc):
-    #     experiment_json_doc["codebook"] = "codebook.json"
-    #     return experiment_json_doc
+    codebook = parse_codebook(codebook_csv)
+    codebook.to_json("codebook.json")
+
+    def post_process_func(experiment_json_doc):
+        experiment_json_doc["codebook"] = "codebook.json"
+        return experiment_json_doc
 
     write_experiment_json(
         path=output_dir,
@@ -181,14 +182,9 @@ def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
         aux_name_to_dimensions={},
         primary_tile_fetcher=primary_tile_fetcher,
         tile_format=ImageFormat.TIFF,
-        # postprocess_func=post_process_func,
+        postprocess_func=post_process_func,
         dimension_order=(Indices.ROUND, Indices.CH, Indices.Z)
     )
-
-    if codebook_csv:
-        with open(os.path.join(output_dir, "codebook.json"), "w") as f:
-            codebook = parse_codebook(codebook_csv)
-            json.dump(codebook, f)
 
     return 0
 

@@ -212,8 +212,9 @@ Where parenthetical fractions are listed, they represent progress towards our go
 1. CLI and API (Java) can parse [supported file formats](https://docs.openmicroscopy.org/bio-formats/6.0.0-m3/supported-formats.html) into SpaceTx-formatted datasets<sup>[5](#fn5)</sup>
 2. Installation of the tool can be accomplished by downloading an archive with a launcher script or by using pre-built docker images
 3. Users and/or data wranglers can point the tool at one of the [stated files](https://docs.openmicroscopy.org/bio-formats/6.0.0-m3/formats/dataset-table.html) for each FOV to generate 2D TIFFs as well as the necessary SpaceTX JSON files
-4. In the case that multiple “series” are present in a single dataset, the user must specify which series to use
-5. The index of the field of view (0-based) must be passed during creation
+4. In the case that multiple independent images (a “series”) are present in a single dataset, the user must specify which offset to use
+5. Multiple datasets can be passed in which case each in order is considered a separate field of view
+5. The starting index of the field of view may be changed from the default of zero
 6. If a codebook exists at the time of creation, it can be passed to the tool for inclusion in the JSON. Otherwise, a dummy codebook will be created
 
 

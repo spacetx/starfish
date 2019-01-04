@@ -1,13 +1,13 @@
 # _starfish_ Roadmap
-This document describes the features and timeline for future work on the _starfish_ package.
+This document describes the features and timeline for current work on the _starfish_ package.
 
-The purpose of this document is to arrive at a detailed list of short-term key deliverables that we aim to deliver by June 2019. To accomplish this, we first outline our primary [use cases](#use-cases). With these to guide us, we then define milestones for releases that support these needs [**what we need to build**](#what-we-need-to-build:-starfish-0.1.0), and candidate future use cases which we may consider building [**what we can build later**](candidates-features-for-0.2.0+).
+The purpose of this document is to describe the deliverables that we intend to deliver by June 2019. To accomplish this, we first outline our primary [use cases](#use-cases). With these to guide us, we then define milestones for releases that support these needs [**what we need to build**](#what-we-need-to-build:-starfish-0.1.0), and candidate features which we may consider building in the future [**what we can build later**](candidates-features-for-0.2.0+).
 
 ## Use cases
-_starfish_ is being developed to support the data processing and benchmarking needs of the SpaceTx consortium. We have identified a set of use cases from these groups that _starfish_ will support. Feedback from these users will set the course for future work on _starfish_, beyond the milestones identified here.
+_starfish_ is being developed to support the data processing and benchmarking needs of the SpaceTx consortium and the Chan Zuckerberg Biohub. We have identified a set of use cases from these groups that _starfish_ will support. Feedback from these users will set the course for future work on _starfish_, beyond the milestones identified here.
 
-### Local processing of data for SpaceTx Users
-Some SpaceTx Assays have moderate processing requirements. Users of these assays would like to be able to use _starfish_ to process multiple fields of view of SpaceTx data on their local machines to enable further parameter tuning and spot-checking of results. To support this, we will define a Python API for running _starfish_ on local machines that processes experiments of arbitrary numbers of fields of view, logs, stores data provenance, is multi-processing enabled. Users will also be able to run _starfish_ pipelines through a command-line interface (CLI).
+### Local processing of data
+Some image-based transcriptomics asays have moderate processing requirements. Users of these assays would like to be able to use _starfish_ to process multiple fields of view of data on their local machines to enable further parameter tuning and spot-checking of results. To support this, we will define a Python API for running _starfish_ on local machines that processes experiments of arbitrary numbers of fields of view, logs, stores data provenance, is multi-processing enabled. Users will also be able to run _starfish_ pipelines through a command-line interface (CLI).
 
 ### Parameter selection on single fields of view
 Image-based transcriptomics workflows are highly dependent upon the tissue, organism, and probes being assayed. Researchers typically select image processing parameters by analyzing and optimizing parameter selection in a single field of view. In support of this use case, _starfish_ must enable users to process data for any SpaceTx assay on the local computer of their choosing and interact with visualization tools necessary to evaluate parameter decisions. It must support this functionality for users that are not proficient in Python.
@@ -23,7 +23,7 @@ The SpaceTx consortium Working Group 6 is devoted to comparing the results of ea
 
 By enabling the creation of standardized, highly compressed outputs that are compatible with both R and Python, _starfish_ will enable working Group 6 to ask questions across all methods like "how many cells/mm2 belonging to the Sst-Chodl cluster were found in layer 4 of mouse primary visual cortex?"  or "Within the inhibitory cell class, what is the abundance and distribution of Pvalb+ and VIP+ cells in human cortex?"
 
-Finally, with a standard format to save and load Cell x Gene tables, visualization of this data will be relatively straightforward for analysts in contributor labs and Working Group 6 members.
+Finally, with a standard format to save and load Cell x Gene tables, visualization of this data will be straightforward for analysts in contributor labs and Working Group 6 members.
 
 ## What is _starfish_?
 We aim for _starfish_ to be a comprehensive platform for the processing of image-based transcriptomics experiments. It should be intuitive to use, fast, and should not require extensive experience with python programming. However, at least during the initial development period, _starfish_ will require domain experience in image processing, as our target users are experts in image generation and processing.
@@ -31,7 +31,7 @@ We aim for _starfish_ to be a comprehensive platform for the processing of image
 ### A General Format and Object Model for Image-based Transcriptomics
 _starfish_ defines a general set of data formats (and paired python object implementations) that (1) enable efficient storage and access for a related set of images broken up into single fields of view<sup>[6](#fn6)</sup>, (2) enable storage and utilization of a codebook, which defines how sets of images are combined to decode spot patterns into biological targets, and (3) defines a pipeline recipe which can be interpreted by _starfish_'s pipeline runner to process an experiment.
 
-To be eligible for processing, images in SpaceTx Format must either be pre-aligned, such that the x-y location of each tile in a Field of View is the same. Image data that does not adhere to this requirement will not be processable with _starfish_ without addition of user-contributed registration pipeline components.
+Currently, starfish needs images in SpaceTx Format must either be pre-aligned, such that the x-y location of each tile in a Field of View is the same. Image data that does not adhere to this requirement will not be processable with _starfish_. See [Candidate features for future releases](#candidate-features-for-future-releases) for more discussion of future directions here.
 
 ### A Modular Library of Pipeline Components
 _starfish_ enables the construction of arbitrary image-based transcriptomics pipelines by implementing the union of algorithms used by SpaceTx labs while combining similar approaches into a simplified subset. These algorithms can be linearly combined to process individual fields of view, requiring no more than 16GB ram for any individual pipeline component. The set of algorithms must include:
@@ -89,7 +89,7 @@ Sequential smFISH assays that capture volumetric images produce fields of view t
 ### A Modular Library of Pipeline Components
 
 #### Documentation
-_starfish_'s API documentation is minimal. We need to add basic documentation that describes how to use each component, and how to fit parameters. This should be adequate for a skilled computational user to pick up _starfish_ and use it to make a pipeline. _starfish_ should also clearly document how a developer can contribute code they need for their analyses to the project. We will need to source feedback from users on what parts of the documentation provoke confusion.
+We need to add basic documentation that describes how to use each component, and how to fit parameters. This should be adequate for a skilled computational user to pick up _starfish_ and use it to make a pipeline. _starfish_ should also clearly document how a developer can contribute code they need for their analyses to the project. We will need to source feedback from users on what parts of the documentation provoke confusion.
 
 #### Image re-scaling & normalization
 Several approaches normalize images to overcome different channel intensities or round biases. We should implement a pipeline component to support this that samples from images within or across fields of view. Determine the minimum amount of data to sample from images across the experiment to equalize their intensities.
@@ -162,7 +162,7 @@ A more detailed description of the features of each of these releases follows.
 1. Library is easily installed on operating systems used by SpaceTx users
 2. Basic for-loop implementation of a pipeline runner to de-risk scale problems that result from processing multiple fields of view, then integrating results for biological analysis
 3. Explicit definition/specification of a pipeline recipe
-4. API for processing multiple FOVs for each SpaceTx group given data in SpaceTx format and a pipeline recipe
+4. API for local processing multiple FOVs for each SpaceTx group given data in SpaceTx format and a pipeline recipe
 5. Translate each example pipeline into an example pipeline recipe
 6. Visualization tooling to enable parameter selection on small datasets to tweak pipeline recipes
 7. API leverages local parallelism

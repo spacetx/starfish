@@ -136,22 +136,29 @@ SeqFISH implements a decoder that carries out a local search of adjacent pixels 
 - [ ] Documented upload procedures to s3
 
 ## Deliverables, milestones, and timeline
-We believe that delivering the following features will enable the above use cases.
 
-To build the features that support these use cases, we have two major phases of development in the first half of 2019, each culminating in minor releases of _starfish_. The first release (0.1.0) will support the needs of SpaceTx members to be able to create _starfish_ pipelines, while the second (0.2.0) will permit running these pipelines at scale.
+The features that meet these needs can be broken down into 9 categories, each of which centers on a user need
+
+1. Library is usable by SpaceTx for generating pipeline recipes and processing their data on individual machines
+2. Documentation supports new users to learn to use _starfish_ without our involvement
+3. _starfish_ facilitates interaction with external visualization software (Napari, FIJI) to enable users to tune image processing parameters
+4. Library can be used to reproduce collaborator's results for single fields of view
+5. The _starfish_ team can run _starfish_ at scale to process the initial set of SpaceTx datasets
+6. Experiment-scale output formats can be loaded on local computers and are adequately expressive to enable QC workflows and specified by our users
+7. _starfish_ output formats enable external annotation to place the data in anatomical and cell type context and allows comparison across methods
+8. Data is easily converted into SpaceTx format from common imaging formats
+9. _starfish_ references example data for each supported assay that can be used by researchers to learn starfish and for scientific comparison of supported assays
+
+To build these feature, we have two major phases of development in the first half of 2019, each culminating in minor releases of _starfish_. The first release (0.1.0) will support the needs of SpaceTx members to be able to create _starfish_ pipelines, while the second (0.2.0) will permit running these pipelines at scale.
 
 - 0.1.0 (April 2019): SpaceTx users are able to define _starfish_ pipelines and run them locally
 - 0.2.0 (June 2019): Insights can be gained from SpaceTx pipelines run at scale
 
 A more detailed description of the features of each of these releases follows.
 
-### 0.2.0
+### 0.1.0  (April 2019): SpaceTx users are able to define _starfish_ pipelines and run them locally
 
-3. Library is usable by SpaceTx for generating pipeline recipes on a single or small number of FOVs (minimum) or processing an entire experiment on individual machines (at best)
-5. Documentation that supports new users to learn to use _starfish_ without our involvement
-6. _starfish_ facilitates easy interaction with external visualization software (Napari, FIJI) to enable users to tune image processing parameters
-
-#### Library is usable by SpaceTx for generating pipeline recipes (minimum) or processing their data on individual machines (at best)
+#### Library is usable by SpaceTx for generating pipeline recipes and processing their data on individual machines
 1. Library is easily installed on operating systems used by SpaceTx users
 2. Basic for-loop implementation of a pipeline runner to de-risk scale problems that result from processing multiple fields of view, then integrating results for biological analysis
 3. Explicit definition/specification of a pipeline recipe
@@ -173,20 +180,16 @@ A more detailed description of the features of each of these releases follows.
 2. _starfish_ has a method to plot spots from an IntensityTable onto an ImageStack in Napari
 3. _starfish_ can dump ImageStacks for viewing 2D TIFFs in FIJI
 
-### 0.3.0
+#### Library that can be used to reproduce collaborator's results for single fields of view
+2. Create a data conversion tool to wrangle contributed data into SpaceTx format (0/10)
+3. Specify an input file format and corresponding object model that supports each assay type (8/10)
 
-2. Library that can be used to reproduce collaborator's results for single fields of view
-4. A way for the _starfish_ team to run _starfish_ at scale to process the initial set of SpaceTx datasets
-7. Experiment-scale output formats can be loaded on local computers and are adequately expressive to enable QC workflows and specified by our users.
-8. _starfish_ output formats enable external annotation to place the data in anatomical and cell type context and allows comparison across methods
-1. Data is easily converted into SpaceTx format from common imaging formats
+### 0.2.0 (June 2019): Insights can be gained from SpaceTx pipelines run at scale
 
 #### Library that can be used to reproduce collaborator's results for single fields of view
 Where parenthetical fractions are listed, they represent progress towards our goals at the time this roadmap was written.
 
 1. Obtain example data, pipelines, and results from each SpaceTx group (9/10)<sup>[1](#fn1)</sup>
-2. Create a data conversion tool to wrangle contributed data into SpaceTx format (0/10)
-3. Specify an input file format and corresponding object model that supports each assay type (8/10)
 4. Specify output file format specifications for detected spots, gene expression matrices, and detected objects (e.g. cells) (0/3), and corresponding object models  (2/3)<sup>[2](#fn2)</sup>
 5. Implementation, in python, of a single-fov proof of concept pipeline that closely matches the processing results of data generators for 9 SpaceTx groups. This is computational biology work to understand the characteristics of the data & assay, and can be done outside _starfish_ as necessary to identify its requirements. (3/10)<sup>[3](#fn3)</sup>
 6. Implementation, in _starfish_, of the same single-FOV pipelines above (3/10)

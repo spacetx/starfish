@@ -26,6 +26,10 @@ PHYSICAL_COORDINATE_DIMENSION = "physical_coordinate"
 This is the xarray dimension name for the physical coordinates of the tiles.
 """
 
+STARFISH = 'starfish'
+"""
+Attribute on Imagestack and IntensityTable for storing starfish related info
+"""
 LOG = "log"
 """
 This is name of the provenance log attribute stored on the IntensityTable

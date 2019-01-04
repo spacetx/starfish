@@ -12,6 +12,7 @@ import pandas as pd
 
 import starfish
 import starfish.data
+from starfish import FieldOfView
 from starfish.types import Indices
 
 # EPY: ESCAPE %matplotlib inline
@@ -21,7 +22,7 @@ from starfish.types import Indices
 
 # EPY: START code
 experiment = starfish.data.osmFISH(use_test_data=True)
-stack = experiment['fov_000']['primary']
+stack = experiment["fov_000"][FieldOfView.PRIMARY_IMAGES]
 # EPY: END code
 
 # EPY: START markdown
@@ -38,7 +39,7 @@ stack = experiment['fov_000']['primary']
 
 # EPY: START code
 def load_results(pickle_file):
-    with open(pickle_file, 'rb') as f:
+    with open(pickle_file, "rb") as f:
         return pickle.load(f)
 
 def get_benchmark_peaks(loaded_results, redo_flag=False):
@@ -46,20 +47,20 @@ def get_benchmark_peaks(loaded_results, redo_flag=False):
     if not redo_flag:
         sp = pd.DataFrame(
             {
-                'y':loaded_results['selected_peaks'][:,0],
-                'x':loaded_results['selected_peaks'][:,1],
-                'selected_peaks_int': loaded_results['selected_peaks_int'],
+                "y":loaded_results["selected_peaks"][:,0],
+                "x":loaded_results["selected_peaks"][:,1],
+                "selected_peaks_int": loaded_results["selected_peaks_int"],
             }
         )
     else:
         p = peaks(loaded_results)
-        coords = p[p.thr_array==loaded_results['selected_thr']].peaks_coords
+        coords = p[p.thr_array==loaded_results["selected_thr"]].peaks_coords
         coords = coords.values[0]
-        sp = pd.DataFrame({'x':coords[:,0], 'y':coords[:,1]})
+        sp = pd.DataFrame({"x":coords[:,0], "y":coords[:,1]})
 
     return sp
 
-benchmark_results = load_results('./data/EXP-17-BP3597_hyb1_Aldoc_pos_33.pkl')
+benchmark_results = load_results("./data/EXP-17-BP3597_hyb1_Aldoc_pos_33.pkl")
 benchmark_peaks = get_benchmark_peaks(benchmark_results, redo_flag=False)
 # EPY: END code
 
@@ -96,12 +97,12 @@ array_for_visualization = mp.xarray.sel({Indices.CH: 0}).squeeze()
 plt.figure(figsize=(10, 10))
 plt.imshow(
     array_for_visualization, 
-    cmap='gray', 
+    cmap="gray", 
     vmin=np.percentile(array_for_visualization, 98), 
     vmax=np.percentile(array_for_visualization, 99.9),
 )
-plt.title('Filtered max projection')
-plt.axis('off');
+plt.title("Filtered max projection")
+plt.axis("off");
 # EPY: END code
 
 # EPY: START markdown
@@ -136,9 +137,9 @@ spot_intensities = lmp.run(mp)
 aldoc_spot_intensities = spot_intensities.sel({Indices.ROUND.value: 0, Indices.CH.value: 0})
 
 plt.hist(aldoc_spot_intensities, bins=20)
-plt.yscale('log')
-plt.xlabel('Intensity')
-plt.ylabel('Number of spots');
+plt.yscale("log")
+plt.xlabel("Intensity")
+plt.ylabel("Number of spots");
 # EPY: END code
 
 # EPY: START markdown
@@ -158,12 +159,12 @@ maximum_projection_2d = mp.sel({Indices.CH: 0, Indices.ROUND: 0}).xarray.squeeze
 plt.figure(figsize=(10,10))
 plt.imshow(
     maximum_projection_2d, 
-    cmap = 'gray', 
+    cmap = "gray", 
     vmin=np.percentile(maximum_projection_2d, 98), 
     vmax=np.percentile(maximum_projection_2d, 99.9),
 )
-plt.plot(spot_intensities[Indices.X.value], spot_intensities[Indices.Y.value], 'or')
-plt.axis('off');
+plt.plot(spot_intensities[Indices.X.value], spot_intensities[Indices.Y.value], "or")
+plt.axis("off");
 # EPY: END code
 
 # EPY: START markdown
@@ -179,14 +180,16 @@ benchmark_spot_count = len(benchmark_peaks)
 starfish_spot_count = len(spot_intensities)
 
 plt.figure(figsize=(10,10))
-plt.plot(benchmark_peaks.x, -benchmark_peaks.y, 'o')
-plt.plot(spot_intensities[Indices.X.value], -spot_intensities[Indices.Y.value], 'x')
+plt.plot(benchmark_peaks.x, -benchmark_peaks.y, "o")
+plt.plot(spot_intensities[Indices.X.value], -spot_intensities[Indices.Y.value], "x")
 
-plt.legend(['Benchmark: {} spots'.format(benchmark_spot_count),
-            'Starfish: {} spots'.format(starfish_spot_count)])
-plt.title('Starfish x osmFISH Benchmark Comparison');
+plt.legend(["Benchmark: {} spots".format(benchmark_spot_count),
+            "Starfish: {} spots".format(starfish_spot_count)])
+plt.title("Starfish x osmFISH Benchmark Comparison");
 # EPY: END code
 
 # EPY: START code
-print("Starfish finds {} fewer spots".format(benchmark_spot_count - starfish_spot_count))
+spot_difference = benchmark_spot_count - starfish_spot_count
+print(f"Starfish finds {spot_difference} fewer spots")
+assert spot_difference == 41  # for starfish testing purposes
 # EPY: END code

@@ -973,11 +973,11 @@ class ImageStack:
 
         Returns
         -------
-        List[Tuple[str, dict]]
+        List[dict]
         """
         return self._log
 
-    def update_log(self, class_instance):
+    def update_log(self, class_instance) -> None:
         """
         Adds a new entry to the log list.
 

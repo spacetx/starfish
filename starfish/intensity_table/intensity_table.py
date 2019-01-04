@@ -237,11 +237,9 @@ class IntensityTable(xr.DataArray):
         intensity_table = cls(
             loaded.data,
             loaded.coords,
-            loaded.dims
+            loaded.dims,
+            attrs=loaded.attrs,
         )
-        # maintain log
-        if LOG in loaded.attrs:
-            intensity_table.attrs[LOG] = loaded.attrs[LOG]
         return intensity_table
 
     def show(self, background_image: np.ndarray) -> None:

@@ -36,7 +36,13 @@ class SeqFISHTile(FetchedTile):
 
     @property
     def shape(self) -> Tuple[int, ...]:
-        """Gets image shape directly from the data"""
+        """
+        Gets image shape directly from the data. Note that this will result in the data being
+        read twice, since the shape is retrieved from all tiles before the data is read, and thus
+        single-file caching does not resolve the duplicated reads.
+
+        Because the data here isn't tremendously large, this is acceptable in this instance.
+        """
         return self.tile_data().shape
 
     @property

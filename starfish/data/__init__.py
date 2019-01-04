@@ -83,3 +83,30 @@ def ImagingMassCytometry(use_test_data: bool=False):
         "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20181023/"
         "imaging_cytof/BodenmillerBreastCancerSamples/experiment.json"
     )
+
+
+def SeqFISH(use_test_data: bool=False):
+    """Loads a SeqFISH field of view generated from cultured mES cells.
+
+    Parameters
+    ----------
+    use_test_data : bool
+        If true, return a small region of testing data that was visually determined to contain two
+        cells.
+
+    Notes
+    -----
+    SeqFISH fields of view are quite large (12, 5, 29, 2048, 2048) and take up approximately
+    5 gb in memory. Use the non-test data with care.
+
+    See Also
+    --------
+    Manuscript for Intron-SeqFISH: https://doi.org/10.1016/j.cell.2018.05.035
+
+    """
+    suffix = "-TEST" if use_test_data else ""
+    url = (
+        f"https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20181211/"
+        f"seqfish{suffix}/experiment.json"
+    )
+    return Experiment.from_json(url)

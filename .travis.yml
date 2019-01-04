@@ -41,6 +41,9 @@ jobs:
     - name: ISS Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: make install-src run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
+    - name: SeqFISH Notebook
+      if: type = push and branch =~ /^(master|merge)/
+      script: make install-src run__notebooks/py/SeqFISH.py
     - name: Released Notebooks
       if: type = cron and branch =~ /^(master|merge)/
       script: make check_notebooks install-pypi run_notebooks

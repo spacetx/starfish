@@ -30,5 +30,5 @@ mypy
 nbencdec >= 0.0.5
 recommonmark
 sphinx
-sphinx_rtd_theme
+sphinx_bootstrap_theme
 sphinxcontrib-programoutput

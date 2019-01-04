@@ -1,48 +1,72 @@
-Starfish documentation
-======================
+*starfish*: scalable pipelines for image-based transcriptomics
+==============================================================
 
-.. include:: introduction/introduction.rst
+.. raw:: html
+
+    <div style="clear: both"></div>
+    <div class="container-fluid hidden-xs hidden-sm">
+      <div class="row">
+
+.. image:: /../../design/logo.png
+   :height: 120 px
+
+.. raw:: html
+
+      </div>
+    </div>
+    <br>
+
+    <div class="container-fluid">
+    <div class="row">
+    <div class="col-md-6">
+    <br>
+
+
+*starfish* is a Python library for image-based transcriptomics.
+
+For a brief introduction to the the package, you can read the
+:ref:`introductory notes <introduction>`. If you want to get
+started, see the :ref:`installation page <installation>`, then
+explore the :ref:`API reference <API>` to learn how to use the package.
+
+To see the code or report a bug, please visit the `github repository
+<https://github.com/spacetx/starfish>`_.
+
+.. raw:: html
+
+  </div>
+  <div class="col-md-3">
+  <h2>Contents</h2>
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
 
-.. toctree::
-   :hidden:
+   introduction/introduction
+   installation/installation
+   API/index
+   contributing
+   debugging
+   license/index
+   sptx-format/index
+   usage/index
+   glossary/glossary
+   citation
 
-   self
+.. raw:: html
 
-.. toctree::
-    installation/installation.rst
+  </div>
+  <div class="col-md-3">
+  <h2>Features</h2>
 
-.. toctree::
-    usage/index.rst
+* Registration: :ref:`API <registration>`
+* Filtering: :ref:`API <filtering>`
+* Spot-Finding: :ref:`API <detection>`
+* Decoding: :ref:`API <decoding>`
+* Segmenting: :ref:`API <segmentation>`
+* Pipelining: :ref:`API <pipeline_component>`
 
-.. toctree::
-    sptx-format/index.rst
+.. raw:: html
 
-.. toctree::
-    API/index.rst
-
-.. toctree::
-    debugging.rst
-
-.. toctree::
-    contributing.rst
-
-.. toctree::
-    glossary/glossary.md
-
-.. toctree::
-    license/index.rst
-
-.. toctree::
-    citation.rst
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   </div>
+   </div>
+   </div>

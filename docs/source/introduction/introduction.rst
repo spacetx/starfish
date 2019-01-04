@@ -1,36 +1,49 @@
+.. _introduction:
+
 Introduction
-------------
+============
 
-.. image:: /../../design/logo.png
-    :width: 250px
+*starfish* is a Python library which lets you build scalable pipelines for processing image-based
+transcriptomics data. This is a **work in progress** and will be developed in the open.
 
-The goal of *starfish* is to **prototype** a reference pipeline for the analysis of image-based
-transcriptomics data that works for each image-based transcriptomic assay. This is a **work in
-progress** and will be developed in the open.
+Assay support
+~~~~~~~~~~~~~
 
-We are currently in **pre-alpha**, finishing proof of concept pipelines for each of the spaceTx
-contributors that leverage starfish's shared object model. At this time starfish is mature enough to
-support computational developers interested in adapting other assays to starfish's object model.
-The below table lists the current state of support for each image-based transcriptomics assay.
+We are currently developing proof-of-concept pipelines for each of image-based
+transcriptomics assays that are being developed by the SpaceTx groups.
 
 ====================  ==========  ===================  ==================
  Assay                Loads Data  Single-FoV Pipeline  Multi-FoV Pipeline
 --------------------  ----------  -------------------  ------------------
- MERFISH              [x]         [x]                  in process
- ISS                  [x]         [x]                  in process
- osmFISH              [x]         in process           [ ]
- allen_smFISH         [x]         in review            [ ]
- BaristaSeq           [x]         in process           [ ]
- DARTFISH             [x]         in review            [ ]
- ex-FISH              [x]         [ ]                  [ ]
- StarMAP              [ ]         [ ]                  [ ]
- FISSEQ               no data     no pipeline          [ ]
- seq-FISH             [ ]         [ ]                  [ ]
- Imaging Mass. Cyto.  [x]         [ ]                  [ ]
+ MERFISH              |done|      |done|               |proc|
+ ISS                  |done|      |done|               |proc|
+ osmFISH              |done|      |proc|               |todo|
+ allen_smFISH         |done|      |revw|               |todo|
+ BaristaSeq           |done|      |proc|               |todo|
+ DARTFISH             |done|      |revw|               |todo|
+ ex-FISH              |done|      |todo|               |todo|
+ StarMAP              |todo|      |todo|               |todo|
+ FISSEQ               |todo|      |todo|               |todo|
+ seq-FISH             |todo|      |todo|               |todo|
+ Imaging Mass. Cyto.  |done|      |todo|               |todo|
 ====================  ==========  ===================  ==================
 
+Legend:
+
+- |done| - Done
+- |revw| - In Review
+- |proc| - In Process
+- |todo| - TODO
+- |none| - Not supported
+
+.. |done| unicode:: U+2705 .. White Heavy Check Mark
+.. |proc| unicode:: U+1F51C .. Soon Arrow
+.. |revw| unicode:: U+1F91E .. Crossed Fingers
+.. |todo| unicode:: U+1F532 .. Black Square Button
+.. |none| unicode:: U+274C .. Cross Mark
+
 Concept
--------
+~~~~~~~
 
 See this document_ for details. The diagram below describes the core pipeline components and
 associated file manifests that this package plans to standardize and implement.

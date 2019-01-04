@@ -76,7 +76,7 @@ Nevertheless, to demonstrate _starfish_'s scale, we will implement workflows on 
 ### A Developer Focus Point
 Two key aims of _starfish_ and SpaceTx are to (1) encourage convergence of the community onto a single object model for processing of image-based transcriptomics data and (2) make it easier to develop pipelines by providing a high-performance platform. To facilitate this, we must encourage developers to work on _starfish_ through active outreach and by being encouraging and helpful.
 
-## Near-term goals
+## Outstanding work
 
 ### A General Format and Object Model for Image-based Transcriptomics
 

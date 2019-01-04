@@ -75,7 +75,7 @@ pytest-xdist==1.24.0
 python-dateutil==2.7.3
 pytz==2018.5
 PyWavelets==1.0.0
-PyYAML==3.13
+PyYAML==4.2b1
 pyzmq==17.1.2
 recommonmark==0.4.0
 regional==1.1.2

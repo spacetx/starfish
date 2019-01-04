@@ -15,6 +15,8 @@ jobs:
       script: make check_notebooks install-src fast
       after_success:
         - bash <(curl -s https://codecov.io/bash)
+    - name: Install Napari
+      script: pip install .[napari]
     - name: Docker
       if: type = push and branch =~ /^(master|merge)/
       script: make docker

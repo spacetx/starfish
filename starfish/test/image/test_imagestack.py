@@ -101,7 +101,7 @@ def test_set_slice_simple_index():
     )
     index = {Indices.ROUND: round_}
 
-    stack.set_slice(index, expected)
+    stack.set_slice(index, expected, [Indices.CH, Indices.Z])
 
     assert np.array_equal(stack.get_slice(index)[0], expected)
 
@@ -122,8 +122,33 @@ def test_set_slice_middle_index():
     )
     index = {Indices.CH: ch}
 
-    stack.set_slice(index, expected)
+    stack.set_slice(index, expected, [Indices.ROUND, Indices.Z])
 
+    assert np.array_equal(stack.get_slice(index)[0], expected)
+
+
+def test_set_slice_reorder():
+    """
+    Sets a slice across one of the indices.  The source data is not in the same order as the
+    imagestack order, but set_slice should reorder the axes and write it correctly.
+    """
+    stack = ImageStack.synthetic_stack()
+    round_ = 1
+    y, x = stack.tile_shape
+    index = {Indices.ROUND: round_}
+
+    written = np.full(
+        (stack.shape[Indices.Z], stack.shape[Indices.CH], y, x),
+        fill_value=0.5,
+        dtype=np.float32
+    )
+    stack.set_slice(index, written, [Indices.Z, Indices.CH])
+
+    expected = np.full(
+        (stack.shape[Indices.CH], stack.shape[Indices.Z], y, x),
+        fill_value=0.5,
+        dtype=np.float32
+    )
     assert np.array_equal(stack.get_slice(index)[0], expected)
 
 
@@ -142,7 +167,7 @@ def test_set_slice_range():
     )
     index = {Indices.Z: zrange}
 
-    stack.set_slice(index, expected)
+    stack.set_slice(index, expected, [Indices.ROUND, Indices.CH, Indices.Z])
 
     assert np.array_equal(stack.get_slice(index)[0], expected)
 

@@ -83,7 +83,7 @@ class ImageStack:
     -------
     get_slice(indices)
         retrieve a slice of the image tensor
-    set_slice(indices, data, axes=None)
+    set_slice(indices, data, axes=[])
         set a slice of the image tensor
     apply(func, group_by={Indices.ROUND, Indices.CH, Indices.Z},
         in_place=False, verbose=False, n_processes=None)
@@ -122,6 +122,7 @@ class ImageStack:
         }
         self._tile_shape = tile_shape
         self._tile_data = tile_data
+        self._log: List[dict] = list()
 
         data_shape: MutableSequence[int] = []
         data_dimensions: MutableSequence[str] = []
@@ -413,51 +414,100 @@ class ImageStack:
             self,
             indices: Mapping[Indices, Union[int, slice]],
             data: np.ndarray,
-            axes: Sequence[Indices]=None):
+            axes: Optional[Sequence[Indices]]=None):
         """
         Given a dictionary mapping the index name to either a value or a slice range and a source
         numpy array, set the slice of the array of this ImageStack to the values in the source
-        numpy array. If the optional parameter axes is provided, that represents the axes of the
-        numpy array beyond the x-y tile.
+        numpy array.
+
+        Consumers of this API should not be aware of the internal order of the axes in ImageStack.
+        As a result, they should be explicitly providing the order of the axes of the numpy array.
+        This method will reorder the data to the internal order of the axes in ImageStack before
+        writing it.
+
+        Parameters
+        ----------
+        indices : Mapping[Indices, Union[int, slice]]
+            The slice of the data we are writing with this operation.  Each index should map to a
+            value or a range.  If the index is not present, we are writing to the entire range along
+            that index.
+        data : np.ndarray
+            The source data for the operation
+        axes : Optional[Sequence[Indices]]
+            The order of the axes for the source data, excluding (Y, X).  If not provided, it is
+            assumed that the data is a 2D tile.
 
         Examples
         --------
-        ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
-        ImageStack Implicit axes: X, Y with shape 10, 20, respectively.
-        Called to set a slice with indices {Z: 5}.
-        Data: a 4-dimensional numpy array with shape (3, 4, 10, 20)
-        Result: Replace the data for Z=5.
+        Setting a slice indicated by scalars.
 
-        ImageStack axes: H, C, and Z. (shape 3, 4, 5)
-        ImageStack Implicit axes: X, Y. (shape 10, 20)
-        Called to set a slice with indices {Z: 5, C: slice(2, 4)}.
-        Data: a 4-dimensional numpy array with shape (3, 2, 10, 20)
-        Result: Replace the data for Z=5, C=2-3.
+            >>> import numpy as np
+            >>> from starfish import ImageStack
+            >>> from starfish.types import Indices
+            >>> stack = ImageStack.synthetic_stack(3, 4, 5, 20, 10)
+            >>> stack.shape
+            OrderedDict([(<Indices.ROUND: 'r'>, 3),
+             (<Indices.CH: 'c'>, 4),
+             (<Indices.Z: 'z'>, 5),
+             ('y', 20),
+             ('x', 10)])
+            >>> new_data = np.zeros((3, 4, 10, 20), dtype=np.float32)
+            >>> stack.set_slice(new_data, axes=[Indices.ROUND, Indices.CH]
+
+        Setting a slice indicated by scalars.  The data presented has a different axis order than
+        the previous example.
+
+            >>> import numpy as np
+            >>> from starfish import ImageStack
+            >>> from starfish.types import Indices
+            >>> stack = ImageStack.synthetic_stack(3, 4, 5, 20, 10)
+            >>> stack.shape
+            OrderedDict([(<Indices.ROUND: 'r'>, 3),
+             (<Indices.CH: 'c'>, 4),
+             (<Indices.Z: 'z'>, 5),
+             ('y', 20),
+             ('x', 10)])
+            >>> new_data = np.zeros((4, 3, 10, 20), dtype=np.float32)
+            >>> stack.set_slice(new_data, axes=[Indices.CH, Indices.ROUND]
+
+        Setting a slice indicated by a range.
+
+            >>> from starfish import ImageStack
+            >>> from starfish.types import Indices
+            >>> stack = ImageStack.synthetic_stack(3, 4, 5, 20, 10)
+            >>> stack.shape
+            OrderedDict([(<Indices.ROUND: 'r'>, 3),
+             (<Indices.CH: 'c'>, 4),
+             (<Indices.Z: 'z'>, 5),
+             ('y', 20),
+             ('x', 10)])
+            >>> new_data = np.zeros((3, 2, 10, 20), dtype=np.float32)
+            >>> stack.set_slice({Indices.Z: 5, Indices.CH: slice(2, 4)}, new_data)
         """
 
         self._validate_data_dtype_and_range(data)
 
         slice_list, expected_axes = self._build_slice_list(indices)
 
-        if axes is not None:
-            if len(axes) != len(data.shape) - 2:
+        if axes is None:
+            axes = list()
+        if len(axes) != len(data.shape) - 2:
+            raise ValueError(
+                "data shape ({}) should be the axes ({}) and (x,y).".format(data.shape, axes))
+        move_src = list()
+        move_dst = list()
+        for src_idx, axis in enumerate(axes):
+            try:
+                dst_idx = expected_axes.index(axis)
+            except ValueError:
                 raise ValueError(
-                    "data shape ({}) should be the axes ({}) and (x,y).".format(data.shape, axes))
-            move_src = list()
-            move_dst = list()
-            for src_idx, axis in enumerate(axes):
-                try:
-                    dst_idx = expected_axes.index(axis)
-                except ValueError:
-                    raise ValueError(
-                        "Unexpected axis {}.  Expecting only {}.".format(axis, expected_axes))
-                if src_idx != dst_idx:
-                    move_src.append(src_idx)
-                    move_dst.append(dst_idx)
+                    "Unexpected axis {}.  Expecting only {}.".format(axis, expected_axes))
+            if src_idx != dst_idx:
+                move_src.append(src_idx)
+                move_dst.append(dst_idx)
 
-            if len(move_src) != 0:
-                data = data.view()
-                np.moveaxis(data, move_src, move_dst)
+        if len(move_src) != 0:
+            data = np.moveaxis(data, move_src, move_dst)
 
         if self._data[slice_list].shape != data.shape:
             raise ValueError("source shape {} mismatches destination shape {}".format(
@@ -927,6 +977,36 @@ class ImageStack:
         and False if not.
         """
         return self._tiles_aligned
+
+    @property
+    def log(self) -> List[dict]:
+        """
+        Returns a list of pipeline components that have been applied to this imagestack
+        as well as their corresponding runtime parameters.
+
+         ex.
+            [('GaussianHighPass', {'sigma': (3, 3), 'is_volume': False}),
+            ('GaussianLowPass', {'sigma': (1, 1), 'is_volume': False}])]
+
+        Means that this imagestack was created by applying a GaussianHighPass Filter then
+        a GaussianLowPass Filter to a starting imagestack
+
+        Returns
+        -------
+        List[Tuple[str, dict]]
+        """
+        return self._log
+
+    def update_log(self, class_instance):
+        """
+        Adds a new entry to the log list.
+
+        Parameters
+        ----------
+        class_instance: The instance of a class being applied to the imagestack
+        """
+        entry = {"method": class_instance.__class__.__name__, "arguments": class_instance.__dict__}
+        self._log.append(entry)
 
     @property
     def raw_shape(self) -> Tuple[int, int, int, int, int]:

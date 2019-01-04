@@ -1,4 +1,52 @@
-class AlgorithmBase:
+from starfish.imagestack.imagestack import ImageStack
+from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.types import LOG
+from starfish.util.JSONenocder import LogEncoder
+
+
+class AlgorithmBaseType(type):
+
+    def __init__(cls, name, bases, namespace):
+        super().__init__(name, bases, namespace)
+        if len(bases) != 0:
+            # this is _not_ AlgorithmBase.  Instead, it's a subclass of AlgorithmBase.
+            cls.run = AlgorithmBaseType.run_with_logging(cls.run)
+
+    @staticmethod
+    def run_with_logging(func):
+        """
+        This method extends each pipeline component.run() method to also log itself and
+        runtime parameters to the IntensityTable and Imagestack objects. There are two
+        scenarios for this method:
+            1.) Filtering:
+                    Imagestack -> Imagestack
+            2.) Spot Detection:
+                    Imagestack -> IntensityTable
+                    Imagestack -> [IntenistyTable, ConnectedComponentDecodingResult]
+            TODO segmentation and decoding
+        """
+        def helper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            # Scenario 1, Filtering
+            if isinstance(result, ImageStack):
+                result.update_log(args[0])
+            # Scenario 2, Spot detection
+            elif isinstance(result, tuple) or isinstance(result, IntensityTable):
+                if isinstance(args[1], ImageStack):
+                    stack = args[1]
+                    # update log with spot detection instance args[0]
+                    stack.update_log(args[0])
+                    # get resulting intensity table and set log
+                    it = result
+                    if isinstance(result, tuple):
+                        it = result[0]
+                    it.attrs.update({LOG: LogEncoder().encode(stack.log)})
+            return result
+        return helper
+
+
+class AlgorithmBase(metaclass=AlgorithmBaseType):
+
     """
     This is the base class of any algorithm that starfish exposes.
 

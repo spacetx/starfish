@@ -4,6 +4,7 @@ from ._constants import (
     Coordinates,
     Features,
     Indices,
+    LOG,
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
 )

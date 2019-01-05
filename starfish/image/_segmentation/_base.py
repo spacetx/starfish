@@ -3,6 +3,6 @@ from starfish.pipeline.algorithmbase import AlgorithmBase
 
 
 class SegmentationAlgorithmBase(AlgorithmBase):
-    def run(self, hybridization_stack: ImageStack, nuclei_stack: ImageStack):
+    def run(self, primary_image_stack: ImageStack, nuclei_stack: ImageStack):
         """Performs registration on the stack provided."""
         raise NotImplementedError()

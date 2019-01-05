@@ -95,7 +95,7 @@ slow: fast run_notebooks docker
 
 docker:
 	docker build -t spacetx/starfish .
-	docker run -ti --rm spacetx/starfish build --fov-count 1 --hybridization-dimensions '{"z": 1}' /tmp/
+	docker run -ti --rm spacetx/starfish build --fov-count 1 --primary-image-dimensions '{"z": 1}' /tmp/
 
 help-integration:
 	$(call print_help, slow, alias for 'fast run_notebooks docker')

@@ -21,7 +21,7 @@ if __name__ == "__main__":
     for fov in exp.fovs():
         fov_dir = pathlib.Path(args.output_dir, fov.name)
         fov_dir.mkdir()
-        fov[FieldOfView.PRIMARY_IMAGES].export(str(fov_dir / "hybridization.json"))
+        fov[FieldOfView.PRIMARY_IMAGES].export(str(fov_dir / "primary_images.json"))
         for image_type in fov.image_types:
             if image_type == FieldOfView.PRIMARY_IMAGES:
                 continue

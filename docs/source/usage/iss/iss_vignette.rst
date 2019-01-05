@@ -95,9 +95,10 @@ Creating a Build Script
 
 Next, we combine these objects with some information we already had about the experiments. On the
 outset we stated that an ISS experiment has 4 imaging rounds and 4 channels, but only 1 z-plane.
-These data fill out the ``hyb_dimensions`` of the ``TileSet``. In addition, it was stated that ISS
-has a single ``dots`` and ``nuclei`` image. In ``starfish``, auxiliary images are also stored as
-``TileSet`` objects even though often, as here, they have only 1 channel, round, and z-plane.
+These data fill out the ``primary_image_dimensions`` of the ``TileSet``. In addition, it was stated
+that ISS has a single ``dots`` and ``nuclei`` image. In ``starfish``, auxiliary images are also
+stored as ``TileSet`` objects even though often, as here, they have only 1 channel, round, and
+z-plane.
 
 We create a dictionary to hold each piece of information, and pass that to
 ``write_experiment_json``, a generic tool that accepts the objects we've aggregated above and

@@ -106,7 +106,7 @@ def format_data(input_dir, output_dir):
 
     num_fovs = 496
 
-    hyb_dimensions = {
+    primary_image_dimensions = {
         Indices.ROUND: 8,
         Indices.CH: 2,
         Indices.Z: 1,
@@ -123,7 +123,7 @@ def format_data(input_dir, output_dir):
     write_experiment_json(output_dir,
                           num_fovs,
                           tile_format=ImageFormat.TIFF,
-                          primary_image_dimensions=hyb_dimensions,
+                          primary_image_dimensions=primary_image_dimensions,
                           aux_name_to_dimensions=aux_name_to_dimensions,
                           primary_tile_fetcher=MERFISHTileFetcher(input_dir, is_dapi=False),
                           aux_tile_fetcher={

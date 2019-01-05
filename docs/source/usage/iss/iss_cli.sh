@@ -8,14 +8,14 @@ python examples/get_iss_data.py /tmp/starfish/raw /tmp/starfish/formatted --d 1
 
 starfish registration \
     -i /tmp/starfish/formatted/primary_image-fov_000.json \
-    -o /tmp/starfish/registered/primary_image.json \
+    -o /tmp/starfish/registered/primary_images.json \
     FourierShiftRegistration \
     --reference-stack /tmp/starfish/formatted/nuclei-fov_000.json \
     --upsampling 1000
 
 starfish filter \
-    -i /tmp/starfish/registered/primary_image.json \
-    -o /tmp/starfish/filtered/primary_image.json \
+    -i /tmp/starfish/registered/primary_images.json \
+    -o /tmp/starfish/filtered/primary_images.json \
     WhiteTophat \
     --masking-radius 15
 
@@ -32,7 +32,7 @@ starfish filter \
     --masking-radius 15
 
 starfish detect_spots \
-    --input /tmp/starfish/filtered/primary_image.json \
+    --input /tmp/starfish/filtered/primary_images.json \
     --output /tmp/starfish/results/spots.nc \
     --blobs-stack /tmp/starfish/filtered/dots.json \
     GaussianSpotDetector \
@@ -42,7 +42,7 @@ starfish detect_spots \
     --threshold 0.01
 
 starfish segment \
-    --hybridization-stack /tmp/starfish/filtered/primary_image.json \
+    --primary-image-stack /tmp/starfish/filtered/primary_images.json \
     --nuclei-stack /tmp/starfish/filtered/nuclei.json \
     -o /tmp/starfish/results/regions.geojson \
     Watershed \

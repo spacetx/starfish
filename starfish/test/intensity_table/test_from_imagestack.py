@@ -30,6 +30,6 @@ def test_intensity_table_can_be_constructed_from_an_imagestack():
     assert np.max(intensities[Indices.Y.value].values) == y - 1
     assert np.max(intensities[Indices.X.value].values) == x - 1
 
-    # the number of channels and hybridizations should match the ImageStack
+    # the number of channels and rounds should match the ImageStack
     assert intensities.sizes[Indices.CH.value] == c
     assert intensities.sizes[Indices.ROUND.value] == r

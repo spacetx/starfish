@@ -147,7 +147,7 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
             Stack where we find the spots in.
         blobs_image : Union[np.ndarray, xr.DataArray]
             If provided, spots will be found in the blobs image, and intensities will be measured
-            across hybs and channels. Otherwise, spots are measured independently for each channel
+            across rounds and channels. Otherwise, spots are measured independently for each channel
             and round.
         reference_image_from_max_projection : bool
             if True, compute a reference image from the maximum projection of the channels and

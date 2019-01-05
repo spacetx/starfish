@@ -212,13 +212,13 @@ def write_experiment_json(
     )
     Writer.write_to_path(
         primary_image,
-        os.path.join(path, "primary_image.json"),
+        os.path.join(path, "primary_images.json"),
         pretty=True,
         partition_path_generator=_fov_path_generator,
         tile_opener=_tile_opener,
         tile_format=tile_format,
     )
-    experiment_doc['images']['primary'] = "primary_image.json"
+    experiment_doc['images']['primary'] = "primary_images.json"
 
     for aux_name, aux_dimensions in aux_name_to_dimensions.items():
         if aux_dimensions is None:

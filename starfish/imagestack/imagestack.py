@@ -513,10 +513,12 @@ class ImageStack:
             value or a range.  If the index is not present, we are writing to the entire range along
             that index.
         data : np.ndarray
-            The source data for the operation
+            a 2- to 5-D numpy array containing the source data for the operation whose last two axes
+            must be (Y, X). If > 2-D data is provided, axes must be set to specify the order of the
+            additional axes (see below).
         axes : Optional[Sequence[Axes]]
-            The order of the axes for the source data, excluding (Y, X).  If not provided, it is
-            assumed that the data is a 2D tile.
+            The order of the axes for the source data, excluding (Y, X). Optional ONLY if data is
+            a (Y, X) 2-d tile.
 
         Examples
         --------
@@ -574,7 +576,7 @@ class ImageStack:
             axes = list()
         if len(axes) != len(data.shape) - 2:
             raise ValueError(
-                "data shape ({}) should be the axes ({}) and (x,y).".format(data.shape, axes))
+                "data shape ({}) should be the axes ({}) and (Y,X).".format(data.shape, axes))
         move_src = list()
         move_dst = list()
         for src_idx, axis in enumerate(axes):

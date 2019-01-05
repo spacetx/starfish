@@ -9,7 +9,7 @@ class TestWithBuildData(unittest.TestCase):
     STAGES = (
         [
             "starfish", "build",
-            "--fov-count=2", '--hybridization-dimensions={"z": 3}',
+            "--fov-count=2", '--primary-image-dimensions={"z": 3}',
             lambda tempdir: tempdir
         ],
         [

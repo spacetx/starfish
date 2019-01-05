@@ -29,7 +29,7 @@ class TestAllenData(CLITest, unittest.TestCase):
             [
                 "starfish", "filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered/fov_001", "hybridization.json"),
+                    tempdir, "registered/fov_001", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "clip_filtered.json"),
                 "Clip",

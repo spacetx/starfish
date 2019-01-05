@@ -258,10 +258,10 @@ class ImageStack:
         Constructs an ImageStack object from a URL and a base URL.
 
         The following examples will all load from the same location:
-          1. url: https://www.example.com/images/hybridization.json  baseurl: None
-          2. url: https://www.example.com/images/hybridization.json  baseurl: I_am_ignored
-          3. url: hybridization.json  baseurl: https://www.example.com/images
-          4. url: images/hybridization.json  baseurl: https://www.example.com
+          1. url: https://www.example.com/images/primary_images.json  baseurl: None
+          2. url: https://www.example.com/images/primary_images.json  baseurl: I_am_ignored
+          3. url: primary_images.json  baseurl: https://www.example.com/images
+          4. url: images/primary_images.json  baseurl: https://www.example.com
 
         Parameters
         ----------
@@ -282,8 +282,8 @@ class ImageStack:
         Constructs an ImageStack object from an absolute URL or a filesystem path.
 
         The following examples will all load from the same location:
-          1. url_or_path: file:///Users/starfish-user/images/hybridization.json
-          2. url_or_path: /Users/starfish-user/images/hybridization.json
+          1. url_or_path: file:///Users/starfish-user/images/primary_images.json
+          2. url_or_path: /Users/starfish-user/images/primary_images.json
 
         Parameters
         ----------
@@ -927,7 +927,7 @@ class ImageStack:
         pd.DataFrame :
             dataframe containing per-tile metadata information for each image. Guaranteed to
             include information on channel, imaging round, z_layer, and barcode index. Also
-            contains any information stored in the extras field for each tile in hybridization.json
+            contains any information stored in the extras field for each tile.
 
         """
 

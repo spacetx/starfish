@@ -4,6 +4,7 @@
 # EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "starfish", "language": "python", "name": "starfish"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START code
+import os
 import pickle
 
 import matplotlib.pyplot as plt
@@ -60,7 +61,15 @@ def get_benchmark_peaks(loaded_results, redo_flag=False):
 
     return sp
 
-benchmark_results = load_results("./data/EXP-17-BP3597_hyb1_Aldoc_pos_33.pkl")
+try:
+    module_path = __file__
+except NameError:
+    # this is probably being run from jupyter
+    cwd = "."
+else:
+    cwd = os.path.dirname(module_path)
+benchmark_results = load_results(os.path.join(
+    cwd, "data", "EXP-17-BP3597_hyb1_Aldoc_pos_33.pkl"))
 benchmark_peaks = get_benchmark_peaks(benchmark_results, redo_flag=False)
 # EPY: END code
 

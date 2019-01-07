@@ -4,24 +4,24 @@ from typing import Iterator, Mapping, Sequence, Tuple
 from starfish.types import Indices
 
 
-def join_dimension_sizes(
+def join_dimension_labels(
         dimension_order: Sequence[Indices],
         *,
-        size_for_round: int,
-        size_for_ch: int,
-        size_for_z: int,
-) -> Sequence[Tuple[Indices, int]]:
+        rounds: Sequence[int],
+        chs: Sequence[int],
+        zlayers: Sequence[int],
+) -> Sequence[Tuple[Indices, Sequence[int]]]:
     """
-    Given a sequence of dimensions and their sizes, return a sequence of tuples of dimensions and
-    its respective size.
+    Given a sequence of dimensions and their labels, return a sequence of tuples of dimensions and
+    its respective labels.
 
-    For example, if dimension_sequence is (ROUND, CH, Z) and each dimension is of size 2, return
-    ((ROUND, 2), (CH, 2), (Z, 2)).
+    For example, if dimension_sequence is (ROUND, CH, Z) and each dimension has labels [0, 1],
+    return ((ROUND, [0, 1]), (CH, [0, 1]), (Z, [0, 1]).
     """
     dimension_mapping = {
-        Indices.ROUND: size_for_round,
-        Indices.CH: size_for_ch,
-        Indices.Z: size_for_z,
+        Indices.ROUND: rounds,
+        Indices.CH: chs,
+        Indices.Z: zlayers,
     }
 
     return [
@@ -31,12 +31,12 @@ def join_dimension_sizes(
 
 
 def ordered_iterator(
-        dimension_sizes: Sequence[Tuple[Indices, int]]
+        dimension_labels: Sequence[Tuple[Indices, Sequence[int]]]
 ) -> Iterator[Mapping[Indices, int]]:
     """
-    Given a sequence of tuples of dimensions and its respective size, return an iterator that steps
-    through all the possible points in the space.  The sequence is ordered from the slowest varying
-    dimension to the fastest varying dimension.
+    Given a sequence of tuples of dimensions and its respective sequence of labels, return an
+    iterator that steps through all the possible points in the space.  The sequence is ordered from
+    the slowest varying dimension to the fastest varying dimension.
     """
-    for tpl in product(*[range(dimension_sizes) for _, dimension_sizes in dimension_sizes]):
-        yield dict(zip((index for index, _ in dimension_sizes), tpl))
+    for tpl in product(*[labels for _, labels in dimension_labels]):
+        yield dict(zip((index for index, _ in dimension_labels), tpl))

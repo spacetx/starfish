@@ -45,6 +45,7 @@ from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
 from starfish.imagestack import indexing_utils, physical_coordinate_calculator
 from starfish.imagestack.parser import TileCollectionData, TileKey
+from starfish.imagestack.parser.numpy import NumpyData
 from starfish.imagestack.parser.tileset import parse_tileset
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.multiprocessing.shmem import SharedMemory
@@ -319,16 +320,19 @@ class ImageStack:
             array = img_as_float32(array)
 
         n_round, n_ch, n_z, height, width = array.shape
-        empty = cls.synthetic_stack(
-            num_round=n_round, num_ch=n_ch, num_z=n_z, tile_height=height, tile_width=width)
-
-        for h in np.arange(n_round):
-            for c in np.arange(n_ch):
-                for z in np.arange(n_z):
-                    view = array[h, c, z]
-                    empty.set_slice({Indices.ROUND: h, Indices.CH: c, Indices.Z: z}, view)
-
-        return empty
+        tile_data = NumpyData(
+            array,
+            {
+                Indices.ROUND: list(range(n_round)),
+                Indices.CH: list(range(n_ch)),
+                Indices.Z: list(range(n_z)),
+            },
+            None,
+        )
+        return cls(
+            (height, width),
+            tile_data,
+        )
 
     @property
     def xarray(self) -> xr.DataArray:

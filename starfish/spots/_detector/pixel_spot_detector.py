@@ -5,6 +5,8 @@ import numpy as np
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.intensity_table.intensity_table_coordinates import \
+    transfer_physical_coords_from_imagestack_to_intensity_table
 from starfish.util import click
 from ._base import SpotFinderAlgorithmBase
 from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedComponentDecodingResult
@@ -85,6 +87,8 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         )
         decoded_spots, image_decoding_results = caf.run(intensities=decoded_intensities)
 
+        transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=stack,
+                                                                    intensity_table=decoded_spots)
         return decoded_spots, image_decoding_results
 
     @staticmethod

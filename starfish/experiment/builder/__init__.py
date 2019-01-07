@@ -1,6 +1,16 @@
 import json
 import os
-from typing import Any, BinaryIO, Callable, Dict, Mapping, Optional, Sequence, Tuple, Union
+from typing import (
+    Any,
+    BinaryIO,
+    Callable,
+    Dict,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 
 from slicedimage import (
     Collection,
@@ -11,7 +21,7 @@ from slicedimage import (
 )
 
 from starfish.codebook.codebook import Codebook
-from starfish.experiment.builder.orderediterator import join_dimension_sizes, ordered_iterator
+from starfish.experiment.builder.orderediterator import join_dimension_labels, ordered_iterator
 from starfish.experiment.version import CURRENT_VERSION
 from starfish.types import Coordinates, Indices
 from .defaultproviders import RandomNoiseTile, tile_fetcher_factory
@@ -47,7 +57,10 @@ def _fov_path_generator(parent_toc_path: str, toc_name: str) -> str:
 
 
 def build_image(
-        fov_count: int, round_count: int, ch_count: int, z_count: int,
+        fovs: Sequence[int],
+        rounds: Sequence[int],
+        chs: Sequence[int],
+        zlayers: Sequence[int],
         image_fetcher: TileFetcher,
         default_shape: Optional[Tuple[int, int]]=None,
         dimension_order: Sequence[Indices]=DEFAULT_DIMENSION_ORDER,
@@ -57,14 +70,14 @@ def build_image(
 
     Parameters
     ----------
-    fov_count : int
-        Number of fields of view in this image set.
-    round_count : int
-        Number for rounds in this image set.
-    ch_count : int
-        Number for channels in this image set.
-    z_count : int
-        Number of z-layers in this image set.
+    fovs : Sequence[int]
+        Sequence of field of view ids in this image set.
+    rounds : Sequence[int]
+        Sequence of the round numbers in this image set.
+    chs : Sequence[int]
+        Sequence of the ch numbers in this image set.
+    zlayers : Sequence[int]
+        Sequence of the zlayer numbers in this image set.
     image_fetcher : TileFetcher
         Instance of TileFetcher that provides the data for the tile.
     default_shape : Optional[Tuple[int, int]]
@@ -87,15 +100,11 @@ def build_image(
     -------
     The slicedimage collection representing the image.
     """
-    dimension_sizes = join_dimension_sizes(
-        dimension_order,
-        size_for_round=round_count,
-        size_for_ch=ch_count,
-        size_for_z=z_count,
-    )
+    dimension_sizes = join_dimension_labels(
+        dimension_order, rounds=rounds, chs=chs, zlayers=zlayers)
 
     collection = Collection()
-    for fov_ix in range(fov_count):
+    for fov_id in fovs:
         fov_images = TileSet(
             [
                 Coordinates.X,
@@ -107,14 +116,14 @@ def build_image(
                 Indices.X,
                 Indices.Y,
             ],
-            {Indices.ROUND: round_count, Indices.CH: ch_count, Indices.Z: z_count},
+            {Indices.ROUND: len(rounds), Indices.CH: len(chs), Indices.Z: len(zlayers)},
             default_shape,
             ImageFormat.TIFF,
         )
 
         for dimension_indices in ordered_iterator(dimension_sizes):
             image = image_fetcher.get_tile(
-                fov_ix,
+                fov_id,
                 dimension_indices[Indices.ROUND],
                 dimension_indices[Indices.CH],
                 dimension_indices[Indices.Z])
@@ -130,7 +139,7 @@ def build_image(
             )
             tile.set_numpy_array_future(image.tile_data)
             fov_images.add_tile(tile)
-        collection.add_partition("fov_{:03}".format(fov_ix), fov_images)
+        collection.add_partition("fov_{:03}".format(fov_id), fov_images)
     return collection
 
 
@@ -202,10 +211,10 @@ def write_experiment_json(
         'extras': {},
     }
     primary_image = build_image(
-        fov_count,
-        primary_image_dimensions[Indices.ROUND],
-        primary_image_dimensions[Indices.CH],
-        primary_image_dimensions[Indices.Z],
+        range(fov_count),
+        range(primary_image_dimensions[Indices.ROUND]),
+        range(primary_image_dimensions[Indices.CH]),
+        range(primary_image_dimensions[Indices.Z]),
         primary_tile_fetcher,
         dimension_order=dimension_order,
         default_shape=default_shape,
@@ -224,8 +233,10 @@ def write_experiment_json(
         if aux_dimensions is None:
             continue
         auxiliary_image = build_image(
-            fov_count,
-            aux_dimensions[Indices.ROUND], aux_dimensions[Indices.CH], aux_dimensions[Indices.Z],
+            range(fov_count),
+            range(aux_dimensions[Indices.ROUND]),
+            range(aux_dimensions[Indices.CH]),
+            range(aux_dimensions[Indices.Z]),
             aux_tile_fetcher.get(aux_name, tile_fetcher_factory(RandomNoiseTile)),
             dimension_order=dimension_order,
             default_shape=default_shape,

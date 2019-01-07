@@ -126,11 +126,53 @@ class Codebook(xr.DataArray):
             codebook whose values are all zero
 
         """
-        codes_index = pd.Index(code_names, name=Features.TARGET)
+        data = np.zeros((len(code_names), n_ch, n_round), dtype=np.uint8)
+        return cls._create_codebook(code_names, n_ch, n_round, data)
+
+    @classmethod
+    def _create_codebook(cls, code_names: Sequence[str], n_ch: int, n_round: int, data: np.ndarray):
+        """create a codebook of shape (code_names, n_ch, n_round) with the given data
+
+        Parameters
+        ----------
+        code_names : Sequence[str]
+            the targets to be coded
+        n_ch : int
+            number of channels used to build the codes
+        n_round : int
+            number of imaging rounds used to build the codes
+        data : np.ndarray
+            array of unit8 values with len(code_names) x n_ch x _nround elements
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from starfish import Codebook
+        >>> data = np.zeros((3, 2, 2), dtype=np.uint8)
+        >>> Codebook._create_codebook(['ACTA', 'ACTB'], n_ch=3, n_round=2, data)
+        <xarray.Codebook (target: 2, c: 3, h: 2)>
+        array([[[0, 0],
+                [0, 0],
+                [0, 0]],
+
+               [[0, 0],
+                [0, 0],
+                [0, 0]]], dtype=uint8)
+        Coordinates:
+          * target     (target) object 'ACTA' 'ACTB'
+          * c          (c) int64 0 1 2
+          * h          (h) int64 0 1
+
+        Returns
+        -------
+        Codebook :
+            codebook with filled values
+
+        """
         return cls(
-            data=np.zeros((codes_index.shape[0], n_ch, n_round), dtype=np.uint8),
+            data=data,
             coords=(
-                codes_index,
+                pd.Index(code_names, name=Features.TARGET),
                 pd.Index(np.arange(n_ch), name=Indices.CH.value),
                 pd.Index(np.arange(n_round), name=Indices.ROUND.value),
             )
@@ -244,17 +286,15 @@ class Codebook(xr.DataArray):
                     f'{missing_fields}')
 
         target_names = [w[Features.TARGET] for w in code_array]
-        code_data = cls._empty_codebook(target_names, n_ch, n_round)
 
         # fill the codebook
-        for code_dict in code_array:
-            codeword = code_dict[Features.CODEWORD]
-            target = code_dict[Features.TARGET]
-            for entry in codeword:
-                code_data.loc[target, entry[Indices.CH], entry[Indices.ROUND]] = entry[
-                    Features.CODE_VALUE]
-
-        return code_data
+        data = np.zeros((len(target_names), n_ch, n_round), dtype=np.uint8)
+        for i, code_dict in enumerate(code_array):
+            for bit in code_dict[Features.CODEWORD]:
+                ch = int(bit[Indices.CH])
+                r = int(bit[Indices.ROUND])
+                data[i, ch, r] = int(bit[Features.CODE_VALUE])
+        return cls._create_codebook(target_names, n_ch, n_round, data)
 
     @classmethod
     def from_json(

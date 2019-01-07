@@ -34,16 +34,14 @@ def codebook_array_factory() -> List[Dict[str, Any]]:
     ]
 
 
-def test_from_code_array_has_three_channels_two_rounds_and_two_codes():
-    """
-    Tests that from_code_array loads a small codebook that has the correct size and values
-    """
-    code_array: List = codebook_array_factory()
-    codebook: Codebook = Codebook.from_code_array(code_array)
+def assert_sizes(codebook, check_values=True):
 
     assert codebook.sizes[Indices.CH] == 3
     assert codebook.sizes[Indices.ROUND] == 2
     assert codebook.sizes[Features.TARGET] == 2
+
+    if not check_values:
+        return
 
     # codebook should have 4 "on" combinations
     expected_values = np.zeros((2, 3, 2))
@@ -53,6 +51,15 @@ def test_from_code_array_has_three_channels_two_rounds_and_two_codes():
     expected_values[1, 1, 1] = 1
 
     assert np.array_equal(codebook.values, expected_values)
+
+
+def test_from_code_array_has_three_channels_two_rounds_and_two_codes():
+    """
+    Tests that from_code_array loads a small codebook that has the correct size and values
+    """
+    code_array: List = codebook_array_factory()
+    codebook: Codebook = Codebook.from_code_array(code_array)
+    assert_sizes(codebook)
 
 
 # TODO ambrosejcarr: this should be a ValueError, not a KeyError,
@@ -113,3 +120,29 @@ def test_from_code_array_throws_exception_when_data_is_improperly_formatted():
 
 
 # TODO codebook should throw an error when an empty array is passed
+
+
+#
+# Underlying methods
+#
+
+def test_empty_codebook():
+    code_array: List = codebook_array_factory()
+    targets = [x[Features.TARGET] for x in code_array]
+    codebook = Codebook._empty_codebook(targets, n_ch=3, n_round=2)
+    assert_sizes(codebook, False)
+
+def test_create_codebook():
+    code_array: List = codebook_array_factory()
+    targets = [x[Features.TARGET] for x in code_array]
+
+    # Loop performed by from_code_array
+    data = np.zeros((2, 3, 2), dtype=np.uint8)
+    for i, code_dict in enumerate(code_array):
+        for bit in code_dict[Features.CODEWORD]:
+            ch = int(bit[Indices.CH])
+            r = int(bit[Indices.ROUND])
+            data[i, ch, r] = int(bit[Features.CODE_VALUE])
+
+    codebook = Codebook._create_codebook(targets, n_ch=3, n_round=2, data=data)
+    assert_sizes(codebook)

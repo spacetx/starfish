@@ -44,8 +44,8 @@ from starfish.config import StarfishConfig
 from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
 from starfish.imagestack import indexing_utils, physical_coordinate_calculator
-from starfish.imagestack.parser import TileKey
-from starfish.imagestack.parser.tileset import parse_tileset, TileSetData
+from starfish.imagestack.parser import TileCollectionData, TileKey
+from starfish.imagestack.parser.tileset import parse_tileset
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.multiprocessing.shmem import SharedMemory
 from starfish.types import (
@@ -113,7 +113,7 @@ class ImageStack:
     def __init__(
             self,
             tile_shape: Tuple[int, int],
-            tile_data: TileSetData,
+            tile_data: TileCollectionData,
     ) -> None:
         self._axes_sizes = {
             Indices.ROUND: len(set(tilekey.round for tilekey in tile_data.keys())),

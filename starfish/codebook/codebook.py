@@ -126,8 +126,7 @@ class Codebook(xr.DataArray):
             codebook whose values are all zero
 
         """
-        codes_index = pd.Index(code_names, name=Features.TARGET)
-        data = np.zeros((codes_index.shape[0], n_ch, n_round), dtype=np.uint8)
+        data = np.zeros((len(code_names), n_ch, n_round), dtype=np.uint8)
         return cls._create_codebook(code_names, n_ch, n_round, data)
 
     @classmethod

@@ -161,7 +161,7 @@ def test_set_slice_range():
     y, x = stack.tile_shape
 
     expected = np.full(
-        (stack.shape[Indices.ROUND], stack.shape[Indices.CH], zrange.stop - zrange.start, y, x),
+        (stack.shape[Indices.ROUND], stack.shape[Indices.CH], zrange.stop - zrange.start + 1, y, x),
         fill_value=0.5,
         dtype=np.float32
     )
@@ -239,7 +239,7 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
     # only 8 values should be set, since there are only 8 locations across the tensor
     assert np.sum(image.xarray != 0) == 8
 
-    intensities = image.xarray.isel(
+    intensities = image.xarray.sel(
         x=xr.DataArray(x, dims=['intensity']),
         y=xr.DataArray(y, dims=['intensity']),
         z=xr.DataArray(z, dims=['intensity']),

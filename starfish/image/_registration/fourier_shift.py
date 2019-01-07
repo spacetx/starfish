@@ -69,14 +69,14 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
                                                                    Indices.CH,
                                                                    Indices.Z)
 
-        for r in range(image.num_rounds):
+        for r in image.index_labels(Indices.ROUND):
             # compute shift between maximum projection (across channels) and dots, for each round
             # TODO: make the max projection array ignorant of axes ordering.
             shift, error = compute_shift(mp_numpy[r, :, :], reference_image_numpy, self.upsampling)
             print(f"For round: {r}, Shift: {shift}, Error: {error}")
 
-            for c in range(image.num_chs):
-                for z in range(image.num_zlayers):
+            for c in image.index_labels(Indices.CH):
+                for z in image.index_labels(Indices.Z):
                     # apply shift to all zlayers, channels, and imaging rounds
                     indices = {Indices.ROUND: r, Indices.CH: c, Indices.Z: z}
                     data, axes = image.get_slice(indices=indices)

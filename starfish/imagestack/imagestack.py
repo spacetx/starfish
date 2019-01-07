@@ -8,6 +8,7 @@ from itertools import product
 from typing import (
     Any,
     Callable,
+    Iterable,
     Iterator,
     List,
     Mapping,
@@ -147,10 +148,10 @@ class ImageStack:
 
             data_shape.append(size_for_axis)
             data_dimensions.append(dim_for_axis.value)
-            data_tick_marks[dim_for_axis.value] = list(range(size_for_axis))
+            data_tick_marks[dim_for_axis.value] = list(self.index_labels(dim_for_axis))
             coordinates_shape.append(size_for_axis)
             coordinates_dimensions.append(dim_for_axis.value)
-            coordinates_tick_marks[dim_for_axis.value] = list(range(size_for_axis))
+            coordinates_tick_marks[dim_for_axis.value] = list(self.index_labels(dim_for_axis))
 
         data_shape.extend(self._tile_shape)
         data_dimensions.extend([Indices.Y.value, Indices.X.value])
@@ -297,13 +298,24 @@ class ImageStack:
         return cls.from_url(relativeurl, baseurl)
 
     @classmethod
-    def from_numpy_array(cls, array: np.ndarray) -> "ImageStack":
+    def from_numpy_array(
+            cls,
+            array: np.ndarray,
+            index_labels: Optional[Mapping[Indices, Sequence[int]]]=None,
+            coordinates: Optional[xr.DataArray]=None,
+    ) -> "ImageStack":
         """Create an ImageStack from a 5d numpy array with shape (n_round, n_ch, n_z, y, x)
 
         Parameters
         ----------
         array : np.ndarray
             5-d tensor of shape (n_round, n_ch, n_z, y, x)
+        index_labels : Optional[Mapping[Indices, Sequence[int]]]
+            Mapping from indices (r, ch, z) to their labels.  If this is not provided, then the
+            axes will be labeled from 0..(n-1), where n=the size of the axes.
+        coordinates : Optional[xr.DataArray]
+            DataArray indexed by r, ch, z, with xmin, xmax, ymin, ymax, zmin, zmax as columns.  If
+            this is not provided, then the ImageStack gets fake coordinates.
 
         Returns
         -------
@@ -320,15 +332,19 @@ class ImageStack:
             array = img_as_float32(array)
 
         n_round, n_ch, n_z, height, width = array.shape
-        tile_data = NumpyData(
-            array,
-            {
+
+        if index_labels is None:
+            index_labels = {
                 Indices.ROUND: list(range(n_round)),
                 Indices.CH: list(range(n_ch)),
                 Indices.Z: list(range(n_z)),
-            },
-            None,
-        )
+            }
+        else:
+            assert len(index_labels[Indices.ROUND]) == n_round
+            assert len(index_labels[Indices.CH]) == n_ch
+            assert len(index_labels[Indices.Z]) == n_z
+
+        tile_data = NumpyData(array, index_labels, coordinates)
         return cls(
             (height, width),
             tile_data,
@@ -374,10 +390,17 @@ class ImageStack:
         # convert indexers to Dict[str, (int/slice)] format
         formatted_indexers = indexing_utils.convert_to_indexers_dict(indexers)
         indexed_data = indexing_utils.index_keep_dimensions(self.xarray, formatted_indexers)
-        stack = self.from_numpy_array(indexed_data.data)
-        # set coords on new stack
-        stack._coordinates = physical_coordinate_calculator.calc_new_physical_coords_array(
+        new_coordinates = physical_coordinate_calculator.calc_new_physical_coords_array(
             self._coordinates, self.shape, formatted_indexers)
+        stack = self.from_numpy_array(
+            indexed_data.data,
+            {
+                Indices.ROUND: indexed_data[Indices.ROUND.value].values.tolist(),
+                Indices.CH: indexed_data[Indices.CH.value].values.tolist(),
+                Indices.Z: indexed_data[Indices.Z.value].values.tolist(),
+            },
+            new_coordinates,
+        )
         return stack
 
     def get_slice(
@@ -391,19 +414,54 @@ class ImageStack:
 
         Examples
         --------
-        ImageStack axes: H, C, and Z with shape 3, 4, 5, respectively.
-        ImageStack Implicit axes: X, Y with shape 10, 20, respectively.
-        Called to slice with indices {Z: 5}.
-        Result: a 4-dimensional numpy array with shape (3, 4, 20, 10) and the remaining axes [H, C].
 
-        Original axes: H, C, and Z.
-        Implicit axes: X, Y.
-        Called to slice with indices {Z: 5, C: slice(2, 4)}.
-        Result: a 4-dimensional numpy array with shape (3, 2, 20, 10) and the remaining axes [H, C].
+        Slicing with a scalar
+            >>> from starfish import ImageStack
+            >>> from starfish.types import Indices
+            >>> stack = ImageStack.synthetic_stack(3, 4, 5, 20, 10)
+            >>> stack.shape
+            OrderedDict([(<Indices.ROUND: 'r'>, 3),
+             (<Indices.CH: 'c'>, 4),
+             (<Indices.Z: 'z'>, 5),
+             ('y', 20),
+             ('x', 10)])
+            >>> stack.index_labels(Indices.ROUND)
+            [0, 1, 2]
+            >>> stack.index_labels(Indices.CH)
+            [0, 1, 2, 3]
+            >>> stack.index_labels(Indices.Z)
+            [2, 3, 4, 5, 6]
+            >>> data, axes = stack.get_slice({Indices.Z: 6})
+            >>> data.shape
+            (3, 4, 20, 10)
+            >>> axes
+            [<Indices.ROUND: 'r'>, <Indices.CH: 'c'>]
 
+        Slicing with a range
+            >>> from starfish import ImageStack
+            >>> from starfish.types import Indices
+            >>> stack = ImageStack.synthetic_stack(3, 4, 5, 20, 10)
+            >>> stack.shape
+            OrderedDict([(<Indices.ROUND: 'r'>, 3),
+             (<Indices.CH: 'c'>, 4),
+             (<Indices.Z: 'z'>, 5),
+             ('y', 20),
+             ('x', 10)])
+            >>> stack.index_labels(Indices.ROUND)
+            [0, 1, 2]
+            >>> stack.index_labels(Indices.CH)
+            [0, 1, 2, 3]
+            >>> stack.index_labels(Indices.Z)
+            [2, 3, 4, 5, 6]
+            >>> data, axes = stack.get_slice({Indices.Z: 5, Indices.CH: slice(2, 4)})
+            >>> data.shape
+            (3, 2, 20, 10)
+            >>> axes
+            [<Indices.ROUND: 'r'>, <Indices.CH: 'c'>]
         """
-        slice_list, axes = self._build_slice_list(indices)
-        result = self._data.values[slice_list]
+        formatted_indexers = indexing_utils.convert_to_indexers_dict(indices)
+        _, axes = self._build_slice_list(indices)
+        result = self._data.sel(formatted_indexers).values
 
         if result.dtype != np.float32:
             warnings.warn(
@@ -513,11 +571,11 @@ class ImageStack:
         if len(move_src) != 0:
             data = np.moveaxis(data, move_src, move_dst)
 
-        if self._data[slice_list].shape != data.shape:
+        if self._data.loc[slice_list].shape != data.shape:
             raise ValueError("source shape {} mismatches destination shape {}".format(
                 data.shape, self._data[slice_list].shape))
 
-        self._data.values[slice_list] = data
+        self._data.loc[slice_list] = data
 
     def show_stack_napari(self, indices: Mapping[Indices, Union[int, slice]]):
         """Displays the image stack using Napari (https://github.com/Napari)
@@ -759,7 +817,7 @@ class ImageStack:
         if indices is None:
             indices = {Indices.ROUND, Indices.CH}
         ordered_indices = list(indices)
-        ranges = [np.arange(self.shape[ind]) for ind in ordered_indices]
+        ranges = [self.index_labels(ind) for ind in ordered_indices]
         for items in product(*ranges):
             a = zip(ordered_indices, items)
             yield {ind: val for (ind, val) in a}
@@ -1085,6 +1143,18 @@ class ImageStack:
     def num_zlayers(self):
         return self._axes_sizes[Indices.Z]
 
+    INDICES_TO_PROPERTY_MAP = {
+        Indices.ROUND: num_rounds,
+        Indices.CH: num_chs,
+        Indices.Z: num_zlayers,
+    }
+
+    def index_labels(self, index: Indices) -> Iterable[int]:
+        """Given a index, return the sorted unique values for that index in this ImageStack.  For
+        instance, imagestack.unique_index_values(Indices.ROUND) returns all the round ids in this
+        imagestack."""
+        return sorted(set(tilekey[index] for tilekey in self._tile_data.keys()))
+
     @property
     def tile_shape(self):
         return self._tile_shape
@@ -1147,37 +1217,35 @@ class ImageStack:
             default_tile_shape=self._tile_shape,
             extras=self._tile_data.extras,
         )
-        for round_ in range(self.num_rounds):
-            for ch in range(self.num_chs):
-                for zlayer in range(self.num_zlayers):
-                    tilekey = TileKey(round=round_, ch=ch, z=zlayer)
-                    extras: dict = self._tile_data[tilekey]
+        for tilekey in self._tile_data.keys():
+            round_, ch, zlayer = tilekey.round, tilekey.ch, tilekey.z
+            extras: dict = self._tile_data[tilekey]
 
-                    tile_indices = {
-                        Indices.ROUND: round_,
-                        Indices.CH: ch,
-                        Indices.Z: zlayer,
-                    }
+            tile_indices = {
+                Indices.ROUND: round_,
+                Indices.CH: ch,
+                Indices.Z: zlayer,
+            }
 
-                    coordinates: MutableMapping[Coordinates, Tuple[Number, Number]] = dict()
-                    x_coordinates = self.tile_coordinates(tile_indices, Coordinates.X)
-                    y_coordinates = self.tile_coordinates(tile_indices, Coordinates.Y)
-                    z_coordinates = self.tile_coordinates(tile_indices, Coordinates.Z)
+            coordinates: MutableMapping[Coordinates, Tuple[Number, Number]] = dict()
+            x_coordinates = self.tile_coordinates(tile_indices, Coordinates.X)
+            y_coordinates = self.tile_coordinates(tile_indices, Coordinates.Y)
+            z_coordinates = self.tile_coordinates(tile_indices, Coordinates.Z)
 
-                    coordinates[Coordinates.X] = x_coordinates
-                    coordinates[Coordinates.Y] = y_coordinates
-                    if z_coordinates[0] != np.nan and z_coordinates[1] != np.nan:
-                        coordinates[Coordinates.Z] = z_coordinates
+            coordinates[Coordinates.X] = x_coordinates
+            coordinates[Coordinates.Y] = y_coordinates
+            if z_coordinates[0] != np.nan and z_coordinates[1] != np.nan:
+                coordinates[Coordinates.Z] = z_coordinates
 
-                    tile = Tile(
-                        coordinates=coordinates,
-                        indices=tile_indices,
-                        extras=extras,
-                    )
-                    tile.numpy_array, _ = self.get_slice(
-                        indices={Indices.ROUND: round_, Indices.CH: ch, Indices.Z: zlayer}
-                    )
-                    tileset.add_tile(tile)
+            tile = Tile(
+                coordinates=coordinates,
+                indices=tile_indices,
+                extras=extras,
+            )
+            tile.numpy_array, _ = self.get_slice(
+                indices={Indices.ROUND: round_, Indices.CH: ch, Indices.Z: zlayer}
+            )
+            tileset.add_tile(tile)
 
         if tile_opener is None:
             def tile_opener(tileset_path, tile, ext):

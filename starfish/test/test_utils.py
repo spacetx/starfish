@@ -34,9 +34,9 @@ def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict
                     coords[PhysicalCoordinateTypes.Z_MIN],
                     coords[PhysicalCoordinateTypes.Z_MAX]]
 
-    for _round in range(stack.num_rounds):
-        for ch in range(stack.num_chs):
-            for z in range(stack.num_zlayers):
+    for _round in stack.index_labels(Indices.ROUND):
+        for ch in stack.index_labels(Indices.CH):
+            for z in stack.index_labels(Indices.Z):
                 coordinate_selector = {
                     Indices.ROUND.value: _round,
                     Indices.CH.value: ch,

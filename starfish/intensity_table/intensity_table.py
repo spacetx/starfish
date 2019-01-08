@@ -167,7 +167,11 @@ class IntensityTable(xr.DataArray):
     def get_log(self):
         """Deserialize and return a list of pipeline components that have been applied
          throughout a starfish session to create this Intensity Table"""
-        return loads(self.attrs[STARFISH])[LOG]
+
+        if STARFISH in self.attrs and LOG in self.attrs[STARFISH]:
+            return loads(self.attrs[STARFISH])[LOG]
+        else:
+            raise RuntimeError('No log info found.')
 
     def save(self, filename: str) -> None:
         """Save an IntensityTable as a Netcdf File

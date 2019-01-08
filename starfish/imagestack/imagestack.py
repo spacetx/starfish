@@ -56,7 +56,7 @@ from starfish.types import (
     Number,
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
-    STARFISH
+    STARFISH_EXTRAS_KEY
 )
 from starfish.util.JSONenocder import LogEncoder
 from ._mp_dataarray import MPDataArray
@@ -128,8 +128,8 @@ class ImageStack:
         self._tile_data = tile_data
 
         # check for existing log info
-        if STARFISH in tile_data.extras:
-            self._log = loads(tile_data.extras[STARFISH])[LOG]
+        if STARFISH_EXTRAS_KEY in tile_data.extras and LOG in tile_data.extras[STARFISH_EXTRAS_KEY]:
+            self._log = loads(tile_data.extras[STARFISH_EXTRAS_KEY])[LOG]
         else:
             self._log: List[dict] = list()
 
@@ -1117,7 +1117,7 @@ class ImageStack:
 
         """
         # Add log data to extras
-        self._tile_data.extras[STARFISH] = LogEncoder().encode({LOG: self.log})
+        self._tile_data.extras[STARFISH_EXTRAS_KEY] = LogEncoder().encode({LOG: self.log})
         tileset = TileSet(
             dimensions={
                 Indices.ROUND,

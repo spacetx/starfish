@@ -7,7 +7,7 @@ from ._constants import (
     LOG,
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
-    STARFISH
+    STARFISH_EXTRAS_KEY
 )
 from ._spot_attributes import SpotAttributes
 

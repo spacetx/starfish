@@ -11,8 +11,12 @@ stages:
 - test
 jobs:
   include:
-    - name: Syntax and Tests
-      script: make check_notebooks install-src fast
+    - name: Syntax and Fast Tests
+      script: make install-src fast
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+    - name: Slow Tests
+      script: make install-src && make -j check-notebooks slow-test
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Install Napari

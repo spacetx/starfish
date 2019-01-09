@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from starfish.spots._detector.blob import BlobDetector
 from starfish.types import Features, Indices
@@ -49,7 +50,7 @@ def test_round_trip_synthetic_data():
     )
 
 
-# @pytest.mark.skip('long-running integration test, for debugging only')
+@pytest.mark.slow
 def test_medium_synthetic_stack():
     np.random.seed(0)
 

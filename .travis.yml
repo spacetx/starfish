@@ -7,6 +7,7 @@ services:
 python:
 - 3.6
 dist: trusty
+install: travis_wait mvn install
 stages:
 - test
 jobs:

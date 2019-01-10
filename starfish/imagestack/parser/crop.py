@@ -4,7 +4,7 @@ import numpy as np
 
 from starfish.imagestack.parser import TileCollectionData, TileData, TileKey
 from starfish.imagestack.physical_coordinate_calculator import recalculate_physical_coordinate_range
-from starfish.types import Coordinates, Indices, Number
+from starfish.types import Axes, Coordinates, Number
 
 
 class CropParameters:
@@ -14,7 +14,7 @@ class CropParameters:
             *,
             permitted_rounds: Optional[Collection[int]]=None,
             permitted_chs: Optional[Collection[int]]=None,
-            permitted_zlayers: Optional[Collection[int]]=None,
+            permitted_zplanes: Optional[Collection[int]]=None,
             x_slice: Optional[Union[int, slice]]=None,
             y_slice: Optional[Union[int, slice]]=None,
     ):
@@ -27,7 +27,7 @@ class CropParameters:
         permitted_chs : Optional[Collection[int]]
             The channels in the original dataset to load into the ImageStack.  If this is not set,
             then all channels are loaded into the ImageStack.
-        permitted_zlayers : Optional[Collection[int]]
+        permitted_zplanes : Optional[Collection[int]]
             The z-layers in the original dataset to load into the ImageStack.  If this is not set,
             then all z-layers are loaded into the ImageStack.
         x_slice : Optional[Union[int, slice]]
@@ -39,7 +39,7 @@ class CropParameters:
         """
         self._permitted_rounds = set(permitted_rounds) if permitted_rounds else None
         self._permitted_chs = set(permitted_chs) if permitted_chs else None
-        self._permitted_zlayers = set(permitted_zlayers) if permitted_zlayers else None
+        self._permitted_zplanes = set(permitted_zplanes) if permitted_zplanes else None
         self._x_slice = x_slice
         self._y_slice = y_slice
 
@@ -53,7 +53,7 @@ class CropParameters:
                 continue
             if self._permitted_chs is not None and tilekey.ch not in self._permitted_chs:
                 continue
-            if self._permitted_zlayers is not None and tilekey.z not in self._permitted_zlayers:
+            if self._permitted_zplanes is not None and tilekey.z not in self._permitted_zplanes:
                 continue
 
             results.append(tilekey)
@@ -163,8 +163,8 @@ class CroppedTileData(TileData):
         )
 
     @property
-    def indices(self) -> Mapping[Indices, int]:
-        return self.backing_tile_data.indices
+    def selector(self) -> Mapping[Axes, int]:
+        return self.backing_tile_data.selector
 
 
 class CroppedTileCollectionData(TileCollectionData):

@@ -3,7 +3,7 @@ from typing import Type
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
-from starfish.types import Indices
+from starfish.types import Axes
 from starfish.util import click
 from . import _base
 
@@ -24,8 +24,8 @@ class SpotFinder(PipelineComponent):
         ref_image = ctx.obj["reference_image_from_max_projection"]
         if blobs_stack is not None:
             blobs_stack = ImageStack.from_path_or_url(blobs_stack)  # type: ignore
-            mp = blobs_stack.max_proj(Indices.ROUND, Indices.CH)
-            mp_numpy = mp._squeezed_numpy(Indices.ROUND, Indices.CH)
+            mp = blobs_stack.max_proj(Axes.ROUND, Axes.CH)
+            mp_numpy = mp._squeezed_numpy(Axes.ROUND, Axes.CH)
             #  TODO: this won't work for PixelSpotDectector
             intensities = instance.run(
                 image_stack,

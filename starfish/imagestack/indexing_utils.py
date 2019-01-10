@@ -1,26 +1,28 @@
-from typing import Mapping, Union
+from typing import Mapping, MutableMapping, Union
 
 import xarray as xr
 
-from starfish.types import Indices
+from starfish.types import Axes
 
 
-def convert_to_indexers_dict(indexers) -> Mapping[str, Union[int, slice]]:
-    """Converts a dict of indexers from Dict[Indices, (int/tuple)] to
-    Dict[str, (int/slice)] so that it can be passed into standard xarray
-    indexing methods
+def convert_to_selector(
+        indexers: Mapping[Axes, Union[int, slice, tuple]]) -> Mapping[str, Union[int, slice]]:
+    """Converts a mapping of Axis to int, slice, or tuple to a mapping of str to int or slice.  The
+    latter format is required for standard xarray indexing methods.
 
     Parameters
     ----------
-    indexers : Dict[Indices, (int/tuple)]
+    indexers : Mapping[Axes, Union[int, slice, tuple]]
             A dictionary of dim:index where index is the value or range to index the dimension
 
     """
-    return_dict = {ind.value: slice(None, None) for ind in Indices}
+    return_dict: MutableMapping[str, Union[int, slice]] = {
+        ind.value: slice(None, None) for ind in Axes}
     for key, value in indexers.items():
         if isinstance(value, tuple):
-            value = slice(value[0], value[1])
-        return_dict[key] = value
+            return_dict[key.value] = slice(value[0], value[1])
+        else:
+            return_dict[key.value] = value
     return return_dict
 
 

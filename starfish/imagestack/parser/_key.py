@@ -1,16 +1,16 @@
 import typing
 
-from starfish.types import Indices
+from starfish.types import Axes
 
 
 class TileKey:
     """
     This class is used to index into the TileData class.
     """
-    def __init__(self, *, round: int, ch: int, z: int) -> None:
+    def __init__(self, *, round: int, ch: int, zplane: int) -> None:
         self._round = round
         self._ch = ch
-        self._z = z
+        self._zplane = zplane
 
     @property
     def round(self) -> int:
@@ -22,29 +22,29 @@ class TileKey:
 
     @property
     def z(self) -> int:
-        return self._z
+        return self._zplane
 
-    INDICES_TO_PROPERTY_MAP = {
-        Indices.ROUND: round,
-        Indices.CH: ch,
-        Indices.Z: z,
+    AXES_TO_PROPERTY_MAP = {
+        Axes.ROUND: round,
+        Axes.CH: ch,
+        Axes.ZPLANE: z,
     }
 
     def __getitem__(self, item) -> int:
         """Given a index, return the corresponding value for that index for this tilekey.  For
-        instance, tilekey[Indices.ROUND] returns the round for this tilekey."""
-        index = typing.cast(Indices, item)
-        prop: property = TileKey.INDICES_TO_PROPERTY_MAP[index]  # type: ignore
+        instance, tilekey[Axes.ROUND] returns the round for this tilekey."""
+        index = typing.cast(Axes, item)
+        prop: property = TileKey.AXES_TO_PROPERTY_MAP[index]  # type: ignore
         return prop.__get__(self, TileKey)
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, TileKey):
             return False
 
-        return self._round == other.round and self._ch == other.ch and self._z == other.z
+        return self._round == other.round and self._ch == other.ch and self._zplane == other.z
 
     def __hash__(self) -> int:
-        return int(self._round ^ self._ch ^ self._z)
+        return int(self._round ^ self._ch ^ self._zplane)
 
     def __repr__(self) -> str:
-        return f"(round: {self._round} ch: {self._ch} z: {self._z})"
+        return f"(round: {self._round} ch: {self._ch} z: {self._zplane})"

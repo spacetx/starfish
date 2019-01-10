@@ -2,11 +2,11 @@ import pytest
 
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Indices
+from starfish.types import Axes
 
 NUM_ROUND = 4
 NUM_CH = 2
-NUM_Z = 12
+NUM_ZPLANE = 12
 
 
 class OnesTilesWithExtras(OnesTile):
@@ -34,10 +34,10 @@ def test_metadata():
     )
 
     stack = ImageStack.synthetic_stack(
-        num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_Z, tile_fetcher=tile_fetcher,
+        num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_ZPLANE, tile_fetcher=tile_fetcher,
     )
     table = stack.tile_metadata
-    assert len(table) == NUM_ROUND * NUM_CH * NUM_Z
+    assert len(table) == NUM_ROUND * NUM_CH * NUM_ZPLANE
 
 
 def test_missing_extras():
@@ -67,10 +67,10 @@ def test_missing_extras():
     )
 
     stack = ImageStack.synthetic_stack(
-        num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_Z, tile_fetcher=tile_fetcher,
+        num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_ZPLANE, tile_fetcher=tile_fetcher,
     )
     table = stack.tile_metadata
-    assert len(table) == NUM_ROUND * NUM_CH * NUM_Z
+    assert len(table) == NUM_ROUND * NUM_CH * NUM_ZPLANE
 
 
 def test_conflict():
@@ -81,14 +81,14 @@ def test_conflict():
         OnesTilesWithExtras,
         False,
         {
-            Indices.ROUND: {
+            Axes.ROUND: {
                 'hello': "world",
             }
         }
     )
 
     stack = ImageStack.synthetic_stack(
-        num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_Z, tile_fetcher=tile_fetcher,
+        num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_ZPLANE, tile_fetcher=tile_fetcher,
     )
     with pytest.raises(ValueError):
         stack.tile_metadata

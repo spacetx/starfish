@@ -11,7 +11,7 @@ from starfish.image._filter.white_tophat import WhiteTophat
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.spots._detector.blob import BlobDetector
-from starfish.types import Features, Indices
+from starfish.types import Axes, Features
 from starfish.util import synthesize
 
 
@@ -32,9 +32,9 @@ def small_intensity_table():
 
     spot_attributes = pd.DataFrame(
         data={
-            Indices.X.value: [0, 1, 2, 3, 4],
-            Indices.Y.value: [3, 4, 5, 6, 7],
-            Indices.Z.value: [0, 0, 0, 0, 0],
+            Axes.X.value: [0, 1, 2, 3, 4],
+            Axes.Y.value: [3, 4, 5, 6, 7],
+            Axes.ZPLANE.value: [0, 0, 0, 0, 0],
             Features.SPOT_RADIUS: [0.1, 2, 3, 2, 1]
         }
     )
@@ -47,22 +47,22 @@ def simple_codebook_array():
     return [
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 0, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 0, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: "SCUBE2"
         },
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 1, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 1, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: "BRCA"
         },
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 1, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 0, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 1, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: "ACTB"
         }
@@ -123,8 +123,8 @@ def synthetic_dataset_with_truth_values_and_called_spots(
 
     wth = WhiteTophat(masking_radius=15)
     filtered = wth.run(image, in_place=False)
-    filtered_mp = filtered.max_proj(Indices.CH, Indices.ROUND)
-    filtered_mp_numpy = filtered_mp._squeezed_numpy(Indices.CH, Indices.ROUND)
+    filtered_mp = filtered.max_proj(Axes.CH, Axes.ROUND)
+    filtered_mp_numpy = filtered_mp._squeezed_numpy(Axes.CH, Axes.ROUND)
 
     min_sigma = 1.5
     max_sigma = 4

@@ -5,7 +5,7 @@ import numpy as np
 import xarray as xr
 
 from starfish.imagestack import physical_coordinate_calculator
-from starfish.types import Indices, PHYSICAL_COORDINATE_DIMENSION, PhysicalCoordinateTypes
+from starfish.types import Axes, PHYSICAL_COORDINATE_DIMENSION, PhysicalCoordinateTypes
 
 
 X_INDEX_0 = 1
@@ -30,9 +30,9 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
                 shape=(1, 1, 1, 6),
                 dtype=np.float32,
             ),
-            dims=(Indices.ROUND.value,
-                  Indices.CH.value,
-                  Indices.Z.value,
+            dims=(Axes.ROUND.value,
+                  Axes.CH.value,
+                  Axes.ZPLANE.value,
                   PHYSICAL_COORDINATE_DIMENSION),
             coords={
                 PHYSICAL_COORDINATE_DIMENSION: [
@@ -46,11 +46,11 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
             },
         )
 
-        self.indexers = {Indices.ROUND: slice(None, None),
-                         Indices.CH: slice(None, None),
-                         Indices.Z: slice(None, None),
-                         Indices.Y: slice(None, None),
-                         Indices.X: slice(None, None)}
+        self.indexers = {Axes.ROUND: slice(None, None),
+                         Axes.CH: slice(None, None),
+                         Axes.ZPLANE: slice(None, None),
+                         Axes.Y: slice(None, None),
+                         Axes.X: slice(None, None)}
 
         self.physical_coords = {PhysicalCoordinateTypes.X_MIN: 1.0,
                                 PhysicalCoordinateTypes.X_MAX: 2.0,
@@ -67,12 +67,12 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
                       self.physical_coords[PhysicalCoordinateTypes.Z_MIN],
                       self.physical_coords[PhysicalCoordinateTypes.Z_MAX]])
 
-        self.stack_shape = OrderedDict([(Indices.ROUND, 1), (Indices.CH, 1),
-                                        (Indices.Z, 1), (Indices.Y, 200), (Indices.X, 200)])
+        self.stack_shape = OrderedDict([(Axes.ROUND, 1), (Axes.CH, 1),
+                                        (Axes.ZPLANE, 1), (Axes.Y, 200), (Axes.X, 200)])
 
     def test_calc_new_physical_coords_array_single_y_slice_x(self):
         # Index on single value of X, range of y
-        self.indexers[Indices.Y], self.indexers[Indices.X] = 100, slice(None, 100)
+        self.indexers[Axes.Y], self.indexers[Axes.X] = 100, slice(None, 100)
         new_coords = physical_coordinate_calculator.calc_new_physical_coords_array(
             physical_coordinates=self.coords_array,
             stack_shape=self.stack_shape,
@@ -94,7 +94,7 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
 
     def test_calc_new_physical_coords_array_slice_x_y(self):
         # Index on last half of Y, first half of X
-        self.indexers[Indices.Y], self.indexers[Indices.X] = slice(100, None), slice(None, 100)
+        self.indexers[Axes.Y], self.indexers[Axes.X] = slice(100, None), slice(None, 100)
         new_coords = physical_coordinate_calculator.calc_new_physical_coords_array(
             physical_coordinates=self.coords_array,
             stack_shape=self.stack_shape,
@@ -116,7 +116,7 @@ class TestPhysicalCoordinateCalculator(unittest.TestCase):
 
     def test_calc_new_physical_coords_array_negative_indexing(self):
         # Negative indexing
-        self.indexers[Indices.Y], self.indexers[Indices.X] = slice(100, -10), slice(1, -50)
+        self.indexers[Axes.Y], self.indexers[Axes.X] = slice(100, -10), slice(1, -50)
         new_coords = physical_coordinate_calculator.calc_new_physical_coords_array(
             physical_coordinates=self.coords_array,
             stack_shape=self.stack_shape,

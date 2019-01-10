@@ -4,7 +4,7 @@ import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.types import Indices
+from starfish.types import Axes
 
 
 def test_reshaping_between_stack_and_intensities():
@@ -42,7 +42,7 @@ def pixel_intensities_to_imagestack(
     # reverses the process used to produce the intensity table in to_pixel_intensities
     data = intensities.values.reshape([
         *image_shape,
-        intensities.sizes[Indices.CH],
-        intensities.sizes[Indices.ROUND]])
+        intensities.sizes[Axes.CH],
+        intensities.sizes[Axes.ROUND]])
     data = data.transpose(4, 3, 0, 1, 2)
     return ImageStack.from_numpy_array(data)

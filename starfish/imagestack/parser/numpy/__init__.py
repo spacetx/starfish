@@ -18,8 +18,8 @@ import xarray as xr
 
 from starfish.imagestack.parser import TileCollectionData, TileData, TileKey
 from starfish.types import (
+    Axes,
     Coordinates,
-    Indices,
     Number,
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
@@ -35,11 +35,11 @@ class NumpyImageTile(TileData):
             self,
             data: np.ndarray,
             coordinates: Mapping[Coordinates, Tuple[Number, Number]],
-            indices: Mapping[Indices, int],
+            selector: Mapping[Axes, int],
     ) -> None:
         self._data = data
         self._coordinates = coordinates
-        self._indices = indices
+        self._selector = selector
 
     @property
     def tile_shape(self) -> Tuple[int, int]:
@@ -54,8 +54,8 @@ class NumpyImageTile(TileData):
         return self._coordinates
 
     @property
-    def indices(self) -> Mapping[Indices, int]:
-        return self._indices
+    def selector(self) -> Mapping[Axes, int]:
+        return self._selector
 
 
 class NumpyData(TileCollectionData):
@@ -66,7 +66,7 @@ class NumpyData(TileCollectionData):
     def __init__(
             self,
             data: np.ndarray,
-            index_labels: Mapping[Indices, Sequence[int]],
+            index_labels: Mapping[Axes, Sequence[int]],
             coordinates: Optional[xr.DataArray],
     ) -> None:
         self.data = data
@@ -80,22 +80,22 @@ class NumpyData(TileCollectionData):
     def keys(self) -> Collection[TileKey]:
         """Returns a Collection of the TileKey's for all the tiles."""
         keys: MutableSequence[TileKey] = list()
-        indices_names: MutableSequence[Indices] = list()
-        indices_values: MutableSequence[Sequence[int]] = list()
-        for index_name, index_possible_values in self.index_labels.items():
-            indices_names.append(index_name)
-            indices_values.append(index_possible_values)
+        axis_names: MutableSequence[Axes] = list()
+        labels: MutableSequence[Sequence[int]] = list()
+        for index_name, index_labels in self.index_labels.items():
+            axis_names.append(index_name)
+            labels.append(index_labels)
 
-        for index_values in product(*indices_values):
-            composed_index_map: MutableMapping[Indices, int] = dict()
-            for index_name, index_value in zip(indices_names, index_values):
-                composed_index_map[index_name] = index_value
+        for indices in product(*labels):
+            selector: MutableMapping[Axes, int] = dict()
+            for index_name, index_value in zip(axis_names, indices):
+                selector[index_name] = index_value
 
             keys.append(
                 TileKey(
-                    round=composed_index_map[Indices.ROUND],
-                    ch=composed_index_map[Indices.CH],
-                    z=composed_index_map[Indices.Z],
+                    round=selector[Axes.ROUND],
+                    ch=selector[Axes.CH],
+                    zplane=selector[Axes.ZPLANE],
                 )
             )
 
@@ -111,14 +111,14 @@ class NumpyData(TileCollectionData):
 
     def get_tile(self, r: int, ch: int, z: int) -> TileData:
         # find the positional r/ch/z.
-        pos_r = self.index_labels[Indices.ROUND].index(r)
-        pos_ch = self.index_labels[Indices.CH].index(ch)
-        pos_z = self.index_labels[Indices.Z].index(z)
+        pos_r = self.index_labels[Axes.ROUND].index(r)
+        pos_ch = self.index_labels[Axes.CH].index(ch)
+        pos_z = self.index_labels[Axes.ZPLANE].index(z)
 
         selectors: Mapping[str, Any] = {
-            Indices.ROUND.value: r,
-            Indices.CH.value: ch,
-            Indices.Z.value: z,
+            Axes.ROUND.value: r,
+            Axes.CH.value: ch,
+            Axes.ZPLANE.value: z,
         }
 
         coordinates: MutableMapping[Coordinates, Tuple[Number, Number]] = dict()
@@ -147,8 +147,8 @@ class NumpyData(TileCollectionData):
             self.data[pos_r, pos_ch, pos_z],
             coordinates,
             {
-                Indices.ROUND: r,
-                Indices.CH: ch,
-                Indices.Z: z,
+                Axes.ROUND: r,
+                Axes.CH: ch,
+                Axes.ZPLANE: z,
             },
         )

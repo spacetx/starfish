@@ -48,10 +48,10 @@ class PhysicalCoordinateTypes(AugmentedEnum):
     X_MIN = 'xmin'
 
 
-class Indices(AugmentedEnum):
+class Axes(AugmentedEnum):
     ROUND = 'r'
     CH = 'c'
-    Z = 'z'
+    ZPLANE = 'z'
     Y = 'y'
     X = 'x'
 

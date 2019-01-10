@@ -10,7 +10,7 @@ from slicedimage import ImageFormat
 
 from starfish import Codebook
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Coordinates, Features, Indices, Number
+from starfish.types import Axes, Coordinates, Features, Number
 
 
 # We use this to cache images across tiles.  In the case of the osmFISH data set, volumes are saved
@@ -26,11 +26,11 @@ class SeqFISHTile(FetchedTile):
             self,
             file_path: str,
             coordinates: Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]],
-            z: int,
+            zplane: int,
             ch: int,
     ):
         self._file_path = file_path
-        self._z = z
+        self._zplane = zplane
         self._ch = ch
         self._coordinates = coordinates
 
@@ -57,7 +57,7 @@ class SeqFISHTile(FetchedTile):
 
     def tile_data(self) -> np.ndarray:
         """vary z the slowest, then channel -- each round has its own TIFF"""
-        return cached_read_fn(self._file_path)[self._z, self._ch]
+        return cached_read_fn(self._file_path)[self._zplane, self._ch]
 
 
 class SeqFISHTileFetcher(TileFetcher):
@@ -75,7 +75,7 @@ class SeqFISHTileFetcher(TileFetcher):
             Coordinates.Z: (0., 0.1),
         }
 
-    def get_tile(self, fov: int, r: int, ch: int, z: int) -> SeqFISHTile:
+    def get_tile(self, fov: int, r: int, ch: int, zplane: int) -> SeqFISHTile:
         """Extracts 2-d data from a multi-page TIFF containing all Tiles for an imaging round
 
         Parameters
@@ -86,7 +86,7 @@ class SeqFISHTileFetcher(TileFetcher):
             Imaging round. Selects the TIFF file to examine
         ch : int
             Selects the channel from within the loaded TIFF file
-        z : int
+        zplane : int
             Selects the z-plane from within the loaded TIFF file
 
         Returns
@@ -95,7 +95,7 @@ class SeqFISHTileFetcher(TileFetcher):
             SeqFISH subclass of FetchedTile
         """
         file_path = os.path.join(self.input_dir, f"{r + 1}.tif")
-        return SeqFISHTile(file_path, self.coordinates, z, ch)
+        return SeqFISHTile(file_path, self.coordinates, zplane, ch)
 
 
 def parse_codebook(codebook_csv: str) -> Codebook:
@@ -122,7 +122,7 @@ def parse_codebook(codebook_csv: str) -> Codebook:
     for gene, channel_series in csv.iterrows():
         mappings.append({
             Features.CODEWORD: [{
-                Indices.ROUND.value: r, Indices.CH.value: c - 1, Features.CODE_VALUE: 1
+                Axes.ROUND.value: r, Axes.CH.value: c - 1, Features.CODE_VALUE: 1
             } for r, c in channel_series.items()],
             Features.TARGET: gene
         })
@@ -168,10 +168,10 @@ def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
     primary_tile_fetcher = SeqFISHTileFetcher(os.path.expanduser(input_dir))
 
     # This is hardcoded for this example data set
-    primary_image_dimensions: Mapping[Union[str, Indices], int] = {
-        Indices.ROUND: 5,
-        Indices.CH: 12,
-        Indices.Z: 29,
+    primary_image_dimensions: Mapping[Union[str, Axes], int] = {
+        Axes.ROUND: 5,
+        Axes.CH: 12,
+        Axes.ZPLANE: 29,
     }
 
     write_experiment_json(
@@ -181,7 +181,7 @@ def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
         aux_name_to_dimensions={},
         primary_tile_fetcher=primary_tile_fetcher,
         tile_format=ImageFormat.TIFF,
-        dimension_order=(Indices.ROUND, Indices.CH, Indices.Z)
+        dimension_order=(Axes.ROUND, Axes.CH, Axes.ZPLANE)
     )
 
     # Note: this must trigger AFTER write_experiment_json, as it will clobber the codebook with

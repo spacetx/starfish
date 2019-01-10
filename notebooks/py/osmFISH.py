@@ -14,7 +14,7 @@ import pandas as pd
 import starfish
 import starfish.data
 from starfish import FieldOfView
-from starfish.types import Indices
+from starfish.types import Axes
 
 # EPY: ESCAPE %matplotlib inline
 # EPY: ESCAPE %load_ext autoreload
@@ -31,11 +31,11 @@ stack = experiment["fov_000"][FieldOfView.PRIMARY_IMAGES]
 # EPY: END markdown
 
 # EPY: START markdown
-#The Field of view that we've used for the test data corresponds to Aldoc, imaged in round one, in position 33. We've also packaged the results from the osmFISH publication for this target to demonstrate that starfish is capable of recovering the same results. 
+#The Field of view that we've used for the test data corresponds to Aldoc, imaged in round one, in position 33. We've also packaged the results from the osmFISH publication for this target to demonstrate that starfish is capable of recovering the same results.
 # EPY: END markdown
 
 # EPY: START markdown
-#The below commands parse and load the results from this file. 
+#The below commands parse and load the results from this file.
 # EPY: END markdown
 
 # EPY: START code
@@ -94,20 +94,20 @@ stack_ghp_laplace = filter_laplace.run(stack_ghp, in_place=False)
 # EPY: END code
 
 # EPY: START markdown
-#Max project over Z, then select the 1st `(0)` channel for visualization in the notebook to demonstrate the effect of background removal using these filters. 
+#Max project over Z, then select the 1st `(0)` channel for visualization in the notebook to demonstrate the effect of background removal using these filters.
 # EPY: END markdown
 
 # EPY: START code
-mp = stack_ghp_laplace.max_proj(Indices.Z)
-array_for_visualization = mp.xarray.sel({Indices.CH: 0}).squeeze()
+mp = stack_ghp_laplace.max_proj(Axes.ZPLANE)
+array_for_visualization = mp.xarray.sel({Axes.CH: 0}).squeeze()
 # EPY: END code
 
 # EPY: START code
 plt.figure(figsize=(10, 10))
 plt.imshow(
-    array_for_visualization, 
-    cmap="gray", 
-    vmin=np.percentile(array_for_visualization, 98), 
+    array_for_visualization,
+    cmap="gray",
+    vmin=np.percentile(array_for_visualization, 98),
     vmax=np.percentile(array_for_visualization, 99.9),
 )
 plt.title("Filtered max projection")
@@ -119,16 +119,16 @@ plt.axis("off");
 # EPY: END markdown
 
 # EPY: START markdown
-#osmFISH uses a peak finder that distinguishes local maxima from their surroundings whose absolute intensities exceed a threshold value. It tests a number of different thresholds, building a curve from the number of peaks detected at each threshold. A threshold in the _stable region_ of the curve is selected, and final peaks are called with that threshold. 
+#osmFISH uses a peak finder that distinguishes local maxima from their surroundings whose absolute intensities exceed a threshold value. It tests a number of different thresholds, building a curve from the number of peaks detected at each threshold. A threshold in the _stable region_ of the curve is selected, and final peaks are called with that threshold.
 #
-#This process is repeated independently for each round and channel. Here we show this process on a single round and channel to demonstrate the procedure. 
+#This process is repeated independently for each round and channel. Here we show this process on a single round and channel to demonstrate the procedure.
 # EPY: END markdown
 
 # EPY: START code
 lmp = starfish.spots.SpotFinder.LocalMaxPeakFinder(
     min_distance=6,
     stringency=0,
-    min_obj_area=6, 
+    min_obj_area=6,
     max_obj_area=600,
 )
 spot_intensities = lmp.run(mp)
@@ -143,7 +143,7 @@ spot_intensities = lmp.run(mp)
 # EPY: END markdown
 
 # EPY: START code
-aldoc_spot_intensities = spot_intensities.sel({Indices.ROUND.value: 0, Indices.CH.value: 0})
+aldoc_spot_intensities = spot_intensities.sel({Axes.ROUND.value: 0, Axes.CH.value: 0})
 
 plt.hist(aldoc_spot_intensities, bins=20)
 plt.yscale("log")
@@ -152,12 +152,12 @@ plt.ylabel("Number of spots");
 # EPY: END code
 
 # EPY: START markdown
-#Starfish enables maximum projection and slicing of the ImageStack object. However, these projections will maintain the 5d shape, leaving one-length dimensions for any array that has been projected over. Here the maximum projection of the z-plane of the ImageStack is calculated. From it, the first channel and round are selected, and `squeeze` is used to eliminate any dimensions with only one value, yielding a two-dimension `(x, y)` tile that can be plotted. 
+#Starfish enables maximum projection and slicing of the ImageStack object. However, these projections will maintain the 5d shape, leaving one-length dimensions for any array that has been projected over. Here the maximum projection of the z-plane of the ImageStack is calculated. From it, the first channel and round are selected, and `squeeze` is used to eliminate any dimensions with only one value, yielding a two-dimension `(x, y)` tile that can be plotted.
 # EPY: END markdown
 
 # EPY: START code
-maximum_projection_5d = stack_ghp_laplace.max_proj(Indices.Z)
-maximum_projection_2d = mp.sel({Indices.CH: 0, Indices.ROUND: 0}).xarray.squeeze()
+maximum_projection_5d = stack_ghp_laplace.max_proj(Axes.ZPLANE)
+maximum_projection_2d = mp.sel({Axes.CH: 0, Axes.ROUND: 0}).xarray.squeeze()
 # EPY: END code
 
 # EPY: START markdown
@@ -167,12 +167,12 @@ maximum_projection_2d = mp.sel({Indices.CH: 0, Indices.ROUND: 0}).xarray.squeeze
 # EPY: START code
 plt.figure(figsize=(10,10))
 plt.imshow(
-    maximum_projection_2d, 
-    cmap = "gray", 
-    vmin=np.percentile(maximum_projection_2d, 98), 
+    maximum_projection_2d,
+    cmap = "gray",
+    vmin=np.percentile(maximum_projection_2d, 98),
     vmax=np.percentile(maximum_projection_2d, 99.9),
 )
-plt.plot(spot_intensities[Indices.X.value], spot_intensities[Indices.Y.value], "or")
+plt.plot(spot_intensities[Axes.X.value], spot_intensities[Axes.Y.value], "or")
 plt.axis("off");
 # EPY: END code
 
@@ -181,7 +181,7 @@ plt.axis("off");
 # EPY: END markdown
 
 # EPY: START markdown
-#Plot spots detected in the benchmark as blue spots, and overlay spots from starfish as orange x's. Starfish detects the same spot positions, but 41 fewer spots in total. 
+#Plot spots detected in the benchmark as blue spots, and overlay spots from starfish as orange x's. Starfish detects the same spot positions, but 41 fewer spots in total.
 # EPY: END markdown
 
 # EPY: START code
@@ -190,7 +190,7 @@ starfish_spot_count = len(spot_intensities)
 
 plt.figure(figsize=(10,10))
 plt.plot(benchmark_peaks.x, -benchmark_peaks.y, "o")
-plt.plot(spot_intensities[Indices.X.value], -spot_intensities[Indices.Y.value], "x")
+plt.plot(spot_intensities[Axes.X.value], -spot_intensities[Axes.Y.value], "x")
 
 plt.legend(["Benchmark: {} spots".format(benchmark_spot_count),
             "Starfish: {} spots".format(starfish_spot_count)])

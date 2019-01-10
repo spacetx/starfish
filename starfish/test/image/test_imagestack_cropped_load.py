@@ -12,7 +12,7 @@ from starfish.experiment.builder import build_image, FetchedTile, tile_fetcher_f
 from starfish.imagestack.imagestack import ImageStack
 from starfish.imagestack.parser.crop import CropParameters
 from starfish.imagestack.physical_coordinate_calculator import recalculate_physical_coordinate_range
-from starfish.types import Coordinates, Indices, Number
+from starfish.types import Axes, Coordinates, Number
 from .imagestack_test_utils import verify_physical_coordinates, verify_stack_data
 
 NUM_ROUND = 3
@@ -51,17 +51,17 @@ def y_coordinates(round_: int, ch: int) -> Tuple[float, float]:
 
 
 def z_coordinates(z: int) -> Tuple[float, float]:
-    """Return the expected physical z coordinate value for a given zlayer index."""
+    """Return the expected physical z coordinate value for a given zplane index."""
     return z * 0.0001, (z + 1) * 0.0001
 
 
 class UniqueTiles(FetchedTile):
     """Tiles where the pixel values are unique per round/ch/z."""
-    def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
+    def __init__(self, fov: int, _round: int, ch: int, zplane: int) -> None:
         super().__init__()
         self._round = _round
         self._ch = ch
-        self._z = z
+        self._zplane = zplane
 
     @property
     def shape(self) -> Tuple[int, ...]:
@@ -72,7 +72,7 @@ class UniqueTiles(FetchedTile):
         return {
             Coordinates.X: x_coordinates(self._round, self._ch),
             Coordinates.Y: y_coordinates(self._round, self._ch),
-            Coordinates.Z: z_coordinates(self._z),
+            Coordinates.Z: z_coordinates(self._zplane),
         }
 
     @property
@@ -80,7 +80,7 @@ class UniqueTiles(FetchedTile):
         return ImageFormat.TIFF
 
     def tile_data(self) -> np.ndarray:
-        return data(self._round, self._ch, self._z)
+        return data(self._round, self._ch, self._zplane)
 
 
 def setup_imagestack(crop_parameters: Optional[CropParameters]) -> ImageStack:
@@ -112,27 +112,27 @@ def test_crop_rcz():
     )
     stack = setup_imagestack(crop_parameters)
 
-    assert stack.index_labels(Indices.ROUND) == rounds
-    assert stack.index_labels(Indices.CH) == chs
-    assert stack.index_labels(Indices.Z) == Z_LABELS
+    assert stack.axis_labels(Axes.ROUND) == rounds
+    assert stack.axis_labels(Axes.CH) == chs
+    assert stack.axis_labels(Axes.ZPLANE) == Z_LABELS
 
-    for round_ in stack.index_labels(Indices.ROUND):
-        for ch in stack.index_labels(Indices.CH):
-            for zlayer in stack.index_labels(Indices.Z):
-                expected_data = data(round_, ch, zlayer)
+    for round_ in stack.axis_labels(Axes.ROUND):
+        for ch in stack.axis_labels(Axes.CH):
+            for zplane in stack.axis_labels(Axes.ZPLANE):
+                expected_data = data(round_, ch, zplane)
 
                 verify_stack_data(
                     stack,
-                    {Indices.ROUND: round_, Indices.CH: ch, Indices.Z: zlayer},
+                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
                     expected_data,
                 )
 
                 verify_physical_coordinates(
                     stack,
-                    {Indices.ROUND: round_, Indices.CH: ch, Indices.Z: zlayer},
+                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
                     x_coordinates(round_, ch),
                     y_coordinates(round_, ch),
-                    z_coordinates(zlayer),
+                    z_coordinates(zplane),
                 )
 
 
@@ -147,22 +147,22 @@ def test_crop_xy():
     )
     stack = setup_imagestack(crop_parameters)
 
-    assert stack.index_labels(Indices.ROUND) == ROUND_LABELS
-    assert stack.index_labels(Indices.CH) == CH_LABELS
-    assert stack.index_labels(Indices.Z) == Z_LABELS
+    assert stack.axis_labels(Axes.ROUND) == ROUND_LABELS
+    assert stack.axis_labels(Axes.CH) == CH_LABELS
+    assert stack.axis_labels(Axes.ZPLANE) == Z_LABELS
 
     assert stack.raw_shape[3] == Y_SLICE[1] - Y_SLICE[0]
     assert stack.raw_shape[4] == X_SLICE[1] - X_SLICE[0]
 
-    for round_ in stack.index_labels(Indices.ROUND):
-        for ch in stack.index_labels(Indices.CH):
-            for zlayer in stack.index_labels(Indices.Z):
-                expected_data = data(round_, ch, zlayer)
+    for round_ in stack.axis_labels(Axes.ROUND):
+        for ch in stack.axis_labels(Axes.CH):
+            for zplane in stack.axis_labels(Axes.ZPLANE):
+                expected_data = data(round_, ch, zplane)
                 expected_data = expected_data[Y_SLICE[0]:Y_SLICE[1], X_SLICE[0]:X_SLICE[1]]
 
                 verify_stack_data(
                     stack,
-                    {Indices.ROUND: round_, Indices.CH: ch, Indices.Z: zlayer},
+                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
                     expected_data,
                 )
 
@@ -184,8 +184,8 @@ def test_crop_xy():
 
                 verify_physical_coordinates(
                     stack,
-                    {Indices.ROUND: round_, Indices.CH: ch, Indices.Z: zlayer},
+                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
                     expected_x_coordinates,
                     expected_y_coordinates,
-                    z_coordinates(zlayer),
+                    z_coordinates(zplane),
                 )

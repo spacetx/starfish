@@ -1,7 +1,7 @@
 from typing import Optional
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Indices
+from starfish.types import Axes
 from starfish.util import click
 from ._base import FilterAlgorithmBase
 
@@ -17,7 +17,7 @@ class MaxProj(FilterAlgorithmBase):
             self, stack: ImageStack, in_place: bool = False, verbose: bool = False,
             n_processes: Optional[int] = None
     ) -> ImageStack:
-        return stack.max_proj(*tuple(Indices(dim) for dim in self.dims))
+        return stack.max_proj(*tuple(Axes(dim) for dim in self.dims))
 
     @staticmethod
     @click.command("MaxProj")

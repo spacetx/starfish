@@ -7,7 +7,7 @@ from starfish import IntensityTable
 from starfish.imagestack import physical_coordinate_calculator
 from starfish.intensity_table import intensity_table_coordinates
 from starfish.test import test_utils
-from starfish.types import Coordinates, Indices, PhysicalCoordinateTypes
+from starfish.types import Axes, Coordinates, PhysicalCoordinateTypes
 
 
 NUMBER_SPOTS = 10
@@ -21,8 +21,8 @@ def physical_cord_to_pixel_value(physical_coord: float,
 
 
 def test_tranfering_physical_coords_to_intensity_table():
-    stack_shape = OrderedDict([(Indices.ROUND, 3), (Indices.CH, 2),
-                               (Indices.Z, 1), (Indices.Y, 50), (Indices.X, 40)])
+    stack_shape = OrderedDict([(Axes.ROUND, 3), (Axes.CH, 2),
+                               (Axes.ZPLANE, 1), (Axes.Y, 50), (Axes.X, 40)])
 
     physical_coords = OrderedDict([(PhysicalCoordinateTypes.X_MIN, 1),
                                    (PhysicalCoordinateTypes.X_MAX, 2),
@@ -36,9 +36,9 @@ def test_tranfering_physical_coords_to_intensity_table():
 
     intensities = IntensityTable.synthetic_intensities(
         codebook,
-        num_z=stack_shape[Indices.Z],
-        height=stack_shape[Indices.Y],
-        width=stack_shape[Indices.X],
+        num_z=stack_shape[Axes.ZPLANE],
+        height=stack_shape[Axes.Y],
+        width=stack_shape[Axes.X],
         n_spots=NUMBER_SPOTS
     )
 
@@ -56,16 +56,16 @@ def test_tranfering_physical_coords_to_intensity_table():
     physical_pixel_size_x = physical_coordinate_calculator._calculate_physical_pixel_size(
         coord_min=physical_coords[PhysicalCoordinateTypes.X_MIN],
         coord_max=physical_coords[PhysicalCoordinateTypes.X_MAX],
-        num_pixels=stack_shape[Indices.X])
+        num_pixels=stack_shape[Axes.X])
 
     physical_pixel_size_y = physical_coordinate_calculator._calculate_physical_pixel_size(
         coord_min=physical_coords[PhysicalCoordinateTypes.Y_MIN],
         coord_max=physical_coords[PhysicalCoordinateTypes.Y_MAX],
-        num_pixels=stack_shape[Indices.Y])
+        num_pixels=stack_shape[Axes.Y])
 
     # Assert that the physical coords align with their corresponding pixel coords
     for spot in xc.features:
-        pixel_x = spot[Indices.X.value].data
+        pixel_x = spot[Axes.X.value].data
         physical_x = spot[Coordinates.X.value].data
         calculated_pixel = physical_cord_to_pixel_value(physical_x,
                                                         physical_pixel_size_x,
@@ -75,7 +75,7 @@ def test_tranfering_physical_coords_to_intensity_table():
         assert np.isclose(pixel_x, calculated_pixel)
 
     for spot in yc.features:
-        pixel_y = spot[Indices.Y.value].data
+        pixel_y = spot[Axes.Y.value].data
         physical_y = spot[Coordinates.Y.value].data
         calculated_pixel = physical_cord_to_pixel_value(physical_y,
                                                         physical_pixel_size_y,

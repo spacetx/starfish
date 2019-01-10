@@ -4,14 +4,14 @@ from typing import Mapping, Sequence, Tuple, Union
 import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Coordinates, Indices, Number
+from starfish.types import Axes, Coordinates, Number
 
 
 def verify_stack_data(
         stack: ImageStack,
-        selectors: Mapping[Indices, Union[int, slice]],
+        selectors: Mapping[Axes, Union[int, slice]],
         expected_data: np.ndarray,
-) -> Tuple[np.ndarray, Sequence[Indices]]:
+) -> Tuple[np.ndarray, Sequence[Axes]]:
     """Given an imagestack and a set of selectors, verify that the data referred to by the selectors
     matches the expected data.
     """
@@ -23,9 +23,9 @@ def verify_stack_data(
 
 def verify_stack_fill(
         stack: ImageStack,
-        selectors: Mapping[Indices, Union[int, slice]],
+        selectors: Mapping[Axes, Union[int, slice]],
         expected_fill_value: Number,
-) -> Tuple[np.ndarray, Sequence[Indices]]:
+) -> Tuple[np.ndarray, Sequence[Axes]]:
     """Given an imagestack and a set of selectors, verify that the data referred to by the selectors
     matches an expected fill value.
     """
@@ -38,7 +38,7 @@ def verify_stack_fill(
 
 def verify_physical_coordinates(
         stack: ImageStack,
-        selectors: Mapping[Indices, int],
+        selectors: Mapping[Axes, int],
         expected_x_coordinates: Tuple[float, float],
         expected_y_coordinates: Tuple[float, float],
         expected_z_coordinates: Tuple[float, float]

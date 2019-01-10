@@ -16,49 +16,51 @@ from starfish.test.dataset_fixtures import (  # noqa: F401
     synthetic_intensity_table,
     synthetic_spot_pass_through_stack,
 )
-from starfish.types import Indices
+from starfish.types import Axes
 
 
 def test_get_slice_simple_index():
     """
-    Retrieve a slice across one of the indices at the end.  For instance, if the dimensions are
-    (P, Q0,..., Qn-1, R), slice across either P or R.
+    Retrieve a slice across one of the axes at the end.  For instance, if the axes are
+    (P, Q0,..., Qn-1, R), slice across either P or R.  This test has expectations regarding the
+    ordering of the axes in the ImageStack.
     """
     stack = ImageStack.synthetic_stack()
     round_ = 1
     imageslice, axes = stack.get_slice(
-        {Indices.ROUND: round_}
+        {Axes.ROUND: round_}
     )
-    assert axes == [Indices.CH, Indices.Z]
+    assert axes == [Axes.CH, Axes.ZPLANE]
 
     y, x = stack.tile_shape
 
-    for ch in range(stack.shape[Indices.CH]):
-        for z in range(stack.shape[Indices.Z]):
+    for ch in range(stack.shape[Axes.CH]):
+        for z in range(stack.shape[Axes.ZPLANE]):
             data = np.empty((y, x))
-            data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] + z)
+            data.fill((round_ * stack.shape[Axes.CH] + ch) * stack.shape[Axes.ZPLANE] + z)
 
             assert data.all() == imageslice[ch, z].all()
 
 
 def test_get_slice_middle_index():
     """
-    Retrieve a slice across one of the indices in the middle.  For instance, if the dimensions are
-    (P, Q0,..., Qn-1, R), slice across one of the Q axes.
+    Retrieve a slice across one of the axes in the middle.  For instance, if the axes are
+    (P, Q0,..., Qn-1, R), slice across one of the Q axes.  This test has expectations regarding the
+    ordering of the axes in the ImageStack.
     """
     stack = ImageStack.synthetic_stack()
     ch = 1
     imageslice, axes = stack.get_slice(
-        {Indices.CH: ch}
+        {Axes.CH: ch}
     )
-    assert axes == [Indices.ROUND, Indices.Z]
+    assert axes == [Axes.ROUND, Axes.ZPLANE]
 
     y, x = stack.tile_shape
 
-    for round_ in range(stack.shape[Indices.ROUND]):
-        for z in range(stack.shape[Indices.Z]):
+    for round_ in range(stack.shape[Axes.ROUND]):
+        for z in range(stack.shape[Axes.ZPLANE]):
             data = np.empty((y, x))
-            data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z] + z)
+            data.fill((round_ * stack.shape[Axes.CH] + ch) * stack.shape[Axes.ZPLANE] + z)
 
             assert data.all() == imageslice[round_, z].all()
 
@@ -70,16 +72,16 @@ def test_get_slice_range():
     stack = ImageStack.synthetic_stack()
     zrange = slice(1, 3)
     imageslice, axes = stack.get_slice(
-        {Indices.Z: zrange}
+        {Axes.ZPLANE: zrange}
     )
     y, x = stack.tile_shape
-    assert axes == [Indices.ROUND, Indices.CH, Indices.Z]
+    assert axes == [Axes.ROUND, Axes.CH, Axes.ZPLANE]
 
-    for round_ in range(stack.shape[Indices.ROUND]):
-        for ch in range(stack.shape[Indices.CH]):
+    for round_ in range(stack.shape[Axes.ROUND]):
+        for ch in range(stack.shape[Axes.CH]):
             for z in range(zrange.stop - zrange.start):
                 data = np.empty((y, x))
-                data.fill((round_ * stack.shape[Indices.CH] + ch) * stack.shape[Indices.Z]
+                data.fill((round_ * stack.shape[Axes.CH] + ch) * stack.shape[Axes.ZPLANE]
                           + (z + zrange.start))
 
                 assert data.all() == imageslice[round_, ch, z].all()
@@ -87,65 +89,67 @@ def test_get_slice_range():
 
 def test_set_slice_simple_index():
     """
-    Sets a slice across one of the indices at the end.  For instance, if the dimensions are
-    (P, Q0,..., Qn-1, R), sets a slice across either P or R.
+    Sets a slice across one of the axes at the end.  For instance, if the axes are
+    (P, Q0,..., Qn-1, R), sets a slice across either P or R.  This test has expectations regarding
+    the ordering of the axes in the ImageStack.
     """
     stack = ImageStack.synthetic_stack()
     round_ = 1
     y, x = stack.tile_shape
 
     expected = np.full(
-        (stack.shape[Indices.CH], stack.shape[Indices.Z], y, x),
+        (stack.shape[Axes.CH], stack.shape[Axes.ZPLANE], y, x),
         fill_value=0.5,
         dtype=np.float32
     )
-    index = {Indices.ROUND: round_}
+    index = {Axes.ROUND: round_}
 
-    stack.set_slice(index, expected, [Indices.CH, Indices.Z])
+    stack.set_slice(index, expected, [Axes.CH, Axes.ZPLANE])
 
     assert np.array_equal(stack.get_slice(index)[0], expected)
 
 
 def test_set_slice_middle_index():
     """
-    Sets a slice across one of the indices in the middle.  For instance, if the dimensions are
-    (P, Q0,..., Qn-1, R), slice across one of the Q axes.
+    Sets a slice across one of the axes in the middle.  For instance, if the axes are
+    (P, Q0,..., Qn-1, R), slice across one of the Q axes.  This test has expectations regarding the
+    ordering of the axes in the ImageStack.
     """
     stack = ImageStack.synthetic_stack()
     ch = 1
     y, x = stack.tile_shape
 
     expected = np.full(
-        (stack.shape[Indices.ROUND], stack.shape[Indices.Z], y, x),
+        (stack.shape[Axes.ROUND], stack.shape[Axes.ZPLANE], y, x),
         fill_value=0.5,
         dtype=np.float32
     )
-    index = {Indices.CH: ch}
+    index = {Axes.CH: ch}
 
-    stack.set_slice(index, expected, [Indices.ROUND, Indices.Z])
+    stack.set_slice(index, expected, [Axes.ROUND, Axes.ZPLANE])
 
     assert np.array_equal(stack.get_slice(index)[0], expected)
 
 
 def test_set_slice_reorder():
     """
-    Sets a slice across one of the indices.  The source data is not in the same order as the
-    imagestack order, but set_slice should reorder the axes and write it correctly.
+    Sets a slice across one of the axes.  The source data is not in the same order as the axes in
+    ImageStack, but set_slice should reorder the axes and write it correctly.
     """
     stack = ImageStack.synthetic_stack()
     round_ = 1
     y, x = stack.tile_shape
-    index = {Indices.ROUND: round_}
+    index = {Axes.ROUND: round_}
 
     written = np.full(
-        (stack.shape[Indices.Z], stack.shape[Indices.CH], y, x),
+        (stack.shape[Axes.ZPLANE], stack.shape[Axes.CH], y, x),
         fill_value=0.5,
         dtype=np.float32
     )
-    stack.set_slice(index, written, [Indices.Z, Indices.CH])
+    stack.set_slice(index, written, [Axes.ZPLANE, Axes.CH])
 
     expected = np.full(
-        (stack.shape[Indices.CH], stack.shape[Indices.Z], y, x),
+        (stack.shape[Axes.CH], stack.shape[Axes.ZPLANE], y, x),
         fill_value=0.5,
         dtype=np.float32
     )
@@ -154,20 +158,20 @@ def test_set_slice_reorder():
 
 def test_set_slice_range():
     """
-    Sets a slice across a range of one of the dimensions.
+    Sets a slice across a range of one of the axes.
     """
     stack = ImageStack.synthetic_stack()
     zrange = slice(1, 3)
     y, x = stack.tile_shape
 
     expected = np.full(
-        (stack.shape[Indices.ROUND], stack.shape[Indices.CH], zrange.stop - zrange.start + 1, y, x),
+        (stack.shape[Axes.ROUND], stack.shape[Axes.CH], zrange.stop - zrange.start + 1, y, x),
         fill_value=0.5,
         dtype=np.float32
     )
-    index = {Indices.Z: zrange}
+    index = {Axes.ZPLANE: zrange}
 
-    stack.set_slice(index, expected, [Indices.ROUND, Indices.CH, Indices.Z])
+    stack.set_slice(index, expected, [Axes.ROUND, Axes.CH, Axes.ZPLANE])
 
     assert np.array_equal(stack.get_slice(index)[0], expected)
 
@@ -196,7 +200,7 @@ def test_max_projection_preserves_dtype():
     array = np.ones((2, 2, 2), dtype=original_dtype)
     image = ImageStack.from_numpy_array(array.reshape((1, 1, 2, 2, 2)))
 
-    max_projection = image.max_proj(Indices.CH, Indices.ROUND, Indices.Z)
+    max_projection = image.max_proj(Axes.CH, Axes.ROUND, Axes.ZPLANE)
     assert max_projection.xarray.dtype == original_dtype
 
 
@@ -232,9 +236,9 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
         np.array([g.shape[0]])
     ])
     for i in np.arange(len(breaks) - 1):
-        x[breaks[i]: breaks[i + 1]] = true_intensities.coords[Indices.X.value][i]
-        y[breaks[i]: breaks[i + 1]] = true_intensities.coords[Indices.Y.value][i]
-        z[breaks[i]: breaks[i + 1]] = true_intensities.coords[Indices.Z.value][i]
+        x[breaks[i]: breaks[i + 1]] = true_intensities.coords[Axes.X.value][i]
+        y[breaks[i]: breaks[i + 1]] = true_intensities.coords[Axes.Y.value][i]
+        z[breaks[i]: breaks[i + 1]] = true_intensities.coords[Axes.ZPLANE.value][i]
 
     # only 8 values should be set, since there are only 8 locations across the tensor
     assert np.sum(image.xarray != 0) == 8

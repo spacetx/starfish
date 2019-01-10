@@ -13,7 +13,7 @@ from slicedimage import ImageFormat
 from starfish import Codebook
 from starfish.experiment.builder import FetchedTile, TileFetcher
 from starfish.experiment.builder import write_experiment_json
-from starfish.types import Coordinates, Features, Indices, Number
+from starfish.types import Axes, Coordinates, Features, Number
 from starfish.util.argparse import FsExistsType
 
 SHAPE = 980, 1330
@@ -98,20 +98,20 @@ def format_data(input_dir, output_dir, d):
         1,
         ImageFormat.TIFF,
         primary_image_dimensions={
-            Indices.ROUND: 4,
-            Indices.CH: 4,
-            Indices.Z: 1,
+            Axes.ROUND: 4,
+            Axes.CH: 4,
+            Axes.ZPLANE: 1,
         },
         aux_name_to_dimensions={
             'nuclei': {
-                Indices.ROUND: 1,
-                Indices.CH: 1,
-                Indices.Z: 1,
+                Axes.ROUND: 1,
+                Axes.CH: 1,
+                Axes.ZPLANE: 1,
             },
             'dots': {
-                Indices.ROUND: 1,
-                Indices.CH: 1,
-                Indices.Z: 1,
+                Axes.ROUND: 1,
+                Axes.CH: 1,
+                Axes.ZPLANE: 1,
             }
         },
         primary_tile_fetcher=ISSPrimaryTileFetcher(input_dir),
@@ -126,19 +126,19 @@ def format_data(input_dir, output_dir, d):
     codebook_array = [
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 2, Indices.CH.value: 1, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 3, Indices.CH.value: 2, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 3, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 3, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 2, Axes.CH.value: 1, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 3, Axes.CH.value: 2, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: "ACTB_human"
         },
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 2, Indices.CH.value: 1, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 3, Indices.CH.value: 2, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 3, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 2, Axes.CH.value: 1, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 3, Axes.CH.value: 2, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: "ACTB_mouse"
         },

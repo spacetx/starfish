@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from starfish import Codebook
-from starfish.types import Features, Indices
+from starfish.types import Axes, Features
 
 
 def test_synthetic_one_hot_codebook_returns_requested_codebook():
@@ -20,8 +20,8 @@ def test_synthetic_one_hot_codebook_returns_requested_codebook():
         n_codes=3
     )
 
-    assert codebook.sizes == {Indices.CH: 2, Indices.ROUND: 4, Features.TARGET: 3}
-    assert np.all(codebook.sum(Indices.CH.value) == 1), "the numbers of channels on per round != 1"
+    assert codebook.sizes == {Axes.CH: 2, Axes.ROUND: 4, Features.TARGET: 3}
+    assert np.all(codebook.sum(Axes.CH.value) == 1), "the numbers of channels on per round != 1"
 
 
 def test_target_names_are_incorporated_into_synthetic_codebook():

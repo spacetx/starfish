@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from starfish import Codebook, IntensityTable
-from starfish.types import Features, Indices, SpotAttributes
+from starfish.types import Axes, Features, SpotAttributes
 
 
 def intensity_table_factory() -> IntensityTable:
@@ -16,7 +16,7 @@ def intensity_table_factory() -> IntensityTable:
     )
     spot_attribute_data = pd.DataFrame(
         data=[0, 0, 0, 1],
-        index=[Indices.Z, Indices.Y, Indices.X, Features.SPOT_RADIUS]
+        index=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
     ).T
     spot_attributes = SpotAttributes(spot_attribute_data)
 
@@ -32,15 +32,15 @@ def codebook_factory() -> Codebook:
     codebook_array = [
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 0, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 0, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: "GENE_A"
         },
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 2, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 2, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: "GENE_B"
         },
@@ -70,7 +70,7 @@ def test_normalize_codes(norm_order, expected_size):
     # each non-zero value should be equal to 1 / expected_size of the norm. There are two non-zero
     # values and so the sum of the code should be (1 / expected_size) * 2
     assert np.all(
-        normed_codebook.sum((Indices.CH.value, Indices.ROUND.value)) == (1 / expected_size) * 2
+        normed_codebook.sum((Axes.CH.value, Axes.ROUND.value)) == (1 / expected_size) * 2
     )
 
 

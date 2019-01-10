@@ -8,7 +8,7 @@ from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Coordinates, Indices, Number
+from starfish.types import Axes, Coordinates, Number
 from starfish.util.argparse import FsExistsType
 
 SHAPE = 2048, 2048
@@ -107,16 +107,16 @@ def format_data(input_dir, output_dir):
     num_fovs = 496
 
     primary_image_dimensions = {
-        Indices.ROUND: 8,
-        Indices.CH: 2,
-        Indices.Z: 1,
+        Axes.ROUND: 8,
+        Axes.CH: 2,
+        Axes.ZPLANE: 1,
     }
 
     aux_name_to_dimensions = {
         'nuclei': {
-            Indices.ROUND: 1,
-            Indices.CH: 1,
-            Indices.Z: 1
+            Axes.ROUND: 1,
+            Axes.CH: 1,
+            Axes.ZPLANE: 1
         }
     }
 

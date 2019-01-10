@@ -5,7 +5,7 @@ from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, tile_fetcher_factory
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Coordinates, Indices, Number
+from starfish.types import Axes, Coordinates, Number
 from .imagestack_test_utils import verify_physical_coordinates
 
 NUM_ROUND = 8
@@ -68,13 +68,13 @@ def test_coordinates():
 
     assert stack.tiles_aligned is False
 
-    for selectors in stack._iter_indices({Indices.ROUND, Indices.CH, Indices.Z}):
+    for selectors in stack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
         verify_physical_coordinates(
             stack,
             selectors,
-            round_to_x(selectors[Indices.ROUND]),
-            round_to_y(selectors[Indices.ROUND]),
-            round_to_z(selectors[Indices.ROUND]),
+            round_to_x(selectors[Axes.ROUND]),
+            round_to_y(selectors[Axes.ROUND]),
+            round_to_z(selectors[Axes.ROUND]),
         )
 
 
@@ -120,10 +120,10 @@ def test_scalar_coordinates():
 
     assert stack.tiles_aligned is False
 
-    for selectors in stack._iter_indices({Indices.ROUND, Indices.CH, Indices.Z}):
-        expected_x = round_to_x(selectors[Indices.ROUND])[0]
-        expected_y = round_to_y(selectors[Indices.ROUND])[0]
-        expected_z = round_to_z(selectors[Indices.ROUND])[0]
+    for selectors in stack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
+        expected_x = round_to_x(selectors[Axes.ROUND])[0]
+        expected_y = round_to_y(selectors[Axes.ROUND])[0]
+        expected_z = round_to_z(selectors[Axes.ROUND])[0]
 
         verify_physical_coordinates(
             stack,

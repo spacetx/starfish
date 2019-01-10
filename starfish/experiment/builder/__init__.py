@@ -21,9 +21,9 @@ from slicedimage import (
 )
 
 from starfish.codebook.codebook import Codebook
-from starfish.experiment.builder.orderediterator import join_dimension_labels, ordered_iterator
+from starfish.experiment.builder.orderediterator import join_axes_labels, ordered_iterator
 from starfish.experiment.version import CURRENT_VERSION
-from starfish.types import Coordinates, Indices
+from starfish.types import Axes, Coordinates
 from .defaultproviders import RandomNoiseTile, tile_fetcher_factory
 from .providers import FetchedTile, TileFetcher
 
@@ -32,7 +32,7 @@ AUX_IMAGE_NAMES = {
     'nuclei',
     'dots',
 }
-DEFAULT_DIMENSION_ORDER = (Indices.Z, Indices.ROUND, Indices.CH)
+DEFAULT_DIMENSION_ORDER = (Axes.ZPLANE, Axes.ROUND, Axes.CH)
 
 
 def _tile_opener(toc_path: str, tile: Tile, file_ext: str) -> BinaryIO:
@@ -40,9 +40,9 @@ def _tile_opener(toc_path: str, tile: Tile, file_ext: str) -> BinaryIO:
     return open(
         "{}-Z{}-H{}-C{}.{}".format(
             tile_basename,
-            tile.indices[Indices.Z],
-            tile.indices[Indices.ROUND],
-            tile.indices[Indices.CH],
+            tile.indices[Axes.ZPLANE],
+            tile.indices[Axes.ROUND],
+            tile.indices[Axes.CH],
             ImageFormat.TIFF.file_ext,
         ),
         "wb")
@@ -60,10 +60,10 @@ def build_image(
         fovs: Sequence[int],
         rounds: Sequence[int],
         chs: Sequence[int],
-        zlayers: Sequence[int],
+        zplanes: Sequence[int],
         image_fetcher: TileFetcher,
         default_shape: Optional[Tuple[int, int]]=None,
-        dimension_order: Sequence[Indices]=DEFAULT_DIMENSION_ORDER,
+        axes_order: Sequence[Axes]=DEFAULT_DIMENSION_ORDER,
 ) -> Collection:
     """
     Build and returns an image set with the following characteristics:
@@ -76,16 +76,16 @@ def build_image(
         Sequence of the round numbers in this image set.
     chs : Sequence[int]
         Sequence of the ch numbers in this image set.
-    zlayers : Sequence[int]
-        Sequence of the zlayer numbers in this image set.
+    zplanes : Sequence[int]
+        Sequence of the zplane numbers in this image set.
     image_fetcher : TileFetcher
         Instance of TileFetcher that provides the data for the tile.
     default_shape : Optional[Tuple[int, int]]
         Default shape of the individual tiles in this image set.
-    dimension_order : Sequence[Indices]
-        Ordering for which dimensions vary, in order of the slowest changing dimension to the
-        fastest.  For instance, if the order is (ROUND, Z, CH) and each dimension has size 2, then
-        the sequence is:
+    axes_order : Sequence[Axes]
+        Ordering for which axes vary, in order of the slowest changing axis to the fastest.  For
+        instance, if the order is (ROUND, Z, CH) and each dimension has size 2, then the sequence
+        is:
           (ROUND=0, CH=0, Z=0)
           (ROUND=0, CH=1, Z=0)
           (ROUND=0, CH=0, Z=1)
@@ -94,14 +94,14 @@ def build_image(
           (ROUND=1, CH=1, Z=0)
           (ROUND=1, CH=0, Z=1)
           (ROUND=1, CH=1, Z=1)
-        (default = (Indices.Z, Indices.ROUND, Indices.CH))
+        (default = (Axes.Z, Axes.ROUND, Axes.CH))
 
     Returns
     -------
     The slicedimage collection representing the image.
     """
-    dimension_sizes = join_dimension_labels(
-        dimension_order, rounds=rounds, chs=chs, zlayers=zlayers)
+    axes_sizes = join_axes_labels(
+        axes_order, rounds=rounds, chs=chs, zplanes=zplanes)
 
     collection = Collection()
     for fov_id in fovs:
@@ -110,29 +110,29 @@ def build_image(
                 Coordinates.X,
                 Coordinates.Y,
                 Coordinates.Z,
-                Indices.Z,
-                Indices.ROUND,
-                Indices.CH,
-                Indices.X,
-                Indices.Y,
+                Axes.ZPLANE,
+                Axes.ROUND,
+                Axes.CH,
+                Axes.X,
+                Axes.Y,
             ],
-            {Indices.ROUND: len(rounds), Indices.CH: len(chs), Indices.Z: len(zlayers)},
+            {Axes.ROUND: len(rounds), Axes.CH: len(chs), Axes.ZPLANE: len(zplanes)},
             default_shape,
             ImageFormat.TIFF,
         )
 
-        for dimension_indices in ordered_iterator(dimension_sizes):
+        for selector in ordered_iterator(axes_sizes):
             image = image_fetcher.get_tile(
                 fov_id,
-                dimension_indices[Indices.ROUND],
-                dimension_indices[Indices.CH],
-                dimension_indices[Indices.Z])
+                selector[Axes.ROUND],
+                selector[Axes.CH],
+                selector[Axes.ZPLANE])
             tile = Tile(
                 image.coordinates,
                 {
-                    Indices.Z: (dimension_indices[Indices.Z]),
-                    Indices.ROUND: (dimension_indices[Indices.ROUND]),
-                    Indices.CH: (dimension_indices[Indices.CH]),
+                    Axes.ZPLANE: (selector[Axes.ZPLANE]),
+                    Axes.ROUND: (selector[Axes.ROUND]),
+                    Axes.CH: (selector[Axes.CH]),
                 },
                 image.shape,
                 extras=image.extras,
@@ -148,13 +148,13 @@ def write_experiment_json(
         fov_count: int,
         tile_format: ImageFormat,
         *,
-        primary_image_dimensions: Mapping[Union[str, Indices], int],
-        aux_name_to_dimensions: Mapping[str, Mapping[Union[str, Indices], int]],
+        primary_image_dimensions: Mapping[Union[str, Axes], int],
+        aux_name_to_dimensions: Mapping[str, Mapping[Union[str, Axes], int]],
         primary_tile_fetcher: Optional[TileFetcher]=None,
         aux_tile_fetcher: Optional[Mapping[str, TileFetcher]]=None,
         postprocess_func: Optional[Callable[[dict], dict]]=None,
         default_shape: Optional[Tuple[int, int]]=None,
-        dimension_order: Sequence[Indices]=(Indices.Z, Indices.ROUND, Indices.CH),
+        dimension_order: Sequence[Axes]=(Axes.ZPLANE, Axes.ROUND, Axes.CH),
 ) -> None:
     """
     Build and returns a top-level experiment description with the following characteristics:
@@ -165,9 +165,9 @@ def write_experiment_json(
         Directory to write the files to.
     fov_count : int
         Number of fields of view in this experiment.
-    primary_image_dimensions : Mapping[Union[str, Indices], int]
+    primary_image_dimensions : Mapping[Union[str, Axes], int]
         Dictionary mapping dimension name to dimension size for the primary image.
-    aux_name_to_dimensions : Mapping[str, Mapping[Union[str, Indices], int]]
+    aux_name_to_dimensions : Mapping[str, Mapping[Union[str, Axes], int]]
         Dictionary mapping the auxiliary image type to dictionaries, which map from dimension name
         to dimension size.
     primary_tile_fetcher : Optional[TileFetcher]
@@ -184,7 +184,7 @@ def write_experiment_json(
         The callable should return what is to be written as the experiment document.
     default_shape : Optional[Tuple[int, int]] (default = None)
         Default shape for the tiles in this experiment.
-    dimension_order : Sequence[Indices]
+    dimension_order : Sequence[Axes]
         Ordering for which dimensions vary, in order of the slowest changing dimension to the
         fastest.  For instance, if the order is (ROUND, Z, CH) and each dimension has size 2, then
         the sequence is:
@@ -196,7 +196,7 @@ def write_experiment_json(
           (ROUND=1, CH=1, Z=0)
           (ROUND=1, CH=0, Z=1)
           (ROUND=1, CH=1, Z=1)
-        (default = (Indices.Z, Indices.ROUND, Indices.CH))
+        (default = (Axes.Z, Axes.ROUND, Axes.CH))
     """
     if primary_tile_fetcher is None:
         primary_tile_fetcher = tile_fetcher_factory(RandomNoiseTile)
@@ -212,11 +212,11 @@ def write_experiment_json(
     }
     primary_image = build_image(
         range(fov_count),
-        range(primary_image_dimensions[Indices.ROUND]),
-        range(primary_image_dimensions[Indices.CH]),
-        range(primary_image_dimensions[Indices.Z]),
+        range(primary_image_dimensions[Axes.ROUND]),
+        range(primary_image_dimensions[Axes.CH]),
+        range(primary_image_dimensions[Axes.ZPLANE]),
         primary_tile_fetcher,
-        dimension_order=dimension_order,
+        axes_order=dimension_order,
         default_shape=default_shape,
     )
     Writer.write_to_path(
@@ -234,11 +234,11 @@ def write_experiment_json(
             continue
         auxiliary_image = build_image(
             range(fov_count),
-            range(aux_dimensions[Indices.ROUND]),
-            range(aux_dimensions[Indices.CH]),
-            range(aux_dimensions[Indices.Z]),
+            range(aux_dimensions[Axes.ROUND]),
+            range(aux_dimensions[Axes.CH]),
+            range(aux_dimensions[Axes.ZPLANE]),
             aux_tile_fetcher.get(aux_name, tile_fetcher_factory(RandomNoiseTile)),
-            dimension_order=dimension_order,
+            axes_order=dimension_order,
             default_shape=default_shape,
         )
         Writer.write_to_path(

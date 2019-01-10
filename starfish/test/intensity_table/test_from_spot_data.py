@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from starfish import IntensityTable
-from starfish.types import Features, Indices, SpotAttributes
+from starfish.types import Axes, Features, SpotAttributes
 
 
 def spot_attribute_factory(n: int) -> SpotAttributes:
@@ -18,7 +18,7 @@ def spot_attribute_factory(n: int) -> SpotAttributes:
     return SpotAttributes(
         pd.DataFrame(
             data=np.array([[i, i, i, 1] for i in np.arange(n)]),
-            columns=[Indices.Z, Indices.Y, Indices.X, Features.SPOT_RADIUS]
+            columns=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
         )
     )
 

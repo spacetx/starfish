@@ -6,7 +6,7 @@ import numpy as np
 
 from starfish import IntensityTable
 from starfish.test import test_utils
-from starfish.types import Features, Indices
+from starfish.types import Axes, Features
 
 
 def test_synthetic_intensity_generation():
@@ -30,14 +30,14 @@ def test_synthetic_intensity_generation():
     )
 
     # sizes should match codebook
-    assert intensities.sizes[Indices.ROUND] == 2
-    assert intensities.sizes[Indices.CH] == 3
+    assert intensities.sizes[Axes.ROUND] == 2
+    assert intensities.sizes[Axes.CH] == 3
     assert intensities.sizes[Features.AXIS] == 2
 
     # attributes should be bounded by the specified size
-    assert np.all(intensities[Indices.Z.value] <= num_z)
-    assert np.all(intensities[Indices.Y.value] <= height)
-    assert np.all(intensities[Indices.X.value] <= width)
+    assert np.all(intensities[Axes.ZPLANE.value] <= num_z)
+    assert np.all(intensities[Axes.Y.value] <= height)
+    assert np.all(intensities[Axes.X.value] <= width)
 
     # both codes should match GENE_B
     assert np.array_equal(

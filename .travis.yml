@@ -7,7 +7,6 @@ services:
 python:
 - 3.6
 dist: trusty
-install: travis_wait mvn install
 stages:
 - test
 jobs:
@@ -26,6 +25,7 @@ jobs:
       script: make install-src run__notebooks/py/allen_smFISH.py
     - name: MERFISH Notebook
       if: type = push and branch =~ /^(saxelrod-coordinates|merge)/
+      install: travis_wait mvn install
       script: make install-src run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
     - name: Assay Notebook
       if: type = push and branch =~ /^(saxelrod-coordinates|merge)/

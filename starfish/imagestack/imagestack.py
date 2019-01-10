@@ -514,8 +514,8 @@ class ImageStack:
             that index.
         data : np.ndarray
             a 2- to 5-D numpy array containing the source data for the operation whose last two axes
-            must be (Y, X). If > 2-D data is provided, axes must be set to specify the order of the
-            additional axes (see below).
+            must be (Y, X). If data larger than 2-D is provided, axes must be set to specify the
+            order of the additional axes (see below).
         axes : Optional[Sequence[Axes]]
             The order of the axes for the source data, excluding (Y, X). Optional ONLY if data is
             a (Y, X) 2-d tile.

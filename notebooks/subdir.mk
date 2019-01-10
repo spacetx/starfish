@@ -8,11 +8,11 @@ py_regenerate_targets := $(addprefix regenerate__notebooks/py/, $(addsuffix .py,
 PYTHON := python
 
 fast: $(ipynb_validate_targets)
-run_notebooks: $(py_run_targets)
-check_notebooks: $(py_check_targets)
-validate_notebooks: $(ipynb_validate_targets)
-regenerate_ipynb: $(ipynb_regenerate_targets)
-regenerate_py: $(py_regenerate_targets)
+run-notebooks: $(py_run_targets)
+check-notebooks: $(py_check_targets)
+validate-notebooks: $(ipynb_validate_targets)
+regenerate-ipynb: $(ipynb_regenerate_targets)
+regenerate-py: $(py_regenerate_targets)
 
 $(py_run_targets): run__%.py :
 	[ -e $*.py.skip ] || $(PYTHON) $*.py

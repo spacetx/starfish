@@ -9,7 +9,7 @@ import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.image._filter.util import preserve_float_range
-from starfish.types import Features, Indices, LOG, SpotAttributes
+from starfish.types import Features, Indices, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
 
 
 class IntensityTable(xr.DataArray):
@@ -167,7 +167,11 @@ class IntensityTable(xr.DataArray):
     def get_log(self):
         """Deserialize and return a list of pipeline components that have been applied
          throughout a starfish session to create this Intensity Table"""
-        return loads(self.attrs[LOG])
+
+        if STARFISH_EXTRAS_KEY in self.attrs and LOG in self.attrs[STARFISH_EXTRAS_KEY]:
+            return loads(self.attrs[STARFISH_EXTRAS_KEY])[LOG]
+        else:
+            raise RuntimeError('No log info found.')
 
     def save(self, filename: str) -> None:
         """Save an IntensityTable as a Netcdf File

@@ -47,6 +47,7 @@ from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
 from starfish.imagestack import indexing_utils, physical_coordinate_calculator
 from starfish.imagestack.parser import TileCollectionData, TileKey
+from starfish.imagestack.parser.crop import CropParameters, CroppedTileCollectionData
 from starfish.imagestack.parser.numpy import NumpyData
 from starfish.imagestack.parser.tileset import parse_tileset
 from starfish.intensity_table.intensity_table import IntensityTable
@@ -246,7 +247,11 @@ class ImageStack:
         return f"<starfish.ImageStack ({shape})>"
 
     @classmethod
-    def from_tileset(cls, tileset: TileSet) -> "ImageStack":
+    def from_tileset(
+            cls,
+            tileset: TileSet,
+            crop_parameters: Optional[CropParameters]=None,
+    ) -> "ImageStack":
         """
         Parse a :py:class:`slicedimage.TileSet` into an ImageStack.
 
@@ -254,14 +259,19 @@ class ImageStack:
         ----------
         tileset : TileSet
             The tileset to parse.
+        crop_parameters : Optional[CropParameters]
+
 
         Returns
         -------
         ImageStack :
             An ImageStack representing encapsulating the data from the TileSet.
         """
-        parsed = parse_tileset(tileset)
-        return cls(*parsed)
+        tile_shape, tile_data = parse_tileset(tileset)
+        if crop_parameters is not None:
+            tile_shape = crop_parameters.crop_shape(tile_shape)
+            tile_data = CroppedTileCollectionData(tile_data, crop_parameters)
+        return cls(tile_shape, tile_data)
 
     @classmethod
     def from_url(cls, url: str, baseurl: Optional[str]):

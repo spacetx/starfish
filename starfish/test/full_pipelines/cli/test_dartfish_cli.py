@@ -4,12 +4,14 @@ import unittest
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from starfish import IntensityTable
 from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 from starfish.types import Features
 
 
+@pytest.mark.slow
 class TestWithDartfishData(CLITest, unittest.TestCase):
 
     @property

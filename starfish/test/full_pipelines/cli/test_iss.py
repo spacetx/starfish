@@ -10,11 +10,13 @@ import unittest
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 from starfish.types import Features
 
 
+@pytest.mark.slow
 class TestWithIssData(CLITest, unittest.TestCase):
 
     @property

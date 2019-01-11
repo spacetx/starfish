@@ -7,7 +7,7 @@ import pandas as pd
 
 import starfish
 from starfish import IntensityTable
-from starfish.types import Features
+from starfish.types import Coordinates, Features
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(starfish.__file__)))
 os.environ["USE_TEST_DATA"] = "1"
@@ -133,6 +133,11 @@ def test_dartfish_pipeline_cropped_data():
     assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
 
     spot_intensities = dartfish.initial_spot_intensities
+
+    # assert tht physical coordinates were transferred
+    assert Coordinates.X in spot_intensities.coords
+    assert Coordinates.Y in spot_intensities.coords
+    assert Coordinates.Z in spot_intensities.coords
 
     pipeline_log = spot_intensities.get_log()
 

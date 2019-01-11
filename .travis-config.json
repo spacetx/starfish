@@ -7,7 +7,7 @@
         }
     },
     "validation": {
-        "strict": "true"
+        "strict": "false"
     },
     "verbose": "true"
 }

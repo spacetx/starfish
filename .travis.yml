@@ -1,7 +1,7 @@
 language: python
 env:
   global:
-    - STARFISH_VALIDATION_STRICT=true
+    - STARFISH_CONFIG=@.travis-config
 services:
 - docker
 python:

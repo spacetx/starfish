@@ -1,7 +1,7 @@
 {
     "slicedimage": {
         "caching": {
-            "debug": "false"
+            "debug": "false",
             "directory": "~/.starfish/cache",
             "size_limit": "10e9"
         },

@@ -1179,31 +1179,31 @@ class ImageStack:
         return self._tile_shape
 
     def to_multipage_tiff(self, filepath: str) -> None:
-            """save the ImageStack as a FIJI-compatible multi-page TIFF file
+        """save the ImageStack as a FIJI-compatible multi-page TIFF file
 
-            Parameters
-            ----------
-            filepath : str
-                filepath for a tiff FILE. "TIFF" suffix will be added if the provided path does not
-                end with .TIFF
+        Parameters
+        ----------
+        filepath : str
+            filepath for a tiff FILE. "TIFF" suffix will be added if the provided path does not
+            end with .TIFF
 
-            """
-            if not filepath.upper().endswith(".TIFF"):
-                filepath += ".TIFF"
+        """
+        if not filepath.upper().endswith(".TIFF"):
+            filepath += ".TIFF"
 
-            # RZCYX is the order expected by FIJI
-            data = self.xarray.transpose(
-                Axes.ROUND.value,
-                Axes.ZPLANE.value,
-                Axes.CH.value,
-                Axes.Y.value,
-                Axes.X.value)
+        # RZCYX is the order expected by FIJI
+        data = self.xarray.transpose(
+            Axes.ROUND.value,
+            Axes.ZPLANE.value,
+            Axes.CH.value,
+            Axes.Y.value,
+            Axes.X.value)
 
-            # Any float32 image with low dynamic range will provoke a warning that the image is
-            # low contrast because the data must be converted to uint16 for compatibility with FIJI.
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", UserWarning)
-                skimage.io.imsave(filepath, data.values, imagej=True)
+        # Any float32 image with low dynamic range will provoke a warning that the image is
+        # low contrast because the data must be converted to uint16 for compatibility with FIJI.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            skimage.io.imsave(filepath, data.values, imagej=True)
 
     def export(self,
                filepath: str,

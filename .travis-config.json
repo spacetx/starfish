@@ -3,7 +3,7 @@
         "caching": {
             "debug": "false",
             "directory": "~/.starfish/cache",
-            "size_limit": "10e9"
+            "size_limit": 10e9
         }
     },
     "validation": {

@@ -61,7 +61,7 @@ clip.run(primary_image, verbose=True, in_place=True)
 # EPY: END markdown
 
 # EPY: START code
-primary_image.show_stack({Axes.CH.value: 0, Axes.ZPLANE.value: 17}, rescale=True)
+primary_image.show_stack({Axes.CH: 0, Axes.ZPLANE: 17}, rescale=True)
 # EPY: END code
 
 # EPY: START code
@@ -75,7 +75,7 @@ bandpass.run(primary_image, verbose=True, in_place=True)
 
 # EPY: START code
 from showit import image
-image(primary_image.get_slice({Axes.CH.value: 0, Axes.ZPLANE.value: 17})[0][0, :, :], size=20, clim=(0, 0.004))
+image(primary_image.get_slice({Axes.CH: 0, Axes.ZPLANE: 17})[0][0, :, :], size=20, clim=(0, 0.004))
 # EPY: END code
 
 # EPY: START markdown
@@ -90,7 +90,7 @@ clip.run(primary_image, verbose=True, in_place=True)
 
 # EPY: START code
 from showit import image
-image(primary_image.get_slice({Axes.CH.value: 0, Axes.ZPLANE.value: 17})[0][0, :, :], size=20, clim=(0, 0.004))
+image(primary_image.get_slice({Axes.CH: 0, Axes.ZPLANE: 17})[0][0, :, :], size=20, clim=(0, 0.004))
 # EPY: END code
 
 # EPY: START code
@@ -108,7 +108,7 @@ glp.run(primary_image, in_place=True, verbose=True)
 # EPY: END markdown
 
 # EPY: START code
-plt.hist(np.ravel(primary_image.get_slice({Axes.CH.value: 0, Axes.ZPLANE.value: 17})[0]), bins=25, log=True);
+plt.hist(np.ravel(primary_image.get_slice({Axes.CH: 0, Axes.ZPLANE: 17})[0]), bins=25, log=True);
 # EPY: END code
 
 # EPY: START code

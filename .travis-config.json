@@ -4,7 +4,7 @@
             "debug": "false",
             "directory": "~/.starfish/cache",
             "size_limit": "10e9"
-        },
+        }
     },
     "validation": {
         "strict": "true"

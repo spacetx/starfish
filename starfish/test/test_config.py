@@ -159,8 +159,6 @@ def test_starfish_config(tmpdir, monkeypatch):
     assert not StarfishConfig().strict
 
 def test_starfish_environ(monkeypatch):
-    monkeypatch.delitem(os.environ, "STARFISH_VALIDATION_STRICT", raising=False)
-    assert not StarfishConfig().strict
     with environ(VALIDATION_STRICT="true"):
         assert StarfishConfig().strict
 

@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from starfish import IntensityTable
-from starfish.types import Features, Indices, SpotAttributes
+from starfish.types import Axes, Features, SpotAttributes
 
 
 def test_intensity_table_can_be_created_from_spot_attributes():
@@ -23,7 +23,7 @@ def test_intensity_table_can_be_created_from_spot_attributes():
                 [[1, 1, 1, 1],
                  [2, 2, 2, 1]]
             ),
-            columns=[Indices.Z, Indices.Y, Indices.X, Features.SPOT_RADIUS]
+            columns=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
         )
     )
 
@@ -33,8 +33,8 @@ def test_intensity_table_can_be_created_from_spot_attributes():
         n_round=3
     )
 
-    assert intensities.sizes[Indices.CH] == 1
-    assert intensities.sizes[Indices.ROUND] == 3
+    assert intensities.sizes[Axes.CH] == 1
+    assert intensities.sizes[Axes.ROUND] == 3
     assert intensities.sizes[Features.AXIS] == 2
     assert np.all(intensities.values == 0)
 
@@ -47,7 +47,7 @@ def test_from_spot_attributes_throws_type_error_when_passed_a_dataframe():
             [[1, 1, 1, 1],
              [2, 2, 2, 1]]
         ),
-        columns=[Indices.Z, Indices.Y, Indices.X, Features.SPOT_RADIUS]
+        columns=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
     )
 
     with pytest.raises(TypeError):

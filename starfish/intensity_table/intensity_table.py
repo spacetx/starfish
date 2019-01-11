@@ -9,7 +9,7 @@ import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.image._filter.util import preserve_float_range
-from starfish.types import Features, Indices, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
+from starfish.types import Axes, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
 
 
 class IntensityTable(xr.DataArray):
@@ -76,8 +76,8 @@ class IntensityTable(xr.DataArray):
             for k in spot_attributes.data}
         coordinates.update({
             Features.AXIS: np.arange(len(spot_attributes.data)),
-            Indices.CH.value: channel_index,
-            Indices.ROUND.value: round_index
+            Axes.CH.value: channel_index,
+            Axes.ROUND.value: round_index
         })
         return coordinates
 
@@ -109,7 +109,7 @@ class IntensityTable(xr.DataArray):
         channel_index = np.arange(n_ch)
         round_index = np.arange(n_round)
         data = np.zeros((spot_attributes.data.shape[0], n_ch, n_round))
-        dims = (Features.AXIS, Indices.CH.value, Indices.ROUND.value)
+        dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
         coords = cls._build_xarray_coords(spot_attributes, channel_index, round_index)
 
         intensity_table = cls(
@@ -159,7 +159,7 @@ class IntensityTable(xr.DataArray):
             np.arange(intensities.shape[1]),
             np.arange(intensities.shape[2]))
 
-        dims = (Features.AXIS, Indices.CH.value, Indices.ROUND.value)
+        dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
 
         intensities = cls(intensities, coords, dims, *args, **kwargs)
         return intensities
@@ -213,8 +213,8 @@ class IntensityTable(xr.DataArray):
         # additional columns can be added here
         df = self.to_features_dataframe()
         column_order = [
-            Indices.X,
-            Indices.Y,
+            Axes.X,
+            Axes.Y,
             Features.TARGET,
             Features.TARGET,  # added twice to support simultaneous coding
         ]
@@ -288,9 +288,9 @@ class IntensityTable(xr.DataArray):
         r.fill(np.nan)  # radius is a function of the point-spread gaussian size
         spot_attributes = SpotAttributes(
             pd.DataFrame(
-                {Indices.Z.value: z,
-                 Indices.Y.value: y,
-                 Indices.X.value: x,
+                {Axes.ZPLANE.value: z,
+                 Axes.Y.value: y,
+                 Axes.X.value: x,
                  Features.SPOT_RADIUS: r}
             )
         )
@@ -355,16 +355,16 @@ class IntensityTable(xr.DataArray):
         zmax = image_stack.shape['z'] - crop_z
         ymax = image_stack.shape['y'] - crop_y
         xmax = image_stack.shape['x'] - crop_x
-        cropped_stack = image_stack.sel({Indices.Z: (zmin, zmax),
-                                         Indices.Y: (ymin, ymax),
-                                         Indices.X: (xmin, xmax)})
+        cropped_stack = image_stack.sel({Axes.ZPLANE: (zmin, zmax),
+                                         Axes.Y: (ymin, ymax),
+                                         Axes.X: (xmin, xmax)})
 
         data = cropped_stack.xarray.transpose(
-            Indices.Z.value,
-            Indices.Y.value,
-            Indices.X.value,
-            Indices.CH.value,
-            Indices.ROUND.value,
+            Axes.ZPLANE.value,
+            Axes.Y.value,
+            Axes.X.value,
+            Axes.CH.value,
+            Axes.ROUND.value,
         )
 
         # (pixels, ch, round)
@@ -456,7 +456,7 @@ class IntensityTable(xr.DataArray):
             vector of feature norms
 
         """
-        feature_traces = self.stack(traces=(Indices.CH.value, Indices.ROUND.value))
+        feature_traces = self.stack(traces=(Axes.CH.value, Axes.ROUND.value))
         norm = np.linalg.norm(feature_traces.values, ord=2, axis=1)  # 2 = feature magnitudes
 
         return norm

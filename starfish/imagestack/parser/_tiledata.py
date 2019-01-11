@@ -2,7 +2,7 @@ from typing import Collection, Mapping, Tuple
 
 import numpy as np
 
-from starfish.types import Coordinates, Indices, Number
+from starfish.types import Axes, Coordinates, Number
 from ._key import TileKey
 
 
@@ -23,7 +23,7 @@ class TileData:
         raise NotImplementedError()
 
     @property
-    def indices(self) -> Mapping[Indices, int]:
+    def selector(self) -> Mapping[Axes, int]:
         raise NotImplementedError()
 
 

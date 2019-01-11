@@ -1,7 +1,7 @@
 import numpy as np
 
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.types import Features, Indices
+from starfish.types import Axes, Features
 from starfish.util import click
 from ._base import TargetAssignmentAlgorithm
 
@@ -26,14 +26,14 @@ class Label(TargetAssignmentAlgorithm):
 
         if len(label_image.shape) == 3:
             cell_ids = label_image[
-                intensities[Indices.Z.value].values,
-                intensities[Indices.Y.value].values,
-                intensities[Indices.X.value].values
+                intensities[Axes.ZPLANE.value].values,
+                intensities[Axes.Y.value].values,
+                intensities[Axes.X.value].values
             ]
         elif len(label_image.shape) == 2:
             cell_ids = label_image[
-                intensities[Indices.Y.value].values,
-                intensities[Indices.X.value].values
+                intensities[Axes.Y.value].values,
+                intensities[Axes.X.value].values
             ]
         else:
             raise ValueError(

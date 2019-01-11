@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 from starfish import Codebook
-from starfish.types import Features, Indices
+from starfish.types import Axes, Features
 
 
 def codebook_array_factory() -> List[Dict[str, Any]]:
@@ -19,15 +19,15 @@ def codebook_array_factory() -> List[Dict[str, Any]]:
     return [
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 0, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 0, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: "GENE_A"
         },
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 2, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 2, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: "GENE_B"
         },
@@ -36,8 +36,8 @@ def codebook_array_factory() -> List[Dict[str, Any]]:
 
 def assert_sizes(codebook, check_values=True):
 
-    assert codebook.sizes[Indices.CH] == 3
-    assert codebook.sizes[Indices.ROUND] == 2
+    assert codebook.sizes[Axes.CH] == 3
+    assert codebook.sizes[Axes.ROUND] == 2
     assert codebook.sizes[Features.TARGET] == 2
 
     if not check_values:
@@ -69,12 +69,12 @@ def test_from_code_array_throws_key_error_with_missing_channel_round_or_value():
     code_array: List = codebook_array_factory()
 
     # codebook is now missing a channel
-    del code_array[0][Features.CODEWORD][0][Indices.ROUND.value]
+    del code_array[0][Features.CODEWORD][0][Axes.ROUND.value]
     with pytest.raises(KeyError):
         Codebook.from_code_array(code_array)
 
     code_array: List = codebook_array_factory()
-    del code_array[0][Features.CODEWORD][0][Indices.CH.value]
+    del code_array[0][Features.CODEWORD][0][Axes.CH.value]
     with pytest.raises(KeyError):
         Codebook.from_code_array(code_array)
 
@@ -91,8 +91,8 @@ def test_from_code_array_expands_codebook_when_provided_n_codes_that_exceeds_arr
     """
     code_array: List = codebook_array_factory()
     codebook: Codebook = Codebook.from_code_array(code_array, n_ch=10, n_round=4)
-    assert codebook.sizes[Indices.CH] == 10
-    assert codebook.sizes[Indices.ROUND] == 4
+    assert codebook.sizes[Axes.CH] == 10
+    assert codebook.sizes[Axes.ROUND] == 4
     assert codebook.sizes[Features.TARGET] == 2
 
 
@@ -140,8 +140,8 @@ def test_create_codebook():
     data = np.zeros((2, 3, 2), dtype=np.uint8)
     for i, code_dict in enumerate(code_array):
         for bit in code_dict[Features.CODEWORD]:
-            ch = int(bit[Indices.CH])
-            r = int(bit[Indices.ROUND])
+            ch = int(bit[Axes.CH])
+            r = int(bit[Axes.ROUND])
             data[i, ch, r] = int(bit[Features.CODE_VALUE])
 
     codebook = Codebook._create_codebook(targets, n_ch=3, n_round=2, data=data)

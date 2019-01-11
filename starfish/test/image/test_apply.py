@@ -3,7 +3,7 @@ import copy
 import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Indices
+from starfish.types import Axes
 from starfish.util.synthesize import SyntheticData
 
 
@@ -24,7 +24,7 @@ def test_apply_3d():
     stack = ImageStack.synthetic_stack()
     assert np.all(stack.xarray == 1)
     stack.apply(divide, in_place=True, value=4,
-                group_by={Indices.ROUND.value, Indices.CH.value})
+                group_by={Axes.ROUND.value, Axes.CH.value})
     assert (stack.xarray == 0.25).all()
 
 

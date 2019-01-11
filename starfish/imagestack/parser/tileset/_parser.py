@@ -10,7 +10,7 @@ from slicedimage import Tile, TileSet
 from starfish.errors import DataFormatWarning
 from starfish.imagestack.dataorder import AXES_DATA
 from starfish.imagestack.parser import TileCollectionData, TileData, TileKey
-from starfish.types import Coordinates, Indices, Number
+from starfish.types import Axes, Coordinates, Number
 
 
 class _TileSetConsistencyDetector:
@@ -26,26 +26,26 @@ class _TileSetConsistencyDetector:
         self.kind = None
         self.dtype_size = None
 
-    def report_tile_shape(self, r: int, ch: int, z: int, tile_shape: Tuple[int, ...]) -> None:
+    def report_tile_shape(self, r: int, ch: int, zplane: int, tile_shape: Tuple[int, ...]) -> None:
         """As each tile is parsed, the tile shape should be reported via this method.  If an
         inconsistency is detected, a ValueError exception will be raised.
 
         Parameters
         ----------
-        r, ch, z : int
+        r, ch, zplane : int
             The indices of the tile, which is used to generate the exception text.
         tile_shape : Tuple[int, ...]
             The shape of the tile.
         """
         if self.tile_shape is not None and self.tile_shape != tile_shape:
             raise ValueError(
-                f"Tile (R: {r} C: {ch} Z: {z}) has shape {tile_shape}, which is different from one "
-                f"or more of the other tiles.  Starfish does not support tiles that are not "
-                f"identical in shape."
+                f"Tile (R: {r} C: {ch} Z: {zplane}) has shape {tile_shape}, which is different "
+                f"from one or more of the other tiles.  Starfish does not support tiles that are "
+                f"not identical in shape."
             )
         self.tile_shape = tile_shape
 
-    def report_dtype(self, r: int, ch: int, z: int, dtype) -> None:
+    def report_dtype(self, r: int, ch: int, zplane: int, dtype) -> None:
         """As each tile is parsed, the tile data type should be reported via this method.  If an
         inconsistency in the data type kind is is detected, a TypeError exception will be raised.
         If the data type are of the same kind but not the same size, it will trigger a
@@ -53,7 +53,7 @@ class _TileSetConsistencyDetector:
 
         Parameters
         ----------
-        r, ch, z : int
+        r, ch, zplane : int
             The indices of the tile, which is used to generate the exception text.
         dtype :
             The data type of the tile.
@@ -62,8 +62,8 @@ class _TileSetConsistencyDetector:
             raise TypeError("All tiles should have the same kind of dtype")
         if self.dtype_size is not None and self.dtype_size != dtype.itemsize:
             warnings.warn(
-                f"Tile (R: {r} C: {ch} Z: {z}) has dtype {dtype}, which is different from one or "
-                f"more of the other tiles.",
+                f"Tile (R: {r} C: {ch} Z: {zplane}) has dtype {dtype}, which is different from one "
+                f"or more of the other tiles.",
                 DataFormatWarning)
 
         self.kind = dtype.kind
@@ -83,26 +83,26 @@ class SlicedImageTile(TileData):
             expectations: _TileSetConsistencyDetector,
             r: int,
             ch: int,
-            z: int,
+            zplane: int,
     ) -> None:
         self._wrapped_tile = wrapped_tile
         self._expectations = expectations
         self._r = r
         self._ch = ch
-        self._z = z
+        self._zplane = zplane
         self._numpy_array: np.ndarray = None
 
     def _load(self):
         if self._numpy_array is not None:
             return
         self._numpy_array = self._wrapped_tile.numpy_array
-        self._expectations.report_dtype(self._r, self._ch, self._z, self._numpy_array.dtype)
+        self._expectations.report_dtype(self._r, self._ch, self._zplane, self._numpy_array.dtype)
 
     @property
     def tile_shape(self) -> Tuple[int, int]:
         self._load()
         tile_shape = self._numpy_array.shape
-        self._expectations.report_tile_shape(self._r, self._ch, self._z, tile_shape)
+        self._expectations.report_tile_shape(self._r, self._ch, self._zplane, tile_shape)
         return tile_shape
 
     @property
@@ -118,10 +118,10 @@ class SlicedImageTile(TileData):
         }
 
     @property
-    def indices(self) -> Mapping[Indices, int]:
+    def selector(self) -> Mapping[Axes, int]:
         return {
-            Indices(indices_str): indices_val
-            for indices_str, indices_val in self._wrapped_tile.indices.items()
+            Axes(axis_str): index
+            for axis_str, index in self._wrapped_tile.indices.items()
         }
 
 
@@ -133,9 +133,9 @@ class TileSetData(TileCollectionData):
         self.tiles: MutableMapping[TileKey, Tile] = dict()
         for tile in tileset.tiles():
             key = TileKey(
-                round=tile.indices[Indices.ROUND],
-                ch=tile.indices[Indices.CH],
-                z=tile.indices.get(Indices.Z, 0))
+                round=tile.indices[Axes.ROUND],
+                ch=tile.indices[Axes.CH],
+                zplane=tile.indices.get(Axes.ZPLANE, 0))
             self.tiles[key] = tile
         self._extras = tileset.extras
         self._expectations = _TileSetConsistencyDetector()
@@ -162,7 +162,7 @@ class TileSetData(TileCollectionData):
 
     def get_tile(self, r: int, ch: int, z: int) -> TileData:
         return SlicedImageTile(
-            self.tiles[TileKey(round=r, ch=ch, z=z)],
+            self.tiles[TileKey(round=r, ch=ch, zplane=z)],
             self._expectations,
             r, ch, z,
         )
@@ -205,7 +205,7 @@ def parse_tileset(
     )
 
 
-def _get_dimension_size(tileset: TileSet, dimension: Indices):
+def _get_dimension_size(tileset: TileSet, dimension: Axes):
     axis_data = AXES_DATA[dimension]
     if dimension in tileset.dimensions or axis_data.required:
         return tileset.get_dimension_shape(dimension)

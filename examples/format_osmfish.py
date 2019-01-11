@@ -9,7 +9,7 @@ from slicedimage import ImageFormat
 
 import starfish.util.try_import
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Coordinates, Features, Indices, Number
+from starfish.types import Axes, Coordinates, Features, Number
 from starfish.util import click
 
 
@@ -158,7 +158,7 @@ class osmFISHTileFetcher(TileFetcher):
         for (round_, channel), target in self.target_map.items():
             mappings.append({
                 Features.CODEWORD: [{
-                    Indices.ROUND.value: round_, Indices.CH.value: channel, Features.CODE_VALUE: 1
+                    Axes.ROUND.value: round_, Axes.CH.value: channel, Features.CODE_VALUE: 1
                 }],
                 Features.TARGET: target
             })
@@ -186,9 +186,9 @@ def cli(input_dir, output_dir, metadata_yaml):
 
     # This is hardcoded for this example data set
     primary_image_dimensions = {
-        Indices.ROUND: 13,
-        Indices.CH: len(primary_tile_fetcher.channel_map),
-        Indices.Z: primary_tile_fetcher.num_z
+        Axes.ROUND: 13,
+        Axes.CH: len(primary_tile_fetcher.channel_map),
+        Axes.ZPLANE: primary_tile_fetcher.num_z
     }
 
     def postprocess_func(experiment_json_doc):
@@ -207,7 +207,7 @@ def cli(input_dir, output_dir, metadata_yaml):
         aux_name_to_dimensions={},
         primary_tile_fetcher=primary_tile_fetcher,
         postprocess_func=postprocess_func,
-        dimension_order=(Indices.ROUND, Indices.CH, Indices.Z)
+        dimension_order=(Axes.ROUND, Axes.CH, Axes.ZPLANE)
     )
     pass
 

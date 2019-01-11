@@ -3,7 +3,7 @@ import os
 import starfish
 from starfish.image import Filter, Registration, Segmentation
 from starfish.spots import SpotFinder, TargetAssignment
-from starfish.types import Indices
+from starfish.types import Axes
 
 test = os.getenv("TESTING") is not None
 
@@ -32,8 +32,8 @@ def iss_pipeline(fov, codebook):
         measurement_type='mean',
     )
 
-    mp = fov['dots'].max_proj(Indices.ROUND, Indices.Z)
-    mp_numpy = mp._squeezed_numpy(Indices.ROUND, Indices.Z)
+    mp = fov['dots'].max_proj(Axes.ROUND, Axes.ZPLANE)
+    mp_numpy = mp._squeezed_numpy(Axes.ROUND, Axes.ZPLANE)
     intensities = p.run(filtered, blobs_image=mp_numpy)
 
     # decode the pixel traces using the codebook

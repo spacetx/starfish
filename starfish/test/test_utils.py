@@ -3,7 +3,7 @@ from collections import OrderedDict
 import numpy as np
 
 from starfish import Codebook, ImageStack
-from starfish.types import Features, Indices, PhysicalCoordinateTypes
+from starfish.types import Axes, Features, PhysicalCoordinateTypes
 
 
 def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict) -> ImageStack:
@@ -14,18 +14,18 @@ def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict
     Parameters
     ----------
     stack_shape: OrderedDict
-        Dict[Indices, int] defining the size of each dimension for an ImageStack
+        Dict[Axes, int] defining the size of each dimension for an ImageStack
 
     coords: OrderedDict
         Dict[PhysicalCoordinateTypes, float] defining the min/max values of physical
         coordinates to assign to each tile of the return ImageStack
     """
 
-    stack = ImageStack.synthetic_stack(num_round=stack_shape[Indices.ROUND],
-                                       num_ch=stack_shape[Indices.CH],
-                                       num_z=stack_shape[Indices.Z],
-                                       tile_height=stack_shape[Indices.Y],
-                                       tile_width=stack_shape[Indices.X])
+    stack = ImageStack.synthetic_stack(num_round=stack_shape[Axes.ROUND],
+                                       num_ch=stack_shape[Axes.CH],
+                                       num_z=stack_shape[Axes.ZPLANE],
+                                       tile_height=stack_shape[Axes.Y],
+                                       tile_width=stack_shape[Axes.X])
 
     coords_array = [coords[PhysicalCoordinateTypes.X_MIN],
                     coords[PhysicalCoordinateTypes.X_MAX],
@@ -34,13 +34,13 @@ def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict
                     coords[PhysicalCoordinateTypes.Z_MIN],
                     coords[PhysicalCoordinateTypes.Z_MAX]]
 
-    for _round in stack.index_labels(Indices.ROUND):
-        for ch in stack.index_labels(Indices.CH):
-            for z in stack.index_labels(Indices.Z):
+    for _round in stack.axis_labels(Axes.ROUND):
+        for ch in stack.axis_labels(Axes.CH):
+            for z in stack.axis_labels(Axes.ZPLANE):
                 coordinate_selector = {
-                    Indices.ROUND.value: _round,
-                    Indices.CH.value: ch,
-                    Indices.Z.value: z,
+                    Axes.ROUND.value: _round,
+                    Axes.CH.value: ch,
+                    Axes.ZPLANE.value: z,
                 }
 
                 stack._coordinates.loc[coordinate_selector] = np.array(coords_array)
@@ -56,15 +56,15 @@ def codebook_array_factory() -> Codebook:
     data = [
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 0, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 0, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: "GENE_A"
         },
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 2, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 2, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: "GENE_B"
         },

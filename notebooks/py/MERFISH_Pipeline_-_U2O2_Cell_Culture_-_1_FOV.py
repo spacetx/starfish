@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 
 from showit import image as show_image
 from starfish import data, FieldOfView
-from starfish.types import Features, Indices
+from starfish.types import Features, Axes
 # EPY: END code
 
 # EPY: START code
@@ -45,7 +45,7 @@ primary_image = experiment.fov()[FieldOfView.PRIMARY_IMAGES]
 
 # EPY: START code
 # show all imaging rounds of channel 0
-primary_image.show_stack({Indices.CH: 0})
+primary_image.show_stack({Axes.CH: 0})
 # EPY: END code
 
 # EPY: START markdown
@@ -116,12 +116,12 @@ low_passed = glp.run(deconvolved, in_place=False, verbose=True)
 # EPY: START code
 if use_test_data:
     scale_factors = {
-        (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
+        (t[Axes.ROUND], t[Axes.CH]): t['scale_factor']
         for t in experiment.extras['scale_factors']
     }
 else:
     scale_factors = {
-        (t[Indices.ROUND], t[Indices.CH]): t['scale_factor']
+        (t[Axes.ROUND], t[Axes.CH]): t['scale_factor']
         for index, t in primary_image.tile_metadata.iterrows()
     }
 # EPY: END code
@@ -132,10 +132,10 @@ else:
 from copy import deepcopy
 scaled_image = deepcopy(low_passed)
 
-for indices in primary_image._iter_indices():
-    data = scaled_image.get_slice(indices)[0]
-    scaled = data / scale_factors[indices[Indices.ROUND.value], indices[Indices.CH.value]]
-    scaled_image.set_slice(indices, scaled, [Indices.Z])
+for selector in primary_image._iter_axes():
+    data = scaled_image.get_slice(selector)[0]
+    scaled = data / scale_factors[selector[Axes.ROUND.value], selector[Axes.CH.value]]
+    scaled_image.set_slice(selector, scaled, [Axes.ZPLANE])
 # EPY: END code
 
 # EPY: START markdown
@@ -244,8 +244,8 @@ with warnings.catch_warnings():
     show_image(np.squeeze(prop_results.decoded_image)*(mask > 2), cmap='nipy_spectral', ax=ax1)
     ax1.axes.set_axis_off()
 
-    mp = scaled_image.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-    mp_numpy = mp._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+    mp = scaled_image.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+    mp_numpy = mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
     clim = scoreatpercentile(mp_numpy, [0.5, 99.5])
     show_image(mp_numpy, clim=clim, ax=ax2)
 

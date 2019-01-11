@@ -15,7 +15,7 @@ from slicedimage import ImageFormat
 
 from starfish.experiment.builder import (FetchedTile, TileFetcher,
                                          write_experiment_json)
-from starfish.types import Coordinates, Indices, Number
+from starfish.types import Axes, Coordinates, Number
 
 DEFAULT_TILE_SHAPE = 1000, 800
 
@@ -92,17 +92,17 @@ def format_data(input_dir, output_dir) -> None:
 
     num_fovs = 1
 
-    primary_image_dimensions: Mapping[Union[str, Indices], int] = {
-        Indices.ROUND: 3,
-        Indices.CH: 4,
-        Indices.Z: 17,
+    primary_image_dimensions: Mapping[Union[str, Axes], int] = {
+        Axes.ROUND: 3,
+        Axes.CH: 4,
+        Axes.ZPLANE: 17,
     }
 
-    aux_name_to_dimensions: Mapping[str, Mapping[Union[str, Indices], int]] = {
+    aux_name_to_dimensions: Mapping[str, Mapping[Union[str, Axes], int]] = {
         "nuclei": {
-            Indices.ROUND: 1,
-            Indices.CH: 1,
-            Indices.Z: 17,
+            Axes.ROUND: 1,
+            Axes.CH: 1,
+            Axes.ZPLANE: 17,
         }
     }
 

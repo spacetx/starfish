@@ -7,7 +7,7 @@ from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Coordinates, Features, Indices, Number
+from starfish.types import Axes, Coordinates, Features, Number
 from starfish.util import click
 
 
@@ -110,7 +110,7 @@ class ImagingMassCytometryTileFetcher(TileFetcher):
         for idx, target in self._ch_dict.items():
             mappings.append({
                 Features.CODEWORD: [{
-                    Indices.ROUND.value: 0, Indices.CH.value: idx, Features.CODE_VALUE: 1
+                    Axes.ROUND.value: 0, Axes.CH.value: idx, Features.CODE_VALUE: 1
                 }],
                 Features.TARGET: target
             })
@@ -141,9 +141,9 @@ def cli(input_dir, output_dir):
 
     primary_tile_fetcher = ImagingMassCytometryTileFetcher(os.path.expanduser(input_dir))
     primary_image_dimensions = {
-        Indices.ROUND: 1,
-        Indices.CH: len(primary_tile_fetcher._ch_dict),
-        Indices.Z: 1
+        Axes.ROUND: 1,
+        Axes.CH: len(primary_tile_fetcher._ch_dict),
+        Axes.ZPLANE: 1
     }
 
     def postprocess_func(experiment_json_doc):

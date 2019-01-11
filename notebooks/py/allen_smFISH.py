@@ -17,7 +17,7 @@ import numpy as np
 import os
 
 from starfish import data, FieldOfView
-from starfish.types import Indices
+from starfish.types import Axes
 # EPY: END code
 
 # EPY: START markdown
@@ -61,7 +61,7 @@ clip.run(primary_image, verbose=True, in_place=True)
 # EPY: END markdown
 
 # EPY: START code
-primary_image.show_stack({Indices.CH.value: 0, Indices.Z.value: 17}, rescale=True)
+primary_image.show_stack({Axes.CH: 0, Axes.ZPLANE: 17}, rescale=True)
 # EPY: END code
 
 # EPY: START code
@@ -75,7 +75,7 @@ bandpass.run(primary_image, verbose=True, in_place=True)
 
 # EPY: START code
 from showit import image
-image(primary_image.get_slice({Indices.CH.value: 0, Indices.Z.value: 17})[0][0, :, :], size=20, clim=(0, 0.004))
+image(primary_image.get_slice({Axes.CH: 0, Axes.ZPLANE: 17})[0][0, :, :], size=20, clim=(0, 0.004))
 # EPY: END code
 
 # EPY: START markdown
@@ -90,7 +90,7 @@ clip.run(primary_image, verbose=True, in_place=True)
 
 # EPY: START code
 from showit import image
-image(primary_image.get_slice({Indices.CH.value: 0, Indices.Z.value: 17})[0][0, :, :], size=20, clim=(0, 0.004))
+image(primary_image.get_slice({Axes.CH: 0, Axes.ZPLANE: 17})[0][0, :, :], size=20, clim=(0, 0.004))
 # EPY: END code
 
 # EPY: START code
@@ -108,7 +108,7 @@ glp.run(primary_image, in_place=True, verbose=True)
 # EPY: END markdown
 
 # EPY: START code
-plt.hist(np.ravel(primary_image.get_slice({Indices.CH.value: 0, Indices.Z.value: 17})[0]), bins=25, log=True);
+plt.hist(np.ravel(primary_image.get_slice({Axes.CH: 0, Axes.ZPLANE: 17})[0]), bins=25, log=True);
 # EPY: END code
 
 # EPY: START code
@@ -158,8 +158,8 @@ spot_attributes.groupby('c').apply(lambda x: np.sum(x > 0))
 # EPY: START code
 import starfish.plot
 
-mp = primary_image.max_proj(Indices.Z, Indices.ROUND)
-mp_numpy = mp._squeezed_numpy(Indices.Z, Indices.ROUND)
+mp = primary_image.max_proj(Axes.ZPLANE, Axes.ROUND)
+mp_numpy = mp._squeezed_numpy(Axes.ZPLANE, Axes.ROUND)
 
 # make the radius bigger to be clearer
 decoded['radius'] *= 4

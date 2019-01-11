@@ -23,8 +23,9 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from showit import image as show_image
+
+import starfish.display
 from starfish import data, FieldOfView
 from starfish.types import Features, Axes
 # EPY: END code
@@ -44,8 +45,8 @@ primary_image = experiment.fov()[FieldOfView.PRIMARY_IMAGES]
 # EPY: END code
 
 # EPY: START code
-# show all imaging rounds of channel 0
-primary_image.show_stack({Axes.CH: 0})
+# Display the data
+starfish.display.stack(primary_image)
 # EPY: END code
 
 # EPY: START markdown

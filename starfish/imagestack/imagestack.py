@@ -27,7 +27,6 @@ import numpy as np
 import pandas as pd
 import skimage.io
 import xarray as xr
-from matplotlib import get_backend as get_matplotlib_backend
 from scipy.ndimage.filters import gaussian_filter
 from scipy.stats import scoreatpercentile
 from skimage import exposure
@@ -597,109 +596,6 @@ class ImageStack:
                 data.shape, self._data[slice_list].shape))
 
         self._data.loc[slice_list] = data
-
-    def show_stack_napari(self, selector: Mapping[Axes, Union[int, slice]]):
-        """Displays the image stack using Napari (https://github.com/Napari)
-
-        Parameters
-        ----------
-        selector : Mapping[Axes, Union[int, slice]],
-            Axes to select a volume to visualize. Passed to `Image.get_slice()`.
-            See `Image.get_slice()` for examples.
-
-        Notes
-        -----
-        To use in a Jupyter notebook, use the %gui qt5 magic.
-        Axes currently cannot be labeled. Until such a time that they can, this function will
-        order them by Round, Channel, and Z.
-
-        """
-        try:
-            import napari_gui
-        except ImportError:
-            warnings.warn("Cannot find the napari library. "
-                          "Install it by running \"pip install napari\"")
-            return
-        # TODO ambrosejcarr: this should use updated imagestack slicing routines when they are added
-        # and selector should be optional to enable full stack viewing.
-        # Switch axes such that it is indexed [x, y, round, channel, z]
-        slices, axes = self.get_slice(selector)
-        reordered_array = np.moveaxis(slices, [-2, -1], [0, 1])
-
-        napari_gui.imshow(reordered_array, multichannel=False)
-
-    def show_stack(
-            self, selector: Mapping[Axes, Union[int, slice]],
-            color_map: str= 'gray', figure_size: Tuple[int, int]=(10, 10),
-            rescale: bool=False, p_min: Optional[float]=None, p_max: Optional[float]=None, **kwargs
-    ):
-        """Create an interactive visualization of an image stack
-
-        Produces a slider that flips through the selected volume tile-by-tile. Supports manual
-        adjustment of dynamic range.
-
-        Parameters
-        ----------
-        selector : Mapping[Axes, Union[int, slice]],
-            Axes to select a volume to visualize. Passed to `Image.get_slice()`.
-            See `Image.get_slice()` for examples.
-        color_map : str (default = 'gray')
-            string id of a matplotlib colormap
-        figure_size : Tuple[int, int] (default = (10, 10))
-            size of the figure in inches
-        rescale : bool (default = False)
-            if True, rescale the data to exclude high and low-value outliers
-            (see skimage.exposure.rescale_intensity).
-        p_min: float
-            clip values below this intensity percentile. If provided, overrides rescale, above.
-            (default = None)
-        p_max: float
-            clip values above this intensity percentile. If provided, overrides rescale, above.
-            (default = None)
-
-        Raises
-        ------
-        ValueError :
-            User must select one of rescale or p_min/p_max to adjust the image dynamic range.
-            If both are selected, a ValueError is raised.
-
-        Notes
-        -----
-        For this widget to function interactively in the notebook, after ipywidgets has been
-        installed, the user must register the widget with jupyter by typing the following command
-        into the terminal: jupyter nbextension enable --py widgetsnbextension
-
-        """
-
-        # infer if %matplotlib inline or notebook
-        mpl_is_notebook = 'nbAgg' in get_matplotlib_backend()
-
-        if not selector:
-            raise ValueError('selector may not be an empty dict or None')
-
-        # get linearized scaled and clipped tiles, along with title names, for plotting
-        linear_view, labels, n_tiles = self._get_scaled_clipped_linear_view(selector,
-                                                                            rescale,
-                                                                            p_min,
-                                                                            p_max
-                                                                            )
-
-        if mpl_is_notebook:
-            self._show_matplotlib_notebook(
-                linear_view,
-                labels,
-                n_tiles,
-                figure_size,
-                color_map
-            )
-        else:
-            return self._show_matplotlib_inline(
-                linear_view,
-                labels,
-                n_tiles,
-                figure_size,
-                color_map
-            )
 
     def _get_scaled_clipped_linear_view(self, selector, rescale, p_min, p_max):
 

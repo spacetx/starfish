@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
+import starfish.display
 from starfish import data, FieldOfView
 from starfish.types import Features, Axes
 
@@ -48,7 +49,7 @@ print(stack.shape)
 # EPY: END code
 
 # EPY: START code
-stack.show_stack({Axes.CH:0}, rescale=True);
+starfish.display.stack(stack)
 # EPY: END code
 
 # EPY: START markdown

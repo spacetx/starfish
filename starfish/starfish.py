@@ -11,6 +11,7 @@ from starfish.image import (
 )
 from starfish.spots import (
     Decoder,
+    PixelSpotDecoder,
     SpotFinder,
     TargetAssignment,
 )
@@ -71,6 +72,7 @@ version.no_art = True  # type: ignore
 # Pipelines
 starfish.add_command(Registration._cli)  # type: ignore
 starfish.add_command(Filter._cli)  # type: ignore
+starfish.add_command(PixelSpotDecoder._cli)
 starfish.add_command(SpotFinder._cli)  # type: ignore
 starfish.add_command(Segmentation._cli)  # type: ignore
 starfish.add_command(TargetAssignment._cli)  # type: ignore

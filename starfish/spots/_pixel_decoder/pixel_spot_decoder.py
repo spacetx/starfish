@@ -8,11 +8,11 @@ from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.intensity_table.intensity_table_coordinates import \
     transfer_physical_coords_from_imagestack_to_intensity_table
 from starfish.util import click
-from ._base import SpotFinderAlgorithmBase
+from ._base import PixelDecoderAlgorithmBase
 from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedComponentDecodingResult
 
 
-class PixelSpotDetector(SpotFinderAlgorithmBase):
+class PixelSpotDecoder(PixelDecoderAlgorithmBase):
     def __init__(
             self, codebook: Codebook, metric: str, distance_threshold: float,
             magnitude_threshold: int, min_area: int, max_area: int, norm_order: int=2,
@@ -92,7 +92,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         return decoded_spots, image_decoding_results
 
     @staticmethod
-    @click.command("PixelSpotDetector")
+    @click.command("PixelSpotDecoder")
     @click.option("--metric", type=str, default='euclidean')
     @click.option(
         "--distance-threshold", type=float, default=0.5176,
@@ -122,7 +122,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
     def _cli(ctx, metric, distance_threshold, magnitude_threshold,
              min_area, max_area, norm_order, crop_x, crop_y, crop_z):
         codebook = ctx.obj["codebook"]
-        instance = PixelSpotDetector(
+        instance = PixelSpotDecoder(
             codebook=codebook,
             metric=metric,
             distance_threshold=distance_threshold,

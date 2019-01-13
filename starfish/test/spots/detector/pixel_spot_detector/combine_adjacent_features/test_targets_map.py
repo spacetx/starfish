@@ -4,7 +4,7 @@ Tests for starfish.spots._detector.combine_adjacent_features.TargetsMap
 
 import numpy as np
 
-from starfish.spots._detector.combine_adjacent_features import TargetsMap
+from starfish.spots._pixel_decoder.combine_adjacent_features import TargetsMap
 
 
 def test_targets_map():

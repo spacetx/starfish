@@ -8,7 +8,7 @@ import numpy as np
 from skimage.measure import label
 
 from starfish import ImageStack, IntensityTable
-from starfish.spots._detector.combine_adjacent_features import CombineAdjacentFeatures
+from starfish.spots._pixel_decoder.combine_adjacent_features import CombineAdjacentFeatures
 from starfish.types import Features
 
 

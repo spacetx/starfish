@@ -1,7 +1,7 @@
 language: python
 env:
   global:
-    - STARFISH_CONFIG=@.travis-config.json
+    - STARFISH_CONFIG=@$TRAVIS_BUILD_DIR/.travis-config.json
 services:
 - docker
 python:

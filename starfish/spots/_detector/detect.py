@@ -210,7 +210,6 @@ def detect_spots(data_stack: ImageStack,
     IntensityTable :
         IntensityTable containing the intensity of each spot, its radius, and location in pixel
         coordinates
-        :param n_processes:
 
     """
 

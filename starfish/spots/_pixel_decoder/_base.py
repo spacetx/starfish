@@ -14,7 +14,7 @@ class PixelDecoderAlgorithmBase(AlgorithmBase):
     def run(
             self,
             primary_image: ImageStack,
-    ) -> Union[IntensityTable, Tuple[IntensityTable, ConnectedComponentDecodingResult]]:
+    ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """Finds spots in an ImageStack"""
         raise NotImplementedError()
 

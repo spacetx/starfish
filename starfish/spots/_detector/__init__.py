@@ -26,7 +26,6 @@ class SpotFinder(PipelineComponent):
             blobs_stack = ImageStack.from_path_or_url(blobs_stack)  # type: ignore
             mp = blobs_stack.max_proj(Axes.ROUND, Axes.CH)
             mp_numpy = mp._squeezed_numpy(Axes.ROUND, Axes.CH)
-            #  TODO: this won't work for PixelSpotDectector
             intensities = instance.run(
                 image_stack,
                 blobs_image=mp_numpy,
@@ -35,7 +34,8 @@ class SpotFinder(PipelineComponent):
         else:
             intensities = instance.run(image_stack)
 
-        # When PixelSpotDetector is used run() returns a tuple
+        # When run() returns a tuple, we only save the intensities for now
+        # TODO ambrosejcarr find a way to save arbitrary detector results
         if isinstance(intensities, tuple):
             intensities = intensities[0]
         intensities.save(output)
@@ -56,16 +56,9 @@ class SpotFinder(PipelineComponent):
             'are found in this image and then measured across all images in the input stack.'
         )
     )
-    @click.option(
-        '--codebook', default=None, required=False, help=(
-            'A spaceTx spec-compliant json file that describes a three dimensional tensor '
-            'whose values are the expected intensity of a spot for each code in each imaging '
-            'round and each color channel.'
-        )
-    )
     @click.pass_context
-    def _cli(ctx, input, output, blobs_stack, reference_image_from_max_projection, codebook):
-        """assign spots to regions"""
+    def _cli(ctx, input, output, blobs_stack, reference_image_from_max_projection):
+        """detect spots"""
         print('Detecting Spots ...')
         ctx.obj = dict(
             component=SpotFinder,
@@ -73,11 +66,6 @@ class SpotFinder(PipelineComponent):
             output=output,
             blobs_stack=blobs_stack,
             reference_image_from_max_projection=reference_image_from_max_projection,
-            codebook=None,
         )
-
-        if codebook is not None:
-            ctx.obj["codebook"] = Codebook.from_json(codebook)
-
 
 SpotFinder._cli_register()

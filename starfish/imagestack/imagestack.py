@@ -1,5 +1,4 @@
 import collections
-import multiprocessing
 import os
 import warnings
 from copy import deepcopy
@@ -50,6 +49,7 @@ from starfish.imagestack.parser.crop import CropParameters, CroppedTileCollectio
 from starfish.imagestack.parser.numpy import NumpyData
 from starfish.imagestack.parser.tileset import parse_tileset
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.multiprocessing.pool import StarfishPool
 from starfish.multiprocessing.shmem import SharedMemory
 from starfish.types import (
     Axes,
@@ -863,8 +863,8 @@ class ImageStack:
             mp_applyfunc: Callable = partial(
                 self._multiprocessing_workflow, partial(func, **kwargs))
 
-            with multiprocessing.Pool(
-                    n_processes,
+            with StarfishPool(
+                    processes=n_processes,
                     initializer=SharedMemory.initializer,
                     initargs=((self._data._backing_mp_array,
                                self._data._data.shape,

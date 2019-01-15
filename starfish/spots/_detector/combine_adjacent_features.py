@@ -1,5 +1,4 @@
 from functools import partial
-from multiprocessing import Pool
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import numpy as np
@@ -10,6 +9,7 @@ from tqdm import tqdm
 
 from starfish.config import StarfishConfig
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.multiprocessing.pool import StarfishPool
 from starfish.types import Axes, Features, Number, SpotAttributes
 
 
@@ -274,7 +274,7 @@ class CombineAdjacentFeatures:
             An array with length equal to the number of features. If zero, indicates that a feature
             has failed area filters.
         """
-        pool = Pool(n_processes)
+        pool = StarfishPool(processes=n_processes)
         mapfunc = pool.map
         applyfunc = partial(
             self._single_spot_attributes,
@@ -285,7 +285,7 @@ class CombineAdjacentFeatures:
         )
 
         iterable = tqdm(region_properties, disable=(not StarfishConfig().verbose))
-        results = mapfunc(applyfunc, iterable)
+        results = mapfunc(func=applyfunc, iterable=iterable)
         spot_attrs, passes_area_filter = zip(*results)
 
         # update passes filter

@@ -847,30 +847,24 @@ class ImageStack:
         if verbose and StarfishConfig().verbose:
             selectors_and_slice_lists = tqdm(selectors_and_slice_lists)
 
-        if n_processes == 1:
-            sp_applyfunc: Callable = partial(
-                self._singleprocessing_workflow,
-                partial(func, **kwargs),
-                self._data.data.values,
-            )
-
-            sp_results = []
-            for selector, slice_list in selectors_and_slice_lists:
-                result = sp_applyfunc((selector, slice_list))
-                sp_results.append((result, selector))
-            return sp_results
-        else:
-            mp_applyfunc: Callable = partial(
-                self._multiprocessing_workflow, partial(func, **kwargs))
-
-            with StarfishPool(
-                    processes=n_processes,
-                    initializer=SharedMemory.initializer,
-                    initargs=((self._data._backing_mp_array,
-                               self._data._data.shape,
-                               self._data._data.dtype),)) as pool:
-                mp_results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
-                return list(zip(mp_results, selectors))
+        with StarfishPool(
+                processes=n_processes,
+                initializer=SharedMemory.initializer,
+                initargs=((self._data._backing_mp_array,
+                           self._data._data.shape,
+                           self._data._data.dtype),)) as pool:
+            if n_processes == 1:
+                sp_applyfunc: Callable = partial(
+                    self._singleprocessing_workflow,
+                    partial(func, **kwargs),
+                    self._data.data.values,
+                )
+                results = pool.map(sp_applyfunc, selectors_and_slice_lists)
+            else:
+                mp_applyfunc: Callable = partial(
+                    self._multiprocessing_workflow, partial(func, **kwargs))
+                results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
+            return list(zip(results, selectors))
 
     @staticmethod
     def _singleprocessing_workflow(

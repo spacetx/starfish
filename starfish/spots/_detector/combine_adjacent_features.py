@@ -295,7 +295,8 @@ class CombineAdjacentFeatures:
         return spot_attributes, passes_filter
 
     def run(
-            self, intensities: IntensityTable
+            self, intensities: IntensityTable,
+            n_processes: Optional[int] = None
     ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """
         Execute the combine_adjacent_features method on an IntensityTable containing pixel
@@ -353,6 +354,7 @@ class CombineAdjacentFeatures:
             props,
             decoded_image,
             target_map,
+            n_processes=n_processes
         )
 
         # augment the SpotAttributes with filtering results and distances from nearest codes

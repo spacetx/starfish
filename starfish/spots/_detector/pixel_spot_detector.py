@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 
@@ -55,6 +55,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
 
     def run(
         self, stack: ImageStack,
+        n_processes: Optional[int] = None
     ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """decode pixels and combine them into spots using connected component labeling
 
@@ -62,6 +63,9 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         ----------
         stack : ImageStack
             ImageStack containing spots
+        n_processes : Optional[int]
+            The number of processes to use for CombineAdjacentFeatures.
+             If None, uses the output of os.cpu_count() (default = None).
 
         Returns
         -------
@@ -85,7 +89,8 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
             max_area=self.max_area,
             mask_filtered_features=True
         )
-        decoded_spots, image_decoding_results = caf.run(intensities=decoded_intensities)
+        decoded_spots, image_decoding_results = caf.run(intensities=decoded_intensities,
+                                                        n_processes=n_processes)
 
         transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=stack,
                                                                     intensity_table=decoded_spots)

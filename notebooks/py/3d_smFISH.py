@@ -4,15 +4,15 @@
 # EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "starfish", "language": "python", "name": "starfish"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
-## Reproduce Allen smFISH results with Starfish
+## Reproduce 3d smFISH results with Starfish
 #
 #This notebook walks through a work flow that analyzes one field of view of a mouse gene panel from the Allen Institute for Cell Science, using the starfish package.
 # EPY: END markdown
 
 # EPY: START markdown
-#The 3d smFISH workflow run by the allen runs a bandpass filter to remove high and low frequency signal and blurs over z with a 1-pixel gaussian to smooth the signal over the z-axis. low-intensity signal is (stringently) clipped from the images before and after these filters. 
+#The 3d smFISH workflow run by the Allen runs a bandpass filter to remove high and low frequency signal and blurs over z with a 1-pixel gaussian to smooth the signal over the z-axis. low-intensity signal is (stringently) clipped from the images before and after these filters.
 #
-#Spots are then detected using a spot finder based on trackpy's locate method, which identifies local intensity maxima, and spots are matched to the gene they represent by looking them up in a codebook that records which (round, channel) matches which gene target. 
+#Spots are then detected using a spot finder based on trackpy's locate method, which identifies local intensity maxima, and spots are matched to the gene they represent by looking them up in a codebook that records which (round, channel) matches which gene target.
 # EPY: END markdown
 
 # EPY: START markdown
@@ -72,17 +72,17 @@ tlmpf = starfish.spots.SpotFinder.TrackpyLocalMaxPeakFinder(
 # EPY: END markdown
 
 # EPY: START markdown
-#Define a function that identifies spots of a field of view. 
+#Define a function that identifies spots of a field of view.
 # EPY: END markdown
 
 # EPY: START code
-def allen_pipeline(
-    experiment: starfish.Experiment, 
-    fov_name: str, 
+def processing_pipeline(
+    experiment: starfish.Experiment,
+    fov_name: str,
     n_processes: Optional[int]=None
 ) -> Tuple[starfish.ImageStack, starfish.IntensityTable]:
     """Process a single field of view of an experiment
-    
+
     Parameters
     ----------
     experiment : starfish.Experiment
@@ -90,17 +90,17 @@ def allen_pipeline(
     fov_name : str
         name of the field of view to process
     n_processes : int
-    
+
     Returns
     -------
-    starfish.IntensityTable : 
+    starfish.IntensityTable :
         decoded IntensityTable containing spots matched to the genes they are hybridized against
     """
-    
+
     print("Loading images...")
     primary_image = experiment[fov_name][FieldOfView.PRIMARY_IMAGES]
     codebook = experiment.codebook
-    
+
     print("Filtering images...")
     filter_kwargs = dict(
         in_place=True,
@@ -111,14 +111,14 @@ def allen_pipeline(
     bandpass.run(primary_image, **filter_kwargs)
     glp.run(primary_image, **filter_kwargs)
     clip2.run(primary_image, **filter_kwargs)
-    
+
     print("Calling spots...")
     spot_attributes = tlmpf.run(primary_image)
-    
+
     print("Decoding spots...")
     decoded = codebook.decode_per_round_max(spot_attributes)
     decoded = decoded[decoded["total_intensity"]>.025]
-    
+
     return primary_image, decoded
 # EPY: END code
 
@@ -129,7 +129,7 @@ def allen_pipeline(
 # EPY: START code
 experiment = starfish.data.allen_smFISH(use_test_data=True)
 
-image, intensities = allen_pipeline(experiment, fov_name='fov_001')
+image, intensities = processing_pipeline(experiment, fov_name='fov_001')
 # EPY: END code
 
 # EPY: START markdown

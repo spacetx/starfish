@@ -14,9 +14,13 @@ from starfish.test.test_utils import (
 )
 from starfish.types import Axes, Features
 
+# verify all spot finders handle different coding types
 _, ONE_HOT_IMAGESTACK, ONE_HOT_MAX_INTENSITY = two_spot_one_hot_coded_data_factory()
 _, SPARSE_IMAGESTACK, SPARSE_MAX_INTENSITY = two_spot_sparse_coded_data_factory()
 _, BLANK_IMAGESTACK, BLANK_MAX_INTENSITY = two_spot_informative_blank_coded_data_factory()
+
+# make sure that all spot finders handle empty arrays
+EMPTY_IMAGESTACK = ImageStack.from_numpy_array(np.zeros((4, 2, 10, 100, 100), dtype=np.float32))
 
 
 def simple_gaussian_spot_detector() -> BlobDetector:
@@ -74,18 +78,29 @@ def test_spot_detection_with_reference_image(
         max_intensity: float,
 ):
     """This testing method uses a reference image to identify spot locations."""
-    reference_image_mp = data_stack.max_proj(Axes.CH, Axes.ROUND)
-    reference_image_mp_numpy = reference_image_mp._squeezed_numpy(Axes.CH, Axes.ROUND)
 
-    intensity_table = detect_spots(data_stack=data_stack,
-                                   spot_finding_method=spot_detector.image_to_spots,
-                                   reference_image=reference_image_mp_numpy,
-                                   measurement_function=np.max,
-                                   radius_is_gyration=radius_is_gyration)
+    def call_detect_spots(stack):
+
+        reference_image_mp = stack.max_proj(Axes.CH, Axes.ROUND)
+        reference_image_mp_numpy = reference_image_mp._squeezed_numpy(Axes.CH, Axes.ROUND)
+
+        return detect_spots(
+            data_stack=stack,
+            spot_finding_method=spot_detector.image_to_spots,
+            reference_image=reference_image_mp_numpy,
+            measurement_function=np.max,
+            radius_is_gyration=radius_is_gyration
+        )
+
+    intensity_table = call_detect_spots(data_stack)
     assert intensity_table.sizes[Features.AXIS] == 2, "wrong number of spots detected"
     expected = [max_intensity * 2, max_intensity * 2]
     assert np.allclose(intensity_table.sum((Axes.ROUND, Axes.CH)).values, expected), \
         "wrong spot intensities detected"
+
+    # verify this execution strategy produces an empty intensitytable when called with a blank image
+    empty_intensity_table = call_detect_spots(EMPTY_IMAGESTACK)
+    assert empty_intensity_table.sizes[Features.AXIS] == 0
 
 
 @pytest.mark.parametrize(*test_parameters)
@@ -96,16 +111,24 @@ def test_spot_detection_with_reference_image_from_max_projection(
         max_intensity: float,
 ):
     """This testing method builds a reference image to identify spot locations."""
-    intensity_table = detect_spots(data_stack=data_stack,
-                                   spot_finding_method=spot_detector.image_to_spots,
-                                   reference_image_from_max_projection=True,
-                                   measurement_function=np.max,
-                                   radius_is_gyration=radius_is_gyration)
+
+    def call_detect_spots(stack):
+        return detect_spots(
+            data_stack=stack,
+            spot_finding_method=spot_detector.image_to_spots,
+            reference_image_from_max_projection=True,
+            measurement_function=np.max,
+            radius_is_gyration=radius_is_gyration,
+        )
+
+    intensity_table = call_detect_spots(data_stack)
     assert intensity_table.sizes[Features.AXIS] == 2, "wrong number of spots detected"
     expected = [max_intensity * 2, max_intensity * 2]
     assert np.allclose(intensity_table.sum((Axes.ROUND, Axes.CH)).values, expected), \
         "wrong spot intensities detected"
 
+    empty_intensity_table = call_detect_spots(EMPTY_IMAGESTACK)
+    assert empty_intensity_table.sizes[Features.AXIS] == 0
 
 @pytest.mark.parametrize(*test_parameters)
 def test_spot_finding_no_reference_image(
@@ -118,11 +141,28 @@ def test_spot_finding_no_reference_image(
     This testing method does not provide a reference image, and should therefore check for spots
     in each (round, ch) combination in sequence. With the given input, it should detect 4 spots.
     """
-    intensity_table = detect_spots(data_stack=data_stack,
-                                   spot_finding_method=spot_detector.image_to_spots,
-                                   measurement_function=np.max,
-                                   radius_is_gyration=radius_is_gyration)
+
+    def call_detect_spots(stack):
+        return detect_spots(
+            data_stack=stack,
+            spot_finding_method=spot_detector.image_to_spots,
+            measurement_function=np.max,
+            radius_is_gyration=radius_is_gyration
+        )
+
+    intensity_table = call_detect_spots(data_stack)
     assert intensity_table.sizes[Features.AXIS] == 4, "wrong number of spots detected"
     expected = [max_intensity] * 4
     assert np.allclose(intensity_table.sum((Axes.ROUND, Axes.CH)).values, expected), \
         "wrong spot intensities detected"
+
+    # verify this execution strategy produces an empty intensitytable when called with a blank image
+    empty_intensity_table = detect_spots(
+        data_stack=EMPTY_IMAGESTACK,
+        spot_finding_method=spot_detector.image_to_spots,
+        measurement_function=np.max,
+        radius_is_gyration=radius_is_gyration
+    )
+
+    empty_intensity_table = call_detect_spots(EMPTY_IMAGESTACK)
+    assert empty_intensity_table.sizes[Features.AXIS] == 0

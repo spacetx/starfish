@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from starfish.config import StarfishConfig
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.multiprocessing.pool import Spool
+from starfish.multiprocessing.pool import Pool
 from starfish.types import Axes, Features, Number, SpotAttributes
 
 
@@ -274,7 +274,7 @@ class CombineAdjacentFeatures:
             An array with length equal to the number of features. If zero, indicates that a feature
             has failed area filters.
         """
-        pool = Spool(processes=n_processes)
+        pool = Pool(processes=n_processes)
         mapfunc = pool.map
         applyfunc = partial(
             self._single_spot_attributes,

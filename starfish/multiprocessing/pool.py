@@ -12,6 +12,7 @@ class Spool(Pool):
 
     def map(self, func, iterable, chunksize=None):
         if self.n_processes == 1:
+            self._initializer(*self._initargs)
             return map(func, iterable)
         return Pool.map(self, func, iterable, chunksize)
 

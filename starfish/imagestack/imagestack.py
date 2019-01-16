@@ -853,32 +853,13 @@ class ImageStack:
                 initargs=((self._data._backing_mp_array,
                            self._data._data.shape,
                            self._data._data.dtype),)) as pool:
-            if n_processes == 1:
-                sp_applyfunc: Callable = partial(
-                    self._singleprocessing_workflow,
-                    partial(func, **kwargs),
-                    self._data.data.values,
-                )
-                results = pool.map(sp_applyfunc, selectors_and_slice_lists)
-            else:
-                mp_applyfunc: Callable = partial(
-                    self._multiprocessing_workflow, partial(func, **kwargs))
-                results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
+            mp_applyfunc: Callable = partial(
+                self._processing_workflow, partial(func, **kwargs))
+            results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
             return list(zip(results, selectors))
 
     @staticmethod
-    def _singleprocessing_workflow(
-            worker_callable: Callable[[np.ndarray], Any],
-            numpy_array: np.ndarray,
-            selector_and_slice_list: Tuple[Mapping[Axes, int],
-                                           Tuple[Union[int, slice], ...]],
-    ):
-        sliced = numpy_array[selector_and_slice_list[1]]
-
-        return worker_callable(sliced)
-
-    @staticmethod
-    def _multiprocessing_workflow(
+    def _processing_workflow(
             worker_callable: Callable[[np.ndarray], Any],
             selector_and_slice_list: Tuple[Mapping[Axes, int],
                                            Tuple[Union[int, slice], ...]],

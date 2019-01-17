@@ -173,6 +173,11 @@ class IntensityTable(xr.DataArray):
         else:
             raise RuntimeError('No log info found.')
 
+    @property
+    def has_physical_coordinate_info(self):
+        return 'xc' in self.coords
+
+
     def save(self, filename: str) -> None:
         """Save an IntensityTable as a Netcdf File
 
@@ -416,7 +421,7 @@ class IntensityTable(xr.DataArray):
         """
 
         # create the 2-d counts matrix
-        grouped = self.to_features_dataframe().groupby(['cell_id', 'target'])
+        grouped = self.to_features_dataframe().groupby(['features', 'target'])
         counts = grouped.count().iloc[:, 0].unstack().fillna(0)
 
         if regions:
@@ -428,7 +433,10 @@ class IntensityTable(xr.DataArray):
                 "z": ("cells", np.zeros(counts.shape[0]))
             }
         else:
-            grouped = self.to_features_dataframe().groupby(['cell_id'])[['x', 'y', 'z']]
+            if self.has_physical_coordinate_info:
+                grouped = self.to_features_dataframe().groupby(['features'])[['x', 'y', 'z', 'xc', 'yc', 'zc']]
+            else:
+                grouped = self.to_features_dataframe().groupby(['features'])[['x', 'y', 'z']]
             min_ = grouped.min()
             max_ = grouped.max()
             coordinate_df = min_ + (max_ - min_) / 2

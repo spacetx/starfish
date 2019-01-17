@@ -9,7 +9,7 @@ import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.image._filter.util import preserve_float_range
-from starfish.types import Axes, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
+from starfish.types import Axes, Coordinates, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
 
 
 class IntensityTable(xr.DataArray):
@@ -174,9 +174,8 @@ class IntensityTable(xr.DataArray):
             raise RuntimeError('No log info found.')
 
     @property
-    def has_physical_coordinate_info(self):
-        return 'xc' in self.coords
-
+    def has_physical_coords(self):
+        return Coordinates.X and Coordinates.Y in self.coords
 
     def save(self, filename: str) -> None:
         """Save an IntensityTable as a Netcdf File
@@ -433,8 +432,9 @@ class IntensityTable(xr.DataArray):
                 "z": ("cells", np.zeros(counts.shape[0]))
             }
         else:
-            if self.has_physical_coordinate_info:
-                grouped = self.to_features_dataframe().groupby(['features'])[['x', 'y', 'z', 'xc', 'yc', 'zc']]
+            if self.has_physical_coords:
+                grouped = self.to_features_dataframe().groupby(['features'])[['x', 'y', 'z',
+                                                                              'xc', 'yc', 'zc']]
             else:
                 grouped = self.to_features_dataframe().groupby(['features'])[['x', 'y', 'z']]
             min_ = grouped.min()

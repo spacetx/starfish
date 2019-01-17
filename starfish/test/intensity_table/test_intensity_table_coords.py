@@ -118,6 +118,10 @@ def test_tranfering_physical_coords_to_expression_matrix():
 
     expression_matrix = intensities.to_expression_matrix()
 
-    return
-
-
+    # Assert that coords were transferred
+    xc = expression_matrix.coords[Coordinates.X]
+    yc = expression_matrix.coords[Coordinates.Y]
+    zc = expression_matrix.coords[Coordinates.Z]
+    assert xc.size == NUMBER_SPOTS
+    assert yc.size == NUMBER_SPOTS
+    assert zc.size == NUMBER_SPOTS

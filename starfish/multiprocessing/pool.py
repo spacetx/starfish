@@ -16,5 +16,11 @@ class Pool(mp.Pool):
             return map(func, iterable)
         return mp.Pool.map(self, func, iterable, chunksize)
 
+    def imap(self, func, iterable, chunksize=1):
+        if self.n_processes == 1:
+            self._initializer(*self._initargs)
+            return map(func, iterable)
+        return mp.Pool.imap(self, func, iterable, chunksize)
+
     def __reduce__(self):
         pass

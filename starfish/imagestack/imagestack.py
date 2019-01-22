@@ -60,7 +60,7 @@ from starfish.types import (
     PhysicalCoordinateTypes,
     STARFISH_EXTRAS_KEY
 )
-from starfish.util.JSONenocder import LogEncoder
+from starfish.util import logging
 from ._mp_dataarray import MPDataArray
 from .dataorder import AXES_DATA, N_AXES
 
@@ -984,7 +984,12 @@ class ImageStack:
         ----------
         class_instance: The instance of a class being applied to the imagestack
         """
-        entry = {"method": class_instance.__class__.__name__, "arguments": class_instance.__dict__}
+        entry = {"method": class_instance.__class__.__name__,
+                 "arguments": class_instance.__dict__,
+                 "os": logging.get_os_info(),
+                 "dependencies": logging.get_core_dependency_info(),
+                 "git hash": logging.get_git_commit_hash()
+                 }
         self._log.append(entry)
 
     @property
@@ -1119,7 +1124,7 @@ class ImageStack:
 
         """
         # Add log data to extras
-        self._tile_data.extras[STARFISH_EXTRAS_KEY] = LogEncoder().encode({LOG: self.log})
+        self._tile_data.extras[STARFISH_EXTRAS_KEY] = logging.LogEncoder().encode({LOG: self.log})
         tileset = TileSet(
             dimensions={
                 Axes.ROUND,

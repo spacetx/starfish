@@ -23,7 +23,7 @@ def get_git_commit_hash():
 
 @lru_cache(maxsize=1)
 def get_os_info():
-    return "Platform: " + platform.system() + " Version: " + platform.version()
+    return {"Platform": platform.system(), "Version:": platform.version()}
 
 
 class LogEncoder(JSONEncoder):

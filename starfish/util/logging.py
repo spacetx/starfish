@@ -3,6 +3,7 @@ import subprocess
 from functools import lru_cache
 from json import JSONEncoder
 
+
 from starfish.types import CORE_DEPENDENCIES
 
 
@@ -10,8 +11,8 @@ from starfish.types import CORE_DEPENDENCIES
 def get_core_dependency_info():
     dependency_info = dict()
     for dependency in CORE_DEPENDENCIES:
-        version = subprocess.check_output(
-            f"pip show {dependency} | grep 'Version'", shell=True).strip()
+        ps = subprocess.Popen(('pip', 'show', dependency), stdout=subprocess.PIPE)
+        version = subprocess.check_output(('grep', 'Version'), stdin=ps.stdout).strip()
         dependency_info[dependency] = version
     return dependency_info
 

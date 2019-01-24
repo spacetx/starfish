@@ -21,3 +21,4 @@ class Pool(mp.Pool):
             self._initializer(*self._initargs)
             return map(func, iterable)
         return mp.Pool.imap(self, func, iterable, chunksize)
+

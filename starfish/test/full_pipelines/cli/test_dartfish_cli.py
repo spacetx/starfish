@@ -27,7 +27,7 @@ class TestWithDartfishData(CLITest, unittest.TestCase):
         return (
             [
                 sys.executable,
-                "examples/get_cli_test_data.py",
+                "starfish/test/full_pipelines/cli/get_cli_test_data.py",
                 "https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH-TEST/",
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
             ],

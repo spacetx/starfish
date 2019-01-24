@@ -1,7 +1,7 @@
 language: python
 env:
   global:
-    - STARFISH_VALIDATION_STRICT=true
+    - STARFISH_CONFIG=@$TRAVIS_BUILD_DIR/.travis-config.json
 services:
 - docker
 python:
@@ -24,9 +24,9 @@ jobs:
     - name: Docker
       if: type = push and branch =~ /^(master|merge)/
       script: make docker
-    - name: Allen Notebook
+    - name: 3d smFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-src run__notebooks/py/allen_smFISH.py
+      script: make install-src run__notebooks/py/3d_smFISH.py
     - name: MERFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: travis_wait make install-src run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py

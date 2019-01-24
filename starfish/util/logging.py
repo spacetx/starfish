@@ -1,8 +1,14 @@
+import os
 import platform
-import subprocess
 from functools import lru_cache
 from json import JSONEncoder
-
+from subprocess import (
+    call,
+    check_output,
+    PIPE,
+    Popen,
+    STDOUT,
+)
 
 from starfish.types import CORE_DEPENDENCIES
 
@@ -11,15 +17,19 @@ from starfish.types import CORE_DEPENDENCIES
 def get_core_dependency_info():
     dependency_info = dict()
     for dependency in CORE_DEPENDENCIES:
-        ps = subprocess.Popen(('pip', 'show', dependency), stdout=subprocess.PIPE)
-        version = subprocess.check_output(('grep', 'Version'), stdin=ps.stdout).strip()
+        ps = Popen(('pip', 'show', dependency), stdout=PIPE)
+        version = check_output(('grep', 'Version'), stdin=ps.stdout).strip()
         dependency_info[dependency] = version
     return dependency_info
 
 
 @lru_cache(maxsize=1)
 def get_git_commit_hash():
-    return subprocess.check_output(["git", "describe", "--always"]).strip()
+    # First check for git repo
+    if call(["git", "branch"], stderr=STDOUT, stdout=open(os.devnull, 'w')) != 0:
+        return check_output(["git", "describe", "--always"]).strip()
+    else:
+        return "No git repo initialized"
 
 
 @lru_cache(maxsize=1)

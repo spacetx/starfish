@@ -22,7 +22,7 @@ jobs:
     - name: Install Napari
       script: pip install .[napari]
     - name: Docker
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and branch =~ /^(saxelrod-testing|merge)/
       script: make docker
     - name: 3d smFISH Notebook
       if: type = push and branch =~ /^(saxelrod-testing|merge)/

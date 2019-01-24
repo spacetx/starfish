@@ -1,5 +1,4 @@
 from functools import partial
-from multiprocessing import Pool
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import numpy as np
@@ -10,6 +9,7 @@ from tqdm import tqdm
 
 from starfish.config import StarfishConfig
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.multiprocessing.pool import Pool
 from starfish.types import Axes, Features, Number, SpotAttributes
 
 
@@ -274,7 +274,7 @@ class CombineAdjacentFeatures:
             An array with length equal to the number of features. If zero, indicates that a feature
             has failed area filters.
         """
-        pool = Pool(n_processes)
+        pool = Pool(processes=n_processes)
         mapfunc = pool.map
         applyfunc = partial(
             self._single_spot_attributes,
@@ -295,7 +295,8 @@ class CombineAdjacentFeatures:
         return spot_attributes, passes_filter
 
     def run(
-            self, intensities: IntensityTable
+            self, intensities: IntensityTable,
+            n_processes: Optional[int] = None
     ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """
         Execute the combine_adjacent_features method on an IntensityTable containing pixel
@@ -353,6 +354,7 @@ class CombineAdjacentFeatures:
             props,
             decoded_image,
             target_map,
+            n_processes=n_processes
         )
 
         # augment the SpotAttributes with filtering results and distances from nearest codes

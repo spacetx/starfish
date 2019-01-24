@@ -1,6 +1,6 @@
 from functools import partial
 from itertools import product
-from typing import Callable, Dict, Sequence, Tuple, Union
+from typing import Callable, Dict, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -164,7 +164,8 @@ def detect_spots(data_stack: ImageStack,
                  reference_image: Union[xr.DataArray, np.ndarray] = None,
                  reference_image_from_max_projection: bool = False,
                  measurement_function: Callable[[Sequence], Number] = np.max,
-                 radius_is_gyration: bool = False) -> IntensityTable:
+                 radius_is_gyration: bool = False,
+                 n_processes: Optional[int] = None) -> IntensityTable:
     """Apply a spot_finding_method to a ImageStack
 
     Parameters
@@ -192,6 +193,9 @@ def detect_spots(data_stack: ImageStack,
     is_volume: bool
         If True, pass 3d volumes (x, y, z) to func, else pass 2d tiles (x, y) to func. (default
         True)
+    n_processes : Optional[int]
+        The number of processes to use in stack.transform if reference image is None.
+        If None, uses the output of os.cpu_count() (default = None).
 
     Notes
     -----
@@ -242,7 +246,8 @@ def detect_spots(data_stack: ImageStack,
         spot_finding_method = partial(spot_finding_method, **spot_finding_kwargs)
         spot_attributes_list = data_stack.transform(
             func=spot_finding_method,
-            group_by=group_by
+            group_by=group_by,
+            n_processes=n_processes
         )
         intensity_table = concatenate_spot_attributes_to_intensities(spot_attributes_list)
 

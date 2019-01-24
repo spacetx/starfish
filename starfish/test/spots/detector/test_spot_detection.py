@@ -165,7 +165,8 @@ def test_spot_finding_no_reference_image(
     intensity_table = detect_spots(data_stack=data_stack,
                                    spot_finding_method=spot_detector.image_to_spots,
                                    measurement_function=np.max,
-                                   radius_is_gyration=radius_is_gyration)
+                                   radius_is_gyration=radius_is_gyration,
+                                   n_processes=1)
     assert intensity_table.shape == (4, 2, 2), "wrong number of spots detected"
     expected = [0.00793712] * 4
     assert np.allclose(intensity_table.sum((Axes.ROUND, Axes.CH)).values, expected), \

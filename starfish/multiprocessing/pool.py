@@ -6,8 +6,8 @@ class Pool(mp.Pool):
     """Wrapper class for multiprocessing pool. If n_processes=1 just use map on main
     thread for debugging purposes """
 
-    def __init__(self, processes: Optional[int]=None, **kwargs):
-        mp.Pool.__init__(self, **kwargs)
+    def __init__(self, processes: Optional[int]=None, *args, **kwargs):
+        mp.Pool.__init__(self, processes, *args, **kwargs)
         self.n_processes = processes
 
     def map(self, func, iterable, chunksize=None):
@@ -21,6 +21,3 @@ class Pool(mp.Pool):
             self._initializer(*self._initargs)
             return map(func, iterable)
         return mp.Pool.imap(self, func, iterable, chunksize)
-
-    def __reduce__(self):
-        pass

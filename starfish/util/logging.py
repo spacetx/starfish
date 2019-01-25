@@ -2,11 +2,13 @@ import platform
 from functools import lru_cache
 from json import JSONEncoder
 from subprocess import (
+    CalledProcessError,
     check_output,
 )
 
 import pkg_resources
 
+import starfish
 from starfish.types import CORE_DEPENDENCIES
 
 
@@ -21,8 +23,12 @@ def get_core_dependency_info():
 
 @lru_cache(maxsize=1)
 def get_git_commit_hash():
-    # First check for git repo
-    return check_output(["git", "describe", "--always"]).strip()
+    # First check if in starfish repo
+    try:
+        check_output(["git", "ls-files", "--error-unmatch", starfish.__file__])
+        return check_output(["git", "describe", "--always"]).strip()
+    except CalledProcessError:
+        return "Starfish project not under git tracking"
 
 
 @lru_cache(maxsize=1)

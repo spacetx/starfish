@@ -1,14 +1,11 @@
-import os
 import platform
 from functools import lru_cache
 from json import JSONEncoder
 from subprocess import (
-    call,
     check_output,
-    PIPE,
-    Popen,
-    STDOUT,
 )
+
+import pkg_resources
 
 from starfish.types import CORE_DEPENDENCIES
 
@@ -17,8 +14,7 @@ from starfish.types import CORE_DEPENDENCIES
 def get_core_dependency_info():
     dependency_info = dict()
     for dependency in CORE_DEPENDENCIES:
-        ps = Popen(('pip', 'show', dependency), stdout=PIPE)
-        version = check_output(('grep', 'Version'), stdin=ps.stdout).strip()
+        version = pkg_resources.get_distribution(dependency).version
         dependency_info[dependency] = version
     return dependency_info
 
@@ -26,15 +22,14 @@ def get_core_dependency_info():
 @lru_cache(maxsize=1)
 def get_git_commit_hash():
     # First check for git repo
-    if call(["git", "branch"], stderr=STDOUT, stdout=open(os.devnull, 'w')) != 0:
-        return check_output(["git", "describe", "--always"]).strip()
-    else:
-        return "No git repo initialized"
+    return check_output(["git", "describe", "--always"]).strip()
 
 
 @lru_cache(maxsize=1)
 def get_os_info():
-    return {"Platform": platform.system(), "Version:": platform.version()}
+    return {"Platform": platform.system(),
+            "Version:": platform.version(),
+            "Python Version": platform.python_version()}
 
 
 class LogEncoder(JSONEncoder):

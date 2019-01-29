@@ -51,7 +51,7 @@ RUN echo "source activate starfish" >> ~/.bashrc
 ENV PATH /home/starfish/.conda/envs/starfish/bin:$PATH
 
 # Build and configure for running
-RUN apt-get update && sudo apt-get install libfreetype6-dev
+RUN apt-get update && sudo apt-get -y install libfreetype6-dev
 RUN pip install -e . --ignore-installed
 
 env MPLBACKEND Agg

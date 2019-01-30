@@ -25,7 +25,7 @@
 import os
 from typing import Optional, Tuple
 
-# import napari_gui
+import napari_gui
 import numpy as np
 
 import starfish

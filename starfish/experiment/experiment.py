@@ -1,6 +1,7 @@
 import json
 from typing import (
     Callable,
+    List,
     MutableMapping,
     MutableSequence,
     MutableSet,
@@ -19,6 +20,8 @@ from sptx_format import validate_sptx
 from starfish.codebook.codebook import Codebook
 from starfish.config import StarfishConfig
 from starfish.imagestack.imagestack import ImageStack
+from starfish.imagestack.parser.crop import CropParameters
+from starfish.types import Coordinates
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
 
@@ -40,12 +43,11 @@ class FieldOfView:
 
     PRIMARY_IMAGES = 'primary'
 
-    def __init__(
-            self,
-            name: str,
-            images: Optional[MutableMapping[str, ImageStack]]=None,
-            image_tilesets: Optional[MutableMapping[str, TileSet]]=None,
-    ) -> None:
+    def __init__(self, name: str,
+                 images: Optional[MutableMapping[str, ImageStack]] = None,
+                 image_tilesets: Optional[MutableMapping[str, TileSet]] = None,
+
+                 ) -> None:
         """
         Fields of views can obtain their primary image from either an ImageStack or a TileSet (but
         only one).  It can obtain their auxiliary image dictionary from either a dictionary of
@@ -58,12 +60,16 @@ class FieldOfView:
         """
         self._name = name
         self._images: MutableMapping[str, Union[ImageStack, TileSet]]
+        self.aligned_coordinate_groups = List[CropParameters]
         if images is not None:
             self._images = images
             if image_tilesets is not None:
                 raise ValueError(
                     "Only one of (images, image_tilesets) should be set.")
-        elif image_tilesets is not None:
+        if image_tilesets is not None:
+            # TODO PARSE TILESETS HERE AND CREATE List of CROPPARAMS (coords groups)
+            self.aligned_coordinate_groups = self.parse_coordinate_groups(
+                image_tilesets[FieldOfView.PRIMARY_IMAGES])
             self._images = image_tilesets
         else:
             self._images = dict()
@@ -81,6 +87,24 @@ class FieldOfView:
             f"    {images}"
         )
 
+    def parse_coordinate_groups(self, tileset: TileSet) -> List[CropParameters]:
+        coord_groups = dict()
+        for tile in tileset._tiles:
+            x_y_coords = tuple(i for i in [
+                tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
+                tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
+            ])
+            if x_y_coords in coord_groups:
+                crop_params = coord_groups[x_y_coords]
+                crop_params._permitted_chs.add(tile.indices['c'])
+                crop_params._permitted_rounds.add(tile.indices['r'])
+                crop_params._permitted_rounds.add(tile.indices['z'])
+            else:
+                coord_groups[x_y_coords] = CropParameters(permitted_chs=[tile.indices['c']],
+                                                          permitted_rounds=[tile.indices['r']],
+                                                          permitted_zplanes=[tile.indices['z']])
+        return list(coord_groups.values())
+
     @property
     def name(self) -> str:
         return self._name
@@ -91,7 +115,9 @@ class FieldOfView:
 
     def __getitem__(self, item) -> ImageStack:
         if isinstance(self._images[item], TileSet):
-            self._images[item] = ImageStack.from_tileset(self._images[item])
+            crop_params = self.aligned_coordinate_groups[0]
+            self._images[item] = ImageStack.from_tileset(self._images[item],
+                                                         crop_parameters=crop_params)
         return self._images[item]
 
 

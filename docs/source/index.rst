@@ -7,7 +7,7 @@
     <div class="container-fluid hidden-xs hidden-sm">
       <div class="row">
 
-.. image:: /../../design/logo.png
+.. image:: /_static/design/logo.png
    :height: 120 px
 
 .. raw:: html

@@ -19,7 +19,7 @@ from starfish.codebook._format import (
 )
 from starfish.config import StarfishConfig
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.types import Features, Indices, Number
+from starfish.types import Axes, Features, Number
 
 
 class Codebook(xr.DataArray):
@@ -126,13 +126,55 @@ class Codebook(xr.DataArray):
             codebook whose values are all zero
 
         """
-        codes_index = pd.Index(code_names, name=Features.TARGET)
+        data = np.zeros((len(code_names), n_ch, n_round), dtype=np.uint8)
+        return cls._create_codebook(code_names, n_ch, n_round, data)
+
+    @classmethod
+    def _create_codebook(cls, code_names: Sequence[str], n_ch: int, n_round: int, data: np.ndarray):
+        """create a codebook of shape (code_names, n_ch, n_round) with the given data
+
+        Parameters
+        ----------
+        code_names : Sequence[str]
+            the targets to be coded
+        n_ch : int
+            number of channels used to build the codes
+        n_round : int
+            number of imaging rounds used to build the codes
+        data : np.ndarray
+            array of unit8 values with len(code_names) x n_ch x _nround elements
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from starfish import Codebook
+        >>> data = np.zeros((3, 2, 2), dtype=np.uint8)
+        >>> Codebook._create_codebook(['ACTA', 'ACTB'], n_ch=3, n_round=2, data)
+        <xarray.Codebook (target: 2, c: 3, h: 2)>
+        array([[[0, 0],
+                [0, 0],
+                [0, 0]],
+
+               [[0, 0],
+                [0, 0],
+                [0, 0]]], dtype=uint8)
+        Coordinates:
+          * target     (target) object 'ACTA' 'ACTB'
+          * c          (c) int64 0 1 2
+          * h          (h) int64 0 1
+
+        Returns
+        -------
+        Codebook :
+            codebook with filled values
+
+        """
         return cls(
-            data=np.zeros((codes_index.shape[0], n_ch, n_round), dtype=np.uint8),
+            data=data,
             coords=(
-                codes_index,
-                pd.Index(np.arange(n_ch), name=Indices.CH.value),
-                pd.Index(np.arange(n_round), name=Indices.ROUND.value),
+                pd.Index(code_names, name=Features.TARGET),
+                pd.Index(np.arange(n_ch), name=Axes.CH.value),
+                pd.Index(np.arange(n_round), name=Axes.ROUND.value),
             )
         )
 
@@ -164,20 +206,20 @@ class Codebook(xr.DataArray):
         --------
         Construct a codebook from some array data in python memory::
 
-            >>> from starfish.types import Indices
+            >>> from starfish.types import Axes
             >>> from starfish import Codebook
             >>> codebook = [
             >>>     {
             >>>         Features.CODEWORD: [
-            >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-            >>>             {Indices.ROUND.value: 1, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>             {Axes.ROUND.value: 0, Axes.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>             {Axes.ROUND.value: 1, Axes.CH.value: 3, Features.CODE_VALUE: 1},
             >>>         ],
             >>>         Features.TARGET: "ACTB_human"
             >>>     },
             >>>     {
             >>>         Features.CODEWORD: [
-            >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-            >>>             {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1},
+            >>>             {Axes.ROUND.value: 0, Axes.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>             {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1},
             >>>         ],
             >>>         Features.TARGET: "ACTB_mouse"
             >>>     },
@@ -212,8 +254,8 @@ class Codebook(xr.DataArray):
 
         for code in code_array:
             for entry in code[Features.CODEWORD]:
-                max_round = max(max_round, entry[Indices.ROUND])
-                max_ch = max(max_ch, entry[Indices.CH])
+                max_round = max(max_round, entry[Axes.ROUND])
+                max_ch = max(max_ch, entry[Axes.CH])
 
         # set n_ch and n_round if either were not provided
         n_round = n_round if n_round is not None else max_round + 1
@@ -244,17 +286,15 @@ class Codebook(xr.DataArray):
                     f'{missing_fields}')
 
         target_names = [w[Features.TARGET] for w in code_array]
-        code_data = cls._empty_codebook(target_names, n_ch, n_round)
 
         # fill the codebook
-        for code_dict in code_array:
-            codeword = code_dict[Features.CODEWORD]
-            target = code_dict[Features.TARGET]
-            for entry in codeword:
-                code_data.loc[target, entry[Indices.CH], entry[Indices.ROUND]] = entry[
-                    Features.CODE_VALUE]
-
-        return code_data
+        data = np.zeros((len(target_names), n_ch, n_round), dtype=np.uint8)
+        for i, code_dict in enumerate(code_array):
+            for bit in code_dict[Features.CODEWORD]:
+                ch = int(bit[Axes.CH])
+                r = int(bit[Axes.ROUND])
+                data[i, ch, r] = int(bit[Features.CODE_VALUE])
+        return cls._create_codebook(target_names, n_ch, n_round, data)
 
     @classmethod
     def from_json(
@@ -278,7 +318,7 @@ class Codebook(xr.DataArray):
         --------
         Create a codebook from in-memory data::
 
-            >>> from starfish.types import Indices
+            >>> from starfish.types import Axes
             >>> from starfish import Codebook
             >>> import tempfile
             >>> import json
@@ -287,15 +327,15 @@ class Codebook(xr.DataArray):
             >>> codebook = [
             >>>     {
             >>>         Features.CODEWORD: [
-            >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-            >>>             {Indices.ROUND.value: 1, Indices.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>             {Axes.ROUND.value: 0, Axes.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>             {Axes.ROUND.value: 1, Axes.CH.value: 3, Features.CODE_VALUE: 1},
             >>>         ],
             >>>         Features.TARGET: "ACTB_human"
             >>>     },
             >>>     {
             >>>         Features.CODEWORD: [
-            >>>             {Indices.ROUND.value: 0, Indices.CH.value: 3, Features.CODE_VALUE: 1},
-            >>>             {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1},
+            >>>             {Axes.ROUND.value: 0, Axes.CH.value: 3, Features.CODE_VALUE: 1},
+            >>>             {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1},
             >>>         ],
             >>>         Features.TARGET: "ACTB_mouse"
             >>>     },
@@ -369,13 +409,13 @@ class Codebook(xr.DataArray):
         code_array = []
         for target in self[Features.TARGET]:
             codeword = []
-            for ch in self[Indices.CH.value]:
-                for round_ in self[Indices.ROUND.value]:
+            for ch in self[Axes.CH.value]:
+                for round_ in self[Axes.ROUND.value]:
                     if self.loc[target, ch, round_]:
                         codeword.append(
                             {
-                                Indices.CH.value: int(ch),
-                                Indices.ROUND.value: int(round_),
+                                Axes.CH.value: int(ch),
+                                Axes.ROUND.value: int(round_),
                                 Features.CODE_VALUE: float(self.loc[target, ch, round_])
                             })
             code_array.append({
@@ -417,12 +457,12 @@ class Codebook(xr.DataArray):
             A 1 dimensional numpy array containing the feature norms
 
         """
-        feature_traces = array.stack(traces=(Indices.CH.value, Indices.ROUND.value))
+        feature_traces = array.stack(traces=(Axes.CH.value, Axes.ROUND.value))
         norm = np.linalg.norm(feature_traces.values, ord=norm_order, axis=1)
         array = array / norm[:, None, None]
 
         # if a feature is all zero, the information should be spread across the channel
-        n = array.sizes[Indices.CH.value] * array.sizes[Indices.ROUND.value]
+        n = array.sizes[Axes.CH.value] * array.sizes[Axes.ROUND.value]
         partitioned_intensity = np.linalg.norm(np.full(n, fill_value=1 / n), ord=norm_order) / n
         array = array.fillna(partitioned_intensity)
 
@@ -455,9 +495,9 @@ class Codebook(xr.DataArray):
         This function does not verify that the intensities have been normalized.
 
         """
-        linear_codes = norm_codes.stack(traces=(Indices.CH.value, Indices.ROUND.value)).values
+        linear_codes = norm_codes.stack(traces=(Axes.CH.value, Axes.ROUND.value)).values
         linear_features = norm_intensities.stack(
-            traces=(Indices.CH.value, Indices.ROUND.value)).values
+            traces=(Axes.CH.value, Axes.ROUND.value)).values
 
         # reshape into traces
         nn = NearestNeighbors(n_neighbors=1, algorithm='ball_tree', metric=metric).fit(linear_codes)
@@ -471,8 +511,8 @@ class Codebook(xr.DataArray):
             intensities: IntensityTable,
     ):
         # verify that the shapes of the codebook and intensities match
-        ch_match = intensities.sizes[Indices.CH] == self.sizes[Indices.CH]
-        round_match = intensities.sizes[Indices.ROUND] == self.sizes[Indices.ROUND]
+        ch_match = intensities.sizes[Axes.CH] == self.sizes[Axes.CH]
+        round_match = intensities.sizes[Axes.ROUND] == self.sizes[Axes.ROUND]
         if not (ch_match and round_match):
             raise ValueError(
                 'Codebook and Intensities must have same number of channels and rounds')
@@ -586,15 +626,15 @@ class Codebook(xr.DataArray):
 
         self._validate_decode_intensity_input_matches_codebook_shape(intensities)
 
-        max_channels = intensities.argmax(Indices.CH.value)
-        codes = self.argmax(Indices.CH.value)
+        max_channels = intensities.argmax(Axes.CH.value)
+        codes = self.argmax(Axes.CH.value)
 
         # TODO ambrosejcarr, dganguli: explore this quality score further
         # calculate distance scores by evaluating the fraction of signal in each round that is
         # found in the non-maximal channels.
-        max_intensities = intensities.max(Indices.CH.value)
-        round_intensities = intensities.sum(Indices.CH.value)
-        distance = 1 - (max_intensities / round_intensities).mean(Indices.ROUND.value)
+        max_intensities = intensities.max(Axes.CH.value)
+        round_intensities = intensities.sum(Axes.CH.value)
+        distance = 1 - (max_intensities / round_intensities).mean(Axes.ROUND.value)
 
         a = _view_row_as_element(codes.values.reshape(self.shape[0], -1))
         b = _view_row_as_element(max_channels.values.reshape(intensities.shape[0], -1))
@@ -667,7 +707,7 @@ class Codebook(xr.DataArray):
         codewords = [
             [
                 {
-                    Indices.ROUND.value: h, Indices.CH.value: c, 'v': 1
+                    Axes.ROUND.value: h, Axes.CH.value: c, 'v': 1
                 } for h, c in enumerate(code)
             ] for code in codes
         ]

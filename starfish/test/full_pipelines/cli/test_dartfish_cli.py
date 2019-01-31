@@ -4,12 +4,14 @@ import unittest
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from starfish import IntensityTable
 from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 from starfish.types import Features
 
 
+@pytest.mark.slow
 class TestWithDartfishData(CLITest, unittest.TestCase):
 
     @property
@@ -25,14 +27,14 @@ class TestWithDartfishData(CLITest, unittest.TestCase):
         return (
             [
                 sys.executable,
-                "examples/get_cli_test_data.py",
+                "starfish/test/full_pipelines/cli/get_cli_test_data.py",
                 "https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH-TEST/",
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
             ],
             [
                 "starfish", "filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered/fov_001", "hybridization.json"),
+                    tempdir, "registered/fov_001", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "scale_filtered.json"),
                 "ScaleByPercentile",

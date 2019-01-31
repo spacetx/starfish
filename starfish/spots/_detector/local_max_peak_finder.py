@@ -12,7 +12,7 @@ from tqdm import tqdm
 from starfish.config import StarfishConfig
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.types import Features, Indices, Number, SpotAttributes
+from starfish.types import Axes, Features, Number, SpotAttributes
 from starfish.util import click
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
@@ -253,9 +253,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # TODO how to get the radius? unlikely that this can be pulled out of
         # self._spot_props, since the last call to peak_local_max can find multiple
         # peaks per label
-        res = {Indices.X.value: self._spot_coords[:, 2],
-               Indices.Y.value: self._spot_coords[:, 1],
-               Indices.Z.value: self._spot_coords[:, 0],
+        res = {Axes.X.value: self._spot_coords[:, 2],
+               Axes.Y.value: self._spot_coords[:, 1],
+               Axes.ZPLANE.value: self._spot_coords[:, 0],
                Features.SPOT_RADIUS: 1,
                Features.SPOT_ID: np.arange(self._spot_coords.shape[0]),
                Features.INTENSITY: data_image[self._spot_coords[:, 0],
@@ -279,7 +279,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             Stack where we find the spots in.
         blobs_image : Union[np.ndarray, xr.DataArray]
             If provided, spots will be found in the blobs image, and intensities will be measured
-            across hybs and channels. Otherwise, spots are measured independently for each channel
+            across rounds and channels. Otherwise, spots are measured independently for each channel
             and round.
         reference_image_from_max_projection : bool
             if True, compute a reference image from the maximum projection of the channels and

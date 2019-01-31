@@ -2,7 +2,7 @@ import json
 
 from slicedimage import ImageFormat
 
-from starfish.types import Indices
+from starfish.types import Axes
 from starfish.util import click
 from . import AUX_IMAGE_NAMES, write_experiment_json
 
@@ -19,9 +19,9 @@ class StarfishIndex(click.ParamType):
                 "Could not parse {} into a valid index specification.".format(spec_json))
 
         return {
-            Indices.ROUND: spec.get(Indices.ROUND, 1),
-            Indices.CH: spec.get(Indices.CH, 1),
-            Indices.Z: spec.get(Indices.Z, 1),
+            Axes.ROUND: spec.get(Axes.ROUND, 1),
+            Axes.CH: spec.get(Axes.CH, 1),
+            Axes.ZPLANE: spec.get(Axes.ZPLANE, 1),
         }
 
 def dimensions_option(name, required):
@@ -33,24 +33,24 @@ def dimensions_option(name, required):
              "dimension.  If a key is not present, the value is assumed to be 0."
              .format(
              name,
-             Indices.ROUND.value,
-             Indices.CH.value,
-             Indices.Z.value))
+             Axes.ROUND.value,
+             Axes.CH.value,
+             Axes.ZPLANE.value))
 
 decorators = [
     click.command(),
     click.argument("output_dir", type=click.Path(exists=True, file_okay=False, writable=True)),
     click.option("--fov-count", type=int, required=True, help="Number of FOVs in this experiment."),
-    dimensions_option("hybridization", True),
+    dimensions_option("primary-image", True),
 ]
 for image_name in AUX_IMAGE_NAMES:
     decorators.append(dimensions_option(image_name, False))
 
-def build(output_dir, fov_count, hybridization_dimensions, **kwargs):
+def build(output_dir, fov_count, primary_image_dimensions, **kwargs):
     """generate synthetic experiments"""
     write_experiment_json(
         output_dir, fov_count, ImageFormat.TIFF,
-        primary_image_dimensions=hybridization_dimensions,
+        primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions=kwargs,
     )
 

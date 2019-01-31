@@ -1,7 +1,8 @@
 import numpy as np
+import pytest
 
 from starfish.spots._detector.blob import BlobDetector
-from starfish.types import Features, Indices
+from starfish.types import Axes, Features
 from starfish.util.synthesize import SyntheticData
 
 
@@ -24,8 +25,8 @@ def test_round_trip_synthetic_data():
     codebook = sd.codebook()
     intensities = sd.intensities(codebook=codebook)
     spots = sd.spots(intensities=intensities)
-    spots_mp = spots.max_proj(Indices.CH, Indices.ROUND)
-    spots_mp_numpy = spots_mp._squeezed_numpy(Indices.CH, Indices.ROUND)
+    spots_mp = spots.max_proj(Axes.CH, Axes.ROUND)
+    spots_mp_numpy = spots_mp._squeezed_numpy(Axes.CH, Axes.ROUND)
     gsd = BlobDetector(min_sigma=1, max_sigma=4, num_sigma=5, threshold=0)
     calculated_intensities = gsd.run(spots, blobs_image=spots_mp_numpy)
     decoded_intensities = codebook.metric_decode(
@@ -49,7 +50,7 @@ def test_round_trip_synthetic_data():
     )
 
 
-# @pytest.mark.skip('long-running integration test, for debugging only')
+@pytest.mark.slow
 def test_medium_synthetic_stack():
     np.random.seed(0)
 
@@ -87,8 +88,8 @@ def test_medium_synthetic_stack():
     valid_locations = valid_z & valid_y & valid_x
     intensities = intensities[np.where(valid_locations)]
     spots = sd.spots(intensities=intensities)
-    spots_mp = spots.max_proj(Indices.CH, Indices.ROUND)
-    spots_mp_numpy = spots_mp._squeezed_numpy(Indices.CH, Indices.ROUND)
+    spots_mp = spots.max_proj(Axes.CH, Axes.ROUND)
+    spots_mp_numpy = spots_mp._squeezed_numpy(Axes.CH, Axes.ROUND)
     gsd = BlobDetector(min_sigma=1, max_sigma=4, num_sigma=5, threshold=1e-4)
     calculated_intensities = gsd.run(spots, blobs_image=spots_mp_numpy)
     calculated_intensities = codebook.metric_decode(
@@ -96,9 +97,9 @@ def test_medium_synthetic_stack():
     )
 
     # spots are detected in a different order that they're generated; sorting makes comparison easy
-    sorted_intensities = intensities.sortby([Indices.Z.value, Indices.Y.value, Indices.X.value])
+    sorted_intensities = intensities.sortby([Axes.ZPLANE.value, Axes.Y.value, Axes.X.value])
     sorted_calculated_intensities = calculated_intensities.sortby(
-        [Indices.Z.value, Indices.Y.value, Indices.X.value]
+        [Axes.ZPLANE.value, Axes.Y.value, Axes.X.value]
     )
 
     # verify that the spots are all detected, and decode to the correct targets

@@ -1,5 +1,4 @@
 from functools import partial
-from multiprocessing import Pool
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import numpy as np
@@ -10,7 +9,8 @@ from tqdm import tqdm
 
 from starfish.config import StarfishConfig
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.types import Features, Indices, Number, SpotAttributes
+from starfish.multiprocessing.pool import Pool
+from starfish.types import Axes, Features, Number, SpotAttributes
 
 
 class ConnectedComponentDecodingResult(NamedTuple):
@@ -133,9 +133,9 @@ class CombineAdjacentFeatures:
 
         """
         # reverses the linearization that was used to transform an ImageStack into an IntensityTable
-        max_x = intensities[Indices.X.value].values.max() + 1
-        max_y = intensities[Indices.Y.value].values.max() + 1
-        max_z = intensities[Indices.Z.value].values.max() + 1
+        max_x = intensities[Axes.X.value].values.max() + 1
+        max_y = intensities[Axes.Y.value].values.max() + 1
+        max_z = intensities[Axes.ZPLANE.value].values.max() + 1
 
         int_targets = target_map.targets_as_int(intensities[Features.TARGET].values)
         if mask_filtered_features:
@@ -274,7 +274,7 @@ class CombineAdjacentFeatures:
             An array with length equal to the number of features. If zero, indicates that a feature
             has failed area filters.
         """
-        pool = Pool(n_processes)
+        pool = Pool(processes=n_processes)
         mapfunc = pool.map
         applyfunc = partial(
             self._single_spot_attributes,
@@ -295,7 +295,8 @@ class CombineAdjacentFeatures:
         return spot_attributes, passes_filter
 
     def run(
-            self, intensities: IntensityTable
+            self, intensities: IntensityTable,
+            n_processes: Optional[int] = None
     ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """
         Execute the combine_adjacent_features method on an IntensityTable containing pixel
@@ -353,6 +354,7 @@ class CombineAdjacentFeatures:
             props,
             decoded_image,
             target_map,
+            n_processes=n_processes
         )
 
         # augment the SpotAttributes with filtering results and distances from nearest codes
@@ -360,12 +362,12 @@ class CombineAdjacentFeatures:
         spot_attributes.data[Features.PASSES_THRESHOLDS] = passes_filter
 
         # create new indexes for the output IntensityTable
-        channel_index = mean_pixel_traces.indexes[Indices.CH]
-        round_index = mean_pixel_traces.indexes[Indices.ROUND]
+        channel_index = mean_pixel_traces.indexes[Axes.CH]
+        round_index = mean_pixel_traces.indexes[Axes.ROUND]
         coords = IntensityTable._build_xarray_coords(spot_attributes, channel_index, round_index)
 
         # create the output IntensityTable
-        dims = (Features.AXIS, Indices.CH.value, Indices.ROUND.value)
+        dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
         intensity_table = IntensityTable(
             data=mean_pixel_traces, coords=coords, dims=dims
         )

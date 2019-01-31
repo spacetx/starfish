@@ -4,7 +4,7 @@ import numpy as np
 import xarray as xr
 from skimage.morphology import binary_opening, disk
 
-from starfish.types import Indices, Number
+from starfish.types import Axes, Number
 
 
 def bin_thresh(img: np.ndarray, thresh: Number) -> np.ndarray:
@@ -147,9 +147,9 @@ def preserve_float_range(
     return array.astype(np.float32)
 
 
-def determine_axes_to_group_by(is_volume: bool) -> Set[Indices]:
+def determine_axes_to_group_by(is_volume: bool) -> Set[Axes]:
     """map is_volume to axes to group by when applying a function over an ImageStack"""
     if is_volume:
-        return {Indices.ROUND, Indices.CH}
+        return {Axes.ROUND, Axes.CH}
     else:
-        return {Indices.ROUND, Indices.CH, Indices.Z}
+        return {Axes.ROUND, Axes.CH, Axes.ZPLANE}

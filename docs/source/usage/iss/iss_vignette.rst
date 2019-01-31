@@ -76,7 +76,7 @@ That means implementing methods that return the shape, format, and an open file 
 Here, we implement those methods, and add a cropping method as well, to mimic the way that ISS data
 was processed when it was published.
 
-.. literalinclude:: /../../examples/get_iss_breast_data.py
+.. literalinclude:: /../../data_formatting_examples/format_iss_breast_data.py
     :pyobject: IssCroppedBreastTile
 
 This object, combined with a ``TileFetcher``, contains all the information that ``starfish`` needs
@@ -84,10 +84,10 @@ to parse a directory of files and create ``sptx-format`` compliant objects. Here
 are needed. One parses the primary images, and another the auxiliary nuclei images that will be
 used to seed the basin for segmentation.
 
-.. literalinclude:: /../../examples/get_iss_breast_data.py
+.. literalinclude:: /../../data_formatting_examples/format_iss_breast_data.py
     :pyobject: ISSCroppedBreastPrimaryTileFetcher
 
-.. literalinclude:: /../../examples/get_iss_breast_data.py
+.. literalinclude:: /../../data_formatting_examples/format_iss_breast_data.py
     :pyobject: ISSCroppedBreastAuxTileFetcher
 
 Creating a Build Script
@@ -95,15 +95,16 @@ Creating a Build Script
 
 Next, we combine these objects with some information we already had about the experiments. On the
 outset we stated that an ISS experiment has 4 imaging rounds and 4 channels, but only 1 z-plane.
-These data fill out the ``hyb_dimensions`` of the ``TileSet``. In addition, it was stated that ISS
-has a single ``dots`` and ``nuclei`` image. In ``starfish``, auxiliary images are also stored as
-``TileSet`` objects even though often, as here, they have only 1 channel, round, and z-plane.
+These data fill out the ``primary_image_dimensions`` of the ``TileSet``. In addition, it was stated
+that ISS has a single ``dots`` and ``nuclei`` image. In ``starfish``, auxiliary images are also
+stored as ``TileSet`` objects even though often, as here, they have only 1 channel, round, and
+z-plane.
 
 We create a dictionary to hold each piece of information, and pass that to
 ``write_experiment_json``, a generic tool that accepts the objects we've aggregated above and
 constructs TileSet objects:
 
-.. literalinclude:: /../../examples/get_iss_breast_data.py
+.. literalinclude:: /../../data_formatting_examples/format_iss_breast_data.py
     :pyobject: format_data
 
 Finally, we can run the script. We've packaged it up as an example in ``starfish``. It takes as
@@ -113,7 +114,7 @@ formatted data) and the number of fields of view to extract from the raw directo
 .. code-block:: bash
 
     mkdir iss/formatted
-    python3 examples/get_iss_breast_data.py iss/raw/ iss/formatted 3
+    python3 data_formatting_examples/format_iss_breast_data.py iss/raw/ iss/formatted 3
     ls iss/formatted/*.json
 
 Constructing a Pipeline

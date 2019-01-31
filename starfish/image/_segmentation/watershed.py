@@ -9,7 +9,7 @@ from skimage.morphology import watershed
 
 from starfish.image._filter.util import bin_open, bin_thresh
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Indices, Number
+from starfish.types import Axes, Number
 from starfish.util import click
 from ._base import SegmentationAlgorithmBase
 
@@ -71,8 +71,8 @@ class Watershed(SegmentationAlgorithmBase):
         """
 
         # create a 'stain' for segmentation
-        mp = primary_images.max_proj(Indices.CH, Indices.Z)
-        mp_numpy = mp._squeezed_numpy(Indices.CH, Indices.Z)
+        mp = primary_images.max_proj(Axes.CH, Axes.ZPLANE)
+        mp_numpy = mp._squeezed_numpy(Axes.CH, Axes.ZPLANE)
         stain = np.mean(mp_numpy, axis=0)
         stain = stain / stain.max()
 
@@ -81,8 +81,8 @@ class Watershed(SegmentationAlgorithmBase):
         disk_size_markers = None
         disk_size_mask = None
 
-        nuclei_mp = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-        nuclei__mp_numpy = nuclei_mp._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+        nuclei_mp = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+        nuclei__mp_numpy = nuclei_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
         self._segmentation_instance = _WatershedSegmenter(nuclei__mp_numpy, stain)
         label_image = self._segmentation_instance.segment(
             self.nuclei_threshold, self.input_threshold, size_lim, disk_size_markers,

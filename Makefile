@@ -3,7 +3,7 @@ SHELL := /bin/bash
 MPLBACKEND?=Agg
 export MPLBACKEND
 
-MODULES=starfish examples sptx_format
+MODULES=starfish data_formatting_examples sptx_format
 
 define print_help
     @printf "    %-24s   $(2)\n" $(1)
@@ -22,7 +22,7 @@ all:	fast
 
 ### UNIT #####################################################
 #
-fast:	lint mypy test docs-html
+fast:	lint mypy fast-test docs-html
 
 lint:   lint-non-init lint-init
 
@@ -34,6 +34,12 @@ lint-init:
 
 test:
 	pytest -v -n 8 --cov starfish --cov sptx_format
+
+fast-test:
+	pytest -v -n 8 --cov starfish --cov sptx_format -m 'not slow'
+
+slow-test:
+	pytest -v -n 8 --cov starfish --cov sptx_format -m 'slow'
 
 mypy:
 	mypy --ignore-missing-imports $(MODULES)
@@ -59,12 +65,12 @@ help-docs:
 
 ### REQUIREMENTS #############################################
 #
-check_requirements:
+check-requirements:
 	if [[ $$(git status --porcelain REQUIREMENTS*) ]]; then \
 	    echo "Modifications found in REQUIREMENTS files"; exit 2; \
 	fi
 
-refresh_all_requirements:
+refresh-all-requirements:
 	@echo -n '' >| REQUIREMENTS.txt
 	@if [ $$(uname -s) == "Darwin" ]; then sleep 1; fi  # this is require because Darwin HFS+ only has second-resolution for timestamps.
 	@touch REQUIREMENTS.txt.in
@@ -95,7 +101,7 @@ slow: fast run_notebooks docker
 
 docker:
 	docker build -t spacetx/starfish .
-	docker run -ti --rm spacetx/starfish build --fov-count 1 --hybridization-dimensions '{"z": 1}' /tmp/
+	docker run -ti --rm spacetx/starfish build --fov-count 1 --primary-image-dimensions '{"z": 1}' /tmp/
 
 help-integration:
 	$(call print_help, slow, alias for 'fast run_notebooks docker')

@@ -18,8 +18,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
+import starfish.display
 from starfish import data, FieldOfView
-from starfish.types import Features, Indices
+from starfish.types import Features, Axes
 
 from starfish import IntensityTable
 
@@ -48,7 +49,7 @@ print(stack.shape)
 # EPY: END code
 
 # EPY: START code
-stack.show_stack({Indices.CH:0}, rescale=True);
+starfish.display.stack(stack)
 # EPY: END code
 
 # EPY: START markdown
@@ -88,7 +89,7 @@ zero_norm_stack = z_filt.run(norm_stack)
 def compute_magnitudes(stack, norm_order=2):
 
     pixel_intensities = IntensityTable.from_image_stack(zero_norm_stack)
-    feature_traces = pixel_intensities.stack(traces=(Indices.CH.value, Indices.ROUND.value))
+    feature_traces = pixel_intensities.stack(traces=(Axes.CH.value, Axes.ROUND.value))
     norm = np.linalg.norm(feature_traces.values, ord=norm_order, axis=1)
 
     return norm
@@ -257,7 +258,7 @@ plt.title('Coded rolonies, zoomed in');
 
 # EPY: START code
 # reshape the spot intensity table into a RxC barcode vector
-pixel_traces = spot_intensities.stack(traces=(Indices.ROUND.value, Indices.CH.value))
+pixel_traces = spot_intensities.stack(traces=(Axes.ROUND.value, Axes.CH.value))
 
 # extract dataframe from spot intensity table for indexing purposes
 pixel_traces_df = pixel_traces.to_features_dataframe()
@@ -273,7 +274,7 @@ ind = 4
 gene = pixel_traces_df.loc[ind].target
 
 # query the codebook for the actual barcode corresponding to this gene
-real_barcode = exp.codebook[exp.codebook.target==gene].stack(traces=(Indices.ROUND.value, Indices.CH.value)).values[0]
+real_barcode = exp.codebook[exp.codebook.target==gene].stack(traces=(Axes.ROUND.value, Axes.CH.value)).values[0]
 read_out_barcode = pixel_traces[ind,:]
 
 plt.plot(real_barcode, 'ok')

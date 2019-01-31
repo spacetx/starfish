@@ -21,7 +21,7 @@ class TestAllenData(CLITest, unittest.TestCase):
         return (
             [
                 sys.executable,
-                "examples/get_cli_test_data.py",
+                "starfish/test/full_pipelines/cli/get_cli_test_data.py",
                 "https://d2nhj9g34unfro.cloudfront.net/20180828/"
                 + "allen_smFISH-TEST/allen_smFISH_test_data.zip",
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
@@ -29,7 +29,7 @@ class TestAllenData(CLITest, unittest.TestCase):
             [
                 "starfish", "filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered/fov_001", "hybridization.json"),
+                    tempdir, "registered/fov_001", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "clip_filtered.json"),
                 "Clip",

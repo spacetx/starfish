@@ -23,14 +23,14 @@ class TestWithMerfishData(CLITest, unittest.TestCase):
         return (
             [
                 sys.executable,
-                "examples/get_cli_test_data.py",
+                "starfish/test/full_pipelines/cli/get_cli_test_data.py",
                 "https://d2nhj9g34unfro.cloudfront.net/20181005/MERFISH-TEST/experiment.json",
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
             ],
             [
                 "starfish", "filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered/fov_001", "hybridization.json"),
+                    tempdir, "registered/fov_001", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "gaussian_filtered.json"),
                 "GaussianHighPass",

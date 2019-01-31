@@ -4,8 +4,8 @@ import xarray as xr
 
 from starfish.imagestack import indexing_utils
 from starfish.types import (
+    Axes,
     Coordinates,
-    Indices,
     Number,
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes
@@ -14,7 +14,7 @@ from starfish.types import (
 
 def calc_new_physical_coords_array(
         physical_coordinates: xr.DataArray,
-        stack_shape: Mapping[Indices, int],
+        stack_shape: Mapping[Axes, int],
         indexers: Mapping[str, Union[int, slice]],
 ) -> xr.DataArray:
     """Calculates the resulting coordinates array from indexing on each dimension in indexers
@@ -35,12 +35,12 @@ def calc_new_physical_coords_array(
 
     new_coords = physical_coordinates.copy(deep=True)
     # index by R, CH, V
-    key = {Indices.ROUND.value: indexers[Indices.ROUND.value],
-           Indices.CH.value: indexers[Indices.CH.value],
-           Indices.Z.value: indexers[Indices.Z.value]}
+    key = {Axes.ROUND.value: indexers[Axes.ROUND.value],
+           Axes.CH.value: indexers[Axes.CH.value],
+           Axes.ZPLANE.value: indexers[Axes.ZPLANE.value]}
     new_coords = indexing_utils.index_keep_dimensions(new_coords, key)
     # check if X or Y dimension indexed, if so recalculate physcal coordinate min/max values
-    if _needs_coords_recalculating(indexers[Indices.X.value], indexers[Indices.Y.value]):
+    if _needs_coords_recalculating(indexers[Axes.X.value], indexers[Axes.Y.value]):
         _recalculate_physical_coordinate_ranges(stack_shape, indexers, new_coords)
     return new_coords
 
@@ -53,7 +53,7 @@ def _needs_coords_recalculating(
 
 
 def _recalculate_physical_coordinate_ranges(
-        stack_shape: Mapping[Indices, int],
+        stack_shape: Mapping[Axes, int],
         indexers: Mapping[str, Union[int, slice]],
         coords_array: xr.DataArray,
 ) -> None:
@@ -73,15 +73,15 @@ def _recalculate_physical_coordinate_ranges(
     A coordinates xarray with values recalculated according to indexing on X/Y
 
     """
-    for _round in range(coords_array.sizes[Indices.ROUND]):
-        for ch in range(coords_array.sizes[Indices.CH]):
-            for z in range(coords_array.sizes[Indices.Z]):
-                indices = {
-                    Indices.ROUND: _round,
-                    Indices.CH: ch,
-                    Indices.Z: z
+    for _round in range(coords_array.sizes[Axes.ROUND]):
+        for ch in range(coords_array.sizes[Axes.CH]):
+            for z in range(coords_array.sizes[Axes.ZPLANE]):
+                selector = {
+                    Axes.ROUND: _round,
+                    Axes.CH: ch,
+                    Axes.ZPLANE: z
                 }
-                xmin, xmax, ymin, ymax = coords_array[indices].loc[
+                xmin, xmax, ymin, ymax = coords_array[selector].loc[
                     dict(physical_coordinate=[
                         PhysicalCoordinateTypes.X_MIN,
                         PhysicalCoordinateTypes.X_MAX,
@@ -90,13 +90,13 @@ def _recalculate_physical_coordinate_ranges(
                     ])]
                 xmin, xmax = recalculate_physical_coordinate_range(
                     xmin, xmax,
-                    stack_shape[Indices.X.value],
-                    indexers[Indices.X.value])
+                    stack_shape[Axes.X.value],
+                    indexers[Axes.X.value])
                 ymin, ymax = recalculate_physical_coordinate_range(
                     ymin, ymax,
-                    stack_shape[Indices.Y.value],
-                    indexers[Indices.Y.value])
-                coords_array[indices].loc[
+                    stack_shape[Axes.Y.value],
+                    indexers[Axes.Y.value])
+                coords_array[selector].loc[
                     dict(physical_coordinate=[
                         PhysicalCoordinateTypes.X_MIN,
                         PhysicalCoordinateTypes.X_MAX,
@@ -166,17 +166,17 @@ def recalculate_physical_coordinate_range(
 
 def get_coordinates(
         coords_array: xr.DataArray,
-        indices: Mapping[Indices, int],
+        selector: Mapping[Axes, int],
         physical_axis: Coordinates,
 ) -> Tuple[float, float]:
 
-    """Given a set of indices that uniquely identify a tile and a physical axis, return the min
+    """Given a selector that uniquely identify a tile and a physical axis, return the min
     and the max coordinates for that tile along that axis."""
 
     selectors: Mapping[str, Any] = {
-        Indices.ROUND.value: indices[Indices.ROUND],
-        Indices.CH.value: indices[Indices.CH],
-        Indices.Z.value: indices[Indices.Z],
+        Axes.ROUND.value: selector[Axes.ROUND],
+        Axes.CH.value: selector[Axes.CH],
+        Axes.ZPLANE.value: selector[Axes.ZPLANE],
     }
     min_selectors = dict(selectors)
     max_selectors = dict(selectors)
@@ -198,13 +198,13 @@ def get_coordinates(
 
 def get_physical_coordinates_of_spot(
         coords_array: xr.DataArray,
-        tile_indices: Mapping[Indices, int],
+        tile_selector: Mapping[Axes, int],
         pixel_x: int,
         pixel_y: int,
         tile_shape: Tuple[int, int]):
-    """Given a set of indices that uniquely identify a tile and the location of a spot in pixel space
+    """Given a selector that uniquely identify a tile and the location of a spot in pixel space,
     calculate the location in physical space."""
-    x_range = get_coordinates(coords_array, tile_indices, Coordinates.X)
+    x_range = get_coordinates(coords_array, tile_selector, Coordinates.X)
     physcial_pixel_size_x = _calculate_physical_pixel_size(coord_max=x_range[1],
                                                            coord_min=x_range[0],
                                                            num_pixels=tile_shape[1])
@@ -213,7 +213,7 @@ def get_physical_coordinates_of_spot(
                                                       coordinates_at_pixel_offset_0=x_range[0],
                                                       dimension_size=tile_shape[1])
 
-    y_range = get_coordinates(coords_array, tile_indices, Coordinates.Y)
+    y_range = get_coordinates(coords_array, tile_selector, Coordinates.Y)
     physcial_pixel_size_y = _calculate_physical_pixel_size(coord_max=y_range[1],
                                                            coord_min=y_range[0],
                                                            num_pixels=tile_shape[0])
@@ -222,7 +222,7 @@ def get_physical_coordinates_of_spot(
                                                       coordinates_at_pixel_offset_0=y_range[0],
                                                       dimension_size=tile_shape[0])
 
-    z_range = get_coordinates(coords_array, tile_indices, Coordinates.Z)
+    z_range = get_coordinates(coords_array, tile_selector, Coordinates.Z)
     # As discussed just taking the middle of the z range for this...unless we change our minds
     physical_z = (z_range[1] - z_range[0]) / 2 + z_range[0]
 

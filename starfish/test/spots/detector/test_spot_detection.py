@@ -8,7 +8,7 @@ from starfish.spots._detector.blob import BlobDetector
 from starfish.spots._detector.detect import detect_spots
 from starfish.spots._detector.local_max_peak_finder import LocalMaxPeakFinder
 from starfish.spots._detector.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
-from starfish.types import Indices
+from starfish.types import Axes
 
 
 def simple_gaussian_spot_detector() -> BlobDetector:
@@ -104,8 +104,8 @@ def test_spot_detection_with_reference_image(
     round. Thus, the total intensity across all channels and round for each spot should be 14.
 
     """
-    reference_image_mp = data_stack.max_proj(Indices.CH, Indices.ROUND)
-    reference_image_mp_numpy = reference_image_mp._squeezed_numpy(Indices.CH, Indices.ROUND)
+    reference_image_mp = data_stack.max_proj(Axes.CH, Axes.ROUND)
+    reference_image_mp_numpy = reference_image_mp._squeezed_numpy(Axes.CH, Axes.ROUND)
 
     intensity_table = detect_spots(data_stack=data_stack,
                                    spot_finding_method=spot_detector.image_to_spots,
@@ -114,7 +114,7 @@ def test_spot_detection_with_reference_image(
                                    radius_is_gyration=radius_is_gyration)
     assert intensity_table.shape == (2, 2, 2), "wrong number of spots detected"
     expected = [0.01587425, 0.01587425]
-    assert np.allclose(intensity_table.sum((Indices.ROUND, Indices.CH)).values, expected), \
+    assert np.allclose(intensity_table.sum((Axes.ROUND, Axes.CH)).values, expected), \
         "wrong spot intensities detected"
 
 
@@ -141,7 +141,7 @@ def test_spot_detection_with_reference_image_from_max_projection(
                                    radius_is_gyration=radius_is_gyration)
     assert intensity_table.shape == (2, 2, 2), "wrong number of spots detected"
     expected = [0.01587425, 0.01587425]
-    assert np.allclose(intensity_table.sum((Indices.ROUND, Indices.CH)).values, expected), \
+    assert np.allclose(intensity_table.sum((Axes.ROUND, Axes.CH)).values, expected), \
         "wrong spot intensities detected"
 
 
@@ -165,8 +165,9 @@ def test_spot_finding_no_reference_image(
     intensity_table = detect_spots(data_stack=data_stack,
                                    spot_finding_method=spot_detector.image_to_spots,
                                    measurement_function=np.max,
-                                   radius_is_gyration=radius_is_gyration)
+                                   radius_is_gyration=radius_is_gyration,
+                                   n_processes=1)
     assert intensity_table.shape == (4, 2, 2), "wrong number of spots detected"
     expected = [0.00793712] * 4
-    assert np.allclose(intensity_table.sum((Indices.ROUND, Indices.CH)).values, expected), \
+    assert np.allclose(intensity_table.sum((Axes.ROUND, Axes.CH)).values, expected), \
         "wrong spot intensities detected"

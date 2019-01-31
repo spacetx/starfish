@@ -13,7 +13,7 @@ from .combine_adjacent_features import ConnectedComponentDecodingResult
 class SpotFinderAlgorithmBase(AlgorithmBase):
     def run(
             self,
-            hybridization_image: ImageStack,
+            primary_image: ImageStack,
     ) -> Union[IntensityTable, Tuple[IntensityTable, ConnectedComponentDecodingResult]]:
         """Finds spots in an ImageStack"""
         raise NotImplementedError()

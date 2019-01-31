@@ -19,10 +19,10 @@ combine multiple fields of view.
 .. literalinclude:: /../../starfish/types/_constants.py
     :pyobject: Coordinates
 
-Indices
--------
-Indices holds constants that represent indexers into the dimensions of the :py:class:`ImageStack` 
-5-d image tensor. They are re-used by objects that inherit subsets of these Indices, such as:
+Axes
+----
+Axes holds constants that represent indexers into the dimensions of the :py:class:`ImageStack` 
+5-d image tensor. They are re-used by objects that inherit subsets of these Axes, such as:
 
 1. :py:class:`IntensityTable`, which stores spot coordinates and pixel traces across 
    rounds and channels

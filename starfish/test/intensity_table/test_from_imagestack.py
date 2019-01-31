@@ -5,7 +5,7 @@ Tests for IntensityTable.from_image_stack method
 import numpy as np
 
 from starfish import ImageStack, IntensityTable
-from starfish.types import Indices
+from starfish.types import Axes
 
 
 # TODO ambrosejcarr: crop is not tested because it should be moved out of this function
@@ -26,10 +26,10 @@ def test_intensity_table_can_be_constructed_from_an_imagestack():
     # the max features should be equal to the array extent (2, 2, 5) minus one, since indices
     # are being compared and python is zero based
     # import pdb; pdb.set_trace()
-    assert np.max(intensities[Indices.Z.value].values) == z - 1
-    assert np.max(intensities[Indices.Y.value].values) == y - 1
-    assert np.max(intensities[Indices.X.value].values) == x - 1
+    assert np.max(intensities[Axes.ZPLANE.value].values) == z - 1
+    assert np.max(intensities[Axes.Y.value].values) == y - 1
+    assert np.max(intensities[Axes.X.value].values) == x - 1
 
-    # the number of channels and hybridizations should match the ImageStack
-    assert intensities.sizes[Indices.CH.value] == c
-    assert intensities.sizes[Indices.ROUND.value] == r
+    # the number of channels and rounds should match the ImageStack
+    assert intensities.sizes[Axes.CH.value] == c
+    assert intensities.sizes[Axes.ROUND.value] == r

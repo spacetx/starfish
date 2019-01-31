@@ -1,6 +1,6 @@
 from functools import partial
 from itertools import product
-from typing import Callable, Dict, Sequence, Tuple, Union
+from typing import Callable, Dict, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -8,7 +8,9 @@ import xarray as xr
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.types import Features, Indices, Number, SpotAttributes
+from starfish.intensity_table.intensity_table_coordinates import \
+    transfer_physical_coords_from_imagestack_to_intensity_table
+from starfish.types import Axes, Features, Number, SpotAttributes
 
 
 def measure_spot_intensity(
@@ -92,8 +94,8 @@ def measure_spot_intensities(
     """
 
     # determine the shape of the intensity table
-    n_ch = data_image.shape[Indices.CH]
-    n_round = data_image.shape[Indices.ROUND]
+    n_ch = data_image.shape[Axes.CH]
+    n_round = data_image.shape[Axes.ROUND]
 
     # construct the empty intensity table
     intensity_table = IntensityTable.empty_intensity_table(
@@ -105,7 +107,7 @@ def measure_spot_intensities(
     # fill the intensity table
     indices = product(range(n_ch), range(n_round))
     for c, r in indices:
-        image, _ = data_image.get_slice({Indices.CH: c, Indices.ROUND: r})
+        image, _ = data_image.get_slice({Axes.CH: c, Axes.ROUND: r})
         blob_intensities: pd.Series = measure_spot_intensity(
             image,
             spot_attributes,
@@ -118,7 +120,7 @@ def measure_spot_intensities(
 
 
 def concatenate_spot_attributes_to_intensities(
-        spot_attributes: Sequence[Tuple[SpotAttributes, Dict[Indices, int]]]
+        spot_attributes: Sequence[Tuple[SpotAttributes, Dict[Axes, int]]]
 ) -> IntensityTable:
     """
     Merge multiple spot attributes frames into a single IntensityTable without merging across
@@ -126,8 +128,8 @@ def concatenate_spot_attributes_to_intensities(
 
     Parameters
     ----------
-    spot_attributes : Sequence[Tuple[SpotAttributes, Dict[Indices, int]]]
-        A sequence of SpotAttribute objects and the Indices (channel, round) that each object is
+    spot_attributes : Sequence[Tuple[SpotAttributes, Dict[Axes, int]]]
+        A sequence of SpotAttribute objects and the indices (channel, round) that each object is
         associated with.
 
     Returns
@@ -136,8 +138,8 @@ def concatenate_spot_attributes_to_intensities(
         concatenated input SpotAttributes, converted to an IntensityTable object
 
     """
-    n_ch: int = max(inds[Indices.CH] for _, inds in spot_attributes) + 1
-    n_round: int = max(inds[Indices.ROUND] for _, inds in spot_attributes) + 1
+    n_ch: int = max(inds[Axes.CH] for _, inds in spot_attributes) + 1
+    n_round: int = max(inds[Axes.ROUND] for _, inds in spot_attributes) + 1
 
     all_spots = pd.concat([sa.data for sa, inds in spot_attributes])
     # this drop call ensures only x, y, z, radius, and quality, are passed to the IntensityTable
@@ -150,7 +152,7 @@ def concatenate_spot_attributes_to_intensities(
     i = 0
     for attrs, inds in spot_attributes:
         for _, row in attrs.data.iterrows():
-            intensity_table[i, inds[Indices.CH], inds[Indices.ROUND]] = row['intensity']
+            intensity_table[i, inds[Axes.CH], inds[Axes.ROUND]] = row['intensity']
             i += 1
 
     return intensity_table
@@ -162,7 +164,8 @@ def detect_spots(data_stack: ImageStack,
                  reference_image: Union[xr.DataArray, np.ndarray] = None,
                  reference_image_from_max_projection: bool = False,
                  measurement_function: Callable[[Sequence], Number] = np.max,
-                 radius_is_gyration: bool = False) -> IntensityTable:
+                 radius_is_gyration: bool = False,
+                 n_processes: Optional[int] = None) -> IntensityTable:
     """Apply a spot_finding_method to a ImageStack
 
     Parameters
@@ -177,7 +180,7 @@ def detect_spots(data_stack: ImageStack,
         (Optional) a reference image. If provided, spots will be found in this image, and then
         the locations that correspond to these spots will be measured across each channel and round,
         filling in the values in the IntensityTable
-    reference_image_from_max_projection : Tuple[Indices]
+    reference_image_from_max_projection : Tuple[Axes]
         (Optional) if True, create a reference image by max-projecting the channels and imaging
         rounds found in data_image.
     measurement_function : Callable[[Sequence], Number]
@@ -190,6 +193,9 @@ def detect_spots(data_stack: ImageStack,
     is_volume: bool
         If True, pass 3d volumes (x, y, z) to func, else pass 2d tiles (x, y) to func. (default
         True)
+    n_processes : Optional[int]
+        The number of processes to use in stack.transform if reference image is None.
+        If None, uses the output of os.cpu_count() (default = None).
 
     Notes
     -----
@@ -216,10 +222,10 @@ def detect_spots(data_stack: ImageStack,
         )
 
     if reference_image_from_max_projection:
-        reference_image = data_stack.max_proj(Indices.CH, Indices.ROUND)
-        reference_image = reference_image._squeezed_numpy(Indices.CH, Indices.ROUND)
+        reference_image = data_stack.max_proj(Axes.CH, Axes.ROUND)
+        reference_image = reference_image._squeezed_numpy(Axes.CH, Axes.ROUND)
 
-    group_by = {Indices.ROUND, Indices.CH}
+    group_by = {Axes.ROUND, Axes.CH}
 
     if reference_image is not None:
         # Throw error here if tiles are not aligned. Trying to do this with unregistered
@@ -240,8 +246,12 @@ def detect_spots(data_stack: ImageStack,
         spot_finding_method = partial(spot_finding_method, **spot_finding_kwargs)
         spot_attributes_list = data_stack.transform(
             func=spot_finding_method,
-            group_by=group_by
+            group_by=group_by,
+            n_processes=n_processes
         )
         intensity_table = concatenate_spot_attributes_to_intensities(spot_attributes_list)
+
+    transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=data_stack,
+                                                                intensity_table=intensity_table)
 
     return intensity_table

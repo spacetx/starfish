@@ -10,11 +10,13 @@ import unittest
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 from starfish.types import Features
 
 
+@pytest.mark.slow
 class TestWithIssData(CLITest, unittest.TestCase):
 
     @property
@@ -36,16 +38,16 @@ class TestWithIssData(CLITest, unittest.TestCase):
         return (
             [
                 sys.executable,
-                "examples/get_cli_test_data.py",
+                "starfish/test/full_pipelines/cli/get_cli_test_data.py",
                 "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS-TEST/",
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted")
             ],
             [
                 "starfish", "registration",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted/fov_001", "hybridization.json"),
+                    tempdir, "formatted/fov_001", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered", "hybridization.json"),
+                    tempdir, "registered", "primary_images.json"),
                 "FourierShiftRegistration",
                 "--reference-stack", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "formatted/fov_001", "dots.json"),
@@ -54,9 +56,9 @@ class TestWithIssData(CLITest, unittest.TestCase):
             [
                 "starfish", "filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered", "hybridization.json"),
+                    tempdir, "registered", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "hybridization.json"),
+                    tempdir, "filtered", "primary_images.json"),
                 "WhiteTophat",
                 "--masking-radius", "15",
             ],
@@ -81,7 +83,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
             [
                 "starfish", "detect_spots",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "hybridization.json"),
+                    tempdir, "filtered", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "spots.nc"),
                 "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(
@@ -95,7 +97,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
             [
                 "starfish", "segment",
                 "--primary-images", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "hybridization.json"),
+                    tempdir, "filtered", "primary_images.json"),
                 "--nuclei", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "nuclei.json"),
                 "-o", lambda tempdir, *args, **kwargs: os.path.join(

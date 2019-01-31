@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from starfish.config import StarfishConfig
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Indices
+from starfish.types import Axes
 from starfish.util import click
 from ._base import FilterAlgorithmBase
 
@@ -58,7 +58,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         """
         # The default is False, so even if code requests True require config to be True as well
         verbose = verbose and StarfishConfig().verbose
-        channels_per_round = stack._data.groupby(Indices.ROUND.value)
+        channels_per_round = stack._data.groupby(Axes.ROUND.value)
         channels_per_round = tqdm(channels_per_round) if verbose else channels_per_round
 
         if not in_place:
@@ -68,18 +68,18 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         # compute channel magnitude mask
         for r, dat in channels_per_round:
             # nervous about how xarray orders dimensions so i put this here explicitly ....
-            dat = dat.transpose(Indices.CH.value,
-                                Indices.Z.value,
-                                Indices.Y.value,
-                                Indices.X.value
+            dat = dat.transpose(Axes.CH.value,
+                                Axes.ZPLANE.value,
+                                Axes.Y.value,
+                                Axes.X.value
                                 )
             # ... to account for this line taking the norm across axis 0, or the channel axis
             ch_magnitude = np.linalg.norm(dat, ord=2, axis=0)
             magnitude_mask = ch_magnitude >= self.thresh
 
             # apply mask and optionally, normalize by channel magnitude
-            for c in range(stack.num_chs):
-                ind = {Indices.ROUND.value: r, Indices.CH.value: c}
+            for c in stack.axis_labels(Axes.CH):
+                ind = {Axes.ROUND.value: r, Axes.CH.value: c}
                 stack._data[ind] = stack._data[ind] * magnitude_mask
 
                 if self.normalize:

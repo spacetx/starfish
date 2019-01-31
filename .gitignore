@@ -1,7 +1,5 @@
-.idea/
 .DS_Store
 *.pyc
-viz/node_modules
 starfish.egg-info/
 *.ipynb_checkpoints
 .coverage

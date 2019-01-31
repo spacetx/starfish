@@ -24,7 +24,7 @@ from showit import image
 import pprint
 
 from starfish import data, FieldOfView
-from starfish.types import Features, Indices
+from starfish.types import Features, Axes
 # EPY: END code
 
 # EPY: START code
@@ -72,8 +72,8 @@ primary_image.xarray.shape
 # EPY: END markdown
 
 # EPY: START code
-dots_mp = dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-dots_mp_numpy = dots._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+dots_mp = dots.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+dots_mp_numpy = dots._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 image(dots_mp_numpy)
 # EPY: END code
 
@@ -82,8 +82,8 @@ image(dots_mp_numpy)
 # EPY: END markdown
 
 # EPY: START code
-nuclei_mp = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-nuclei_mp_numpy = nuclei_mp._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+nuclei_mp = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+nuclei_mp_numpy = nuclei_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 image(nuclei_mp_numpy)
 # EPY: END code
 
@@ -169,8 +169,8 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
 
     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    dots = dots.max_proj(Indices.ROUND, Indices.Z)
-    dots_numpy = dots._squeezed_numpy(Indices.ROUND, Indices.Z)
+    dots = dots.max_proj(Axes.ROUND, Axes.ZPLANE)
+    dots_numpy = dots._squeezed_numpy(Axes.ROUND, Axes.ZPLANE)
     blobs_image = dots_numpy
     intensities = p.run(registered_image, blobs_image=blobs_image)
 # EPY: END code
@@ -229,12 +229,12 @@ dapi_thresh = .16  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
 min_dist = 57
 
-registered_mp = registered_image.max_proj(Indices.CH, Indices.Z)
-registered_mp_numpy = registered_mp._squeezed_numpy(Indices.CH, Indices.Z)
+registered_mp = registered_image.max_proj(Axes.CH, Axes.ZPLANE)
+registered_mp_numpy = registered_mp._squeezed_numpy(Axes.CH, Axes.ZPLANE)
 stain = np.mean(registered_mp_numpy, axis=0)
 stain = stain/stain.max()
-nuclei = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-nuclei_numpy = nuclei._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+nuclei = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+nuclei_numpy = nuclei._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 
 seg = Segmentation.Watershed(
     nuclei_threshold=dapi_thresh,
@@ -258,11 +258,11 @@ GENE1 = 'HER2'
 GENE2 = 'VIM'
 
 rgb = np.zeros(registered_image.tile_shape + (3,))
-nuclei_mp = nuclei.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-nuclei_numpy = nuclei_mp._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+nuclei_mp = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+nuclei_numpy = nuclei_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 rgb[:,:,0] = nuclei_numpy
-dots_mp = dots.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-dots_mp_numpy = dots_mp._squeezed_numpy(Indices.ROUND, Indices.CH, Indices.Z)
+dots_mp = dots.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+dots_mp_numpy = dots_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 rgb[:,:,1] = dots_mp_numpy
 do = rgb2gray(rgb)
 do = do/(do.max())

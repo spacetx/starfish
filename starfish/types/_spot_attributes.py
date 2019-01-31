@@ -3,16 +3,16 @@ import json
 import numpy as np
 import pandas as pd
 
-from starfish.types import Features, Indices
+from starfish.types import Axes, Features
 from ._validated_table import ValidatedTable
 
 
 class SpotAttributes(ValidatedTable):
 
     required_fields = {
-        Indices.X.value,  # spot x-coordinate
-        Indices.Y.value,  # spot y-coordinate
-        Indices.Z.value,  # spot z-coordinate
+        Axes.X.value,          # spot x-coordinate
+        Axes.Y.value,          # spot y-coordinate
+        Axes.ZPLANE.value,     # spot z-coordinate
         Features.SPOT_RADIUS,  # spot radius
     }
 

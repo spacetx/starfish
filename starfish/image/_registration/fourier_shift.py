@@ -7,7 +7,7 @@ from skimage.feature import register_translation
 
 from starfish.image._filter.util import preserve_float_range
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Indices
+from starfish.types import Axes
 from starfish.util import click
 from ._base import RegistrationAlgorithmBase
 
@@ -62,30 +62,30 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
             image = deepcopy(image)
 
         # TODO: (ambrosejcarr) is this the appropriate way of dealing with Z in registration?
-        mp = image.max_proj(Indices.CH, Indices.Z)
-        mp_numpy = mp._squeezed_numpy(Indices.CH, Indices.Z)
-        reference_image_mp = self.reference_stack.max_proj(Indices.ROUND, Indices.CH, Indices.Z)
-        reference_image_numpy = reference_image_mp._squeezed_numpy(Indices.ROUND,
-                                                                   Indices.CH,
-                                                                   Indices.Z)
+        mp = image.max_proj(Axes.CH, Axes.ZPLANE)
+        mp_numpy = mp._squeezed_numpy(Axes.CH, Axes.ZPLANE)
+        reference_image_mp = self.reference_stack.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+        reference_image_numpy = reference_image_mp._squeezed_numpy(Axes.ROUND,
+                                                                   Axes.CH,
+                                                                   Axes.ZPLANE)
 
-        for r in range(image.num_rounds):
+        for r in image.axis_labels(Axes.ROUND):
             # compute shift between maximum projection (across channels) and dots, for each round
             # TODO: make the max projection array ignorant of axes ordering.
             shift, error = compute_shift(mp_numpy[r, :, :], reference_image_numpy, self.upsampling)
             print(f"For round: {r}, Shift: {shift}, Error: {error}")
 
-            for c in range(image.num_chs):
-                for z in range(image.num_zlayers):
-                    # apply shift to all zlayers, channels, and imaging rounds
-                    indices = {Indices.ROUND: r, Indices.CH: c, Indices.Z: z}
-                    data, axes = image.get_slice(indices=indices)
+            for c in image.axis_labels(Axes.CH):
+                for z in image.axis_labels(Axes.ZPLANE):
+                    # apply shift to all zplanes, channels, and imaging rounds
+                    selector = {Axes.ROUND: r, Axes.CH: c, Axes.ZPLANE: z}
+                    data, axes = image.get_slice(selector=selector)
                     assert len(axes) == 0
 
                     result = shift_im(data, shift)
                     result = preserve_float_range(result)
 
-                    image.set_slice(indices=indices, data=result)
+                    image.set_slice(selector=selector, data=result)
 
         if not in_place:
             return image

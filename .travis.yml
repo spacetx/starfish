@@ -1,7 +1,7 @@
 language: python
 env:
   global:
-    - STARFISH_VALIDATION_STRICT=true
+    - STARFISH_CONFIG=@$TRAVIS_BUILD_DIR/.travis-config.json
 services:
 - docker
 python:
@@ -11,8 +11,12 @@ stages:
 - test
 jobs:
   include:
-    - name: Syntax and Tests
-      script: make check_notebooks install-src fast
+    - name: Syntax and Fast Tests
+      script: make install-src fast
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+    - name: Slow Tests
+      script: make install-src && make -j check-notebooks slow-test
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Install Napari
@@ -20,12 +24,12 @@ jobs:
     - name: Docker
       if: type = push and branch =~ /^(master|merge)/
       script: make docker
-    - name: Allen Notebook
+    - name: 3d smFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-src run__notebooks/py/allen_smFISH.py
+      script: make install-src run__notebooks/py/3d_smFISH.py
     - name: MERFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-src run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
+      script: travis_wait make install-src run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
     - name: Assay Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: make install-src run__notebooks/py/assay_comparison.py
@@ -41,6 +45,9 @@ jobs:
     - name: ISS Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: make install-src run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
+    - name: SeqFISH Notebook
+      if: type = push and branch =~ /^(master|merge)/
+      script: make install-src run__notebooks/py/SeqFISH.py
     - name: Released Notebooks
       if: type = cron and branch =~ /^(master|merge)/
       script: make check_notebooks install-pypi run_notebooks

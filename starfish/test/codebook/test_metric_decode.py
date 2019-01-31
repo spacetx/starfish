@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from starfish import Codebook, IntensityTable
-from starfish.types import Features, Indices, SpotAttributes
+from starfish.types import Axes, Features, SpotAttributes
 
 
 def intensity_table_factory(data: np.ndarray=np.array([[[0, 3], [4, 0]]])) -> IntensityTable:
@@ -19,7 +19,7 @@ def intensity_table_factory(data: np.ndarray=np.array([[[0, 3], [4, 0]]])) -> In
     # each attribute has coordinates (z, y, x) equal to the feature index, and radius 1.
     spot_attributes_data = pd.DataFrame(
         data=np.array([[i, i, i, 1] for i in np.arange(data.shape[0])]),
-        columns=[Indices.Z, Indices.Y, Indices.X, Features.SPOT_RADIUS]
+        columns=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
     )
 
     intensity_table = IntensityTable.from_spot_data(data, SpotAttributes(spot_attributes_data))
@@ -34,15 +34,15 @@ def codebook_factory() -> Codebook:
     codebook_array = [
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 1, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 0, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 1, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: 'GENE_A'
         },
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 1, Indices.CH.value: 0, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: 'GENE_B'
         },
@@ -104,8 +104,8 @@ def test_unmatched_intensities_and_codebook_table_sizes_throws_value_error():
     codebook_array = [
         {
             Features.CODEWORD: [
-                {Indices.ROUND.value: 0, Indices.CH.value: 2, Features.CODE_VALUE: 1},
-                {Indices.ROUND.value: 1, Indices.CH.value: 0, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 0, Axes.CH.value: 2, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: 'GENE_A'
         },

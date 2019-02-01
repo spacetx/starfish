@@ -102,13 +102,6 @@ class ImageStack:
         the image tensor is split.
     max_proj(*dims)
         return a max projection over one or more axis of the image tensor
-    show_stack(selector, color_map='gray', figure_size=(10, 10), rescale=False, p_min=None,
-        p_max=None)
-        show an interactive, pageable view of the image tensor, or a slice of the image tensor
-    show_stack_napari(selector)
-        view the selected selectore of the image tensor with Napari. Note that Napari is
-        still a prototype, but does offer more performant viewing of multi-dimensional images.
-        pip install napari-gui (requires 0.0.4)
     sel(indexers)
         return an ImageStack (coordinates preserved) that is the subset described
         by the indexers. The indexers can slice all 5 dimensions of the image tensor.

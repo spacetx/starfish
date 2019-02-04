@@ -41,6 +41,3 @@ class TargetAssignment(PipelineComponent):
             intensity_table=IntensityTable.load(intensities),
             label_image=imread(label_image)
         )
-
-
-TargetAssignment._cli_register()

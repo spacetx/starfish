@@ -38,6 +38,3 @@ class Decoder(PipelineComponent):
             intensities=IntensityTable.load(input),
             codebook=Codebook.from_json(codebook),
         )
-
-
-Decoder._cli_register()

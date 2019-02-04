@@ -41,6 +41,3 @@ class Segmentation(PipelineComponent):
             primary_images=ImageStack.from_path_or_url(primary_images),
             nuclei=ImageStack.from_path_or_url(nuclei),
         )
-
-
-Segmentation._cli_register()

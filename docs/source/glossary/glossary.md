@@ -89,6 +89,6 @@ a single pixel.
 Feature intensity values across all imaging rounds and/or color channels. These map to codewords in
 a codebook.
 
-### decoding
+### Decoding
 Matching putative barcodes to codewords in a codebook to read out the corresponding target believed
 to be associated with that barcode.

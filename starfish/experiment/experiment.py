@@ -56,15 +56,14 @@ class FieldOfView:
         not happen until the image is accessed.  Be prepared to handle errors when images are
         accessed.
         """
+        self._images: MutableMapping[str, TileSet] = dict()
         self._name = name
-        self.aligned_coordinate_groups: List[CropParameters] = list()
-        if image_tilesets is not None:
-            # TODO check logic here with ambrose about aux images
-            self.aligned_coordinate_groups = self.parse_coordinate_groups(
-                image_tilesets[FieldOfView.PRIMARY_IMAGES])
-            self._images = image_tilesets
-        else:
-            self._images = dict()
+        self.aligned_coordinate_groups: Dict[str, List[CropParameters]] = dict()
+        if image_tilesets:
+            for name, tileset in image_tilesets.items():
+                self.aligned_coordinate_groups[name] = self.parse_coordinate_groups(
+                    image_tilesets[name])
+                self._images = image_tilesets
 
     def __repr__(self):
         images = '\n    '.join(
@@ -113,22 +112,15 @@ class FieldOfView:
         return set(self._images.keys())
 
     def show_aligned_image_groups(self):
-        # TODO check logic here with ambrose to see what user wants
+        # TODO show ch/r/z and imagestack shape
         group_info = '\n    '.join(
             f'{k}: {v}'
             for k, v in enumerate(self.aligned_coordinate_groups)
         )
         return "Aligned Groups: [" + f"{group_info} ]"
 
-    def get_image(self, item, aligned_group: Optional[int] = None):
-        # TODO check logic here with ambrose to see what user wants
-        crop_params = None
-        if item == self.PRIMARY_IMAGES:
-            if aligned_group:
-                crop_params = self.aligned_coordinate_groups[aligned_group]
-            else:
-                # If asking for primary image with no crop params, return first group
-                crop_params = self.aligned_coordinate_groups[0]
+    def get_image(self, item, aligned_group: int = 0):
+        crop_params = self.aligned_coordinate_groups[item][aligned_group]
         return ImageStack.from_tileset(self._images[item], crop_parameters=crop_params)
 
 

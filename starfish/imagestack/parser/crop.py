@@ -43,6 +43,14 @@ class CropParameters:
         self._x_slice = x_slice
         self._y_slice = y_slice
 
+    def add_permitted_axes(self, axis_type: Axes, permitted_axis: int) -> None:
+        if axis_type == Axes.ROUND and self._permitted_rounds:
+            self._permitted_rounds.add(permitted_axis)
+        if axis_type == Axes.CH and self._permitted_chs:
+            self._permitted_chs.add(permitted_axis)
+        if axis_type == Axes.ZPLANE and self._permitted_zplanes:
+            self._permitted_zplanes.add(permitted_axis)
+
     def __repr__(self):
         return (f"<starfish.CropParameters>"
                 f"  Rounds: {self._permitted_rounds}"

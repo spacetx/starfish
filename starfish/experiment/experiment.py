@@ -59,6 +59,7 @@ class FieldOfView:
         self._name = name
         self.aligned_coordinate_groups: List[CropParameters] = list()
         if image_tilesets is not None:
+            # TODO check logic here with ambrose about aux images
             self.aligned_coordinate_groups = self.parse_coordinate_groups(
                 image_tilesets[FieldOfView.PRIMARY_IMAGES])
             self._images = image_tilesets
@@ -91,15 +92,16 @@ class FieldOfView:
                 tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
                 tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
             ])
-            if coord_groups and x_y_coords in coord_groups:
+            if x_y_coords in coord_groups:
                 crop_params = coord_groups[x_y_coords]
-                crop_params._permitted_chs.add(tile.indices[Axes.CH])
-                crop_params._permitted_rounds.add(tile.indices[Axes.ROUND])
-                crop_params._permitted_rounds.add(tile.indices[Axes.ZPLANE])
+                crop_params.add_permitted_axes(Axes.CH, tile.indices[Axes.CH])
+                crop_params.add_permitted_axes(Axes.ROUND, tile.indices[Axes.ROUND])
+                crop_params.add_permitted_axes(Axes.ZPLANE, tile.indices[Axes.ZPLANE])
             else:
-                coord_groups[x_y_coords] = CropParameters(permitted_chs=[tile.indices[Axes.CH]],
-                                                          permitted_rounds=[tile.indices[Axes.ROUND]],
-                                                          permitted_zplanes=[tile.indices[Axes.ZPLANE]])
+                coord_groups[x_y_coords] = CropParameters(
+                    permitted_chs=[tile.indices[Axes.CH]],
+                    permitted_rounds=[tile.indices[Axes.ROUND]],
+                    permitted_zplanes=[tile.indices[Axes.ZPLANE]])
         return list(coord_groups.values())
 
     @property
@@ -110,11 +112,8 @@ class FieldOfView:
     def image_types(self) -> Set[str]:
         return set(self._images.keys())
 
-    def get_first_image(self):
-        crop_params = self.aligned_coordinate_groups[0]
-        return ImageStack.from_tileset(self._images[self.PRIMARY_IMAGES], crop_parameters=crop_params)
-
     def show_aligned_image_groups(self):
+        # TODO check logic here with ambrose to see what user wants
         group_info = '\n    '.join(
             f'{k}: {v}'
             for k, v in enumerate(self.aligned_coordinate_groups)
@@ -122,12 +121,14 @@ class FieldOfView:
         return "Aligned Groups: [" + f"{group_info} ]"
 
     def get_image(self, item, aligned_group: Optional[int] = None):
+        # TODO check logic here with ambrose to see what user wants
         crop_params = None
-        if aligned_group:
-            crop_params = self.aligned_coordinate_groups[aligned_group]
-        # If asking for primary image with no crop params, return first group
-        elif item ==self.PRIMARY_IMAGES:
-            crop_params = self.aligned_coordinate_groups[0]
+        if item == self.PRIMARY_IMAGES:
+            if aligned_group:
+                crop_params = self.aligned_coordinate_groups[aligned_group]
+            else:
+                # If asking for primary image with no crop params, return first group
+                crop_params = self.aligned_coordinate_groups[0]
         return ImageStack.from_tileset(self._images[item], crop_parameters=crop_params)
 
 

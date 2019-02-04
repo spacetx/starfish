@@ -40,7 +40,7 @@ setuptools.setup(
         'regional',
     ],
     extras_require={
-        'napari': ['napari-gui==0.0.5.1', 'matplotlib==2.1.2']
+        'napari': ['napari-gui']
     },
     entry_points={
         'console_scripts': [

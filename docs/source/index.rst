@@ -43,13 +43,10 @@ To see the code or report a bug, please visit the `github repository
 
    introduction/introduction
    installation/installation
+   tutorial/index
    api/index
    contributing
-   debugging
-   license/index
-   sptx-format/index
-   usage/index
-   glossary/glossary
+   introduction/spacetx
    citation
 
 .. raw:: html

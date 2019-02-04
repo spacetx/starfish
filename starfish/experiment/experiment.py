@@ -1,6 +1,7 @@
 import json
 from typing import (
     Callable,
+    Dict,
     List,
     MutableMapping,
     MutableSequence,
@@ -8,7 +9,6 @@ from typing import (
     Optional,
     Sequence,
     Set,
-    Union,
 )
 
 from semantic_version import Version
@@ -21,7 +21,7 @@ from starfish.codebook.codebook import Codebook
 from starfish.config import StarfishConfig
 from starfish.imagestack.imagestack import ImageStack
 from starfish.imagestack.parser.crop import CropParameters
-from starfish.types import Coordinates
+from starfish.types import Axes, Coordinates
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
 
@@ -44,9 +44,7 @@ class FieldOfView:
     PRIMARY_IMAGES = 'primary'
 
     def __init__(self, name: str,
-                 images: Optional[MutableMapping[str, ImageStack]] = None,
-                 image_tilesets: Optional[MutableMapping[str, TileSet]] = None,
-
+                 image_tilesets: Optional[MutableMapping[str, TileSet]] = None
                  ) -> None:
         """
         Fields of views can obtain their primary image from either an ImageStack or a TileSet (but
@@ -59,15 +57,8 @@ class FieldOfView:
         accessed.
         """
         self._name = name
-        self._images: MutableMapping[str, Union[ImageStack, TileSet]]
-        self.aligned_coordinate_groups = List[CropParameters]
-        if images is not None:
-            self._images = images
-            if image_tilesets is not None:
-                raise ValueError(
-                    "Only one of (images, image_tilesets) should be set.")
+        self.aligned_coordinate_groups: List[CropParameters] = list()
         if image_tilesets is not None:
-            # TODO PARSE TILESETS HERE AND CREATE List of CROPPARAMS (coords groups)
             self.aligned_coordinate_groups = self.parse_coordinate_groups(
                 image_tilesets[FieldOfView.PRIMARY_IMAGES])
             self._images = image_tilesets
@@ -80,29 +71,35 @@ class FieldOfView:
             for k, v in self._images.items()
             if k != FieldOfView.PRIMARY_IMAGES
         )
+        group_info = '\n    '.join(
+            f'{k}: {v}'
+            for k, v in enumerate(self.aligned_coordinate_groups)
+        )
         return (
             f"<starfish.FieldOfView>\n"
             f"  Primary Image: {self._images[FieldOfView.PRIMARY_IMAGES]}\n"
+            f"  Aligned Groups:\n"
+            f"    {group_info}\n"
             f"  Auxiliary Images:\n"
             f"    {images}"
         )
 
     def parse_coordinate_groups(self, tileset: TileSet) -> List[CropParameters]:
-        coord_groups = dict()
+        coord_groups: Dict[tuple, CropParameters] = dict()
         for tile in tileset._tiles:
             x_y_coords = tuple(i for i in [
                 tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
                 tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
             ])
-            if x_y_coords in coord_groups:
+            if coord_groups and x_y_coords in coord_groups:
                 crop_params = coord_groups[x_y_coords]
-                crop_params._permitted_chs.add(tile.indices['c'])
-                crop_params._permitted_rounds.add(tile.indices['r'])
-                crop_params._permitted_rounds.add(tile.indices['z'])
+                crop_params._permitted_chs.add(tile.indices[Axes.CH])
+                crop_params._permitted_rounds.add(tile.indices[Axes.ROUND])
+                crop_params._permitted_rounds.add(tile.indices[Axes.ZPLANE])
             else:
-                coord_groups[x_y_coords] = CropParameters(permitted_chs=[tile.indices['c']],
-                                                          permitted_rounds=[tile.indices['r']],
-                                                          permitted_zplanes=[tile.indices['z']])
+                coord_groups[x_y_coords] = CropParameters(permitted_chs=[tile.indices[Axes.CH]],
+                                                          permitted_rounds=[tile.indices[Axes.ROUND]],
+                                                          permitted_zplanes=[tile.indices[Axes.ZPLANE]])
         return list(coord_groups.values())
 
     @property
@@ -113,12 +110,25 @@ class FieldOfView:
     def image_types(self) -> Set[str]:
         return set(self._images.keys())
 
-    def __getitem__(self, item) -> ImageStack:
-        if isinstance(self._images[item], TileSet):
+    def get_first_image(self):
+        crop_params = self.aligned_coordinate_groups[0]
+        return ImageStack.from_tileset(self._images[self.PRIMARY_IMAGES], crop_parameters=crop_params)
+
+    def show_aligned_image_groups(self):
+        group_info = '\n    '.join(
+            f'{k}: {v}'
+            for k, v in enumerate(self.aligned_coordinate_groups)
+        )
+        return "Aligned Groups: [" + f"{group_info} ]"
+
+    def get_image(self, item, aligned_group: Optional[int] = None):
+        crop_params = None
+        if aligned_group:
+            crop_params = self.aligned_coordinate_groups[aligned_group]
+        # If asking for primary image with no crop params, return first group
+        elif item ==self.PRIMARY_IMAGES:
             crop_params = self.aligned_coordinate_groups[0]
-            self._images[item] = ImageStack.from_tileset(self._images[item],
-                                                         crop_parameters=crop_params)
-        return self._images[item]
+        return ImageStack.from_tileset(self._images[item], crop_parameters=crop_params)
 
 
 class Experiment:

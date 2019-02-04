@@ -18,7 +18,7 @@ def test_allen_smFISH_cropped_data():
     # load the experiment
     experiment = starfish.data.allen_smFISH(use_test_data=True)
 
-    primary_image = experiment.fov()[FieldOfView.PRIMARY_IMAGES]
+    primary_image = experiment.fov().get_image(FieldOfView.PRIMARY_IMAGES)
 
     clip = Clip(p_min=10, p_max=100)
     clipped_image = clip.run(primary_image, in_place=False)

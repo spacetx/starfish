@@ -23,7 +23,7 @@ from starfish.types import Axes
 
 # EPY: START code
 experiment = starfish.data.osmFISH(use_test_data=True)
-stack = experiment["fov_000"][FieldOfView.PRIMARY_IMAGES]
+stack = experiment["fov_000"].get_image(FieldOfView.PRIMARY_IMAGES)
 # EPY: END code
 
 # EPY: START markdown

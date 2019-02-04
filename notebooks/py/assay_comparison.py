@@ -100,7 +100,7 @@ merfish_nuclei_mp = experiment.fov()['nuclei'].max_proj(Axes.CH, Axes.ROUND, Axe
 merfish_nuclei__mp_numpy = merfish_nuclei_mp._squeezed_numpy(Axes.CH, Axes.ROUND, Axes.ZPLANE)
 # merfish doesn't have a dots image, and some of the channels are stronger than others.
 # We can use the scale factors to get the right levels
-merfish_background = experiment.fov()[FieldOfView.PRIMARY_IMAGES].max_proj(Axes.CH, Axes.ROUND)
+merfish_background = experiment.fov().get_image(FieldOfView.PRIMARY_IMAGES).max_proj(Axes.CH, Axes.ROUND)
 
 
 from starfish.image import Filter

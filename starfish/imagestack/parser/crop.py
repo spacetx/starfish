@@ -43,6 +43,15 @@ class CropParameters:
         self._x_slice = x_slice
         self._y_slice = y_slice
 
+    def __repr__(self):
+        return (f"<starfish.CropParameters>"
+                f"  Rounds: {self._permitted_rounds}"
+                f"  Channels: {self._permitted_chs}"
+                f"  Z_PLanes: {self._permitted_zplanes}"
+                f"  X_Slice: {self._x_slice}"
+                f"  Y_Slice: {self._y_slice}"
+                )
+
     def filter_tilekeys(self, tilekeys: Collection[TileKey]) -> Collection[TileKey]:
         """
         Filters tilekeys for those that should be included in the resulting ImageStack.

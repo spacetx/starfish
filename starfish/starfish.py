@@ -62,9 +62,8 @@ def starfish(ctx, profile):
 
 @starfish.command()
 def version():
-    import pkg_resources
-    version = pkg_resources.require("starfish")[0].version
-    print(version)
+    from starfish import __version__
+    print(__version__)
 version.no_art = True  # type: ignore
 
 

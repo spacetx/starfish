@@ -16,6 +16,7 @@ class PipelineComponentType(type):
         if len(bases) != 0:
             # this is _not_ PipelineComponent.  Instead, it's a subclass of PipelineComponent.
             PipelineComponentType._ensure_algorithms_setup(cls)
+            PipelineComponentType._cli_register(cls)
 
     @classmethod
     def _ensure_algorithms_setup(mcs, cls):
@@ -30,6 +31,11 @@ class PipelineComponentType(type):
                 cls._algorithm_to_class_map_int[algorithm_cls.__name__] = algorithm_cls
 
                 setattr(cls, algorithm_cls._get_algorithm_name(), algorithm_cls)
+
+    @classmethod
+    def _cli_register(mcs, cls):
+        for algorithm_cls in cls._algorithm_to_class_map().values():
+            cls._cli.add_command(algorithm_cls._cli)
 
 
 class PipelineComponent(metaclass=PipelineComponentType):
@@ -74,11 +80,6 @@ class PipelineComponent(metaclass=PipelineComponentType):
     @classmethod
     def _cli_run(cls, ctx, instance, *args, **kwargs):
         raise NotImplementedError()
-
-    @classmethod
-    def _cli_register(cls):
-        for algorithm_cls in cls._algorithm_to_class_map().values():
-            cls._cli.add_command(algorithm_cls._cli)
 
 
 def import_all_submodules(path_str: str, package: str, excluded: Optional[Set[str]]=None) -> None:

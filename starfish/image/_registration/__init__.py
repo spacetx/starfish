@@ -34,6 +34,3 @@ class Registration(PipelineComponent):
             output=output,
             stack=ImageStack.from_path_or_url(input),
         )
-
-
-Registration._cli_register()

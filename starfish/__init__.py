@@ -5,6 +5,8 @@ import warnings
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")  # noqa
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")  # noqa
 
+import pkg_resources
+
 # image processing methods and objects
 from . import image
 # spot detection and manipulation
@@ -15,6 +17,11 @@ from .experiment.experiment import Experiment, FieldOfView
 from .imagestack.imagestack import ImageStack
 from .intensity_table.intensity_table import IntensityTable
 from .starfish import starfish
+
+
+# NOTE: if we move to python 3.7, we can produce this value at call time via __getattr__
+__version__ = pkg_resources.require("starfish")[0].version
+
 
 if __name__ == "__main__":
     starfish()

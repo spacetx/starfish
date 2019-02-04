@@ -91,6 +91,7 @@ six==1.11.0
 slicedimage==1.0.3
 snowballstemmer==1.2.1
 Sphinx==1.8.1
+sphinx-bootstrap-theme==0.6.5
 sphinx-rtd-theme==0.4.2
 sphinxcontrib-programoutput==0.11
 sphinxcontrib-websupport==1.1.0

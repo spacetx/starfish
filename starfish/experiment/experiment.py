@@ -119,7 +119,8 @@ class FieldOfView:
         )
         return "Aligned Groups: [" + f"{group_info} ]"
 
-    def get_image(self, item, aligned_group: int = 0):
+    def get_image(self, item, aligned_group: int = 0, crop_parameters: Optional[CropParameters]=None):
+        # TODO provide either crop params or aligned group
         crop_params = self.aligned_coordinate_groups[item][aligned_group]
         return ImageStack.from_tileset(self._images[item], crop_parameters=crop_params)
 

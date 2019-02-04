@@ -78,6 +78,3 @@ class SpotFinder(PipelineComponent):
 
         if codebook is not None:
             ctx.obj["codebook"] = Codebook.from_json(codebook)
-
-
-SpotFinder._cli_register()

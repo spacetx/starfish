@@ -23,7 +23,7 @@ matplotlib.use('agg')
 
 # -- Project information -----------------------------------------------------
 
-project = 'Starfish'
+project = 'starfish'
 copyright = '2018, The Chan Zuckerberg Initiative'
 author = 'Ambrose J. Carr, Tony Tung, Shannon Axelrod, Brian Long, Jeremy Freeman, Deep Ganguli'
 
@@ -42,6 +42,9 @@ release = ''
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+
+# import sphinx_gallery
+
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
@@ -51,6 +54,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinxcontrib.programoutput',
     'm2r',
+    # 'sphinx_gallery.gen_gallery',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -82,13 +86,33 @@ exclude_patterns = []
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+sphinx_gallery_conf = {
+    # path to your examples scripts
+    'examples_dirs': '../../notebooks/py',
+    # path where to save gallery generated examples
+    'gallery_dirs': 'gallery',
+    # #directory where function granular galleries are stored
+    'backreferences_dir': 'generated',
+    #
+    # # Modules for which function level galleries are created.  In
+    # # this case sphinx_gallery and numpy in a tuple of strings.
+    # 'doc_module': ('neuroglia',),
+    'download_section_examples': False,
+    # 'default_thumb_file': '_static/max_proj.png',
+    'min_reported_time': 10,
+
+}
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+# html_theme = 'sphinx_rtd_theme'
+html_theme = 'bootstrap'
+
+import sphinx_bootstrap_theme
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -96,10 +120,25 @@ html_theme = 'sphinx_rtd_theme'
 #
 # html_theme_options = {}
 
+html_favicon = '_static/favicon.ico'
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+html_theme_options = {
+    'source_link_position': "footer",
+    'bootswatch_theme': "flatly", # https://bootswatch.com/
+    'navbar_sidebarrel': False,
+    'bootstrap_version': "3",
+    'navbar_links': [
+                     ("Introduction", "introduction/introduction"),
+                     ("Installation", "installation/installation"),
+                     ("API", "api/index"),
+                     ],
+
+    }
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.

@@ -14,10 +14,6 @@ CLASSIFIERS = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 
-install_requires = [
-    line.rstrip() for line in open(os.path.join(os.path.dirname(__file__), "REQUIREMENTS.txt"))
-]
-
 setuptools.setup(
     name="starfish",
     version="0.0.31",
@@ -26,7 +22,23 @@ setuptools.setup(
     author_email="dganguli@chanzuckerberg.com",
     license="MIT",
     packages=setuptools.find_packages(),
-    install_requires=install_requires,
+    install_requires=[
+        'numpy>=0.15.1',
+        'scipy>=1.1.0',
+        'pandas>=0.23.4',
+        'xarray>=0.10.8',
+        'scikit-image>=0.14.0',
+        'scikit-learn>=0.19.2',
+        'semantic-version',
+        'trackpy',
+        'showit',
+        'slicedimage',
+        'tqdm',
+        'sympy',
+        'jsonschema',
+        'click',
+        'regional',
+    ],
     extras_require={
         'napari': ['napari-gui==0.0.5.1', 'matplotlib==2.1.2']
     },

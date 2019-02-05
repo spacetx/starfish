@@ -125,8 +125,8 @@ class FieldOfView:
             info = '\n    '.join(
                 f" Group {k}: "
                 f" <starfish.ImageStack "
-                f"({len(v._permitted_rounds), len(v._permitted_chs), len(v._permitted_zplanes),} "
-                f"{y_size, x_size})>"
+                f"""({len(v._permitted_rounds), len(v._permitted_chs),
+                 len(v._permitted_zplanes), y_size, x_size})>"""
                 for k, v in enumerate(groups)
             )
             all_groups[name] = f'{info}'

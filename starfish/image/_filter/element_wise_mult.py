@@ -19,7 +19,7 @@ class ElementWiseMult(FilterAlgorithmBase):
         ----------
         mult_mat : np.ndarray
             each image in the stack is scaled by this percentile.
-        
+
         """
         self.mult_mat = mult_mat
 
@@ -28,7 +28,7 @@ class ElementWiseMult(FilterAlgorithmBase):
 
     @staticmethod
     def _mult(image: np.ndarray, mult_mat: np.ndarray) -> np.ndarray:
-        """Perform elementwise multiplication on the image tensor. This is useful for 
+        """Perform elementwise multiplication on the image tensor. This is useful for
         performing operations such as image normalization or field flatness correction
 
         Parameters

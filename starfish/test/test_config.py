@@ -74,6 +74,37 @@ def test_cache_config():
     assert cache_config["size_limit"] == 5 * 10 ** 9
 
 
+def test_cache_remove_step_wise():
+    config = Config("""{
+        "a": {
+             "b": {
+                "c": true,
+                "d": true
+             },
+             "e": 1
+         },
+         "f": 2
+    }""")
+    config.lookup(("a", "b", "c"), {}, remove=True)
+    assert "c" not in config.data["a"]["b"]
+    config.lookup(("a", "b"), {}, remove=True)
+    assert "b" not in config.data["a"]
+    config.lookup(("a",), {}, remove=True)
+    assert "a" not in config.data
+
+
+def test_cache_remove_all():
+    config = Config("""{
+        "a": {
+             "b": {
+                "c": true
+             }
+         }
+    }""")
+    config.lookup(("a", "b", "c"), {}, remove=True)
+    assert not  config.data
+
+
 def test_starfish_config_value_default_key(monkeypatch):
     monkeypatch.setenv("STARFISH_CONFIG", simple_str)
     config = StarfishConfig()._config_obj

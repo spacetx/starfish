@@ -12,8 +12,14 @@ class TestWithBuildData(unittest.TestCase):
             "--fov-count=2", '--primary-image-dimensions={"z": 3}',
             lambda tempdir: tempdir
         ],
+        # Old-style
         [
             "starfish", "validate", "--experiment-json",
+            lambda tempdir: os.sep.join([tempdir, "experiment.json"])
+        ],
+        # New-style
+        [
+            "starfish", "validate", "experiment",
             lambda tempdir: os.sep.join([tempdir, "experiment.json"])
         ],
     )

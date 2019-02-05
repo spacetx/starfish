@@ -23,8 +23,7 @@ class ElementWiseMult(FilterAlgorithmBase):
         """
         self.mult_mat = mult_mat
 
-    #TODO add default testing param
-    #_DEFAULT_TESTING_PARAMETERS = {"mult_mat": 0}
+    _DEFAULT_TESTING_PARAMETERS = {"mult_mat": np.array([[[[[1]]], [[[0.5]]]]])}
 
     @staticmethod
     def _mult(image: np.ndarray, mult_mat: np.ndarray) -> np.ndarray:
@@ -57,7 +56,6 @@ class ElementWiseMult(FilterAlgorithmBase):
 
         # Element-wise mult
         image = np.multiply(image, squeezed_mult_mat)
-
 
         image = preserve_float_range(image)
 
@@ -97,7 +95,6 @@ class ElementWiseMult(FilterAlgorithmBase):
         if self.mult_mat.shape[2] == 1:
             group_by.add(Axes.ZPLANE)
 
-
         clip = partial(self._mult, mult_mat=self.mult_mat)
         result = stack.apply(
             clip,
@@ -108,9 +105,6 @@ class ElementWiseMult(FilterAlgorithmBase):
     @staticmethod
     @click.command("ElementWiseMult")
     @click.option(
-        "--mult-mat", default=100, type=int, help="scale images by this percentile")
-    @click.option(  # FIXME: was this intentionally missed?
-        "--is-volume", is_flag=True, help="filter 3D volumes")
-    @click.pass_context
-    def _cli(ctx, p, is_volume):
+        "--mult-mat", required=True, type=np.ndarray, help="matrix to multiply with the image")
+    def _cli(ctx, mult_mat):
         ctx.obj["component"]._cli_run(ctx, ElementWiseMult(mult_mat, is_volume))

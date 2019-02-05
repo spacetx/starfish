@@ -32,7 +32,7 @@ setuptools.setup(
         'semantic-version',
         'trackpy',
         'showit',
-        'slicedimage',
+        'slicedimage==1.0.3',
         'tqdm',
         'sympy',
         'jsonschema',

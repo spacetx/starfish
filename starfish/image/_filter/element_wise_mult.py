@@ -107,4 +107,4 @@ class ElementWiseMult(FilterAlgorithmBase):
     @click.option(
         "--mult-mat", required=True, type=np.ndarray, help="matrix to multiply with the image")
     def _cli(ctx, mult_mat):
-        ctx.obj["component"]._cli_run(ctx, ElementWiseMult(mult_mat, is_volume))
+        ctx.obj["component"]._cli_run(ctx, ElementWiseMult(mult_mat))

@@ -112,10 +112,17 @@ class FieldOfView:
 
         ex.
             {'primary': 'Group 0:  <starfish.ImageStack (8, 2, 1, 205, 405))>',
-             'nuclei': '  Group 0:  <starfish.ImageStack (1, 1, 1, 205, 405))>'}
+             'nuclei': 'Group 0:  <starfish.ImageStack (1, 1, 1, 205, 405))>'}
 
         Means there are two tilesets in this FOV, (primary and nuclei) each tileset only
         has one aligned subgroup.
+
+        ex.
+            {'primary': 'Group 0:  <starfish.ImageStack (4, 2, 1, 205, 405))>
+                         Group 1:  <starfish.ImageStack (4, 2, 1, 205, 405))>'}
+
+        Means there is one tileset in this FOV, (primary), it has two different aligned
+        coordinate groups with 4 rounds in each
 
         """
         all_groups = dict()

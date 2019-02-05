@@ -9,6 +9,7 @@ from typing import (
     Optional,
     Sequence,
     Set,
+    Union
 )
 
 from semantic_version import Version
@@ -71,15 +72,9 @@ class FieldOfView:
             for k, v in self._images.items()
             if k != FieldOfView.PRIMARY_IMAGES
         )
-        group_info = '\n    '.join(
-            f'{k}: {v}'
-            for k, v in enumerate(self.aligned_coordinate_groups)
-        )
         return (
             f"<starfish.FieldOfView>\n"
             f"  Primary Image: {self._images[FieldOfView.PRIMARY_IMAGES]}\n"
-            f"  Aligned Groups:\n"
-            f"    {group_info}\n"
             f"  Auxiliary Images:\n"
             f"    {images}"
         )
@@ -112,16 +107,55 @@ class FieldOfView:
         return set(self._images.keys())
 
     def show_aligned_image_groups(self):
-        # TODO show ch/r/z and imagestack shape
-        group_info = '\n    '.join(
-            f'{k}: {v}'
-            for k, v in enumerate(self.aligned_coordinate_groups)
-        )
-        return "Aligned Groups: [" + f"{group_info} ]"
+        """
+        Describe the aligned subgroups for each Tileset in this FOV
 
-    def get_image(self, item, aligned_group: int = 0, crop_parameters: Optional[CropParameters]=None):
-        # TODO provide either crop params or aligned group
+        ex.
+            {'primary': 'Group 0:  <starfish.ImageStack (8, 2, 1, 205, 405))>',
+             'nuclei': '  Group 0:  <starfish.ImageStack (1, 1, 1, 205, 405))>'}
+
+        Means there are two tilesets in this FOV, (primary and nuclei) each tileset only
+        has one aligned subgroup.
+
+        """
+        all_groups = dict()
+        for name, groups in self.aligned_coordinate_groups.items():
+            y_size = self._images[name].default_tile_shape[0]
+            x_size = self._images[name].default_tile_shape[1]
+            info = '\n    '.join(
+                f" Group {k}: "
+                f" <starfish.ImageStack "
+                f"({len(v._permitted_rounds), len(v._permitted_chs), len(v._permitted_zplanes),} "
+                f"{y_size, x_size})>"
+                for k, v in enumerate(groups)
+            )
+            all_groups[name] = f'{info}'
+        return all_groups
+
+    def get_image(self, item, aligned_group: int = 0,
+                  x_slice: Optional[Union[int, slice]] = None,
+                  y_slice: Optional[Union[int, slice]] = None,
+                  ) -> ImageStack:
+        """
+        Parameters
+        ----------
+
+        item: str
+            The name of the tileset ex. 'primary' or 'nuclei'
+        aligned_group: int
+            The aligned subgroup, default 0
+        x_slice: int or slice
+            The cropping parameters for the x axis
+        y_slice:
+            The cropping parameters for the y axis
+
+        Returns
+        -------
+        The instantiated ImageStack
+        """
         crop_params = self.aligned_coordinate_groups[item][aligned_group]
+        crop_params._x_slice = x_slice
+        crop_params._y_slice = y_slice
         return ImageStack.from_tileset(self._images[item], crop_parameters=crop_params)
 
 

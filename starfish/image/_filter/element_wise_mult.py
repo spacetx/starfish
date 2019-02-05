@@ -17,14 +17,14 @@ class ElementWiseMult(FilterAlgorithmBase):
 
         Parameters
         ----------
-        corr_mat : np.ndarray
+        mult_mat : np.ndarray
             each image in the stack is scaled by this percentile.
         
         """
         self.mult_mat = mult_mat
 
     #TODO add default testing param
-    #_DEFAULT_TESTING_PARAMETERS = {"corr_mat": 0}
+    #_DEFAULT_TESTING_PARAMETERS = {"mult_mat": 0}
 
     @staticmethod
     def _mult(image: np.ndarray, mult_mat: np.ndarray) -> np.ndarray:
@@ -47,9 +47,16 @@ class ElementWiseMult(FilterAlgorithmBase):
 
         """
 
-        # Element-wise mult
+        # Get the axes to squeeze and squeeze the mult_mat while
+        # preserving the X, Y axes
+        to_squeeze = np.isin(mult_mat.shape[0:3], 1)
+        squeezable_axes = np.array([0, 1, 2])
+        axes_to_squeeze = tuple(squeezable_axes[to_squeeze])
 
-        image = np.multiply(image, np.squeeze(mult_mat))
+        squeezed_mult_mat = np.squeeze(mult_mat, axis=axes_to_squeeze)
+
+        # Element-wise mult
+        image = np.multiply(image, squeezed_mult_mat)
 
 
         image = preserve_float_range(image)
@@ -89,6 +96,7 @@ class ElementWiseMult(FilterAlgorithmBase):
             group_by.add(Axes.CH)
         if self.mult_mat.shape[2] == 1:
             group_by.add(Axes.ZPLANE)
+
 
         clip = partial(self._mult, mult_mat=self.mult_mat)
         result = stack.apply(

@@ -64,7 +64,7 @@ class FieldOfView:
             for name, tileset in image_tilesets.items():
                 self.aligned_coordinate_groups[name] = self.parse_coordinate_groups(
                     image_tilesets[name])
-                self._images = image_tilesets
+            self._images = image_tilesets
 
     def __repr__(self):
         images = '\n    '.join(

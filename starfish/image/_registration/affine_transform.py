@@ -3,7 +3,8 @@ from typing import Optional, Tuple, Union
 
 from itertools import product
 import numpy as np
-from skimage.transform import AffineTransform, warp
+from skimage.transform import AffineTransform as AT
+from skimage.transform import warp
 
 from starfish.image._filter.util import preserve_float_range
 from starfish.imagestack.imagestack import ImageStack
@@ -86,15 +87,15 @@ class AffineTransform(RegistrationAlgorithmBase):
         slice_indices = product(self.rounds, self.channels, self.zplanes)
 
         # Get the transform
-        transform = AffineTransform(scale=self.scale, rotation=self.rotation,
+        transformation = AT(scale=self.scale, rotation=self.rotation,
                                     shear=self.shear, translation=self.translation)
 
         # Iterate through the selected tiles and perform the transform
         for r, c, z in slice_indices:
-            selector = {Axes.ROUND: r, Axes.CH: c, Axes.ZPLANES: z}
+            selector = {Axes.ROUND: r, Axes.CH: c, Axes.ZPLANE: z}
 
             tile = image.get_slice(selector)[0]
-            transformed = warp(tile, transform)
+            transformed = warp(tile, transformation)
             image.set_slice(selector, transformed.astype(np.float32))
 
         if not in_place:

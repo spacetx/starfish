@@ -1,12 +1,11 @@
 from copy import deepcopy
-from typing import Optional, Tuple, Union
-
 from itertools import product
+from typing import Optional, Union
+
 import numpy as np
 from skimage.transform import AffineTransform as AT
 from skimage.transform import warp
 
-from starfish.image._filter.util import preserve_float_range
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
 from starfish.util import click
@@ -22,7 +21,7 @@ class AffineTransform(RegistrationAlgorithmBase):
         self, scale: Union[list, tuple]=None, rotation: float=None,
         shear: float=None, translation: Union[list, tuple]=None,
         rounds=None, channels=None, zplanes=None
-            ) -> None:
+    ) -> None:
 
         """Performs an affine transform on the specified indices of an ImageStack
         Wraps skimage's AffineTransform
@@ -88,7 +87,7 @@ class AffineTransform(RegistrationAlgorithmBase):
 
         # Get the transform
         transformation = AT(scale=self.scale, rotation=self.rotation,
-                                    shear=self.shear, translation=self.translation)
+                            shear=self.shear, translation=self.translation)
 
         # Iterate through the selected tiles and perform the transform
         for r, c, z in slice_indices:
@@ -121,4 +120,4 @@ class AffineTransform(RegistrationAlgorithmBase):
     def _cli(ctx, scale, rotation, shear, translation, rounds, channels, zplanes):
         ctx.obj["component"]._cli_run(
             ctx, AffineTransform(scale, rotation, shear, translation, rounds, channels, zplanes)
-                )
+        )

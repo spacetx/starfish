@@ -20,7 +20,6 @@ class DefaultGroup(click.Group):
                 copy.extend(parts)
             else:
                 copy.append(arg)
-        print(copy)
         super(DefaultGroup, self).parse_args(ctx, copy)
 
 

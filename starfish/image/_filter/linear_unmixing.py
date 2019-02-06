@@ -4,8 +4,8 @@ from typing import Optional
 import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.util import click
 from starfish.types import Axes
+from starfish.util import click
 from ._base import FilterAlgorithmBase
 from .util import preserve_float_range
 
@@ -90,8 +90,6 @@ class LinearUnmixing(FilterAlgorithmBase):
             original stack.
 
         """
-        assert self.coeff_mat.shape == (stack.num_chs, stack.num_chs) 
-
         group_by = {Axes.ROUND, Axes.ZPLANE}
         unmix = partial(self._unmix, coeff_mat=self.coeff_mat)
         result = stack.apply(

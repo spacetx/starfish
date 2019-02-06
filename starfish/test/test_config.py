@@ -204,6 +204,13 @@ def test_starfish_environ(monkeypatch):
     with environ(VALIDATION_STRICT="true"):
         assert StarfishConfig().strict
 
+def test_starfish_environ_warn(tmpdir, monkeypatch):
+    setup_config({}, tmpdir, monkeypatch)
+    with environ(UNKNOWN="true"):
+        with warnings.catch_warnings(record=True) as warnings_:
+            StarfishConfig()
+            assert len(warnings_) == 1  # type: ignore
+
 #
 # HELPERS
 #

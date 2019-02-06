@@ -113,6 +113,7 @@ class StarfishConfig(object):
         """
         config = os.environ.get("STARFISH_CONFIG", "@~/.starfish/config")
         self._config_obj = Config(config)
+        self._env_keys = [x for x in os.environ.keys() if x.startswith("STARFISH_") and x != "STARFISH_CONFIG"]
 
         # If no directory is set, then force the default
         self._slicedimage = self._config_obj.lookup(("slicedimage",), NestedDict(), remove=True)
@@ -129,6 +130,8 @@ class StarfishConfig(object):
 
         if self._config_obj.data:
             warnings.warn(f"unknown configuration: {self._config_obj.data}")
+        if self._env_keys:
+            warnings.warn(f"unknown environment variables: {self._env_keys}")
 
     def _slicedimage_update(self, lookup, parse=lambda x: x):
         """ accept STARFISH_SLICEDIMAGE_ or SLICEDIMAGE_ prefixes"""
@@ -137,6 +140,7 @@ class StarfishConfig(object):
             name = "STARFISH_" + name
             if name not in os.environ:
                 return
+        self._env_keys.remove(name)
         value = parse(os.environ[name])
 
         v = self._slicedimage

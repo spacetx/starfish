@@ -1,4 +1,5 @@
 import os
+import warnings
 from json import dump, loads
 
 from diskcache import Cache
@@ -188,6 +189,14 @@ def test_starfish_config(tmpdir, monkeypatch):
     setup_config({}, tmpdir, monkeypatch,
                  STARFISH_VALIDATION_STRICT="false")
     assert not StarfishConfig().strict
+
+def test_starfish_warn(tmpdir, monkeypatch):
+    config = {"unknown": True}
+    setup_config(config, tmpdir, monkeypatch,
+                 STARFISH_SLICEDIMAGE_CACHING_SIZE_LIMIT="1")
+    with warnings.catch_warnings(record=True) as warnings_:
+        StarfishConfig()
+        assert len(warnings_) == 1  # type: ignore
 
 def test_starfish_environ(monkeypatch):
     monkeypatch.delitem(os.environ, "STARFISH_VALIDATION_STRICT", raising=False)

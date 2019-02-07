@@ -15,12 +15,12 @@ HEIGHT = 10
 WIDTH = 10
 
 
-def round_to_x(r: int) -> Tuple[float, float]:
-    return (r + 1) * 1000, (r + 1) * 100
+def round_to_x() -> Tuple[float, float]:
+    return 1000, 100
 
 
-def round_to_y(r: int) -> Tuple[float, float]:
-    return (r + 1) * 10, (r + 1) * 0.1
+def round_to_y() -> Tuple[float, float]:
+    return 10, 0.1
 
 
 def round_to_z(r: int) -> Tuple[float, float]:
@@ -40,8 +40,8 @@ class OffsettedTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return {
-            Coordinates.X: round_to_x(self._round),
-            Coordinates.Y: round_to_y(self._round),
+            Coordinates.X: round_to_x(),
+            Coordinates.Y: round_to_y(),
             Coordinates.Z: round_to_z(self._round),
         }
 
@@ -66,20 +66,18 @@ def test_coordinates():
         )
     )
 
-    assert stack.tiles_aligned is False
-
     for selectors in stack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
         verify_physical_coordinates(
             stack,
             selectors,
-            round_to_x(selectors[Axes.ROUND]),
-            round_to_y(selectors[Axes.ROUND]),
+            round_to_x(),
+            round_to_y(),
             round_to_z(selectors[Axes.ROUND]),
         )
 
 
-class OffsettedScalarTiles(FetchedTile):
-    """Tiles that are physically offset based on round, but only have a single scalar coordinate."""
+class ScalarTiles(FetchedTile):
+    """Tiles that have a single scalar coordinate."""
     def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
         super().__init__()
         self._round = _round
@@ -91,8 +89,8 @@ class OffsettedScalarTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return {
-            Coordinates.X: round_to_x(self._round)[0],
-            Coordinates.Y: round_to_y(self._round)[0],
+            Coordinates.X: round_to_x()[0],
+            Coordinates.Y: round_to_y()[0],
             Coordinates.Z: round_to_z(self._round)[0],
         }
 
@@ -113,16 +111,14 @@ def test_scalar_coordinates():
         NUM_ROUND, NUM_CH, NUM_Z,
         HEIGHT, WIDTH,
         tile_fetcher=tile_fetcher_factory(
-            OffsettedScalarTiles,
+            ScalarTiles,
             True,
         )
     )
 
-    assert stack.tiles_aligned is False
-
     for selectors in stack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
-        expected_x = round_to_x(selectors[Axes.ROUND])[0]
-        expected_y = round_to_y(selectors[Axes.ROUND])[0]
+        expected_x = round_to_x()[0]
+        expected_y = round_to_y()[0]
         expected_z = round_to_z(selectors[Axes.ROUND])[0]
 
         verify_physical_coordinates(
@@ -132,44 +128,3 @@ def test_scalar_coordinates():
             (expected_y, expected_y),
             (expected_z, expected_z),
         )
-
-
-class AlignedTiles(FetchedTile):
-    """Tiles that all have the same physical coordinates"""
-    def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
-        super().__init__()
-        self._round = _round
-
-    @property
-    def shape(self) -> Tuple[int, ...]:
-        return HEIGHT, WIDTH
-
-    @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
-        return {
-            Coordinates.X: 1,
-            Coordinates.Y: 4,
-            Coordinates.Z: round_to_z(self._round)[0],
-        }
-
-    @property
-    def format(self) -> ImageFormat:
-        return ImageFormat.TIFF
-
-    def tile_data(self) -> np.ndarray:
-        return np.ones((HEIGHT, WIDTH), dtype=np.float32)
-
-
-def test_aligned_coordinates():
-    """Set up an ImageStack where all the tiles are aligned (have the same physical coordinate values).
-    Assert that the resulting Imagestack's tiles_aligned attribute is True
-    """
-    stack = ImageStack.synthetic_stack(
-        NUM_ROUND, NUM_CH, NUM_Z,
-        HEIGHT, WIDTH,
-        tile_fetcher=tile_fetcher_factory(
-            AlignedTiles,
-            True,
-        )
-    )
-    assert stack.tiles_aligned is True

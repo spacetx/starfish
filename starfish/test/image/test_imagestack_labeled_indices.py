@@ -31,18 +31,18 @@ def fill_value(round_: int, ch: int, z: int) -> float:
     return float((((round_idx * NUM_CH) + ch_idx) * NUM_Z) + z_idx) / (NUM_ROUND * NUM_CH * NUM_Z)
 
 
-def x_coordinates(round_: int, ch: int) -> Tuple[float, float]:
+def x_coordinates() -> Tuple[float, float]:
     """Return the expected physical x coordinate value for a given round/ch tuple.  Note that in
     real life, physical coordinates are not expected to vary for different ch values.  However, for
     completeness of the tests, we are pretending they will."""
-    return min(round_, ch) * 0.01, max(round_, ch) * 0.01
+    return 0.01, 0.01
 
 
-def y_coordinates(round_: int, ch: int) -> Tuple[float, float]:
+def y_coordinates() -> Tuple[float, float]:
     """Return the expected physical y coordinate value for a given round/ch tuple.  Note that in
     real life, physical coordinates are not expected to vary for different ch values.  However, for
     completeness of the tests, we are pretending they will."""
-    return min(round_, ch) * 0.001, max(round_, ch) * 0.001
+    return 0.001, 0.001
 
 
 def z_coordinates(z: int) -> Tuple[float, float]:
@@ -65,8 +65,8 @@ class UniqueTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return {
-            Coordinates.X: x_coordinates(self._round, self._ch),
-            Coordinates.Y: y_coordinates(self._round, self._ch),
+            Coordinates.X: x_coordinates(),
+            Coordinates.Y: y_coordinates(),
             Coordinates.Z: z_coordinates(self._zplane),
         }
 
@@ -164,8 +164,8 @@ def test_labeled_indices_sel_single_tile():
         verify_physical_coordinates(
             stack,
             selector,
-            x_coordinates(selector[Axes.ROUND], selector[Axes.CH]),
-            y_coordinates(selector[Axes.ROUND], selector[Axes.CH]),
+            x_coordinates(),
+            y_coordinates(),
             z_coordinates(selector[Axes.ZPLANE]),
         )
 
@@ -200,7 +200,7 @@ def test_labeled_indices_sel_slice():
         verify_physical_coordinates(
             stack,
             selectors,
-            x_coordinates(selectors[Axes.ROUND], selectors[Axes.CH]),
-            y_coordinates(selectors[Axes.ROUND], selectors[Axes.CH]),
+            x_coordinates(),
+            y_coordinates(),
             z_coordinates(selectors[Axes.ZPLANE]),
         )

@@ -97,7 +97,7 @@ def import_all_submodules(path_str: str, package: str, excluded: Optional[Set[st
         A set of files not to include.  If this is not provided, it defaults to set("__init__.py").
     """
     if excluded is None:
-        excluded = set(("__init__.py",))
+        excluded = {'__init__.py'}
 
     path: Path = Path(path_str).parent
     for entry in path.iterdir():

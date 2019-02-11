@@ -103,7 +103,7 @@ def test_cache_remove_all():
          }
     }""")
     config.lookup(("a", "b", "c"), {}, remove=True)
-    assert not  config.data
+    assert not config.data
 
 
 def test_starfish_config_value_default_key(monkeypatch):

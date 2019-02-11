@@ -113,7 +113,9 @@ class StarfishConfig(object):
         """
         config = os.environ.get("STARFISH_CONFIG", "@~/.starfish/config")
         self._config_obj = Config(config)
-        self._env_keys = [x for x in os.environ.keys() if x.startswith("STARFISH_") and x != "STARFISH_CONFIG"]
+        self._env_keys = [
+            x for x in os.environ.keys()
+            if x.startswith("STARFISH_") and x != "STARFISH_CONFIG"]
 
         # If no directory is set, then force the default
         self._slicedimage = self._config_obj.lookup(("slicedimage",), NestedDict(), remove=True)

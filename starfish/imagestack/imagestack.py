@@ -151,12 +151,29 @@ class ImageStack:
             data_shape.append(size_for_axis)
             data_dimensions.append(dim_for_axis.value)
             data_tick_marks[dim_for_axis.value] = list(self.axis_labels(dim_for_axis))
+            # TODO build coords here data_tick_marks[dim_for_axis.value] needs to be dict that has
+            # data tick marks and coords for x y axis, this loop only goes through r/ch/z
             coordinates_shape.append(size_for_axis)
             coordinates_dimensions.append(dim_for_axis.value)
             coordinates_tick_marks[dim_for_axis.value] = list(self.axis_labels(dim_for_axis))
 
         data_shape.extend(self._tile_shape)
         data_dimensions.extend([Axes.Y.value, Axes.X.value])
+
+        all_selectors = list(self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}))
+        first_selector = all_selectors[0]
+        tile = tile_data.get_tile(r=first_selector[Axes.ROUND],
+                                  ch=first_selector[Axes.CH],
+                                  z=first_selector[Axes.ZPLANE])
+        # only compare X,Y coords
+        starting_coords = [
+            tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
+            tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
+        ]
+
+        data_tick_marks[Axes.X.value] = np.linspace(tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1], self.tile_shape[1])
+        data_tick_marks[Axes.Y.value] = np.linspace(tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1], self.tile_shape[0])
+
         coordinates_shape.append(6)
         coordinates_dimensions.append(PHYSICAL_COORDINATE_DIMENSION)
         coordinates_tick_marks[PHYSICAL_COORDINATE_DIMENSION] = [
@@ -175,25 +192,15 @@ class ImageStack:
             dims=data_dimensions,
             coords=data_tick_marks,
         )
-        self._coordinates = xr.DataArray(
-            np.empty(
-                shape=coordinates_shape,
-                dtype=np.float32,
-            ),
-            dims=coordinates_dimensions,
-            coords=coordinates_tick_marks,
-        )
+        # self._coordinates = xr.DataArray(
+        #     np.empty(
+        #         shape=coordinates_shape,
+        #         dtype=np.float32,
+        #     ),
+        #     dims=coordinates_dimensions,
+        #     coords=coordinates_tick_marks,
+        # )
 
-        all_selectors = list(self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}))
-        first_selector = all_selectors[0]
-        tile = tile_data.get_tile(r=first_selector[Axes.ROUND],
-                                  ch=first_selector[Axes.CH],
-                                  z=first_selector[Axes.ZPLANE])
-        # only compare X,Y coords
-        starting_coords = [
-            tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
-            tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
-        ]
         for selector in tqdm(all_selectors):
             tile = tile_data.get_tile(
                 r=selector[Axes.ROUND], ch=selector[Axes.CH], z=selector[Axes.ZPLANE])

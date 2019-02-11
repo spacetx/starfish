@@ -112,23 +112,20 @@ def test_starfish_config_value_default_key(monkeypatch):
     assert config.data["a"] == 1
 
 
-@mark.parametrize("name,config", (
-    ("enabled", {
-        "expected": (2841272, 4e6),
+@mark.parametrize("name,expected,config", (
+    ("enabled", (2841272, 4e6), {
         "validation": {"strict": True},
         "slicedimage": {
             "caching": {
                 "directory": "REPLACEME",
             }}}),
-    ("disabled", {
-        "expected": (0, 0),
+    ("disabled", (0, 0), {
         "validation": {"strict": True},
         "slicedimage": {
             "caching": {
                 "size_limit": 0,
             }}}),
-    ("limited", {
-        "expected": (1e5, 3e6),
+    ("limited", (1e5, 3e6), {
         "validation": {"strict": True},
         "slicedimage": {
             "caching": {
@@ -136,7 +133,7 @@ def test_starfish_config_value_default_key(monkeypatch):
                 "size_limit": 1e5,
             }}}),
 ))
-def test_cache_merfish(tmpdir, name, config, monkeypatch):
+def test_cache_merfish(tmpdir, name, expected, config, monkeypatch):
 
     cache_enabled = (0 != config["slicedimage"]["caching"].get("size_limit", None))
     if cache_enabled:
@@ -158,7 +155,7 @@ def test_cache_merfish(tmpdir, name, config, monkeypatch):
         cache.cull()
 
     cache_size = get_size(tmpdir / "caching")
-    min, max = config["expected"]
+    min, max = expected
     assert (min <= cache_size) and (cache_size <= max)
 
 def test_starfish_config(tmpdir, monkeypatch):
@@ -209,6 +206,17 @@ def test_starfish_environ_warn(tmpdir, monkeypatch):
     with environ(UNKNOWN="true"):
         with warnings.catch_warnings(record=True) as warnings_:
             StarfishConfig()
+            assert len(warnings_) == 1  # type: ignore
+
+def test_starfish_environ_warn_on_duplicate(tmpdir, monkeypatch):
+    setup_config({}, tmpdir, monkeypatch,
+                 SLICEDIMAGE_CACHING_DIRECTORY=None,
+                 STARFISH_SLICEDIMAGE_CACHING_DIRECTORY=None)
+    assert "directory" not in StarfishConfig().slicedimage
+    with environ(SLICEDIMAGE_CACHING_DIRECTORY="foo",
+                 STARFISH_SLICEDIMAGE_CACHING_DIRECTORY="bar"):
+        with warnings.catch_warnings(record=True) as warnings_:
+            assert "bar" == StarfishConfig().slicedimage["caching"]["directory"]
             assert len(warnings_) == 1  # type: ignore
 
 #

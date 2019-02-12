@@ -35,19 +35,19 @@ def x_coordinates() -> Tuple[float, float]:
     """Return the expected physical x coordinate value for a given round/ch tuple.  Note that in
     real life, physical coordinates are not expected to vary for different ch values.  However, for
     completeness of the tests, we are pretending they will."""
-    return 0.01, 0.01
+    return 0.01, 0.1
 
 
 def y_coordinates() -> Tuple[float, float]:
     """Return the expected physical y coordinate value for a given round/ch tuple.  Note that in
     real life, physical coordinates are not expected to vary for different ch values.  However, for
     completeness of the tests, we are pretending they will."""
-    return 0.001, 0.001
+    return 0.001, 0.01
 
 
-def z_coordinates(z: int) -> Tuple[float, float]:
+def z_coordinates() -> Tuple[float, float]:
     """Return the expected physical z coordinate value for a given zplane index."""
-    return z * 0.0001, (z + 1) * 0.0001
+    return 0.0001, 0.001
 
 
 class UniqueTiles(FetchedTile):
@@ -67,7 +67,7 @@ class UniqueTiles(FetchedTile):
         return {
             Coordinates.X: x_coordinates(),
             Coordinates.Y: y_coordinates(),
-            Coordinates.Z: z_coordinates(self._zplane),
+            Coordinates.Z: z_coordinates(),
         }
 
     @property
@@ -161,13 +161,12 @@ def test_labeled_indices_sel_single_tile():
             assert sizes[dim] == 1
 
         # assert that the physical coordinate values are what we expect.
-        verify_physical_coordinates(
-            stack,
-            selector,
-            x_coordinates(),
-            y_coordinates(),
-            z_coordinates(selector[Axes.ZPLANE]),
-        )
+    verify_physical_coordinates(
+        stack,
+        x_coordinates(),
+        y_coordinates(),
+        z_coordinates(),
+    )
 
 
 def test_labeled_indices_sel_slice():
@@ -197,10 +196,9 @@ def test_labeled_indices_sel_slice():
         verify_stack_fill(subselected, selectors, expected_fill_value)
 
         # verify that each tile in the subselected stack has the correct physical coordinates.
-        verify_physical_coordinates(
-            stack,
-            selectors,
-            x_coordinates(),
-            y_coordinates(),
-            z_coordinates(selectors[Axes.ZPLANE]),
-        )
+    verify_physical_coordinates(
+        stack,
+        x_coordinates(),
+        y_coordinates(),
+        z_coordinates(),
+    )

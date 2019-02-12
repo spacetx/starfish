@@ -131,9 +131,6 @@ class ImageStack:
         data_shape: MutableSequence[int] = []
         data_dimensions: MutableSequence[str] = []
         data_tick_marks: MutableMapping[str, Sequence[int]] = dict()
-        coordinates_shape: MutableSequence[int] = []
-        coordinates_dimensions: MutableSequence[str] = []
-        coordinates_tick_marks: MutableMapping[str, Sequence[Union[int, str]]] = dict()
         for ix in range(N_AXES):
             size_for_axis: Optional[int] = None
             dim_for_axis: Optional[Axes] = None
@@ -151,39 +148,10 @@ class ImageStack:
             data_shape.append(size_for_axis)
             data_dimensions.append(dim_for_axis.value)
             data_tick_marks[dim_for_axis.value] = list(self.axis_labels(dim_for_axis))
-            # TODO build coords here data_tick_marks[dim_for_axis.value] needs to be dict that has
-            # data tick marks and coords for x y axis, this loop only goes through r/ch/z
-            coordinates_shape.append(size_for_axis)
-            coordinates_dimensions.append(dim_for_axis.value)
-            coordinates_tick_marks[dim_for_axis.value] = list(self.axis_labels(dim_for_axis))
 
         data_shape.extend(self._tile_shape)
         data_dimensions.extend([Axes.Y.value, Axes.X.value])
 
-        all_selectors = list(self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}))
-        first_selector = all_selectors[0]
-        tile = tile_data.get_tile(r=first_selector[Axes.ROUND],
-                                  ch=first_selector[Axes.CH],
-                                  z=first_selector[Axes.ZPLANE])
-        # only compare X,Y coords
-        starting_coords = [
-            tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
-            tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
-        ]
-
-        data_tick_marks[Axes.X.value] = np.linspace(tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1], self.tile_shape[1])
-        data_tick_marks[Axes.Y.value] = np.linspace(tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1], self.tile_shape[0])
-
-        coordinates_shape.append(6)
-        coordinates_dimensions.append(PHYSICAL_COORDINATE_DIMENSION)
-        coordinates_tick_marks[PHYSICAL_COORDINATE_DIMENSION] = [
-            PhysicalCoordinateTypes.X_MIN.value,
-            PhysicalCoordinateTypes.X_MAX.value,
-            PhysicalCoordinateTypes.Y_MIN.value,
-            PhysicalCoordinateTypes.Y_MAX.value,
-            PhysicalCoordinateTypes.Z_MIN.value,
-            PhysicalCoordinateTypes.Z_MAX.value,
-        ]
         # now that we know the tile data type (kind and size), we can allocate the data array.
         self._data = MPDataArray.from_shape_and_dtype(
             shape=data_shape,
@@ -192,14 +160,31 @@ class ImageStack:
             dims=data_dimensions,
             coords=data_tick_marks,
         )
-        # self._coordinates = xr.DataArray(
-        #     np.empty(
-        #         shape=coordinates_shape,
-        #         dtype=np.float32,
-        #     ),
-        #     dims=coordinates_dimensions,
-        #     coords=coordinates_tick_marks,
-        # )
+
+        all_selectors = list(self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}))
+        first_selector = all_selectors[0]
+        tile = tile_data.get_tile(r=first_selector[Axes.ROUND],
+                                  ch=first_selector[Axes.CH],
+                                  z=first_selector[Axes.ZPLANE])
+
+        # Set up coordinates
+        self._data[Coordinates.X.value] = xr.DataArray(
+            np.linspace(tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
+                        self.xarray.sizes[Axes.X.value]), dims=Axes.X.value)
+        self._data[Coordinates.Y.value] = xr.DataArray(
+            np.linspace(tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
+                        self.xarray.sizes[Axes.Y.value]), dims=Axes.Y.value)
+        if Coordinates.Z in tile.coordinates:
+            # As discussed just taking the middle of the z range for this...unless we change our minds
+            self._data[Coordinates.Z.value] = xr.DataArray(
+                np.linspace(tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1],
+                            self.xarray.sizes[Axes.ZPLANE.value]), dims=Axes.ZPLANE.value)
+
+        # Get coords on first tile to verify imagestack is aligned
+        starting_coords = [
+            tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
+            tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
+        ]
 
         for selector in tqdm(all_selectors):
             tile = tile_data.get_tile(
@@ -207,10 +192,7 @@ class ImageStack:
 
             data = img_as_float32(tile.numpy_array)
             self.set_slice(selector=selector, data=data)
-            coordinate_selector = {
-                index.value: index_value
-                for index, index_value in selector.items()
-            }
+
             coordinates_values = [
                 tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
                 tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
@@ -218,14 +200,7 @@ class ImageStack:
             if starting_coords != coordinates_values:
                 raise ValueError(
                     f"Tiles must be aligned")
-            if Coordinates.Z in tile.coordinates:
-                coordinates_values.extend([
-                    tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1],
-                ])
-            else:
-                coordinates_values.extend([np.nan, np.nan])
 
-            self._coordinates.loc[coordinate_selector] = np.array(coordinates_values)
 
     @staticmethod
     def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
@@ -408,8 +383,7 @@ class ImageStack:
         # convert indexers to Dict[str, (int/slice)] format
         selector = indexing_utils.convert_to_selector(indexers)
         indexed_data = indexing_utils.index_keep_dimensions(self.xarray, selector)
-        new_coordinates = physical_coordinate_calculator.calc_new_physical_coords_array(
-            self._coordinates, self.shape, selector)
+        new_coordinates = //TODO I guess make xarray of min/max values
         stack = self.from_numpy_array(
             indexed_data.data,
             {
@@ -990,32 +964,6 @@ class ImageStack:
         return result
 
     @property
-    def coordinates(self):
-        """
-        Returns an xarray where the row labels are the axes (R, C, Z) and the column labels are the
-        min and max for each type of coordinate (X, Y, Z).
-        """
-        return self._coordinates
-
-    def tile_coordinates(
-            self,
-            selector: Mapping[Axes, int],
-            physical_axis: Coordinates) -> Tuple[float, float]:
-        """Given a set of selector that uniquely identify a tile and a physical axis, return the min
-        and the max coordinates for that tile along that axis.
-
-        Examples
-        --------
-        stack.coordinates({Axes.ROUND: 4, Axes.CH: 3, Axes.ZPLANE: 2}, Coordinates.X)
-            Retrieves the xmin, xmax for the tile identified by round=4, ch=3, z=2
-        """
-
-        return physical_coordinate_calculator.get_coordinates(
-            coords_array=self._coordinates,
-            selector=selector,
-            physical_axis=physical_axis)
-
-    @property
     def num_rounds(self):
         return self._axes_sizes[Axes.ROUND]
 
@@ -1114,13 +1062,15 @@ class ImageStack:
             }
 
             coordinates: MutableMapping[Coordinates, Tuple[Number, Number]] = dict()
-            x_coordinates = self.tile_coordinates(selector, Coordinates.X)
-            y_coordinates = self.tile_coordinates(selector, Coordinates.Y)
-            z_coordinates = self.tile_coordinates(selector, Coordinates.Z)
-
+            x_coordinates = (np.float32(min(self.xarray[Coordinates.X.value])),
+                             np.float32(max(self.xarray[Coordinates.X.value])))
+            y_coordinates = (np.float32(min(self.xarray[Coordinates.Y.value])),
+                             np.float32(max(self.xarray[Coordinates.Y.value])))
             coordinates[Coordinates.X] = x_coordinates
             coordinates[Coordinates.Y] = y_coordinates
-            if z_coordinates[0] != np.nan and z_coordinates[1] != np.nan:
+            if Coordinates.Z in self.xarray.coords:
+                z_coordinates = (np.float32(min(self.xarray[Coordinates.Z.value])),
+                                 np.float32(max(self.xarray[Coordinates.Z.value])))
                 coordinates[Coordinates.Z] = z_coordinates
 
             tile = Tile(

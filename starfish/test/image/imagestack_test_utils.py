@@ -38,7 +38,6 @@ def verify_stack_fill(
 
 def verify_physical_coordinates(
         stack: ImageStack,
-        selectors: Mapping[Axes, int],
         expected_x_coordinates: Tuple[float, float],
         expected_y_coordinates: Tuple[float, float],
         expected_z_coordinates: Tuple[float, float]
@@ -46,12 +45,16 @@ def verify_physical_coordinates(
     """Given an imagestack and a set of selectors, verify that the physical coordinates for the data
     referred to by the selectors match the expected physical coordinates.
     """
-    assert np.all(np.isclose(
-        stack.tile_coordinates(selectors, Coordinates.X),
-        expected_x_coordinates))
-    assert np.all(np.isclose(
-        stack.tile_coordinates(selectors, Coordinates.Y),
-        expected_y_coordinates))
-    assert np.all(np.isclose(
-        stack.tile_coordinates(selectors, Coordinates.Z),
-        expected_z_coordinates))
+
+    assert np.all(np.isclose(stack.xarray[Coordinates.X.value],
+                             np.linspace(expected_x_coordinates[0],
+                                         expected_x_coordinates[1],
+                                         stack.xarray.sizes[Axes.X.value])))
+    assert np.all(np.isclose(stack.xarray[Coordinates.Y.value],
+                             np.linspace(expected_y_coordinates[0],
+                                         expected_y_coordinates[1],
+                                         stack.xarray.sizes[Axes.Y.value])))
+    assert np.all(np.isclose(stack.xarray[Coordinates.Z.value],
+                             np.linspace(expected_z_coordinates[0],
+                                         expected_z_coordinates[1],
+                                         stack.xarray.sizes[Axes.ZPLANE.value])))

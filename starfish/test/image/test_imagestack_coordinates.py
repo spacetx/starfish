@@ -5,7 +5,7 @@ from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, tile_fetcher_factory
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Axes, Coordinates, Number
+from starfish.types import Coordinates, Number
 from .imagestack_test_utils import verify_physical_coordinates
 
 NUM_ROUND = 8
@@ -15,16 +15,16 @@ HEIGHT = 10
 WIDTH = 10
 
 
-def round_to_x() -> Tuple[float, float]:
+def x_coordinates() -> Tuple[float, float]:
     return 1000, 100
 
 
-def round_to_y() -> Tuple[float, float]:
+def y_coordinates() -> Tuple[float, float]:
     return 10, 0.1
 
 
-def round_to_z(r: int) -> Tuple[float, float]:
-    return (r + 1) * 0.01, (r + 1) * 0.001
+def z_coordinates() -> Tuple[float, float]:
+    return 0.01, 0.001
 
 
 class OffsettedTiles(FetchedTile):
@@ -40,9 +40,9 @@ class OffsettedTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return {
-            Coordinates.X: round_to_x(),
-            Coordinates.Y: round_to_y(),
-            Coordinates.Z: round_to_z(self._round),
+            Coordinates.X: x_coordinates(),
+            Coordinates.Y: y_coordinates(),
+            Coordinates.Z: z_coordinates(),
         }
 
     @property
@@ -66,14 +66,12 @@ def test_coordinates():
         )
     )
 
-    for selectors in stack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
-        verify_physical_coordinates(
-            stack,
-            selectors,
-            round_to_x(),
-            round_to_y(),
-            round_to_z(selectors[Axes.ROUND]),
-        )
+    verify_physical_coordinates(
+        stack,
+        x_coordinates(),
+        y_coordinates(),
+        z_coordinates(),
+    )
 
 
 class ScalarTiles(FetchedTile):
@@ -89,9 +87,9 @@ class ScalarTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return {
-            Coordinates.X: round_to_x()[0],
-            Coordinates.Y: round_to_y()[0],
-            Coordinates.Z: round_to_z(self._round)[0],
+            Coordinates.X: x_coordinates()[0],
+            Coordinates.Y: y_coordinates()[0],
+            Coordinates.Z: z_coordinates()[0],
         }
 
     @property
@@ -116,15 +114,13 @@ def test_scalar_coordinates():
         )
     )
 
-    for selectors in stack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
-        expected_x = round_to_x()[0]
-        expected_y = round_to_y()[0]
-        expected_z = round_to_z(selectors[Axes.ROUND])[0]
+    expected_x = x_coordinates()[0]
+    expected_y = y_coordinates()[0]
+    expected_z = z_coordinates()[0]
 
-        verify_physical_coordinates(
-            stack,
-            selectors,
-            (expected_x, expected_x),
-            (expected_y, expected_y),
-            (expected_z, expected_z),
-        )
+    verify_physical_coordinates(
+        stack,
+        (expected_x, expected_x),
+        (expected_y, expected_y),
+        (expected_z, expected_z),
+    )

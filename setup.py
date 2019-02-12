@@ -28,7 +28,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=install_requires,
     extras_require={
-        'napari': ['napari-gui==0.0.5.1', 'matplotlib==2.1.2']
+        'napari': ['napari-gui==0.0.5.1', 'matplotlib==2.1.2'],
     },
     entry_points={
         'console_scripts': [

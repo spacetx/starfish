@@ -12,11 +12,11 @@ stages:
 jobs:
   include:
     - name: Syntax and Fast Tests
-      script: make install-src fast
+      script: make install-dev fast
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Slow Tests
-      script: make install-src && make -j check-notebooks slow-test
+      script: make install-dev && make -j check-notebooks slow-test
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Install Napari
@@ -26,31 +26,31 @@ jobs:
       script: make docker
     - name: 3d smFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-src run__notebooks/py/3d_smFISH.py
+      script: make install-dev run__notebooks/py/3d_smFISH.py
     - name: MERFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: travis_wait make install-src run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
+      script: travis_wait make install-dev run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
     - name: Assay Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-src run__notebooks/py/assay_comparison.py
+      script: make install-dev run__notebooks/py/assay_comparison.py
     - name: osmFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-src run__notebooks/py/osmFISH.py
+      script: make install-dev run__notebooks/py/osmFISH.py
     - name: DARTFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-src run__notebooks/py/DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV.py
+      script: make install-dev run__notebooks/py/DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV.py
     - name: Simulation Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-src run__notebooks/py/Starfish_simulation.py
+      script: make install-dev run__notebooks/py/Starfish_simulation.py
     - name: ISS Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-src run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
+      script: make install-dev run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
     - name: SeqFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-src run__notebooks/py/SeqFISH.py
+      script: make install-dev run__notebooks/py/SeqFISH.py
     - name: Released Notebooks
       if: type = cron and branch =~ /^(master|merge)/
-      script: make check_notebooks install-pypi run_notebooks
+      script: make check_notebooks install-released-notebooks-support run_notebooks
     - name: Check Requirements
       if: type = cron AND branch = /^master$/
       script: make refresh_all_requirements check_requirements

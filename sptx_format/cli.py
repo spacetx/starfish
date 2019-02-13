@@ -77,9 +77,10 @@ def xarray(ctx, file):
         else:
             print("Unknown xarray output format!")
             ctx.exit(1)
-        ctx.exit(0)
     except KeyboardInterrupt:
         ctx.exit(3)
     except Exception as e:
         print(f"Invalid xarray: {e}")
         ctx.exit(1)
+    else:
+        ctx.exit(0)

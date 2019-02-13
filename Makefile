@@ -116,7 +116,7 @@ help-integration:
 #
 install-dev:
 	pip install --force-reinstall --upgrade -r REQUIREMENTS-STRICT.txt
-	pip install --force-reinstall --upgrade -e .
+	pip install -e .
 	pip install -r REQUIREMENTS-CI.txt
 	pip freeze
 

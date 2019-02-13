@@ -184,7 +184,7 @@ class BlobDetector(SpotFinderAlgorithmBase):
     )
     @click.pass_context
     def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show, detector_method):
-            instance = BlobDetector(min_sigma, max_sigma, num_sigma, threshold, overlap,
-                                    detector_method=detector_method)
-            #  FIXME: measurement_type, is_volume missing as options; show missing as ctor args
-            ctx.obj["component"]._cli_run(ctx, instance)
+        instance = BlobDetector(min_sigma, max_sigma, num_sigma, threshold, overlap,
+                                detector_method=detector_method)
+        #  FIXME: measurement_type, is_volume missing as options; show missing as ctor args
+        ctx.obj["component"]._cli_run(ctx, instance)

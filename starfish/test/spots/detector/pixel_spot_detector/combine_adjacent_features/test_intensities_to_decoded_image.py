@@ -7,7 +7,9 @@ from typing import Tuple
 import numpy as np
 
 from starfish import ImageStack, IntensityTable
-from starfish.spots._detector.combine_adjacent_features import CombineAdjacentFeatures, TargetsMap
+from starfish.spots._pixel_decoder.combine_adjacent_features import (
+    CombineAdjacentFeatures, TargetsMap
+)
 from starfish.types import Features
 
 

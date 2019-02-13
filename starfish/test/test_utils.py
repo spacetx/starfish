@@ -1,6 +1,8 @@
 from collections import OrderedDict
+from typing import Sequence, Tuple
 
 import numpy as np
+from scipy.ndimage.filters import gaussian_filter
 
 from starfish import Codebook, ImageStack
 from starfish.types import Axes, Features, PhysicalCoordinateTypes
@@ -70,3 +72,171 @@ def codebook_array_factory() -> Codebook:
         },
     ]
     return Codebook.from_code_array(data)
+
+
+def _create_dataset(
+    pixel_dimensions: Tuple[int, int, int],
+    spot_coordinates: Sequence[Tuple[int, int, int]],
+    codebook: Codebook
+) -> ImageStack:
+    """
+    creates a numpy array containing one spot per codebook entry at spot_coordinates. length of
+    spot_coordinates must therefore match the number of codes in Codebook.
+    """
+    assert len(spot_coordinates) == codebook.sizes[Features.TARGET]
+
+    data_shape = (
+        codebook.sizes[Axes.ROUND.value],
+        codebook.sizes[Axes.CH.value],
+        *pixel_dimensions
+    )
+    imagestack_data = np.zeros((data_shape), dtype=np.float32)
+
+    for ((z, y, x), f) in zip(spot_coordinates, range(codebook.sizes[Features.TARGET])):
+        imagestack_data[:, :, z, y, x] = codebook[f].transpose(Axes.ROUND.value, Axes.CH.value)
+
+    # blur with a small non-isotropic kernel TODO make kernel smaller.
+    imagestack_data = gaussian_filter(imagestack_data, sigma=(0, 0, 0.7, 1.5, 1.5))
+    return ImageStack.from_numpy_array(imagestack_data)
+
+
+def two_spot_one_hot_coded_data_factory() -> Tuple[Codebook, ImageStack, float]:
+    """
+    Produce a 2-channel 2-round Codebook with two codes and an ImageStack containing one spot from
+    each code. The spots do not overlap and the data are noiseless.
+
+    The encoding of this data is similar to that used in In-situ Sequencing, FISSEQ,
+    BaristaSeq, STARMAP, MExFISH, or SeqFISH.
+
+    Returns
+    -------
+    Codebook :
+        codebook containing codes that match the data
+    ImageStack :
+        noiseless ImageStack containing one spot per code in codebook
+    float :
+        the maximum intensity found in the created ImageStack
+
+    """
+
+    codebook_data = [
+        {
+            Features.CODEWORD: [
+                {Axes.ROUND.value: 0, Axes.CH.value: 0, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+            ],
+            Features.TARGET: "GENE_A"
+        },
+        {
+            Features.CODEWORD: [
+                {Axes.ROUND.value: 0, Axes.CH.value: 1, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1}
+            ],
+            Features.TARGET: "GENE_B"
+        },
+    ]
+    codebook = Codebook.from_code_array(codebook_data)
+
+    imagestack = _create_dataset(
+        pixel_dimensions=(10, 100, 100),
+        spot_coordinates=((4, 10, 90), (5, 90, 10)),
+        codebook=codebook
+    )
+
+    max_intensity = np.max(imagestack.xarray.values)
+
+    return codebook, imagestack, max_intensity
+
+
+def two_spot_sparse_coded_data_factory() -> Tuple[Codebook, ImageStack, float]:
+    """
+    Produce a 3-channel 3-round Codebook with two codes and an ImageStack containing one spot from
+    each code. The spots do not overlap and the data are noiseless.
+
+    These spots display sparsity in both rounds and channels, similar to the sparse encoding of
+    MERFISH
+
+    Returns
+    -------
+    ImageStack :
+        noiseless ImageStack containing two spots
+
+    """
+
+    codebook_data = [
+        {
+            Features.CODEWORD: [
+                {Axes.ROUND.value: 0, Axes.CH.value: 0, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 2, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+            ],
+            Features.TARGET: "GENE_A"
+        },
+        {
+            Features.CODEWORD: [
+                {Axes.ROUND.value: 0, Axes.CH.value: 1, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 2, Features.CODE_VALUE: 1}
+            ],
+            Features.TARGET: "GENE_B"
+        },
+    ]
+    codebook = Codebook.from_code_array(codebook_data)
+
+    imagestack = _create_dataset(
+        pixel_dimensions=(10, 100, 100),
+        spot_coordinates=((4, 10, 90), (5, 90, 10)),
+        codebook=codebook
+    )
+
+    max_intensity = np.max(imagestack.xarray.values)
+
+    return codebook, imagestack, max_intensity
+
+
+def two_spot_informative_blank_coded_data_factory() -> Tuple[Codebook, ImageStack, float]:
+    """
+    Produce a 4-channel 2-round Codebook with two codes and an ImageStack containing one spot from
+    each code. The spots do not overlap and the data are noiseless.
+
+    The encoding of this data is essentially a one-hot encoding, but where one of the channels is a
+    intentionally and meaningfully "blank".
+
+    Returns
+    -------
+    Codebook :
+        codebook containing codes that match the data
+    ImageStack :
+        noiseless ImageStack containing one spot per code in codebook
+    float :
+        the maximum intensity found in the created ImageStack
+
+    """
+
+    codebook_data = [
+        {
+            Features.CODEWORD: [
+                {Axes.ROUND.value: 0, Axes.CH.value: 0, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1},
+                # round 3 is blank and channel 3 is not used
+            ],
+            Features.TARGET: "GENE_A"
+        },
+        {
+            Features.CODEWORD: [
+                # round 0 is blank and channel 0 is not used
+                {Axes.ROUND.value: 1, Axes.CH.value: 3, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 2, Axes.CH.value: 2, Features.CODE_VALUE: 1},
+            ],
+            Features.TARGET: "GENE_B"
+        },
+    ]
+    codebook = Codebook.from_code_array(codebook_data)
+
+    imagestack = _create_dataset(
+        pixel_dimensions=(10, 100, 100),
+        spot_coordinates=((4, 10, 90), (5, 90, 10)),
+        codebook=codebook
+    )
+
+    max_intensity = np.max(imagestack.xarray.values)
+
+    return codebook, imagestack, max_intensity

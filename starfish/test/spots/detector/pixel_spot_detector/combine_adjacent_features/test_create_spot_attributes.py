@@ -5,7 +5,9 @@ Tests for CombineAdjacentFeatures._create_spot_attributes method
 import numpy as np
 from skimage.measure import regionprops
 
-from starfish.spots._detector.combine_adjacent_features import CombineAdjacentFeatures, TargetsMap
+from starfish.spots._pixel_decoder.combine_adjacent_features import (
+    CombineAdjacentFeatures, TargetsMap
+)
 from starfish.types import Axes, Features, SpotAttributes
 from .test_calculate_mean_pixel_traces import labeled_intensities_factory  # reuse this fixture
 

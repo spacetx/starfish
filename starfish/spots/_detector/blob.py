@@ -108,6 +108,9 @@ class BlobDetector(SpotFinderAlgorithmBase):
             self.overlap
         )
 
+        if fitted_blobs_array.shape[0] == 0:
+            return SpotAttributes.empty(extra_fields=['intensity', 'spot_id'])
+
         # create the SpotAttributes Table
         columns = [Axes.ZPLANE.value, Axes.Y.value, Axes.X.value, Features.SPOT_RADIUS]
         fitted_blobs = pd.DataFrame(data=fitted_blobs_array, columns=columns)

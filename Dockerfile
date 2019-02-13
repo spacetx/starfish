@@ -44,7 +44,8 @@ USER starfish
 COPY --chown=starfish:starfish environment.yml /src/environment.yml
 COPY --chown=starfish:starfish REQUIREMENTS* /src/
 WORKDIR /src
-RUN conda env create -f environment.yml
+RUN conda env create -f environment.yml \
+    && conda clean -tipsy
 
 # Prepare for build
 COPY --chown=starfish:starfish . /src
@@ -52,7 +53,7 @@ RUN echo "source activate starfish" >> ~/.bashrc
 ENV PATH /home/starfish/.conda/envs/starfish/bin:$PATH
 
 # Build and configure for running
-RUN pip install -e . --ignore-installed
+RUN pip install -e . --ignore-installed --no-cache-dir
 
 env MPLBACKEND Agg
 ENTRYPOINT ["starfish"]

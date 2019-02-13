@@ -128,6 +128,23 @@ class TestWithIssData(CLITest, unittest.TestCase):
                     tempdir, "results", "decoded-spots.nc"),
                 "PerRoundMaxChannelDecoder",
             ],
+
+            # Validate results/{spots,targeted-spots,decoded-spots}.nc
+            [
+                "starfish", "validate", "xarray",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "spots.nc")
+            ],
+            [
+                "starfish", "validate", "xarray",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "targeted-spots.nc")
+            ],
+            [
+                "starfish", "validate", "xarray",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "decoded-spots.nc")
+            ],
         )
 
     def verify_results(self, intensities):

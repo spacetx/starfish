@@ -104,6 +104,10 @@ def measure_spot_intensities(
         n_round=n_round,
     )
 
+    # if no spots were detected, return the empty IntensityTable
+    if intensity_table.sizes[Features.AXIS] == 0:
+        return intensity_table
+
     # fill the intensity table
     indices = product(range(n_ch), range(n_round))
     for c, r in indices:
@@ -141,7 +145,7 @@ def concatenate_spot_attributes_to_intensities(
     n_ch: int = max(inds[Axes.CH] for _, inds in spot_attributes) + 1
     n_round: int = max(inds[Axes.ROUND] for _, inds in spot_attributes) + 1
 
-    all_spots = pd.concat([sa.data for sa, inds in spot_attributes])
+    all_spots = pd.concat([sa.data for sa, inds in spot_attributes], sort=True)
     # this drop call ensures only x, y, z, radius, and quality, are passed to the IntensityTable
     features_coordinates = all_spots.drop(['spot_id', 'intensity'], axis=1)
 

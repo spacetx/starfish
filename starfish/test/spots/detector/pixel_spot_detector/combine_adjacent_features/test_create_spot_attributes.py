@@ -20,7 +20,7 @@ def test_create_spot_attributes():
     """
     # make some fixtures
     intensity_table, label_image, decoded_image = labeled_intensities_factory()
-    region_properties = regionprops(label_image)
+    region_properties = regionprops(np.squeeze(label_image))
     target_map = TargetsMap(np.array(list('abcdef')))
     caf = CombineAdjacentFeatures(min_area=1, max_area=3, connectivity=2)
     spot_attributes, passes_filters = caf._create_spot_attributes(

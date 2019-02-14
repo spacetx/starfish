@@ -54,7 +54,4 @@ def verify_physical_coordinates(
                              np.linspace(expected_y_coordinates[0],
                                          expected_y_coordinates[1],
                                          stack.xarray.sizes[Axes.Y.value])))
-    assert np.all(np.isclose(stack.xarray[Coordinates.Z.value],
-                             np.linspace(expected_z_coordinates[0],
-                                         expected_z_coordinates[1],
-                                         stack.xarray.sizes[Axes.ZPLANE.value])))
+    assert np.all(np.isclose(stack.xarray[Coordinates.Z.value], expected_z_coordinates))

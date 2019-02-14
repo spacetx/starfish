@@ -38,7 +38,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
         return (
             [
                 sys.executable,
-                "starfish/test/full_pipelines/cli/get_cli_test_data.py",
+                "get_cli_test_data.py",
                 "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS-TEST/",
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted")
             ],

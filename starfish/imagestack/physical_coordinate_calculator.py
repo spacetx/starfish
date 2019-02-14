@@ -196,34 +196,10 @@ def get_coordinates(
     )
 
 
-def get_physical_coordinates_of_spot(
-        coords_array: xr.DataArray,
-        tile_selector: Mapping[Axes, int],
-        pixel_x: int,
-        pixel_y: int,
-        tile_shape: Tuple[int, int]):
+def get_physical_coordinates_of_z_plane(zrange: Tuple[float, float]):
     """Given a selector that uniquely identify a tile and the location of a spot in pixel space,
     calculate the location in physical space."""
-    x_range = get_coordinates(coords_array, tile_selector, Coordinates.X)
-    physcial_pixel_size_x = _calculate_physical_pixel_size(coord_max=x_range[1],
-                                                           coord_min=x_range[0],
-                                                           num_pixels=tile_shape[1])
-    physical_x = _pixel_offset_to_physical_coordinate(physical_pixel_size=physcial_pixel_size_x,
-                                                      pixel_offset=pixel_x,
-                                                      coordinates_at_pixel_offset_0=x_range[0],
-                                                      dimension_size=tile_shape[1])
 
-    y_range = get_coordinates(coords_array, tile_selector, Coordinates.Y)
-    physcial_pixel_size_y = _calculate_physical_pixel_size(coord_max=y_range[1],
-                                                           coord_min=y_range[0],
-                                                           num_pixels=tile_shape[0])
-    physical_y = _pixel_offset_to_physical_coordinate(physical_pixel_size=physcial_pixel_size_y,
-                                                      pixel_offset=pixel_y,
-                                                      coordinates_at_pixel_offset_0=y_range[0],
-                                                      dimension_size=tile_shape[0])
-
-    z_range = get_coordinates(coords_array, tile_selector, Coordinates.Z)
     # As discussed just taking the middle of the z range for this...unless we change our minds
-    physical_z = (z_range[1] - z_range[0]) / 2 + z_range[0]
-
-    return physical_x, physical_y, physical_z
+    physical_z = (zrange[1] - zrange[0]) / 2 + zrange[0]
+    return physical_z

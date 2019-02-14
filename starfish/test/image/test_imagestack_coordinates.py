@@ -5,6 +5,7 @@ from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, tile_fetcher_factory
 from starfish.imagestack.imagestack import ImageStack
+from starfish.imagestack.physical_coordinate_calculator import get_physical_coordinates_of_z_plane
 from starfish.types import Coordinates, Number
 from .imagestack_test_utils import verify_physical_coordinates
 
@@ -70,7 +71,7 @@ def test_coordinates():
         stack,
         x_coordinates(),
         y_coordinates(),
-        z_coordinates(),
+        get_physical_coordinates_of_z_plane(z_coordinates()),
     )
 
 
@@ -122,5 +123,5 @@ def test_scalar_coordinates():
         stack,
         (expected_x, expected_x),
         (expected_y, expected_y),
-        (expected_z, expected_z),
+        (expected_z, expected_z)
     )

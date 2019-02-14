@@ -24,7 +24,7 @@ def test_apply_3d():
     stack = ImageStack.synthetic_stack()
     assert np.all(stack.xarray == 1)
     stack.apply(divide, in_place=True, value=4,
-                group_by={Axes.ROUND.value, Axes.CH.value})
+                group_by={Axes.ROUND, Axes.CH})
     assert (stack.xarray == 0.25).all()
 
 

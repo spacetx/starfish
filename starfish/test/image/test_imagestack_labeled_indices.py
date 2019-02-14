@@ -9,6 +9,7 @@ from slicedimage import ImageFormat
 
 from starfish.experiment.builder import build_image, FetchedTile, tile_fetcher_factory
 from starfish.imagestack.imagestack import ImageStack
+from starfish.imagestack.physical_coordinate_calculator import get_physical_coordinates_of_z_plane
 from starfish.types import Axes, Coordinates, Number
 from .imagestack_test_utils import verify_physical_coordinates, verify_stack_fill
 
@@ -155,17 +156,12 @@ def test_labeled_indices_sel_single_tile():
             selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE])
         verify_stack_fill(stack, selector, expected_fill_value)
 
-        # verify that the subselected stack has the correct size for the physical coordinates table.
-        sizes = subselected.coordinates.sizes
-        for dim in (Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE.value):
-            assert sizes[dim] == 1
-
         # assert that the physical coordinate values are what we expect.
     verify_physical_coordinates(
         stack,
         x_coordinates(),
         y_coordinates(),
-        z_coordinates(),
+        get_physical_coordinates_of_z_plane(z_coordinates()),
     )
 
 
@@ -183,12 +179,6 @@ def test_labeled_indices_sel_slice():
             (Axes.ZPLANE, [4],)):
         assert subselected.axis_labels(index_type) == expected_results
 
-    # verify that the subselected stack has the correct size for the physical coordinates table.
-    sizes = subselected.coordinates.sizes
-    assert sizes[Axes.ROUND] == 2
-    assert sizes[Axes.CH] == 2
-    assert sizes[Axes.ZPLANE] == 1
-
     for selectors in subselected._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
         # verify that the subselected stack has the correct data.
         expected_fill_value = fill_value(
@@ -200,5 +190,5 @@ def test_labeled_indices_sel_slice():
         stack,
         x_coordinates(),
         y_coordinates(),
-        z_coordinates(),
+        get_physical_coordinates_of_z_plane(z_coordinates()),
     )

@@ -1,9 +1,11 @@
 from collections import OrderedDict
 
 import numpy as np
+import xarray as xr
 
 from starfish import Codebook, ImageStack
-from starfish.types import Axes, Features, PhysicalCoordinateTypes
+from starfish.imagestack import physical_coordinate_calculator
+from starfish.types import Axes, Features, PhysicalCoordinateTypes, Coordinates
 
 
 def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict) -> ImageStack:
@@ -27,23 +29,22 @@ def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict
                                        tile_height=stack_shape[Axes.Y],
                                        tile_width=stack_shape[Axes.X])
 
-    coords_array = [coords[PhysicalCoordinateTypes.X_MIN],
-                    coords[PhysicalCoordinateTypes.X_MAX],
-                    coords[PhysicalCoordinateTypes.Y_MIN],
-                    coords[PhysicalCoordinateTypes.Y_MAX],
-                    coords[PhysicalCoordinateTypes.Z_MIN],
-                    coords[PhysicalCoordinateTypes.Z_MAX]]
+    stack.xarray[Coordinates.X.value] = xr.DataArray(
+        np.linspace(coords[PhysicalCoordinateTypes.X_MIN], coords[PhysicalCoordinateTypes.X_MAX],
+                    stack.xarray.sizes[Axes.X.value]), dims=Axes.X.value)
 
-    for _round in stack.axis_labels(Axes.ROUND):
-        for ch in stack.axis_labels(Axes.CH):
-            for z in stack.axis_labels(Axes.ZPLANE):
-                coordinate_selector = {
-                    Axes.ROUND.value: _round,
-                    Axes.CH.value: ch,
-                    Axes.ZPLANE.value: z,
-                }
+    stack.xarray[Coordinates.Y.value] = xr.DataArray(
+        np.linspace(coords[PhysicalCoordinateTypes.Y_MIN], coords[PhysicalCoordinateTypes.Y_MAX],
+                    stack.xarray.sizes[Axes.Y.value]), dims=Axes.Y.value)
 
-                stack._coordinates.loc[coordinate_selector] = np.array(coords_array)
+    z_coord = physical_coordinate_calculator.\
+                get_physical_coordinates_of_z_plane((coords[PhysicalCoordinateTypes.Z_MIN], coords[PhysicalCoordinateTypes.Z_MAX]))
+
+    stack.xarray[Coordinates.Z.value] = xr.DataArray(np.zeros(stack.xarray.sizes[Axes.ZPLANE.value]), dims=Axes.ZPLANE.value)
+
+    for z in stack.axis_labels(Axes.ZPLANE):
+
+        stack.xarray[Coordinates.Z.value].loc[z] = z_coord
 
     return stack
 

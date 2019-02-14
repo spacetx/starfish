@@ -123,11 +123,12 @@ def test_crop_rcz():
                     expected_data,
                 )
 
+    expected_z_coordinates = get_physical_coordinates_of_z_plane(z_coordinates())
     verify_physical_coordinates(
         stack,
         x_coordinates(),
         y_coordinates(),
-        z_coordinates(),
+        expected_z_coordinates,
     )
 
 

@@ -199,10 +199,11 @@ class ImageStack:
             if starting_coords != coordinates_values:
                 raise ValueError(
                     f"Tiles must be aligned")
-            z_range = (tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1])
-            # As discussed just taking the middle of the z range for this...unless we change our minds
-            self._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = physical_coordinate_calculator.\
-                get_physical_coordinates_of_z_plane(z_range)
+            if Coordinates.Z in tile.coordinates:
+                z_range = (tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1])
+                # As discussed just taking the middle of the z range for this...unless we change our minds
+                self._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = physical_coordinate_calculator.\
+                    get_physical_coordinates_of_z_plane(z_range)
 
 
     @staticmethod

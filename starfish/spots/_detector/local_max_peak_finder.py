@@ -234,7 +234,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
         # store re-calculated regionprops and labels based on the area-masked image
         self._labels = label(masked_image)[0]
-        self._spot_props = regionprops(labels)
+        self._spot_props = regionprops(self._labels)
 
         if self.verbose:
             print('computing final spots ...')

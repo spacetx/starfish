@@ -20,7 +20,7 @@ def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict
 
     coords: OrderedDict
         Dict[PhysicalCoordinateTypes, float] defining the min/max values of physical
-        coordinates to assign to each tile of the return ImageStack
+        coordinates to assign to the Imagestack
     """
 
     stack = ImageStack.synthetic_stack(num_round=stack_shape[Axes.ROUND],
@@ -46,7 +46,6 @@ def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict
         dims=Axes.ZPLANE.value)
 
     for z in stack.axis_labels(Axes.ZPLANE):
-
         stack.xarray[Coordinates.Z.value].loc[z] = z_coord
 
     return stack

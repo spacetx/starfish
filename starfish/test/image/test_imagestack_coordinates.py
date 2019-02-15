@@ -28,8 +28,8 @@ def z_coordinates() -> Tuple[float, float]:
     return 0.01, 0.001
 
 
-class OffsettedTiles(FetchedTile):
-    """Tiles that are physically offset based on round."""
+class AlignedTiles(FetchedTile):
+    """Tiles that are physically aligned ob every tile."""
     def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
         super().__init__()
         self._round = _round
@@ -55,14 +55,14 @@ class OffsettedTiles(FetchedTile):
 
 
 def test_coordinates():
-    """Set up an ImageStack with tiles that are offset based on round.  Verify that the coordinates
+    """Set up an ImageStack with tiles that are aligned.  Verify that the coordinates
     retrieved match.
     """
     stack = ImageStack.synthetic_stack(
         NUM_ROUND, NUM_CH, NUM_Z,
         HEIGHT, WIDTH,
         tile_fetcher=tile_fetcher_factory(
-            OffsettedTiles,
+            AlignedTiles,
             True,
         )
     )

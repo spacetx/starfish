@@ -39,17 +39,17 @@ def data(round_: int, ch: int, z: int) -> np.ndarray:
 
 
 def x_coordinates() -> Tuple[float, float]:
-    """Return the expected physical x coordinate value for a given round/ch tuple."""
+    """Return the expected physical x coordinates."""
     return 0.01, 0.1
 
 
 def y_coordinates() -> Tuple[float, float]:
-    """Return the expected physical y coordinate value for a given round/ch tuple."""
+    """Return the expected physical y coordinates."""
     return 0.001, 0.01
 
 
 def z_coordinates() -> Tuple[float, float]:
-    """Return the expected physical z coordinate value for a given zplane index."""
+    """Return the expected physical z coordinates."""
     return 0.0001, 0.001
 
 

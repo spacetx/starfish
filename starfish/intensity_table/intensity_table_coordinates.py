@@ -36,6 +36,7 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack: Ima
             pixel_x = spot.coords[Axes.X].data
             pixel_y = spot.coords[Axes.Y].data
             pixel_z = spot.coords[Axes.ZPLANE].data
+            # Grab physical coordinates from imagestack.coords
             physical_x = image_stack.xarray[Coordinates.X.value][pixel_x]
             physical_y = image_stack.xarray[Coordinates.Y.value][pixel_y]
             physical_z = image_stack.xarray[Coordinates.Z.value][pixel_z]

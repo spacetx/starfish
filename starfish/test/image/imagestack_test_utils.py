@@ -42,8 +42,9 @@ def verify_physical_coordinates(
         expected_y_coordinates: Tuple[float, float],
         expected_z_coordinates: Tuple[float, float]
 ) -> None:
-    """Given an imagestack and a set of selectors, verify that the physical coordinates for the data
-    referred to by the selectors match the expected physical coordinates.
+    """Given an imagestack and a set coordinate min/max values
+    verify that the physical coordinates on the stack match the expected
+    range of values for each coord dimension.
     """
 
     assert np.all(np.isclose(stack.xarray[Coordinates.X.value],

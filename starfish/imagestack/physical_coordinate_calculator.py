@@ -197,9 +197,6 @@ def get_coordinates(
 
 
 def get_physical_coordinates_of_z_plane(zrange: Tuple[float, float]):
-    """Given a selector that uniquely identify a tile and the location of a spot in pixel space,
-    calculate the location in physical space."""
-
-    # As discussed just taking the middle of the z range for this...unless we change our minds
+    """Calculate the midpoint of the given zrange."""
     physical_z = (zrange[1] - zrange[0]) / 2 + zrange[0]
     return physical_z

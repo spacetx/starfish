@@ -72,8 +72,18 @@ def version():
 version.no_art = True  # type: ignore
 
 
-@starfish.command()
+@starfish.group()
+def util():
+    """
+    house-keeping commands for the starfish library
+    """
+    pass
+
+@util.command()
 def install_strict_dependencies():
+    """
+    warning! updates different packages in your local installation
+    """
     strict_requirements_file = pkg_resources.resource_filename(
         "starfish", "REQUIREMENTS-STRICT.txt")
     subprocess.check_call([

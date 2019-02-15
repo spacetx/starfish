@@ -1,3 +1,4 @@
+import os
 import platform
 from functools import lru_cache
 from json import JSONEncoder
@@ -29,11 +30,12 @@ def get_dependency_version(dependency: str) -> str:
 @lru_cache(maxsize=1)
 def get_git_commit_hash() -> str:
     # First check if in starfish repo
+    os.chdir(os.path.dirname(starfish.__file__))
     try:
-        check_output(["git", "ls-files", "--error-unmatch", starfish.__file__])
-        return check_output(["git", "describe", "--always"]).strip()
+        check_output(["git", "ls-files", starfish.__file__])
     except CalledProcessError:
         return "Starfish project not under git tracking"
+    return check_output(["git", "describe", "--always"]).strip()
 
 
 @lru_cache(maxsize=1)

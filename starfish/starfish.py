@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 import cProfile
+import subprocess
+import sys
 from pstats import Stats
+
+import pkg_resources
 
 from sptx_format.cli import validate as validate_cli
 from starfish.experiment.builder.cli import build as build_cli
@@ -66,6 +70,15 @@ def version():
     from starfish import __version__
     print(__version__)
 version.no_art = True  # type: ignore
+
+
+@starfish.command()
+def install_strict_dependencies():
+    strict_requirements_file = pkg_resources.resource_filename(
+        "starfish", "REQUIREMENTS-STRICT.txt")
+    subprocess.check_call([
+        sys.executable, "-m", "pip", "install", "-r", strict_requirements_file
+    ])
 
 
 # Pipelines

@@ -83,13 +83,14 @@ REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
 	.$<-env/bin/pip install -r $<
 	echo "# You should not edit this file directly.  Instead, you should edit one of the following files ($^) and run make $@" >| $@
 	.$<-env/bin/pip freeze >> $@
+	cp -f $@ starfish/REQUIREMENTS-STRICT.txt
 	rm -rf .$<-env
 
 help-requirements:
 	$(call print_help, refresh_all_requirements, regenerate requirements files)
 	$(call print_help, check_requirements, fail if requirements files have been modified)
 
-.PHONY: refresh_all_requirements
+.PHONY: refresh_all_requirements starfish/REQUIREMENTS-STRICT.txt
 #
 ##############################################################
 

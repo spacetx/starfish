@@ -50,7 +50,7 @@ PyYAML==4.2b4
 pyzmq==17.1.2
 regional==1.1.2
 requests==2.21.0
-scikit-image==0.14.2
+git+https://github.com/scikit-image/scikit-image@e9cf8b850c4c2800cc221be6f1dfff6a2a32a4eb
 scikit-learn==0.20.2
 scipy==1.2.1
 semantic-version==2.6.0

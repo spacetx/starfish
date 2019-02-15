@@ -1,12 +1,14 @@
 import warnings
 from collections import OrderedDict
-from typing import Iterable, List, Optional, Set, Tuple, Union
+from typing import Iterable, List, Mapping, Optional, Set, Tuple, Union
 
+import matplotlib.pyplot as plt
+import napari_gui
 import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.types import Axes, Features
+from starfish.types import Axes, Features, Number
 
 
 def _normalize_axes(axes: Iterable[Union[Axes, str]]) -> List[str]:
@@ -96,17 +98,57 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
     coords[:, 3] = np.tile(np.repeat(range(n_channels), n_rounds), n_features)
     coords[:, 4] = np.repeat(intensity_table[Features.AXIS][Axes.ZPLANE.value].values, code_length)
 
-    sizes = np.repeat(intensity_table.radius.values, code_length)
+    sizes = np.repeat(intensity_table.radius.values, code_length)[:, np.newaxis]
+    # must share order with napari, currently (y, x, r, c, z)
+    vector_sizes = np.concatenate(
+        [
+            np.repeat(sizes, 2, axis=1),  # y, x
+            np.repeat(np.full_like(sizes, 0), 2, axis=1),  # no size in channels, rounds
+            np.repeat(sizes, 1, axis=1),  # z
+        ], axis=1
+    )
 
-    return coords, sizes
+    return coords, vector_sizes
+
+def _plot_markers(
+    window,
+    spots: Optional[IntensityTable],
+    project_axes: Optional[Set[Axes]],
+    mask_intensities: float,
+    radius_multiplier: Number,
+    color: str,
+):
+    if project_axes is not None:
+        spots = _max_intensity_table_maintain_dims(spots, project_axes)
+
+    coords, sizes = _spots_to_markers(spots)
+
+    # mask low-intensity values
+    mask = _mask_low_intensity_spots(spots, mask_intensities)
+
+    if not np.sum(mask):
+        warnings.warn(f"No spots passed provided intensity threshold of {mask_intensities}")
+        return window
+
+    coords = coords[mask, :]
+    sizes = sizes[mask, :]
+
+    window.viewer.add_markers(
+        coords=coords, face_color=color, edge_color=color, symbol="o",
+        size=sizes * radius_multiplier,
+        n_dimensional=True
+    )
+
+    return window
 
 
 def stack(
-        stack: ImageStack,
-        spots: Optional[IntensityTable] = None,
-        project_axes: Optional[Set[Axes]] = None,
-        mask_intensities: float = 0.,
-        radius_multiplier: int = 1
+    stack: ImageStack,
+    spots: Optional[IntensityTable] = None,
+    project_axes: Optional[Set[Axes]] = None,
+    mask_intensities: float = 0.,
+    radius_multiplier: int = 1,
+    extra_spots: Optional[Mapping[str, Tuple[str, IntensityTable]]] = None,
 ):
     """
     Displays the image stack using Napari (https://github.com/Napari).
@@ -129,6 +171,11 @@ def stack(
         (see documentation on IntensityTable.where() for more details) (default 0, no masking)
     radius_multiplier : int
         Multiplies the radius of the displayed spots (default 1, no scaling)
+    extra_spots : Optional[Mapping[Tuple[str, IntensityTable]]]
+        Optional dict of name: (color, IntensityTable). These spots will be displayed in the same
+        manner as the main spots, except a different color. This is useful for contrasting between
+        spots that do and do not decode, and can be used to mask spots if the provided color is the
+        base color of the cmap (e.g. black, k)
 
     Examples
     --------
@@ -189,37 +236,14 @@ def stack(
         Axes.ZPLANE.value
     ).values
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings('ignore', module='vispy.visuals.isocurve', lineno=22)
-        # display the imagestack using napari
-        viewer = napari_gui.imshow(reordered_array, multichannel=False)
-    viewer._index = [0, 0, 0, 0, 0]  # initialize napari status bar
+    # display the imagestack using napari
+    window = napari_gui.imshow(reordered_array, multichannel=False)
 
     if spots is not None:
+        _plot_markers(window, spots, project_axes, mask_intensities, radius_multiplier, color="c")
 
-        # _detect_per_round_spot_finding_intensity_tables(spots)
-        if project_axes is not None:
-            spots = _max_intensity_table_maintain_dims(spots, project_axes)
+    if extra_spots is not None:
+        for name, (color, espots) in extra_spots.items():
+            _plot_markers(window, espots, project_axes, mask_intensities, radius_multiplier, color)
 
-        # TODO ambrosejcarr guard rails:
-        # 1. verify that x, y, z fit inside the imagestack (weird projections)
-        # 2. warn if whole tiles are missing spot calls (possible miss-use)
-
-        coords, sizes = _spots_to_markers(spots)
-
-        # mask low-intensity values
-        mask = _mask_low_intensity_spots(spots, mask_intensities)
-
-        if not np.sum(mask):
-            warnings.warn(f'No spots passed provided intensity threshold of {mask_intensities}')
-            return viewer
-
-        coords = coords[mask, :]
-        sizes = sizes[mask]
-
-        viewer.add_markers(
-            coords=coords, face_color='white', edge_color='white', symbol='ring',
-            size=sizes * radius_multiplier
-        )
-
-    return viewer
+    return window

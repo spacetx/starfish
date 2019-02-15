@@ -26,6 +26,7 @@ MarkupSafe==1.1.0
 matplotlib==2.1.2
 mistune==0.8.4
 mpmath==1.1.0
+git+https://github.com/napari/napari-gui.git@master
 nbconvert==5.4.1
 nbformat==4.4.0
 networkx==2.2
@@ -50,7 +51,7 @@ PyYAML==4.2b4
 pyzmq==17.1.2
 regional==1.1.2
 requests==2.21.0
-scikit-image==0.14.2
+git+https://github.com/scikit-image/scikit-image.git@master
 scikit-learn==0.20.2
 scipy==1.2.1
 semantic-version==2.6.0

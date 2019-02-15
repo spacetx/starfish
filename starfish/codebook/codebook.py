@@ -1,5 +1,6 @@
 import json
 import uuid
+from itertools import product
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import numpy as np
@@ -722,3 +723,56 @@ class Codebook(xr.DataArray):
                     for w, g in zip(codewords, target_names)]
 
         return cls.from_code_array(codebook, n_round=n_round, n_ch=n_channel)
+
+    @classmethod
+    def constitutive_fluorescence_mask(cls, n_channel: int, n_round: int) -> "Codebook":
+        """Produce a codebook that will detect pan-spectral autofluorescent spots.
+        Use metric decode to detect examples of these spots.
+
+        Parameters
+        ----------
+        n_channel : int
+            number of channels for the codebook
+        n_round : int
+            number of rounds for the codebook
+
+        Returns
+        -------
+        Codebook :
+            codebook with a single code that expects fluorescence in all rounds and channels
+        """
+        combinations = product(range(n_channel), range(n_round))
+        codeword = [
+            {Axes.ROUND.value: r, Axes.CH.value: c, Features.CODE_VALUE: 1}
+            for (c, r) in combinations
+        ]
+        code_array = [{Features.CODEWORD: codeword, Features.TARGET: "autofluorescence"}]
+        return cls.from_code_array(code_array, n_round=n_round, n_ch=n_channel)
+
+    @classmethod
+    def constitutive_channel_fluorescence_mask(cls, n_channel: int, n_round: int) -> "Codebook":
+        """Produce a codebook that will detect spots that fluoresce in the same channel across
+        all rounds of an experiment. Use metric decode to detect examples of these spots.
+
+        Parameters
+        ----------
+        n_channel : int
+            number of channels for the codebook
+        n_round : int
+            number of rounds for the codebook
+
+        Returns
+        -------
+        Codebook :
+            codebook with codes equal to the number of channels in the codebook
+        """
+        code_array = []
+        for c in range(n_channel):
+            codeword = []
+            for r in range(n_round):
+                codeword.append({Axes.ROUND.value: r, Axes.CH.value: c, Features.CODE_VALUE: 1})
+            code_array.append({
+                Features.CODEWORD: codeword,
+                Features.TARGET: f"channel_{c}_autofluorescence"
+            })
+        return cls.from_code_array(code_array, n_round=n_round, n_ch=n_channel)

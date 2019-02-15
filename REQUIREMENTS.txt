@@ -5,7 +5,7 @@ numpy != 1.13.0
 pandas >= 0.23.4
 regional
 semantic_version
-scikit-image>=0.14.0
+git+https://github.com/scikit-image/scikit-image@e9cf8b850c4c2800cc221be6f1dfff6a2a32a4eb
 scikit-learn
 scipy
 showit >= 1.1.4

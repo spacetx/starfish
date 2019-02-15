@@ -11,7 +11,9 @@ from slicedimage import ImageFormat
 from starfish.experiment.builder import build_image, FetchedTile, tile_fetcher_factory
 from starfish.imagestack.imagestack import ImageStack
 from starfish.imagestack.parser.crop import CropParameters
-from starfish.imagestack.physical_coordinate_calculator import recalculate_physical_coordinate_range, get_physical_coordinates_of_z_plane
+from starfish.imagestack.physical_coordinate_calculator import (
+    get_physical_coordinates_of_z_plane,
+    recalculate_physical_coordinate_range)
 from starfish.types import Axes, Coordinates, Number
 from .imagestack_test_utils import verify_physical_coordinates, verify_stack_data
 

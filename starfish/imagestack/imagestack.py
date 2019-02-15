@@ -56,8 +56,6 @@ from starfish.types import (
     Coordinates,
     LOG,
     Number,
-    PHYSICAL_COORDINATE_DIMENSION,
-    PhysicalCoordinateTypes,
     STARFISH_EXTRAS_KEY
 )
 from starfish.util.JSONenocder import LogEncoder
@@ -147,7 +145,8 @@ class ImageStack:
 
             data_shape.append(size_for_axis)
             data_dimensions.append(dim_for_axis.value)
-            data_tick_marks[dim_for_axis.value] = list(sorted(set(tilekey[dim_for_axis] for tilekey in self._tile_data.keys())))
+            data_tick_marks[dim_for_axis.value] = list(
+                sorted(set(tilekey[dim_for_axis] for tilekey in self._tile_data.keys())))
 
         data_shape.extend(tile_shape)
         data_dimensions.extend([Axes.Y.value, Axes.X.value])
@@ -175,9 +174,10 @@ class ImageStack:
             np.linspace(tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
                         self.xarray.sizes[Axes.Y.value]), dims=Axes.Y.value)
         if Coordinates.Z in tile.coordinates:
-            # As discussed just taking the middle of the z range for this...unless we change our minds
-            self._data[Coordinates.Z.value] = xr.DataArray(np.zeros(self.xarray.sizes[Axes.ZPLANE.value]),
-                                                           dims=Axes.ZPLANE.value)
+            # Fill with zeros for now, then replace with calculated midpoints
+            self._data[Coordinates.Z.value] = xr.DataArray(np.zeros(
+                self.xarray.sizes[Axes.ZPLANE.value]),
+                dims=Axes.ZPLANE.value)
 
         # Get coords on first tile to verify imagestack is aligned
         starting_coords = [
@@ -201,10 +201,9 @@ class ImageStack:
                     f"Tiles must be aligned")
             if Coordinates.Z in tile.coordinates:
                 z_range = (tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1])
-                # As discussed just taking the middle of the z range for this...unless we change our minds
-                self._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = physical_coordinate_calculator.\
-                    get_physical_coordinates_of_z_plane(z_range)
-
+                # As discussed just taking the middle of the z range
+                self._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = \
+                    physical_coordinate_calculator.get_physical_coordinates_of_z_plane(z_range)
 
     @staticmethod
     def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:

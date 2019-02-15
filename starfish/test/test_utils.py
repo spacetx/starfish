@@ -5,7 +5,7 @@ import xarray as xr
 
 from starfish import Codebook, ImageStack
 from starfish.imagestack import physical_coordinate_calculator
-from starfish.types import Axes, Features, PhysicalCoordinateTypes, Coordinates
+from starfish.types import Axes, Coordinates, Features, PhysicalCoordinateTypes
 
 
 def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict) -> ImageStack:
@@ -38,9 +38,12 @@ def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict
                     stack.xarray.sizes[Axes.Y.value]), dims=Axes.Y.value)
 
     z_coord = physical_coordinate_calculator.\
-                get_physical_coordinates_of_z_plane((coords[PhysicalCoordinateTypes.Z_MIN], coords[PhysicalCoordinateTypes.Z_MAX]))
+        get_physical_coordinates_of_z_plane((coords[PhysicalCoordinateTypes.Z_MIN],
+                                             coords[PhysicalCoordinateTypes.Z_MAX]))
 
-    stack.xarray[Coordinates.Z.value] = xr.DataArray(np.zeros(stack.xarray.sizes[Axes.ZPLANE.value]), dims=Axes.ZPLANE.value)
+    stack.xarray[Coordinates.Z.value] = xr.DataArray(np.zeros(
+        stack.xarray.sizes[Axes.ZPLANE.value]),
+        dims=Axes.ZPLANE.value)
 
     for z in stack.axis_labels(Axes.ZPLANE):
 

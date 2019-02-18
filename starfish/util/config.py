@@ -72,7 +72,7 @@ class Config(object):
             exception will be raised if none is provided.
         remove: bool
             If True, then delete the key from the object once it has been
-            looked up. If parent objects are left with no values, the will
+            looked up. If parent objects are left with no values, they will
             be removed.
         """
         data: Any = self.data

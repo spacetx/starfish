@@ -65,6 +65,9 @@ def stages(commands: Sequence[Sequence[Union[str, Callable]]],
     finally:
         if tempobj:
             tempobj.cleanup()
+        else:
+            print("Temporary files kept under:")
+            print(tempdir)
 
 
 def prepare_stage(stage: Sequence[Union[str, Callable]],

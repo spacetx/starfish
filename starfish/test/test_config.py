@@ -113,7 +113,7 @@ def test_starfish_config_value_default_key(monkeypatch):
 
 
 @mark.parametrize("name,expected,config", (
-    ("enabled", (2841272, 4e6), {
+    ("enabled", (2658848, 4e6), {
         "validation": {"strict": True},
         "slicedimage": {
             "caching": {

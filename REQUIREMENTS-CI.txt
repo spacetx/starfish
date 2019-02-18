@@ -1,0 +1,15 @@
+flake8
+flake8-import-order
+m2r
+mypy
+nbencdec >= 0.0.5
+pycodestyle==2.5.0
+pytest>=3.6.3
+pytest-cov>=2.5.1
+pytest-xdist
+recommonmark
+requests
+seaborn
+sphinx
+sphinx_bootstrap_theme
+sphinxcontrib-programoutput

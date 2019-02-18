@@ -108,6 +108,9 @@ class BlobDetector(SpotFinderAlgorithmBase):
             self.overlap
         )
 
+        if fitted_blobs_array.shape[0] == 0:
+            return SpotAttributes.empty(extra_fields=['intensity', 'spot_id'])
+
         # create the SpotAttributes Table
         columns = [Axes.ZPLANE.value, Axes.Y.value, Axes.X.value, Features.SPOT_RADIUS]
         fitted_blobs = pd.DataFrame(data=fitted_blobs_array, columns=columns)
@@ -181,7 +184,7 @@ class BlobDetector(SpotFinderAlgorithmBase):
     )
     @click.pass_context
     def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show, detector_method):
-            instance = BlobDetector(min_sigma, max_sigma, num_sigma, threshold, overlap,
-                                    detector_method=detector_method)
-            #  FIXME: measurement_type, is_volume missing as options; show missing as ctor args
-            ctx.obj["component"]._cli_run(ctx, instance)
+        instance = BlobDetector(min_sigma, max_sigma, num_sigma, threshold, overlap,
+                                detector_method=detector_method)
+        #  FIXME: measurement_type, is_volume missing as options; show missing as ctor args
+        ctx.obj["component"]._cli_run(ctx, instance)

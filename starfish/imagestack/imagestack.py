@@ -78,7 +78,7 @@ class ImageStack:
         the number of imaging rounds stored in the image tensor
     num_zplanes : int
         the number of z-layers stored in the image tensor
-    numpy_array : np.ndarray
+    xarray : xarray.core.dataarray.DataArray
         the 5-d image tensor is stored in this array
     raw_shape : Tuple[int]
         the shape of the image tensor (in integers)

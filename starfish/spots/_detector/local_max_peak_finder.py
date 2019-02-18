@@ -225,7 +225,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         # identify each spot's size by binarizing and calculating regionprops
         masked_image = data_image[:, :] > self.threshold
         labels = label(masked_image)[0]
-        spot_props = regionprops(labels)
+        spot_props = regionprops(np.squeeze(labels))
 
         # mask spots whose areas are too small or too large
         for spot_prop in spot_props:
@@ -234,7 +234,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
         # store re-calculated regionprops and labels based on the area-masked image
         self._labels = label(masked_image)[0]
-        self._spot_props = regionprops(labels)
+        self._spot_props = regionprops(np.squeeze(self._labels))
 
         if self.verbose:
             print('computing final spots ...')

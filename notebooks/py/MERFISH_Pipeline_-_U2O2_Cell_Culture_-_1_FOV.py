@@ -175,8 +175,8 @@ for selector in primary_image._iter_axes():
 
 # EPY: START code
 # TODO this crop should be (x, y) = (40, 40) but it was getting eaten by kwargs
-from starfish.spots import SpotFinder
-psd = SpotFinder.PixelSpotDetector(
+from starfish.spots import PixelSpotDecoder
+psd = PixelSpotDecoder.PixelSpotDecoder(
     codebook=experiment.codebook,
     metric='euclidean',
     distance_threshold=0.5176,

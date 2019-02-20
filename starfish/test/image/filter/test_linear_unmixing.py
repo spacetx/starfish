@@ -24,7 +24,7 @@ def setup_linear_unmixing_test():
 
 def test_linear_unmixing():
     """ Test the linear unmixing filter """
-    
+
     stack, coeff_mat, ref_result = setup_linear_unmixing_test()
 
     filter_unmix = LinearUnmixing(coeff_mat=coeff_mat)

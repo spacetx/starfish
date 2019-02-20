@@ -2,6 +2,7 @@ from functools import partial
 from typing import Optional
 
 import numpy as np
+import xarray as xr
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
@@ -12,18 +13,22 @@ from .util import preserve_float_range
 
 class ElementWiseMult(FilterAlgorithmBase):
 
-    def __init__(self, mult_mat: np.ndarray) -> None:
-        """Image scaling filter
+    def __init__(self, mult_mat: xr.core.dataarray.DataArray) -> None:
+        """Perform elementwise multiplication on the image tensor. This is useful for
+        performing operations such as image normalization or field flatness correction
 
         Parameters
         ----------
-        mult_mat : np.ndarray
-            each image in the stack is scaled by this percentile.
+        mult_mat : xr.DataArray
+            the image is element-wise multiplied with this array
 
         """
         self.mult_mat = mult_mat
 
-    _DEFAULT_TESTING_PARAMETERS = {"mult_mat": np.array([[[[[1]]], [[[0.5]]]]])}
+    _DEFAULT_TESTING_PARAMETERS = {
+        "mult_mat": xr.DataArray(np.array([[[[[1]]], [[[0.5]]]]]),
+        dims=('r','c', 'z', 'y', 'x'))
+    }
 
     @staticmethod
     def _mult(image: np.ndarray, mult_mat: np.ndarray) -> np.ndarray:
@@ -85,17 +90,23 @@ class ElementWiseMult(FilterAlgorithmBase):
             original stack.
 
         """
+        
+        # Align the axes of the multipliers with ImageStack
+        mult_mat_aligned = self.mult_mat.transpose(*stack.xarray.dims)
+
         # Build the grouping set
         group_by = set()
 
-        if self.mult_mat.shape[0] == 1:
+        sizes = mult_mat_aligned.sizes
+
+        if sizes['r'] == 1:
             group_by.add(Axes.ROUND)
-        if self.mult_mat.shape[1] == 1:
+        if sizes['c'] == 1:
             group_by.add(Axes.CH)
-        if self.mult_mat.shape[2] == 1:
+        if sizes['z'] == 1:
             group_by.add(Axes.ZPLANE)
 
-        clip = partial(self._mult, mult_mat=self.mult_mat)
+        clip = partial(self._mult, mult_mat=mult_mat_aligned.values)
         result = stack.apply(
             clip,
             group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes

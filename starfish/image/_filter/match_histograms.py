@@ -2,7 +2,7 @@ from functools import partial
 from typing import Mapping, Optional
 
 import numpy as np
-from skimage.transform import match_histograms
+from starfish.compat import match_histograms
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes

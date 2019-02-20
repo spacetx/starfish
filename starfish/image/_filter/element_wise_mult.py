@@ -26,8 +26,10 @@ class ElementWiseMult(FilterAlgorithmBase):
         self.mult_mat = mult_mat
 
     _DEFAULT_TESTING_PARAMETERS = {
-        "mult_mat": xr.DataArray(np.array([[[[[1]]], [[[0.5]]]]]),
-            dims=('r', 'c', 'z', 'y', 'x'))
+        "mult_mat": xr.DataArray(
+            np.array([[[[[1]]], [[[0.5]]]]]),
+            dims=('r', 'c', 'z', 'y', 'x')
+        )
     }
 
     @staticmethod

@@ -139,6 +139,10 @@ class FieldOfView:
             all_groups[name] = f'{info}'
         return all_groups
 
+    def iterate_image_type(self, image_type: str):
+        for aligned_group, _ in enumerate(self.aligned_coordinate_groups[image_type]):
+            yield self.get_image(item=image_type, aligned_group=aligned_group)
+
     def get_image(self, item, aligned_group: int = 0,
                   x_slice: Optional[Union[int, slice]] = None,
                   y_slice: Optional[Union[int, slice]] = None,

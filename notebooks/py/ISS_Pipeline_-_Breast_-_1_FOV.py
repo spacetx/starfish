@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 from showit import image
 import pprint
 
-from starfish import data, FieldOfView
+from starfish import data, FieldOfView, IntensityTable
 from starfish.types import Features, Axes
 # EPY: END code
 
@@ -52,127 +52,129 @@ pp.pprint(experiment._src_doc)
 
 # EPY: START code
 fov = experiment.fov()
-primary_image = fov.get_image(FieldOfView.PRIMARY_IMAGES)
-dots = fov.get_image('dots')
-nuclei = fov.get_image('nuclei')
-images = [primary_image, nuclei, dots]
-# EPY: END code
+all_intensities = list()
+for primary_image, dots, nuclei in zip(fov.iterate_image_type(FieldOfView.PRIMARY_IMAGES), fov.iterate_image_type('dots'), fov.iterate_image_type("nuclei")):
 
-# EPY: START code
-# round, channel, x, y, z
-primary_image.xarray.shape
-# EPY: END code
+    images = [primary_image, nuclei, dots]
+    # EPY: END code
 
-# EPY: START markdown
-### Show auxiliary images captured during the experiment
-# EPY: END markdown
+    # EPY: START code
+    # round, channel, x, y, z
+    primary_image.xarray.shape
+    # EPY: END code
 
-# EPY: START markdown
-#'dots' is a general stain for all possible transcripts. This image should correspond to the maximum projcection of all color channels within a single imaging round. This auxiliary image is useful for registering images from multiple imaging rounds to this reference image. We'll see an example of this further on in the notebook
-# EPY: END markdown
+    # EPY: START markdown
+    ### Show auxiliary images captured during the experiment
+    # EPY: END markdown
 
-# EPY: START code
-dots_mp = dots.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
-dots_mp_numpy = dots._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
-image(dots_mp_numpy)
-# EPY: END code
+    # EPY: START markdown
+    #'dots' is a general stain for all possible transcripts. This image should correspond to the maximum projcection of all color channels within a single imaging round. This auxiliary image is useful for registering images from multiple imaging rounds to this reference image. We'll see an example of this further on in the notebook
+    # EPY: END markdown
 
-# EPY: START markdown
-#Below is a DAPI auxiliary image, which specifically marks nuclei. This is useful cell segmentation later on in the processing.
-# EPY: END markdown
+    # EPY: START code
+    dots_mp = dots.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+    dots_mp_numpy = dots._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+    image(dots_mp_numpy)
+    # EPY: END code
 
-# EPY: START code
-nuclei_mp = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
-nuclei_mp_numpy = nuclei_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
-image(nuclei_mp_numpy)
-# EPY: END code
+    # EPY: START markdown
+    #Below is a DAPI auxiliary image, which specifically marks nuclei. This is useful cell segmentation later on in the processing.
+    # EPY: END markdown
 
-# EPY: START markdown
-### Examine the codebook
-# EPY: END markdown
+    # EPY: START code
+    nuclei_mp = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+    nuclei_mp_numpy = nuclei_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+    image(nuclei_mp_numpy)
+    # EPY: END code
 
-# EPY: START markdown
-#Each 4 letter quatenary code (as read out from the 4 imaging rounds and 4 color channels) represents a gene. This relationship is stored in a codebook
-# EPY: END markdown
+    # EPY: START markdown
+    ### Examine the codebook
+    # EPY: END markdown
 
-# EPY: START code
-experiment.codebook
-# EPY: END code
+    # EPY: START markdown
+    #Each 4 letter quatenary code (as read out from the 4 imaging rounds and 4 color channels) represents a gene. This relationship is stored in a codebook
+    # EPY: END markdown
 
-# EPY: START markdown
-### Filter and scale raw data
-#
-#Now apply the white top hat filter to both the spots image and the individual channels. White top had enhances white spots on a black background.
-# EPY: END markdown
+    # EPY: START code
+    experiment.codebook
+    # EPY: END code
 
-# EPY: START code
-from starfish.image import Filter
+    # EPY: START markdown
+    ### Filter and scale raw data
+    #
+    #Now apply the white top hat filter to both the spots image and the individual channels. White top had enhances white spots on a black background.
+    # EPY: END markdown
 
-# filter raw data
-masking_radius = 15
-filt = Filter.WhiteTophat(masking_radius, is_volume=False)
-for img in images:
-    filt.run(img, verbose=True, in_place=True)
-# EPY: END code
+    # EPY: START code
+    from starfish.image import Filter
 
-# EPY: START markdown
-### Register data
-# EPY: END markdown
+    # filter raw data
+    masking_radius = 15
+    filt = Filter.WhiteTophat(masking_radius, is_volume=False)
+    for img in images:
+        filt.run(img, verbose=True, in_place=True)
+    # EPY: END code
 
-# EPY: START markdown
-#For each imaging round, the max projection across color channels should look like the dots stain.
-#Below, this computes the max projection across the color channels of an imaging round and learns the linear transformation to maps the resulting image onto the dots image.
-#
-#The Fourier shift registration approach can be thought of as maximizing the cross-correlation of two images.
-#
-#In the below table, Error is the minimum mean-squared error, and shift reports changes in x and y dimension.
-# EPY: END markdown
+    # EPY: START markdown
+    ### Register data
+    # EPY: END markdown
 
-# EPY: START code
-from starfish.image import Registration
+    # EPY: START markdown
+    #For each imaging round, the max projection across color channels should look like the dots stain.
+    #Below, this computes the max projection across the color channels of an imaging round and learns the linear transformation to maps the resulting image onto the dots image.
+    #
+    #The Fourier shift registration approach can be thought of as maximizing the cross-correlation of two images.
+    #
+    #In the below table, Error is the minimum mean-squared error, and shift reports changes in x and y dimension.
+    # EPY: END markdown
 
-registration = Registration.FourierShiftRegistration(
-    upsampling=1000,
-    reference_stack=dots,
-    verbose=True)
-registered_image = registration.run(primary_image, in_place=False)
-# EPY: END code
+    # EPY: START code
+    from starfish.image import Registration
 
-# EPY: START markdown
-### Use spot-detector to create 'encoder' table  for standardized input  to decoder
-# EPY: END markdown
+    registration = Registration.FourierShiftRegistration(
+        upsampling=1000,
+        reference_stack=dots,
+        verbose=True)
+    registered_image = registration.run(primary_image, in_place=False)
+    # EPY: END code
 
-# EPY: START markdown
-#Each pipeline exposes an encoder that translates an image into spots with intensities.  This approach uses a Gaussian spot detector.
-# EPY: END markdown
+    # EPY: START markdown
+    ### Use spot-detector to create 'encoder' table  for standardized input  to decoder
+    # EPY: END markdown
 
-# EPY: START code
-from starfish.spots import SpotFinder
-import warnings
+    # EPY: START markdown
+    #Each pipeline exposes an encoder that translates an image into spots with intensities.  This approach uses a Gaussian spot detector.
+    # EPY: END markdown
 
-# parameters to define the allowable gaussian sizes (parameter space)
-min_sigma = 1
-max_sigma = 10
-num_sigma = 30
-threshold = 0.01
+    # EPY: START code
+    from starfish.spots import SpotFinder
+    import warnings
 
-p = SpotFinder.BlobDetector(
-    min_sigma=min_sigma,
-    max_sigma=max_sigma,
-    num_sigma=num_sigma,
-    threshold=threshold,
-    measurement_type='mean',
-)
+    # parameters to define the allowable gaussian sizes (parameter space)
+    min_sigma = 1
+    max_sigma = 10
+    num_sigma = 30
+    threshold = 0.01
 
-# detect triggers some numpy warnings
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
+    p = SpotFinder.BlobDetector(
+        min_sigma=min_sigma,
+        max_sigma=max_sigma,
+        num_sigma=num_sigma,
+        threshold=threshold,
+        measurement_type='mean',
+    )
 
-    # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    dots = dots.max_proj(Axes.ROUND, Axes.ZPLANE)
-    dots_numpy = dots._squeezed_numpy(Axes.ROUND, Axes.ZPLANE)
-    blobs_image = dots_numpy
-    intensities = p.run(registered_image, blobs_image=blobs_image)
+    # detect triggers some numpy warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+
+        # blobs = dots; define the spots in the dots image, but then find them again in the stack.
+        dots = dots.max_proj(Axes.ROUND, Axes.ZPLANE)
+        dots_numpy = dots._squeezed_numpy(Axes.ROUND, Axes.ZPLANE)
+        blobs_image = dots_numpy
+        intensities = p.run(registered_image, blobs_image=blobs_image)
+        all_intensities.append(intensities)
+
 # EPY: END code
 
 # EPY: START markdown
@@ -198,6 +200,7 @@ with warnings.catch_warnings():
 # EPY: END markdown
 
 # EPY: START code
+intensities = IntensityTable.concatanate_intensity_tables(all_intensities)
 decoded = experiment.codebook.decode_per_round_max(intensities)
 # EPY: END code
 

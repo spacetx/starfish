@@ -46,3 +46,34 @@ def test_synthetic_intensity_generation():
          [1, 2, 1, 2],  # one each in channel 1 & 2
          [1, 0, 1, 0]],  # channel 1 matches round 1, channel 2 matches round zero
     )
+
+
+def test_intensity_table_concat():
+    np.random.seed(1)
+    codebook = test_utils.codebook_array_factory()
+    num_z, height, width = 3, 4, 5
+    intensities1 = IntensityTable.synthetic_intensities(
+        codebook,
+        num_z=num_z,
+        height=height,
+        width=width,
+        n_spots=2
+    )
+    intensities1.name = "it1"
+
+    np.random.seed(1)
+    codebook = test_utils.codebook_array_factory()
+    num_z, height, width = 2, 4, 5
+    intensities2 = IntensityTable.synthetic_intensities(
+        codebook,
+        num_z=num_z,
+        height=height,
+        width=width,
+        n_spots=2
+    )
+    intensities2.name = "it2"
+
+    it_list = [intensities1, intensities2]
+    combined_it = IntensityTable.concatanate_intensity_tables(it_list)
+
+    return combined_it

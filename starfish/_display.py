@@ -101,7 +101,7 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
     return coords, sizes
 
 
-def stack(
+def display(
         stack: ImageStack,
         spots: Optional[IntensityTable] = None,
         project_axes: Optional[Set[Axes]] = None,
@@ -135,15 +135,15 @@ def stack(
 
     1. Display a stack to evaluate a filtering result. Just pass any ImageStack!
 
-    >>> import starfish.display
-    >>> starfish.display.stack(stack)
+    >>> starfish import display
+    >>> display(stack)
 
     2. Display spots of a single-molecule FISH experiment: smFISH will produce IntensityTables where
     most values are np.NaN. These will be masked automatically, so passing an ImageStack +
     IntensityTable will display spots in the rounds and channels that they are detected
 
-    >>> import starfish.display
-    >>> starfish.display.stack(stack, intensities)
+    >>> from starfish import display
+    >>> display(stack, intensities)
 
     3. Diagnose spot calls within each round and channel of a coded experiment. A user might want to
     evaluate if spot calling is failing for a specific round/channel pair. To accomplish this,
@@ -151,16 +151,15 @@ def stack(
     channels. The user can additionally filter the IntensityTable to further mask additional spots
     (any np.NaN value will not be displayed)
 
-    >>> import starfish.display
+    >>> from starfish import display
     >>> mask_intensities = 0.3  # this was the spot calling intensity threshold
-    >>> starfish.display(stack, intensities, mask_intensities=mask_intensities)
+    >>> display(stack, intensities, mask_intensities=mask_intensities)
 
     4. Evaluate spot calls across rounds and channels by visualizing spots on a max projection of
     The rounds and channels.
 
-    >>> import starfish.display
-    >>> from starfish import Axes
-    >>> starfish.display.stack(stack, intensities, project_axes={Axes.CH, Axes.ROUND})
+    >>> from starfish import display, Axes
+    >>> display(stack, intensities, project_axes={Axes.CH, Axes.ROUND})
 
     Notes
     -----

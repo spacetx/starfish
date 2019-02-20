@@ -54,9 +54,8 @@ pp.pprint(experiment._src_doc)
 fov = experiment.fov()
 all_intensities = list()
 for primary_image, dots, nuclei in zip(fov.iterate_image_type(FieldOfView.PRIMARY_IMAGES), fov.iterate_image_type('dots'), fov.iterate_image_type("nuclei")):
-
     images = [primary_image, nuclei, dots]
-    # EPY: END code
+# EPY: END code
 
     # EPY: START code
     # round, channel, x, y, z

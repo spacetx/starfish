@@ -90,12 +90,13 @@ class FieldOfView:
                 crop_params = coord_groups[x_y_coords]
                 crop_params.add_permitted_axes(Axes.CH, tile.indices[Axes.CH])
                 crop_params.add_permitted_axes(Axes.ROUND, tile.indices[Axes.ROUND])
-                crop_params.add_permitted_axes(Axes.ZPLANE, tile.indices[Axes.ZPLANE])
+                if Axes.ZPLANE in tile.indices:
+                    crop_params.add_permitted_axes(Axes.ZPLANE, tile.indices[Axes.ZPLANE])
             else:
                 coord_groups[x_y_coords] = CropParameters(
                     permitted_chs=[tile.indices[Axes.CH]],
                     permitted_rounds=[tile.indices[Axes.ROUND]],
-                    permitted_zplanes=[tile.indices[Axes.ZPLANE]])
+                    permitted_zplanes=[tile.indices[Axes.ZPLANE]] if Axes.ZPLANE in tile.indices else None)
         return list(coord_groups.values())
 
     @property
@@ -132,8 +133,9 @@ class FieldOfView:
             info = '\n    '.join(
                 f" Group {k}: "
                 f" <starfish.ImageStack "
-                f"""({len(v._permitted_rounds), len(v._permitted_chs),
-                 len(v._permitted_zplanes), y_size, x_size})>"""
+                f"""({len(v._permitted_rounds) if v._permitted_rounds else 0, 
+                    len(v._permitted_chs) if v._permitted_chs else 0,
+                 len(v._permitted_zplanes) if v._permitted_zplanes else 0, y_size, x_size})>"""
                 for k, v in enumerate(groups)
             )
             all_groups[name] = f'{info}'

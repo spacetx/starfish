@@ -60,7 +60,7 @@ benchmark_peaks = get_benchmark_peaks(benchmark_results, redo_flag=False)
 experiment = starfish.data.osmFISH(use_test_data=True)
 intensities = list()
 for stack in experiment.fov().iterate_image_type(FieldOfView.PRIMARY_IMAGES):
-    # EPY: END code
+# EPY: END code
 
     # EPY: START markdown
     ### Load pysmFISH results

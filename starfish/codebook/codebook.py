@@ -741,13 +741,9 @@ class Codebook(xr.DataArray):
         Codebook :
             codebook with a single code that expects fluorescence in all rounds and channels
         """
-        combinations = product(range(n_channel), range(n_round))
-        codeword = [
-            {Axes.ROUND.value: r, Axes.CH.value: c, Features.CODE_VALUE: 1}
-            for (c, r) in combinations
-        ]
-        code_array = [{Features.CODEWORD: codeword, Features.TARGET: "autofluorescence"}]
-        return cls.from_code_array(code_array, n_round=n_round, n_ch=n_channel)
+        data = np.ones((1, n_channel, n_round))
+        code_names = ["autofluorescence"]
+        return cls._create_codebook(code_names, n_channel, n_round, data)
 
     @classmethod
     def constitutive_channel_fluorescence_mask(cls, n_channel: int, n_round: int) -> "Codebook":
@@ -766,13 +762,9 @@ class Codebook(xr.DataArray):
         Codebook :
             codebook with codes equal to the number of channels in the codebook
         """
-        code_array = []
+        data = np.zeros((n_channel, n_channel, n_round))
         for c in range(n_channel):
-            codeword = []
-            for r in range(n_round):
-                codeword.append({Axes.ROUND.value: r, Axes.CH.value: c, Features.CODE_VALUE: 1})
-            code_array.append({
-                Features.CODEWORD: codeword,
-                Features.TARGET: f"channel_{c}_autofluorescence"
-            })
-        return cls.from_code_array(code_array, n_round=n_round, n_ch=n_channel)
+            data[c, c] = 1
+        code_names = [f"channel_{c}_autofluorescence" for c in range(n_channel)]
+
+        return cls._create_codebook(code_names, n_channel, n_round, data)

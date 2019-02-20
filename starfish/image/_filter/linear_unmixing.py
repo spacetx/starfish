@@ -39,18 +39,18 @@ class LinearUnmixing(FilterAlgorithmBase):
         coeff_mat : np.ndarray
             matrix of the linear unmixing coefficients. Should take the form:
             B = AX, where B are the unmixed values, A is coeff_mat and X are
-            the observed values.
+            the observed values. coeff_mat has shape (n_ch, n_ch).
 
         Returns
         -------
         np.ndarray :
-          Numpy array of same shape as img
+          Numpy array of same shape as image
 
         """
         # Preallocate the new image in the same shape
         unmixed_image = np.zeros(image.shape)
 
-        # Due to the grouping, assumes image is shape [chan, x, y]
+        # Due to the grouping in run(), image is shape [chan, x, y]
         n_channels = image.shape[0]
 
         for c in range(n_channels):

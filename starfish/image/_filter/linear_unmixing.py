@@ -29,7 +29,7 @@ class LinearUnmixing(FilterAlgorithmBase):
 
     @staticmethod
     def _unmix(image: np.ndarray, coeff_mat: np.ndarray) -> np.ndarray:
-        """Clip values of img below and above percentiles p_min and p_max
+        """Perform linear unmixing of channels
 
         Parameters
         ----------

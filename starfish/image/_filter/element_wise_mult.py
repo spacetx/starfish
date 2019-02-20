@@ -27,7 +27,7 @@ class ElementWiseMult(FilterAlgorithmBase):
 
     _DEFAULT_TESTING_PARAMETERS = {
         "mult_mat": xr.DataArray(np.array([[[[[1]]], [[[0.5]]]]]),
-        dims=('r','c', 'z', 'y', 'x'))
+            dims=('r', 'c', 'z', 'y', 'x'))
     }
 
     @staticmethod
@@ -90,7 +90,7 @@ class ElementWiseMult(FilterAlgorithmBase):
             original stack.
 
         """
-        
+
         # Align the axes of the multipliers with ImageStack
         mult_mat_aligned = self.mult_mat.transpose(*stack.xarray.dims)
 

@@ -31,8 +31,8 @@ class FieldOfView:
     This encapsulates a field of view.  It contains the primary image and auxiliary images that are
     associated with the field of view.
 
-    All images can be accessed using a the get_image('primary') method with the name of the image type.
-    The primary image is accessed using the name
+    All images can be accessed using a the get_image('primary') method with the name of the image
+    type. The primary image is accessed using the name
     :py:attr:`starfish.experiment.experiment.FieldOFView.PRIMARY_IMAGES`.
 
     Attributes
@@ -105,7 +105,8 @@ class FieldOfView:
                 coord_groups[x_y_coords] = CropParameters(
                     permitted_chs=[tile.indices[Axes.CH]],
                     permitted_rounds=[tile.indices[Axes.ROUND]],
-                    permitted_zplanes=[tile.indices[Axes.ZPLANE]] if Axes.ZPLANE in tile.indices else None)
+                    permitted_zplanes=[tile.indices[Axes.ZPLANE]] if Axes.ZPLANE in tile.indices
+                    else None)
         return list(coord_groups.values())
 
     @property
@@ -142,7 +143,7 @@ class FieldOfView:
             info = '\n    '.join(
                 f" Group {k}: "
                 f" <starfish.ImageStack "
-                f"""({len(v._permitted_rounds) if v._permitted_rounds else 1, 
+                f"""({len(v._permitted_rounds) if v._permitted_rounds else 1,
                     len(v._permitted_chs) if v._permitted_chs else 1,
                  len(v._permitted_zplanes) if v._permitted_zplanes else 1, y_size, x_size})>"""
                 for k, v in enumerate(groups)

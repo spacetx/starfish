@@ -28,7 +28,7 @@ HEIGHT = 10
 WIDTH = 10
 
 
-def get_aligned_tilset():
+def get_aligned_tileset():
     alignedTileset = TileSet(
         [Axes.X, Axes.Y, Axes.CH, Axes.ZPLANE, Axes.ROUND],
         {Axes.CH: NUM_CH, Axes.ROUND: NUM_ROUND, Axes.ZPLANE: NUM_Z},
@@ -41,7 +41,7 @@ def get_aligned_tilset():
                     {
                         Coordinates.X: 1,
                         Coordinates.Y: 4,
-                        Coordinates.Z: round_to_z(r),
+                        Coordinates.Z: 3,
                     },
                     {
                         Axes.ROUND: r,
@@ -54,7 +54,7 @@ def get_aligned_tilset():
     return alignedTileset
 
 
-def get_un_aligned_tilset():
+def get_un_aligned_tileset():
     unAlignedTileset = TileSet(
         [Axes.X, Axes.Y, Axes.CH, Axes.ZPLANE, Axes.ROUND],
         {Axes.CH: NUM_CH, Axes.ROUND: NUM_ROUND, Axes.ZPLANE: NUM_Z},
@@ -101,7 +101,7 @@ def test_crop_experiment():
 
 
 def test_fov_aligned_tileset():
-    tilesets = {'primary': get_aligned_tilset(), 'nuclei': get_aligned_tilset()}
+    tilesets = {'primary': get_aligned_tileset(), 'nuclei': get_aligned_tileset()}
     fov = FieldOfView("aligned", tilesets)
     # Assert only one coordinate group for each aligned stack
     assert len(fov.aligned_coordinate_groups['primary']) == 1
@@ -109,7 +109,7 @@ def test_fov_aligned_tileset():
 
 
 def test_fov_un_aligned_tileset():
-    tilesets = {'primary': get_un_aligned_tilset(), 'nuclei': get_un_aligned_tilset()}
+    tilesets = {'primary': get_un_aligned_tileset(), 'nuclei': get_un_aligned_tileset()}
     fov = FieldOfView("unaligned", tilesets)
     # Assert that the number of coordinate groups == NUM_ROUNDS
     assert len(fov.aligned_coordinate_groups['primary']) == NUM_ROUND

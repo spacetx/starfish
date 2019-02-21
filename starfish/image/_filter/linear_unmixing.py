@@ -2,12 +2,12 @@ from functools import partial
 from typing import Optional
 
 import numpy as np
+import xarray as xr
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
 from starfish.util import click
 from ._base import FilterAlgorithmBase
-from .util import preserve_float_range
 
 
 class LinearUnmixing(FilterAlgorithmBase):
@@ -28,7 +28,7 @@ class LinearUnmixing(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"coeff_mat": np.array([[1, -0.25], [-0.25, 1]])}
 
     @staticmethod
-    def _unmix(image: np.ndarray, coeff_mat: np.ndarray) -> np.ndarray:
+    def _unmix(image: xr.DataArray, coeff_mat: np.ndarray) -> np.ndarray:
         """Perform linear unmixing of channels
 
         Parameters
@@ -47,22 +47,16 @@ class LinearUnmixing(FilterAlgorithmBase):
           Numpy array of same shape as image
 
         """
-        # Preallocate the new image in the same shape
-        unmixed_image = np.zeros(image.shape)
 
-        # Due to the grouping in run(), image is shape [chan, x, y]
-        n_channels = image.shape[0]
+        x = image.sizes[Axes.X.value]
+        y = image.sizes[Axes.Y.value]
+        c = image.sizes[Axes.CH.value]
 
-        for c in range(n_channels):
-            # Get the coefficients
-            coeffs = np.zeros((n_channels, 1, 1))
-            coeffs[:, 0, 0] = coeff_mat[c]
+        # broadcast each channel coefficient across x and y
+        broadcast_coeff = np.tile(coeff_mat, reps=x * y).reshape(c, y, x, c)
 
-            coeff_im = np.multiply(image, coeffs)
-
-            unmixed_image[c, ...] = np.sum(coeff_im, axis=0)
-
-        unmixed_image = preserve_float_range(unmixed_image)
+        # multiply the image by each coefficient
+        unmixed_image = np.sum(image.values[..., None] * broadcast_coeff, axis=-1)
 
         return unmixed_image
 

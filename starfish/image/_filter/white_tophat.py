@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
+import xarray as xr
 from skimage.morphology import ball, disk, white_tophat
 
 from starfish.imagestack.imagestack import ImageStack
@@ -38,7 +39,7 @@ class WhiteTophat(FilterAlgorithmBase):
 
     _DEFAULT_TESTING_PARAMETERS = {"masking_radius": 3}
 
-    def _white_tophat(self, image: np.ndarray) -> np.ndarray:
+    def _white_tophat(self, image: Union[xr.DataArray, np.ndarray]) -> np.ndarray:
         if self.is_volume:
             structuring_element = ball(self.masking_radius)
         else:

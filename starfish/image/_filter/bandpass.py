@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import xarray as xr
@@ -47,13 +47,14 @@ class Bandpass(FilterAlgorithmBase):
 
     @staticmethod
     def _bandpass(
-            image: xr.DataArray, lshort: Number, llong: int, threshold: Number, truncate: Number
+            image: Union[xr.DataArray, np.ndarray],
+            lshort: Number, llong: int, threshold: Number, truncate: Number
     ) -> np.ndarray:
         """Apply a bandpass filter to remove noise and background variation
 
         Parameters
         ----------
-        image : np.ndarray
+        image : Union[xr.DataArray, np.ndarray]
         lshort : float
             filter frequencies below this value
         llong : int

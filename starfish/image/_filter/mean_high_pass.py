@@ -2,6 +2,7 @@ from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
+import xarray as xr
 from scipy.ndimage.filters import uniform_filter
 
 from starfish.imagestack.imagestack import ImageStack
@@ -44,13 +45,15 @@ class MeanHighPass(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"size": 1}
 
     @staticmethod
-    def _high_pass(image: np.ndarray, size: Number, rescale: bool=False) -> np.ndarray:
+    def _high_pass(
+        image: Union[xr.DataArray, np.ndarray], size: Number, rescale: bool=False
+    ) -> np.ndarray:
         """
         Applies a mean high pass filter to an image
 
         Parameters
         ----------
-        image : numpy.ndarray[np.float32]
+        image : Union[xr.DataArray, numpy.ndarray]
             2-d or 3-d image data
         size : Union[Number, Tuple[Number]]
             width of the kernel
@@ -59,7 +62,7 @@ class MeanHighPass(FilterAlgorithmBase):
 
         Returns
         -------
-        np.ndarray [np.float32]:
+        np.ndarray[np.float32]:
             Filtered image, same shape as input
         """
 

@@ -1,7 +1,8 @@
 from functools import partial
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
+import xarray as xr
 from scipy.signal import convolve, fftconvolve
 
 from starfish.imagestack.imagestack import ImageStack
@@ -52,13 +53,14 @@ class DeconvolvePSF(FilterAlgorithmBase):
     # and the results look bad. #548 addresses this problem.
     @staticmethod
     def _richardson_lucy_deconv(
-            image: np.ndarray, iterations: int, psf: np.ndarray, clip: bool) -> np.ndarray:
+            image: Union[xr.DataArray, np.ndarray], iterations: int, psf: np.ndarray, clip: bool
+    ) -> np.ndarray:
         """
         Deconvolves input image with a specified point spread function.
 
         Parameters
         ----------
-        image : ndarray
+        image : Union[xr.DataArray, np.ndarray]
            Input degraded image (can be N dimensional).
         psf : ndarray
            The point spread function.

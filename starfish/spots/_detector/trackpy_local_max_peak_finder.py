@@ -99,6 +99,10 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
             spot attributes table for all detected spots
 
         """
+
+        if isinstance(image, xr.DataArray):
+            image = image.values
+
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', FutureWarning)  # trackpy numpy indexing warning
             warnings.simplefilter('ignore', UserWarning)  # yielded if black images

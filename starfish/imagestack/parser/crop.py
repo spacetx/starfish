@@ -44,6 +44,9 @@ class CropParameters:
         self._y_slice = y_slice
 
     def add_permitted_axes(self, axis_type: Axes, permitted_axis: int) -> None:
+        """
+        Add a value to one of the permitted axes sets.
+        """
         if axis_type == Axes.ROUND and self._permitted_rounds:
             self._permitted_rounds.add(permitted_axis)
         if axis_type == Axes.CH and self._permitted_chs:
@@ -142,11 +145,13 @@ class CropParameters:
                 shape[0],
                 self._y_slice)
 
-        return {
+        return_coords = {
             Coordinates.X: (xmin, xmax),
-            Coordinates.Y: (ymin, ymax),
-            Coordinates.Z: coordinates[Coordinates.Z],
+            Coordinates.Y: (ymin, ymax)
         }
+        if Coordinates.Z in coordinates:
+            return_coords[Coordinates.Z] = coordinates[Coordinates.Z]
+        return return_coords
 
 
 class CroppedTileData(TileData):

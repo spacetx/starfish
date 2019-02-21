@@ -1,7 +1,12 @@
-.. _sptx_format:
+SpaceTx Format
+==============
 
-.. mdinclude:: ../../../sptx_format/README.md
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents:
 
-.. _schema:
+.. toctree::
+   input_formats/index.rst
 
-.. mdinclude:: ../../../sptx_format/schema/README.md
+.. toctree::
+   output_formats/index.rst

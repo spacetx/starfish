@@ -1,7 +1,7 @@
 from typing import Union
 
-import xarray as xr
 import numpy as np
+import xarray as xr
 
 def preserve_float_range(
         array: Union[xr.DataArray, np.ndarray],

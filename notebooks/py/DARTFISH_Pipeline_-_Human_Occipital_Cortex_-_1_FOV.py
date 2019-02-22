@@ -38,12 +38,22 @@ sns.set_style('ticks')
 # EPY: END markdown
 
 # EPY: START code
+def compute_magnitudes(stack, norm_order=2):
+
+    pixel_intensities = IntensityTable.from_image_stack(zero_norm_stack)
+    feature_traces = pixel_intensities.stack(traces=(Axes.CH.value, Axes.ROUND.value))
+    norm = np.linalg.norm(feature_traces.values, ord=norm_order, axis=1)
+
+    return norm
+# EPY: END code
+
+# EPY: START code
 use_test_data = os.getenv("USE_TEST_DATA") is not None
 exp = data.DARTFISH(use_test_data=use_test_data)
 
 intensities = list()
 for stack in exp.fov().iterate_image_type(FieldOfView.PRIMARY_IMAGES):
-# EPY: END code
+    # EPY: END code
 
     # EPY: START code
     print(stack.shape)
@@ -87,16 +97,7 @@ for stack in exp.fov().iterate_image_type(FieldOfView.PRIMARY_IMAGES):
     # EPY: END markdown
 
     # EPY: START code
-    def compute_magnitudes(stack, norm_order=2):
-
-        pixel_intensities = IntensityTable.from_image_stack(zero_norm_stack)
-        feature_traces = pixel_intensities.stack(traces=(Axes.CH.value, Axes.ROUND.value))
-        norm = np.linalg.norm(feature_traces.values, ord=norm_order, axis=1)
-
-        return norm
-
     mags = compute_magnitudes(zero_norm_stack)
-
     plt.hist(mags, bins=20);
     sns.despine(offset=3)
     plt.xlabel('Barcode magnitude')
@@ -225,35 +226,34 @@ for stack in exp.fov().iterate_image_type(FieldOfView.PRIMARY_IMAGES):
 
     spot_intensities, results = psd.run(zero_norm_stack)
     spot_intensities = IntensityTable(spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True))
-    # EPY: END code
-
-    # EPY: START code
-    # exclude spots that don't meet our area thresholds
-    area_lookup = lambda x: 0 if x == 0 else results.region_properties[x - 1].area
-    vfunc = np.vectorize(area_lookup)
-    mask = np.squeeze(vfunc(results.label_image))
-    new_image = np.squeeze(results.decoded_image)*(mask > area_threshold[0])*(mask < area_threshold[1])
-
-    plt.figure(figsize=(10,10))
-    plt.imshow(new_image, cmap = 'nipy_spectral');
-    plt.axis('off');
-    plt.title('Coded rolonies');
-
-    from matplotlib.collections import PatchCollection
-    from matplotlib.patches import Rectangle
-
-    rect = [Rectangle((100, 600), width=200, height=200)]
-    pc = PatchCollection(rect, facecolor='none', alpha=1.0, edgecolor='w', linewidth=1.5)
-    plt.gca().add_collection(pc)
-
-    plt.figure(figsize=(10,10))
-    plt.imshow(new_image[600:800, 100:300], cmap = 'nipy_spectral');
-    plt.axis('off');
-    plt.title('Coded rolonies, zoomed in');
-    # EPY: END code
     intensities.append(spot_intensities)
+    # EPY: END code
 
+# EPY: START code
 spot_intensities = IntensityTable.concatanate_intensity_tables(intensities)
+# exclude spots that don't meet our area thresholds
+area_lookup = lambda x: 0 if x == 0 else results.region_properties[x - 1].area
+vfunc = np.vectorize(area_lookup)
+mask = np.squeeze(vfunc(results.label_image))
+new_image = np.squeeze(results.decoded_image)*(mask > area_threshold[0])*(mask < area_threshold[1])
+
+plt.figure(figsize=(10,10))
+plt.imshow(new_image, cmap = 'nipy_spectral');
+plt.axis('off');
+plt.title('Coded rolonies');
+
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Rectangle
+
+rect = [Rectangle((100, 600), width=200, height=200)]
+pc = PatchCollection(rect, facecolor='none', alpha=1.0, edgecolor='w', linewidth=1.5)
+plt.gca().add_collection(pc)
+
+plt.figure(figsize=(10,10))
+plt.imshow(new_image[600:800, 100:300], cmap = 'nipy_spectral');
+plt.axis('off');
+plt.title('Coded rolonies, zoomed in');
+# EPY: END code
 
 # EPY: START markdown
 #### visualization of matched barcodes

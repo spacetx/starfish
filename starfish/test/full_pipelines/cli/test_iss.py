@@ -43,6 +43,11 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted")
             ],
             [
+                "starfish", "validate", "experiment",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted", "experiment.json")
+            ],
+            [
                 "starfish", "registration",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "formatted/fov_001", "primary_images.json"),

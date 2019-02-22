@@ -18,7 +18,8 @@ from .util import (
 class MeanHighPass(FilterAlgorithmBase):
 
     def __init__(
-            self, size: Union[Number, Tuple[Number]], is_volume: bool=False) -> None:
+        self, size: Union[Number, Tuple[Number]], is_volume: bool=False, clip_method: int=0
+    ) -> None:
         """Mean high pass filter.
 
         The mean high pass filter reduces low spatial frequency features by subtracting a
@@ -42,6 +43,7 @@ class MeanHighPass(FilterAlgorithmBase):
 
         self.size = validate_and_broadcast_kernel_size(size, is_volume)
         self.is_volume = is_volume
+        self.clip_method = clip_method
 
     _DEFAULT_TESTING_PARAMETERS = {"size": 1}
 
@@ -75,8 +77,8 @@ class MeanHighPass(FilterAlgorithmBase):
         return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
-            n_processes: Optional[int]=None
+        self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
+        n_processes: Optional[int]=None
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -102,7 +104,8 @@ class MeanHighPass(FilterAlgorithmBase):
         high_pass: Callable = partial(self._high_pass, size=self.size)
         result = stack.apply(
             high_pass,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
+            clip_method=self.clip_method
         )
         return result
 
@@ -113,6 +116,10 @@ class MeanHighPass(FilterAlgorithmBase):
     @click.option(
         "--is-volume", is_flag=True,
         help="indicates that the image stack should be filtered in 3d")
+    @click.option(
+        "--clip-method", default=0, type=int,
+        help="method to constrain data to [0,1]. 0: clip, 1: scale by max per chunk, 2: scale "
+             "by max over whole ImageStack")
     @click.pass_context
-    def _cli(ctx, size, is_volume):
-        ctx.obj["component"]._cli_run(ctx, MeanHighPass(size, is_volume))
+    def _cli(ctx, size, is_volume, clip_method):
+        ctx.obj["component"]._cli_run(ctx, MeanHighPass(size, is_volume, clip_method))

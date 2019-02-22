@@ -15,8 +15,9 @@ from .util import determine_axes_to_group_by
 class Bandpass(FilterAlgorithmBase):
 
     def __init__(
-            self, lshort: Number, llong: int, threshold: Number=0, truncate: Number=4,
-            is_volume: bool=False) -> None:
+        self, lshort: Number, llong: int, threshold: Number=0, truncate: Number=4,
+        is_volume: bool=False, clip_method: int=0
+    ) -> None:
         """
 
         Parameters
@@ -32,6 +33,14 @@ class Bandpass(FilterAlgorithmBase):
             deviations (default 4)
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
+        clip_method : int
+            (Default 0) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            0: data above 1 are set to 1, and below 0 are set to 0
+            1: data above 1 are scaled by the maximum value, with the maximum value calculated
+               over the entire ImageStack
+            2: data above 1 are scaled by the maximum value, with the maximum value calculated
+               over each slice, where slice shapes are determined by the group_by parameters
         """
         self.lshort = lshort
         self.llong = llong
@@ -42,6 +51,7 @@ class Bandpass(FilterAlgorithmBase):
         self.threshold = threshold
         self.truncate = truncate
         self.is_volume = is_volume
+        self.clip_method = clip_method
 
     _DEFAULT_TESTING_PARAMETERS = {"lshort": 1, "llong": 3, "threshold": 0.01}
 
@@ -113,6 +123,7 @@ class Bandpass(FilterAlgorithmBase):
             group_by=group_by,
             in_place=in_place,
             n_processes=n_processes,
+            clip_method=self.clip_method,
         )
         return result
 
@@ -127,6 +138,13 @@ class Bandpass(FilterAlgorithmBase):
     @click.option(
         "--truncate", default=4, type=float,
         help="truncate the filter at this many standard deviations")
+    @click.option(
+        "--clip-method", default=0, type=int,
+        help="method to constrain data to [0,1]. 0: clip, 1: scale by max per chunk, 2: scale "
+             "by max over whole ImageStack")
     @click.pass_context
-    def _cli(ctx, lshort, llong, threshold, truncate):
-        ctx.obj["component"]._cli_run(ctx, Bandpass(lshort, llong, threshold, truncate))
+    def _cli(ctx, lshort, llong, threshold, truncate, clip_method):
+        ctx.obj["component"]._cli_run(
+            ctx,
+            Bandpass(lshort, llong, threshold, truncate, clip_method)
+        )

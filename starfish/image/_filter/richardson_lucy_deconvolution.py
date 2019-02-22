@@ -18,8 +18,9 @@ from .util import (
 
 class DeconvolvePSF(FilterAlgorithmBase):
 
-    def __init__(self, num_iter: int, sigma: Number, is_volume: bool = False
-                 ) -> None:
+    def __init__(
+        self, num_iter: int, sigma: Number, is_volume: bool = False, clip_method: int=1
+    ) -> None:
         """Deconvolve a point spread function
 
         Parameters
@@ -32,7 +33,14 @@ class DeconvolvePSF(FilterAlgorithmBase):
         is_volume: bool
             If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
             independently.
-
+        clip_method : int
+            (Default 1) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            0: data above 1 are set to 1, and below 0 are set to 0
+            1: data above 1 are scaled by the maximum value, with the maximum value calculated
+               over the entire ImageStack
+            2: data above 1 are scaled by the maximum value, with the maximum value calculated
+               over each slice, where slice shapes are determined by the group_by parameters
         """
         self.num_iter = num_iter
         self.sigma = sigma
@@ -42,8 +50,9 @@ class DeconvolvePSF(FilterAlgorithmBase):
             sigma=sigma
         )
         self.is_volume = is_volume
+        self.clip_method = clip_method
 
-    _DEFAULT_TESTING_PARAMETERS = {"num_iter": 1, "sigma": 1}
+    _DEFAULT_TESTING_PARAMETERS = {"num_iter": 2, "sigma": 1}
 
     # Here be dragons. This algorithm had a bug, but the results looked nice. Now we've "fixed" it
     # and the results look bad. #548 addresses this problem.
@@ -124,10 +133,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
                 'All-NaN output data detected. Likely cause is that deconvolution has been run for '
                 'too many iterations.')
 
-        # Changing to cliping values above 1 here changes test results
-        # so keeping this as rescaling for now
-        im_deconv = preserve_float_range(im_deconv, True)
-
         return im_deconv
 
     def run(
@@ -174,9 +179,12 @@ class DeconvolvePSF(FilterAlgorithmBase):
         '--num-iter', type=int, help='number of iterations to run')
     @click.option(
         '--sigma', type=float, help='standard deviation of gaussian kernel')
+    @click.option("--is-volume", is_flag=True,
+                  help="indicates that the image stack should be filtered in 3d")
     @click.option(
-        '--no-clip', is_flag=True,
-        help='(default True) if True, clip values below 0 and above 1')
+        "--clip-method", default=1, type=int,
+        help="method to constrain data to [0,1]. 0: clip, 1: scale by max per chunk, 2: scale "
+             "by max over whole ImageStack")
     @click.pass_context
-    def _cli(ctx, num_iter, sigma, no_clip):
-        ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, no_clip))
+    def _cli(ctx, num_iter, sigma, is_volume, clip_method):
+        ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, is_volume, clip_method))

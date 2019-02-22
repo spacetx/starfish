@@ -19,7 +19,7 @@ from .util import (
 class GaussianHighPass(FilterAlgorithmBase):
 
     def __init__(
-            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False,
+            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False, clip_method: int=0
     ) -> None:
         """Gaussian high pass filter
 
@@ -30,10 +30,19 @@ class GaussianHighPass(FilterAlgorithmBase):
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
             independently.
+        clip_method : int
+            (Default 0) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            0: data above 1 are set to 1, and below 0 are set to 0
+            1: data above 1 are scaled by the maximum value, with the maximum value calculated
+               over the entire ImageStack
+            2: data above 1 are scaled by the maximum value, with the maximum value calculated
+               over each slice, where slice shapes are determined by the group_by parameters
 
         """
         self.sigma = validate_and_broadcast_kernel_size(sigma, is_volume)
         self.is_volume = is_volume
+        self.clip_method = clip_method
 
     _DEFAULT_TESTING_PARAMETERS = {"sigma": 3}
 
@@ -95,7 +104,8 @@ class GaussianHighPass(FilterAlgorithmBase):
         high_pass: Callable = partial(self._high_pass, sigma=self.sigma)
         result = stack.apply(
             high_pass,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
+            clip_method=self.clip_method
         )
         return result
 
@@ -104,6 +114,10 @@ class GaussianHighPass(FilterAlgorithmBase):
     @click.option("--sigma", type=float, help="standard deviation of gaussian kernel")
     @click.option("--is-volume", is_flag=True,
                   help="indicates that the image stack should be filtered in 3d")
+    @click.option(
+        "--clip-method", default=0, type=int,
+        help="method to constrain data to [0,1]. 0: clip, 1: scale by max per chunk, 2: scale "
+             "by max over whole ImageStack")
     @click.pass_context
-    def _cli(ctx, sigma, is_volume):
-        ctx.obj["component"]._cli_run(ctx, GaussianHighPass(sigma, is_volume))
+    def _cli(ctx, sigma, is_volume, clip_method):
+        ctx.obj["component"]._cli_run(ctx, GaussianHighPass(sigma, is_volume, clip_method))

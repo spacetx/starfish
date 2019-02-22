@@ -1,8 +1,10 @@
 import json
 import posixpath
 import sys
+from typing import Dict
 
 from pkg_resources import resource_filename
+from slicedimage.backends._base import Backend
 from slicedimage.io import resolve_path_or_url
 
 from starfish.config import StarfishConfig
@@ -52,66 +54,54 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     valid = True
 
     # use slicedimage to read the top-level experiment json file passed by the user
-    backend, name, baseurl = resolve_path_or_url(experiment_json, backend_config=config.slicedimage)
+    try:
+        backend, name, baseurl = resolve_path_or_url(experiment_json, backend_config=config.slicedimage)
+    except ValueError as exception:
+        raise Exception(f"could not load {experiment_json}:\n{exception}")
+
     with backend.read_contextmanager(name) as fh:
         experiment = json.load(fh)
 
     # validate experiment.json
-    experiment_validator = SpaceTxValidator(_get_absolute_schema_path('experiment.json'))
-    if fuzz:
-        experiment_validator.fuzz_object(experiment, name)
-    else:
-        valid &= experiment_validator.validate_object(experiment, name)
+    valid &= validate_file(name, "experiment.json", fuzz, backend)
 
     # loop over all the manifests that are stored in images. Disallowed names will have already been
     # excluded by experiment validation.
     manifests = []
     for manifest in experiment['images'].values():
-        with backend.read_contextmanager(manifest) as fh:
-            manifests.append((json.load(fh), manifest))
-
-    fovs = []
-    manifest_validator = SpaceTxValidator(_get_absolute_schema_path('fov_manifest.json'))
-    for manifest, filename in manifests:
-        if fuzz:
-            manifest_validator.fuzz_object(manifest, filename)
+        obj = dict()
+        if not validate_file(manifest, "fov_manifest.json", fuzz, backend, obj):
+            valid = False
         else:
-            if not manifest_validator.validate_object(manifest, filename):
-                valid = False
-            else:
-                for key, fov in manifest['contents'].items():
-                    with backend.read_contextmanager(fov) as fh:
-                        fovs.append((json.load(fh), fov))
-
-    # fovs may be empty if the manifests were not valid
-    if fovs:
-        fov_schema = _get_absolute_schema_path('field_of_view/field_of_view.json')
-        fov_validator = SpaceTxValidator(fov_schema)
-        for fov, filename in fovs:
-            if fuzz:
-                fov_validator.fuzz_object(fov, filename)
-            else:
-                valid &= fov_validator.validate_object(fov, filename)
+            for key, fov in obj['contents'].items():
+                valid &= validate_file(fov, 'field_of_view/field_of_view.json', fuzz, backend)
 
     codebook_file = experiment.get('codebook')
     if codebook_file is not None:
-        valid &= validate_codebook(codebook_file, fuzz, backend)
+        valid &= validate_file(codebook_file, "codebook/codebook.json", fuzz, backend)
 
     return valid
 
 
-def validate_codebook(codebook_file: str, fuzz: bool=False, backend=None) -> bool:
-    """validate a spaceTx formatted codebook.
+def validate_file(file: str, schema: str, fuzz: bool=False,
+                  backend: Backend=None, output: Dict=None) -> bool:
+    """validate a spaceTx formatted file with a given schema.
     Accepts local filepaths or files hosted at http links.
 
     Parameters
     ----------
-    codebok_file : str
-        path or URL to a target json object to be validated against the schema passed to this
-        object's constructor
+    file : str
+        path or URL to a target json object to be validated against the schema passed
+    schema : str
+        resource path to the schema
+    backend : slicedimage.backends._base.Backend
+        backend previously loaded from a file path or URL,
+        or potentially None if a new backend should be loaded.
     fuzz : bool
         whether or not to perform element-by-element fuzzing.
         If true, will return true and will *not* use warnings.
+    output : Dict
+        dictionary into which the output object can be stored
 
     Returns
     -------
@@ -122,25 +112,27 @@ def validate_codebook(codebook_file: str, fuzz: bool=False, backend=None) -> boo
     --------
     The following will read the codebook json file provided, downloading it if necessary:
 
-        >>> from sptx_format import validate_codebook
-        >>> valid = validate_sptx.validate_codebook(json_url)
+        >>> from sptx_format import validate_file
+        >>> valid = validate_sptx.validate_file(json_url, "codebook/codebook.json")
     """
 
-    codebook_validator = SpaceTxValidator(_get_absolute_schema_path('codebook/codebook.json'))
+    validator = SpaceTxValidator(_get_absolute_schema_path(schema))
 
     if backend is None:
-        backend, name, baseurl = resolve_path_or_url(codebook_file)
+        backend, name, baseurl = resolve_path_or_url(file)
     else:
-        name = codebook_file
+        name = file
 
     with backend.read_contextmanager(name) as fh:
-        codebook = json.load(fh)
+        obj = json.load(fh)
+        if output is not None:
+            output.update(obj)
 
     if fuzz:
-        codebook_validator.fuzz_object(codebook, codebook_file)
+        validator.fuzz_object(obj, file)
         return True
     else:
-        return codebook_validator.validate_object(codebook, codebook_file)
+        return validator.validate_object(obj, file)
 
 
 if __name__ == "__main__":

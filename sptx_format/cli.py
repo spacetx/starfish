@@ -32,14 +32,14 @@ def validate(ctx, experiment_json, fuzz):
 
 
 @validate.command()
-@click.argument("codebook_file", metavar="JSON_FILE_OR_URL")
+@click.argument("path", metavar="JSON_FILE_OR_URL")
 @click.option("--fuzz", is_flag=True)
 @click.pass_context
-def codebook(ctx, codebook_file, fuzz):
+def codebook(ctx, path, fuzz):
     """validate codebook against the jsonschemas"""
 
     try:
-        valid = validate_sptx.validate_codebook(codebook_file, fuzz)
+        valid = validate_sptx.validate_file(path, "codebook/codebook.json", fuzz)
         if valid:
             ctx.exit(0)
         else:
@@ -49,14 +49,31 @@ def codebook(ctx, codebook_file, fuzz):
 
 
 @validate.command()
-@click.argument("experiment_json", metavar="JSON_FILE_OR_URL")
+@click.argument("path", metavar="JSON_FILE_OR_URL")
 @click.option("--fuzz", is_flag=True)
 @click.pass_context
-def experiment(ctx, experiment_json, fuzz):
+def experiment(ctx, path, fuzz):
     """validate experiment against the jsonschemas"""
 
     try:
-        valid = validate_sptx.validate(experiment_json, fuzz)
+        valid = validate_sptx.validate(path, fuzz)
+        if valid:
+            ctx.exit(0)
+        else:
+            ctx.exit(1)
+    except KeyboardInterrupt:
+        ctx.exit(3)
+
+
+@validate.command()
+@click.argument("file", metavar="JSON_FILE_OR_URL")
+@click.option("--fuzz", is_flag=True)
+@click.pass_context
+def fov(ctx, file, fuzz):
+    """validate codebook against the jsonschemas"""
+
+    try:
+        valid = validate_sptx.validate_file(file, "field_of_view/field_of_view.json", fuzz)
         if valid:
             ctx.exit(0)
         else:

@@ -55,7 +55,8 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
 
     # use slicedimage to read the top-level experiment json file passed by the user
     try:
-        backend, name, baseurl = resolve_path_or_url(experiment_json, backend_config=config.slicedimage)
+        backend, name, baseurl = resolve_path_or_url(
+            experiment_json, backend_config=config.slicedimage)
     except ValueError as exception:
         raise Exception(f"could not load {experiment_json}:\n{exception}")
 
@@ -67,7 +68,6 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
 
     # loop over all the manifests that are stored in images. Disallowed names will have already been
     # excluded by experiment validation.
-    manifests = []
     for manifest in experiment['images'].values():
         obj = dict()
         if not validate_file(manifest, "fov_manifest.json", fuzz, backend, obj):

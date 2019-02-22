@@ -129,6 +129,13 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "PerRoundMaxChannelDecoder",
             ],
 
+            # Validate codebook
+            [
+                "starfish", "validate", "codebook",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted", "codebook.json")
+            ],
+
             # Validate results/{spots,targeted-spots,decoded-spots}.nc
             [
                 "starfish", "validate", "xarray",

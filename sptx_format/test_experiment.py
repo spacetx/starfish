@@ -3,6 +3,7 @@ import warnings
 import pytest
 from pkg_resources import resource_filename
 
+import starfish  # trigger early loading
 from .util import SpaceTxValidator
 from .validate_sptx import validate
 

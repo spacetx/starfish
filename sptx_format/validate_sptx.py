@@ -1,7 +1,6 @@
 import json
 import posixpath
 import sys
-from typing import Dict
 
 from pkg_resources import resource_filename
 from slicedimage.io import resolve_path_or_url
@@ -94,19 +93,54 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
             else:
                 valid &= fov_validator.validate_object(fov, filename)
 
-    # validate codebook
-    codebook_validator = SpaceTxValidator(_get_absolute_schema_path('codebook/codebook.json'))
     codebook_file = experiment.get('codebook')
-    codebook: Dict = {}
     if codebook_file is not None:
-        with backend.read_contextmanager(codebook_file) as fh:
-            codebook = json.load(fh)
-    if fuzz:
-        codebook_validator.fuzz_object(codebook, codebook_file)
-    else:
-        valid &= codebook_validator.validate_object(codebook, codebook_file)
+        valid &= validate_codebook(codebook_file, fuzz, backend)
 
     return valid
+
+
+def validate_codebook(codebook_file: str, fuzz: bool=False, backend=None) -> bool:
+    """validate a spaceTx formatted codebook.
+    Accepts local filepaths or files hosted at http links.
+
+    Parameters
+    ----------
+    codebok_file : str
+        path or URL to a target json object to be validated against the schema passed to this
+        object's constructor
+    fuzz : bool
+        whether or not to perform element-by-element fuzzing.
+        If true, will return true and will *not* use warnings.
+
+    Returns
+    -------
+    bool :
+        True, if object valid or fuzz=True, else False
+
+    Examples
+    --------
+    The following will read the codebook json file provided, downloading it if necessary:
+
+        >>> from sptx_format import validate_codebook
+        >>> valid = validate_sptx.validate_codebook(json_url)
+    """
+
+    codebook_validator = SpaceTxValidator(_get_absolute_schema_path('codebook/codebook.json'))
+
+    if backend is None:
+        backend, name, baseurl = resolve_path_or_url(codebook_file)
+    else:
+        name = codebook_file
+
+    with backend.read_contextmanager(name) as fh:
+        codebook = json.load(fh)
+
+    if fuzz:
+        codebook_validator.fuzz_object(codebook, codebook_file)
+        return True
+    else:
+        return codebook_validator.validate_object(codebook, codebook_file)
 
 
 if __name__ == "__main__":

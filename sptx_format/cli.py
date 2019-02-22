@@ -32,6 +32,23 @@ def validate(ctx, experiment_json, fuzz):
 
 
 @validate.command()
+@click.argument("codebook_file", metavar="JSON_FILE_OR_URL")
+@click.option("--fuzz", is_flag=True)
+@click.pass_context
+def codebook(ctx, codebook_file, fuzz):
+    """validate codebook against the jsonschemas"""
+
+    try:
+        valid = validate_sptx.validate_codebook(codebook_file, fuzz)
+        if valid:
+            ctx.exit(0)
+        else:
+            ctx.exit(1)
+    except KeyboardInterrupt:
+        ctx.exit(3)
+
+
+@validate.command()
 @click.argument("experiment_json", metavar="JSON_FILE_OR_URL")
 @click.option("--fuzz", is_flag=True)
 @click.pass_context

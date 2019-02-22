@@ -7,7 +7,7 @@ import xarray as xr
 from starfish.imagestack.imagestack import ImageStack
 from starfish.util import click
 from ._base import FilterAlgorithmBase
-from .util import determine_axes_to_group_by, preserve_float_range
+from .util import determine_axes_to_group_by
 
 
 class ScaleByPercentile(FilterAlgorithmBase):
@@ -53,7 +53,6 @@ class ScaleByPercentile(FilterAlgorithmBase):
         v = np.percentile(image, p)
 
         image = image / v
-        image = preserve_float_range(image)
 
         return image
 

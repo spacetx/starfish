@@ -9,7 +9,7 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from starfish.util import click
 from ._base import FilterAlgorithmBase
-from .util import determine_axes_to_group_by, preserve_float_range
+from .util import determine_axes_to_group_by
 
 
 class Bandpass(FilterAlgorithmBase):
@@ -75,7 +75,7 @@ class Bandpass(FilterAlgorithmBase):
             image, lshort=lshort, llong=llong, threshold=threshold,
             truncate=truncate
         )
-        return preserve_float_range(bandpassed)
+        return bandpassed
 
     def run(
             self, stack: ImageStack, in_place: bool = False, verbose: bool = False,

@@ -8,17 +8,17 @@ from scipy.signal import convolve, fftconvolve
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from starfish.util import click
+from starfish.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by,
     gaussian_kernel,
-    preserve_float_range
 )
 
 
 class DeconvolvePSF(FilterAlgorithmBase):
 
-    def __init__(self, num_iter: int, sigma: Number, clip: bool = True, is_volume: bool = False
+    def __init__(self, num_iter: int, sigma: Number, is_volume: bool = False
                  ) -> None:
         """Deconvolve a point spread function
 
@@ -29,9 +29,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
             careful optimization
         sigma : Number
             standard deviation of the gaussian kernel used to construct the point spread function
-        clip : bool (default = False)
-            if True, pixel values below -1 and above 1 are clipped for skimage pipeline
-            compatibility
         is_volume: bool
             If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
             independently.
@@ -39,7 +36,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
         """
         self.num_iter = num_iter
         self.sigma = sigma
-        self.clip = clip
         self.kernel_size: int = int(2 * np.ceil(2 * sigma) + 1)
         self.psf: np.ndarray = gaussian_kernel(
             shape=(self.kernel_size, self.kernel_size),
@@ -53,7 +49,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
     # and the results look bad. #548 addresses this problem.
     @staticmethod
     def _richardson_lucy_deconv(
-            image: Union[xr.DataArray, np.ndarray], iterations: int, psf: np.ndarray, clip: bool
+            image: Union[xr.DataArray, np.ndarray], iterations: int, psf: np.ndarray
     ) -> np.ndarray:
         """
         Deconvolves input image with a specified point spread function.
@@ -67,9 +63,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
         iterations : int
            Number of iterations. This parameter plays the role of
            regularisation.
-        clip : boolean
-            If true, pixel value of the result above 1 or
-           under -1 are thresholded for skimage pipeline compatibility.
 
         Returns
         -------
@@ -131,10 +124,9 @@ class DeconvolvePSF(FilterAlgorithmBase):
                 'All-NaN output data detected. Likely cause is that deconvolution has been run for '
                 'too many iterations.')
 
-        if clip:
-            # Changing to cliping values above 1 here changes test results
-            # so keeping this as rescaling for now
-            im_deconv = preserve_float_range(im_deconv, True)
+        # Changing to cliping values above 1 here changes test results
+        # so keeping this as rescaling for now
+        im_deconv = preserve_float_range(im_deconv, True)
 
         return im_deconv
 
@@ -165,7 +157,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
         group_by = determine_axes_to_group_by(self.is_volume)
         func = partial(
             self._richardson_lucy_deconv,
-            iterations=self.num_iter, psf=self.psf, clip=self.clip
+            iterations=self.num_iter, psf=self.psf
         )
         result = stack.apply(
             func,

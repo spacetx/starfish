@@ -5,7 +5,7 @@ import numpy as np
 from scipy.ndimage import fourier_shift
 from skimage.feature import register_translation
 
-from starfish.image._filter.util import preserve_float_range
+from starfish.util.dtype import preserve_float_range
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
 from starfish.util import click

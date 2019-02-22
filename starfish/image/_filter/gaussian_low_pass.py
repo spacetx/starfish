@@ -8,10 +8,10 @@ from skimage.filters import gaussian
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from starfish.util import click
+from starfish.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by,
-    preserve_float_range,
     validate_and_broadcast_kernel_size,
 )
 

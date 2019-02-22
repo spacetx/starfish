@@ -59,6 +59,7 @@ from starfish.types import (
     STARFISH_EXTRAS_KEY
 )
 from starfish.util import logging
+from starfish.util.dtype import preserve_float_range
 from ._mp_dataarray import MPDataArray
 from .dataorder import AXES_DATA, N_AXES
 
@@ -771,7 +772,7 @@ class ImageStack:
     @staticmethod
     def _in_place_apply(apply_func: Callable[..., np.ndarray], data: np.ndarray, **kwargs) -> None:
         result = apply_func(data, **kwargs)
-        data[:] = result
+        data[:] = preserve_float_range(result)
 
     def transform(
             self,

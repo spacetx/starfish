@@ -9,7 +9,6 @@ from scipy.ndimage import gaussian_laplace
 from starfish.image._filter._base import FilterAlgorithmBase
 from starfish.image._filter.util import (
     determine_axes_to_group_by,
-    preserve_float_range,
     validate_and_broadcast_kernel_size,
 )
 from starfish.imagestack.imagestack import ImageStack
@@ -90,7 +89,6 @@ class Laplace(FilterAlgorithmBase):
             image, sigma=sigma, mode=mode, cval=cval)
 
         filtered = -filtered  # the peaks are negative so invert the signal
-        filtered = preserve_float_range(filtered)
 
         return filtered
 

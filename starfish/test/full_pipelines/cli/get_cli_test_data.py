@@ -33,8 +33,9 @@ if __name__ == "__main__":
     with open(pathlib.Path(args.output_dir, 'codebook.json'), 'w') as f:
         json.dump(data, f)
 
-    # get experiment.json from url and save locally to tmp dir
-    experiment = requests.get(posixpath.join(args.experiment_url, "experiment.json"))
-    data = experiment.json()
-    with open(pathlib.Path(args.output_dir, 'experiment.json'), 'w') as f:
-        json.dump(data, f)
+    # get json files from url and save locally to tmp dir
+    for filename in ("experiment.json", "hybridization.json", "nuclei.json", "dots.json"):
+        obj = requests.get(posixpath.join(args.experiment_url, filename))
+        data = obj.json()
+        with open(pathlib.Path(args.output_dir, filename), 'w') as f:
+            json.dump(data, f)

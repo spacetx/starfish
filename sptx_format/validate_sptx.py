@@ -69,7 +69,7 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     # loop over all the manifests that are stored in images. Disallowed names will have already been
     # excluded by experiment validation.
     for manifest in experiment['images'].values():
-        obj = dict()
+        obj: Dict = dict()
         if not validate_file(manifest, "fov_manifest.json", fuzz, backend, obj):
             valid = False
         else:

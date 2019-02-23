@@ -1,6 +1,5 @@
 import json
 import uuid
-from itertools import product
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import numpy as np

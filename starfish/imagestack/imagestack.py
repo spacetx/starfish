@@ -749,9 +749,9 @@ class ImageStack:
             set to 0.
             0: data above 1 are set to 1.
             1: data above 1 are scaled by the maximum value, with the maximum value calculated
-               over the entire ImageStack
+            over the entire ImageStack
             2: data above 1 are scaled by the maximum value, with the maximum value calculated
-               over each slice, where slice shapes are determined by the group_by parameters
+            over each slice, where slice shapes are determined by the group_by parameters
 
         Returns
         -------

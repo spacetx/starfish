@@ -1,7 +1,7 @@
 import skimage
 from packaging import version
 
-if version.parse(skimage.version) > version.parse("0.14.2"):
+if version.parse(skimage.__version__) > version.parse("0.14.2"):
     from skimage.transform import match_histograms
 else:
 

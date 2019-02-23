@@ -140,8 +140,8 @@ class Bandpass(FilterAlgorithmBase):
         help="truncate the filter at this many standard deviations")
     @click.option(
         "--clip-method", default=0, type=int,
-        help="method to constrain data to [0,1]. 0: clip, 1: scale by max per chunk, 2: scale "
-             "by max over whole ImageStack")
+        help="method to constrain data to [0,1]. 0: clip, 1: scale by max over whole image, "
+             "2: scale by max per chunk")
     @click.pass_context
     def _cli(ctx, lshort, llong, threshold, truncate, clip_method):
         ctx.obj["component"]._cli_run(

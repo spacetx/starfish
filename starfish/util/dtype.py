@@ -31,8 +31,9 @@ def preserve_float_range(
     else:
         data = array
 
-    if np.any(data < 0):
-        data[data < 0] = 0
+    negative = data < 0
+    if np.any(negative):
+        data[negative] = 0
     if np.any(data > 1):
         if rescale:
             data /= data.max()

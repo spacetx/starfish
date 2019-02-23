@@ -8,7 +8,6 @@ from scipy.signal import convolve, fftconvolve
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Number
 from starfish.util import click
-from starfish.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by,
@@ -19,7 +18,7 @@ from .util import (
 class DeconvolvePSF(FilterAlgorithmBase):
 
     def __init__(
-        self, num_iter: int, sigma: Number, is_volume: bool = False, clip_method: int=1
+        self, num_iter: int, sigma: Number, is_volume: bool = False, clip_method: int=0
     ) -> None:
         """Deconvolve a point spread function
 
@@ -182,9 +181,9 @@ class DeconvolvePSF(FilterAlgorithmBase):
     @click.option("--is-volume", is_flag=True,
                   help="indicates that the image stack should be filtered in 3d")
     @click.option(
-        "--clip-method", default=1, type=int,
-        help="method to constrain data to [0,1]. 0: clip, 1: scale by max per chunk, 2: scale "
-             "by max over whole ImageStack")
+        "--clip-method", default=0, type=int,
+        help="method to constrain data to [0,1]. 0: clip, 1: scale by max over whole image, "
+             "2: scale by max per chunk")
     @click.pass_context
     def _cli(ctx, num_iter, sigma, is_volume, clip_method):
         ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, is_volume, clip_method))

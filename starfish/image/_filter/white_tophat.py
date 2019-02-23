@@ -20,7 +20,7 @@ class WhiteTophat(FilterAlgorithmBase):
     https://en.wikipedia.org/wiki/Top-hat_transform
     """
 
-    def __init__(self, masking_radius: int, is_volume: bool=False, clip_method: bool=0) -> None:
+    def __init__(self, masking_radius: int, is_volume: bool=False, clip_method: int=0) -> None:
         """
         Instance of a white top hat morphological masking filter which masks objects larger
         than `masking_radius`
@@ -96,8 +96,8 @@ class WhiteTophat(FilterAlgorithmBase):
         "--is-volume", is_flag=True, help="filter 3D volumes")
     @click.option(
         "--clip-method", default=0, type=int,
-        help="method to constrain data to [0,1]. 0: clip, 1: scale by max per chunk, 2: scale "
-             "by max over whole ImageStack")
+        help="method to constrain data to [0,1]. 0: clip, 1: scale by max over whole image, "
+             "2: scale by max per chunk")
     @click.pass_context
     def _cli(ctx, masking_radius, is_volume, clip_method):
         ctx.obj["component"]._cli_run(ctx, WhiteTophat(masking_radius, is_volume, clip_method))

@@ -744,9 +744,10 @@ class ImageStack:
         kwargs : dict
             Additional arguments to pass to func
         clip_method : int
-            (Default 0) Controls the way that data are scaled to retain skimage dtype
-            requirements that float data fall in [0, 1].
-            0: data above 1 are set to 1, and below 0 are set to 0
+            (Default 0) Controls the way that data that exceed 1 are scaled to retain skimage dtype
+            requirements (float data fall in [0, 1]). Regardless of the method, data below 0 are
+            set to 0.
+            0: data above 1 are set to 1.
             1: data above 1 are scaled by the maximum value, with the maximum value calculated
                over the entire ImageStack
             2: data above 1 are scaled by the maximum value, with the maximum value calculated
@@ -767,7 +768,9 @@ class ImageStack:
             image_stack = deepcopy(self)
             return image_stack.apply(
                 func=func,
-                group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
+                group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes,
+                clip_method=clip_method,
+                **kwargs
             )
 
         # wrapper adds a target `data` parameter where the results from func will be stored
@@ -794,9 +797,9 @@ class ImageStack:
     ) -> None:
         result = apply_func(data, **kwargs)
         if clip_method == 0:
-            data[:] = preserve_float_range(result, False)
+            data[:] = preserve_float_range(result, rescale=False)
         elif clip_method == 2:
-            data[:] = preserve_float_range(result, True)
+            data[:] = preserve_float_range(result, rescale=True)
         else:
             data[:] = result
 

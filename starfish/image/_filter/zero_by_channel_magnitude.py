@@ -23,7 +23,6 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         thresh : int
             pixels in each round that have a L2 norm across channels below this threshold
             are set to 0
-
         normalize : bool
             if True, this scales all rounds to have unit L2 norm across channels
         """

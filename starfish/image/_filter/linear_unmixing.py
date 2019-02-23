@@ -12,7 +12,7 @@ from ._base import FilterAlgorithmBase
 
 class LinearUnmixing(FilterAlgorithmBase):
 
-    def __init__(self, coeff_mat: np.ndarray) -> None:
+    def __init__(self, coeff_mat: np.ndarray, clip_method: int=1) -> None:
         """Image scaling filter
 
         Parameters
@@ -21,6 +21,14 @@ class LinearUnmixing(FilterAlgorithmBase):
             matrix of the linear unmixing coefficients. Should take the form:
             B = AX, where B are the unmixed values, A is coeff_mat and X are
             the observed values.
+        clip_method : int
+            (Default 1) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            0: data above 1 are set to 1, and below 0 are set to 0
+            1: data above 1 are scaled by the maximum value, with the maximum value calculated
+               over the entire ImageStack
+            2: data above 1 are scaled by the maximum value, with the maximum value calculated
+               over each slice, where slice shapes are determined by the group_by parameters
 
         """
         self.coeff_mat = coeff_mat
@@ -96,6 +104,10 @@ class LinearUnmixing(FilterAlgorithmBase):
     @click.command("LinearUnmixing")
     @click.option(
         "--coeff_mat", required=True, type=np.ndarray, help="linear unmixing coefficients")
+    @click.option(
+        "--clip-method", default=1, type=int,
+        help="method to constrain data to [0,1]. 0: clip, 1: scale by max over whole image, "
+             "2: scale by max per chunk")
     @click.pass_context
     def _cli(ctx, coeff_mat):
         ctx.obj["component"]._cli_run(ctx, LinearUnmixing(coeff_mat))

@@ -7,5 +7,5 @@ Expression Matrix is a wrapper for xarray.DataArray that provides serialization 
 loom, and AnnData to enable it to be used with single-cell analysis software packages such as
 scanpy (python) and seurat (R).
 
-.. automodule:: starfish.expression_matrix.expression_matrix.ExpressionMatrix
+.. automodule:: starfish.expression_matrix.expression_matrix
    :members:

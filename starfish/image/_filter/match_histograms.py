@@ -1,7 +1,8 @@
 from functools import partial
-from typing import Mapping, Optional
+from typing import Mapping, Optional, Union
 
 import numpy as np
+import xarray as xr
 
 from starfish.compat import match_histograms
 from starfish.imagestack.imagestack import ImageStack
@@ -31,7 +32,9 @@ class MatchHistograms(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"reference_selector": {Axes.CH: 0, Axes.ROUND: 0}}
 
     @staticmethod
-    def _match_histograms(image: np.ndarray, reference: np.ndarray) -> np.ndarray:
+    def _match_histograms(
+        image: Union[xr.DataArray, np.ndarray], reference: np.ndarray
+    ) -> np.ndarray:
         """
         matches the intensity distribution of image to reference
 
@@ -45,6 +48,8 @@ class MatchHistograms(FilterAlgorithmBase):
         np.ndarray :
             image, with intensities matched to reference
         """
+        if isinstance(image, xr.DataArray):
+            image = image.values
         return match_histograms(image, reference=reference)
 
     def run(

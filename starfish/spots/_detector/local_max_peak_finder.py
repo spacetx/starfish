@@ -205,7 +205,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         threshold = self._select_optimal_threshold(thresholds, spot_counts)
         return threshold
 
-    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
+    def image_to_spots(self, data_image: xr.DataArray) -> SpotAttributes:
         """measure attributes of spots detected by binarizing the image using the selected threshold
 
         Parameters
@@ -221,6 +221,9 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
         if self.threshold is None:
             self.threshold = self._compute_threshold(data_image)
+
+        if isinstance(data_image, xr.DataArray):
+            data_image = data_image.values
 
         # identify each spot's size by binarizing and calculating regionprops
         masked_image = data_image[:, :] > self.threshold

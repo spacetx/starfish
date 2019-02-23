@@ -857,12 +857,24 @@ class ImageStack:
             selector_and_slice_list: Tuple[Mapping[Axes, int],
                                            Tuple[Union[int, slice], ...]],
     ):
+        # build the numpy array from the shared memory object
         backing_mp_array, shape, dtype = SharedMemory.get_payload()
         unshaped_numpy_array = np.frombuffer(backing_mp_array.get_obj(), dtype=dtype)
-        numpy_array = unshaped_numpy_array.reshape(shape)
 
-        sliced = numpy_array[selector_and_slice_list[1]]
+        # get the correct dimension order for the imagestack based on AXES_DATA
+        dims = [
+            name.value for (name, data) in
+            sorted(AXES_DATA.items(), key=lambda kv: kv[1].order)
+        ] + [Axes.Y.value, Axes.X.value]
 
+        # build and then slice the xarray to get the piece needed for this worker
+        data_array = xr.DataArray(
+            data=unshaped_numpy_array.reshape(shape),
+            dims=dims,
+        )
+        sliced = data_array.sel(selector_and_slice_list[0])
+
+        # return the result of the function called on the slice
         return worker_callable(sliced)
 
     @property

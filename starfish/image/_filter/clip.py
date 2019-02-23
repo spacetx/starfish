@@ -1,7 +1,8 @@
 from functools import partial
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
+import xarray as xr
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.util import click
@@ -30,12 +31,12 @@ class Clip(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"p_min": 0, "p_max": 100}
 
     @staticmethod
-    def _clip(image: np.ndarray, p_min: int, p_max: int) -> np.ndarray:
+    def _clip(image: Union[xr.DataArray, np.ndarray], p_min: int, p_max: int) -> np.ndarray:
         """Clip values of img below and above percentiles p_min and p_max
 
         Parameters
         ----------
-        image : np.ndarray
+        image : Union[xr.DataArray, np.ndarray]
             image to be clipped
         p_min : int
           values below this percentile are set to the value of this percentile

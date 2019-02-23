@@ -1,7 +1,8 @@
 from functools import partial
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
+import xarray as xr
 from trackpy import bandpass
 
 from starfish.imagestack.imagestack import ImageStack
@@ -46,13 +47,14 @@ class Bandpass(FilterAlgorithmBase):
 
     @staticmethod
     def _bandpass(
-            image: np.ndarray, lshort: Number, llong: int, threshold: Number, truncate: Number
+            image: Union[xr.DataArray, np.ndarray],
+            lshort: Number, llong: int, threshold: Number, truncate: Number
     ) -> np.ndarray:
         """Apply a bandpass filter to remove noise and background variation
 
         Parameters
         ----------
-        image : np.ndarray
+        image : Union[xr.DataArray, np.ndarray]
         lshort : float
             filter frequencies below this value
         llong : int
@@ -69,7 +71,7 @@ class Bandpass(FilterAlgorithmBase):
             bandpassed image
 
         """
-        bandpassed: np.ndarray = bandpass(
+        bandpassed = bandpass(
             image, lshort=lshort, llong=llong, threshold=threshold,
             truncate=truncate
         )

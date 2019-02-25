@@ -95,6 +95,7 @@ class FieldOfView:
                 tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
                 tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
             ])
+            # A tile with this (x, y) has already been seen, add tile's Indices to CropParameters
             if x_y_coords in coord_groups:
                 crop_params = coord_groups[x_y_coords]
                 crop_params.add_permitted_axes(Axes.CH, tile.indices[Axes.CH])
@@ -125,8 +126,8 @@ class FieldOfView:
             {'primary': 'Group 0:  <starfish.ImageStack (8, 2, 1, 205, 405))>',
              'nuclei': 'Group 0:  <starfish.ImageStack (1, 1, 1, 205, 405))>'}
 
-        Means there are two tilesets in this FOV, (primary and nuclei) each tileset only
-        has one aligned subgroup.
+       Means there are two tilesets in this FOV (primary and nuclei), and because all images have
+       the same (x, y) coordinates, each tileset has a single aligned subgroup.
 
         ex.
             {'primary': 'Group 0:  <starfish.ImageStack (4, 2, 1, 205, 405)>
@@ -140,12 +141,13 @@ class FieldOfView:
         for name, groups in self.aligned_coordinate_groups.items():
             y_size = self._images[name].default_tile_shape[0]
             x_size = self._images[name].default_tile_shape[1]
-            info = '\n    '.join(
+            info = '\n'.join(
                 f" Group {k}: "
                 f" <starfish.ImageStack "
-                f"""({len(v._permitted_rounds) if v._permitted_rounds else 1,
-                    len(v._permitted_chs) if v._permitted_chs else 1,
-                 len(v._permitted_zplanes) if v._permitted_zplanes else 1, y_size, x_size})>"""
+                f"r={v._permitted_rounds if v._permitted_rounds else 1}, "
+                f"ch={v._permitted_chs if v._permitted_chs else 1}, "
+                f"z={v._permitted_zplanes if v._permitted_zplanes else 1}, "
+                f"(y, x)={y_size, x_size}>"
                 for k, v in enumerate(groups)
             )
             all_groups[name] = f'{info}'

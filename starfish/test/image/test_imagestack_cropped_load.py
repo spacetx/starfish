@@ -11,9 +11,7 @@ from slicedimage import ImageFormat
 from starfish.experiment.builder import build_image, FetchedTile, tile_fetcher_factory
 from starfish.imagestack.imagestack import ImageStack
 from starfish.imagestack.parser.crop import CropParameters
-from starfish.imagestack.physical_coordinate_calculator import (
-    get_physical_coordinates_of_z_plane,
-    recalculate_physical_coordinate_range)
+from starfish.imagestack.physical_coordinate_calculator import recalculate_physical_coordinate_range
 from starfish.types import Axes, Coordinates, Number
 from .imagestack_test_utils import verify_physical_coordinates, verify_stack_data
 
@@ -26,6 +24,8 @@ CH_LABELS = list(range(NUM_CH))
 Z_LABELS = list(range(NUM_Z))
 HEIGHT = 40
 WIDTH = 60
+X_COORDS = 0.01, 0.01
+Y_COORDS = 0.001, 0.001
 
 
 def data(round_: int, ch: int, z: int) -> np.ndarray:
@@ -38,19 +38,9 @@ def data(round_: int, ch: int, z: int) -> np.ndarray:
     return img_as_float32(result)
 
 
-def x_coordinates() -> Tuple[float, float]:
-    """Return the expected physical x coordinates."""
-    return 0.01, 0.1
-
-
-def y_coordinates() -> Tuple[float, float]:
-    """Return the expected physical y coordinates."""
-    return 0.001, 0.01
-
-
-def z_coordinates() -> Tuple[float, float]:
-    """Return the expected physical z coordinates."""
-    return 0.0001, 0.001
+def z_coordinates(z: int) -> Tuple[float, float]:
+    """Return the expected physical z coordinate value for a given zplane index."""
+    return z * 0.0001, (z + 1) * 0.0001
 
 
 class UniqueTiles(FetchedTile):
@@ -68,9 +58,9 @@ class UniqueTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return {
-            Coordinates.X: x_coordinates(),
-            Coordinates.Y: y_coordinates(),
-            Coordinates.Z: z_coordinates(),
+            Coordinates.X: X_COORDS,
+            Coordinates.Y: Y_COORDS,
+            Coordinates.Z: z_coordinates(self._zplane),
         }
 
     @property
@@ -125,13 +115,13 @@ def test_crop_rcz():
                     expected_data,
                 )
 
-    expected_z_coordinates = get_physical_coordinates_of_z_plane(z_coordinates())
-    verify_physical_coordinates(
-        stack,
-        x_coordinates(),
-        y_coordinates(),
-        expected_z_coordinates,
-    )
+                verify_physical_coordinates(
+                    stack,
+                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
+                    X_COORDS,
+                    Y_COORDS,
+                    z_coordinates(zplane),
+                )
 
 
 def test_crop_xy():
@@ -164,27 +154,26 @@ def test_crop_xy():
                     expected_data,
                 )
 
-    # the coordinates should be rescaled.  verify that the coordinates on the ImageStack
-    # are also rescaled.
-    original_x_coordinates = x_coordinates()
-    expected_x_coordinates = recalculate_physical_coordinate_range(
-        original_x_coordinates[0], original_x_coordinates[1],
-        WIDTH,
-        slice(*X_SLICE),
-    )
+                # the coordinates should be rescaled.  verify that the coordinates on the ImageStack
+                # are also rescaled.
+                original_x_coordinates = X_COORDS
+                expected_x_coordinates = recalculate_physical_coordinate_range(
+                    original_x_coordinates[0], original_x_coordinates[1],
+                    WIDTH,
+                    slice(*X_SLICE),
+                )
 
-    original_y_coordinates = y_coordinates()
-    expected_y_coordinates = recalculate_physical_coordinate_range(
-        original_y_coordinates[0], original_y_coordinates[1],
-        HEIGHT,
-        slice(*Y_SLICE),
-    )
+                original_y_coordinates = Y_COORDS
+                expected_y_coordinates = recalculate_physical_coordinate_range(
+                    original_y_coordinates[0], original_y_coordinates[1],
+                    HEIGHT,
+                    slice(*Y_SLICE),
+                )
 
-    expected_z_coordinates = get_physical_coordinates_of_z_plane(z_coordinates())
-
-    verify_physical_coordinates(
-        stack,
-        expected_x_coordinates,
-        expected_y_coordinates,
-        expected_z_coordinates,
-    )
+                verify_physical_coordinates(
+                    stack,
+                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
+                    expected_x_coordinates,
+                    expected_y_coordinates,
+                    z_coordinates(zplane),
+                )

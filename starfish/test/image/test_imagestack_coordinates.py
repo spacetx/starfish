@@ -5,8 +5,7 @@ from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, tile_fetcher_factory
 from starfish.imagestack.imagestack import ImageStack
-from starfish.imagestack.physical_coordinate_calculator import get_physical_coordinates_of_z_plane
-from starfish.types import Coordinates, Number
+from starfish.types import Axes, Coordinates, Number
 from .imagestack_test_utils import verify_physical_coordinates
 
 NUM_ROUND = 8
@@ -16,20 +15,16 @@ HEIGHT = 10
 WIDTH = 10
 
 
-def x_coordinates() -> Tuple[float, float]:
-    return 1000, 100
+X_COORDS = 100, 1000
+Y_COORDS = .1, 10
 
 
-def y_coordinates() -> Tuple[float, float]:
-    return 10, 0.1
+def round_to_z(r: int) -> Tuple[float, float]:
+    return (r + 1) * 0.01, (r + 1) * 0.001
 
 
-def z_coordinates() -> Tuple[float, float]:
-    return 0.01, 0.001
-
-
-class AlignedTiles(FetchedTile):
-    """Tiles that are physically aligned ob every tile."""
+class OffsettedTiles(FetchedTile):
+    """Tiles that are physically offset based on round."""
     def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
         super().__init__()
         self._round = _round
@@ -41,9 +36,9 @@ class AlignedTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return {
-            Coordinates.X: x_coordinates(),
-            Coordinates.Y: y_coordinates(),
-            Coordinates.Z: z_coordinates(),
+            Coordinates.X: X_COORDS,
+            Coordinates.Y: Y_COORDS,
+            Coordinates.Z: round_to_z(self._round),
         }
 
     @property
@@ -55,24 +50,26 @@ class AlignedTiles(FetchedTile):
 
 
 def test_coordinates():
-    """Set up an ImageStack with tiles that are aligned.  Verify that the coordinates
+    """Set up an ImageStack with tiles that are offset based on round.  Verify that the coordinates
     retrieved match.
     """
     stack = ImageStack.synthetic_stack(
         NUM_ROUND, NUM_CH, NUM_Z,
         HEIGHT, WIDTH,
         tile_fetcher=tile_fetcher_factory(
-            AlignedTiles,
+            OffsettedTiles,
             True,
         )
     )
 
-    verify_physical_coordinates(
-        stack,
-        x_coordinates(),
-        y_coordinates(),
-        get_physical_coordinates_of_z_plane(z_coordinates()),
-    )
+    for selectors in stack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
+        verify_physical_coordinates(
+            stack,
+            selectors,
+            X_COORDS,
+            Y_COORDS,
+            round_to_z(selectors[Axes.ROUND]),
+        )
 
 
 class ScalarTiles(FetchedTile):
@@ -88,9 +85,9 @@ class ScalarTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return {
-            Coordinates.X: x_coordinates()[0],
-            Coordinates.Y: y_coordinates()[0],
-            Coordinates.Z: z_coordinates()[0],
+            Coordinates.X: X_COORDS[0],
+            Coordinates.Y: Y_COORDS[0],
+            Coordinates.Z: round_to_z(self._round)[0],
         }
 
     @property
@@ -115,13 +112,15 @@ def test_scalar_coordinates():
         )
     )
 
-    expected_x = x_coordinates()[0]
-    expected_y = y_coordinates()[0]
-    expected_z = z_coordinates()[0]
+    for selectors in stack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
+        expected_x = X_COORDS[0]
+        expected_y = Y_COORDS[0]
+        expected_z = round_to_z(selectors[Axes.ROUND])[0]
 
-    verify_physical_coordinates(
-        stack,
-        (expected_x, expected_x),
-        (expected_y, expected_y),
-        (expected_z, expected_z)
-    )
+        verify_physical_coordinates(
+            stack,
+            selectors,
+            (expected_x, expected_x),
+            (expected_y, expected_y),
+            (expected_z, expected_z),
+        )

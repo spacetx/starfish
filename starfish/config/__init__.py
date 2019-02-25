@@ -171,9 +171,14 @@ class StarfishConfig(object):
             v = v[k]
         v[lookup[-1]] = value
 
-    @staticmethod
-    def flag(name, default_value=""):
-        value = os.environ.get(name, default_value)
+    def flag(self, name, default_value=""):
+
+        if name in os.environ:
+            value = os.environ[name]
+            self._env_keys.remove(name)
+        else:
+            value = default_value
+
         if isinstance(value, str):
             value = value.lower()
             return value in ("true", "1", "yes", "y", "on", "active", "enabled")

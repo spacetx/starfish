@@ -15,12 +15,8 @@ HEIGHT = 10
 WIDTH = 10
 
 
-def round_to_x() -> Tuple[float, float]:
-    return 1000, 100
-
-
-def round_to_y() -> Tuple[float, float]:
-    return 10, 0.1
+X_COORDS = 100, 1000
+Y_COORDS = .1, 10
 
 
 def round_to_z(r: int) -> Tuple[float, float]:
@@ -40,8 +36,8 @@ class OffsettedTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return {
-            Coordinates.X: round_to_x(),
-            Coordinates.Y: round_to_y(),
+            Coordinates.X: X_COORDS,
+            Coordinates.Y: Y_COORDS,
             Coordinates.Z: round_to_z(self._round),
         }
 
@@ -70,8 +66,8 @@ def test_coordinates():
         verify_physical_coordinates(
             stack,
             selectors,
-            round_to_x(),
-            round_to_y(),
+            X_COORDS,
+            Y_COORDS,
             round_to_z(selectors[Axes.ROUND]),
         )
 
@@ -89,8 +85,8 @@ class ScalarTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return {
-            Coordinates.X: round_to_x()[0],
-            Coordinates.Y: round_to_y()[0],
+            Coordinates.X: X_COORDS[0],
+            Coordinates.Y: Y_COORDS[0],
             Coordinates.Z: round_to_z(self._round)[0],
         }
 
@@ -117,8 +113,8 @@ def test_scalar_coordinates():
     )
 
     for selectors in stack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
-        expected_x = round_to_x()[0]
-        expected_y = round_to_y()[0]
+        expected_x = X_COORDS[0]
+        expected_y = Y_COORDS[0]
         expected_z = round_to_z(selectors[Axes.ROUND])[0]
 
         verify_physical_coordinates(

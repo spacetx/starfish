@@ -86,8 +86,9 @@ def get_un_aligned_tileset():
 def test_fov_order():
     data = SyntheticData()
     codebook = data.codebook()
-    fovs = [FieldOfView("stack2"),
-            FieldOfView("stack1")]
+    tilesets = {"primary": get_aligned_tileset()}
+    fovs = [FieldOfView("stack2", tilesets),
+            FieldOfView("stack1", tilesets)]
     extras = {"synthetic": True}
     experiment = Experiment(fovs, codebook, extras)
     assert "stack1" == experiment.fov().name

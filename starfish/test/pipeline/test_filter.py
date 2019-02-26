@@ -23,7 +23,7 @@ def test_gaussian_high_pass(sigma: Union[Number, Tuple[Number]], is_volume: bool
     image_stack = random_data_image_stack_factory()
     sum_before = np.sum(image_stack.xarray)
     ghp = gaussian_high_pass.GaussianHighPass(sigma=sigma, is_volume=is_volume)
-    result = ghp.run(image_stack)
+    result = ghp.run(image_stack, n_processes=1)
     assert np.sum(result.xarray) < sum_before
 
 @pytest.mark.parametrize('size, is_volume', [

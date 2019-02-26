@@ -1,5 +1,4 @@
 import collections
-import multiprocessing
 import os
 import warnings
 from copy import deepcopy
@@ -50,6 +49,7 @@ from starfish.imagestack.parser.crop import CropParameters, CroppedTileCollectio
 from starfish.imagestack.parser.numpy import NumpyData
 from starfish.imagestack.parser.tileset import parse_tileset
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.multiprocessing.pool import Pool
 from starfish.multiprocessing.shmem import SharedMemory
 from starfish.types import (
     Axes,
@@ -78,7 +78,7 @@ class ImageStack:
         the number of imaging rounds stored in the image tensor
     num_zplanes : int
         the number of z-layers stored in the image tensor
-    numpy_array : np.ndarray
+    xarray : xarray.core.dataarray.DataArray
         the 5-d image tensor is stored in this array
     raw_shape : Tuple[int]
         the shape of the image tensor (in integers)
@@ -102,13 +102,6 @@ class ImageStack:
         the image tensor is split.
     max_proj(*dims)
         return a max projection over one or more axis of the image tensor
-    show_stack(selector, color_map='gray', figure_size=(10, 10), rescale=False, p_min=None,
-        p_max=None)
-        show an interactive, pageable view of the image tensor, or a slice of the image tensor
-    show_stack_napari(selector)
-        view the selected selectore of the image tensor with Napari. Note that Napari is
-        still a prototype, but does offer more performant viewing of multi-dimensional images.
-        pip install napari-gui (requires 0.0.4)
     sel(indexers)
         return an ImageStack (coordinates preserved) that is the subset described
         by the indexers. The indexers can slice all 5 dimensions of the image tensor.
@@ -847,44 +840,19 @@ class ImageStack:
         if verbose and StarfishConfig().verbose:
             selectors_and_slice_lists = tqdm(selectors_and_slice_lists)
 
-        if n_processes == 1:
-            sp_applyfunc: Callable = partial(
-                self._singleprocessing_workflow,
-                partial(func, **kwargs),
-                self._data.data.values,
-            )
-
-            sp_results = []
-            for selector, slice_list in selectors_and_slice_lists:
-                result = sp_applyfunc((selector, slice_list))
-                sp_results.append((result, selector))
-            return sp_results
-        else:
+        with Pool(
+                processes=n_processes,
+                initializer=SharedMemory.initializer,
+                initargs=((self._data._backing_mp_array,
+                           self._data._data.shape,
+                           self._data._data.dtype),)) as pool:
             mp_applyfunc: Callable = partial(
-                self._multiprocessing_workflow, partial(func, **kwargs))
-
-            with multiprocessing.Pool(
-                    n_processes,
-                    initializer=SharedMemory.initializer,
-                    initargs=((self._data._backing_mp_array,
-                               self._data._data.shape,
-                               self._data._data.dtype),)) as pool:
-                mp_results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
-                return list(zip(mp_results, selectors))
+                self._processing_workflow, partial(func, **kwargs))
+            results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
+            return list(zip(results, selectors))
 
     @staticmethod
-    def _singleprocessing_workflow(
-            worker_callable: Callable[[np.ndarray], Any],
-            numpy_array: np.ndarray,
-            selector_and_slice_list: Tuple[Mapping[Axes, int],
-                                           Tuple[Union[int, slice], ...]],
-    ):
-        sliced = numpy_array[selector_and_slice_list[1]]
-
-        return worker_callable(sliced)
-
-    @staticmethod
-    def _multiprocessing_workflow(
+    def _processing_workflow(
             worker_callable: Callable[[np.ndarray], Any],
             selector_and_slice_list: Tuple[Mapping[Axes, int],
                                            Tuple[Union[int, slice], ...]],

@@ -7,7 +7,6 @@ from typing import (
     Optional,
     Sequence,
     Set,
-    Union,
 )
 
 from semantic_version import Version
@@ -19,6 +18,7 @@ from sptx_format import validate_sptx
 from starfish.codebook.codebook import Codebook
 from starfish.config import StarfishConfig
 from starfish.imagestack.imagestack import ImageStack
+from starfish.imagestack.parser.crop import CropParameters
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
 
@@ -57,7 +57,7 @@ class FieldOfView:
         accessed.
         """
         self._name = name
-        self._images: MutableMapping[str, Union[ImageStack, TileSet]]
+        self._images: MutableMapping[str, TileSet]
         if images is not None:
             self._images = images
             if image_tilesets is not None:
@@ -89,10 +89,11 @@ class FieldOfView:
     def image_types(self) -> Set[str]:
         return set(self._images.keys())
 
-    def __getitem__(self, item) -> ImageStack:
-        if isinstance(self._images[item], TileSet):
-            self._images[item] = ImageStack.from_tileset(self._images[item])
-        return self._images[item]
+    def get_image(self, item: str, crop_parameters: Optional[CropParameters]=None) -> ImageStack:
+        return ImageStack.from_tileset(self._images[item], crop_parameters)
+
+    def __getitem__(self, item: str) -> ImageStack:
+        return self.get_image(item)
 
 
 class Experiment:

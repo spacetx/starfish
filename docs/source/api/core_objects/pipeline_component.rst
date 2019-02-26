@@ -1,4 +1,4 @@
-.. pipeline_component
+.. _pipeline_component:
 
 Pipeline Component
 ==================

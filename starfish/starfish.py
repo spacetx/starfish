@@ -11,6 +11,7 @@ from starfish.image import (
 )
 from starfish.spots import (
     Decoder,
+    PixelSpotDecoder,
     SpotFinder,
     TargetAssignment,
 )
@@ -62,15 +63,15 @@ def starfish(ctx, profile):
 
 @starfish.command()
 def version():
-    import pkg_resources
-    version = pkg_resources.require("starfish")[0].version
-    print(version)
+    from starfish import __version__
+    print(__version__)
 version.no_art = True  # type: ignore
 
 
 # Pipelines
 starfish.add_command(Registration._cli)  # type: ignore
 starfish.add_command(Filter._cli)  # type: ignore
+starfish.add_command(PixelSpotDecoder._cli)
 starfish.add_command(SpotFinder._cli)  # type: ignore
 starfish.add_command(Segmentation._cli)  # type: ignore
 starfish.add_command(TargetAssignment._cli)  # type: ignore

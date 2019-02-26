@@ -1,4 +1,5 @@
 import json
+from typing import Iterable
 
 import numpy as np
 import pandas as pd
@@ -25,6 +26,13 @@ class SpotAttributes(ValidatedTable):
 
         """
         super().__init__(spot_attributes, SpotAttributes.required_fields)
+
+    @classmethod
+    def empty(cls, extra_fields: Iterable=tuple()) -> "SpotAttributes":
+        """return an empty SpotAttributes object"""
+        fields = list(cls.required_fields.union(extra_fields))
+        dtype = list(zip(fields, [np.object] * len(fields)))
+        return cls(pd.DataFrame(np.array([], dtype=dtype)))
 
     def save_geojson(self, output_file_name: str) -> None:
         """Save to geojson for web visualization

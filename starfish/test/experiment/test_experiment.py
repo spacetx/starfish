@@ -118,3 +118,13 @@ def test_fov_un_aligned_tileset():
     # Assert that the number of coordinate groups == NUM_ROUNDS
     assert len(fov.aligned_coordinate_groups['primary']) == NUM_ROUND
     assert len(fov.aligned_coordinate_groups['nuclei']) == NUM_ROUND
+
+
+def test_fov_partially_aligned_tileset():
+    # Create combo of aligned and unaligned tiles
+    partially_aligned_tileset = get_aligned_tileset().add_tile(
+        t for t in get_un_aligned_tileset().tiles())
+    tileset_dict = {'primary': partially_aligned_tileset}
+    fov = FieldOfView("paritally aligned", tileset_dict)
+    # Assert the number of tile groups is num rounds + 1 aligned group
+    assert len(fov.aligned_coordinate_groups['primary']) == NUM_ROUND + 1

@@ -65,6 +65,9 @@ def get_un_aligned_tileset():
             for z in range(NUM_Z):
                 tile = Tile(
                     {
+                        # The round_to methods generate coordinates
+                        # based on the r value, therefore the coords vary
+                        # throughout the tileset
                         Coordinates.X: round_to_x(r),
                         Coordinates.Y: round_to_y(r),
                         Coordinates.Z: round_to_z(r),

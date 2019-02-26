@@ -11,6 +11,7 @@ from starfish.util.argparse import FsExistsType
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--primary-name", default="primary_images.json")
     parser.add_argument("experiment_url")
     parser.add_argument("output_dir", type=FsExistsType())
     args = parser.parse_args()
@@ -21,7 +22,7 @@ if __name__ == "__main__":
     for fov in exp.fovs():
         fov_dir = pathlib.Path(args.output_dir, fov.name)
         fov_dir.mkdir()
-        fov[FieldOfView.PRIMARY_IMAGES].export(str(fov_dir / "hybridization.json"))
+        fov[FieldOfView.PRIMARY_IMAGES].export(str(fov_dir / args.primary_name))
         for image_type in fov.image_types:
             if image_type == FieldOfView.PRIMARY_IMAGES:
                 continue
@@ -34,8 +35,10 @@ if __name__ == "__main__":
         json.dump(data, f)
 
     # get json files from url and save locally to tmp dir
-    for filename in ("experiment.json", "hybridization.json", "nuclei.json", "dots.json"):
+    for filename in ("experiment.json", args.primary_name, "nuclei.json", "dots.json"):
         obj = requests.get(posixpath.join(args.experiment_url, filename))
-        data = obj.json()
-        with open(pathlib.Path(args.output_dir, filename), 'w') as f:
-            json.dump(data, f)
+        # download file if it exists
+        if obj.status_code == 200:
+            data = obj.json()
+            with open(pathlib.Path(args.output_dir, filename), 'w') as f:
+                json.dump(data, f)

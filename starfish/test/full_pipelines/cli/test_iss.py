@@ -50,9 +50,9 @@ class TestWithIssData(CLITest, unittest.TestCase):
             [
                 "starfish", "registration",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted/fov_001", "primary_images.json"),
+                    tempdir, "formatted/fov_001", "hybridization.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered", "primary_images.json"),
+                    tempdir, "registered", "hybridization.json"),
                 "FourierShiftRegistration",
                 "--reference-stack", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "formatted/fov_001", "dots.json"),
@@ -61,9 +61,9 @@ class TestWithIssData(CLITest, unittest.TestCase):
             [
                 "starfish", "filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered", "primary_images.json"),
+                    tempdir, "registered", "hybridization.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "primary_images.json"),
+                    tempdir, "filtered", "hybridization.json"),
                 "WhiteTophat",
                 "--masking-radius", "15",
             ],
@@ -88,7 +88,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
             [
                 "starfish", "detect_spots",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "primary_images.json"),
+                    tempdir, "filtered", "hybridization.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "spots.nc"),
                 "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(
@@ -102,7 +102,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
             [
                 "starfish", "segment",
                 "--primary-images", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "primary_images.json"),
+                    tempdir, "filtered", "hybridization.json"),
                 "--nuclei", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "nuclei.json"),
                 "-o", lambda tempdir, *args, **kwargs: os.path.join(

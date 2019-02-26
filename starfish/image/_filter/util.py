@@ -134,10 +134,7 @@ def preserve_float_range(
     """
     array = array.copy()
 
-    if isinstance(array, xr.DataArray):
-        data = array.values
-    else:
-        data = array
+    data = np.asarray(array)
 
     if np.any(data < 0):
         data[data < 0] = 0

@@ -85,7 +85,7 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self.is_volume = is_volume
         self.verbose = verbose
 
-    def image_to_spots(self, image: np.ndarray) -> SpotAttributes:
+    def image_to_spots(self, image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
         """
 
         Parameters
@@ -99,10 +99,7 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
             spot attributes table for all detected spots
 
         """
-
-        if isinstance(image, xr.DataArray):
-            image = image.values
-
+        image = np.asarray(image)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', FutureWarning)  # trackpy numpy indexing warning
             warnings.simplefilter('ignore', UserWarning)  # yielded if black images

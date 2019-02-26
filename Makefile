@@ -129,12 +129,6 @@ install-released-notebooks-support:
 	pip install -r REQUIREMENTS-CI.txt
 	pip freeze
 
-install-with-git:
-    git checkout git@github.com:spacetx/starfish.git
-    cd starfish
-    python -m venv .venv
-    source .venv/bin/activate
-
 help-install:
 	$(call print_help, install-dev, pip install from the current directory with pinned requirements and tooling for CI)
 	$(call print_help, install-src, pip install from the current directory)

@@ -22,7 +22,7 @@ created in the previous section is valid:
 
 ::
 
-    starfish validate --experiment-json tmp/experiment.json > /dev/null && echo ok
+    starfish validate experiment tmp/experiment.json > /dev/null && echo ok
 
 
 Building a :ref:`synthetic experiment <cli_build>` can provide you with a template that
@@ -31,7 +31,7 @@ might see the following validation warning:
 
 ::
 
-    $ starfish validate --experiment-json tmp/experiment.json
+    $ starfish validate experiment tmp/experiment.json
     
              _              __ _     _
             | |            / _(_)   | |
@@ -57,3 +57,9 @@ might see the following validation warning:
             Filename:               codebook.json
     
       warnings.warn(message)
+
+Validating the experiment, validates all of the included files. These files can also be individually validated:
+
+::
+
+    $ starfish validate experiment tmp/codebook.json

@@ -22,6 +22,23 @@ class TestWithBuildData(unittest.TestCase):
             "starfish", "validate", "experiment",
             lambda tempdir: os.sep.join([tempdir, "experiment.json"])
         ],
+        # Validate other input files
+        [
+            "starfish", "validate", "experiment",
+            lambda tempdir, *args, **kwargs: os.sep.join([tempdir, "experiment.json"])
+        ],
+        [
+            "starfish", "validate", "codebook",
+            lambda tempdir, *args, **kwargs: os.sep.join([tempdir, "codebook.json"])
+        ],
+        [
+            "starfish", "validate", "manifest",
+            lambda tempdir, *args, **kwargs: os.sep.join([tempdir, "primary_images.json"])
+        ],
+        [
+            "starfish", "validate", "fov",
+            lambda tempdir, *args, **kwargs: os.sep.join([tempdir, "primary_images-fov_000.json"])
+        ],
     )
 
     def test_run_build(self):

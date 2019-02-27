@@ -1056,16 +1056,16 @@ class ImageStack:
                 Axes.ZPLANE: zplane,
             }
 
-            coordinates: MutableMapping[Coordinates, Tuple[Number, Number]] = dict()
-            x_coordinates = (float(min(self.xarray[Coordinates.X.value])),
-                             float(max(self.xarray[Coordinates.X.value])))
-            y_coordinates = (float(min(self.xarray[Coordinates.Y.value])),
-                             float(max(self.xarray[Coordinates.Y.value])))
+            coordinates: MutableMapping[Coordinates, Union[Tuple[Number, Number], Number]] = dict()
+            x_coordinates = (float(self.xarray[Coordinates.X.value][0]),
+                             float(self.xarray[Coordinates.X.value][-1]))
+            y_coordinates = (float(self.xarray[Coordinates.Y.value][0]),
+                             float(self.xarray[Coordinates.Y.value][-1]))
             coordinates[Coordinates.X] = x_coordinates
             coordinates[Coordinates.Y] = y_coordinates
             if Coordinates.Z in self.xarray.coords:
-                z_coordinates = (float(min(self.xarray[Coordinates.Z.value])),
-                                 float(max(self.xarray[Coordinates.Z.value])))
+                # set the z coord to the calculated value from the associated z plane
+                z_coordinates = float(self.xarray[Coordinates.Z.value][zplane])
                 coordinates[Coordinates.Z] = z_coordinates
 
             tile = Tile(

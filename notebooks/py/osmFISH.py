@@ -22,7 +22,7 @@ from starfish.types import Axes
 # EPY: END code
 
 # EPY: START code
-#TODO NEED TO WORK THROUGH FOV ITERATION, EACH TILE HAS SEPERATE COORDS
+#TODO NEED TO REFORMAT COORDINATE DATA TO FIX THIS NOTEBOOK
 experiment = starfish.data.osmFISH(use_test_data=True)
 stack = experiment["fov_000"][FieldOfView.PRIMARY_IMAGES]
 # EPY: END code

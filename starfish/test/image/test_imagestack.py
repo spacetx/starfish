@@ -1,12 +1,16 @@
+from collections import OrderedDict
+
 import numpy as np
 import pytest
 import xarray as xr
 from slicedimage import ImageFormat
 
 from starfish.imagestack.imagestack import ImageStack
+from starfish.imagestack.physical_coordinate_calculator import get_physical_coordinates_of_z_plane
 from starfish.intensity_table.intensity_table import IntensityTable
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
+from starfish.test import test_utils
 from starfish.test.dataset_fixtures import (  # noqa: F401
     codebook_intensities_image_for_single_synthetic_spot,
     loaded_codebook,
@@ -16,7 +20,12 @@ from starfish.test.dataset_fixtures import (  # noqa: F401
     synthetic_intensity_table,
     synthetic_spot_pass_through_stack,
 )
-from starfish.types import Axes
+from starfish.types import Axes, PhysicalCoordinateTypes
+from .imagestack_test_utils import verify_physical_coordinates
+
+X_COORDS = 1, 2
+Y_COORDS = 4, 6
+Z_COORDS = 1, 3
 
 
 def test_get_slice_simple_index():
@@ -272,18 +281,35 @@ def test_imagestack_to_intensity_table_no_noise(synthetic_spot_pass_through_stac
 
 
 @pytest.mark.parametrize("format,count", (
-    (ImageFormat.TIFF, 192),
-    (ImageFormat.NUMPY, 192),
+    (ImageFormat.TIFF, 6),
+    (ImageFormat.NUMPY, 6),
 ))
 def test_imagestack_export(tmpdir, format, count, recwarn):
     """
     Save a synthetic stack to files and check the results
     """
-    stack = ImageStack.synthetic_stack()
+    stack_shape = OrderedDict([(Axes.ROUND, 3), (Axes.CH, 2),
+                               (Axes.ZPLANE, 1), (Axes.Y, 50), (Axes.X, 40)])
+
+    physical_coords = OrderedDict([(PhysicalCoordinateTypes.X_MIN, X_COORDS[0]),
+                                   (PhysicalCoordinateTypes.X_MAX, X_COORDS[1]),
+                                   (PhysicalCoordinateTypes.Y_MIN, Y_COORDS[0]),
+                                   (PhysicalCoordinateTypes.Y_MAX, Y_COORDS[1]),
+                                   (PhysicalCoordinateTypes.Z_MIN, Z_COORDS[0]),
+                                   (PhysicalCoordinateTypes.Z_MAX, Z_COORDS[1])])
+
+    stack = test_utils.imagestack_with_coords_factory(stack_shape, physical_coords)
+
     stack_json = tmpdir / "output.json"
     stack.export(str(stack_json), tile_format=format)
     files = list([x for x in tmpdir.listdir() if str(x).endswith(format.file_ext)])
-    assert ImageStack.from_path_or_url(str(stack_json))
+    loaded_stack = ImageStack.from_path_or_url(str(stack_json))
+    verify_physical_coordinates(
+        loaded_stack,
+        X_COORDS,
+        Y_COORDS,
+        get_physical_coordinates_of_z_plane(Z_COORDS),
+    )
     assert count == len(files)
     with open(files[0], "rb") as fh:
         format.reader_func(fh)

@@ -956,7 +956,7 @@ class ImageStack:
                  "arguments": class_instance.__dict__,
                  "os": logging.get_os_info(),
                  "dependencies": logging.get_core_dependency_info(),
-                 "git hash": logging.get_git_commit_hash(),
+                 "release tag": logging.get_release_tag(),
                  "starfish version": logging.get_dependency_version('starfish')
                  }
         self._log.append(entry)

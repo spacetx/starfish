@@ -1,11 +1,6 @@
-import os
 import platform
 from functools import lru_cache
 from json import JSONEncoder
-from subprocess import (
-    CalledProcessError,
-    check_output,
-)
 from typing import Mapping
 
 import pkg_resources
@@ -28,14 +23,10 @@ def get_dependency_version(dependency: str) -> str:
 
 
 @lru_cache(maxsize=1)
-def get_git_commit_hash() -> str:
-    # First check if in starfish repo
-    os.chdir(os.path.dirname(starfish.__file__))
-    try:
-        check_output(["git", "ls-files", starfish.__file__])
-    except CalledProcessError:
-        return "Starfish project not under git tracking"
-    return check_output(["git", "describe", "--always"]).strip()
+def get_release_tag() -> str:
+    if not starfish.__release_tag__:
+        return "Running starfish from source"
+    return starfish.__release_tag__
 
 
 @lru_cache(maxsize=1)

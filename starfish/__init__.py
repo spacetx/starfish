@@ -22,6 +22,9 @@ from .starfish import starfish
 # NOTE: if we move to python 3.7, we can produce this value at call time via __getattr__
 __version__ = pkg_resources.require("starfish")[0].version
 
+# Variable to be set by release process
+__release_tag__ = None
+
 
 if __name__ == "__main__":
     starfish()

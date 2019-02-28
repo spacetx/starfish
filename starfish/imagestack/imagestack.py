@@ -201,7 +201,7 @@ class ImageStack:
                     f"Tiles must be aligned")
             if Coordinates.Z in tile.coordinates:
                 z_range = (tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1])
-                # As discussed just taking the middle of the z range
+                # Use mid-point of the z range for a tile for the z-coordinate
                 self._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = \
                     physical_coordinate_calculator.get_physical_coordinates_of_z_plane(z_range)
 

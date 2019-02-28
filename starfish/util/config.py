@@ -56,7 +56,9 @@ class Config(object):
 
         self.data = data
 
-    def lookup(self, keys: Sequence[str], value: Any=__NO_VALUE_PASSED) -> Any:
+    def lookup(self, keys: Sequence[str],
+               value: Any=__NO_VALUE_PASSED,
+               remove: bool=False) -> Any:
         """
         Parameters
         ----------
@@ -68,10 +70,16 @@ class Config(object):
         value: Any
             Default value to return in the case that the lookup fails. An
             exception will be raised if none is provided.
+        remove: bool
+            If True, then delete the key from the object once it has been
+            looked up. If parent objects are left with no values, they will
+            be removed.
         """
         data: Any = self.data
+        stack = []
         for key in keys:
             try:
+                stack.append(data)
                 data = data.get(key)
             except (AttributeError, KeyError):
                 data = None  # Clear value
@@ -80,6 +88,13 @@ class Config(object):
         if data:
             # If we've reached here without exception,
             # then we've found the value.
+            if remove:
+                for idx in reversed(range(len(keys))):
+                    key = keys[idx]
+                    source = stack[idx]
+                    source.pop(key)
+                    if source:
+                        break
             return data
         elif value is not Config.__NO_VALUE_PASSED:
             return value

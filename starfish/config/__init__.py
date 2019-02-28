@@ -1,6 +1,18 @@
 import os
+import warnings
 
 from starfish.util.config import Config, NestedDict
+
+
+def special_prefix(key):
+    """
+    All environment variables starting with these prefixes require
+    special handling
+    """
+    for x in ("STARFISH_", "SLICEDIMAGE_"):
+        if key.startswith(x):
+            return True
+    return False
 
 
 class environ(object):
@@ -23,7 +35,7 @@ class environ(object):
     def __enter__(self):
         self.orig = dict()
         for k, newval in self.kwargs.items():
-            if not k.startswith("STARFISH_"):
+            if not special_prefix(k):
                 k = "STARFISH_%s" % k
             old = os.environ.get(k, None)
             try:
@@ -112,37 +124,61 @@ class StarfishConfig(object):
         """
         config = os.environ.get("STARFISH_CONFIG", "@~/.starfish/config")
         self._config_obj = Config(config)
+        self._env_keys = [
+            x for x in os.environ.keys()
+            if special_prefix(x) and x != "STARFISH_CONFIG"]
 
         # If no directory is set, then force the default
-        self._slicedimage = self._config_obj.lookup(("slicedimage",), NestedDict())
+        self._slicedimage = self._config_obj.lookup(("slicedimage",), NestedDict(), remove=True)
         if not self._slicedimage["caching"]["directory"]:
             self._slicedimage["caching"]["directory"] = "~/.starfish/cache"
         self._slicedimage_update(('caching', 'directory'))
         self._slicedimage_update(('caching', 'size_limit'), int)
 
         self._strict = self._config_obj.lookup(
-            ("validation", "strict"), self.flag("STARFISH_VALIDATION_STRICT", "false"))
+            ("validation", "strict"), self.flag("STARFISH_VALIDATION_STRICT", "false"), remove=True)
 
         self._verbose = self._config_obj.lookup(
-            ("verbose",), self.flag("STARFISH_VERBOSE", "true"))
+            ("verbose",), self.flag("STARFISH_VERBOSE", "true"), remove=True)
+
+        if self._config_obj.data:
+            warnings.warn(f"unknown configuration: {self._config_obj.data}")
+        if self._env_keys:
+            warnings.warn(f"unknown environment variables: {self._env_keys}")
 
     def _slicedimage_update(self, lookup, parse=lambda x: x):
         """ accept STARFISH_SLICEDIMAGE_ or SLICEDIMAGE_ prefixes"""
-        name = "SLICEDIMAGE_" + "_".join([x.upper() for x in lookup])
-        if name not in os.environ:
-            name = "STARFISH_" + name
-            if name not in os.environ:
-                return
-        value = parse(os.environ[name])
+
+        value = None
+
+        name1 = "SLICEDIMAGE_" + "_".join([x.upper() for x in lookup])
+        if name1 in os.environ:
+            self._env_keys.remove(name1)
+            value = parse(os.environ[name1])
+
+        name2 = "STARFISH_" + name1
+        if name2 in os.environ:
+            if value:
+                warnings.warn(f"duplicate variable: (STARFISH_){name1}")
+            self._env_keys.remove(name2)
+            value = parse(os.environ[name2])
+
+        if value is None:
+            return  # Nothing found
 
         v = self._slicedimage
         for k in lookup[:-1]:
             v = v[k]
         v[lookup[-1]] = value
 
-    @staticmethod
-    def flag(name, default_value=""):
-        value = os.environ.get(name, default_value)
+    def flag(self, name, default_value=""):
+
+        if name in os.environ:
+            value = os.environ[name]
+            self._env_keys.remove(name)
+        else:
+            value = default_value
+
         if isinstance(value, str):
             value = value.lower()
             return value in ("true", "1", "yes", "y", "on", "active", "enabled")

@@ -1,7 +1,8 @@
 from functools import partial
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
+import xarray as xr
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.util import click
@@ -27,12 +28,12 @@ class ScaleByPercentile(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"p": 0}
 
     @staticmethod
-    def _scale(image: np.ndarray, p: int) -> np.ndarray:
+    def _scale(image: Union[xr.DataArray, np.ndarray], p: int) -> np.ndarray:
         """Clip values of img below and above percentiles p_min and p_max
 
         Parameters
         ----------
-        image : np.ndarray
+        image : Union[xr.DataArray, np.ndarray
             image to be scaled
 
         p : int

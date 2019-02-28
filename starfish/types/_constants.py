@@ -34,6 +34,10 @@ LOG = "log"
 """
 This is name of the provenance log attribute stored on the IntensityTable
 """
+CORE_DEPENDENCIES = {'numpy', 'scikit-image', 'pandas', 'scikit-learn', 'scipy', 'xarray', 'sympy'}
+"""
+The set of dependencies whose versions are are logged for each starfish session
+"""
 
 
 class PhysicalCoordinateTypes(AugmentedEnum):

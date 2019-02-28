@@ -60,7 +60,7 @@ from starfish.types import (
     PhysicalCoordinateTypes,
     STARFISH_EXTRAS_KEY
 )
-from starfish.util.JSONenocder import LogEncoder
+from starfish.util import logging
 from ._mp_dataarray import MPDataArray
 from .dataorder import AXES_DATA, N_AXES
 
@@ -78,7 +78,7 @@ class ImageStack:
         the number of imaging rounds stored in the image tensor
     num_zplanes : int
         the number of z-layers stored in the image tensor
-    numpy_array : np.ndarray
+    xarray : xarray.core.dataarray.DataArray
         the 5-d image tensor is stored in this array
     raw_shape : Tuple[int]
         the shape of the image tensor (in integers)
@@ -857,12 +857,24 @@ class ImageStack:
             selector_and_slice_list: Tuple[Mapping[Axes, int],
                                            Tuple[Union[int, slice], ...]],
     ):
+        # build the numpy array from the shared memory object
         backing_mp_array, shape, dtype = SharedMemory.get_payload()
         unshaped_numpy_array = np.frombuffer(backing_mp_array.get_obj(), dtype=dtype)
-        numpy_array = unshaped_numpy_array.reshape(shape)
 
-        sliced = numpy_array[selector_and_slice_list[1]]
+        # get the correct dimension order for the imagestack based on AXES_DATA
+        dims = [
+            name.value for (name, data) in
+            sorted(AXES_DATA.items(), key=lambda kv: kv[1].order)
+        ] + [Axes.Y.value, Axes.X.value]
 
+        # build and then slice the xarray to get the piece needed for this worker
+        data_array = xr.DataArray(
+            data=unshaped_numpy_array.reshape(shape),
+            dims=dims,
+        )
+        sliced = data_array.sel(selector_and_slice_list[0])
+
+        # return the result of the function called on the slice
         return worker_callable(sliced)
 
     @property
@@ -952,7 +964,13 @@ class ImageStack:
         ----------
         class_instance: The instance of a class being applied to the imagestack
         """
-        entry = {"method": class_instance.__class__.__name__, "arguments": class_instance.__dict__}
+        entry = {"method": class_instance.__class__.__name__,
+                 "arguments": class_instance.__dict__,
+                 "os": logging.get_os_info(),
+                 "dependencies": logging.get_core_dependency_info(),
+                 "release tag": logging.get_release_tag(),
+                 "starfish version": logging.get_dependency_version('starfish')
+                 }
         self._log.append(entry)
 
     @property
@@ -1087,7 +1105,7 @@ class ImageStack:
 
         """
         # Add log data to extras
-        self._tile_data.extras[STARFISH_EXTRAS_KEY] = LogEncoder().encode({LOG: self.log})
+        self._tile_data.extras[STARFISH_EXTRAS_KEY] = logging.LogEncoder().encode({LOG: self.log})
         tileset = TileSet(
             dimensions={
                 Axes.ROUND,

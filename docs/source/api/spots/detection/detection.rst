@@ -24,8 +24,8 @@ Local Max Peak Finder
 .. autoclass:: starfish.spots._detector.local_max_peak_finder.LocalMaxPeakFinder
     :members:
 
-Pixel Spot Detector
+Pixel Spot Decoder
 -------------------
 
-.. autoclass:: starfish.spots._detector.pixel_spot_detector.PixelSpotDetector
+.. autoclass:: starfish.spots._pixel_decoder.pixel_spot_decoder.PixelSpotDecoder
     :members:

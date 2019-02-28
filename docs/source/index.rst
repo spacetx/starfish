@@ -50,6 +50,7 @@ To see the code or report a bug, please visit the `github repository
    sptx-format/index
    usage/index
    glossary/glossary
+   roadmap
    citation
 
 .. raw:: html

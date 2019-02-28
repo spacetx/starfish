@@ -38,8 +38,10 @@ Finally, then install starfish:
 Installation for developers
 ---------------------------
 
-Check out the code for starfish and set up a virtualenv_.
+If you are on a mac, make sure you have the `XCode CommandLine Tools`_
+installed.  Check out the code for starfish and set up a virtualenv_.
 
+.. _`XCode CommandLine Tools`: https://developer.apple.com/library/archive/technotes/tn2339/_index.html
 .. _virtualenv: https://packaging.python.org/tutorials/installing-packages/#creating-virtual-environments
 
 .. code-block:: bash
@@ -53,4 +55,4 @@ Finally, then install starfish:
 
 .. code-block:: bash
 
-   % pip install -e .
+   % make install-dev

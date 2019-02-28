@@ -85,7 +85,7 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self.is_volume = is_volume
         self.verbose = verbose
 
-    def image_to_spots(self, image: np.ndarray) -> SpotAttributes:
+    def image_to_spots(self, image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
         """
 
         Parameters
@@ -99,8 +99,10 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
             spot attributes table for all detected spots
 
         """
+        image = np.asarray(image)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', FutureWarning)  # trackpy numpy indexing warning
+            warnings.simplefilter('ignore', UserWarning)  # yielded if black images
             attributes = locate(
                 image,
                 diameter=self.diameter,
@@ -113,6 +115,10 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
                 percentile=self.percentile,
                 preprocess=self.preprocess
             )
+
+        # when zero spots are detected, 'ep' is missing from the trackpy locate results.
+        if attributes.shape[0] == 0:
+            attributes['ep'] = []
 
         # TODO ambrosejcarr: data should always be at least pseudo-3d, this may not be necessary
         # TODO ambrosejcarr: this is where max vs. sum vs. mean would be parametrized.

@@ -1,4 +1,5 @@
 import os
+import warnings
 from json import dump, loads
 
 from diskcache import Cache
@@ -74,29 +75,57 @@ def test_cache_config():
     assert cache_config["size_limit"] == 5 * 10 ** 9
 
 
+def test_cache_remove_step_wise():
+    config = Config("""{
+        "a": {
+             "b": {
+                "c": true,
+                "d": true
+             },
+             "e": 1
+         },
+         "f": 2
+    }""")
+    config.lookup(("a", "b", "c"), {}, remove=True)
+    assert "c" not in config.data["a"]["b"]
+    config.lookup(("a", "b"), {}, remove=True)
+    assert "b" not in config.data["a"]
+    config.lookup(("a",), {}, remove=True)
+    assert "a" not in config.data
+
+
+def test_cache_remove_all():
+    config = Config("""{
+        "a": {
+             "b": {
+                "c": true
+             }
+         }
+    }""")
+    config.lookup(("a", "b", "c"), {}, remove=True)
+    assert not config.data
+
+
 def test_starfish_config_value_default_key(monkeypatch):
     monkeypatch.setenv("STARFISH_CONFIG", simple_str)
     config = StarfishConfig()._config_obj
     assert config.data["a"] == 1
 
 
-@mark.parametrize("name,config", (
-    ("enabled", {
-        "expected": (2841272, 4e6),
+@mark.parametrize("name,expected,config", (
+    ("enabled", (2658848, 4e6), {
         "validation": {"strict": True},
         "slicedimage": {
             "caching": {
                 "directory": "REPLACEME",
             }}}),
-    ("disabled", {
-        "expected": (0, 0),
+    ("disabled", (0, 0), {
         "validation": {"strict": True},
         "slicedimage": {
             "caching": {
                 "size_limit": 0,
             }}}),
-    ("limited", {
-        "expected": (1e5, 3e6),
+    ("limited", (1e5, 3e6), {
         "validation": {"strict": True},
         "slicedimage": {
             "caching": {
@@ -104,7 +133,7 @@ def test_starfish_config_value_default_key(monkeypatch):
                 "size_limit": 1e5,
             }}}),
 ))
-def test_cache_merfish(tmpdir, name, config, monkeypatch):
+def test_cache_merfish(tmpdir, name, expected, config, monkeypatch):
 
     cache_enabled = (0 != config["slicedimage"]["caching"].get("size_limit", None))
     if cache_enabled:
@@ -126,7 +155,7 @@ def test_cache_merfish(tmpdir, name, config, monkeypatch):
         cache.cull()
 
     cache_size = get_size(tmpdir / "caching")
-    min, max = config["expected"]
+    min, max = expected
     assert (min <= cache_size) and (cache_size <= max)
 
 def test_starfish_config(tmpdir, monkeypatch):
@@ -158,11 +187,37 @@ def test_starfish_config(tmpdir, monkeypatch):
                  STARFISH_VALIDATION_STRICT="false")
     assert not StarfishConfig().strict
 
+def test_starfish_warn(tmpdir, monkeypatch):
+    config = {"unknown": True}
+    setup_config(config, tmpdir, monkeypatch,
+                 STARFISH_SLICEDIMAGE_CACHING_SIZE_LIMIT="1")
+    with warnings.catch_warnings(record=True) as warnings_:
+        StarfishConfig()
+        assert len(warnings_) == 1  # type: ignore
+
 def test_starfish_environ(monkeypatch):
     monkeypatch.delitem(os.environ, "STARFISH_VALIDATION_STRICT", raising=False)
     assert not StarfishConfig().strict
     with environ(VALIDATION_STRICT="true"):
         assert StarfishConfig().strict
+
+def test_starfish_environ_warn(tmpdir, monkeypatch):
+    setup_config({}, tmpdir, monkeypatch)
+    with environ(UNKNOWN="true"):
+        with warnings.catch_warnings(record=True) as warnings_:
+            StarfishConfig()
+            assert len(warnings_) == 1  # type: ignore
+
+def test_starfish_environ_warn_on_duplicate(tmpdir, monkeypatch):
+    setup_config({}, tmpdir, monkeypatch,
+                 SLICEDIMAGE_CACHING_DIRECTORY=None,
+                 STARFISH_SLICEDIMAGE_CACHING_DIRECTORY=None)
+    assert "directory" not in StarfishConfig().slicedimage
+    with environ(SLICEDIMAGE_CACHING_DIRECTORY="foo",
+                 STARFISH_SLICEDIMAGE_CACHING_DIRECTORY="bar"):
+        with warnings.catch_warnings(record=True) as warnings_:
+            assert "bar" == StarfishConfig().slicedimage["caching"]["directory"]
+            assert len(warnings_) == 1  # type: ignore
 
 #
 # HELPERS

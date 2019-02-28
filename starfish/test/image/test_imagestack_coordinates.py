@@ -23,7 +23,41 @@ def round_to_z(r: int) -> Tuple[float, float]:
     return (r + 1) * 0.01, (r + 1) * 0.001
 
 
+def round_to_x(r: int) -> Tuple[float, float]:
+    return (r + 1) * 0.001, (r + 1) * 0.0001
+
+
+def round_to_y(r: int) -> Tuple[float, float]:
+    return (r + 1) * 0.1, (r + 1) * 1
+
+
 class OffsettedTiles(FetchedTile):
+    """Tiles that are physically offset based on round."""
+    def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
+        super().__init__()
+        self._round = _round
+
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return HEIGHT, WIDTH
+
+    @property
+    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+        return {
+            Coordinates.X: round_to_x(self._round),
+            Coordinates.Y: round_to_y(self._round),
+            Coordinates.Z: round_to_z(self._round),
+        }
+
+    @property
+    def format(self) -> ImageFormat:
+        return ImageFormat.TIFF
+
+    def tile_data(self) -> np.ndarray:
+        return np.ones((HEIGHT, WIDTH), dtype=np.float32)
+
+
+class AlignedTiles(FetchedTile):
     """Tiles that are physically offset based on round."""
     def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
         super().__init__()
@@ -57,7 +91,7 @@ def test_coordinates():
         NUM_ROUND, NUM_CH, NUM_Z,
         HEIGHT, WIDTH,
         tile_fetcher=tile_fetcher_factory(
-            OffsettedTiles,
+            AlignedTiles,
             True,
         )
     )
@@ -96,6 +130,23 @@ class ScalarTiles(FetchedTile):
 
     def tile_data(self) -> np.ndarray:
         return np.ones((HEIGHT, WIDTH), dtype=np.float32)
+
+
+def test_unaligned_tiles():
+    """Test that imagestack error is thrown when constructed with unaligned tiles"""
+
+    try:
+        ImageStack.synthetic_stack(
+            NUM_ROUND, NUM_CH, NUM_Z,
+            HEIGHT, WIDTH,
+            tile_fetcher=tile_fetcher_factory(
+                OffsettedTiles,
+                True,
+            )
+        )
+    except ValueError as e:
+        # Assert value error is thrown with right message
+        assert e.args[0] == "Tiles must be aligned"
 
 
 def test_scalar_coordinates():

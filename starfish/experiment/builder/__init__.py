@@ -1,5 +1,7 @@
+import io
 import json
 import os
+import sys
 from typing import (
     Any,
     BinaryIO,
@@ -35,17 +37,46 @@ AUX_IMAGE_NAMES = {
 DEFAULT_DIMENSION_ORDER = (Axes.ZPLANE, Axes.ROUND, Axes.CH)
 
 
+class DevNull(io.BytesIO):
+    """A class meant to mimic an open(filepath, 'wb') operation but
+    prevents any actual writing, reading, or seeking.
+
+    This class is an ugly hack to prevent the slicedimage
+    Writer.generate_partition_document() function from needlessly creating
+    a copy of image data.
+
+    See: https://docs.python.org/3/library/io.html
+    See also: cpython/Lib/_pyio.py
+    """
+    def __init__(self, filepath, mode='wb', *args, **kwargs):
+        super(DevNull, self).__init__(*args, **kwargs)
+        self.name = filepath
+        self.mode = mode
+
+    def read(self, size=-1):
+        raise NotImplementedError()
+
+    def write(self, b):
+        return sys.getsizeof(b)
+
+    def seek(self, pos, whence=0):
+        raise NotImplementedError()
+
+
 def _tile_opener(toc_path: str, tile: Tile, file_ext: str) -> BinaryIO:
-    tile_basename = os.path.splitext(toc_path)[0]
-    return open(
-        "{}-Z{}-H{}-C{}.{}".format(
-            tile_basename,
-            tile.indices[Axes.ZPLANE],
-            tile.indices[Axes.ROUND],
-            tile.indices[Axes.CH],
-            ImageFormat.TIFF.file_ext,
-        ),
-        "wb")
+    if tile.filepath:
+        return DevNull(tile.filepath, mode='wb')
+    else:
+        tile_basename = os.path.splitext(toc_path)[0]
+        return open(
+            "{}-Z{}-H{}-C{}.{}".format(
+                tile_basename,
+                tile.indices[Axes.ZPLANE],
+                tile.indices[Axes.ROUND],
+                tile.indices[Axes.CH],
+                ImageFormat.TIFF.file_ext,
+            ),
+            "wb")
 
 
 def _fov_path_generator(parent_toc_path: str, toc_name: str) -> str:
@@ -137,6 +168,7 @@ def build_image(
                 image.shape,
                 extras=image.extras,
             )
+            tile.filepath = image.filepath
             tile.set_numpy_array_future(image.tile_data)
             fov_images.add_tile(tile)
         collection.add_partition("fov_{:03}".format(fov_id), fov_images)

@@ -2,7 +2,7 @@
 This module describes the contracts to provide data to the experiment builder.
 """
 
-from typing import Mapping, Tuple, Union
+from typing import Mapping, Optional, Tuple, Union
 
 import numpy as np
 
@@ -48,6 +48,20 @@ class FetchedTile:
             Maps from a key to its value.
         """
         return {}
+
+    @property
+    def filepath(self) -> Optional[str]:
+        """Return the filepath associated with the tile.
+
+        Providing this attribute will disable copying of data done by:
+        starfish.experiment.builder.write_experiment_json()
+
+        Returns
+        -------
+        Optional[str]
+            A filepath string or None.
+        """
+        return None
 
     def tile_data(self) -> np.ndarray:
         """Return the image data representing the tile.

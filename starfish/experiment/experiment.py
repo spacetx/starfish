@@ -39,6 +39,8 @@ class FieldOfView:
     type. The primary image is accessed using the name
     :py:attr:`starfish.experiment.experiment.FieldOFView.PRIMARY_IMAGES`.
 
+    Access a FOV through a experiment. experiement.fov()
+
     Attributes
     ----------
     name : str
@@ -128,7 +130,7 @@ class FieldOfView:
         ex.
         {'nuclei': ' Group 0:  <starfish.ImageStack r={0}, ch={0}, z={0}, (y, x)=(190,270)>',
         'primary': ' Group 0:  <starfish.ImageStack r={0, 1, 2, 3, 4, 5}, ch={0, 1, '
-            '2}, z={0}, (y, x)=(190, 270)>'}
+        '2}, z={0}, (y, x)=(190, 270)>'}
 
         Means there are two tilesets in this FOV (primary and nuclei), and because all images have
         the same (x, y) coordinates, each tileset has a single aligned subgroup.

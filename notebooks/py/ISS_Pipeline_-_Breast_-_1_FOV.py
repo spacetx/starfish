@@ -23,11 +23,9 @@ import matplotlib.pyplot as plt
 from showit import image
 import pprint
 
-from starfish import data, FieldOfView, IntensityTable
+from starfish import data, FieldOfView
 from starfish.types import Features, Axes
 # EPY: END code
-
-# TODO - NEED TO FIX REGISTRATION FOR THIS PIPELINE SO WE DON'T HAVE TO ALIGNED IMAGE GROUP LOOP
 
 # EPY: START code
 use_test_data = os.getenv("USE_TEST_DATA") is not None

@@ -38,6 +38,54 @@ sns.set_style('ticks')
 # EPY: END markdown
 
 # EPY: START code
+use_test_data = os.getenv("USE_TEST_DATA") is not None
+exp = data.DARTFISH(use_test_data=use_test_data)
+
+stack = exp.fov().get_image(FieldOfView.PRIMARY_IMAGES)
+# EPY: END code
+
+# EPY: START code
+print(stack.shape)
+# EPY: END code
+
+# EPY: START code
+starfish.display.stack(stack)
+# EPY: END code
+
+# EPY: START markdown
+#### Load codebook
+# EPY: END markdown
+
+# EPY: START code
+exp.codebook
+# EPY: END code
+
+# EPY: START markdown
+#### Load copy number benchmark results
+# EPY: END markdown
+
+# EPY: START code
+cnts_benchmark = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/fov_001/counts.csv')
+cnts_benchmark.head()
+# EPY: END code
+
+# EPY: START markdown
+#### Filter Image Stack
+# EPY: END markdown
+
+# EPY: START code
+sc_filt = Filter.ScaleByPercentile(p=100)
+z_filt = Filter.ZeroByChannelMagnitude(thresh=.05, normalize=False)
+
+norm_stack = sc_filt.run(stack)
+zero_norm_stack = z_filt.run(norm_stack)
+# EPY: END code
+
+# EPY: START markdown
+##### Visualize barcode magnitudes to help determine an appropriate threshold for decoding
+# EPY: END markdown
+
+# EPY: START code
 def compute_magnitudes(stack, norm_order=2):
 
     pixel_intensities = IntensityTable.from_image_stack(zero_norm_stack)
@@ -45,192 +93,140 @@ def compute_magnitudes(stack, norm_order=2):
     norm = np.linalg.norm(feature_traces.values, ord=norm_order, axis=1)
 
     return norm
+
+mags = compute_magnitudes(zero_norm_stack)
+
+plt.hist(mags, bins=20);
+sns.despine(offset=3)
+plt.xlabel('Barcode magnitude')
+plt.ylabel('Number of pixels')
+plt.yscale('log');
+# EPY: END code
+
+# EPY: START markdown
+#### Decode
+# EPY: END markdown
+
+# EPY: START code
+# how much magnitude should a barcode have for it to be considered by decoding? this was set by looking at
+# the plot above
+magnitude_threshold = 0.5
+# how big do we expect our spots to me, min/max size. this was set to be equivalent to the parameters
+# determined by the Zhang lab.
+area_threshold = (5, 30)
+# how close, in euclidean space, should the pixel barcode be to the nearest barcode it was called to?
+# here, I set this to be a large number, so I can inspect the distribution of decoded distances below
+distance_threshold = 3
+
+psd = SpotFinder.PixelSpotDetector(
+    codebook=exp.codebook,
+    metric='euclidean',
+    distance_threshold=distance_threshold,
+    magnitude_threshold=magnitude_threshold,
+    min_area=area_threshold[0],
+    max_area=area_threshold[1]
+)
+
+initial_spot_intensities, results = psd.run(zero_norm_stack)
 # EPY: END code
 
 # EPY: START code
-use_test_data = os.getenv("USE_TEST_DATA") is not None
-exp = data.DARTFISH(use_test_data=use_test_data)
+spots_df = initial_spot_intensities.to_features_dataframe()
+spots_df['area'] = np.pi*spots_df['radius']**2
+spots_df = spots_df.loc[spots_df[Features.PASSES_THRESHOLDS]]
+spots_df.head()
+# EPY: END code
 
-intensities = list()
-for stack in exp.fov().iterate_image_type(FieldOfView.PRIMARY_IMAGES):
-    # EPY: END code
+# EPY: START markdown
+#### QC Plots
+# EPY: END markdown
 
-    # EPY: START code
-    print(stack.shape)
-    # EPY: END code
-
-    # EPY: START code
-    starfish.display.stack(stack)
-    # EPY: END code
-
-    # EPY: START markdown
-    #### Load codebook
-    # EPY: END markdown
-
-    # EPY: START code
-    exp.codebook
-    # EPY: END code
-
-    # EPY: START markdown
-    #### Load copy number benchmark results
-    # EPY: END markdown
-
-    # EPY: START code
-    cnts_benchmark = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/fov_001/counts.csv')
-    cnts_benchmark.head()
-    # EPY: END code
-
-    # EPY: START markdown
-    #### Filter Image Stack
-    # EPY: END markdown
-
-    # EPY: START code
-    sc_filt = Filter.ScaleByPercentile(p=100)
-    z_filt = Filter.ZeroByChannelMagnitude(thresh=.05, normalize=False)
-
-    norm_stack = sc_filt.run(stack)
-    zero_norm_stack = z_filt.run(norm_stack)
-    # EPY: END code
-
-    # EPY: START markdown
-    ##### Visualize barcode magnitudes to help determine an appropriate threshold for decoding
-    # EPY: END markdown
-
-    # EPY: START code
-    mags = compute_magnitudes(zero_norm_stack)
-    plt.hist(mags, bins=20);
-    sns.despine(offset=3)
-    plt.xlabel('Barcode magnitude')
-    plt.ylabel('Number of pixels')
-    plt.yscale('log');
-    # EPY: END code
-
-    # EPY: START markdown
-    #### Decode
-    # EPY: END markdown
-
-    # EPY: START code
-    # how much magnitude should a barcode have for it to be considered by decoding? this was set by looking at
-    # the plot above
-    magnitude_threshold = 0.5
-    # how big do we expect our spots to me, min/max size. this was set to be equivalent to the parameters
-    # determined by the Zhang lab.
-    area_threshold = (5, 30)
-    # how close, in euclidean space, should the pixel barcode be to the nearest barcode it was called to?
-    # here, I set this to be a large number, so I can inspect the distribution of decoded distances below
-    distance_threshold = 3
-
-    psd = SpotFinder.PixelSpotDetector(
-        codebook=exp.codebook,
-        metric='euclidean',
-        distance_threshold=distance_threshold,
-        magnitude_threshold=magnitude_threshold,
-        min_area=area_threshold[0],
-        max_area=area_threshold[1]
-    )
-
-    initial_spot_intensities, results = psd.run(zero_norm_stack)
-    # EPY: END code
-
-    # EPY: START code
-    spots_df = initial_spot_intensities.to_features_dataframe()
-    spots_df['area'] = np.pi*spots_df['radius']**2
-    spots_df = spots_df.loc[spots_df[Features.PASSES_THRESHOLDS]]
-    spots_df.head()
-    # EPY: END code
-
-    # EPY: START markdown
-    #### QC Plots
-    # EPY: END markdown
-
-    # EPY: START markdown
-    ##### parameter tuning plots
-    # EPY: END markdown
-
-    # EPY: START code
-    # these plots help inform how the parameters above were wet.
-    # looking at the last plot below, I reset the distance_threshold parameter to
-    min_dist = 0.6
-
-    plt.figure(figsize=(10,3))
-
-    plt.subplot(131)
-    plt.hist(mags, bins=100);
-    plt.yscale('log')
-    plt.xlabel('barcode magnitude')
-    plt.ylabel('number of pixels')
-    sns.despine(offset=2)
-    plt.vlines(magnitude_threshold, ymin=plt.gca().get_ylim()[0], ymax=plt.gca().get_ylim()[1])
-    plt.title('Set magnitude threshod')
-
-    plt.subplot(132)
-    spots_df['area'] = np.pi*spots_df.radius**2
-    spots_df.area.hist(bins=30);
-    plt.xlabel('area')
-    plt.ylabel('number of spots')
-    sns.despine(offset=2)
-    plt.title('Set area threshold')
-
-    plt.subplot(133)
-    spots_df.distance.hist(bins=30)
-    plt.xlabel('min distance to code');
-    plt.vlines(min_dist, ymin=plt.gca().get_ylim()[0], ymax=plt.gca().get_ylim()[1])
-    sns.despine(offset=2)
-    plt.title('Set minimum distance threshold');
-    # EPY: END code
-
-    # EPY: START markdown
-    ##### Copy number comparisons
-    # EPY: END markdown
-
-    # EPY: START code
-    # select spots with distance less than a threshold, and count the number of each target gene
-    cnts_starfish = spots_df[spots_df.distance<=min_dist].groupby('target').count()['area']
-    cnts_starfish = cnts_starfish.reset_index(level=0)
-    cnts_starfish.rename(columns = {'target':'gene', 'area':'cnt_starfish'}, inplace=True)
-
-    benchmark_comparison = pd.merge(cnts_benchmark, cnts_starfish, on='gene', how='left')
-    benchmark_comparison.head(20)
-    # EPY: END code
-
-    # EPY: START code
-    x = benchmark_comparison.dropna().cnt.values
-    y = benchmark_comparison.dropna().cnt_starfish.values
-    r = np.corrcoef(x, y)
-    r = r[0,1]
-
-    plt.scatter(x, y, 50,zorder=2)
-
-    plt.xlabel('Gene copy number Benchmark')
-    plt.ylabel('Gene copy number Starfish')
-    plt.title('r = {}'.format(r))
-
-    sns.despine(offset=2)
-    # EPY: END code
-
-    # EPY: START markdown
-    ##### visualization of rolonies
-    # EPY: END markdown
-
-    # EPY: START code
-    distance_threshold = min_dist
-
-    psd = SpotFinder.PixelSpotDetector(
-        codebook=exp.codebook,
-        metric='euclidean',
-        distance_threshold=distance_threshold,
-        magnitude_threshold=magnitude_threshold,
-        min_area=area_threshold[0],
-        max_area=area_threshold[1]
-    )
-
-    spot_intensities, results = psd.run(zero_norm_stack)
-    spot_intensities = IntensityTable(spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True))
-    intensities.append(spot_intensities)
-    # EPY: END code
+# EPY: START markdown
+##### parameter tuning plots
+# EPY: END markdown
 
 # EPY: START code
-spot_intensities = IntensityTable.concatanate_intensity_tables(intensities)
+# these plots help inform how the parameters above were wet.
+# looking at the last plot below, I reset the distance_threshold parameter to
+min_dist = 0.6
+
+plt.figure(figsize=(10,3))
+
+plt.subplot(131)
+plt.hist(mags, bins=100);
+plt.yscale('log')
+plt.xlabel('barcode magnitude')
+plt.ylabel('number of pixels')
+sns.despine(offset=2)
+plt.vlines(magnitude_threshold, ymin=plt.gca().get_ylim()[0], ymax=plt.gca().get_ylim()[1])
+plt.title('Set magnitude threshod')
+
+plt.subplot(132)
+spots_df['area'] = np.pi*spots_df.radius**2
+spots_df.area.hist(bins=30);
+plt.xlabel('area')
+plt.ylabel('number of spots')
+sns.despine(offset=2)
+plt.title('Set area threshold')
+
+plt.subplot(133)
+spots_df.distance.hist(bins=30)
+plt.xlabel('min distance to code');
+plt.vlines(min_dist, ymin=plt.gca().get_ylim()[0], ymax=plt.gca().get_ylim()[1])
+sns.despine(offset=2)
+plt.title('Set minimum distance threshold');
+# EPY: END code
+
+# EPY: START markdown
+##### Copy number comparisons
+# EPY: END markdown
+
+# EPY: START code
+# select spots with distance less than a threshold, and count the number of each target gene
+cnts_starfish = spots_df[spots_df.distance<=min_dist].groupby('target').count()['area']
+cnts_starfish = cnts_starfish.reset_index(level=0)
+cnts_starfish.rename(columns = {'target':'gene', 'area':'cnt_starfish'}, inplace=True)
+
+benchmark_comparison = pd.merge(cnts_benchmark, cnts_starfish, on='gene', how='left')
+benchmark_comparison.head(20)
+# EPY: END code
+
+# EPY: START code
+x = benchmark_comparison.dropna().cnt.values
+y = benchmark_comparison.dropna().cnt_starfish.values
+r = np.corrcoef(x, y)
+r = r[0,1]
+
+plt.scatter(x, y, 50,zorder=2)
+
+plt.xlabel('Gene copy number Benchmark')
+plt.ylabel('Gene copy number Starfish')
+plt.title('r = {}'.format(r))
+
+sns.despine(offset=2)
+# EPY: END code
+
+# EPY: START markdown
+##### visualization of rolonies
+# EPY: END markdown
+
+# EPY: START code
+distance_threshold = min_dist
+
+psd = SpotFinder.PixelSpotDetector(
+    codebook=exp.codebook,
+    metric='euclidean',
+    distance_threshold=distance_threshold,
+    magnitude_threshold=magnitude_threshold,
+    min_area=area_threshold[0],
+    max_area=area_threshold[1]
+)
+
+spot_intensities, results = psd.run(zero_norm_stack)
+spot_intensities = IntensityTable(spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True))
+# EPY: END code
+
+# EPY: START code
 # exclude spots that don't meet our area thresholds
 area_lookup = lambda x: 0 if x == 0 else results.region_properties[x - 1].area
 vfunc = np.vectorize(area_lookup)

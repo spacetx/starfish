@@ -17,7 +17,6 @@ if __name__ == "__main__":
 
     # save image stacks locally
     exp = Experiment.from_json(posixpath.join(args.experiment_url, "experiment.json"))
-
     for fov in exp.fovs():
         fov_dir = pathlib.Path(args.output_dir, fov.name)
         fov_dir.mkdir()

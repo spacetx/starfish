@@ -23,7 +23,7 @@ from .starfish import starfish
 __version__ = pkg_resources.require("starfish")[0].version
 
 # Variable to be set by release process
-__release_tag__ = None
+__is_release_tag__ = None
 
 
 if __name__ == "__main__":

@@ -24,9 +24,9 @@ def get_dependency_version(dependency: str) -> str:
 
 @lru_cache(maxsize=1)
 def get_release_tag() -> str:
-    if not starfish.__release_tag__:
+    if not starfish.__is_release_tag__:
         return "Running starfish from source"
-    return starfish.__release_tag__
+    return starfish.__is_release_tag__
 
 
 @lru_cache(maxsize=1)

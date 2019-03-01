@@ -384,6 +384,7 @@ class ImageStack:
         """
 
         # convert indexers to Dict[str, (int/slice)] format
+        # TODO shanaxel42 check if this can be changed to xarray.copy(deep=false)
         stack = deepcopy(self)
         selector = indexing_utils.convert_to_selector(indexers)
         stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector)

@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 import cProfile
+import subprocess
+import sys
 from pstats import Stats
+
+import pkg_resources
 
 from sptx_format.cli import validate as validate_cli
 from starfish.experiment.builder.cli import build as build_cli
@@ -11,6 +15,7 @@ from starfish.image import (
 )
 from starfish.spots import (
     Decoder,
+    PixelSpotDecoder,
     SpotFinder,
     TargetAssignment,
 )
@@ -67,9 +72,29 @@ def version():
 version.no_art = True  # type: ignore
 
 
+@starfish.group()
+def util():
+    """
+    house-keeping commands for the starfish library
+    """
+    pass
+
+@util.command()
+def install_strict_dependencies():
+    """
+    warning! updates different packages in your local installation
+    """
+    strict_requirements_file = pkg_resources.resource_filename(
+        "starfish", "REQUIREMENTS-STRICT.txt")
+    subprocess.check_call([
+        sys.executable, "-m", "pip", "install", "-r", strict_requirements_file
+    ])
+
+
 # Pipelines
 starfish.add_command(Registration._cli)  # type: ignore
 starfish.add_command(Filter._cli)  # type: ignore
+starfish.add_command(PixelSpotDecoder._cli)
 starfish.add_command(SpotFinder._cli)  # type: ignore
 starfish.add_command(Segmentation._cli)  # type: ignore
 starfish.add_command(TargetAssignment._cli)  # type: ignore

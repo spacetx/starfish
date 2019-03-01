@@ -71,25 +71,26 @@ check-requirements:
 	fi
 
 refresh-all-requirements:
-	@echo -n '' >| REQUIREMENTS.txt
+	@echo -n '' >| REQUIREMENTS-STRICT.txt
 	@if [ $$(uname -s) == "Darwin" ]; then sleep 1; fi  # this is require because Darwin HFS+ only has second-resolution for timestamps.
-	@touch REQUIREMENTS.txt.in
-	@$(MAKE) REQUIREMENTS.txt
+	@touch REQUIREMENTS.txt
+	@$(MAKE) REQUIREMENTS-STRICT.txt
 
-REQUIREMENTS.txt : %.txt : %.txt.in
-	[ ! -e .requirements-env ] || exit 1
+REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
+	[ ! -e .$<-env ] || exit 1
 	$(call create_venv, .$<-env)
 	.$<-env/bin/pip install -r $@
 	.$<-env/bin/pip install -r $<
 	echo "# You should not edit this file directly.  Instead, you should edit one of the following files ($^) and run make $@" >| $@
 	.$<-env/bin/pip freeze >> $@
+	cp -f $@ starfish/REQUIREMENTS-STRICT.txt
 	rm -rf .$<-env
 
 help-requirements:
 	$(call print_help, refresh_all_requirements, regenerate requirements files)
 	$(call print_help, check_requirements, fail if requirements files have been modified)
 
-.PHONY: refresh_all_requirements
+.PHONY: refresh_all_requirements starfish/REQUIREMENTS-STRICT.txt
 #
 ##############################################################
 
@@ -114,20 +115,27 @@ help-integration:
 
 ### INSTALL ##################################################
 #
-install-src:
-	pip install --force-reinstall --upgrade -r REQUIREMENTS.txt
+install-dev:
+	pip install --force-reinstall --upgrade -r REQUIREMENTS-STRICT.txt
 	pip install -e .
+	pip install -r REQUIREMENTS-CI.txt
 	pip freeze
 
-install-pypi:
-	pip install -r REQUIREMENTS.txt starfish
+install-src:
+	pip install --force-reinstall --upgrade -e .
+	pip freeze
+
+install-released-notebooks-support:
+	pip install starfish
+	pip install -r REQUIREMENTS-CI.txt
+	pip freeze
 
 help-install:
-	$(call print_help, install-src, pip install the current directory)
-	$(call print_help, install-pypi, pip install starfish from pypi)
-	$(call print_help, install-travis, chooses between src and pypi based on TRAVIS_EVENT_TYPE)
+	$(call print_help, install-dev, pip install from the current directory with pinned requirements and tooling for CI)
+	$(call print_help, install-src, pip install from the current directory)
+	$(call print_help, install-released-notebooks, pip install tooling to run notebooks against the released version of starfish)
 
-.PHONY: install-src install-pypi
+.PHONY: install-dev install-src install-released-notebooks-support help-install
 #
 ###############################################################
 

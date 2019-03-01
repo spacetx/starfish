@@ -3,6 +3,7 @@ from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
+import xarray as xr
 from scipy.ndimage import gaussian_laplace
 
 from starfish.image._filter._base import FilterAlgorithmBase
@@ -81,8 +82,10 @@ class Laplace(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"sigma": 0.5}
 
     @staticmethod
-    def _gaussian_laplace(image: np.ndarray, sigma: Union[Number, Tuple[Number]],
-                          mode: str = 'reflect', cval: float = 0.0) -> np.ndarray:
+    def _gaussian_laplace(
+        image: Union[xr.DataArray, np.ndarray], sigma: Union[Number, Tuple[Number]],
+        mode: str = 'reflect', cval: float = 0.0
+    ) -> np.ndarray:
         filtered = gaussian_laplace(
             image, sigma=sigma, mode=mode, cval=cval)
 

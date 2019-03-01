@@ -1,4 +1,4 @@
-from typing import Callable, Sequence, Tuple, Union
+from typing import Any, Callable, Sequence, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -7,14 +7,13 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.types import Number, SpotAttributes
-from .combine_adjacent_features import ConnectedComponentDecodingResult
 
 
 class SpotFinderAlgorithmBase(AlgorithmBase):
     def run(
             self,
             primary_image: ImageStack,
-    ) -> Union[IntensityTable, Tuple[IntensityTable, ConnectedComponentDecodingResult]]:
+    ) -> Union[IntensityTable, Tuple[IntensityTable, Any]]:
         """Finds spots in an ImageStack"""
         raise NotImplementedError()
 

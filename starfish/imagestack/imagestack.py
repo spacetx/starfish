@@ -27,8 +27,6 @@ import pandas as pd
 import skimage.io
 import xarray as xr
 from scipy.ndimage.filters import gaussian_filter
-from scipy.stats import scoreatpercentile
-from skimage import exposure
 from skimage import img_as_float32, img_as_uint
 from slicedimage import (
     ImageFormat,
@@ -589,55 +587,6 @@ class ImageStack:
                 data.shape, self._data[slice_list].shape))
 
         self._data.loc[slice_list] = data
-
-    def _get_scaled_clipped_linear_view(self, selector, rescale, p_min, p_max):
-
-        # get the requested chunk, linearize the remaining data into a sequence of tiles
-        data, remaining_inds = self.get_slice(selector)
-
-        # identify the dimensionality of data with all dimensions other than x, y linearized
-        if len(data.shape) >= 3:
-            n_tiles = np.product(data.shape[:-2])
-        else:
-            raise ValueError(
-                f'a stack with dimensionality >= 3 is required, the provided indexer produced a '
-                f'stack with shape {data.shape}')
-
-        # linearize the array
-        linear_view: np.ndarray = data.reshape((n_tiles,) + data.shape[-2:])
-
-        # set the labels for the linearized tiles
-        labels: List[List[str]] = []
-        for index, size in zip(remaining_inds, data.shape[:-2]):
-            labels.append([f'{index}{n}' for n in range(size)])
-
-        # mypy thinks this has an incompatible type "Iterator[Tuple[Any, ...]]";
-        # it expects "Iterable[List[str]]"
-        labels = list(product(*labels))  # type: ignore
-
-        n_tiles = linear_view.shape[0]
-
-        if rescale and any((p_min, p_max)):
-            raise ValueError('select one of rescale and p_min/p_max to rescale image, not both.')
-
-        elif rescale:
-            print("Rescaling ...")
-            vmin, vmax = scoreatpercentile(data, (0.5, 99.5))
-            linear_view = exposure.rescale_intensity(
-                linear_view,
-                in_range=(vmin, vmax),
-                out_range=np.float32
-            ).astype(np.float32)
-
-        elif p_min or p_max:
-            print("Clipping ...")
-            a_min, a_max = scoreatpercentile(
-                linear_view,
-                (p_min if p_min else 0, p_max if p_max else 100)
-            )
-            linear_view = np.clip(linear_view, a_min=a_min, a_max=a_max)
-
-        return linear_view, labels, n_tiles
 
     @staticmethod
     def _show_matplotlib_notebook(

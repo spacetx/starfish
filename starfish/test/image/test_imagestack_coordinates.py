@@ -6,22 +6,22 @@ from slicedimage import ImageFormat
 from starfish.experiment.builder import FetchedTile, tile_fetcher_factory
 from starfish.imagestack.imagestack import ImageStack
 from starfish.imagestack.physical_coordinate_calculator import get_physical_coordinates_of_z_plane
-from starfish.types import Coordinates, Number
+from starfish.types import Axes, Coordinates, Number
 from .imagestack_test_utils import verify_physical_coordinates
 
 NUM_ROUND = 8
 NUM_CH = 1
-NUM_Z = 1
+NUM_Z = 3
 HEIGHT = 10
 WIDTH = 10
 
 
 X_COORDS = 100, 1000
 Y_COORDS = .1, 10
-Z_COORDS = 0.01, 0.001
 
-def round_to_z(r: int) -> Tuple[float, float]:
-    return (r + 1) * 0.01, (r + 1) * 0.001
+
+def zplane_to_z(z: int) -> Tuple[float, float]:
+    return (z + 1) * 0.01, (z + 1) * 0.001
 
 
 def round_to_x(r: int) -> Tuple[float, float]:
@@ -38,6 +38,7 @@ class AlignedTiles(FetchedTile):
     def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
         super().__init__()
         self._round = _round
+        self._zplane = z
 
     @property
     def shape(self) -> Tuple[int, ...]:
@@ -48,7 +49,7 @@ class AlignedTiles(FetchedTile):
         return {
             Coordinates.X: X_COORDS,
             Coordinates.Y: Y_COORDS,
-            Coordinates.Z: Z_COORDS,
+            Coordinates.Z: zplane_to_z(self._zplane),
         }
 
     @property
@@ -71,13 +72,11 @@ def test_coordinates():
             True,
         )
     )
-
-    verify_physical_coordinates(
-        stack,
-        X_COORDS,
-        Y_COORDS,
-        get_physical_coordinates_of_z_plane(Z_COORDS),
-    )
+    for selectors in stack._iter_axes({Axes.ZPLANE}):
+        verify_physical_coordinates(stack, X_COORDS, Y_COORDS,
+                                    get_physical_coordinates_of_z_plane(
+                                        zplane_to_z(selectors[Axes.ZPLANE])),
+                                    selectors[Axes.ZPLANE])
 
 
 class ScalarTiles(FetchedTile):
@@ -85,6 +84,7 @@ class ScalarTiles(FetchedTile):
     def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
         super().__init__()
         self._round = _round
+        self._zplane = z
 
     @property
     def shape(self) -> Tuple[int, ...]:
@@ -95,7 +95,7 @@ class ScalarTiles(FetchedTile):
         return {
             Coordinates.X: X_COORDS[0],
             Coordinates.Y: Y_COORDS[0],
-            Coordinates.Z: Z_COORDS[0],
+            Coordinates.Z: zplane_to_z(self._zplane)[0],
         }
 
     @property
@@ -121,7 +121,7 @@ class OffsettedTiles(FetchedTile):
         return {
             Coordinates.X: round_to_x(self._round),
             Coordinates.Y: round_to_y(self._round),
-            Coordinates.Z: round_to_z(self._round),
+            Coordinates.Z: zplane_to_z(self._round),
         }
 
     @property
@@ -165,11 +165,11 @@ def test_scalar_coordinates():
 
     expected_x = X_COORDS[0]
     expected_y = Y_COORDS[0]
-    expected_z = Z_COORDS[0]
 
-    verify_physical_coordinates(
-        stack,
-        (expected_x, expected_x),
-        (expected_y, expected_y),
-        (expected_z, expected_z)
-    )
+    for selectors in stack._iter_axes({Axes.ZPLANE}):
+        expected_z = zplane_to_z(selectors[Axes.ZPLANE])[0]
+        verify_physical_coordinates(stack,
+                                    (expected_x, expected_x),
+                                    (expected_y, expected_y),
+                                    get_physical_coordinates_of_z_plane((expected_z, expected_z)),
+                                    selectors[Axes.ZPLANE])

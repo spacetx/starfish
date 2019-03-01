@@ -42,7 +42,7 @@ def verify_physical_coordinates(
         expected_y_coordinates: Tuple[float, float],
         expected_z_coordinates: Tuple[float, float]
 ) -> None:
-    """Given an imagestack and a set coordinate min/max values
+    """Given an imagestack and a set of coordinate min/max values
     verify that the physical coordinates on the stack match the expected
     range of values for each coord dimension.
     """

@@ -65,6 +65,9 @@ def get_un_aligned_tileset():
             for z in range(NUM_Z):
                 tile = Tile(
                     {
+                        # The round_to methods generate coordinates
+                        # based on the r value, therefore the coords vary
+                        # throughout the tileset
                         Coordinates.X: round_to_x(r),
                         Coordinates.Y: round_to_y(r),
                         Coordinates.Z: round_to_z(r),
@@ -83,8 +86,9 @@ def get_un_aligned_tileset():
 def test_fov_order():
     data = SyntheticData()
     codebook = data.codebook()
-    fovs = [FieldOfView("stack2"),
-            FieldOfView("stack1")]
+    tilesets = {"primary": get_aligned_tileset()}
+    fovs = [FieldOfView("stack2", tilesets),
+            FieldOfView("stack1", tilesets)]
     extras = {"synthetic": True}
     experiment = Experiment(fovs, codebook, extras)
     assert "stack1" == experiment.fov().name
@@ -114,3 +118,14 @@ def test_fov_un_aligned_tileset():
     # Assert that the number of coordinate groups == NUM_ROUNDS
     assert len(fov.aligned_coordinate_groups['primary']) == NUM_ROUND
     assert len(fov.aligned_coordinate_groups['nuclei']) == NUM_ROUND
+
+
+def test_fov_partially_aligned_tileset():
+    # Create combo of aligned and unaligned tiles
+    partially_aligned_tileset = get_aligned_tileset()
+    for tile in get_un_aligned_tileset().tiles():
+        partially_aligned_tileset.add_tile(tile)
+    tileset_dict = {'primary': partially_aligned_tileset}
+    fov = FieldOfView("paritally aligned", tileset_dict)
+    # Assert the number of tile groups is num rounds + 1 aligned group
+    assert len(fov.aligned_coordinate_groups['primary']) == NUM_ROUND + 1

@@ -133,17 +133,16 @@ def preserve_float_range(
 
     """
     array = array.copy()
-    if isinstance(array, xr.DataArray):
-        data = array.values
-    else:
-        data = array
+
+    data = np.asarray(array)
+
     if np.any(data < 0):
-        data[array < 0] = 0
-    if np.any(array > 1):
+        data[data < 0] = 0
+    if np.any(data > 1):
         if rescale:
             data /= data.max()
         else:
-            data[array > 1] = 1
+            data[data > 1] = 1
     return array.astype(np.float32)
 
 

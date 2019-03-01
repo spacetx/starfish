@@ -43,7 +43,7 @@ class CropParameters:
         self._x_slice = x_slice
         self._y_slice = y_slice
 
-    def add_permitted_axes(self, axis_type: Axes, permitted_axis: int) -> None:
+    def _add_permitted_axes(self, axis_type: Axes, permitted_axis: int) -> None:
         """
         Add a value to one of the permitted axes sets.
         """

@@ -27,10 +27,10 @@ CH_LABELS = list(range(NUM_CH))
 Z_LABELS = list(range(NUM_Z))
 HEIGHT = 40
 WIDTH = 60
+
 X_COORDS = 0.01, 0.1
 Y_COORDS = 0.001, 0.01
 Z_COORDS = 0.0001, 0.001
-
 
 def data(round_: int, ch: int, z: int) -> np.ndarray:
     """Return the data for a given tile."""
@@ -40,7 +40,6 @@ def data(round_: int, ch: int, z: int) -> np.ndarray:
 
         result[row:] = np.linspace(base_val, base_val + WIDTH, WIDTH, False)
     return img_as_float32(result)
-
 
 class UniqueTiles(FetchedTile):
     """Tiles where the pixel values are unique per round/ch/z."""
@@ -113,7 +112,6 @@ def test_crop_rcz():
                     {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
                     expected_data,
                 )
-
     expected_z_coordinates = get_physical_coordinates_of_z_plane(Z_COORDS)
     verify_physical_coordinates(
         stack,
@@ -122,7 +120,7 @@ def test_crop_rcz():
         expected_z_coordinates,
     )
 
-
+    
 def test_crop_xy():
     """Build an imagestack that contains a crop in x/y.  Verify that the data is sliced correctly.
     """

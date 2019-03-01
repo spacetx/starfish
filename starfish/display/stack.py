@@ -189,8 +189,10 @@ def stack(
         Axes.ZPLANE.value
     ).values
 
-    # display the imagestack using napari
-    viewer = napari_gui.imshow(reordered_array, multichannel=False)
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', module='vispy.visuals.isocurve', lineno=22)
+        # display the imagestack using napari
+        viewer = napari_gui.imshow(reordered_array, multichannel=False)
     viewer._index = [0, 0, 0, 0, 0]  # initialize napari status bar
 
     if spots is not None:

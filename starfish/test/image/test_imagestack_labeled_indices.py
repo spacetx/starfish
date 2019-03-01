@@ -53,6 +53,7 @@ class UniqueTiles(FetchedTile):
             Coordinates.X: X_COORDS,
             Coordinates.Y: Y_COORDS,
             Coordinates.Z: Z_COORDS,
+
         }
 
     @property
@@ -147,6 +148,7 @@ def test_labeled_indices_sel_single_tile():
         Y_COORDS,
         get_physical_coordinates_of_z_plane(Z_COORDS),
     )
+
 
 
 def test_labeled_indices_sel_slice():

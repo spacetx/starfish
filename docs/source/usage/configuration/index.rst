@@ -22,7 +22,8 @@ If neither is true, then only the :ref:`default values <env_defaults>` will appl
 
 
 Additionally, the individual properties from the configuration JSON can be set by
-environment variable. For example:
+environment variable. These values take precedence if also set in the configuration
+file. For example:
 
 ::
 
@@ -38,7 +39,7 @@ can also be specified as:
 
     export STARFISH_VALIDATION_STRICT=true
 
-Other valid values for "true" are: "TRUE", "True", "yes", "y", and "1".
+Other valid values for "true" are: "TRUE", "True", "yes", "y", "1", "on", and "enabled".
 
 .. _env_defaults:
 

@@ -20,7 +20,7 @@ install_requires = [
 
 setuptools.setup(
     name="starfish",
-    version="0.0.31",
+    version="0.0.33",
     description="Pipelines and pipeline components for the analysis of image-based transcriptomics data",
     author="Deep Ganguli",
     author_email="dganguli@chanzuckerberg.com",
@@ -28,7 +28,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=install_requires,
     extras_require={
-        'napari': ['napari-gui==0.0.5.1', 'matplotlib==2.1.2']
+        'napari': ['napari-gui==0.0.5.1'],
     },
     entry_points={
         'console_scripts': [

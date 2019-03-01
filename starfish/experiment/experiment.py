@@ -1,7 +1,11 @@
+import copy
 import json
+import pprint
+from collections import OrderedDict
 from typing import (
     Callable,
     Dict,
+    Iterator,
     List,
     MutableMapping,
     MutableSequence,
@@ -35,6 +39,8 @@ class FieldOfView:
     type. The primary image is accessed using the name
     :py:attr:`starfish.experiment.experiment.FieldOFView.PRIMARY_IMAGES`.
 
+    Access a FOV through a experiment. experiement.fov()
+
     Attributes
     ----------
     name : str
@@ -47,7 +53,7 @@ class FieldOfView:
 
     def __init__(
             self, name: str,
-            image_tilesets: Optional[MutableMapping[str, TileSet]] = None
+            image_tilesets: MutableMapping[str, TileSet]
     ) -> None:
         """
         Fields of views can obtain their primary image from either an ImageStack or a TileSet (but
@@ -62,10 +68,9 @@ class FieldOfView:
         self._images: MutableMapping[str, TileSet] = dict()
         self._name = name
         self.aligned_coordinate_groups: Dict[str, List[CropParameters]] = dict()
-        if image_tilesets:
-            for name, tileset in image_tilesets.items():
-                self.aligned_coordinate_groups[name] = self.parse_coordinate_groups(tileset)
-            self._images = image_tilesets
+        for name, tileset in image_tilesets.items():
+            self.aligned_coordinate_groups[name] = self.parse_coordinate_groups(tileset)
+        self._images = image_tilesets
 
     def __repr__(self):
         images = '\n    '.join(
@@ -89,19 +94,19 @@ class FieldOfView:
          A list of CropParameters. Each entry describes the r/ch/z values of tiles that are aligned
          (have matching coordinates)
          """
-        coord_groups: Dict[tuple, CropParameters] = dict()
-        for tile in tileset._tiles:
-            x_y_coords = tuple(i for i in [
+        coord_groups: OrderedDict[tuple, CropParameters] = OrderedDict()
+        for tile in tileset.tiles():
+            x_y_coords = (
                 tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
-                tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
-            ])
+                tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1]
+            )
             # A tile with this (x, y) has already been seen, add tile's Indices to CropParameters
             if x_y_coords in coord_groups:
                 crop_params = coord_groups[x_y_coords]
-                crop_params.add_permitted_axes(Axes.CH, tile.indices[Axes.CH])
-                crop_params.add_permitted_axes(Axes.ROUND, tile.indices[Axes.ROUND])
+                crop_params._add_permitted_axes(Axes.CH, tile.indices[Axes.CH])
+                crop_params._add_permitted_axes(Axes.ROUND, tile.indices[Axes.ROUND])
                 if Axes.ZPLANE in tile.indices:
-                    crop_params.add_permitted_axes(Axes.ZPLANE, tile.indices[Axes.ZPLANE])
+                    crop_params._add_permitted_axes(Axes.ZPLANE, tile.indices[Axes.ZPLANE])
             else:
                 coord_groups[x_y_coords] = CropParameters(
                     permitted_chs=[tile.indices[Axes.CH]],
@@ -118,24 +123,17 @@ class FieldOfView:
     def image_types(self) -> Set[str]:
         return set(self._images.keys())
 
-    def show_aligned_image_groups(self):
+    def show_aligned_image_groups(self) -> None:
         """
         Describe the aligned subgroups for each Tileset in this FOV
 
         ex.
-            {'primary': 'Group 0:  <starfish.ImageStack (8, 2, 1, 205, 405))>',
-             'nuclei': 'Group 0:  <starfish.ImageStack (1, 1, 1, 205, 405))>'}
+        {'nuclei': ' Group 0:  <starfish.ImageStack r={0}, ch={0}, z={0}, (y, x)=(190,270)>',
+        'primary': ' Group 0:  <starfish.ImageStack r={0, 1, 2, 3, 4, 5}, ch={0, 1, '
+        '2}, z={0}, (y, x)=(190, 270)>'}
 
-       Means there are two tilesets in this FOV (primary and nuclei), and because all images have
-       the same (x, y) coordinates, each tileset has a single aligned subgroup.
-
-        ex.
-            {'primary': 'Group 0:  <starfish.ImageStack (4, 2, 1, 205, 405)>
-                         Group 1:  <starfish.ImageStack (4, 2, 1, 205, 405)>'}
-
-        Means there is one tileset in this FOV, (primary), it has two different aligned
-        coordinate groups with 4 rounds in each
-
+        Means there are two tilesets in this FOV (primary and nuclei), and because all images have
+        the same (x, y) coordinates, each tileset has a single aligned subgroup.
         """
         all_groups = dict()
         for name, groups in self.aligned_coordinate_groups.items():
@@ -151,13 +149,13 @@ class FieldOfView:
                 for k, v in enumerate(groups)
             )
             all_groups[name] = f'{info}'
-        return all_groups
+        pprint.pprint(all_groups)
 
-    def iterate_image_type(self, image_type: str):
+    def iterate_image_type(self, image_type: str) -> Iterator[ImageStack]:
         for aligned_group, _ in enumerate(self.aligned_coordinate_groups[image_type]):
             yield self.get_image(item=image_type, aligned_group=aligned_group)
 
-    def get_image(self, item, aligned_group: int = 0,
+    def get_image(self, item: str, aligned_group: int = 0,
                   x_slice: Optional[Union[int, slice]] = None,
                   y_slice: Optional[Union[int, slice]] = None,
                   ) -> ImageStack:
@@ -178,7 +176,7 @@ class FieldOfView:
         -------
         The instantiated ImageStack
         """
-        crop_params = self.aligned_coordinate_groups[item][aligned_group]
+        crop_params = copy.copy((self.aligned_coordinate_groups[item][aligned_group]))
         crop_params._x_slice = x_slice
         crop_params._y_slice = y_slice
         return ImageStack.from_tileset(self._images[item], crop_parameters=crop_params)

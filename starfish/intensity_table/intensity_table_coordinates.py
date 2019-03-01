@@ -18,7 +18,7 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(image_stack: Ima
         - Calculate the physical x,y values
         - Assign those values to the coords arrays for this spot
     """
-    # TODO consider refactoring pixel case where were can just reshape from Imagestack
+    # TODO shanaxel42 consider refactoring pixel case where were can just reshape from Imagestack
     # Add three new coords to xarray (xc, yc, zc)
     num_features = intensity_table.sizes[Features.AXIS]
     intensity_table[Coordinates.X.value] = xr.DataArray(np.zeros(num_features, np.float32),

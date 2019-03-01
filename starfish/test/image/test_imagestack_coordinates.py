@@ -172,3 +172,4 @@ def test_scalar_coordinates():
         (expected_x, expected_x),
         (expected_y, expected_y),
         (expected_z, expected_z)
+    )

@@ -150,7 +150,6 @@ def test_labeled_indices_sel_single_tile():
     )
 
 
-
 def test_labeled_indices_sel_slice():
     """Select a single tile across each index from an ImageStack with labeled indices.  Verify that
     the data is correct and that the physical coordinates are correctly set."""

@@ -184,7 +184,6 @@ class ImageStack:
             coords=coordinates_tick_marks,
         )
 
-        self._tiles_aligned = True
         all_selectors = list(self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}))
         first_selector = all_selectors[0]
         tile = tile_data.get_tile(r=first_selector[Axes.ROUND],
@@ -210,7 +209,8 @@ class ImageStack:
                 tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
             ]
             if starting_coords != coordinates_values:
-                self._tiles_aligned = False
+                raise ValueError(
+                    f"Tiles must be aligned")
             if Coordinates.Z in tile.coordinates:
                 coordinates_values.extend([
                     tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1],
@@ -928,14 +928,6 @@ class ImageStack:
                 data['barcode_index'].append(barcode_index)
 
         return pd.DataFrame(data)
-
-    @property
-    def tiles_aligned(self) -> bool:
-        """
-        Returns True if all the tiles in this ImageStack have the same physical coordinates
-        and False if not.
-        """
-        return self._tiles_aligned
 
     @property
     def log(self) -> List[dict]:

@@ -179,7 +179,7 @@ class ImageStack:
                 self.xarray.sizes[Axes.ZPLANE.value]),
                 dims=Axes.ZPLANE.value)
 
-        # Get coords on first tile to verify imagestack is aligned
+        # Get coords on first tile, then verify all subsequent tiles are aligned
         starting_coords = [
             tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
             tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],

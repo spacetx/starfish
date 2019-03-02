@@ -53,6 +53,7 @@ from starfish.multiprocessing.pool import Pool
 from starfish.multiprocessing.shmem import SharedMemory
 from starfish.types import (
     Axes,
+    Clip,
     Coordinates,
     LOG,
     Number,
@@ -716,7 +717,7 @@ class ImageStack:
             in_place=False,
             verbose: bool=False,
             n_processes: Optional[int]=None,
-            clip_method: int=0,
+            clip_method: Union[str, Clip]=Clip.CLIP,
             **kwargs
     ) -> "ImageStack":
         """Split the image along a set of axes and apply a function across all the components.  This
@@ -743,15 +744,15 @@ class ImageStack:
             (default = None).
         kwargs : dict
             Additional arguments to pass to func
-        clip_method : int
-            (Default 0) Controls the way that data that exceed 1 are scaled to retain skimage dtype
-            requirements (float data fall in [0, 1]). Regardless of the method, data below 0 are
-            set to 0.
-            0: data above 1 are set to 1.
-            1: data above 1 are scaled by the maximum value, with the maximum value calculated
-            over the entire ImageStack
-            2: data above 1 are scaled by the maximum value, with the maximum value calculated
-            over each slice, where slice shapes are determined by the group_by parameters
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over the entire ImageStack
+            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over each slice, where slice shapes are determined by the group_by
+                parameters
 
         Returns
         -------
@@ -762,6 +763,9 @@ class ImageStack:
         # default grouping is by (x, y) tile
         if group_by is None:
             group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
+
+        if not isinstance(clip_method, (str, Clip)):
+            raise TypeError("must pass a Clip method. See Starfish.types.Clip for valid options")
 
         if not in_place:
             # create a copy of the ImageStack, call apply on that stack with in_place=True
@@ -786,19 +790,20 @@ class ImageStack:
             **kwargs)
 
         # scale based on values of whole image
-        if clip_method == 1:
+        if clip_method == Clip.SCALE_BY_IMAGE:
             self._data = preserve_float_range(self._data, rescale=True)
 
         return self
 
     @staticmethod
     def _in_place_apply(
-        apply_func: Callable[..., np.ndarray], data: np.ndarray, clip_method: int, **kwargs
+        apply_func: Callable[..., Union[xr.DataArray, np.ndarray]], data: np.ndarray,
+        clip_method: Union[str, Clip], **kwargs
     ) -> None:
         result = apply_func(data, **kwargs)
-        if clip_method == 0:
+        if clip_method == Clip.CLIP:
             data[:] = preserve_float_range(result, rescale=False)
-        elif clip_method == 2:
+        elif clip_method == Clip.SCALE_BY_CHUNK:
             data[:] = preserve_float_range(result, rescale=True)
         else:
             data[:] = result

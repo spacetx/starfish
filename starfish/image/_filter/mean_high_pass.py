@@ -6,7 +6,7 @@ import xarray as xr
 from scipy.ndimage.filters import uniform_filter
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Number
+from starfish.types import Clip, Number
 from starfish.util import click
 from starfish.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
@@ -18,7 +18,8 @@ from .util import (
 class MeanHighPass(FilterAlgorithmBase):
 
     def __init__(
-        self, size: Union[Number, Tuple[Number]], is_volume: bool=False, clip_method: int=0
+        self, size: Union[Number, Tuple[Number]], is_volume: bool=False,
+        clip_method: Union[str, Clip]=Clip.CLIP
     ) -> None:
         """Mean high pass filter.
 
@@ -38,7 +39,15 @@ class MeanHighPass(FilterAlgorithmBase):
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
             independently.
-
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over the entire ImageStack
+            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over each slice, where slice shapes are determined by the group_by
+                parameters
         """
 
         self.size = validate_and_broadcast_kernel_size(size, is_volume)
@@ -118,8 +127,8 @@ class MeanHighPass(FilterAlgorithmBase):
         help="indicates that the image stack should be filtered in 3d")
     @click.option(
         "--clip-method", default=0, type=int,
-        help="method to constrain data to [0,1]. 0: clip, 1: scale by max over whole image, "
-             "2: scale by max per chunk")
+        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
+             "'scale_by_chunk'")
     @click.pass_context
     def _cli(ctx, size, is_volume, clip_method):
         ctx.obj["component"]._cli_run(ctx, MeanHighPass(size, is_volume, clip_method))

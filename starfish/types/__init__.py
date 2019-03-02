@@ -2,6 +2,7 @@ from typing import Union
 
 from ._constants import (
     Axes,
+    Clip,
     Coordinates,
     CORE_DEPENDENCIES,
     Features,

@@ -12,16 +12,16 @@ from starfish.image._filter.util import (
     validate_and_broadcast_kernel_size,
 )
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Number
+from starfish.types import Clip, Number
 from starfish.util import click
 
 
 class Laplace(FilterAlgorithmBase):
 
     def __init__(
-            self,
-            sigma: Union[Number, Tuple[Number]], mode: str='reflect',
-            cval: float=0.0, is_volume: bool=False, clip_method: int=0,
+        self,
+        sigma: Union[Number, Tuple[Number]], mode: str='reflect',
+        cval: float=0.0, is_volume: bool=False, clip_method: Union[str, Clip]=Clip.CLIP,
     ) -> None:
         """Multi-dimensional gaussian-laplacian filter used to enhance dots against background
 
@@ -58,14 +58,15 @@ class Laplace(FilterAlgorithmBase):
             (Default 0) Value to fill past edges of input if mode is ‘constant’.
         is_volume: bool
             If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
-        clip_method : int
-            (Default 0) Controls the way that data are scaled to retain skimage dtype
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
             requirements that float data fall in [0, 1].
-            0: data above 1 are set to 1, and below 0 are set to 0
-            1: data above 1 are scaled by the maximum value, with the maximum value calculated
-                over the entire ImageStack
-            2: data above 1 are scaled by the maximum value, with the maximum value calculated
-                over each slice, where slice shapes are determined by the group_by parameters
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over the entire ImageStack
+            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over each slice, where slice shapes are determined by the group_by
+                parameters
         """
 
         self.sigma = validate_and_broadcast_kernel_size(sigma, is_volume=is_volume)
@@ -130,8 +131,8 @@ class Laplace(FilterAlgorithmBase):
         help="indicates that the image stack should be filtered in 3d")
     @click.option(
         "--clip-method", default=0, type=int,
-        help="method to constrain data to [0,1]. 0: clip, 1: scale by max over whole image, "
-             "2: scale by max per chunk")
+        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
+             "'scale_by_chunk'")
     @click.pass_context
     def _cli(ctx, sigma, mode, cval, is_volume, clip_method):
         ctx.obj["component"]._cli_run(ctx, Laplace(sigma, mode, cval, is_volume, clip_method))

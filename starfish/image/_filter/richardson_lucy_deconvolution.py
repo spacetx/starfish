@@ -6,7 +6,7 @@ import xarray as xr
 from scipy.signal import convolve, fftconvolve
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Number
+from starfish.types import Clip, Number
 from starfish.util import click
 from ._base import FilterAlgorithmBase
 from .util import (
@@ -18,7 +18,8 @@ from .util import (
 class DeconvolvePSF(FilterAlgorithmBase):
 
     def __init__(
-        self, num_iter: int, sigma: Number, is_volume: bool = False, clip_method: int=0
+        self, num_iter: int, sigma: Number, is_volume: bool = False,
+        clip_method: Union[str, Clip]=Clip.CLIP
     ) -> None:
         """Deconvolve a point spread function
 
@@ -32,14 +33,15 @@ class DeconvolvePSF(FilterAlgorithmBase):
         is_volume: bool
             If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
             independently.
-        clip_method : int
-            (Default 1) Controls the way that data are scaled to retain skimage dtype
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
             requirements that float data fall in [0, 1].
-            0: data above 1 are set to 1, and below 0 are set to 0
-            1: data above 1 are scaled by the maximum value, with the maximum value calculated
-               over the entire ImageStack
-            2: data above 1 are scaled by the maximum value, with the maximum value calculated
-               over each slice, where slice shapes are determined by the group_by parameters
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over the entire ImageStack
+            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over each slice, where slice shapes are determined by the group_by
+                parameters
         """
         self.num_iter = num_iter
         self.sigma = sigma
@@ -182,8 +184,8 @@ class DeconvolvePSF(FilterAlgorithmBase):
                   help="indicates that the image stack should be filtered in 3d")
     @click.option(
         "--clip-method", default=0, type=int,
-        help="method to constrain data to [0,1]. 0: clip, 1: scale by max over whole image, "
-             "2: scale by max per chunk")
+        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
+             "'scale_by_chunk'")
     @click.pass_context
     def _cli(ctx, num_iter, sigma, is_volume, clip_method):
         ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, is_volume, clip_method))

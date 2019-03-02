@@ -5,6 +5,7 @@ import xarray as xr
 from skimage.morphology import ball, disk, white_tophat
 
 from starfish.imagestack.imagestack import ImageStack
+from starfish.types import Clip
 from starfish.util import click
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by
@@ -20,7 +21,9 @@ class WhiteTophat(FilterAlgorithmBase):
     https://en.wikipedia.org/wiki/Top-hat_transform
     """
 
-    def __init__(self, masking_radius: int, is_volume: bool=False, clip_method: int=0) -> None:
+    def __init__(
+        self, masking_radius: int, is_volume: bool=False, clip_method: Union[str, Clip]=Clip.CLIP
+    ) -> None:
         """
         Instance of a white top hat morphological masking filter which masks objects larger
         than `masking_radius`
@@ -32,15 +35,15 @@ class WhiteTophat(FilterAlgorithmBase):
         is_volume : int
             If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
             independently.
-        clip_method : int
-            (Default 0) Controls the way that data are scaled to retain skimage dtype
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
             requirements that float data fall in [0, 1].
-            0: data above 1 are set to 1, and below 0 are set to 0
-            1: data above 1 are scaled by the maximum value, with the maximum value calculated
-               over the entire ImageStack
-            2: data above 1 are scaled by the maximum value, with the maximum value calculated
-               over each slice, where slice shapes are determined by the group_by parameters
-
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over the entire ImageStack
+            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over each slice, where slice shapes are determined by the group_by
+                parameters
         """
         self.masking_radius = masking_radius
         self.is_volume = is_volume
@@ -96,8 +99,8 @@ class WhiteTophat(FilterAlgorithmBase):
         "--is-volume", is_flag=True, help="filter 3D volumes")
     @click.option(
         "--clip-method", default=0, type=int,
-        help="method to constrain data to [0,1]. 0: clip, 1: scale by max over whole image, "
-             "2: scale by max per chunk")
+        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
+             "'scale_by_chunk'")
     @click.pass_context
     def _cli(ctx, masking_radius, is_volume, clip_method):
         ctx.obj["component"]._cli_run(ctx, WhiteTophat(masking_radius, is_volume, clip_method))

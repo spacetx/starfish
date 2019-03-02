@@ -6,7 +6,7 @@ import xarray as xr
 from trackpy import bandpass
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Number
+from starfish.types import Clip, Number
 from starfish.util import click
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by
@@ -16,7 +16,7 @@ class Bandpass(FilterAlgorithmBase):
 
     def __init__(
         self, lshort: Number, llong: int, threshold: Number=0, truncate: Number=4,
-        is_volume: bool=False, clip_method: int=0
+        is_volume: bool=False, clip_method: Union[str, Clip]=Clip.CLIP
     ) -> None:
         """
 
@@ -33,14 +33,15 @@ class Bandpass(FilterAlgorithmBase):
             deviations (default 4)
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
-        clip_method : int
-            (Default 0) Controls the way that data are scaled to retain skimage dtype
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
             requirements that float data fall in [0, 1].
-            0: data above 1 are set to 1, and below 0 are set to 0
-            1: data above 1 are scaled by the maximum value, with the maximum value calculated
-               over the entire ImageStack
-            2: data above 1 are scaled by the maximum value, with the maximum value calculated
-               over each slice, where slice shapes are determined by the group_by parameters
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over the entire ImageStack
+            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over each slice, where slice shapes are determined by the group_by
+                parameters
         """
         self.lshort = lshort
         self.llong = llong
@@ -140,8 +141,8 @@ class Bandpass(FilterAlgorithmBase):
         help="truncate the filter at this many standard deviations")
     @click.option(
         "--clip-method", default=0, type=int,
-        help="method to constrain data to [0,1]. 0: clip, 1: scale by max over whole image, "
-             "2: scale by max per chunk")
+        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
+             "'scale_by_chunk'")
     @click.pass_context
     def _cli(ctx, lshort, llong, threshold, truncate, clip_method):
         ctx.obj["component"]._cli_run(

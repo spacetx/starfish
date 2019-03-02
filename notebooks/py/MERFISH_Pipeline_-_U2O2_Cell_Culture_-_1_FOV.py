@@ -95,7 +95,8 @@ high_passed = ghp.run(primary_image, verbose=True, in_place=False)
 # EPY: END markdown
 
 # EPY: START code
-dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2, clip_method=2)
+from starfish.types import Clip
+dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2, clip_method=Clip.SCALE_BY_CHUNK)
 deconvolved = dpsf.run(high_passed, verbose=True, in_place=False)
 # EPY: END code
 

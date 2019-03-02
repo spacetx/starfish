@@ -1,17 +1,21 @@
 from copy import deepcopy
+from typing import Union
 
 import numpy as np
 import xarray as xr
 
 from starfish.imagestack.imagestack import ImageStack
+from starfish.types import Clip
 from starfish.util import click
+from starfish.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
-from .util import preserve_float_range
 
 
 class ElementWiseMultiply(FilterAlgorithmBase):
 
-    def __init__(self, mult_array: xr.core.dataarray.DataArray) -> None:
+    def __init__(
+        self, mult_array: xr.core.dataarray.DataArray, clip_method: Union[str, Clip]=Clip.CLIP
+    ) -> None:
         """Perform elementwise multiplication on the image tensor. This is useful for
         performing operations such as image normalization or field flatness correction
 
@@ -19,9 +23,17 @@ class ElementWiseMultiply(FilterAlgorithmBase):
         ----------
         mult_mat : xr.DataArray
             the image is element-wise multiplied with this array
-
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over the entire ImageStack
         """
         self.mult_array = mult_array
+        if clip_method == Clip.SCALE_BY_CHUNK:
+            raise ValueError("`scale_by_chunk` is not a valid clip_method for ElementWiseMultiply")
+        self.clip_method = clip_method
 
     _DEFAULT_TESTING_PARAMETERS = {
         "mult_array": xr.DataArray(
@@ -64,12 +76,18 @@ class ElementWiseMultiply(FilterAlgorithmBase):
 
         # stack._data contains the xarray
         stack._data *= mult_array_aligned
-        stack._data = preserve_float_range(stack._data)
+        if self.clip_method == Clip.CLIP:
+            stack._data = preserve_float_range(stack._data, rescale=False)
+        else:
+            stack._data = preserve_float_range(stack._data, rescale=True)
         return stack
 
     @staticmethod
     @click.command("ElementWiseMultiply")
     @click.option(
         "--mult-array", required=True, type=np.ndarray, help="matrix to multiply with the image")
-    def _cli(ctx, mult_array):
-        ctx.obj["component"]._cli_run(ctx, ElementWiseMultiply(mult_array))
+    @click.option(
+        "--clip-method", default=Clip.CLIP, type=Clip,
+        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image'")
+    def _cli(ctx, mult_array, clip_method):
+        ctx.obj["component"]._cli_run(ctx, ElementWiseMultiply(mult_array), clip_method)

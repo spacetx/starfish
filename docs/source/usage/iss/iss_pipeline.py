@@ -9,12 +9,12 @@ test = os.getenv("TESTING") is not None
 
 
 def iss_pipeline(fov, codebook):
-    primary_image = fov[starfish.FieldOfView.PRIMARY_IMAGES]
+    primary_image = fov.get_image(starfish.FieldOfView.PRIMARY_IMAGES)
 
     # register the raw images
     registration = Registration.FourierShiftRegistration(
         upsampling=1000,
-        reference_stack=fov['dots']
+        reference_stack=fov.get_image('dots')
     )
     registered = registration.run(primary_image, in_place=False)
 
@@ -32,7 +32,7 @@ def iss_pipeline(fov, codebook):
         measurement_type='mean',
     )
 
-    mp = fov['dots'].max_proj(Axes.ROUND, Axes.ZPLANE)
+    mp = fov.get_image('dots').max_proj(Axes.ROUND, Axes.ZPLANE)
     mp_numpy = mp._squeezed_numpy(Axes.ROUND, Axes.ZPLANE)
     intensities = p.run(filtered, blobs_image=mp_numpy)
 
@@ -45,7 +45,7 @@ def iss_pipeline(fov, codebook):
         input_threshold=.22,
         min_distance=57,
     )
-    label_image = seg.run(primary_image, fov['nuclei'])
+    label_image = seg.run(primary_image, fov.get_image('dots'))
 
     # assign spots to cells
     ta = TargetAssignment.Label()

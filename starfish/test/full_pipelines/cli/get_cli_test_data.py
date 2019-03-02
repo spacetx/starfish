@@ -18,15 +18,14 @@ if __name__ == "__main__":
 
     # save image stacks locally
     exp = Experiment.from_json(posixpath.join(args.experiment_url, "experiment.json"))
-
     for fov in exp.fovs():
         fov_dir = pathlib.Path(args.output_dir, fov.name)
         fov_dir.mkdir()
-        fov[FieldOfView.PRIMARY_IMAGES].export(str(fov_dir / args.primary_name))
+        fov.get_image(FieldOfView.PRIMARY_IMAGES).export(str(fov_dir / args.primary_name))
         for image_type in fov.image_types:
             if image_type == FieldOfView.PRIMARY_IMAGES:
                 continue
-            fov[image_type].export(str(fov_dir / f"{image_type}.json"))
+            fov.get_image(image_type).export(str(fov_dir / f"{image_type}.json"))
 
     # get codebook from url and save locally to tmp dir
     codebook = requests.get(posixpath.join(args.experiment_url, "codebook.json"))

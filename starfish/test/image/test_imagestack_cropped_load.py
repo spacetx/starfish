@@ -11,7 +11,10 @@ from slicedimage import ImageFormat
 from starfish.experiment.builder import build_image, FetchedTile, tile_fetcher_factory
 from starfish.imagestack.imagestack import ImageStack
 from starfish.imagestack.parser.crop import CropParameters
-from starfish.imagestack.physical_coordinate_calculator import recalculate_physical_coordinate_range
+from starfish.imagestack.physical_coordinate_calculator import (
+    get_physical_coordinates_of_z_plane,
+    recalculate_physical_coordinate_range
+)
 from starfish.types import Axes, Coordinates, Number
 from .imagestack_test_utils import verify_physical_coordinates, verify_stack_data
 
@@ -25,6 +28,10 @@ Z_LABELS = list(range(NUM_Z))
 HEIGHT = 40
 WIDTH = 60
 
+X_COORDS = 0.01, 0.1
+Y_COORDS = 0.001, 0.01
+Z_COORDS = 0.0001, 0.001
+
 
 def data(round_: int, ch: int, z: int) -> np.ndarray:
     """Return the data for a given tile."""
@@ -34,25 +41,6 @@ def data(round_: int, ch: int, z: int) -> np.ndarray:
 
         result[row:] = np.linspace(base_val, base_val + WIDTH, WIDTH, False)
     return img_as_float32(result)
-
-
-def x_coordinates(round_: int, ch: int) -> Tuple[float, float]:
-    """Return the expected physical x coordinate value for a given round/ch tuple.  Note that in
-    real life, physical coordinates are not expected to vary for different ch values.  However, for
-    completeness of the tests, we are pretending they will."""
-    return min(round_, ch) * 0.01, max(round_, ch) * 0.01
-
-
-def y_coordinates(round_: int, ch: int) -> Tuple[float, float]:
-    """Return the expected physical y coordinate value for a given round/ch tuple.  Note that in
-    real life, physical coordinates are not expected to vary for different ch values.  However, for
-    completeness of the tests, we are pretending they will."""
-    return min(round_, ch) * 0.001, max(round_, ch) * 0.001
-
-
-def z_coordinates(z: int) -> Tuple[float, float]:
-    """Return the expected physical z coordinate value for a given zplane index."""
-    return z * 0.0001, (z + 1) * 0.0001
 
 
 class UniqueTiles(FetchedTile):
@@ -70,9 +58,9 @@ class UniqueTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return {
-            Coordinates.X: x_coordinates(self._round, self._ch),
-            Coordinates.Y: y_coordinates(self._round, self._ch),
-            Coordinates.Z: z_coordinates(self._zplane),
+            Coordinates.X: X_COORDS,
+            Coordinates.Y: Y_COORDS,
+            Coordinates.Z: Z_COORDS,
         }
 
     @property
@@ -126,14 +114,13 @@ def test_crop_rcz():
                     {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
                     expected_data,
                 )
-
-                verify_physical_coordinates(
-                    stack,
-                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
-                    x_coordinates(round_, ch),
-                    y_coordinates(round_, ch),
-                    z_coordinates(zplane),
-                )
+    expected_z_coordinates = get_physical_coordinates_of_z_plane(Z_COORDS)
+    verify_physical_coordinates(
+        stack,
+        X_COORDS,
+        Y_COORDS,
+        expected_z_coordinates,
+    )
 
 
 def test_crop_xy():
@@ -166,26 +153,27 @@ def test_crop_xy():
                     expected_data,
                 )
 
-                # the coordinates should be rescaled.  verify that the coordinates on the ImageStack
-                # are also rescaled.
-                original_x_coordinates = x_coordinates(round_, ch)
-                expected_x_coordinates = recalculate_physical_coordinate_range(
-                    original_x_coordinates[0], original_x_coordinates[1],
-                    WIDTH,
-                    slice(*X_SLICE),
-                )
+    # the coordinates should be rescaled.  verify that the coordinates on the ImageStack
+    # are also rescaled.
+    original_x_coordinates = X_COORDS
+    expected_x_coordinates = recalculate_physical_coordinate_range(
+        original_x_coordinates[0], original_x_coordinates[1],
+        WIDTH,
+        slice(*X_SLICE),
+    )
 
-                original_y_coordinates = y_coordinates(round_, ch)
-                expected_y_coordinates = recalculate_physical_coordinate_range(
-                    original_y_coordinates[0], original_y_coordinates[1],
-                    HEIGHT,
-                    slice(*Y_SLICE),
-                )
+    original_y_coordinates = Y_COORDS
+    expected_y_coordinates = recalculate_physical_coordinate_range(
+        original_y_coordinates[0], original_y_coordinates[1],
+        HEIGHT,
+        slice(*Y_SLICE),
+    )
 
-                verify_physical_coordinates(
-                    stack,
-                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
-                    expected_x_coordinates,
-                    expected_y_coordinates,
-                    z_coordinates(zplane),
-                )
+    expected_z_coordinates = get_physical_coordinates_of_z_plane(Z_COORDS)
+
+    verify_physical_coordinates(
+        stack,
+        expected_x_coordinates,
+        expected_y_coordinates,
+        expected_z_coordinates,
+    )

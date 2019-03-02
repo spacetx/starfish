@@ -77,7 +77,7 @@ datasets = [iss_intensity_table, merfish_intensity_table, dartfish_intensity_tab
 import starfish.data
 experiment = starfish.data.DARTFISH()
 
-dartfish_nuclei_mp = experiment.fov()['nuclei'].max_proj(Axes.CH, Axes.ROUND, Axes.ZPLANE)
+dartfish_nuclei_mp = experiment.fov().get_image('nuclei').max_proj(Axes.CH, Axes.ROUND, Axes.ZPLANE)
 dartfish_nuclei_mp_numpy = dartfish_nuclei_mp._squeezed_numpy(Axes.CH, Axes.ROUND, Axes.ZPLANE)
 dartfish_link = os.path.join(data_root, "dartfish_dots_image.npy")
 dartfish_npy = os.path.join(tmp, "dartfish.npy")
@@ -88,19 +88,19 @@ dartfish_dots = np.load(dartfish_npy)
 # EPY: START code
 experiment = starfish.data.ISS()
 
-iss_nuclei_mp = experiment.fov()['nuclei'].max_proj(Axes.CH, Axes.ROUND, Axes.ZPLANE)
+iss_nuclei_mp = experiment.fov().get_image('nuclei').max_proj(Axes.CH, Axes.ROUND, Axes.ZPLANE)
 iss_nuclei_mp_numpy = iss_nuclei_mp._squeezed_numpy(Axes.CH, Axes.ROUND, Axes.ZPLANE)
-iss_dots_mp = experiment.fov()['dots'].max_proj(Axes.CH, Axes.ROUND, Axes.ZPLANE)
+iss_dots_mp = experiment.fov().get_image('dots').max_proj(Axes.CH, Axes.ROUND, Axes.ZPLANE)
 iss_dots_mp_numpy = iss_dots_mp._squeezed_numpy(Axes.CH, Axes.ROUND, Axes.ZPLANE)
 # EPY: END code
 
 # EPY: START code
 experiment = starfish.data.MERFISH()
-merfish_nuclei_mp = experiment.fov()['nuclei'].max_proj(Axes.CH, Axes.ROUND, Axes.ZPLANE)
+merfish_nuclei_mp = experiment.fov().get_image('nuclei').max_proj(Axes.CH, Axes.ROUND, Axes.ZPLANE)
 merfish_nuclei__mp_numpy = merfish_nuclei_mp._squeezed_numpy(Axes.CH, Axes.ROUND, Axes.ZPLANE)
 # merfish doesn't have a dots image, and some of the channels are stronger than others.
 # We can use the scale factors to get the right levels
-merfish_background = experiment.fov()[FieldOfView.PRIMARY_IMAGES].max_proj(Axes.CH, Axes.ROUND)
+merfish_background = experiment.fov().get_image(FieldOfView.PRIMARY_IMAGES).max_proj(Axes.CH, Axes.ROUND)
 
 
 from starfish.image import Filter

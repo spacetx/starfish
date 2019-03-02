@@ -142,11 +142,11 @@ def test_cache_merfish(tmpdir, name, expected, config, monkeypatch):
     setup_config(config, tmpdir, monkeypatch)
 
     # Run 1
-    data.MERFISH(use_test_data=True).fov()["primary"]
+    data.MERFISH(use_test_data=True).fov().get_image("primary")
 
     # Run 2
     if cache_enabled:
-        data.MERFISH(use_test_data=True).fov()["primary"]
+        data.MERFISH(use_test_data=True).fov().get_image("primary")
 
     # Check constraints
     if cache_enabled:

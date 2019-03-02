@@ -56,8 +56,6 @@ from starfish.types import (
     Coordinates,
     LOG,
     Number,
-    PHYSICAL_COORDINATE_DIMENSION,
-    PhysicalCoordinateTypes,
     STARFISH_EXTRAS_KEY
 )
 from starfish.util import logging
@@ -114,12 +112,12 @@ class ImageStack:
             tile_shape: Tuple[int, int],
             tile_data: TileCollectionData,
     ) -> None:
-        self._axes_sizes = {
+        axes_sizes = {
             Axes.ROUND: len(set(tilekey.round for tilekey in tile_data.keys())),
             Axes.CH: len(set(tilekey.ch for tilekey in tile_data.keys())),
             Axes.ZPLANE: len(set(tilekey.z for tilekey in tile_data.keys())),
         }
-        self._tile_shape = tile_shape
+
         self._tile_data = tile_data
 
         # check for existing log info
@@ -131,16 +129,13 @@ class ImageStack:
         data_shape: MutableSequence[int] = []
         data_dimensions: MutableSequence[str] = []
         data_tick_marks: MutableMapping[str, Sequence[int]] = dict()
-        coordinates_shape: MutableSequence[int] = []
-        coordinates_dimensions: MutableSequence[str] = []
-        coordinates_tick_marks: MutableMapping[str, Sequence[Union[int, str]]] = dict()
         for ix in range(N_AXES):
             size_for_axis: Optional[int] = None
             dim_for_axis: Optional[Axes] = None
 
             for axis_name, axis_data in AXES_DATA.items():
                 if ix == axis_data.order:
-                    size_for_axis = self._axes_sizes[axis_name]
+                    size_for_axis = axes_sizes[axis_name]
                     dim_for_axis = axis_name
                     break
 
@@ -150,23 +145,12 @@ class ImageStack:
 
             data_shape.append(size_for_axis)
             data_dimensions.append(dim_for_axis.value)
-            data_tick_marks[dim_for_axis.value] = list(self.axis_labels(dim_for_axis))
-            coordinates_shape.append(size_for_axis)
-            coordinates_dimensions.append(dim_for_axis.value)
-            coordinates_tick_marks[dim_for_axis.value] = list(self.axis_labels(dim_for_axis))
+            data_tick_marks[dim_for_axis.value] = list(
+                sorted(set(tilekey[dim_for_axis] for tilekey in self._tile_data.keys())))
 
-        data_shape.extend(self._tile_shape)
+        data_shape.extend(tile_shape)
         data_dimensions.extend([Axes.Y.value, Axes.X.value])
-        coordinates_shape.append(6)
-        coordinates_dimensions.append(PHYSICAL_COORDINATE_DIMENSION)
-        coordinates_tick_marks[PHYSICAL_COORDINATE_DIMENSION] = [
-            PhysicalCoordinateTypes.X_MIN.value,
-            PhysicalCoordinateTypes.X_MAX.value,
-            PhysicalCoordinateTypes.Y_MIN.value,
-            PhysicalCoordinateTypes.Y_MAX.value,
-            PhysicalCoordinateTypes.Z_MIN.value,
-            PhysicalCoordinateTypes.Z_MAX.value,
-        ]
+
         # now that we know the tile data type (kind and size), we can allocate the data array.
         self._data = MPDataArray.from_shape_and_dtype(
             shape=data_shape,
@@ -175,50 +159,51 @@ class ImageStack:
             dims=data_dimensions,
             coords=data_tick_marks,
         )
-        self._coordinates = xr.DataArray(
-            np.empty(
-                shape=coordinates_shape,
-                dtype=np.float32,
-            ),
-            dims=coordinates_dimensions,
-            coords=coordinates_tick_marks,
-        )
 
-        self._tiles_aligned = True
         all_selectors = list(self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}))
         first_selector = all_selectors[0]
         tile = tile_data.get_tile(r=first_selector[Axes.ROUND],
                                   ch=first_selector[Axes.CH],
                                   z=first_selector[Axes.ZPLANE])
-        # only compare X,Y coords
+
+        # Set up coordinates
+        self._data[Coordinates.X.value] = xr.DataArray(
+            np.linspace(tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
+                        self.xarray.sizes[Axes.X.value]), dims=Axes.X.value)
+        self._data[Coordinates.Y.value] = xr.DataArray(
+            np.linspace(tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
+                        self.xarray.sizes[Axes.Y.value]), dims=Axes.Y.value)
+        if Coordinates.Z in tile.coordinates:
+            # Fill with zeros for now, then replace with calculated midpoints
+            self._data[Coordinates.Z.value] = xr.DataArray(np.zeros(
+                self.xarray.sizes[Axes.ZPLANE.value]),
+                dims=Axes.ZPLANE.value)
+
+        # Get coords on first tile, then verify all subsequent tiles are aligned
         starting_coords = [
             tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
             tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
         ]
+
         for selector in tqdm(all_selectors):
             tile = tile_data.get_tile(
                 r=selector[Axes.ROUND], ch=selector[Axes.CH], z=selector[Axes.ZPLANE])
 
             data = img_as_float32(tile.numpy_array)
             self.set_slice(selector=selector, data=data)
-            coordinate_selector = {
-                index.value: index_value
-                for index, index_value in selector.items()
-            }
+
             coordinates_values = [
                 tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
                 tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
             ]
             if starting_coords != coordinates_values:
-                self._tiles_aligned = False
+                raise ValueError(
+                    f"Tiles must be aligned")
             if Coordinates.Z in tile.coordinates:
-                coordinates_values.extend([
-                    tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1],
-                ])
-            else:
-                coordinates_values.extend([np.nan, np.nan])
-
-            self._coordinates.loc[coordinate_selector] = np.array(coordinates_values)
+                z_range = (tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1])
+                # Use mid-point of the z range for a tile for the z-coordinate
+                self._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = \
+                    physical_coordinate_calculator.get_physical_coordinates_of_z_plane(z_range)
 
     @staticmethod
     def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
@@ -399,19 +384,10 @@ class ImageStack:
         """
 
         # convert indexers to Dict[str, (int/slice)] format
+        # TODO shanaxel42 check if this can be changed to xarray.copy(deep=false)
+        stack = deepcopy(self)
         selector = indexing_utils.convert_to_selector(indexers)
-        indexed_data = indexing_utils.index_keep_dimensions(self.xarray, selector)
-        new_coordinates = physical_coordinate_calculator.calc_new_physical_coords_array(
-            self._coordinates, self.shape, selector)
-        stack = self.from_numpy_array(
-            indexed_data.data,
-            {
-                Axes.ROUND: indexed_data[Axes.ROUND.value].values.tolist(),
-                Axes.CH: indexed_data[Axes.CH.value].values.tolist(),
-                Axes.ZPLANE: indexed_data[Axes.ZPLANE.value].values.tolist(),
-            },
-            new_coordinates,
-        )
+        stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector)
         return stack
 
     def get_slice(
@@ -930,14 +906,6 @@ class ImageStack:
         return pd.DataFrame(data)
 
     @property
-    def tiles_aligned(self) -> bool:
-        """
-        Returns True if all the tiles in this ImageStack have the same physical coordinates
-        and False if not.
-        """
-        return self._tiles_aligned
-
-    @property
     def log(self) -> List[dict]:
         """
         Returns a list of pipeline components that have been applied to this imagestack
@@ -1009,42 +977,16 @@ class ImageStack:
         return result
 
     @property
-    def coordinates(self):
-        """
-        Returns an xarray where the row labels are the axes (R, C, Z) and the column labels are the
-        min and max for each type of coordinate (X, Y, Z).
-        """
-        return self._coordinates
-
-    def tile_coordinates(
-            self,
-            selector: Mapping[Axes, int],
-            physical_axis: Coordinates) -> Tuple[float, float]:
-        """Given a set of selector that uniquely identify a tile and a physical axis, return the min
-        and the max coordinates for that tile along that axis.
-
-        Examples
-        --------
-        stack.coordinates({Axes.ROUND: 4, Axes.CH: 3, Axes.ZPLANE: 2}, Coordinates.X)
-            Retrieves the xmin, xmax for the tile identified by round=4, ch=3, z=2
-        """
-
-        return physical_coordinate_calculator.get_coordinates(
-            coords_array=self._coordinates,
-            selector=selector,
-            physical_axis=physical_axis)
-
-    @property
     def num_rounds(self):
-        return self._axes_sizes[Axes.ROUND]
+        return self.xarray.sizes[Axes.ROUND]
 
     @property
     def num_chs(self):
-        return self._axes_sizes[Axes.CH]
+        return self.xarray.sizes[Axes.CH]
 
     @property
     def num_zplanes(self):
-        return self._axes_sizes[Axes.ZPLANE]
+        return self.xarray.sizes[Axes.ZPLANE]
 
     AXES_TO_PROPERTY_MAP = {
         Axes.ROUND: num_rounds,
@@ -1056,11 +998,12 @@ class ImageStack:
         """Given a axis, return the sorted unique values for that axis in this ImageStack.  For
         instance, imagestack.unique_index_values(Axes.ROUND) returns all the round ids in this
         imagestack."""
-        return sorted(set(tilekey[axis] for tilekey in self._tile_data.keys()))
+
+        return [val for val in self.xarray.coords[axis.value].values]
 
     @property
     def tile_shape(self):
-        return self._tile_shape
+        return self.xarray.sizes[Axes.Y], self.xarray.sizes[Axes.X]
 
     def to_multipage_tiff(self, filepath: str) -> None:
         """save the ImageStack as a FIJI-compatible multi-page TIFF file
@@ -1119,7 +1062,7 @@ class ImageStack:
                 Axes.CH: self.num_chs,
                 Axes.ZPLANE: self.num_zplanes,
             },
-            default_tile_shape=self._tile_shape,
+            default_tile_shape=self.tile_shape,
             extras=self._tile_data.extras,
         )
         for tilekey in self._tile_data.keys():
@@ -1132,14 +1075,16 @@ class ImageStack:
                 Axes.ZPLANE: zplane,
             }
 
-            coordinates: MutableMapping[Coordinates, Tuple[Number, Number]] = dict()
-            x_coordinates = self.tile_coordinates(selector, Coordinates.X)
-            y_coordinates = self.tile_coordinates(selector, Coordinates.Y)
-            z_coordinates = self.tile_coordinates(selector, Coordinates.Z)
-
+            coordinates: MutableMapping[Coordinates, Union[Tuple[Number, Number], Number]] = dict()
+            x_coordinates = (float(self.xarray[Coordinates.X.value][0]),
+                             float(self.xarray[Coordinates.X.value][-1]))
+            y_coordinates = (float(self.xarray[Coordinates.Y.value][0]),
+                             float(self.xarray[Coordinates.Y.value][-1]))
             coordinates[Coordinates.X] = x_coordinates
             coordinates[Coordinates.Y] = y_coordinates
-            if z_coordinates[0] != np.nan and z_coordinates[1] != np.nan:
+            if Coordinates.Z in self.xarray.coords:
+                # set the z coord to the calculated value from the associated z plane
+                z_coordinates = float(self.xarray[Coordinates.Z.value][zplane])
                 coordinates[Coordinates.Z] = z_coordinates
 
             tile = Tile(

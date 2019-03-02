@@ -41,7 +41,7 @@ experiment = data.MERFISH(use_test_data=use_test_data)
 # EPY: END markdown
 
 # EPY: START code
-primary_image = experiment.fov()[FieldOfView.PRIMARY_IMAGES]
+primary_image = experiment.fov().get_image(FieldOfView.PRIMARY_IMAGES)
 # EPY: END code
 
 # EPY: START code

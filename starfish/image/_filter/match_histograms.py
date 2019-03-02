@@ -88,7 +88,7 @@ class MatchHistograms(FilterAlgorithmBase):
     @staticmethod
     @click.command("MatchHistograms")
     @click.option(
-        "--reference-selector", type=dict,
+        "--reference-selector", type=dict, required=True,
         help=("dict that specifies the round and channel to match the intensity of each"
               "subsequent image to, e.g. {Axes.CH: 0, Axes.ROUND: 0}")
     )

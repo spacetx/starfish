@@ -4,7 +4,6 @@ from typing import Union
 import numpy as np
 
 from starfish import IntensityTable
-from starfish.imagestack import physical_coordinate_calculator
 from starfish.intensity_table import intensity_table_coordinates
 from starfish.test import test_utils
 from starfish.types import Axes, Coordinates, PhysicalCoordinateTypes
@@ -53,39 +52,19 @@ def test_tranfering_physical_coords_to_intensity_table():
     assert yc.size == NUMBER_SPOTS
     assert zc.size == NUMBER_SPOTS
 
-    physical_pixel_size_x = physical_coordinate_calculator._calculate_physical_pixel_size(
-        coord_min=physical_coords[PhysicalCoordinateTypes.X_MIN],
-        coord_max=physical_coords[PhysicalCoordinateTypes.X_MAX],
-        num_pixels=stack_shape[Axes.X])
-
-    physical_pixel_size_y = physical_coordinate_calculator._calculate_physical_pixel_size(
-        coord_min=physical_coords[PhysicalCoordinateTypes.Y_MIN],
-        coord_max=physical_coords[PhysicalCoordinateTypes.Y_MAX],
-        num_pixels=stack_shape[Axes.Y])
-
     # Assert that the physical coords align with their corresponding pixel coords
     for spot in xc.features:
         pixel_x = spot[Axes.X.value].data
-        physical_x = spot[Coordinates.X.value].data
-        calculated_pixel = physical_cord_to_pixel_value(physical_x,
-                                                        physical_pixel_size_x,
-                                                        physical_coords[
-                                                            PhysicalCoordinateTypes.X_MIN
-                                                        ])
-        assert np.isclose(pixel_x, calculated_pixel)
+        physical_x = stack.xarray[Coordinates.X.value][pixel_x]
+        assert np.isclose(spot[Coordinates.X.value], physical_x)
 
     for spot in yc.features:
         pixel_y = spot[Axes.Y.value].data
-        physical_y = spot[Coordinates.Y.value].data
-        calculated_pixel = physical_cord_to_pixel_value(physical_y,
-                                                        physical_pixel_size_y,
-                                                        physical_coords[
-                                                            PhysicalCoordinateTypes.Y_MIN
-                                                        ])
-        assert np.isclose(pixel_y, calculated_pixel)
+        physical_y = stack.xarray[Coordinates.Y.value][pixel_y]
+        assert np.isclose(spot[Coordinates.Y.value], physical_y)
 
     # Assert that zc value is middle of z range
     for spot in zc.features:
-        physical_z = spot[Coordinates.Z.value].data
-        assert np.isclose(physical_coords[PhysicalCoordinateTypes.Z_MAX],
-                          (physical_z * 2) - physical_coords[PhysicalCoordinateTypes.Z_MIN])
+        z_plane = spot[Axes.ZPLANE.value].data
+        physical_z = stack.xarray[Coordinates.Z.value][z_plane]
+        assert np.isclose(spot[Coordinates.Z.value], physical_z)

@@ -130,7 +130,7 @@ class Laplace(FilterAlgorithmBase):
         "--is-volume", is_flag=True,
         help="indicates that the image stack should be filtered in 3d")
     @click.option(
-        "--clip-method", default=0, type=int,
+        "--clip-method", default=Clip.CLIP, type=Clip,
         help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
              "'scale_by_chunk'")
     @click.pass_context

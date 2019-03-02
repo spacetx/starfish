@@ -140,7 +140,7 @@ class Bandpass(FilterAlgorithmBase):
         "--truncate", default=4, type=float,
         help="truncate the filter at this many standard deviations")
     @click.option(
-        "--clip-method", default=0, type=int,
+        "--clip-method", default=Clip.CLIP, type=Clip,
         help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
              "'scale_by_chunk'")
     @click.pass_context

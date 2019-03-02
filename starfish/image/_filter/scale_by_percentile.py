@@ -109,7 +109,7 @@ class ScaleByPercentile(FilterAlgorithmBase):
     @click.option(  # FIXME: was this intentionally missed?
         "--is-volume", is_flag=True, help="filter 3D volumes")
     @click.option(
-        "--clip-method", default=0, type=int,
+        "--clip-method", default=Clip.CLIP, type=Clip,
         help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
              "'scale_by_chunk'")
     @click.pass_context

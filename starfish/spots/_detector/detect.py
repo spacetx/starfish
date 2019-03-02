@@ -227,7 +227,6 @@ def detect_spots(data_stack: ImageStack,
 
     if reference_image_from_max_projection:
         reference_image = data_stack.max_proj(Axes.CH, Axes.ROUND).xarray.squeeze()
-        # reference_image = reference_image._squeezed_numpy(Axes.CH, Axes.ROUND)
 
     group_by = {Axes.ROUND, Axes.CH}
 

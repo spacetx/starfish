@@ -53,12 +53,14 @@ from starfish.multiprocessing.pool import Pool
 from starfish.multiprocessing.shmem import SharedMemory
 from starfish.types import (
     Axes,
+    Clip,
     Coordinates,
     LOG,
     Number,
     STARFISH_EXTRAS_KEY
 )
 from starfish.util import logging
+from starfish.util.dtype import preserve_float_range
 from ._mp_dataarray import MPDataArray
 from .dataorder import AXES_DATA, N_AXES
 
@@ -715,6 +717,7 @@ class ImageStack:
             in_place=False,
             verbose: bool=False,
             n_processes: Optional[int]=None,
+            clip_method: Union[str, Clip]=Clip.CLIP,
             **kwargs
     ) -> "ImageStack":
         """Split the image along a set of axes and apply a function across all the components.  This
@@ -724,14 +727,14 @@ class ImageStack:
         Parameters
         ----------
         func : Callable
-            Function to apply. must expect a first argument which is a numpy array (see group_by)
-            but may return any object type.
+            Function to apply. must expect a first argument which is a 2d or 3d numpy array and
+            return an array of the same shape.
         group_by : Set[Axes]
             Axes to split the data along.  For instance, splitting a 2D array (axes: X, Y; size:
             3, 4) by X results in 3 arrays of size 4.  (default {Axes.ROUND, Axes.CH,
             Axes.ZPLANE})
         in_place : bool
-            (default True) If True, function is executed in place. If n_proc is not 1, the tile or
+            (Default False) If True, function is executed in place. If n_proc is not 1, the tile or
             volume will be copied once during execution. If false, a new ImageStack object will be
             produced.
         verbose : bool
@@ -741,6 +744,15 @@ class ImageStack:
             (default = None).
         kwargs : dict
             Additional arguments to pass to func
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+            value calculated over the entire ImageStack
+            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+            value calculated over each slice, where slice shapes are determined by the group_by
+            parameters
 
         Returns
         -------
@@ -748,30 +760,53 @@ class ImageStack:
             If inplace is False, return a new ImageStack, otherwise return a reference to the
             original stack with data modified by application of func
         """
+        # default grouping is by (x, y) tile
         if group_by is None:
             group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
 
+        if not isinstance(clip_method, (str, Clip)):
+            raise TypeError("must pass a Clip method. See Starfish.types.Clip for valid options")
+
         if not in_place:
+            # create a copy of the ImageStack, call apply on that stack with in_place=True
             image_stack = deepcopy(self)
             return image_stack.apply(
-                func,
-                group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
+                func=func,
+                group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes,
+                clip_method=clip_method,
+                **kwargs
             )
-        bound_func = partial(ImageStack._in_place_apply, func)
 
+        # wrapper adds a target `data` parameter where the results from func will be stored
+        # data are clipped or scaled by chunk using preserve_float_range if clip_method != 2
+        bound_func = partial(ImageStack._in_place_apply, func, clip_method=clip_method)
+
+        # execute the processing workflow
         self.transform(
-            bound_func,
+            func=bound_func,
             group_by=group_by,
             verbose=verbose,
             n_processes=n_processes,
             **kwargs)
 
+        # scale based on values of whole image
+        if clip_method == Clip.SCALE_BY_IMAGE:
+            self._data = preserve_float_range(self._data, rescale=True)
+
         return self
 
     @staticmethod
-    def _in_place_apply(apply_func: Callable[..., np.ndarray], data: np.ndarray, **kwargs) -> None:
+    def _in_place_apply(
+        apply_func: Callable[..., Union[xr.DataArray, np.ndarray]], data: np.ndarray,
+        clip_method: Union[str, Clip], **kwargs
+    ) -> None:
         result = apply_func(data, **kwargs)
-        data[:] = result
+        if clip_method == Clip.CLIP:
+            data[:] = preserve_float_range(result, rescale=False)
+        elif clip_method == Clip.SCALE_BY_CHUNK:
+            data[:] = preserve_float_range(result, rescale=True)
+        else:
+            data[:] = result
 
     def transform(
             self,
@@ -805,8 +840,9 @@ class ImageStack:
         List[Any] :
             The results of applying func to stored image data
         """
+        # default grouping is by (x, y) tile
         if group_by is None:
-            group_by = {Axes.X, Axes.Y}
+            group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
 
         selectors = list(self._iter_axes(group_by))
         slice_lists = [self._build_slice_list(index)[0]
@@ -816,15 +852,19 @@ class ImageStack:
         if verbose and StarfishConfig().verbose:
             selectors_and_slice_lists = tqdm(selectors_and_slice_lists)
 
+        mp_applyfunc: Callable = partial(
+            self._processing_workflow, partial(func, **kwargs))
+
         with Pool(
                 processes=n_processes,
                 initializer=SharedMemory.initializer,
                 initargs=((self._data._backing_mp_array,
                            self._data._data.shape,
                            self._data._data.dtype),)) as pool:
-            mp_applyfunc: Callable = partial(
-                self._processing_workflow, partial(func, **kwargs))
             results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
+
+            # Note: results is [None, ...] if executing an in-place workflow
+            # Note: this return must be inside the context manager or the Pool will deadlock
             return list(zip(results, selectors))
 
     @staticmethod
@@ -850,8 +890,8 @@ class ImageStack:
         )
         sliced = data_array.sel(selector_and_slice_list[0])
 
-        # return the result of the function called on the slice
-        return worker_callable(sliced)
+        # pass worker_callable a view into the backing array, which will be overwritten
+        return worker_callable(sliced)  # type: ignore
 
     @property
     def tile_metadata(self) -> pd.DataFrame:

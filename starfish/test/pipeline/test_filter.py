@@ -5,7 +5,7 @@ import pytest
 
 from starfish.image._filter import gaussian_high_pass, mean_high_pass
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Number
+from starfish.types import Clip, Number
 
 
 def random_data_image_stack_factory():
@@ -22,7 +22,9 @@ def test_gaussian_high_pass(sigma: Union[Number, Tuple[Number]], is_volume: bool
     """high pass is subtractive, sum of array should be less after running."""
     image_stack = random_data_image_stack_factory()
     sum_before = np.sum(image_stack.xarray)
-    ghp = gaussian_high_pass.GaussianHighPass(sigma=sigma, is_volume=is_volume)
+    ghp = gaussian_high_pass.GaussianHighPass(
+        sigma=sigma, is_volume=is_volume, clip_method=Clip.CLIP
+    )
     result = ghp.run(image_stack, n_processes=1)
     assert np.sum(result.xarray) < sum_before
 
@@ -35,6 +37,6 @@ def test_mean_high_pass(size: Union[Number, Tuple[Number]], is_volume: bool) -> 
     """high pass is subtractive, sum of array should be less after running."""
     image_stack = random_data_image_stack_factory()
     sum_before = np.sum(image_stack.xarray)
-    mhp = mean_high_pass.MeanHighPass(size=size, is_volume=is_volume)
+    mhp = mean_high_pass.MeanHighPass(size=size, is_volume=is_volume, clip_method=Clip.CLIP)
     result = mhp.run(image_stack)
     assert np.sum(result.xarray) < sum_before

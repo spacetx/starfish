@@ -76,3 +76,13 @@ class Features:
     CELL_ID = 'cell_id'
     SPOT_ID = 'spot_id'
     INTENSITY = 'intensity'
+
+
+class Clip(AugmentedEnum):
+    """
+    contains clipping options that determine how out-of-bounds values produced by filters are
+    treated to keep the image contained within [0, 1]
+    """
+    CLIP = 'clip'
+    SCALE_BY_IMAGE = 'scale_by_image'
+    SCALE_BY_CHUNK = 'scale_by_chunk'

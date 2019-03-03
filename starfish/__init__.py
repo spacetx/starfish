@@ -22,8 +22,9 @@ from .starfish import starfish
 
 # NOTE: if we move to python 3.7, we can produce this value at call time via __getattr__
 __version__ = get_versions()['version']
-__is_release_tag__ = ("+" not in str(__version__))
-print("FIXME", __version__, __is_release_tag__)
+__is_release_tag__ = None
+if "+" not in str(__version__):
+    __is_release_tag__ = f"Release: {__version__}"
 del get_versions
 
 if __name__ == "__main__":

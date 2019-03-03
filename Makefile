@@ -173,10 +173,10 @@ clean:
 	rm -rf .eggs
 
 help-deployment:
-	$(call print_help, release-prep, TODO)
-	$(call print_help, release-verify, TODO)
-	$(call print_help, release-upload, TODO)
-	$(call print_help, clean, TODO)
+	$(call print_help, release-prep, Builds and installs the current tagged version)
+	$(call print_help, release-verify, Runs tests on the tagged version)
+	$(call print_help, release-upload, Prints commands for uploading release artifacts)
+	$(call print_help, clean, Deletes build-related directories)
 
 .PHONY: clean release-prep release-verify release-upload
 #

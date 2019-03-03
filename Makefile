@@ -98,15 +98,15 @@ help-requirements:
 #
 include notebooks/subdir.mk
 
-slow: fast run_notebooks docker
+slow: fast run-notebooks docker
 
 docker:
 	docker build -t spacetx/starfish .
 	docker run -ti --rm spacetx/starfish build --fov-count 1 --primary-image-dimensions '{"z": 1}' /tmp/
 
 help-integration:
-	$(call print_help, slow, alias for 'fast run_notebooks docker')
-	$(call print_help, run_notebooks, run all files matching 'notebooks/py/*.py')
+	$(call print_help, slow, alias for 'fast run-notebooks docker')
+	$(call print_help, run-notebooks, run all files matching 'notebooks/py/*.py')
 	$(call print_help, docker, build docker and run a simple container)
 
 .PHONY: slow docker
@@ -171,6 +171,7 @@ clean:
 	rm -rf dist
 	rm -rf build
 	rm -rf .eggs
+	rm -f .cover*
 
 help-deployment:
 	$(call print_help, release-prep, Builds and installs the current tagged version)

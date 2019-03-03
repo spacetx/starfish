@@ -6,7 +6,7 @@ export MPLBACKEND
 MODULES=starfish data_formatting_examples sptx_format
 
 define print_help
-    @printf "    %-24s   $(2)\n" $(1)
+    @printf "    %-28s   $(2)\n" $(1)
 endef
 
 define create_venv
@@ -139,13 +139,55 @@ help-install:
 #
 ###############################################################
 
+### Deployment ###############################################
+#
+release-prep:
+	@VERSION=$(shell sh -c "git describe --exact") && \
+	 if test -z "$$VERSION"; then                     \
+		echo VERSION is not set.;                     \
+		echo Please create a git tag;                 \
+		exit 100;                                     \
+	else                                              \
+		echo "Releasing version: $$VERSION";          \
+	fi;                                               \
+	python setup.py clean;                            \
+	python setup.py sdist;                            \
+	pip install dist/starfish-$$VERSION.tar.gz
+
+release-verify: slow
+	@VERSION=$(shell sh -c "git describe --exact") && \
+	docker tag spacetx/starfish:latest spacetx/starfish:$$VERSION
+
+release-upload:
+	@VERSION=$(shell sh -c "git describe --exact") && \
+	printf '\n# Please execute the following steps\n';\
+	echo git push origin $$VERSION;                   \
+	echo docker push spacetx/starfish:latest;         \
+	echo docker push spacetx/starfish:$$VERSION;      \
+	echo twine upload dist/starfish-$$VERSION.tar.gz
+
+clean:
+	rm -rf starfish.egg-info
+	rm -rf dist
+	rm -rf build
+	rm -rf .eggs
+
+help-deployment:
+	$(call print_help, release-prep, TODO)
+	$(call print_help, release-verify, TODO)
+	$(call print_help, release-upload, TODO)
+	$(call print_help, clean, TODO)
+
+.PHONY: clean release-prep release-verify release-upload
+#
+###############################################################
 help: help-main help-parts
 help-main:
 	@echo Main starfish make targets:
 	@echo =======================================================================================
 	$(call print_help, help, print this text)
-help-parts: help-unit help-docs help-requirements help-integration help-install
+help-parts: help-unit help-docs help-requirements help-integration help-install help-deployment
 	@echo =======================================================================================
 	@echo Default: all
 
-.PHONY: help help-unit help-requirements help-integration help-install
+.PHONY: help help-unit help-requirements help-integration help-install help-release

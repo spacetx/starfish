@@ -20,10 +20,13 @@ from .starfish import starfish
 
 
 # NOTE: if we move to python 3.7, we can produce this value at call time via __getattr__
-__version__ = pkg_resources.require("starfish")[0].version
-
-# Variable to be set by release process
-__is_release_tag__ = None
+try:
+    __version__ = pkg_resources.require("starfish")[0].version
+    __is_release_tag__ = ("dev" not in str(__version__))
+    print("FIXME", __version__, __is_release_tag__)
+except pkg_resources.DistributionNotFound:
+    __version__ = "unknown"
+    __is_release_tag__ = False
 
 
 if __name__ == "__main__":

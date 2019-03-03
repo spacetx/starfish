@@ -2,6 +2,7 @@
 
 import os
 import setuptools
+import versioneer
 
 CLASSIFIERS = [
     "Development Status :: 2 - Pre-Alpha",
@@ -20,7 +21,6 @@ install_requires = [
 
 setuptools.setup(
     name="starfish",
-    version="0.0.33",
     description="Pipelines and pipeline components for the analysis of image-based transcriptomics data",
     author="Deep Ganguli",
     author_email="dganguli@chanzuckerberg.com",
@@ -37,4 +37,6 @@ setuptools.setup(
     },
     classifiers=CLASSIFIERS,
     include_package_data=True,
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
 )

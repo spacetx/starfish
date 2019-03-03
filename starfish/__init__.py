@@ -11,6 +11,7 @@ import pkg_resources
 from . import image
 # spot detection and manipulation
 from . import spots
+from ._version import get_versions
 # top-level objects
 from .codebook.codebook import Codebook
 from .experiment.experiment import Experiment, FieldOfView
@@ -20,14 +21,10 @@ from .starfish import starfish
 
 
 # NOTE: if we move to python 3.7, we can produce this value at call time via __getattr__
-try:
-    __version__ = pkg_resources.require("starfish")[0].version
-    __is_release_tag__ = ("dev" not in str(__version__))
-    print("FIXME", __version__, __is_release_tag__)
-except pkg_resources.DistributionNotFound:
-    __version__ = "unknown"
-    __is_release_tag__ = False
-
+__version__ = get_versions()['version']
+__is_release_tag__ = ("+" not in str(__version__))
+print("FIXME", __version__, __is_release_tag__)
+del get_versions
 
 if __name__ == "__main__":
     starfish()

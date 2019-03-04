@@ -41,7 +41,6 @@ sns.set_style('ticks')
 use_test_data = os.getenv("USE_TEST_DATA") is not None
 exp = data.DARTFISH(use_test_data=use_test_data)
 
-# EXAMPLE SIMPLE LOOPING OVER ALIGNED IMAGE GROUPS: for stack in exp.fov().iterate_image_type(FieldOfView.PRIMARY_IMAGES)
 stack = exp.fov().get_image(FieldOfView.PRIMARY_IMAGES)
 # EPY: END code
 

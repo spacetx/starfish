@@ -90,7 +90,7 @@ def test_from_code_array_expands_codebook_when_provided_n_codes_that_exceeds_arr
     larger than that, and the codebook should be expanded to those numbers as a result.
     """
     code_array: List = codebook_array_factory()
-    codebook: Codebook = Codebook.from_code_array(code_array, n_ch=10, n_round=4)
+    codebook: Codebook = Codebook.from_code_array(code_array, n_channel=10, n_round=4)
     assert codebook.sizes[Axes.CH] == 10
     assert codebook.sizes[Axes.ROUND] == 4
     assert codebook.sizes[Features.TARGET] == 2
@@ -105,18 +105,18 @@ def test_from_code_array_throws_exceptions_when_data_does_not_match_channel_or_r
 
     # should throw an exception, as 3 channels are present in the data
     with pytest.raises(ValueError):
-        Codebook.from_code_array(code_array, n_ch=2, n_round=4)
+        Codebook.from_code_array(code_array, n_channel=2, n_round=4)
 
     # should throw an exception, as 2 rounds are present in the data
     with pytest.raises(ValueError):
-        Codebook.from_code_array(code_array, n_ch=3, n_round=1)
+        Codebook.from_code_array(code_array, n_channel=3, n_round=1)
 
 
 def test_from_code_array_throws_exception_when_data_is_improperly_formatted():
     code_array: List = codebook_array_factory()
     code_array[0][Features.CODEWORD][0] = ('I should be a dict, oops!',)
     with pytest.raises(TypeError):
-        Codebook.from_code_array(code_array, n_ch=3, n_round=1)
+        Codebook.from_code_array(code_array, n_channel=3, n_round=1)
 
 
 # TODO codebook should throw an error when an empty array is passed
@@ -129,7 +129,7 @@ def test_from_code_array_throws_exception_when_data_is_improperly_formatted():
 def test_empty_codebook():
     code_array: List = codebook_array_factory()
     targets = [x[Features.TARGET] for x in code_array]
-    codebook = Codebook._empty_codebook(targets, n_ch=3, n_round=2)
+    codebook = Codebook._empty_codebook(targets, n_channel=3, n_round=2)
     assert_sizes(codebook, False)
 
 def test_create_codebook():
@@ -144,5 +144,5 @@ def test_create_codebook():
             r = int(bit[Axes.ROUND])
             data[i, ch, r] = int(bit[Features.CODE_VALUE])
 
-    codebook = Codebook._create_codebook(targets, n_ch=3, n_round=2, data=data)
+    codebook = Codebook._create_codebook(targets, n_channel=3, n_round=2, data=data)
     assert_sizes(codebook)

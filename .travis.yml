@@ -12,7 +12,7 @@ stages:
 jobs:
   include:
     - name: Syntax and Fast Tests
-      script: make install-dev fast
+      script: travis_wait make install-dev fast
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Slow Tests

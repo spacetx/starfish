@@ -25,7 +25,7 @@
 import os
 from typing import Optional, Tuple
 
-import napari_gui
+# import napari_gui
 import numpy as np
 
 import starfish
@@ -98,7 +98,7 @@ def processing_pipeline(
     """
 
     print("Loading images...")
-    primary_image = experiment[fov_name][FieldOfView.PRIMARY_IMAGES]
+    primary_image = experiment[fov_name].get_image(FieldOfView.PRIMARY_IMAGES)
     codebook = experiment.codebook
 
     print("Filtering images...")

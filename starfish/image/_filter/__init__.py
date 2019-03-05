@@ -34,6 +34,3 @@ class Filter(PipelineComponent):
             output=output,
             stack=ImageStack.from_path_or_url(input),
         )
-
-
-Filter._cli_register()

@@ -52,9 +52,9 @@ pp.pprint(experiment._src_doc)
 
 # EPY: START code
 fov = experiment.fov()
-primary_image = fov[FieldOfView.PRIMARY_IMAGES]
-dots = fov['dots']
-nuclei = fov['nuclei']
+primary_image = fov.get_image(FieldOfView.PRIMARY_IMAGES)
+dots = fov.get_image('dots')
+nuclei = fov.get_image('nuclei')
 images = [primary_image, nuclei, dots]
 # EPY: END code
 

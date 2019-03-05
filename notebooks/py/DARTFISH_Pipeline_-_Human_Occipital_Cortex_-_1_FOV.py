@@ -25,7 +25,7 @@ from starfish.types import Features, Axes
 from starfish import IntensityTable
 
 from starfish.image import Filter
-from starfish.spots import SpotFinder
+from starfish.spots import PixelSpotDecoder
 
 sns.set_context('talk')
 sns.set_style('ticks')
@@ -41,7 +41,7 @@ sns.set_style('ticks')
 use_test_data = os.getenv("USE_TEST_DATA") is not None
 exp = data.DARTFISH(use_test_data=use_test_data)
 
-stack = exp.fov()[FieldOfView.PRIMARY_IMAGES]
+stack = exp.fov().get_image(FieldOfView.PRIMARY_IMAGES)
 # EPY: END code
 
 # EPY: START code
@@ -118,7 +118,7 @@ area_threshold = (5, 30)
 # here, I set this to be a large number, so I can inspect the distribution of decoded distances below
 distance_threshold = 3
 
-psd = SpotFinder.PixelSpotDetector(
+psd = PixelSpotDecoder.PixelSpotDecoder(
     codebook=exp.codebook,
     metric='euclidean',
     distance_threshold=distance_threshold,
@@ -213,7 +213,7 @@ sns.despine(offset=2)
 # EPY: START code
 distance_threshold = min_dist
 
-psd = SpotFinder.PixelSpotDetector(
+psd = PixelSpotDecoder.PixelSpotDecoder(
     codebook=exp.codebook,
     metric='euclidean',
     distance_threshold=distance_threshold,

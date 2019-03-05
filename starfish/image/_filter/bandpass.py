@@ -1,21 +1,23 @@
 from functools import partial
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
+import xarray as xr
 from trackpy import bandpass
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Number
+from starfish.types import Clip, Number
 from starfish.util import click
 from ._base import FilterAlgorithmBase
-from .util import determine_axes_to_group_by, preserve_float_range
+from .util import determine_axes_to_group_by
 
 
 class Bandpass(FilterAlgorithmBase):
 
     def __init__(
-            self, lshort: Number, llong: int, threshold: Number=0, truncate: Number=4,
-            is_volume: bool=False) -> None:
+        self, lshort: Number, llong: int, threshold: Number=0, truncate: Number=4,
+        is_volume: bool=False, clip_method: Union[str, Clip]=Clip.CLIP
+    ) -> None:
         """
 
         Parameters
@@ -31,6 +33,15 @@ class Bandpass(FilterAlgorithmBase):
             deviations (default 4)
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over the entire ImageStack
+            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over each slice, where slice shapes are determined by the group_by
+                parameters
         """
         self.lshort = lshort
         self.llong = llong
@@ -41,18 +52,20 @@ class Bandpass(FilterAlgorithmBase):
         self.threshold = threshold
         self.truncate = truncate
         self.is_volume = is_volume
+        self.clip_method = clip_method
 
     _DEFAULT_TESTING_PARAMETERS = {"lshort": 1, "llong": 3, "threshold": 0.01}
 
     @staticmethod
     def _bandpass(
-            image: np.ndarray, lshort: Number, llong: int, threshold: Number, truncate: Number
+            image: Union[xr.DataArray, np.ndarray],
+            lshort: Number, llong: int, threshold: Number, truncate: Number
     ) -> np.ndarray:
         """Apply a bandpass filter to remove noise and background variation
 
         Parameters
         ----------
-        image : np.ndarray
+        image : Union[xr.DataArray, np.ndarray]
         lshort : float
             filter frequencies below this value
         llong : int
@@ -69,11 +82,11 @@ class Bandpass(FilterAlgorithmBase):
             bandpassed image
 
         """
-        bandpassed: np.ndarray = bandpass(
+        bandpassed = bandpass(
             image, lshort=lshort, llong=llong, threshold=threshold,
             truncate=truncate
         )
-        return preserve_float_range(bandpassed)
+        return bandpassed
 
     def run(
             self, stack: ImageStack, in_place: bool = False, verbose: bool = False,
@@ -111,6 +124,7 @@ class Bandpass(FilterAlgorithmBase):
             group_by=group_by,
             in_place=in_place,
             n_processes=n_processes,
+            clip_method=self.clip_method,
         )
         return result
 
@@ -125,6 +139,13 @@ class Bandpass(FilterAlgorithmBase):
     @click.option(
         "--truncate", default=4, type=float,
         help="truncate the filter at this many standard deviations")
+    @click.option(
+        "--clip-method", default=Clip.CLIP, type=Clip,
+        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
+             "'scale_by_chunk'")
     @click.pass_context
-    def _cli(ctx, lshort, llong, threshold, truncate):
-        ctx.obj["component"]._cli_run(ctx, Bandpass(lshort, llong, threshold, truncate))
+    def _cli(ctx, lshort, llong, threshold, truncate, clip_method):
+        ctx.obj["component"]._cli_run(
+            ctx,
+            Bandpass(lshort, llong, threshold, truncate, clip_method)
+        )

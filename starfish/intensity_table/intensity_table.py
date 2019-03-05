@@ -8,8 +8,9 @@ import regional
 import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
-from starfish.image._filter.util import preserve_float_range
 from starfish.types import Axes, Coordinates, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
+from starfish.util.dtype import preserve_float_range
+
 
 
 class IntensityTable(xr.DataArray):
@@ -175,7 +176,7 @@ class IntensityTable(xr.DataArray):
 
     @property
     def has_physical_coords(self):
-        return Coordinates.X and Coordinates.Y in self.coords
+        return Coordinates.X in self.coords and Coordinates.Y in self.coords
 
     def save(self, filename: str) -> None:
         """Save an IntensityTable as a Netcdf File

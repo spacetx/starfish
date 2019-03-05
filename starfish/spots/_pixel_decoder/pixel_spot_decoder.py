@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 
@@ -8,11 +8,11 @@ from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.intensity_table.intensity_table_coordinates import \
     transfer_physical_coords_from_imagestack_to_intensity_table
 from starfish.util import click
-from ._base import SpotFinderAlgorithmBase
+from ._base import PixelDecoderAlgorithmBase
 from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedComponentDecodingResult
 
 
-class PixelSpotDetector(SpotFinderAlgorithmBase):
+class PixelSpotDecoder(PixelDecoderAlgorithmBase):
     def __init__(
             self, codebook: Codebook, metric: str, distance_threshold: float,
             magnitude_threshold: int, min_area: int, max_area: int, norm_order: int=2,
@@ -55,6 +55,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
 
     def run(
         self, stack: ImageStack,
+        n_processes: Optional[int] = None
     ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """decode pixels and combine them into spots using connected component labeling
 
@@ -62,6 +63,9 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
         ----------
         stack : ImageStack
             ImageStack containing spots
+        n_processes : Optional[int]
+            The number of processes to use for CombineAdjacentFeatures.
+             If None, uses the output of os.cpu_count() (default = None).
 
         Returns
         -------
@@ -85,14 +89,15 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
             max_area=self.max_area,
             mask_filtered_features=True
         )
-        decoded_spots, image_decoding_results = caf.run(intensities=decoded_intensities)
+        decoded_spots, image_decoding_results = caf.run(intensities=decoded_intensities,
+                                                        n_processes=n_processes)
 
         transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=stack,
                                                                     intensity_table=decoded_spots)
         return decoded_spots, image_decoding_results
 
     @staticmethod
-    @click.command("PixelSpotDetector")
+    @click.command("PixelSpotDecoder")
     @click.option("--metric", type=str, default='euclidean')
     @click.option(
         "--distance-threshold", type=float, default=0.5176,
@@ -122,7 +127,7 @@ class PixelSpotDetector(SpotFinderAlgorithmBase):
     def _cli(ctx, metric, distance_threshold, magnitude_threshold,
              min_area, max_area, norm_order, crop_x, crop_y, crop_z):
         codebook = ctx.obj["codebook"]
-        instance = PixelSpotDetector(
+        instance = PixelSpotDecoder(
             codebook=codebook,
             metric=metric,
             distance_threshold=distance_threshold,

@@ -41,7 +41,7 @@ experiment = data.MERFISH(use_test_data=use_test_data)
 # EPY: END markdown
 
 # EPY: START code
-primary_image = experiment.fov()[FieldOfView.PRIMARY_IMAGES]
+primary_image = experiment.fov().get_image(FieldOfView.PRIMARY_IMAGES)
 # EPY: END code
 
 # EPY: START code
@@ -95,7 +95,8 @@ high_passed = ghp.run(primary_image, verbose=True, in_place=False)
 # EPY: END markdown
 
 # EPY: START code
-dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2, clip=True)
+from starfish.types import Clip
+dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2, clip_method=Clip.SCALE_BY_CHUNK)
 deconvolved = dpsf.run(high_passed, verbose=True, in_place=False)
 # EPY: END code
 
@@ -175,8 +176,8 @@ for selector in primary_image._iter_axes():
 
 # EPY: START code
 # TODO this crop should be (x, y) = (40, 40) but it was getting eaten by kwargs
-from starfish.spots import SpotFinder
-psd = SpotFinder.PixelSpotDetector(
+from starfish.spots import PixelSpotDecoder
+psd = PixelSpotDecoder.PixelSpotDecoder(
     codebook=experiment.codebook,
     metric='euclidean',
     distance_threshold=0.5176,

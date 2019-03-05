@@ -1,24 +1,26 @@
 from functools import partial
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
+import xarray as xr
 from scipy.signal import convolve, fftconvolve
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Number
+from starfish.types import Clip, Number
 from starfish.util import click
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by,
     gaussian_kernel,
-    preserve_float_range
 )
 
 
 class DeconvolvePSF(FilterAlgorithmBase):
 
-    def __init__(self, num_iter: int, sigma: Number, clip: bool = True, is_volume: bool = False
-                 ) -> None:
+    def __init__(
+        self, num_iter: int, sigma: Number, is_volume: bool = False,
+        clip_method: Union[str, Clip]=Clip.CLIP
+    ) -> None:
         """Deconvolve a point spread function
 
         Parameters
@@ -28,46 +30,49 @@ class DeconvolvePSF(FilterAlgorithmBase):
             careful optimization
         sigma : Number
             standard deviation of the gaussian kernel used to construct the point spread function
-        clip : bool (default = False)
-            if True, pixel values below -1 and above 1 are clipped for skimage pipeline
-            compatibility
         is_volume: bool
             If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
             independently.
-
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over the entire ImageStack
+            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over each slice, where slice shapes are determined by the group_by
+                parameters
         """
         self.num_iter = num_iter
         self.sigma = sigma
-        self.clip = clip
         self.kernel_size: int = int(2 * np.ceil(2 * sigma) + 1)
         self.psf: np.ndarray = gaussian_kernel(
             shape=(self.kernel_size, self.kernel_size),
             sigma=sigma
         )
         self.is_volume = is_volume
+        self.clip_method = clip_method
 
-    _DEFAULT_TESTING_PARAMETERS = {"num_iter": 1, "sigma": 1}
+    _DEFAULT_TESTING_PARAMETERS = {"num_iter": 2, "sigma": 1}
 
     # Here be dragons. This algorithm had a bug, but the results looked nice. Now we've "fixed" it
     # and the results look bad. #548 addresses this problem.
     @staticmethod
     def _richardson_lucy_deconv(
-            image: np.ndarray, iterations: int, psf: np.ndarray, clip: bool) -> np.ndarray:
+            image: Union[xr.DataArray, np.ndarray], iterations: int, psf: np.ndarray
+    ) -> np.ndarray:
         """
         Deconvolves input image with a specified point spread function.
 
         Parameters
         ----------
-        image : ndarray
+        image : Union[xr.DataArray, np.ndarray]
            Input degraded image (can be N dimensional).
         psf : ndarray
            The point spread function.
         iterations : int
            Number of iterations. This parameter plays the role of
            regularisation.
-        clip : boolean
-            If true, pixel value of the result above 1 or
-           under -1 are thresholded for skimage pipeline compatibility.
 
         Returns
         -------
@@ -129,11 +134,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
                 'All-NaN output data detected. Likely cause is that deconvolution has been run for '
                 'too many iterations.')
 
-        if clip:
-            # Changing to cliping values above 1 here changes test results
-            # so keeping this as rescaling for now
-            im_deconv = preserve_float_range(im_deconv, True)
-
         return im_deconv
 
     def run(
@@ -163,7 +163,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
         group_by = determine_axes_to_group_by(self.is_volume)
         func = partial(
             self._richardson_lucy_deconv,
-            iterations=self.num_iter, psf=self.psf, clip=self.clip
+            iterations=self.num_iter, psf=self.psf
         )
         result = stack.apply(
             func,
@@ -180,9 +180,12 @@ class DeconvolvePSF(FilterAlgorithmBase):
         '--num-iter', type=int, help='number of iterations to run')
     @click.option(
         '--sigma', type=float, help='standard deviation of gaussian kernel')
+    @click.option("--is-volume", is_flag=True,
+                  help="indicates that the image stack should be filtered in 3d")
     @click.option(
-        '--no-clip', is_flag=True,
-        help='(default True) if True, clip values below 0 and above 1')
+        "--clip-method", default=Clip.CLIP, type=Clip,
+        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
+             "'scale_by_chunk'")
     @click.pass_context
-    def _cli(ctx, num_iter, sigma, no_clip):
-        ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, no_clip))
+    def _cli(ctx, num_iter, sigma, is_volume, clip_method):
+        ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, is_volume, clip_method))

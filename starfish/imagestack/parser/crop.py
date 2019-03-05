@@ -43,6 +43,17 @@ class CropParameters:
         self._x_slice = x_slice
         self._y_slice = y_slice
 
+    def _add_permitted_axes(self, axis_type: Axes, permitted_axis: int) -> None:
+        """
+        Add a value to one of the permitted axes sets.
+        """
+        if axis_type == Axes.ROUND and self._permitted_rounds:
+            self._permitted_rounds.add(permitted_axis)
+        if axis_type == Axes.CH and self._permitted_chs:
+            self._permitted_chs.add(permitted_axis)
+        if axis_type == Axes.ZPLANE and self._permitted_zplanes:
+            self._permitted_zplanes.add(permitted_axis)
+
     def filter_tilekeys(self, tilekeys: Collection[TileKey]) -> Collection[TileKey]:
         """
         Filters tilekeys for those that should be included in the resulting ImageStack.
@@ -134,11 +145,13 @@ class CropParameters:
                 shape[0],
                 self._y_slice)
 
-        return {
+        return_coords = {
             Coordinates.X: (xmin, xmax),
-            Coordinates.Y: (ymin, ymax),
-            Coordinates.Z: coordinates[Coordinates.Z],
+            Coordinates.Y: (ymin, ymax)
         }
+        if Coordinates.Z in coordinates:
+            return_coords[Coordinates.Z] = coordinates[Coordinates.Z]
+        return return_coords
 
 
 class CroppedTileData(TileData):

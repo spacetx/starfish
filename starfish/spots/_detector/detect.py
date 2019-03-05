@@ -1,6 +1,6 @@
 from functools import partial
 from itertools import product
-from typing import Callable, Dict, Sequence, Tuple, Union
+from typing import Callable, Dict, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -104,6 +104,10 @@ def measure_spot_intensities(
         n_round=n_round,
     )
 
+    # if no spots were detected, return the empty IntensityTable
+    if intensity_table.sizes[Features.AXIS] == 0:
+        return intensity_table
+
     # fill the intensity table
     indices = product(range(n_ch), range(n_round))
     for c, r in indices:
@@ -141,7 +145,7 @@ def concatenate_spot_attributes_to_intensities(
     n_ch: int = max(inds[Axes.CH] for _, inds in spot_attributes) + 1
     n_round: int = max(inds[Axes.ROUND] for _, inds in spot_attributes) + 1
 
-    all_spots = pd.concat([sa.data for sa, inds in spot_attributes])
+    all_spots = pd.concat([sa.data for sa, inds in spot_attributes], sort=True)
     # this drop call ensures only x, y, z, radius, and quality, are passed to the IntensityTable
     features_coordinates = all_spots.drop(['spot_id', 'intensity'], axis=1)
 
@@ -164,7 +168,8 @@ def detect_spots(data_stack: ImageStack,
                  reference_image: Union[xr.DataArray, np.ndarray] = None,
                  reference_image_from_max_projection: bool = False,
                  measurement_function: Callable[[Sequence], Number] = np.max,
-                 radius_is_gyration: bool = False) -> IntensityTable:
+                 radius_is_gyration: bool = False,
+                 n_processes: Optional[int] = None) -> IntensityTable:
     """Apply a spot_finding_method to a ImageStack
 
     Parameters
@@ -192,6 +197,9 @@ def detect_spots(data_stack: ImageStack,
     is_volume: bool
         If True, pass 3d volumes (x, y, z) to func, else pass 2d tiles (x, y) to func. (default
         True)
+    n_processes : Optional[int]
+        The number of processes to use in stack.transform if reference image is None.
+        If None, uses the output of os.cpu_count() (default = None).
 
     Notes
     -----
@@ -218,19 +226,11 @@ def detect_spots(data_stack: ImageStack,
         )
 
     if reference_image_from_max_projection:
-        reference_image = data_stack.max_proj(Axes.CH, Axes.ROUND)
-        reference_image = reference_image._squeezed_numpy(Axes.CH, Axes.ROUND)
+        reference_image = data_stack.max_proj(Axes.CH, Axes.ROUND).xarray.squeeze()
 
     group_by = {Axes.ROUND, Axes.CH}
 
     if reference_image is not None:
-        # Throw error here if tiles are not aligned. Trying to do this with unregistered
-        if not data_stack.tiles_aligned:
-            raise ValueError(
-                'Detected tiles in the image stack that correspond to different positions '
-                'in coordinate space. Please make sure your data are'
-                'pre aligned, as per our spaceTx file format specification'
-            )
         reference_spot_locations = spot_finding_method(reference_image, **spot_finding_kwargs)
         intensity_table = measure_spot_intensities(
             data_image=data_stack,
@@ -242,7 +242,8 @@ def detect_spots(data_stack: ImageStack,
         spot_finding_method = partial(spot_finding_method, **spot_finding_kwargs)
         spot_attributes_list = data_stack.transform(
             func=spot_finding_method,
-            group_by=group_by
+            group_by=group_by,
+            n_processes=n_processes
         )
         intensity_table = concatenate_spot_attributes_to_intensities(spot_attributes_list)
 

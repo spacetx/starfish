@@ -202,7 +202,7 @@ def cli(input_dir, output_dir, metadata_yaml):
     write_experiment_json(
         path=output_dir,
         fov_count=len(primary_tile_fetcher.fov_map),
-        tile_format=ImageFormat.NUMPY,
+        tile_format=ImageFormat.TIFF,
         primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions={},
         primary_tile_fetcher=primary_tile_fetcher,

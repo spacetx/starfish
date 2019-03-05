@@ -2,15 +2,16 @@ from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
+import xarray as xr
 from skimage.filters import gaussian
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Number
+from starfish.types import Clip, Number
 from starfish.util import click
+from starfish.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by,
-    preserve_float_range,
     validate_and_broadcast_kernel_size,
 )
 
@@ -18,7 +19,9 @@ from .util import (
 class GaussianLowPass(FilterAlgorithmBase):
 
     def __init__(
-            self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False) -> None:
+        self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False,
+        clip_method: Union[str, Clip]=Clip.CLIP
+    ) -> None:
         """Multi-dimensional low-pass gaussian filter.
 
         Parameters
@@ -28,16 +31,25 @@ class GaussianLowPass(FilterAlgorithmBase):
         is_volume : bool
             If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
             independently.
-
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over the entire ImageStack
+            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over each slice, where slice shapes are determined by the group_by
+                parameters
         """
         self.sigma = validate_and_broadcast_kernel_size(sigma, is_volume)
         self.is_volume = is_volume
+        self.clip_method = clip_method
 
     _DEFAULT_TESTING_PARAMETERS = {"sigma": 1}
 
     @staticmethod
     def _low_pass(
-            image: np.ndarray,
+            image: Union[xr.DataArray, np.ndarray],
             sigma: Union[Number, Tuple[Number]],
             rescale: bool=False
     ) -> np.ndarray:
@@ -46,7 +58,7 @@ class GaussianLowPass(FilterAlgorithmBase):
 
         Parameters
         ----------
-        image : np.ndarray[np.float32]
+        image : Union[xr.DataArray, np.ndarray]
             2-d or 3-d image data
         sigma : Union[Number, Tuple[Number]]
             Standard deviation of the Gaussian kernel that will be applied. If a float, an
@@ -98,7 +110,8 @@ class GaussianLowPass(FilterAlgorithmBase):
         low_pass: Callable = partial(self._low_pass, sigma=self.sigma)
         result = stack.apply(
             low_pass,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
+            clip_method=self.clip_method
         )
         return result
 
@@ -107,6 +120,10 @@ class GaussianLowPass(FilterAlgorithmBase):
     @click.option("--sigma", type=float, help="standard deviation of gaussian kernel")
     @click.option("--is-volume", is_flag=True,
                   help="indicates that the image stack should be filtered in 3d")
+    @click.option(
+        "--clip-method", default=Clip.CLIP, type=Clip,
+        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
+             "'scale_by_chunk'")
     @click.pass_context
-    def _cli(ctx, sigma, is_volume):
-        ctx.obj["component"]._cli_run(ctx, GaussianLowPass(sigma, is_volume))
+    def _cli(ctx, sigma, is_volume, clip_method):
+        ctx.obj["component"]._cli_run(ctx, GaussianLowPass(sigma, is_volume, clip_method))

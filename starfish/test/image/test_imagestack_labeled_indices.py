@@ -9,6 +9,7 @@ from slicedimage import ImageFormat
 
 from starfish.experiment.builder import build_image, FetchedTile, tile_fetcher_factory
 from starfish.imagestack.imagestack import ImageStack
+from starfish.imagestack.physical_coordinate_calculator import get_physical_coordinates_of_z_plane
 from starfish.types import Axes, Coordinates, Number
 from .imagestack_test_utils import verify_physical_coordinates, verify_stack_fill
 
@@ -21,6 +22,9 @@ WIDTH = 4
 NUM_ROUND = len(ROUND_LABELS)
 NUM_CH = len(CH_LABELS)
 NUM_Z = len(ZPLANE_LABELS)
+X_COORDS = 0.01, 0.01
+Y_COORDS = 0.001, 0.001
+Z_COORDS = 0.0001, 0.0001
 
 
 def fill_value(round_: int, ch: int, z: int) -> float:
@@ -29,25 +33,6 @@ def fill_value(round_: int, ch: int, z: int) -> float:
     ch_idx = CH_LABELS.index(ch)
     z_idx = ZPLANE_LABELS.index(z)
     return float((((round_idx * NUM_CH) + ch_idx) * NUM_Z) + z_idx) / (NUM_ROUND * NUM_CH * NUM_Z)
-
-
-def x_coordinates(round_: int, ch: int) -> Tuple[float, float]:
-    """Return the expected physical x coordinate value for a given round/ch tuple.  Note that in
-    real life, physical coordinates are not expected to vary for different ch values.  However, for
-    completeness of the tests, we are pretending they will."""
-    return min(round_, ch) * 0.01, max(round_, ch) * 0.01
-
-
-def y_coordinates(round_: int, ch: int) -> Tuple[float, float]:
-    """Return the expected physical y coordinate value for a given round/ch tuple.  Note that in
-    real life, physical coordinates are not expected to vary for different ch values.  However, for
-    completeness of the tests, we are pretending they will."""
-    return min(round_, ch) * 0.001, max(round_, ch) * 0.001
-
-
-def z_coordinates(z: int) -> Tuple[float, float]:
-    """Return the expected physical z coordinate value for a given zplane index."""
-    return z * 0.0001, (z + 1) * 0.0001
 
 
 class UniqueTiles(FetchedTile):
@@ -65,9 +50,10 @@ class UniqueTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
         return {
-            Coordinates.X: x_coordinates(self._round, self._ch),
-            Coordinates.Y: y_coordinates(self._round, self._ch),
-            Coordinates.Z: z_coordinates(self._zplane),
+            Coordinates.X: X_COORDS,
+            Coordinates.Y: Y_COORDS,
+            Coordinates.Z: Z_COORDS,
+
         }
 
     @property
@@ -155,19 +141,13 @@ def test_labeled_indices_sel_single_tile():
             selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE])
         verify_stack_fill(stack, selector, expected_fill_value)
 
-        # verify that the subselected stack has the correct size for the physical coordinates table.
-        sizes = subselected.coordinates.sizes
-        for dim in (Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE.value):
-            assert sizes[dim] == 1
-
         # assert that the physical coordinate values are what we expect.
-        verify_physical_coordinates(
-            stack,
-            selector,
-            x_coordinates(selector[Axes.ROUND], selector[Axes.CH]),
-            y_coordinates(selector[Axes.ROUND], selector[Axes.CH]),
-            z_coordinates(selector[Axes.ZPLANE]),
-        )
+    verify_physical_coordinates(
+        stack,
+        X_COORDS,
+        Y_COORDS,
+        get_physical_coordinates_of_z_plane(Z_COORDS),
+    )
 
 
 def test_labeled_indices_sel_slice():
@@ -184,12 +164,6 @@ def test_labeled_indices_sel_slice():
             (Axes.ZPLANE, [4],)):
         assert subselected.axis_labels(index_type) == expected_results
 
-    # verify that the subselected stack has the correct size for the physical coordinates table.
-    sizes = subselected.coordinates.sizes
-    assert sizes[Axes.ROUND] == 2
-    assert sizes[Axes.CH] == 2
-    assert sizes[Axes.ZPLANE] == 1
-
     for selectors in subselected._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
         # verify that the subselected stack has the correct data.
         expected_fill_value = fill_value(
@@ -197,10 +171,9 @@ def test_labeled_indices_sel_slice():
         verify_stack_fill(subselected, selectors, expected_fill_value)
 
         # verify that each tile in the subselected stack has the correct physical coordinates.
-        verify_physical_coordinates(
-            stack,
-            selectors,
-            x_coordinates(selectors[Axes.ROUND], selectors[Axes.CH]),
-            y_coordinates(selectors[Axes.ROUND], selectors[Axes.CH]),
-            z_coordinates(selectors[Axes.ZPLANE]),
-        )
+    verify_physical_coordinates(
+        stack,
+        X_COORDS,
+        Y_COORDS,
+        get_physical_coordinates_of_z_plane(Z_COORDS),
+    )

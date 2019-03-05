@@ -2,7 +2,7 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import LOG
 from starfish.types._constants import STARFISH_EXTRAS_KEY
-from starfish.util.JSONenocder import LogEncoder
+from starfish.util.logging import LogEncoder
 
 
 class AlgorithmBaseType(type):

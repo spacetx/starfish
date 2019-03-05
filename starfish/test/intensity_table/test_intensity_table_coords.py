@@ -104,5 +104,3 @@ def test_tranfering_physical_coords_to_expression_matrix():
     assert xc.size == NUMBER_SPOTS
     assert yc.size == NUMBER_SPOTS
     assert zc.size == NUMBER_SPOTS
-
-

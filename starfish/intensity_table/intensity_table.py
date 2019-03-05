@@ -12,7 +12,6 @@ from starfish.types import Axes, Coordinates, Features, LOG, SpotAttributes, STA
 from starfish.util.dtype import preserve_float_range
 
 
-
 class IntensityTable(xr.DataArray):
     """Container for spot/pixel features extracted from image data
 
@@ -421,36 +420,37 @@ class IntensityTable(xr.DataArray):
         """
 
         # create the 2-d counts matrix
-        grouped = self.to_features_dataframe().groupby(['features', 'target'])
+        grouped = self.to_features_dataframe().groupby([Features.AXIS, Features.TARGET])
         counts = grouped.count().iloc[:, 0].unstack().fillna(0)
 
         if regions:
             # counts.index stores cell_id, extract cell information from the regional.many object
             metadata = {
-                "area": ("cells", [regions[id_].area for id_ in counts.index]),
-                "x": ("cells", [regions[id_].center[0] for id_ in counts.index]),
-                "y": ("cells", [regions[id_].center[1] for id_ in counts.index]),
-                "z": ("cells", np.zeros(counts.shape[0]))
+                Features.AREA: (Features.CELLS, [regions[id_].area for id_ in counts.index]),
+                Axes.X: (Features.CELLS, [regions[id_].center[0] for id_ in counts.index]),
+                Axes.Y: (Features.CELLS, [regions[id_].center[1] for id_ in counts.index]),
+                Axes.ZPLANE: (Features.CELLS, np.zeros(counts.shape[0]))
             }
         else:
             if self.has_physical_coords:
-                grouped = self.to_features_dataframe().groupby(['features'])[['x', 'y', 'z',
-                                                                              'xc', 'yc', 'zc']]
+                grouped = self.to_features_dataframe().groupby([Features.AXIS])[[
+                    Axes.X, Axes.Y, Axes.ZPLANE, Coordinates.X, Coordinates.Y, Coordinates.Z]]
             else:
-                grouped = self.to_features_dataframe().groupby(['features'])[['x', 'y', 'z']]
+                grouped = self.to_features_dataframe().groupby([Features.AXIS])[[
+                    Axes.X, Axes.Y, Axes.ZPLANE]]
             min_ = grouped.min()
             max_ = grouped.max()
             coordinate_df = min_ + (max_ - min_) / 2
-            metadata = {name: ("cells", data.values) for name, data in coordinate_df.items()}
-            metadata['area'] = ("cells", np.full(counts.shape[0], fill_value=np.nan))
+            metadata = {name: (Features.CELLS, data.values) for name, data in coordinate_df.items()}
+            metadata[Features.AREA] = (Features.CELLS, np.full(counts.shape[0], fill_value=np.nan))
 
         # add genes to the metadata
-        metadata.update({"genes": counts.columns.values})
-        metadata.update({"cell_id": ("cells", counts.index.values)})
+        metadata.update({Features.GENES: counts.columns.values})
+        metadata.update({Features.CELL_ID: (Features.CELLS, counts.index.values)})
 
         mat = ExpressionMatrix(
             data=counts.values,
-            dims=('cells', 'genes'),
+            dims=(Features.CELLS, Features.GENES),
             coords=metadata,
             name='expression_matrix'
         )

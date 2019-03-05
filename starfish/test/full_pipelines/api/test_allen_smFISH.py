@@ -1,5 +1,3 @@
-import gc
-
 import numpy as np
 
 import starfish.data
@@ -46,5 +44,4 @@ def test_allen_smFISH_cropped_data():
         )
         intensities = lmpf.run(z_filtered_image)  # noqa
         all_intensities.append(intensities)
-        gc.collect()
     IntensityTable.concatanate_intensity_tables(all_intensities)

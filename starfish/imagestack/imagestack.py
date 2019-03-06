@@ -648,7 +648,7 @@ class ImageStack:
         Yields
         ------
         Dict[str, int]
-            Mapping of dimension name to index
+            Mapping of axis name to index
 
         """
         if axes is None:
@@ -988,7 +988,7 @@ class ImageStack:
         instance, imagestack.unique_index_values(Axes.ROUND) returns all the round ids in this
         imagestack."""
 
-        return [val for val in self.xarray.coords[axis.value].values]
+        return [int(val) for val in self.xarray.coords[axis.value].values]
 
     @property
     def tile_shape(self):

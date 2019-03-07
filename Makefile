@@ -8,7 +8,7 @@ MODULES=starfish data_formatting_examples sptx_format
 DOCKER_IMAGE?=spacetx/starfish
 DOCKER_BUILD?=1
 
-VERSION=$(shell sh -c "git describe --exact --dirty")
+VERSION=$(shell sh -c "git describe --exact --dirty 2> /dev/null")
 
 define print_help
     @printf "    %-28s   $(2)\n" $(1)
@@ -149,17 +149,21 @@ help-install:
 # General release steps:
 # --------------------------------------------------------------
 #  (1) commit all files and remove any untracked files
-#  (2) create an annotated tag (with -a or -s)
-#  (3) run `make release-prep` which:
+#      `git status` should show nothing.
+#  (2) `make release-changelog` to print a suggested
+#      update to CHANGELOG.md. Replace "XXX" with your
+#      intended tag.
+#  (3) create an annotated tag (with -a or -s)
+#  (4) `make release-prep` which:
 #     - checks the tag
 #     - creates a virtualenv
 #     - builds and installs the sdist
-#  (4) run `make release-verify` which:
+#  (5) `make release-verify` which:
 #     - runs tests
 #     - builds docker
-#  (5a) if everything succeeds: run `make release-upload`
+#  (6a) if everything succeeds: run `make release-upload`
 #       and execute the commands in order.
-#  (5b) if anything goes wrong, rollback the various steps:
+#  (6b) if anything goes wrong, rollback the various steps:
 #     - delete on docker hub
 #     - delete local docker image
 #     - delete tag locally
@@ -192,6 +196,16 @@ release-env/bin/make_shell:
 	echo 'source release-env/bin/activate' >> $@
 	echo 'bash "$$@"' >> $@
 	chmod a+x $@
+
+release-changelog:
+	@if test -n "$(VERSION)"; then                    \
+		echo VERSION is set to $(VERSION)         \
+		echo Create your changelog before tagging.\
+		exit 102;                                 \
+	fi;
+	@echo "##" "[XXX]" - $(shell sh -c "date +'%Y-%m-%d'")
+	@git log $(shell sh -c "git describe --tags --abbrev=0")..HEAD --pretty=format:"- %s"
+	@echo; cat CHANGELOG.md; echo "[XXX]: https://github.com/spacetx/starfish/releases/tag/XXX"
 
 release-prep: release-check release-env
 	release-env/bin/python setup.py clean

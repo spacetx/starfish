@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Mapping, Optional, Union
+from typing import Optional, Set, Union
 
 import numpy as np
 import xarray as xr
@@ -9,46 +9,52 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
 from starfish.util import click
 from ._base import FilterAlgorithmBase
-from .util import determine_axes_to_group_by
 
 
 class MatchHistograms(FilterAlgorithmBase):
 
     def __init__(
-            self, reference_selector: Mapping[Axes, int],
+            self, group_by: Set[Axes]
     ) -> None:
         """Normalize data by matching distributions of each tile or volume to a reference volume
 
+        Chunks sharing the same values for axes specified by group_by will be quantile
+        normalized such that their intensity values are identically distributed. The reference
+        distribution is calculated by sorting the intensities in each chunk and averaging across
+        chunks.
+
+        For example, if group_by={Axes.CH, Axes.ROUND} each (z, y, x) volume will be linearized,
+        the intensities will be sorted, and averaged across {Axes.CH, Axes.ROUND}, equalizing
+        the intensity distribution of each (round, channel) volume.
+
+        Setting group_by={Axes.CH} would carry out the same approach, but the result would _retain_
+        variation across channel.
+
         Parameters
         ----------
-        reference_selector : Mapping[Axes, int]
-            A mapping that specifies the round and channel to match the intensity of each subsequent
-            image to. For example, {Axes.CH: 0, Axes.ROUND: 0} would match each image to the first
-            round and channel. This filter automatically detects whether the data is flat or
-            volumetric.
+        group_by : Set[Axes]
         """
-        self.reference_selector = reference_selector
+        self.group_by = group_by
 
-    _DEFAULT_TESTING_PARAMETERS = {"reference_selector": {Axes.CH: 0, Axes.ROUND: 0}}
+    _DEFAULT_TESTING_PARAMETERS = {"group_by": {Axes.CH, Axes.ROUND}}
 
     @staticmethod
-    def _compute_reference_distribution(stack: ImageStack):
+    def _harmonize_enum(iterable):
+        return list(v if isinstance(v, str) else v.value for v in iterable)
+
+    def _compute_reference_distribution(self, data: ImageStack):
         """compute the average reference distribution across the ImageStack"""
-        stacked = xarray.stack(pixels=(Axes.X.value, Axes.Y.value, Axes.ZPLANE.value))
-        inds = stacked.groupby(Axes.CH.value).apply(np.argsort)
-        pos = inds.groupby(Axes.CH.value).apply(np.argsort)
+        chunk_key = self._harmonize_enum(data.shape.keys() - self.group_by)
+        sort_key = self._harmonize_enum(self.group_by)
 
-        sorted_pixels = deepcopy(stacked)
-        for v in sorted_pixels.coords[Axes.CH.value]:
-            sorted_pixels[v, :] = sorted_pixels[v, inds[v].values].values
+        # stack up the array
+        stacked = data.xarray.stack(chunk_key=chunk_key)
+        stacked = stacked.stack(sort_key=sort_key)
 
-        rank = sorted_pixels.mean(Axes.CH.value)
-
-        output = deepcopy(stacked)
-        for v in output.coords[Axes.CH.value]:
-            output[v] = rank[pos[v].values].values
-
-        return output.unstack("pixels")
+        sorted_stacked = stacked.groupby("sort_key").apply(np.sort)
+        reference = sorted_stacked.mean("sort_key")
+        reference = reference.unstack("chunk_key")
+        return reference
 
     @staticmethod
     def _match_histograms(
@@ -67,8 +73,8 @@ class MatchHistograms(FilterAlgorithmBase):
         np.ndarray :
             image, with intensities matched to reference
         """
-        if isinstance(image, xr.DataArray):
-            image = image.values
+        image = np.asarray(image)
+        reference = np.asarray(reference)
         return match_histograms(image, reference=reference)
 
     def run(
@@ -95,22 +101,22 @@ class MatchHistograms(FilterAlgorithmBase):
             original stack.
 
         """
-        group_by = determine_axes_to_group_by(is_volume=stack.shape[Axes.ZPLANE] > 1)
-        reference_image: np.ndarray = stack.xarray.sel(self.reference_selector).values
+        reference_image = self._compute_reference_distribution(stack)
         apply_function = partial(self._match_histograms, reference=reference_image)
         result = stack.apply(
             apply_function,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            group_by=self.group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
 
     @staticmethod
     @click.command("MatchHistograms")
     @click.option(
-        "--reference-selector", type=dict, required=True,
-        help=("dict that specifies the round and channel to match the intensity of each"
-              "subsequent image to, e.g. {Axes.CH: 0, Axes.ROUND: 0}")
+        "--group-by", type=set, required=True,
+        help=("set that specifies the grouping over which to match the image intensity "
+              "e.g. {'c', 'r'} would equalize each volume, whereas {'c',} would equalize all "
+              "volumes within a channel.")
     )
     @click.pass_context
-    def _cli(ctx, reference_selector):
-        ctx.obj["component"]._cli_run(ctx, MatchHistograms(reference_selector))
+    def _cli(ctx, group_by):
+        ctx.obj["component"]._cli_run(ctx, MatchHistograms(group_by))

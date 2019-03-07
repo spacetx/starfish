@@ -199,7 +199,9 @@ release-prep: release-check release-env
 	release-env/bin/pip install dist/starfish-$(VERSION).tar.gz
 
 release-verify: export SHELL=release-env/bin/make_shell
-release-verify: release-check slow
+release-verify: release-check slow release-docker
+
+release-docker: release-check
 	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(VERSION)
 	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(VERSION)-$(DOCKER_BUILD)
 

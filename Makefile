@@ -8,7 +8,7 @@ MODULES=starfish data_formatting_examples sptx_format
 DOCKER_IMAGE?=spacetx/starfish
 DOCKER_BUILD?=1
 
-VERSION=$(shell sh -c "git describe --exact")
+VERSION=$(shell sh -c "git describe --exact --dirty")
 
 define print_help
     @printf "    %-28s   $(2)\n" $(1)
@@ -144,15 +144,40 @@ help-install:
 #
 ###############################################################
 
-### Deployment ###############################################
+### Deployment ################################################
+#
+# General release steps:
+# --------------------------------------------------------------
+#  (1) commit all files and remove any untracked files
+#  (2) create an annotated tag (with -a or -s)
+#  (3) run `make release-prep` which:
+#     - checks the tag
+#     - creates a virtualenv
+#     - builds and installs the sdist
+#  (4) run `make release-verify` which:
+#     - runs tests
+#     - builds docker
+#  (5a) if everything succeeds: run `make release-upload`
+#       and execute the commands in order.
+#  (5b) if anything goes wrong, rollback the various steps:
+#     - delete on docker hub
+#     - delete local docker image
+#     - delete tag locally
+#     - make clean
 #
 release-check:
-	@if test -z "$(VERSION)"; then                     \
+	@if test -z "$(VERSION)"; then                    \
 		echo VERSION is not set.;                 \
 		echo Please create a git tag;             \
 		exit 100;                                 \
+	elif [[ "$(VERSION)" == *"dirty"* ]] ; then       \
+		echo VERSION is dirty.;                   \
+		echo Please commit all files and re-tag.; \
+		exit 101;                                 \
 	else                                              \
-		echo "Releasing version: $(VERSION)";      \
+		echo "===============================";   \
+		echo "Releasing version: $(VERSION)";     \
+		echo "===============================";   \
 	fi;
 
 release-env: release-env/bin/activate release-env/bin/make_shell

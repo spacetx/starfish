@@ -29,18 +29,23 @@ Starfish Usage Checklist
 
    b. Corrected for optical aberration,
 
+      i.   *starfish* contains some experimental filters to enable
+           linear unmixing and flat field correction. These are not yet
+           fully tested, so use these at your own risk. More complex
+           transforms must be pre-applied.
+
    c. Registered
 
       i.   If the data are from a multiplexed assay, then starfish
            expects labs to send us pre-registered images, such that each
            image tile in a FOV, across rounds, covers data from the same
-           coordinate range
+           coordinate range.
 
       ii.  If the data are from a non-multiplexed assay, then we either
            expect labs to send us pre-registered images as above, or for
            labs to enter the post-registered coordinates of each tile in
            the metadata. In the latter case, we expect labs to handle
-           registration artifact post-processing
+           registration artifact post-processing.
 
       iii. If data require *only* translation registration, and authors
            provide a reference image against which all rounds can be

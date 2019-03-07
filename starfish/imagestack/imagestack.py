@@ -251,7 +251,7 @@ class ImageStack:
         return cls(tile_shape, tile_data)
 
     @classmethod
-    def from_url(cls, url: str, baseurl: Optional[str]):
+    def from_url(cls, url: str, baseurl: Optional[str], aligned_group: int = 0):
         """
         Constructs an ImageStack object from a URL and a base URL.
 
@@ -268,14 +268,18 @@ class ImageStack:
         baseurl : Optional[str]
             If url is a relative URL, then this must be provided.  If url is an absolute URL, then
             this parameter is ignored.
+        aligned_group: int
+            Which aligned tile group to load into the Imagestack, only applies if the
+            tileset is unaligned. Default 0 (the first group)
         """
         config = StarfishConfig()
         tileset = Reader.parse_doc(url, baseurl, backend_config=config.slicedimage)
-
-        return cls.from_tileset(tileset)
+        coordinate_groups = CropParameters.parse_coordinate_groups(tileset)
+        crop_params = coordinate_groups[aligned_group]
+        return cls.from_tileset(tileset, crop_parameters=crop_params)
 
     @classmethod
-    def from_path_or_url(cls, url_or_path: str) -> "ImageStack":
+    def from_path_or_url(cls, url_or_path: str, aligned_group: int = 0) -> "ImageStack":
         """
         Constructs an ImageStack object from an absolute URL or a filesystem path.
 
@@ -287,11 +291,14 @@ class ImageStack:
         ----------
         url_or_path : str
             Either an absolute URL or a filesystem path to an imagestack.
+        aligned_group: int
+            Which aligned tile group to load into the Imagestack, only applies if the
+            tileset is unaligned. Default 0 (the first group)
         """
         config = StarfishConfig()
         _, relativeurl, baseurl = resolve_path_or_url(url_or_path,
                                                       backend_config=config.slicedimage)
-        return cls.from_url(relativeurl, baseurl)
+        return cls.from_url(relativeurl, baseurl, aligned_group)
 
     @classmethod
     def from_numpy_array(

@@ -1,6 +1,8 @@
-from typing import Collection, Mapping, MutableSequence, Optional, Tuple, Union
+from collections import OrderedDict
+from typing import Collection, List, Mapping, MutableSequence, Optional, Tuple, Union
 
 import numpy as np
+from slicedimage import TileSet
 
 from starfish.imagestack.parser import TileCollectionData, TileData, TileKey
 from starfish.imagestack.physical_coordinate_calculator import recalculate_physical_coordinate_range
@@ -102,6 +104,37 @@ class CropParameters:
             stop = min(size, crop.stop)
 
         return start, stop
+
+    @staticmethod
+    def parse_coordinate_groups(tileset: TileSet) -> List["CropParameters"]:
+        """Takes a tileset and compares the physical coordinates on each tile to
+         create aligned coordinate groups (groups of tiles that have the same physical coordinates)
+
+         Returns
+         -------
+         A list of CropParameters. Each entry describes the r/ch/z values of tiles that are aligned
+         (have matching coordinates)
+         """
+        coord_groups: OrderedDict[tuple, CropParameters] = OrderedDict()
+        for tile in tileset.tiles():
+            x_y_coords = (
+                tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
+                tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1]
+            )
+            # A tile with this (x, y) has already been seen, add tile's Indices to CropParameters
+            if x_y_coords in coord_groups:
+                crop_params = coord_groups[x_y_coords]
+                crop_params._add_permitted_axes(Axes.CH, tile.indices[Axes.CH])
+                crop_params._add_permitted_axes(Axes.ROUND, tile.indices[Axes.ROUND])
+                if Axes.ZPLANE in tile.indices:
+                    crop_params._add_permitted_axes(Axes.ZPLANE, tile.indices[Axes.ZPLANE])
+            else:
+                coord_groups[x_y_coords] = CropParameters(
+                    permitted_chs=[tile.indices[Axes.CH]],
+                    permitted_rounds=[tile.indices[Axes.ROUND]],
+                    permitted_zplanes=[tile.indices[Axes.ZPLANE]] if Axes.ZPLANE in tile.indices
+                    else None)
+        return list(coord_groups.values())
 
     def crop_shape(self, shape: Tuple[int, int]) -> Tuple[int, int]:
         """

@@ -8,6 +8,8 @@ MODULES=starfish data_formatting_examples sptx_format
 DOCKER_IMAGE?=spacetx/starfish
 DOCKER_BUILD?=1
 
+VERSION=$(shell sh -c "git describe --exact")
+
 define print_help
     @printf "    %-28s   $(2)\n" $(1)
 endef
@@ -145,36 +147,47 @@ help-install:
 ### Deployment ###############################################
 #
 release-check:
-	@VERSION=$(shell sh -c "git describe --exact") && \
-	 if test -z "$$VERSION"; then                     \
+	@if test -z "$(VERSION)"; then                     \
 		echo VERSION is not set.;                 \
 		echo Please create a git tag;             \
 		exit 100;                                 \
 	else                                              \
-		echo "Releasing version: $$VERSION";      \
+		echo "Releasing version: $(VERSION)";      \
 	fi;
 
-release-prep: release-check
-	@VERSION=$(shell sh -c "git describe --exact") && \
-	python setup.py clean;                            \
-	python setup.py sdist;                            \
-	pip install dist/starfish-$$VERSION.tar.gz
+release-env: release-env/bin/activate release-env/bin/make_shell
 
+release-env/bin/activate:
+	$(call create_venv, release-env)
+	release-env/bin/pip install -r REQUIREMENTS-CI.txt
+	touch release-env/bin/activate
+
+release-env/bin/make_shell:
+	echo '#!/bin/bash' > $@
+	echo 'source release-env/bin/activate' >> $@
+	echo 'bash "$$@"' >> $@
+	chmod a+x $@
+
+release-prep: release-check release-env
+	release-env/bin/python setup.py clean
+	release-env/bin/python setup.py sdist
+	release-env/bin/pip install dist/starfish-$(VERSION).tar.gz
+
+release-verify: export SHELL=release-env/bin/make_shell
 release-verify: release-check slow
-	@VERSION=$(shell sh -c "git describe --exact") && \
-	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$$VERSION && \
-	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$$VERSION-$(DOCKER_BUILD)
+	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(VERSION)
+	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(VERSION)-$(DOCKER_BUILD)
 
 release-upload: release-check
-	@VERSION=$(shell sh -c "git describe --exact") && \
-	printf '\n# Please execute the following steps\n';\
-	echo git push origin $$VERSION;                   \
-	echo docker push $(DOCKER_IMAGE);                 \
-	echo docker push $(DOCKER_IMAGE):$$VERSION;       \
-	echo docker push $(DOCKER_IMAGE):$$VERSION-$(DOCKER_BUILD);\
-	echo twine upload dist/starfish-$$VERSION.tar.gz
+	printf '\n# Please execute the following steps\n'
+	echo git push origin $(VERSION)
+	echo docker push $(DOCKER_IMAGE)
+	echo docker push $(DOCKER_IMAGE):$(VERSION)
+	echo docker push $(DOCKER_IMAGE):$(VERSION)-$(DOCKER_BUILD)
+	echo twine upload dist/starfish-$(VERSION).tar.gz
 
 clean:
+	rm -rf release-env
 	rm -rf starfish.egg-info
 	rm -rf dist
 	rm -rf build

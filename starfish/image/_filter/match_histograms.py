@@ -34,7 +34,21 @@ class MatchHistograms(FilterAlgorithmBase):
     @staticmethod
     def _compute_reference_distribution(stack: ImageStack):
         """compute the average reference distribution across the ImageStack"""
-        pass
+        stacked = xarray.stack(pixels=(Axes.X.value, Axes.Y.value, Axes.ZPLANE.value))
+        inds = stacked.groupby(Axes.CH.value).apply(np.argsort)
+        pos = inds.groupby(Axes.CH.value).apply(np.argsort)
+
+        sorted_pixels = deepcopy(stacked)
+        for v in sorted_pixels.coords[Axes.CH.value]:
+            sorted_pixels[v, :] = sorted_pixels[v, inds[v].values].values
+
+        rank = sorted_pixels.mean(Axes.CH.value)
+
+        output = deepcopy(stacked)
+        for v in output.coords[Axes.CH.value]:
+            output[v] = rank[pos[v].values].values
+
+        return output.unstack("pixels")
 
     @staticmethod
     def _match_histograms(

@@ -206,12 +206,12 @@ release-docker: release-check
 	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(VERSION)-$(DOCKER_BUILD)
 
 release-upload: release-check
-	printf '\n# Please execute the following steps\n'
-	echo git push origin $(VERSION)
-	echo docker push $(DOCKER_IMAGE)
-	echo docker push $(DOCKER_IMAGE):$(VERSION)
-	echo docker push $(DOCKER_IMAGE):$(VERSION)-$(DOCKER_BUILD)
-	echo twine upload dist/starfish-$(VERSION).tar.gz
+	@printf '\n# Please execute the following steps\n'
+	@echo git push origin $(VERSION)
+	@echo docker push $(DOCKER_IMAGE)
+	@echo docker push $(DOCKER_IMAGE):$(VERSION)
+	@echo docker push $(DOCKER_IMAGE):$(VERSION)-$(DOCKER_BUILD)
+	@echo twine upload dist/starfish-$(VERSION).tar.gz
 
 clean:
 	rm -rf release-env

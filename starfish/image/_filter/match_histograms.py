@@ -32,6 +32,11 @@ class MatchHistograms(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"reference_selector": {Axes.CH: 0, Axes.ROUND: 0}}
 
     @staticmethod
+    def _compute_reference_distribution(stack: ImageStack):
+        """compute the average reference distribution across the ImageStack"""
+        pass
+
+    @staticmethod
     def _match_histograms(
         image: Union[xr.DataArray, np.ndarray], reference: np.ndarray
     ) -> np.ndarray:

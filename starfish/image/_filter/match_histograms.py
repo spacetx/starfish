@@ -101,6 +101,8 @@ class MatchHistograms(FilterAlgorithmBase):
             original stack.
 
         """
+        if verbose:
+            print("Calculating reference distribution...")
         reference_image = self._compute_reference_distribution(stack)
         apply_function = partial(self._match_histograms, reference=reference_image)
         result = stack.apply(

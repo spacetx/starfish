@@ -10,6 +10,7 @@ import xarray as xr
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.image._filter.util import preserve_float_range
 from starfish.types import Axes, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
+from starfish.types._constants import OverlapStrategy
 
 
 class IntensityTable(xr.DataArray):
@@ -389,10 +390,44 @@ class IntensityTable(xr.DataArray):
         return IntensityTable.from_spot_data(intensity_data, pixel_coordinates)
 
     @staticmethod
-    def concatanate_intensity_tables(intensity_tables: List["IntensityTable"]):
-        # TODO VARY CONCAT LOGIC IF TILES OVERLAP
-        # This method is a starting point for handling tile overlap, right now
-        # it does a simple concat but people want other overlap logic implmented
+    def take_max(intensity_table1: "IntensityTable", intensityTable2: "IntensityTable") -> None:
+        """Find the overlapping sections between IntensityTables
+        and eliminate spots from sections with less spots.
+        """
+
+        # Find intersection of two arrays
+        i1_min_x, i1_max_x, i1_min_y, i1_max_y = min(intensity_table1['xc']).data, \
+                                                 max(intensity_table1['xc']).data, \
+                                                 min(intensity_table1['yc']).data,\
+                                                 max(intensity_table1['yc']).data
+
+        i2_min_x, i2_max_x, i2_min_y, i2_max_y = min(intensity_table1['xc']).data, \
+                                                 max(intensity_table1['xc']).data, \
+                                                 min(intensity_table1['yc']).data, \
+                                                 max(intensity_table1['yc']).data
+
+        # select from i1 where coord values in 12min/max
+
+        # select from 12 where coord values in i1 min/mx
+
+
+
+        # Count spots in intersection for both
+        # Whichever has the least spots, convert values to nan
+
+
+        return None
+
+    OVERLAP_STRATEGY_MAP = {
+        OverlapStrategy.TAKE_MAX: take_max
+    }
+
+    @staticmethod
+    def concatanate_intensity_tables(intensity_tables: List["IntensityTable"],
+                                     overlap_strategy: OverlapStrategy = None):
+        if overlap_strategy:
+            overlap_method = IntensityTable.OVERLAP_STRATEGY_MAP[overlap_strategy]
+            overlap_method(intensity_tables)
         return xr.concat(intensity_tables, dim=Features.AXIS)
 
     def to_features_dataframe(self) -> pd.DataFrame:

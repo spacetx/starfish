@@ -76,3 +76,7 @@ class Features:
     CELL_ID = 'cell_id'
     SPOT_ID = 'spot_id'
     INTENSITY = 'intensity'
+
+
+class OverlapStrategy:
+    TAKE_MAX = 'take_max'

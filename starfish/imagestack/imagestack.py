@@ -45,7 +45,7 @@ from starfish.imagestack import indexing_utils, physical_coordinate_calculator
 from starfish.imagestack.parser import TileCollectionData, TileKey
 from starfish.imagestack.parser.crop import CropParameters, CroppedTileCollectionData
 from starfish.imagestack.parser.numpy import NumpyData
-from starfish.imagestack.parser.tileset import parse_tileset
+from starfish.imagestack.parser.tileset import TileSetData
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.multiprocessing.pool import Pool
 from starfish.multiprocessing.shmem import SharedMemory
@@ -109,7 +109,6 @@ class ImageStack:
 
     def __init__(
             self,
-            tile_shape: Tuple[int, int],
             tile_data: TileCollectionData,
     ) -> None:
         axes_sizes = {
@@ -148,7 +147,7 @@ class ImageStack:
             data_tick_marks[dim_for_axis.value] = list(
                 sorted(set(tilekey[dim_for_axis] for tilekey in self._tile_data.keys())))
 
-        data_shape.extend(tile_shape)
+        data_shape.extend(tile_data.tile_shape)
         data_dimensions.extend([Axes.Y.value, Axes.X.value])
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
@@ -244,11 +243,10 @@ class ImageStack:
         ImageStack :
             An ImageStack representing encapsulating the data from the TileSet.
         """
-        tile_shape, tile_data = parse_tileset(tileset)
+        tile_data: TileCollectionData = TileSetData(tileset)
         if crop_parameters is not None:
-            tile_shape = crop_parameters.crop_shape(tile_shape)
             tile_data = CroppedTileCollectionData(tile_data, crop_parameters)
-        return cls(tile_shape, tile_data)
+        return cls(tile_data)
 
     @classmethod
     def from_url(cls, url: str, baseurl: Optional[str]):
@@ -341,10 +339,7 @@ class ImageStack:
             assert len(index_labels[Axes.ZPLANE]) == n_z
 
         tile_data = NumpyData(array, index_labels, coordinates)
-        return cls(
-            (height, width),
-            tile_data,
-        )
+        return cls(tile_data)
 
     @property
     def xarray(self) -> xr.DataArray:

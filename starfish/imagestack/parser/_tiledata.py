@@ -41,6 +41,11 @@ class TileCollectionData:
         raise NotImplementedError()
 
     @property
+    def tile_shape(self) -> Tuple[int, int]:
+        """Returns the shape of a tile."""
+        raise NotImplementedError()
+
+    @property
     def extras(self) -> dict:
         """Returns the extras metadata for the TileSet."""
         raise NotImplementedError()

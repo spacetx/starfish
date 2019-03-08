@@ -977,12 +977,6 @@ class ImageStack:
     def num_zplanes(self):
         return self.xarray.sizes[Axes.ZPLANE]
 
-    AXES_TO_PROPERTY_MAP = {
-        Axes.ROUND: num_rounds,
-        Axes.CH: num_chs,
-        Axes.ZPLANE: num_zplanes,
-    }
-
     def axis_labels(self, axis: Axes) -> Iterable[int]:
         """Given a axis, return the sorted unique values for that axis in this ImageStack.  For
         instance, imagestack.unique_index_values(Axes.ROUND) returns all the round ids in this

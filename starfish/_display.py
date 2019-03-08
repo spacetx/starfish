@@ -1,3 +1,4 @@
+import __main__
 import warnings
 from collections import OrderedDict
 from typing import Iterable, List, Optional, Set, Tuple, Union
@@ -7,6 +8,9 @@ import numpy as np
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Axes, Features
+
+
+INTERACTIVE = not hasattr(__main__, "__file__")
 
 
 def _normalize_axes(axes: Iterable[Union[Axes, str]]) -> List[str]:
@@ -65,7 +69,7 @@ def _mask_low_intensity_spots(
     """
     with warnings.catch_warnings():
         # we expect to have invalid values (np.nan) in IntensityTable, hide the warnings from users
-        warnings.simplefilter('ignore', RuntimeWarning)
+        warnings.simplefilter("ignore", RuntimeWarning)
         # reshape the values into a 1-d vector of length product(features, rounds, channels)
         return np.ravel(intensity_table.values >= intensity_threshold)
 
@@ -101,17 +105,15 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
     return coords, sizes
 
 
-def stack(
-        stack: ImageStack,
+def display(
+        stack: Optional[ImageStack] = None,
         spots: Optional[IntensityTable] = None,
         project_axes: Optional[Set[Axes]] = None,
         mask_intensities: float = 0.,
         radius_multiplier: int = 1
 ):
     """
-    Displays the image stack using Napari (https://github.com/Napari).
-    Can optionally overlay detected spots if the corresponding IntensityTable
-    is provided.
+    Displays an image stack and/or detected spots using Napari (https://github.com/napari/Napari).
 
     Parameters
     ----------
@@ -135,15 +137,15 @@ def stack(
 
     1. Display a stack to evaluate a filtering result. Just pass any ImageStack!
 
-    >>> import starfish.display
-    >>> starfish.display.stack(stack)
+    >>> starfish import display
+    >>> display(stack)
 
     2. Display spots of a single-molecule FISH experiment: smFISH will produce IntensityTables where
     most values are np.NaN. These will be masked automatically, so passing an ImageStack +
     IntensityTable will display spots in the rounds and channels that they are detected
 
-    >>> import starfish.display
-    >>> starfish.display.stack(stack, intensities)
+    >>> from starfish import display
+    >>> display(stack, intensities)
 
     3. Diagnose spot calls within each round and channel of a coded experiment. A user might want to
     evaluate if spot calling is failing for a specific round/channel pair. To accomplish this,
@@ -151,52 +153,61 @@ def stack(
     channels. The user can additionally filter the IntensityTable to further mask additional spots
     (any np.NaN value will not be displayed)
 
-    >>> import starfish.display
+    >>> from starfish import display
     >>> mask_intensities = 0.3  # this was the spot calling intensity threshold
-    >>> starfish.display(stack, intensities, mask_intensities=mask_intensities)
+    >>> display(stack, intensities, mask_intensities=mask_intensities)
 
     4. Evaluate spot calls across rounds and channels by visualizing spots on a max projection of
     The rounds and channels.
 
-    >>> import starfish.display
-    >>> from starfish import Axes
-    >>> starfish.display.stack(stack, intensities, project_axes={Axes.CH, Axes.ROUND})
+    >>> from starfish import display, Axes
+    >>> display(stack, intensities, project_axes={Axes.CH, Axes.ROUND})
 
     Notes
     -----
-    - To use in ipython, use the %gui qt5 magic.
+    - To use in ipython, use the `%gui qt5` magic.
     - Napari axes currently cannot be labeled. Until such a time that they can, this function will
       order them by Round, Channel, and Z.
-    - Requires napari 0.0.5.1: install starfish using `pip install starfish[napari]` to install all
+    - Requires napari 0.0.6: install starfish using `pip install starfish[napari]` to install all
       necessary requirements
     """
+    if stack is None and spots is None:
+        raise TypeError("expected a stack and/or spots; got nothing")
+
     try:
-        import napari_gui
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", module="vispy.visuals.isocurve", lineno=22)
+            from napari import Window, Viewer
     except ImportError:
-        print("Requires napari 0.0.5.1. Run `pip install starfish[napari]` to install the "
+        print("Requires napari 0.0.6. Run `pip install starfish[napari]` to install the "
               "necessary requirements.")
         return
 
-    if project_axes is not None:
-        stack = stack.max_proj(*project_axes)
+    from PyQt5.QtWidgets import QApplication
 
-    # Switch axes to match napari expected order [x, y, round, channel, z]
-    reordered_array: np.ndarray = stack.xarray.transpose(
-        Axes.Y.value,
-        Axes.X.value,
-        Axes.ROUND.value,
-        Axes.CH.value,
-        Axes.ZPLANE.value
-    ).values
+    app = QApplication.instance() or QApplication([])
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings('ignore', module='vispy.visuals.isocurve', lineno=22)
-        # display the imagestack using napari
-        viewer = napari_gui.imshow(reordered_array, multichannel=False)
-    viewer._index = [0, 0, 0, 0, 0]  # initialize napari status bar
+    # initialize the viewer
+    viewer = Viewer()
+    window = Window(viewer, show=False)
+    viewer._window = window
+
+    if stack is not None:
+        if project_axes is not None:
+            stack = stack.max_proj(*project_axes)
+
+        # Switch axes to match napari expected order [x, y, round, channel, z]
+        reordered_array: np.ndarray = stack.xarray.transpose(
+            Axes.Y.value,
+            Axes.X.value,
+            Axes.ROUND.value,
+            Axes.CH.value,
+            Axes.ZPLANE.value
+        ).values
+
+        viewer.add_image(reordered_array, multichannel=False)
 
     if spots is not None:
-
         # _detect_per_round_spot_finding_intensity_tables(spots)
         if project_axes is not None:
             spots = _max_intensity_table_maintain_dims(spots, project_axes)
@@ -211,15 +222,18 @@ def stack(
         mask = _mask_low_intensity_spots(spots, mask_intensities)
 
         if not np.sum(mask):
-            warnings.warn(f'No spots passed provided intensity threshold of {mask_intensities}')
+            warnings.warn(f"No spots passed provided intensity threshold of {mask_intensities}")
             return viewer
 
         coords = coords[mask, :]
         sizes = sizes[mask]
 
-        viewer.add_markers(
-            coords=coords, face_color='white', edge_color='white', symbol='ring',
-            size=sizes * radius_multiplier
-        )
+        viewer.add_markers(coords=coords, face_color="white", edge_color="white", symbol="ring",
+                           size=sizes * radius_multiplier, n_dimensional=True)
+
+    window.show()
+
+    if not INTERACTIVE:
+        app.exec()  # create blocking process to persist windows
 
     return viewer

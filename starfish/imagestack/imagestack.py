@@ -21,7 +21,6 @@ from typing import (
     Union,
 )
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import skimage.io
@@ -560,52 +559,6 @@ class ImageStack:
                 data.shape, self._data[slice_list].shape))
 
         self._data.loc[slice_list] = data
-
-    @staticmethod
-    def _show_matplotlib_notebook(
-            linear_view, labels, n_tiles, figure_size, color_map
-    ):
-        from ipywidgets import interact, fixed
-
-        fig, ax = plt.subplots(figsize=figure_size)
-        im = ax.imshow(linear_view[0], cmap=color_map)
-        ax.set_xticks([])
-        ax.set_yticks([])
-
-        def show_plane(ax, plane, plane_index, cmap="gray", title=None):
-            # Update the image in the current plane
-            im.set_data(plane)
-            if title:
-                ax.set_title(title)
-
-        def display_slice(plane_index, ax):
-            title_str = " ".join(str(lab).upper() for lab in labels[plane_index])
-            show_plane(ax, linear_view[plane_index], plane_index, title=title_str, cmap=color_map)
-
-        interact(display_slice, ax=fixed(ax), plane_index=(0, n_tiles - 1))
-
-    @staticmethod
-    def _show_matplotlib_inline(
-            linear_view, labels, n_tiles, figure_size, color_map
-    ):
-        from ipywidgets import interact
-
-        def show_plane(ax, plane, plane_index, cmap="gray", title=None):
-            ax.imshow(plane, cmap=cmap)
-
-            if title:
-                ax.set_title(title, fontsize=16)
-            ax.set_xticks([])
-            ax.set_yticks([])
-
-        @interact(plane_index=(0, n_tiles - 1))
-        def display_slice(plane_index=0):
-            fig, ax = plt.subplots(figsize=figure_size)
-            title_str = " ".join(str(lab).upper() for lab in labels[plane_index])
-            show_plane(ax, linear_view[plane_index], plane_index, title=title_str, cmap=color_map)
-            plt.show()
-
-        return display_slice
 
     @staticmethod
     def _build_slice_list(

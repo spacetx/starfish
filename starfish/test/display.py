@@ -3,7 +3,7 @@ from functools import lru_cache
 
 import numpy as np
 
-from starfish.display.stack import (
+from starfish.display import (
     _mask_low_intensity_spots,
     _max_intensity_table_maintain_dims,
     _spots_to_markers,

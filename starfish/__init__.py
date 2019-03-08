@@ -11,6 +11,8 @@ import pkg_resources
 from . import image
 # spot detection and manipulation
 from . import spots
+# display images and spots
+from ._display import display
 # top-level objects
 from .codebook.codebook import Codebook
 from .experiment.experiment import Experiment, FieldOfView

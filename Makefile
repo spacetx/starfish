@@ -3,7 +3,7 @@ SHELL := /bin/bash
 MPLBACKEND?=Agg
 export MPLBACKEND
 
-MODULES=starfish data_formatting_examples sptx_format
+MODULES=starfish data_formatting_examples
 
 define print_help
     @printf "    %-24s   $(2)\n" $(1)
@@ -33,13 +33,13 @@ lint-init:
 	flake8 --ignore 'E252, E301, E302, E305, E401, F401, W503, E731, F811' --filename='*__init__.py' $(MODULES)
 
 test:
-	pytest -v -n 8 --cov starfish --cov sptx_format
+	pytest -v -n 8 --cov starfish
 
 fast-test:
-	pytest -v -n 8 --cov starfish --cov sptx_format -m 'not slow'
+	pytest -v -n 8 --cov starfish -m 'not slow'
 
 slow-test:
-	pytest -v -n 8 --cov starfish --cov sptx_format -m 'slow'
+	pytest -v -n 8 --cov starfish -m 'slow'
 
 mypy:
 	mypy --ignore-missing-imports $(MODULES)

@@ -1,4 +1,4 @@
 include REQUIREMENTS.txt
 include starfish/REQUIREMENTS-STRICT.txt
-recursive-include sptx_format/schema/ *.json
-recursive-include sptx_format/examples/ *.json
+recursive-include starfish/spacetx_format/schema/ *.json
+recursive-include starfish/spacetx_format/examples/ *.json

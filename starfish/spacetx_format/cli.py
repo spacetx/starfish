@@ -2,8 +2,8 @@ from time import time
 
 import xarray as xr
 
-from sptx_format import validate_sptx
 from starfish.util import click
+from . import validate_sptx
 
 
 class DefaultGroup(click.Group):

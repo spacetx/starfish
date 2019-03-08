@@ -197,6 +197,10 @@ class CroppedTileCollectionData(TileCollectionData):
         return self.crop_parameters.filter_tilekeys(self.backing_tile_collection_data.keys())
 
     @property
+    def tile_shape(self) -> Tuple[int, int]:
+        return self.crop_parameters.crop_shape(self.backing_tile_collection_data.tile_shape)
+
+    @property
     def extras(self) -> dict:
         return self.backing_tile_collection_data.extras
 

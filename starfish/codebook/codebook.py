@@ -723,47 +723,48 @@ class Codebook(xr.DataArray):
 
         return cls.from_code_array(codebook, n_round=n_round, n_ch=n_channel)
 
-    @classmethod
-    def constitutive_fluorescence_mask(cls, n_channel: int, n_round: int) -> "Codebook":
-        """Produce a codebook that will detect pan-spectral autofluorescent spots.
+    def mask_pan_channel_autofluorescence(self) -> "Codebook":
+        """Add features to the codebook that that will detect pan-spectral autofluorescent spots.
         Use metric decode to detect examples of these spots.
 
-        Parameters
-        ----------
-        n_channel : int
-            number of channels for the codebook
-        n_round : int
-            number of rounds for the codebook
+        Returns
+        -------
+        Codebook :
+            codebook augmented with a single code that detects pan-channel autofluorescence
+        """
+        data = np.ones((1, self.sizes[Axes.CH.value], self.sizes[Axes.ROUND.value]))
+        dims = (Features.TARGET, Axes.CH.value, Axes.ROUND.value)
+        coords = {
+            Features.TARGET: (Features.TARGET, ("autofluorescence", )),
+            Axes.CH.value: (Axes.CH.value, self.coords[Axes.CH.value]),
+            Axes.ROUND.value: (Axes.ROUND.value, self.coords[Axes.ROUND.value])
+        }
+        autofluorescence = Codebook(data, coords, dims)
+        return Codebook(xr.concat([self, autofluorescence], dim=Features.TARGET))
+
+    def mask_channel_specific_autofluorescence(self) -> "Codebook":
+        """Add features to the codebook that that detects channel-specific autofluorescent spots.
+        Use metric decode to detect examples of these spots.
 
         Returns
         -------
         Codebook :
-            codebook with a single code that expects fluorescence in all rounds and channels
+            codebook augmented with codes equal to the number of channels used in the experiment.
         """
-        data = np.ones((1, n_channel, n_round))
-        code_names = ["autofluorescence"]
-        return cls._create_codebook(code_names, n_channel, n_round, data)
+        n_channel = self.sizes[Axes.CH.value]
+        n_round = self.sizes[Axes.ROUND.value]
 
-    @classmethod
-    def constitutive_channel_fluorescence_mask(cls, n_channel: int, n_round: int) -> "Codebook":
-        """Produce a codebook that will detect spots that fluoresce in the same channel across
-        all rounds of an experiment. Use metric decode to detect examples of these spots.
-
-        Parameters
-        ----------
-        n_channel : int
-            number of channels for the codebook
-        n_round : int
-            number of rounds for the codebook
-
-        Returns
-        -------
-        Codebook :
-            codebook with codes equal to the number of channels in the codebook
-        """
         data = np.zeros((n_channel, n_channel, n_round))
         for c in range(n_channel):
             data[c, c] = 1
         code_names = [f"channel_{c}_autofluorescence" for c in range(n_channel)]
 
-        return cls._create_codebook(code_names, n_channel, n_round, data)
+        dims = (Features.TARGET, Axes.CH.value, Axes.ROUND.value)
+        coords = {
+            Features.TARGET: (Features.TARGET, code_names),
+            Axes.CH.value: (Axes.CH.value, self.coords[Axes.CH.value]),
+            Axes.ROUND.value: (Axes.ROUND.value, self.coords[Axes.ROUND.value])
+        }
+        autofluorescence = Codebook(data, coords, dims)
+
+        return Codebook(xr.concat([self, autofluorescence], dim=Features.TARGET))

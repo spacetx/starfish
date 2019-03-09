@@ -130,6 +130,8 @@ class TileSetData(TileCollectionData):
     This class presents a simpler API for accessing a TileSet and its constituent tiles.
     """
     def __init__(self, tileset: TileSet) -> None:
+        self._tile_shape = tileset.default_tile_shape
+
         self.tiles: MutableMapping[TileKey, Tile] = dict()
         for tile in tileset.tiles():
             key = TileKey(
@@ -137,6 +139,11 @@ class TileSetData(TileCollectionData):
                 ch=tile.indices[Axes.CH],
                 zplane=tile.indices.get(Axes.ZPLANE, 0))
             self.tiles[key] = tile
+
+            # if we don't have the tile shape, then we peek at the tile and get its shape.
+            if self._tile_shape is None:
+                self._tile_shape = tile.tile_shape
+
         self._extras = tileset.extras
         self._expectations = _TileSetConsistencyDetector()
 
@@ -147,6 +154,10 @@ class TileSetData(TileCollectionData):
     def keys(self) -> Collection[TileKey]:
         """Returns a Collection of the TileKey's for all the tiles."""
         return self.tiles.keys()
+
+    @property
+    def tile_shape(self) -> Tuple[int, int]:
+        return self._tile_shape
 
     @property
     def extras(self) -> dict:

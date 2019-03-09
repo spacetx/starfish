@@ -25,7 +25,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from showit import image as show_image
 
-import starfish.display
+from starfish import display
 from starfish import data, FieldOfView
 from starfish.types import Features, Axes
 # EPY: END code
@@ -46,7 +46,8 @@ primary_image = experiment.fov().get_image(FieldOfView.PRIMARY_IMAGES)
 
 # EPY: START code
 # Display the data
-starfish.display.stack(primary_image)
+# EPY: ESCAPE %gui qt5
+display(primary_image)
 # EPY: END code
 
 # EPY: START markdown

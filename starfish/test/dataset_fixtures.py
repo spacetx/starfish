@@ -79,7 +79,7 @@ def simple_codebook_json(simple_codebook_array) -> Generator[str, None, None]:
 
 @pytest.fixture(scope='module')
 def loaded_codebook(simple_codebook_json):
-    return Codebook.from_json(simple_codebook_json, n_ch=2, n_round=2)
+    return Codebook.from_json(simple_codebook_json, n_channel=2, n_round=2)
 
 
 @pytest.fixture(scope='function')

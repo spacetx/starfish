@@ -66,14 +66,14 @@ def experiment(ctx, path, fuzz):
 
 
 @validate.command()
-@click.argument("file", metavar="JSON_FILE_OR_URL")
+@click.argument("path", metavar="JSON_FILE_OR_URL")
 @click.option("--fuzz", is_flag=True)
 @click.pass_context
-def fov(ctx, file, fuzz):
+def fov(ctx, path, fuzz):
     """validate field-of-view against the jsonschemas"""
 
     try:
-        valid = validate_sptx.validate_file(file, "field_of_view/field_of_view.json", fuzz)
+        valid = validate_sptx.validate_file(path, "field_of_view/field_of_view.json", fuzz)
         if valid:
             ctx.exit(0)
         else:
@@ -83,14 +83,14 @@ def fov(ctx, file, fuzz):
 
 
 @validate.command()
-@click.argument("file", metavar="JSON_FILE_OR_URL")
+@click.argument("path", metavar="JSON_FILE_OR_URL")
 @click.option("--fuzz", is_flag=True)
 @click.pass_context
-def manifest(ctx, file, fuzz):
+def manifest(ctx, path, fuzz):
     """validate manifest against the jsonschemas"""
 
     try:
-        valid = validate_sptx.validate_file(file, "fov_manifest.json", fuzz)
+        valid = validate_sptx.validate_file(path, "fov_manifest.json", fuzz)
         if valid:
             ctx.exit(0)
         else:
@@ -100,17 +100,17 @@ def manifest(ctx, file, fuzz):
 
 
 @validate.command()
-@click.argument("file")
+@click.argument("path")
 @click.pass_context
-def xarray(ctx, file):
+def xarray(ctx, path):
     try:
-        d = xr.open_dataset(file)
+        d = xr.open_dataset(path)
         print("=" * 60)
         start = time()
         print(d)
         stop = time()
         print("=" * 60)
-        print(f"Opened {file} in {stop-start}s.")
+        print(f"Opened {path} in {stop-start}s.")
         names = set(d.coords._names)
         spots = "z y x radius z_min z_max y_min y_max x_min x_max "
         spots += "intensity spot_id features c r xc yc zc"

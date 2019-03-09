@@ -11,6 +11,9 @@ import pkg_resources
 from . import image
 # spot detection and manipulation
 from . import spots
+# display images and spots
+from ._display import display
+# generated version number and commit hash
 from ._version import get_versions
 # top-level objects
 from .codebook.codebook import Codebook

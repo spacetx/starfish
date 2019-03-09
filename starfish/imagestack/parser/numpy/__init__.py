@@ -102,6 +102,10 @@ class NumpyData(TileCollectionData):
         return keys
 
     @property
+    def tile_shape(self) -> Tuple[int, int]:
+        return self.data.shape[-2:]
+
+    @property
     def extras(self) -> dict:
         """Returns the extras metadata for the TileSet."""
         return {}

@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
-import starfish.display
+from starfish import display
 from starfish import data, FieldOfView
 from starfish.types import Features, Axes
 
@@ -49,7 +49,8 @@ print(stack.shape)
 # EPY: END code
 
 # EPY: START code
-starfish.display.stack(stack)
+# EPY: ESCAPE %gui qt5
+display(stack)
 # EPY: END code
 
 # EPY: START markdown

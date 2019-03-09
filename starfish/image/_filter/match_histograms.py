@@ -42,7 +42,7 @@ class MatchHistograms(FilterAlgorithmBase):
     def _harmonize_enum(iterable):
         return list(v if isinstance(v, str) else v.value for v in iterable)
 
-    def _compute_reference_distribution(self, data: ImageStack):
+    def _compute_reference_distribution(self, data: ImageStack) -> xr.DataArray:
         """compute the average reference distribution across the ImageStack"""
         chunk_key = self._harmonize_enum(data.shape.keys() - self.group_by)
         sort_key = self._harmonize_enum(self.group_by)

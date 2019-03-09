@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Optional, Set, Union
+from typing import Optional, Set
 
 import numpy as np
 import xarray as xr
@@ -7,7 +7,7 @@ import xarray as xr
 from starfish.compat import match_histograms
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
-from starfish.util import click
+from starfish.util import click, enum
 from ._base import FilterAlgorithmBase
 
 
@@ -38,14 +38,10 @@ class MatchHistograms(FilterAlgorithmBase):
 
     _DEFAULT_TESTING_PARAMETERS = {"group_by": {Axes.CH, Axes.ROUND}}
 
-    @staticmethod
-    def _harmonize_enum(iterable):
-        return list(v if isinstance(v, str) else v.value for v in iterable)
-
     def _compute_reference_distribution(self, data: ImageStack) -> xr.DataArray:
         """compute the average reference distribution across the ImageStack"""
-        chunk_key = self._harmonize_enum(data.shape.keys() - self.group_by)
-        sort_key = self._harmonize_enum(self.group_by)
+        chunk_key = enum.harmonize(data.shape.keys() - self.group_by)
+        sort_key = enum.harmonize(self.group_by)
 
         # stack up the array
         stacked = data.xarray.stack(chunk_key=chunk_key)
@@ -58,15 +54,15 @@ class MatchHistograms(FilterAlgorithmBase):
 
     @staticmethod
     def _match_histograms(
-        image: Union[xr.DataArray, np.ndarray], reference: np.ndarray
+        image: xr.DataArray, reference: np.ndarray
     ) -> np.ndarray:
         """
         matches the intensity distribution of image to reference
 
         Parameters
         ----------
-        image, reference : numpy.ndarray[np.float32]
-            2-d or 3-d image data
+        image, reference : xr.DataArray
+            3-d image data
 
         Returns
         -------
@@ -78,7 +74,7 @@ class MatchHistograms(FilterAlgorithmBase):
         return match_histograms(image, reference=reference)
 
     def run(
-            self, stack: ImageStack, in_place: bool=False, verbose: bool=True,
+            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
             n_processes: Optional[int]=None
     ) -> ImageStack:
         """Perform filtering of an image stack
@@ -88,9 +84,9 @@ class MatchHistograms(FilterAlgorithmBase):
         stack : ImageStack
             Stack to be filtered.
         in_place : bool
-            if True, process ImageStack in-place, otherwise return a new stack
+            if True, process ImageStack in-place, otherwise return a new stack (default False)
         verbose : bool
-            if True, report on filtering progress (default = False)
+            if True, report on filtering progress (default False)
         n_processes : Optional[int]
             Number of parallel processes to devote to calculating the filter
 

@@ -735,7 +735,7 @@ class Codebook(xr.DataArray):
         data = np.ones((1, self.sizes[Axes.CH.value], self.sizes[Axes.ROUND.value]))
         dims = (Features.TARGET, Axes.CH.value, Axes.ROUND.value)
         coords = {
-            Features.TARGET: (Features.TARGET, ("autofluorescence", )),
+            Features.TARGET: (Features.TARGET, ["autofluorescence"]),
             Axes.CH.value: (Axes.CH.value, self.coords[Axes.CH.value]),
             Axes.ROUND.value: (Axes.ROUND.value, self.coords[Axes.ROUND.value])
         }

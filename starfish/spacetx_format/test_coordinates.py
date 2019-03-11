@@ -3,11 +3,13 @@ from pkg_resources import resource_filename
 
 from .util import SpaceTxValidator
 
-package_name = "sptx_format"
-coordinates_path = resource_filename(package_name, "schema/field_of_view/tiles/coordinates.json")
+package_name = "starfish"
+coordinates_path = resource_filename(
+    package_name, "spacetx_format/schema/field_of_view/tiles/coordinates.json")
 validator = SpaceTxValidator(coordinates_path)
 
-example = resource_filename(package_name, "examples/field_of_view/coordinates_%s.json")
+example = resource_filename(
+    package_name, "spacetx_format/examples/field_of_view/coordinates_%s.json")
 
 
 @pytest.mark.parametrize("name", (

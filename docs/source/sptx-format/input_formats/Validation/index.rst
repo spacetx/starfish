@@ -1,3 +1,3 @@
 .. _schema:
 
-.. mdinclude:: ../../../../../sptx_format/schema/README.md
+.. mdinclude:: ../../../../../starfish/spacetx_format/schema/README.md

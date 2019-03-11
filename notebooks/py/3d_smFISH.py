@@ -30,7 +30,8 @@ import numpy as np
 
 import starfish
 import starfish.display
-from starfish import data, FieldOfView
+from starfish import data, FieldOfView, IntensityTable
+
 # EPY: END code
 
 # EPY: START markdown
@@ -99,22 +100,25 @@ def processing_pipeline(
 
     print("Loading images...")
     primary_image = experiment[fov_name].get_image(FieldOfView.PRIMARY_IMAGES)
+    all_intensities = list()
     codebook = experiment.codebook
+    for primary_image in experiment[fov_name].iterate_image_type(FieldOfView.PRIMARY_IMAGES):
+        print("Filtering images...")
+        filter_kwargs = dict(
+            in_place=True,
+            verbose=True,
+            n_processes=n_processes
+        )
+        clip1.run(primary_image, **filter_kwargs)
+        bandpass.run(primary_image, **filter_kwargs)
+        glp.run(primary_image, **filter_kwargs)
+        clip2.run(primary_image, **filter_kwargs)
 
-    print("Filtering images...")
-    filter_kwargs = dict(
-        in_place=True,
-        verbose=True,
-        n_processes=n_processes
-    )
-    clip1.run(primary_image, **filter_kwargs)
-    bandpass.run(primary_image, **filter_kwargs)
-    glp.run(primary_image, **filter_kwargs)
-    clip2.run(primary_image, **filter_kwargs)
+        print("Calling spots...")
+        spot_attributes = tlmpf.run(primary_image)
+        all_intensities.append(spot_attributes)
 
-    print("Calling spots...")
-    spot_attributes = tlmpf.run(primary_image)
-
+    spot_attributes = IntensityTable.concatanate_intensity_tables(all_intensities)
     print("Decoding spots...")
     decoded = codebook.decode_per_round_max(spot_attributes)
     decoded = decoded[decoded["total_intensity"]>.025]

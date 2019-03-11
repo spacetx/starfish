@@ -1,7 +1,7 @@
 import numpy as np
 import xarray as xr
 from functools import partial
-from typing import Union, Optional
+from typing import List, Union, Mapping, Optional, Tuple
 
 from skimage import transform
 from skimage.transform._geometric import GeometricTransform
@@ -14,29 +14,30 @@ from starfish.types import Axes
 
 class Warp(ApplyTransformBase):
 
-    def __init__(self, transformation_object: GeometricTransform):
-        self.transformation_object = transformation_object
-
     @staticmethod
     def _warp(image: Union[xr.DataArray, np.ndarray], transformation_object: GeometricTransform
               ) -> np.ndarray:
         """ Wrapper around skimage.transform.warp. Warps an image according to a
         given coordinate transformation.
-        image:
-        transformation_object:
+        image: the image to be transformed
+        transformation_object: skimage.transform.GeometricTransform
         Returns
         -------
         """
         return transform.warp(image, transformation_object)
 
     def run(
-            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
+            self, stack: ImageStack,
+            transforms_list: List[Tuple[Mapping[Axes, int], GeometricTransform]],
+            in_place: bool=False, verbose: bool=False,
             n_processes: Optional[int]=None) -> ImageStack:
         """Applies a transformation to an Imagestack
         Parameters
         ----------
         stack : ImageStack
             Stack to be transformed.
+        transforms_list:
+            TALJBGWOUGBOUWR:BWOURGB:WURGB
         in_place : bool
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
@@ -49,23 +50,19 @@ class Warp(ApplyTransformBase):
             If in-place is False, return the results of filter as a new stack.  Otherwise return the
             original stack.
         """
+        all_axes = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
+        for selector, transformation_object in transforms_list:
+            other_axes = all_axes - {list(selector.keys())[0]}
+            for axes in stack._iter_axes(other_axes):
+                selector.update(axes)
+                selected_image = np.squeeze(stack.sel(selector).xarray)
+                transformed_image = Warp._warp(selected_image, transformation_object)
+                stack.set_slice(selector, transformed_image.astype(np.float32))
 
-
-
-
-        group_by = {Axes.CH, Axes.ROUND, Axes.ZPLANE}
-        warp = partial(self._warp, transformation_object=self.transformation_object)
-        result = stack.apply(
-            warp,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
-        )
-
-        return result
+        return stack
 
     @staticmethod
     @click.command("Warp")
-    @click.option(
-        "--transform-object", default=None, type=int, help="clip intensities below this percentile")
     @click.pass_context
-    def _cli(ctx, transform_object):
-        ctx.obj["component"]._cli_run(ctx, Warp(transformation_object=transform_object))
+    def _cli(ctx):
+        ctx.obj["component"]._cli_run(ctx, Warp())

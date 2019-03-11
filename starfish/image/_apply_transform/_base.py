@@ -4,6 +4,6 @@ from starfish.pipeline.algorithmbase import AlgorithmBase
 
 
 class ApplyTransformBase(AlgorithmBase):
-    def run(self, stack) -> ImageStack:
+    def run(self, stack, transforms_list) -> ImageStack:
         """Performs registration on the stack provided."""
         raise NotImplementedError()

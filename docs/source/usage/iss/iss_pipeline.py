@@ -1,7 +1,7 @@
 import os
 
 import starfish
-from starfish.image import Filter, Registration, Segmentation
+from starfish.image import ApplyTransform, Filter, LearnTransform, Registration, Segmentation
 from starfish.spots import SpotFinder, TargetAssignment
 from starfish.types import Axes
 
@@ -11,12 +11,11 @@ test = os.getenv("TESTING") is not None
 def iss_pipeline(fov, codebook):
     primary_image = fov.get_image(starfish.FieldOfView.PRIMARY_IMAGES)
 
-    # register the raw images
-    registration = Registration.FourierShiftRegistration(
-        upsampling=1000,
-        reference_stack=fov.get_image('dots')
-    )
-    registered = registration.run(primary_image, in_place=False)
+    # register the raw image
+    learn_translation = LearnTransform.Translation(reference_stack=fov.get_image('dots'))
+    transforms_list = learn_translation.run(primary_image.max_proj(Axes.CH, Axes.ZPLANE), Axes.ROUND)
+    warp = ApplyTransform.Warp()
+    registered = warp.run(primary_image, transforms_list, in_place=False, verbose=True)
 
     # filter raw data
     masking_radius = 15

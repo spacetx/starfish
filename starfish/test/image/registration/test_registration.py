@@ -16,7 +16,7 @@ def test_learn_throws_error():
         assert e.args[0] == "Only axes: r can have a length > 1"
 
 
-def test_learn():
+def test_learn_translation():
     exp = data.ISS(use_test_data=True)
     stack = exp.fov().get_image('primary')
     reference_stack = exp.fov().get_image('dots')
@@ -24,6 +24,8 @@ def test_learn():
     # Calculate max_proh accrss
     stack = stack.max_proj(Axes.CH, Axes.ZPLANE)
     transform_list = translation.run(stack, Axes.ROUND)
+    # assert there's a transofrmation object for each round
+    assert len(transform_list) == stack.num_rounds
 
 
 def test_apply():

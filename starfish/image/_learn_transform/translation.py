@@ -4,10 +4,10 @@ from typing import List, Mapping, Tuple, Union
 from skimage.feature import register_translation
 from skimage.transform._geometric import SimilarityTransform
 
-from starfish.image._learn_transform._base import LearnTransformBase
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
 from starfish.util import click
+from ._base import LearnTransformBase
 
 
 class Translation(LearnTransformBase):

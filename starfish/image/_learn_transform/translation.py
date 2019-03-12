@@ -1,6 +1,6 @@
-import numpy as np
 from typing import List, Mapping, Tuple, Union
 
+import numpy as np
 from skimage.feature import register_translation
 from skimage.transform._geometric import SimilarityTransform
 
@@ -19,7 +19,8 @@ class Translation(LearnTransformBase):
         else:
             self.reference_stack = ImageStack.from_path_or_url(reference_stack)
 
-    def run(self, stack: ImageStack, axis: Axes) -> List[Tuple[Mapping[Axes, int], SimilarityTransform]]:
+    def run(self, stack: ImageStack, axis: Axes
+            ) -> List[Tuple[Mapping[Axes, int], SimilarityTransform]]:
         """Iterate over the given axis of an imagestack and learn the Similarity transform based off the
         instantiated reference_image.
         Parameters
@@ -57,4 +58,3 @@ class Translation(LearnTransformBase):
     @click.pass_context
     def _cli(ctx, reference_stack):
         ctx.obj["component"]._cli_run(ctx, Translation(reference_stack=reference_stack))
-

@@ -1,17 +1,17 @@
+from copy import deepcopy
+from typing import List, Mapping, Tuple, Union
+
 import numpy as np
 import xarray as xr
-from copy import deepcopy
-from typing import List, Union, Mapping, Tuple
-
 from skimage import transform
 from skimage.transform._geometric import GeometricTransform
 from tqdm import tqdm
 
 from starfish.config import StarfishConfig
-from starfish.imagestack.imagestack import ImageStack
-from starfish.util import click
 from starfish.image._apply_transform._base import ApplyTransformBase
+from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
+from starfish.util import click
 
 
 class Warp(ApplyTransformBase):

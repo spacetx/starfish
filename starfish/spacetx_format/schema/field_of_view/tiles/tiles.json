@@ -37,15 +37,41 @@
       ]
     },
     "tile_shape": {
-      "type": "array",
-      "minItems": 2,
-      "maxItems": 2,
-      "items": {
-        "type": "integer",
-        "description": "The shape (x, y) of this tile.",
-        "minimum": 0,
-        "maximum": 3000
-      }
+      "oneOf": [
+        {
+          "type": "array",
+          "description": "The default tile shape (y, x) of the tiles in this field of view.",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "integer",
+            "example": 2048,
+            "minimum": 0,
+            "maximum": 3000
+          }
+        },
+        {
+          "type": "object",
+          "description": "The default tile shape of the tiles in this field of view.",
+          "properties": {
+            "x": {
+              "type": "integer",
+              "description": "The width of the tile in pixels.",
+              "minimum": 1
+            },
+            "y": {
+              "type": "integer",
+              "description": "The height of the tile in pixels.",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "x",
+            "y"
+          ],
+          "additionalProperties": false
+        }
+      ]
     },
     "extras": {
       "description": "Unstructured field used to contain additional data about this data manifest.",

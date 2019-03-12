@@ -32,7 +32,7 @@ def get_aligned_tileset():
     alignedTileset = TileSet(
         [Axes.X, Axes.Y, Axes.CH, Axes.ZPLANE, Axes.ROUND],
         {Axes.CH: NUM_CH, Axes.ROUND: NUM_ROUND, Axes.ZPLANE: NUM_Z},
-        (HEIGHT, WIDTH))
+        {Axes.Y: HEIGHT, Axes.X: WIDTH})
 
     for r in range(NUM_ROUND):
         for ch in range(NUM_CH):
@@ -58,7 +58,7 @@ def get_un_aligned_tileset():
     unAlignedTileset = TileSet(
         [Axes.X, Axes.Y, Axes.CH, Axes.ZPLANE, Axes.ROUND],
         {Axes.CH: NUM_CH, Axes.ROUND: NUM_ROUND, Axes.ZPLANE: NUM_Z},
-        (HEIGHT, WIDTH))
+        {Axes.Y: HEIGHT, Axes.X: WIDTH})
 
     for r in range(NUM_ROUND):
         for ch in range(NUM_CH):

@@ -14,7 +14,7 @@ from .util import SpaceTxValidator
 
 def _get_absolute_schema_path(schema_name: str) -> str:
     """turn the name of the schema into an absolute path by joining it to <package_root>/schema."""
-    return resource_filename("sptx_format", posixpath.join("schema", schema_name))
+    return resource_filename("starfish", posixpath.join("spacetx_format", "schema", schema_name))
 
 
 @click.command()
@@ -46,7 +46,7 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     The following will read the experiment json file provided, downloading it if necessary,
     and begin recursively validating it and all referenced json files (e.g. codebook.json):
 
-        >>> from sptx_format import validate_sptx
+        >>> from starfish.spacetx_format import validate_sptx
         >>> valid = validate_sptx.validate(json_url)
     """
 
@@ -112,7 +112,7 @@ def validate_file(file: str, schema: str, fuzz: bool=False,
     --------
     The following will read the codebook json file provided, downloading it if necessary:
 
-        >>> from sptx_format import validate_file
+        >>> from starfish.spacetx_format.validate_sptx import validate_file
         >>> valid = validate_sptx.validate_file(json_url, "codebook/codebook.json")
     """
 

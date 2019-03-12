@@ -85,7 +85,6 @@ def local_search_blob_detector(search_radius: int, anchor_channel=0) -> LocalSea
         max_sigma=(0.6, 1.7, 1.7),
         num_sigma=3,
         threshold=0.1,
-        is_volume=True,
         overlap=0.5,
         search_radius=search_radius,
         anchor_round=anchor_channel,

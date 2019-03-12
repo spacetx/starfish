@@ -19,7 +19,7 @@ class AlgorithmBaseType(type):
         This method extends each pipeline component.run() method to also log itself and
         runtime parameters to the IntensityTable and Imagestack objects. There are two
         scenarios for this method:
-            1.) Filtering:
+            1.) Filtering/Registration:
                     Imagestack -> Imagestack
             2.) Spot Detection:
                     Imagestack -> IntensityTable
@@ -28,7 +28,7 @@ class AlgorithmBaseType(type):
         """
         def helper(*args, **kwargs):
             result = func(*args, **kwargs)
-            # Scenario 1, Filtering
+            # Scenario 1, Filtering, Registration
             if isinstance(result, ImageStack):
                 result.update_log(args[0])
             # Scenario 2, Spot detection

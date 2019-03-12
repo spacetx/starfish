@@ -131,9 +131,9 @@ for img in images:
 # EPY: START code
 from starfish.image import ApplyTransform, LearnTransform
 
-learn_translation = LearnTransform.Translation(reference_stack=dots)
+learn_translation = LearnTransform.Translation(reference_stack=dots, upsampling=1000)
 transforms_list = learn_translation.run(primary_image.max_proj(Axes.CH, Axes.ZPLANE), Axes.ROUND)
-warp = ApplyTransform.Warp()
+warp = ApplyTransform.Warp(transforms_list=None)
 registered_image = warp.run(primary_image, transforms_list, in_place=False, verbose=True)
 # EPY: END code
 
@@ -266,7 +266,7 @@ rgb[:,:,1] = dots_mp_numpy
 do = rgb2gray(rgb)
 do = do/(do.max())
 
-image(do,size=10)
+# image(do,size=10)
 with warnings.catch_warnings():
     warnings.simplefilter('ignore', FutureWarning)
     is_gene1 = decoded.where(decoded[Features.AXIS][Features.TARGET] == GENE1, drop=True)

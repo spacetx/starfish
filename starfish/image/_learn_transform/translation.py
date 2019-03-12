@@ -43,10 +43,13 @@ class Translation(LearnTransformBase):
                 raise ValueError(
                     "Only axes: " + axis.value + " can have a length > 1"
                 )
-            shift, error, phasediff = register_translation(target_image,
-                                                           reference_image,
+
+            shift, error, phasediff = register_translation(src_image=target_image,
+                                                           target_image=reference_image,
                                                            upsample_factor=self.upsampling)
+            print(f"For {axis}: {a}, Shift: {shift}, Error: {error}")
             selectors = {axis: a}
+            shift = shift[::-1]
             transforms.append((selectors, SimilarityTransform(translation=shift)))
 
         return transforms

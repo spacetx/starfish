@@ -16,19 +16,14 @@ from starfish.util import click
 
 class Warp(ApplyTransformBase):
 
-    @staticmethod
-    def _warp(image: Union[xr.DataArray, np.ndarray],
-              transformation_object: GeometricTransform,
-              **kwargs
-              ) -> np.ndarray:
-        """ Wrapper around skimage.transform.warp. Warps an image according to a
-        given coordinate transformation.
-        image: the image to be transformed
-        transformation_object: skimage.transform.GeometricTransform
-        Returns
-        -------
-        """
-        return transform.warp(image, transformation_object, **kwargs)
+    def __init__(self,
+                 transforms_list: Union[str, List[Tuple[Mapping[Axes, int], GeometricTransform]]]
+                 ):
+        if isinstance(transforms_list, list):
+            self.transforms_list = transforms_list
+        else:
+            # TODO CREATE WAY TO READ TRANSFORMS LIST FROM DISK
+            self.transforms_list = list()
 
     def run(
             self, stack: ImageStack,
@@ -64,15 +59,17 @@ class Warp(ApplyTransformBase):
         if verbose and StarfishConfig().verbose:
             transforms_list = tqdm(transforms_list)
         all_axes = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
+        # TODO CHANGE TO SELF>TRANSFORMS_LIST
         for selector, transformation_object in transforms_list:
             other_axes = all_axes - {list(selector.keys())[0]}
             # iterate through remaining axes
             for axes in stack._iter_axes(other_axes):
                 # combine all axes data to select one tile
-                selector.update(axes)
-                selected_image = np.squeeze(stack.sel(selector).xarray)
-                transformed_image = Warp._warp(selected_image, transformation_object, **kwargs)
-                stack.set_slice(selector, transformed_image.astype(np.float32))
+                selector.update(axes)  # type: ignore
+                selected_image, _ = stack.get_slice(selector)
+                warped_image = warp(selected_image, transformation_object, **kwargs
+                                    ).astype(np.float32)
+                stack.set_slice(selector, warped_image)
         return stack
 
     @staticmethod
@@ -80,3 +77,17 @@ class Warp(ApplyTransformBase):
     @click.pass_context
     def _cli(ctx):
         ctx.obj["component"]._cli_run(ctx, Warp())
+
+
+def warp(image: Union[xr.DataArray, np.ndarray],
+         transformation_object: GeometricTransform,
+         **kwargs
+         ) -> np.ndarray:
+    """ Wrapper around skimage.transform.warp. Warps an image according to a
+    given coordinate transformation.
+    image: the image to be transformed
+    transformation_object: skimage.transform.GeometricTransform
+    Returns
+    -------
+    """
+    return transform.warp(image, transformation_object, **kwargs)

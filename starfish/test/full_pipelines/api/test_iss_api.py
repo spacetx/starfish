@@ -57,50 +57,11 @@ def test_iss_pipeline_cropped_data():
 
     registered_image = iss.registered_image
 
-    # assert on a random part of the filtered image
-    expected_registered_values = np.array(
-        [[1.15684755e-02, 3.86373512e-03, 2.60785664e-03, 1.35898031e-03,
-          0.00000000e+00, 0.00000000e+00, 1.15468545e-04, 0.00000000e+00,
-          0.00000000e+00, 7.16284662e-03],
-         [1.33818155e-02, 8.74291547e-03, 8.54650512e-03, 5.62853599e-03,
-          1.74340000e-03, 5.84440822e-05, 5.53897815e-04, 7.40510353e-04,
-          1.09384397e-04, 0.00000000e+00],
-         [2.32197642e-02, 1.48485349e-02, 1.20572122e-02, 1.00518325e-02,
-          3.78616550e-03, 5.51953330e-04, 1.58034940e-03, 0.00000000e+00,
-          6.80672762e-04, 3.19095445e-03],
-         [3.35171446e-02, 2.30573826e-02, 1.86911281e-02, 1.16252769e-02,
-          6.42230362e-03, 4.63001803e-03, 2.50486028e-03, 1.08768849e-03,
-          0.00000000e+00, 6.75229309e-03],
-         [5.30732870e-02, 3.61515097e-02, 3.07820514e-02, 2.19761301e-02,
-          1.52691351e-02, 9.15373303e-03, 5.41988341e-03, 0.00000000e+00,
-          9.24524793e-04, 3.14691127e-03],
-         [6.05984218e-02, 5.18058091e-02, 4.45022509e-02, 3.48668806e-02,
-          2.37355866e-02, 1.48193939e-02, 1.27216997e-02, 4.51163156e-03,
-          9.03905951e-04, 1.46147527e-03],
-         [6.03375509e-02, 6.00600466e-02, 5.51640466e-02, 4.15391065e-02,
-          3.14524844e-02, 2.64199078e-02, 1.41928447e-02, 6.39168778e-03,
-          5.34856878e-03, 3.28401709e-03],
-         [4.75437082e-02, 5.76229692e-02, 5.73692545e-02, 4.73626107e-02,
-          3.53275351e-02, 2.55322661e-02, 1.92126688e-02, 9.48204752e-03,
-          9.59323533e-03, 3.06630856e-03],
-         [3.94404493e-02, 4.60249558e-02, 4.95812669e-02, 5.13879694e-02,
-          3.92197557e-02, 2.88589876e-02, 1.97741222e-02, 1.41243441e-02,
-          8.03299714e-03, 6.66760467e-03],
-         [3.60199437e-02, 3.75546440e-02, 4.03789952e-02, 4.74576391e-02,
-          4.75049056e-02, 3.51673886e-02, 2.08846033e-02, 1.69556923e-02,
-          1.06233349e-02, 1.02646966e-02]],
-        dtype=np.float32
-    )
-    assert np.allclose(
-        expected_registered_values,
-        registered_image.xarray[2, 2, 0, 40:50, 40:50]
-    )
-
     pipeline_log = registered_image.log
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'
-    assert pipeline_log[1]['method'] == 'FourierShiftRegistration'
-    assert pipeline_log[2]['method'] == 'BlobDetector'
+    assert pipeline_log[1]['method'] == 'Warp'
+    assert pipeline_log[3]['method'] == 'BlobDetector'
 
     intensities = iss.intensities
 
@@ -112,9 +73,10 @@ def test_iss_pipeline_cropped_data():
 
     # decoding identifies 4 genes, each with 1 count
     genes, gene_counts = iss.genes, iss.counts
-    assert np.array_equal(genes, np.array(['ACTB', 'CD68', 'CTSL2', 'EPCAM', 'ETV4', 'GAPDH',
-                                           'HER2', 'MET', 'RAC1', 'TFRC', 'TP53', 'VEGF']))
-    assert np.array_equal(gene_counts, [18, 1, 5, 2, 1, 12, 3, 1, 2, 1, 1, 2])
+    assert np.array_equal(genes, np.array(['ACTB', 'CD68', 'CTSL2', 'EPCAM',
+                                           'ETV4', 'GAPDH', 'GUS', 'HER2', 'RAC1',
+                                           'TFRC', 'TP53', 'VEGF']))
+    assert np.array_equal(gene_counts, [20, 1, 5, 2, 1, 11, 1, 3, 2, 1, 1, 2])
 
     label_image = iss.label_image
 
@@ -135,8 +97,8 @@ def test_iss_pipeline_cropped_data():
     assert Coordinates.Z in assigned.coords
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'
-    assert pipeline_log[1]['method'] == 'FourierShiftRegistration'
-    assert pipeline_log[2]['method'] == 'BlobDetector'
+    assert pipeline_log[1]['method'] == 'Warp'
+    assert pipeline_log[3]['method'] == 'BlobDetector'
 
     # Test serialization / deserialization of IntensityTable log
     fp = tempfile.NamedTemporaryFile()
@@ -145,8 +107,8 @@ def test_iss_pipeline_cropped_data():
     pipeline_log = loaded_intensities.get_log()
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'
-    assert pipeline_log[1]['method'] == 'FourierShiftRegistration'
-    assert pipeline_log[2]['method'] == 'BlobDetector'
+    assert pipeline_log[1]['method'] == 'Warp'
+    assert pipeline_log[3]['method'] == 'BlobDetector'
 
     # 28 of the spots are assigned to cell 1 (although most spots do not decode!)
     assert np.sum(assigned['cell_id'] == 1) == 28

@@ -9,8 +9,9 @@ import pkg_resources
 from sptx_format.cli import validate as validate_cli
 from starfish.experiment.builder.cli import build as build_cli
 from starfish.image import (
+    ApplyTransform,
     Filter,
-    Registration,
+    LearnTransform,
     Segmentation,
 )
 from starfish.spots import (
@@ -92,7 +93,8 @@ def install_strict_dependencies():
 
 
 # Pipelines
-starfish.add_command(Registration._cli)  # type: ignore
+starfish.add_command(LearnTransform._cli)  # type: ignore
+starfish.add_command(ApplyTransform._cli)  # type: ignore
 starfish.add_command(Filter._cli)  # type: ignore
 starfish.add_command(PixelSpotDecoder._cli)
 starfish.add_command(SpotFinder._cli)  # type: ignore

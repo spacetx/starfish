@@ -246,6 +246,38 @@ seg.show()
 # EPY: END code
 
 # EPY: START markdown
+#### Assign spots to cells and create cell x gene count matrix
+# EPY: END markdown
+
+# EPY: START code
+from starfish.spots import TargetAssignment
+al = TargetAssignment.Label()
+labeled = al.run(label_image, decoded)
+# EPY: END code
+
+# EPY: START code
+from starfish.expression_matrix.expression_matrix import ExpressionMatrix
+# EPY: END code
+
+# EPY: START code
+cg = labeled.to_expression_matrix()
+cg
+# EPY: END code
+
+# EPY: START markdown
+#Plot the (x, y) centroids of segmented cells in small cyan dots. Plot cells expressing VIM in blue, and cells expressing HER2 in red. Compare with the following plot of the displayed _spots_ below. This demonstrates that (1) the expression matrix is being properly created but (2) many of the spots are occuring outside segmented cells, suggesting that the segmentation may be too restrictive. 
+# EPY: END markdown
+
+# EPY: START code
+vim_mask = cg.loc[:, 'VIM'] > 0
+her2_mask = cg.loc[:, 'HER2'] > 0
+plt.scatter(cg['x'], -cg['y'], s=5, c='c')
+plt.scatter(cg['x'][vim_mask], -cg['y'][vim_mask], s=12, c='b')
+plt.scatter(cg['x'][her2_mask], -cg['y'][her2_mask], s=12, c='r')
+
+# EPY: END code
+
+# EPY: START markdown
 #### Visualize results
 #
 #This FOV was selected to make sure that we can visualize the tumor/stroma boundary, below this is described by pseudo-coloring `HER2` (tumor) and vimentin (`VIM`, stroma)

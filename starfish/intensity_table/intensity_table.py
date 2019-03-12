@@ -409,14 +409,24 @@ class IntensityTable(xr.DataArray):
     def to_expression_matrix(self) -> ExpressionMatrix:
         """Generates a cell x gene count matrix where each cell is annotated with spatial metadata
 
+        Requires that spots in the IntensityTable have been assigned to cells.
+
         Returns
         -------
         ExpressionMatrix :
             cell x gene expression table
         """
+        try:
+            grouped = self.to_features_dataframe().groupby(['cell_id', 'target'])
+        except KeyError as e:
+            if "cell_id" in str(e):
+                raise RuntimeError(
+                    "IntensityTable must have 'cell_id' assignments for each cell before "
+                    "this function can be called. See starfish.TargetAssignment.Label."
+                )
+            else:
+                raise
 
-        # create the 2-d counts matrix
-        grouped = self.to_features_dataframe().groupby(['cell_id', 'target'])
         counts = grouped.count().iloc[:, 0].unstack().fillna(0)
 
         grouped = self.to_features_dataframe().groupby(['cell_id'])[['x', 'y', 'z']]

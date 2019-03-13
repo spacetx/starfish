@@ -1,7 +1,7 @@
 import os
 
 import starfish
-from starfish.image import ApplyTransform, Filter, LearnTransform, Registration, Segmentation
+from starfish.image import ApplyTransform, Filter, LearnTransform, Segmentation
 from starfish.spots import SpotFinder, TargetAssignment
 from starfish.types import Axes
 

@@ -1,12 +1,8 @@
-from typing import List, Mapping, Tuple
-
-from skimage.transform._geometric import GeometricTransform
-
+from starfish.image._learn_transform.transforms_list import TransformsList
 from starfish.pipeline.algorithmbase import AlgorithmBase
-from starfish.types import Axes
 
 
 class LearnTransformBase(AlgorithmBase):
-    def run(self, stack, axis) -> List[Tuple[Mapping[Axes, int], GeometricTransform]]:
+    def run(self, stack, axis) -> TransformsList:
         """Performs registration on the stack provided."""
         raise NotImplementedError()

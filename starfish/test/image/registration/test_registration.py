@@ -25,7 +25,7 @@ def test_learn_translation():
     stack = stack.max_proj(Axes.CH, Axes.ZPLANE)
     transform_list = translation.run(stack, Axes.ROUND)
     # assert there's a transofrmation object for each round
-    assert len(transform_list) == stack.num_rounds
+    assert len(transform_list.transforms) == stack.num_rounds
 
 
 def test_apply():
@@ -36,5 +36,5 @@ def test_apply():
     # Calculate max_proh accrss
     stack = stack.max_proj(Axes.CH, Axes.ZPLANE)
     transform_list = translation.run(stack, Axes.ROUND)
-    apply_transform = Warp()
-    apply_transform.run(stack, transform_list)
+    apply_transform = Warp(transform_list)
+    apply_transform.run(stack)

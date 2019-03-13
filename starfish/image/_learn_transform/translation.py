@@ -1,9 +1,10 @@
-from typing import List, Mapping, Tuple, Union
+from typing import Union
 
 import numpy as np
 from skimage.feature import register_translation
 from skimage.transform._geometric import SimilarityTransform
 
+from starfish.image._learn_transform.transforms_list import TransformsList
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
 from starfish.util import click
@@ -20,7 +21,7 @@ class Translation(LearnTransformBase):
             self.reference_stack = ImageStack.from_path_or_url(reference_stack)
 
     def run(self, stack: ImageStack, axis: Axes
-            ) -> List[Tuple[Mapping[Axes, int], SimilarityTransform]]:
+            ) -> TransformsList:
         """Iterate over the given axis of an imagestack and learn the Similarity transform based off the
         instantiated reference_image.
         Parameters
@@ -35,7 +36,7 @@ class Translation(LearnTransformBase):
             A list of tuples containing the round of the Imagestack and associated transform.
         """
 
-        transforms: List[Tuple[Mapping[Axes, int], SimilarityTransform]] = list()
+        transforms = TransformsList()
         reference_image = np.squeeze(self.reference_stack.xarray)
         for a in stack.axis_labels(axis):
             target_image = np.squeeze(stack.sel({axis: a}).xarray)
@@ -50,7 +51,7 @@ class Translation(LearnTransformBase):
             print(f"For {axis}: {a}, Shift: {shift}, Error: {error}")
             selectors = {axis: a}
             shift = shift[::-1]
-            transforms.append((selectors, SimilarityTransform(translation=shift)))
+            transforms.append(selectors, SimilarityTransform(translation=shift))
 
         return transforms
 

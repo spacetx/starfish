@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import List, Mapping, Tuple, Union
+from typing import Union
 
 import numpy as np
 import xarray as xr
@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 from starfish.config import StarfishConfig
 from starfish.image._apply_transform._base import ApplyTransformBase
+from starfish.image._learn_transform.transforms_list import TransformsList
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
 from starfish.util import click
@@ -16,27 +17,20 @@ from starfish.util import click
 
 class Warp(ApplyTransformBase):
 
-    def __init__(self,
-                 transforms_list: Union[str, List[Tuple[Mapping[Axes, int], GeometricTransform]]]
-                 ):
-        if isinstance(transforms_list, list):
+    def __init__(self, transforms_list: Union[str, TransformsList]):
+        if isinstance(transforms_list, TransformsList):
             self.transforms_list = transforms_list
         else:
-            # TODO CREATE WAY TO READ TRANSFORMS LIST FROM DISK
-            self.transforms_list = list()
+            self.transforms_list = TransformsList.from_path(filepath=transforms_list)
 
     def run(
             self, stack: ImageStack,
-            transforms_list: List[Tuple[Mapping[Axes, int], GeometricTransform]],
             in_place: bool=False, verbose: bool=False, **kwargs) -> ImageStack:
         """Applies a transformation to an Imagestack
         Parameters
         ----------
         stack : ImageStack
             Stack to be transformed.
-        transforms_list:
-            List[Tuple[Mapping[Axes, int], GeometricTransform]] where each entry describes
-            a specific axis and the transformation object to apply to it.
         in_place : bool
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
@@ -52,15 +46,13 @@ class Warp(ApplyTransformBase):
             image_stack = deepcopy(stack)
             return self.run(
                 image_stack,
-                transforms_list,
                 in_place=True,
                 **kwargs
             )
         if verbose and StarfishConfig().verbose:
-            transforms_list = tqdm(transforms_list)
+            self.transforms_list.transforms = tqdm(self.transforms_list.transforms)
         all_axes = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
-        # TODO CHANGE TO SELF>TRANSFORMS_LIST
-        for selector, transformation_object in transforms_list:
+        for selector, transformation_object in self.transforms_list.transforms:
             other_axes = all_axes - {list(selector.keys())[0]}
             # iterate through remaining axes
             for axes in stack._iter_axes(other_axes):
@@ -74,9 +66,11 @@ class Warp(ApplyTransformBase):
 
     @staticmethod
     @click.command("Warp")
+    @click.option("--transformation-list", required=True, type=click.Path(exists=True),
+                  help="The list of transformations to appy to the imagestack.")
     @click.pass_context
-    def _cli(ctx):
-        ctx.obj["component"]._cli_run(ctx, Warp())
+    def _cli(ctx, transformation_list):
+        ctx.obj["component"]._cli_run(ctx, Warp(transformation_list))
 
 
 def warp(image: Union[xr.DataArray, np.ndarray],

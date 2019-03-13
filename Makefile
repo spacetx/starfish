@@ -148,16 +148,21 @@ help-install:
 #
 # General release steps:
 # --------------------------------------------------------------
-#  (1) commit all files and remove any untracked files
+#  (0) Check out the latest version of the branch for releasing.
+#
+#  (1) `make release-changelog` to print a suggested update to
+#      CHANGELOG.md. Replace "XXX" with your intended tag.
+#
+#  (2) Commit all files and remove any untracked files.
 #      `git status` should show nothing.
-#  (2) `make release-changelog` to print a suggested
-#      update to CHANGELOG.md. Replace "XXX" with your
-#      intended tag.
-#  (3) create an annotated tag (with -a or -s)
-#  (4) `make release-prep` which:
+#
+#  (3) Create an annotated tag (with -a or -s)
+#
+#  (4) Run `make release-prep` which:
 #     - checks the tag
 #     - creates a virtualenv
 #     - builds and installs the sdist
+#
 #  (5) `make release-verify` which:
 #     - runs tests
 #     - builds docker
@@ -168,7 +173,8 @@ help-install:
 #     - delete local docker image
 #     - delete tag locally
 #     - make clean
-#
+
+# private: assert a clean tag on the current commit
 release-check:
 	@if test -z "$(VERSION)"; then                    \
 		echo VERSION is not set.;                 \
@@ -184,19 +190,31 @@ release-check:
 		echo "===============================";   \
 	fi;
 
+# private: assert no existing release-env directory
+release-ready:
+	@if test -e release-env ; then                    \
+		echo "Previous release found.";           \
+		echo "Run 'make clean'";                  \
+		exit 103;                                 \
+	fi;
+
+# private: create a virtualenv for testing the release
 release-env: release-env/bin/activate release-env/bin/make_shell
 
+# private: call virtualenv and pip install
 release-env/bin/activate:
 	$(call create_venv, release-env)
 	release-env/bin/pip install -r REQUIREMENTS-CI.txt
 	touch release-env/bin/activate
 
+# private: create make_shell for activating the virtualenv below
 release-env/bin/make_shell:
 	echo '#!/bin/bash' > $@
 	echo 'source release-env/bin/activate' >> $@
 	echo 'bash "$$@"' >> $@
 	chmod a+x $@
 
+# public: print a changelog to stdout
 release-changelog:
 	@if test -n "$(VERSION)"; then                    \
 		echo VERSION is set to $(VERSION)         \
@@ -207,18 +225,30 @@ release-changelog:
 	@git log $(shell sh -c "git describe --tags --abbrev=0")..HEAD --pretty=format:"- %s"
 	@echo; cat CHANGELOG.md; echo "[XXX]: https://github.com/spacetx/starfish/releases/tag/XXX"
 
-release-prep: release-check release-env
+# public: generate a tag from the current commit & changelog
+release-tag:
+	@if test -n "$(TAG)"; then                     \
+		echo TAG is not set.;                  \
+		echo Use 'make TAG=x.y.z release-tag'; \
+		exit 104;                              \
+	fi;
+
+# public: generate the release build
+release-prep: release-check release-ready release-env
 	release-env/bin/python setup.py clean
 	release-env/bin/python setup.py sdist
 	release-env/bin/pip install dist/starfish-$(VERSION).tar.gz
 
+# public: run tests on the current release build
 release-verify: export SHELL=release-env/bin/make_shell
 release-verify: release-check slow release-docker
 
+# public: tag the docker images
 release-docker: release-check
 	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(VERSION)
 	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(VERSION)-$(DOCKER_BUILD)
 
+# public: print commands for uploading artifacts
 release-upload: release-check
 	@printf '\n# Please execute the following steps\n'
 	@echo git push origin $(VERSION)

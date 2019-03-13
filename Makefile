@@ -148,6 +148,7 @@ help-install:
 #
 # General release steps:
 # --------------------------------------------------------------
+#
 #  (0) Check out the latest version of the branch for releasing.
 #
 #  (1) `make release-changelog` to print a suggested update to
@@ -176,6 +177,34 @@ help-install:
 #     - delete local docker image
 #     - delete tag locally
 #     - make clean
+
+## Sections: 1 - 3
+
+# public: print a changelog to stdout
+release-changelog:
+	@if test -n "$(VERSION)"; then                    \
+		echo VERSION is set to $(VERSION)         \
+		echo Create your changelog before tagging.\
+		exit 102;                                 \
+	fi;
+	@echo "##" "[XXX]" - $(shell sh -c "date +'%Y-%m-%d'")
+	@git log $(shell sh -c "git describe --tags --abbrev=0")..HEAD --pretty=format:"- %s"
+	@printf "\n\n"
+	@cat CHANGELOG.md; echo "[XXX]: https://github.com/spacetx/starfish/releases/tag/XXX"
+
+# public: generate a tag from the current commit & changelog
+release-tag:
+	@if test -z "$(TAG)"; then                     \
+		echo TAG is not set. Use:              \
+		echo make TAG=x.y.z release-tag;       \
+		exit 104;                              \
+	fi;                                            \
+	printf "Tag $(TAG)\n\n" > release-msg;         \
+	sed -n -e '/^##/,/^##/{ /^##/d; /^##/d; p; }' CHANGELOG.md >> release-msg; \
+	git tag -a -F release-msg "$(TAG)";             \
+	rm release-msg
+
+## Sections: 4
 
 # private: assert a clean tag on the current commit
 release-check:
@@ -216,36 +245,13 @@ release-env/bin/make_shell:
 	echo 'source release-env/bin/activate' >> $@
 	echo 'bash "$$@"' >> $@
 	chmod a+x $@
-
-# public: print a changelog to stdout
-release-changelog:
-	@if test -n "$(VERSION)"; then                    \
-		echo VERSION is set to $(VERSION)         \
-		echo Create your changelog before tagging.\
-		exit 102;                                 \
-	fi;
-	@echo "##" "[XXX]" - $(shell sh -c "date +'%Y-%m-%d'")
-	@git log $(shell sh -c "git describe --tags --abbrev=0")..HEAD --pretty=format:"- %s"
-	@printf "\n\n"
-	@cat CHANGELOG.md; echo "[XXX]: https://github.com/spacetx/starfish/releases/tag/XXX"
-
-# public: generate a tag from the current commit & changelog
-release-tag:
-	@if test -z "$(TAG)"; then                     \
-		echo TAG is not set. Use:              \
-		echo make TAG=x.y.z release-tag;       \
-		exit 104;                              \
-	fi;                                            \
-	printf "Tag $(TAG)\n\n" > release-msg;         \
-	sed -n -e '/^##/,/^##/{ /^##/d; /^##/d; p; }' CHANGELOG.md >> release-msg; \
-	git tag -a -F release-msg "$(TAG)";             \
-	rm release-msg
-
 # public: generate the release build
 release-prep: release-check release-ready release-env
 	release-env/bin/python setup.py clean
 	release-env/bin/python setup.py sdist
 	release-env/bin/pip install dist/starfish-$(VERSION).tar.gz
+
+## Sections: 5 - 6
 
 # public: run tests on the current release build
 release-verify: export SHELL=release-env/bin/make_shell

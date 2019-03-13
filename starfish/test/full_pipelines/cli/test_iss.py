@@ -28,6 +28,8 @@ class TestWithIssData(CLITest, unittest.TestCase):
         return (
             "raw",
             "formatted",
+            "max_projected",
+            "transforms",
             "registered",
             "filtered",
             "results",
@@ -49,15 +51,37 @@ class TestWithIssData(CLITest, unittest.TestCase):
                     tempdir, "formatted", "experiment.json")
             ],
             [
-                "starfish", "registration",
+                "starfish", "filter",
+                "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted/fov_001", "hybridization.json"),
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "max_projected", "hybridization.json"),
+                "MaxProj",
+                "--dims", "c",
+                "--dims", "z"
+
+            ],
+            [
+                "starfish", "learn_transform",
+                "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "max_projected", "hybridization.json"),
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "transforms", "transforms.json"),
+                "Translation",
+                "--reference-stack", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted/fov_001", "dots.json"),
+                "--upsampling", "1000",
+                "--axis", "r"
+            ],
+            [
+                "starfish", "apply_transform",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "formatted/fov_001", "hybridization.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "registered", "hybridization.json"),
-                "FourierShiftRegistration",
-                "--reference-stack", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted/fov_001", "dots.json"),
-                "--upsampling", "1000",
+                "Warp",
+                "--transformation-list", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "transforms", "transforms.json"),
             ],
             [
                 "starfish", "filter",

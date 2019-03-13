@@ -15,20 +15,19 @@ class LearnTransform(PipelineComponent):
 
     @classmethod
     def _cli_run(cls, ctx, instance, *args, **kwargs):
-        # TODO FIX THIS OUTPUT SHOULD BE GEOMETRIC TRANSFORM
         output = ctx.obj["output"]
         stack = ctx.obj["stack"]
         transformed = instance.run(stack)
-        transformed.export(output)
+        transformed.to_json(output)
 
     @staticmethod
-    @click.group("apply_transform")
+    @click.group("learn_transform")
     @click.option("-i", "--input", type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, input, output):
-        """smooth, sharpen, denoise, etc"""
-        print("Applying Transform to images...")
+        """learn a set of transforms for an ImageStack."""
+        print("Learning Transforms for images...")
         ctx.obj = dict(
             component=LearnTransform,
             input=input,

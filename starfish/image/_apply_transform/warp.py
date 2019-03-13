@@ -21,7 +21,7 @@ class Warp(ApplyTransformBase):
         if isinstance(transforms_list, TransformsList):
             self.transforms_list = transforms_list
         else:
-            self.transforms_list = TransformsList.from_path(filepath=transforms_list)
+            self.transforms_list = TransformsList.from_json(filename=transforms_list)
 
     def run(
             self, stack: ImageStack,
@@ -67,7 +67,7 @@ class Warp(ApplyTransformBase):
     @staticmethod
     @click.command("Warp")
     @click.option("--transformation-list", required=True, type=click.Path(exists=True),
-                  help="The list of transformations to appy to the imagestack.")
+                  help="The list of transformations to apply to the imagestack.")
     @click.pass_context
     def _cli(ctx, transformation_list):
         ctx.obj["component"]._cli_run(ctx, Warp(transformation_list))

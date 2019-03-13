@@ -1,5 +1,7 @@
 SHELL := /bin/bash
 
+EDITOR?=vi
+
 MPLBACKEND?=Agg
 export MPLBACKEND
 
@@ -198,10 +200,11 @@ release-tag:
 		echo TAG is not set. Use:              \
 		echo make TAG=x.y.z release-tag;       \
 		exit 104;                              \
-	fi;                                            \
-	printf "Tag $(TAG)\n\n" > release-msg;         \
-	sed -n -e '/^##/,/^##/{ /^##/d; /^##/d; p; }' CHANGELOG.md >> release-msg; \
-	git tag -a -F release-msg "$(TAG)";             \
+	fi &&                                          \
+	printf "Tag $(TAG)\n\n" > release-msg &&       \
+	sed -n -e '/^##/,/^##/{ /^##/d; /^##/d; p; }' CHANGELOG.md >> release-msg && \
+	$(EDITOR) release-msg &&                      \
+	git tag -a -F release-msg "$(TAG)" &&          \
 	rm release-msg
 
 ## Sections: 4

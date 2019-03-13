@@ -284,6 +284,8 @@ clean:
 	rm -f .cover*
 
 help-deployment:
+	$(call print_help, release-changelog, Print changelog for updating CHANGELOG.md)
+	$(call print_help, release-tag, Tag current commit with update changelog)
 	$(call print_help, release-prep, Builds and installs the current tagged version)
 	$(call print_help, release-verify, Runs tests on the tagged version)
 	$(call print_help, release-upload, Prints commands for uploading release artifacts)

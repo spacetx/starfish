@@ -151,24 +151,27 @@ help-install:
 #  (0) Check out the latest version of the branch for releasing.
 #
 #  (1) `make release-changelog` to print a suggested update to
-#      CHANGELOG.md. Replace "XXX" with your intended tag.
+#      CHANGELOG.md. Replace "XXX" with your intended tag and
+#      perform other edits. Important is that each section is
+#      separated by a line beginning with '##'.
 #
 #  (2) Commit all files and remove any untracked files.
 #      `git status` should show nothing.
 #
-#  (3) Create an annotated tag (with -a or -s)
+#  (3) Run `make release-tag TAG=x.y.z` to tag your release.
 #
 #  (4) Run `make release-prep` which:
 #     - checks the tag
 #     - creates a virtualenv
 #     - builds and installs the sdist
 #
-#  (5) `make release-verify` which:
+#  (5) Run `make release-verify` which:
 #     - runs tests
 #     - builds docker
-#  (6a) if everything succeeds: run `make release-upload`
-#       and execute the commands in order.
-#  (6b) if anything goes wrong, rollback the various steps:
+#
+#  (6) Run `make release-upload` and execute the commands.
+#
+#  If anything goes wrong, rollback the various steps:
 #     - delete on docker hub
 #     - delete local docker image
 #     - delete tag locally
@@ -190,9 +193,9 @@ release-check:
 		echo "===============================";   \
 	fi;
 
-# private: assert no existing release-env directory
+# private: assert release-env and release-msg don't exist
 release-ready:
-	@if test -e release-env ; then                    \
+	@if compgen -G release-* > /dev/null; then        \
 		echo "Previous release found.";           \
 		echo "Run 'make clean'";                  \
 		exit 103;                                 \
@@ -223,15 +226,20 @@ release-changelog:
 	fi;
 	@echo "##" "[XXX]" - $(shell sh -c "date +'%Y-%m-%d'")
 	@git log $(shell sh -c "git describe --tags --abbrev=0")..HEAD --pretty=format:"- %s"
-	@echo; cat CHANGELOG.md; echo "[XXX]: https://github.com/spacetx/starfish/releases/tag/XXX"
+	@printf "\n\n"
+	@cat CHANGELOG.md; echo "[XXX]: https://github.com/spacetx/starfish/releases/tag/XXX"
 
 # public: generate a tag from the current commit & changelog
 release-tag:
-	@if test -n "$(TAG)"; then                     \
-		echo TAG is not set.;                  \
-		echo Use 'make TAG=x.y.z release-tag'; \
+	@if test -z "$(TAG)"; then                     \
+		echo TAG is not set. Use:              \
+		echo make TAG=x.y.z release-tag;       \
 		exit 104;                              \
-	fi;
+	fi;                                            \
+	printf "Tag $(TAG)\n\n" > release-msg;         \
+	sed -n -e '/^##/,/^##/{ /^##/d; /^##/d; p; }' CHANGELOG.md >> release-msg; \
+	git tag -a -F release-msg "$(TAG)";             \
+	rm release-msg
 
 # public: generate the release build
 release-prep: release-check release-ready release-env
@@ -259,6 +267,7 @@ release-upload: release-check
 
 clean:
 	rm -rf release-env
+	rm -rf release-msg
 	rm -rf starfish.egg-info
 	rm -rf dist
 	rm -rf build

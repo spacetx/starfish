@@ -4,5 +4,5 @@ from starfish.pipeline.algorithmbase import AlgorithmBase
 
 class LearnTransformBase(AlgorithmBase):
     def run(self, stack) -> TransformsList:
-        """Performs registration on the stack provided."""
+        """Learns Transforms for a given stack."""
         raise NotImplementedError()

@@ -26,7 +26,6 @@ class ApplyTransform(PipelineComponent):
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, input, output):
-        """smooth, sharpen, denoise, etc"""
         print("Applying Transform to images...")
         ctx.obj = dict(
             component=ApplyTransform,

@@ -266,7 +266,7 @@ rgb[:,:,1] = dots_mp_numpy
 do = rgb2gray(rgb)
 do = do/(do.max())
 
-# image(do,size=10)
+image(do,size=10)
 with warnings.catch_warnings():
     warnings.simplefilter('ignore', FutureWarning)
     is_gene1 = decoded.where(decoded[Features.AXIS][Features.TARGET] == GENE1, drop=True)

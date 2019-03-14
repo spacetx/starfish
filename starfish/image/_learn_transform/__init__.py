@@ -17,8 +17,8 @@ class LearnTransform(PipelineComponent):
     def _cli_run(cls, ctx, instance, *args, **kwargs):
         output = ctx.obj["output"]
         stack = ctx.obj["stack"]
-        transformed = instance.run(stack)
-        transformed.to_json(output)
+        transformation_list = instance.run(stack)
+        transformation_list.to_json(output)
 
     @staticmethod
     @click.group("learn_transform")

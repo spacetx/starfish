@@ -44,7 +44,7 @@ def test_learn_transforms_throws_error():
     except ValueError as e:
         # Assert value error is thrown when the stack is not max projected
         # across all other axes.
-        assert e.args[0] == "Only axes: r can have a length > 1"
+        assert e.args[0] == "Only axes: r can have a length > 1, please max project."
 
 
 def test_learn_transforms_translation():

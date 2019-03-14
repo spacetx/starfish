@@ -16,8 +16,17 @@ from starfish.util import click
 
 
 class Warp(ApplyTransformBase):
+    """Class that applies a list of arbitrary skimage GeometricTransforms to an ImageStack
+     using skimage.transform.warp"""
 
     def __init__(self, transforms_list: Union[str, TransformsList]):
+        """
+        Parameters
+        ----------
+        transforms_list: TransformsList
+            A list of tuples that describe a subset of an ImageStack axis and a GeometricTransform
+            to apply to it.
+        """
         if isinstance(transforms_list, TransformsList):
             self.transforms_list = transforms_list
         else:
@@ -26,7 +35,8 @@ class Warp(ApplyTransformBase):
     def run(
             self, stack: ImageStack,
             in_place: bool=False, verbose: bool=False, **kwargs) -> ImageStack:
-        """Applies a transformation to an Imagestack
+        """Applies a list of transformations to an ImageStack
+
         Parameters
         ----------
         stack : ImageStack
@@ -35,11 +45,12 @@ class Warp(ApplyTransformBase):
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             if True, report on filtering progress (default = False)
+
         Returns
         -------
         ImageStack :
-            If in-place is False, return the results of filter as a new stack.  Otherwise return the
-            original stack.
+            If in-place is False, return the results of the transforms as a new stack.
+            Otherwise return the original stack.
         """
         if not in_place:
             # create a copy of the ImageStack, call apply on that stack with in_place=True
@@ -53,7 +64,7 @@ class Warp(ApplyTransformBase):
             self.transforms_list.transforms = tqdm(self.transforms_list.transforms)
         all_axes = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
         for selector, transformation_object in self.transforms_list.transforms:
-            other_axes = all_axes - {list(selector.keys())[0]}
+            other_axes = all_axes - set(selector.keys())
             # iterate through remaining axes
             for axes in stack._iter_axes(other_axes):
                 # combine all axes data to select one tile
@@ -67,7 +78,7 @@ class Warp(ApplyTransformBase):
     @staticmethod
     @click.command("Warp")
     @click.option("--transformation-list", required=True, type=click.Path(exists=True),
-                  help="The list of transformations to apply to the imagestack.")
+                  help="The list of transformations to apply to the ImageStack.")
     @click.pass_context
     def _cli(ctx, transformation_list):
         ctx.obj["component"]._cli_run(ctx, Warp(transformation_list))
@@ -79,9 +90,17 @@ def warp(image: Union[xr.DataArray, np.ndarray],
          ) -> np.ndarray:
     """ Wrapper around skimage.transform.warp. Warps an image according to a
     given coordinate transformation.
-    image: the image to be transformed
+
+    Parameters
+    ----------
+    image: np.ndarray
+        The image to be transformed
     transformation_object: skimage.transform.GeometricTransform
+        The transformation object to apply.
+
     Returns
     -------
+    np.ndarray:
+        the warped image.
     """
     return transform.warp(image, transformation_object, **kwargs)

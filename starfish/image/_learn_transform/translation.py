@@ -15,11 +15,14 @@ class Translation(LearnTransformBase):
 
     def __init__(self, reference_stack: Union[str, ImageStack], axis: Axes, upsampling: int=1):
         """
-
         Parameters
         ----------
         axis:
             The aixs {r, ch, zplane} to iterate over
+        reference_stack: ImageStack
+            The target image used in skimage.feature.register_translation
+        upsampling: int
+            upsampling factor
         """
         self.upsampling = upsampling
         self.axis = axis
@@ -29,16 +32,19 @@ class Translation(LearnTransformBase):
             self.reference_stack = ImageStack.from_path_or_url(reference_stack)
 
     def run(self, stack: ImageStack) -> TransformsList:
-        """Iterate over the given axis of an imagestack and learn the Similarity transform
+        """
+        Iterate over the given axis of an ImageStack and learn the Similarity transform
          based off the instantiated reference_image.
+
         Parameters
         ----------
         stack : ImageStack
-            Stack to be transformed.
+            Stack to calculate the transforms on.
+
         Returns
         -------
         List[Tuple[Any, SimilarityTransform]] :
-            A list of tuples containing the axis of the Imagestack and associated
+            A list of tuples containing axes of the Imagestack and associated
             transform to apply.
         """
 
@@ -48,7 +54,8 @@ class Translation(LearnTransformBase):
             target_image = np.squeeze(stack.sel({self.axis: a}).xarray)
             if len(target_image.shape) is not 2:
                 raise ValueError(
-                    "Only axes: " + self.axis.value + " can have a length > 1"
+                    "Only axes: " + self.axis.value + " can have a length > 1, "
+                                                      "please max project."
                 )
 
             shift, error, phasediff = register_translation(src_image=target_image,
@@ -56,6 +63,7 @@ class Translation(LearnTransformBase):
                                                            upsample_factor=self.upsampling)
             print(f"For {self.axis}: {a}, Shift: {shift}, Error: {error}")
             selectors = {self.axis: a}
+            # reverse shift because SimilarityTransform stores in y,x format
             shift = shift[::-1]
             transforms.append(selectors, SimilarityTransform(translation=shift))
 
@@ -64,7 +72,7 @@ class Translation(LearnTransformBase):
     @staticmethod
     @click.command("Translation")
     @click.option("--reference-stack", required=True, type=click.Path(exists=True),
-                  help="The image stack to align the input image stack to.")
+                  help="The image to align the input ImageStack to.")
     @click.option("--axis", default="r", type=str, help="The axis to iterate over.")
     @click.option("--upsampling", default=1, type=int, help="Upsampling factor.")
     @click.pass_context

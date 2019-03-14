@@ -19,8 +19,9 @@ class TransformsList:
         """
         Parameters
         ----------
-        transforms_list:  A list of tuples containing the axis of the Imagestack and
-        associated transform to apply.
+        transforms_list: List[Tuple[Mapping[Axes, int], SimilarityTransform]]
+            A list of tuples containing axes of an Imagestack and associated
+            transform to apply.
         """
 
         if transforms_list:
@@ -31,6 +32,17 @@ class TransformsList:
     def append(self,
                selectors: Mapping[Axes, int], transform_object: SimilarityTransform
                ) -> None:
+        """
+        Adds a new TransformationObject to the list
+
+        Parameters
+        ----------
+        transform_object:
+            The TransformationObject to add
+        selectors:
+            The axes associated with the transform.
+
+        """
         self.transforms.append((selectors, transform_object))
 
     def to_json(self, filename: str) -> None:
@@ -40,7 +52,6 @@ class TransformsList:
         Parameters
         ----------
         filename : str
-            filename
         """
         tranforms_array = []
         # Need to convert Axes to str values, and TransformationObjects to array
@@ -55,13 +66,12 @@ class TransformsList:
     @classmethod
     def from_json(cls, filename: str) -> "TransformsList":
         """
-        Load the TransformsList from a json file or a url pointing to such a file
+        Load a TransformsList from a json file or a url pointing to such a file
         Loads configuration from StarfishConfig.
 
         Parameters
         ----------
         filename : str
-            filename
 
         Returns
         -------

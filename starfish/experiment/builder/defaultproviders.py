@@ -9,7 +9,7 @@ from slicedimage import (
     ImageFormat,
 )
 
-from starfish.types import Coordinates, Number
+from starfish.types import Axes, Coordinates, Number
 from .providers import FetchedTile, TileFetcher
 
 
@@ -19,8 +19,8 @@ class RandomNoiseTile(FetchedTile):
     for the image.
     """
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return 1536, 1024
+    def shape(self) -> Mapping[Axes, int]:
+        return {Axes.Y: 1536, Axes.X: 1024}
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
@@ -35,7 +35,8 @@ class RandomNoiseTile(FetchedTile):
         return ImageFormat.TIFF
 
     def tile_data(self) -> np.ndarray:
-        return np.random.randint(0, 256, size=self.shape, dtype=np.uint8)
+        return np.random.randint(
+            0, 256, size=(self.shape[Axes.Y], self.shape[Axes.X]), dtype=np.uint8)
 
 
 class OnesTile(FetchedTile):
@@ -43,12 +44,12 @@ class OnesTile(FetchedTile):
     This is a simple implementation of :class:`.FetchedImage` that simply is entirely all pixels at
     maximum intensity.
     """
-    def __init__(self, shape: Tuple[int, int]) -> None:
+    def __init__(self, shape: Mapping[Axes, int]) -> None:
         super().__init__()
         self._shape = shape
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> Mapping[Axes, int]:
         return self._shape
 
     @property
@@ -64,7 +65,10 @@ class OnesTile(FetchedTile):
         return ImageFormat.TIFF
 
     def tile_data(self) -> np.ndarray:
-        return np.full(shape=self.shape, fill_value=1.0, dtype=np.float32)
+        return np.full(
+            shape=(self.shape[Axes.Y], self.shape[Axes.X]),
+            fill_value=1.0,
+            dtype=np.float32)
 
 
 def tile_fetcher_factory(

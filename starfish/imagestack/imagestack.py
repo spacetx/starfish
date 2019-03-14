@@ -146,7 +146,7 @@ class ImageStack:
             data_tick_marks[dim_for_axis.value] = list(
                 sorted(set(tilekey[dim_for_axis] for tilekey in self._tile_data.keys())))
 
-        data_shape.extend(tile_data.tile_shape)
+        data_shape.extend([tile_data.tile_shape[Axes.Y], tile_data.tile_shape[Axes.X]])
         data_dimensions.extend([Axes.Y.value, Axes.X.value])
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
@@ -993,7 +993,7 @@ class ImageStack:
                 Axes.CH: self.num_chs,
                 Axes.ZPLANE: self.num_zplanes,
             },
-            default_tile_shape=self.tile_shape,
+            default_tile_shape={Axes.Y: self.tile_shape[0], Axes.X: self.tile_shape[1]},
             extras=self._tile_data.extras,
         )
         for tilekey in self._tile_data.keys():
@@ -1102,7 +1102,7 @@ class ImageStack:
             tile_fetcher = tile_fetcher_factory(
                 OnesTile,
                 False,
-                (tile_height, tile_width),
+                {Axes.Y: tile_height, Axes.X: tile_width},
             )
 
         collection = build_image(

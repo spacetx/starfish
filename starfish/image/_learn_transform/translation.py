@@ -52,7 +52,7 @@ class Translation(LearnTransformBase):
         reference_image = np.squeeze(self.reference_stack.xarray)
         for a in stack.axis_labels(self.axis):
             target_image = np.squeeze(stack.sel({self.axis: a}).xarray)
-            if len(target_image.shape) is not 2:
+            if len(target_image.shape) != 2:
                 raise ValueError(
                     "Only axes: " + self.axis.value + " can have a length > 1, "
                                                       "please max project."

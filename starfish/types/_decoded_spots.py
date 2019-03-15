@@ -8,31 +8,23 @@ from starfish.types import Axes, Features
 from ._validated_table import ValidatedTable
 
 
-class SpotAttributes(ValidatedTable):
+class DecodedSpots(ValidatedTable):
 
     required_fields = {
         Axes.X.value,          # spot x-coordinate
         Axes.Y.value,          # spot y-coordinate
-        Axes.ZPLANE.value,     # spot z-coordinate
-        Features.SPOT_RADIUS,  # spot radius
+        Features.TARGET,     # spot z-coordinate
     }
 
-    def __init__(self, spot_attributes: pd.DataFrame) -> None:
-        """Construct a SpotAttributes instance
+    def __init__(self, decoded_spots: pd.DataFrame) -> None:
+        """Construct a decoded_spots instance
 
         Parameters
         ----------
-        spot_attributes : pd.DataFrame
+        decoded_spots : pd.DataFrame
 
         """
-        super().__init__(spot_attributes, SpotAttributes.required_fields)
-
-    @classmethod
-    def empty(cls, extra_fields: Iterable = tuple()) -> "SpotAttributes":
-        """return an empty SpotAttributes object"""
-        fields = list(cls.required_fields.union(extra_fields))
-        dtype = list(zip(fields, [np.object] * len(fields)))
-        return cls(pd.DataFrame(np.array([], dtype=dtype)))
+        super().__init__(decoded_spots, DecodedSpots.required_fields)
 
     def save_geojson(self, output_file_name: str) -> None:
         """Save to geojson for web visualization
@@ -44,7 +36,6 @@ class SpotAttributes(ValidatedTable):
 
         """
 
-        # TODO ambrosejcarr: write a test for this
         geojson = [
             {
                 'properties': {'id': int(row.spot_id), 'radius': int(row.r)},
@@ -54,3 +45,10 @@ class SpotAttributes(ValidatedTable):
 
         with open(output_file_name, 'w') as f:
             f.write(json.dumps(geojson))
+
+    def save_csv(self, output_file_name: str) -> None:
+        self.data.to_csv(output_file_name, index=False)
+
+    @classmethod
+    def load_csv(cls, file_name: str) -> "DecodedSpots":
+        return cls(pd.read_csv(file_name))

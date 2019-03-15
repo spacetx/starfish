@@ -11,7 +11,4 @@ Image Manipulation
    filtering/index.rst
 
 .. toctree::
-   registration/index.rst
-
-.. toctree::
    segmentation/index.rst

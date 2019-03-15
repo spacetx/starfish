@@ -41,7 +41,7 @@ RUN useradd -m starfish
 USER starfish
 
 # Set up the initial conda environment
-COPY --chown=starfish:starfish environment.yml /src/environment.yml
+COPY --chown=starfish:starfish docker/environment.yml /src/environment.yml
 COPY --chown=starfish:starfish REQUIREMENTS* /src/
 WORKDIR /src
 RUN conda env create -f environment.yml \

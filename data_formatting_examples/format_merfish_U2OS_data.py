@@ -11,7 +11,7 @@ from starfish.experiment.builder import FetchedTile, TileFetcher, write_experime
 from starfish.types import Axes, Coordinates, Number
 from starfish.util.argparse import FsExistsType
 
-SHAPE = 2048, 2048
+SHAPE = {Axes.Y: 2048, Axes.X: 2048}
 
 
 # We use this to cache images across tiles.  In the case of the merfish data set, FOVs are saved
@@ -47,7 +47,7 @@ class MERFISHTile(FetchedTile):
         self.ch = ch
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> Mapping[Axes, int]:
         return SHAPE
 
     @property
@@ -69,7 +69,7 @@ class MERFISHAuxTile(FetchedTile):
         self.dapi_index = 17
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> Mapping[Axes, int]:
         return SHAPE
 
     @property

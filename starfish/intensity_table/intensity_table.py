@@ -1,6 +1,6 @@
 from itertools import product
 from json import loads
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -387,6 +387,13 @@ class IntensityTable(xr.DataArray):
         pixel_coordinates = SpotAttributes(feature_attribute_data)
 
         return IntensityTable.from_spot_data(intensity_data, pixel_coordinates)
+
+    @staticmethod
+    def concatanate_intensity_tables(intensity_tables: List["IntensityTable"]):
+        # TODO VARY CONCAT LOGIC IF TILES OVERLAP
+        # This method is a starting point for handling tile overlap, right now
+        # it does a simple concat but people want other overlap logic implmented
+        return xr.concat(intensity_tables, dim=Features.AXIS)
 
     def to_features_dataframe(self) -> pd.DataFrame:
         """Generates a dataframe of the underlying features multi-index.

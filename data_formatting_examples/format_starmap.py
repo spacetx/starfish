@@ -55,8 +55,8 @@ class StarMapTile(FetchedTile):
         }
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return (3738, 17247)  # hard coded for these datasets.
+    def shape(self) -> Mapping[Axes, int]:
+        return {Axes.Y: 3738, Axes.X: 17247}  # hard coded for these datasets.
 
     @property
     def coordinates(self):

@@ -8,3 +8,4 @@ starfish.egg-info/
 build/
 dist/
 .venv/
+.eggs/

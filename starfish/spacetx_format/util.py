@@ -8,7 +8,7 @@ from typing import Any, Dict, IO, Iterator, List, Optional, Union
 from jsonschema import Draft4Validator, RefResolver, ValidationError
 from pkg_resources import resource_filename
 
-package_name = 'sptx_format'
+package_name = 'starfish'
 
 
 class SpaceTxValidator:
@@ -40,7 +40,8 @@ class SpaceTxValidator:
             json-schema validator specific to the supplied schema, with references resolved
 
         """
-        experiment_schema_path = resource_filename(package_name, "schema/experiment.json")
+        experiment_schema_path = resource_filename(
+            package_name, "spacetx_format/schema/experiment.json")
         package_root = os.path.dirname(os.path.dirname(experiment_schema_path))
         base_uri = 'file://' + package_root + '/'
         resolver = RefResolver(base_uri, schema)
@@ -104,8 +105,9 @@ class SpaceTxValidator:
         Validate a codebook file::
 
             >>> from pkg_resources import resource_filename
-            >>> from sptx_format.util import SpaceTxValidator
-            >>> schema_path = resource_filename("sptx_format", "schema/codebook/codebook.json")
+            >>> from starfish.spacetx_format.util import SpaceTxValidator
+            >>> schema_path = resource_filename(
+                    "starfish", "spacetx_format/schema/codebook/codebook.json")
             >>> validator = SpaceTxValidator(schema_path)
             >>> if not validator.validate_file(your_codebook_filename):
             >>>     raise Exception("invalid")
@@ -139,8 +141,8 @@ class SpaceTxValidator:
         Validate an experiment json string ::
 
             >>> from pkg_resources import resource_filename
-            >>> from sptx_format.util import SpaceTxValidator
-            >>> schema_path = resource_filename("sptx_format", "schema/experiment.json")
+            >>> from starfish.spacetx_format.util import SpaceTxValidator
+            >>> schema_path = resource_filename("starfish", "spacetx_format/schema/experiment.json")
             >>> validator = SpaceTxValidator(schema_path)
             >>> if not validator.validate_object(your_experiment_object):
             >>>     raise Exception("invalid")

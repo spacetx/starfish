@@ -13,6 +13,8 @@ from . import image
 from . import spots
 # display images and spots
 from ._display import display
+# generated version number and commit hash
+from ._version import get_versions
 # top-level objects
 from .codebook.codebook import Codebook
 from .experiment.experiment import Experiment, FieldOfView
@@ -22,11 +24,11 @@ from .starfish import starfish
 
 
 # NOTE: if we move to python 3.7, we can produce this value at call time via __getattr__
-__version__ = pkg_resources.require("starfish")[0].version
-
-# Variable to be set by release process
+__version__ = get_versions()['version']
 __is_release_tag__ = None
-
+if "+" not in str(__version__):
+    __is_release_tag__ = f"Release: {__version__}"
+del get_versions
 
 if __name__ == "__main__":
     starfish()

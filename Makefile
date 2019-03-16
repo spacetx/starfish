@@ -212,8 +212,9 @@ release-tag:
 # private: assert a clean tag on the current commit
 release-check:
 	@if test -z "$(VERSION)"; then                    \
-		echo VERSION is not set.;                 \
-		echo Please create a git tag;             \
+		echo VERSION is not set\!;                \
+		echo Is the current commit tagged?;       \
+		echo If not, create a tag for the current version.;\
 		exit 100;                                 \
 	elif [[ "$(VERSION)" == *"dirty"* ]] ; then       \
 		echo VERSION is dirty.;                   \

@@ -12,5 +12,6 @@ from ._constants import (
     STARFISH_EXTRAS_KEY
 )
 from ._spot_attributes import SpotAttributes
+from ._decoded_spots import DecodedSpots
 
 Number = Union[int, float]

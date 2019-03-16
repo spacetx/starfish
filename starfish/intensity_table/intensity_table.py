@@ -8,7 +8,7 @@ import regional
 import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
-from starfish.types import Axes, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
+from starfish.types import Axes, Features, LOG, SpotAttributes, DecodedSpots, STARFISH_EXTRAS_KEY
 from starfish.util.dtype import preserve_float_range
 
 
@@ -405,6 +405,19 @@ class IntensityTable(xr.DataArray):
 
         """
         return pd.DataFrame(dict(self[Features.AXIS].coords))
+
+    def to_decoded_spots(self) -> DecodedSpots:
+        """
+        Generates a dataframe containing decoded spot information. Guaranteed to contain physical
+        spot coordinates (z, y, x) and gene target. Does not contain pixel coordinates.
+        """
+        if Features.TARGET not in self.coords.keys():
+            raise RuntimeError(
+                "Intensities must be decoded before a DecodedSpots table can be produced.")
+        df = self.to_features_dataframe()
+        pixel_coordinates = pd.Index([Axes.X, Axes.Y, Axes.ZPLANE])
+        df = df.drop(pixel_coordinates.intersection(df.columns), axis=1).drop(Features.AXIS, axis=1)
+        return DecodedSpots(df)
 
     def to_expression_matrix(self, regions: Optional[regional.many]=None) -> ExpressionMatrix:
         """Generates a cell x gene count matrix where each cell is annotated with spatial metadata

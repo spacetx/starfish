@@ -212,3 +212,18 @@ In contrast, a coded experiment may have a more complex codebook:
 
 The above example describes the coding scheme of an experiment with 2 rounds and 2 channels, where each code expects exactly two images out of four to produce signal for a given target.
 In the above example, a spot in the image tensor would decode to `SCUBE2` if the spot was detected in (round=0, channel=0) and (round=0, channel=1).
+
+Note that the codebook only states opinions about non-zero expected fluorescence values, and is not designed to distinguish between a literal `0` and a missing value, which would imply "any fluorescence level". For example, the following two codewords are treated identically and cannot be distinguished at the level of the codebook.
+
+```json
+[
+  {"r": 0, "c": 1, "v": 1},
+  {"r": 1, "c": 0, "v": 0}
+]
+
+[
+  {"r": 0, "c": 1, "v": 1},
+]
+```
+
+Libraries leveraging SpaceTx Format can implement logic to support distinctions between these types by implementing a flag that allows the user to specify whether missing or zero `(round, channel)` combinations should be instantiated as `0` or `null`. The latter is needed to support smFISH experiments for which each `(round, channel)` pair codes for a separate gene, and for which fluorescence intensities in other channels are _irrelevant_ and should not be considered by a decoder function.

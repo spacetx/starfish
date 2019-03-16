@@ -1,12 +1,12 @@
 import os
+import tempfile
 
 import pandas as pd
 import pytest
-import tempfile
 
 from starfish import IntensityTable
-from starfish.types import Coordinates, DecodedSpots, Features
 from starfish.test import test_utils
+from starfish.types import Coordinates, DecodedSpots, Features
 
 
 def dummy_intensities() -> IntensityTable:
@@ -51,5 +51,3 @@ def test_decoded_spots() -> None:
     # load back into memory
     ds2 = DecodedSpots.load_csv(filename)
     pd.testing.assert_frame_equal(ds.data, ds2.data)
-
-    import pdb; pdb.set_trace()

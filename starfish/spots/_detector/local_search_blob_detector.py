@@ -122,6 +122,12 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
             x_inds = results[:, 2].astype(int)
             intensities = data.values[tuple([z_inds, y_inds, x_inds])]
 
+            # collapse radius if sigma is non-scalar
+            if all(np.isscalar(s) for s in (self.min_sigma, self.max_sigma)):
+                radius = results[:, 3]
+            else:
+                radius = np.mean(results[:, -3:], axis=1)
+
             # construct dataframe
             spot_data = pd.DataFrame(
                 data={
@@ -129,7 +135,7 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
                     Axes.ZPLANE: z_inds,
                     Axes.Y: y_inds,
                     Axes.X: x_inds,
-                    Features.SPOT_RADIUS: np.mean(results[:, -3:], axis=1)
+                    Features.SPOT_RADIUS: radius
                 }
             )
 
@@ -390,7 +396,7 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
         return intensity_table
 
     @staticmethod
-    @click.command("BlobDetector")
+    @click.command("LocalSearchBlobDetector")
     @click.option(
         "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation).")
     @click.option(

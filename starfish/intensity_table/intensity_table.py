@@ -1,10 +1,9 @@
 from itertools import product
 from json import loads
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
-import regional
 import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix

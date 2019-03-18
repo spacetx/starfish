@@ -128,7 +128,7 @@ def display(
         ImageStack to display
     spots : IntensityTable
         IntensityTable containing spot information that was generated from the submitted stack.
-    viewer : napari.components._viewer.model.Viewer
+    viewer : napari.Viewer
         Napari viewer to append the ImageStack and/or spots to. If None, creates a new viewer.
         Note: appending is only supported in interactive environments.
     project_axes : Optional[Set[Axes]]

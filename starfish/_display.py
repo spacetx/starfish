@@ -9,6 +9,12 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Axes, Features
 
+try:
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", module="vispy.visuals.isocurve", lineno=22)
+        from napari import Window, Viewer
+except ImportError:
+    Window, Viewer = None, None
 
 INTERACTIVE = not hasattr(__main__, "__file__")
 
@@ -108,7 +114,7 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
 def display(
         stack: Optional[ImageStack] = None,
         spots: Optional[IntensityTable] = None,
-        viewer=None,
+        viewer: Optional[Viewer] = None,
         project_axes: Optional[Set[Axes]] = None,
         mask_intensities: float = 0.,
         radius_multiplier: int = 1
@@ -124,6 +130,7 @@ def display(
         IntensityTable containing spot information that was generated from the submitted stack.
     viewer : napari.components._viewer.model.Viewer
         Napari viewer to append the ImageStack and/or spots to. If None, creates a new viewer.
+        Note: appending is only supported in interactive environments.
     project_axes : Optional[Set[Axes]]
         If provided, both the ImageStack and the Spots will be maximum projected along the
         selected axes. Useful for displaying spots across coded assays where spots may not
@@ -184,13 +191,9 @@ def display(
     if stack is None and spots is None:
         raise TypeError("expected a stack and/or spots; got nothing")
 
-    try:
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", module="vispy.visuals.isocurve", lineno=22)
-            from napari import Window, Viewer
-    except ImportError:
-        print("Requires napari 0.0.6. Run `pip install starfish[napari]` to install the "
-              "necessary requirements.")
+    if Window is None or Viewer is None:
+        warnings.warn("Requires napari 0.0.6. Run `pip install starfish[napari]` to install the "
+                      "necessary requirements.")
         return
 
     from PyQt5.QtWidgets import QApplication

@@ -108,6 +108,7 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
 def display(
         stack: Optional[ImageStack] = None,
         spots: Optional[IntensityTable] = None,
+        viewer=None,
         project_axes: Optional[Set[Axes]] = None,
         mask_intensities: float = 0.,
         radius_multiplier: int = 1
@@ -121,6 +122,8 @@ def display(
         ImageStack to display
     spots : IntensityTable
         IntensityTable containing spot information that was generated from the submitted stack.
+    viewer : napari.components._viewer.model.Viewer
+        Napari viewer to append the ImageStack and/or spots to. If None, creates a new viewer.
     project_axes : Optional[Set[Axes]]
         If provided, both the ImageStack and the Spots will be maximum projected along the
         selected axes. Useful for displaying spots across coded assays where spots may not
@@ -163,6 +166,13 @@ def display(
     >>> from starfish import display, Axes
     >>> display(stack, intensities, project_axes={Axes.CH, Axes.ROUND})
 
+    5. Compare the image before (raw_stack) and after (filtered_stack) filtering by displaying
+    two stacks in the same Viewer.
+
+    >>> from starfish import display
+    >>> viewer = display(raw_stack)
+    >>> viewer = display(stack=filtered_stack, viewer=viewer)
+
     Notes
     -----
     - To use in ipython, use the `%gui qt5` magic.
@@ -185,12 +195,19 @@ def display(
 
     from PyQt5.QtWidgets import QApplication
 
-    app = QApplication.instance() or QApplication([])
+    # Instantiate the napari viewer
+    if viewer is None:
+        app = QApplication.instance() or QApplication([])
 
-    # initialize the viewer
-    viewer = Viewer()
-    window = Window(viewer, show=False)
-    viewer._window = window
+        # initialize the viewer
+        viewer = Viewer()
+        window = Window(viewer, show=False)
+        viewer._window = window
+        new_viewer = True
+    elif isinstance(viewer, Viewer):
+        new_viewer = False
+    else:
+        raise TypeError("viewer must be a napari Viewer or None")
 
     if stack is not None:
         if project_axes is not None:
@@ -231,9 +248,10 @@ def display(
         viewer.add_markers(coords=coords, face_color="white", edge_color="white", symbol="ring",
                            size=sizes * radius_multiplier, n_dimensional=True)
 
-    window.show()
+    if new_viewer:
+        window.show()
 
-    if not INTERACTIVE:
-        app.exec()  # create blocking process to persist windows
+        if not INTERACTIVE:
+            app.exec()  # create blocking process to persist windows
 
     return viewer

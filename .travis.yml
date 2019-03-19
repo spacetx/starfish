@@ -45,6 +45,9 @@ jobs:
     - name: ISS Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: make install-dev run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
+    - name: BaristaSeq Notebook
+      if: type = push and branch =~ /^(master|merge)/
+      script: make install-dev run__notebooks/py/BaristaSeq.py
     - name: SeqFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: make install-dev run__notebooks/py/SeqFISH.py

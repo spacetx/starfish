@@ -265,15 +265,19 @@ cg
 # EPY: END code
 
 # EPY: START markdown
-#Plot the (x, y) centroids of segmented cells in small cyan dots. Plot cells expressing VIM in blue, and cells expressing HER2 in red. Compare with the following plot of the displayed _spots_ below. This demonstrates that (1) the expression matrix is being properly created but (2) many of the spots are occuring outside segmented cells, suggesting that the segmentation may be too restrictive. 
+#Plot the (x, y) centroids of segmented cells in small cyan dots. Plot cells expressing VIM in blue, and cells expressing HER2 in red. Compare with the following plot of the displayed _spots_ below. This demonstrates that (1) the expression matrix is being properly created but (2) many of the spots are occuring outside segmented cells, suggesting that the segmentation may be too restrictive.
 # EPY: END markdown
 
 # EPY: START code
-vim_mask = cg.loc[:, 'VIM'] > 0
-her2_mask = cg.loc[:, 'HER2'] > 0
-plt.scatter(cg['x'], -cg['y'], s=5, c='c')
-plt.scatter(cg['x'][vim_mask], -cg['y'][vim_mask], s=12, c='b')
-plt.scatter(cg['x'][her2_mask], -cg['y'][her2_mask], s=12, c='r')
+#Test data is from a region of the tissue slice containing cancer cells, there is no VIM.
+if not use_test_data:
+    vim_mask = cg.loc[:, 'VIM'] > 0
+    her2_mask = cg.loc[:, 'HER2'] > 0
+    plt.scatter(cg['x'], -cg['y'], s=5, c='c')
+    plt.scatter(cg['x'][vim_mask], -cg['y'][vim_mask], s=12, c='b')
+    plt.scatter(cg['x'][her2_mask], -cg['y'][her2_mask], s=12, c='r')
+else:
+    assert np.sum(cg.loc[:, 'HER2'] > 0) > 0
 
 # EPY: END code
 

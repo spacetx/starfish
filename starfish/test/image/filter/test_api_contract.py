@@ -17,7 +17,7 @@ parameters for the constructor (omit is_volume), and it will be tested against t
 way of registration to the FilterAlgorithmBase
 """
 
-from typing import Dict
+from typing import Mapping, Type
 
 import numpy as np
 import pytest
@@ -26,7 +26,7 @@ from starfish import ImageStack
 from starfish.image import Filter
 from starfish.image._filter.max_proj import MaxProj
 
-methods: Dict = Filter._algorithm_to_class_map()
+methods: Mapping[str, Type] = Filter._algorithm_to_class_map()
 
 
 def generate_default_data():

@@ -9,6 +9,12 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import Axes, Features
 
+try:
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", module="vispy.visuals.isocurve", lineno=22)
+        from napari import Window, Viewer
+except ImportError:
+    Window, Viewer = None, None
 
 INTERACTIVE = not hasattr(__main__, "__file__")
 
@@ -108,6 +114,7 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
 def display(
         stack: Optional[ImageStack] = None,
         spots: Optional[IntensityTable] = None,
+        viewer: Optional[Viewer] = None,
         project_axes: Optional[Set[Axes]] = None,
         mask_intensities: float = 0.,
         radius_multiplier: int = 1
@@ -121,6 +128,9 @@ def display(
         ImageStack to display
     spots : IntensityTable
         IntensityTable containing spot information that was generated from the submitted stack.
+    viewer : napari.Viewer
+        Napari viewer to append the ImageStack and/or spots to. If None, creates a new viewer.
+        Note: appending is only supported in interactive environments.
     project_axes : Optional[Set[Axes]]
         If provided, both the ImageStack and the Spots will be maximum projected along the
         selected axes. Useful for displaying spots across coded assays where spots may not
@@ -163,6 +173,13 @@ def display(
     >>> from starfish import display, Axes
     >>> display(stack, intensities, project_axes={Axes.CH, Axes.ROUND})
 
+    5. Compare the image before (raw_stack) and after (filtered_stack) filtering by displaying
+    two stacks in the same Viewer.
+
+    >>> from starfish import display
+    >>> viewer = display(raw_stack)
+    >>> viewer = display(stack=filtered_stack, viewer=viewer)
+
     Notes
     -----
     - To use in ipython, use the `%gui qt5` magic.
@@ -174,23 +191,26 @@ def display(
     if stack is None and spots is None:
         raise TypeError("expected a stack and/or spots; got nothing")
 
-    try:
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", module="vispy.visuals.isocurve", lineno=22)
-            from napari import Window, Viewer
-    except ImportError:
-        print("Requires napari 0.0.6. Run `pip install starfish[napari]` to install the "
-              "necessary requirements.")
+    if Window is None or Viewer is None:
+        warnings.warn("Requires napari 0.0.6. Run `pip install starfish[napari]` to install the "
+                      "necessary requirements.")
         return
 
     from PyQt5.QtWidgets import QApplication
 
-    app = QApplication.instance() or QApplication([])
+    # Instantiate the napari viewer
+    if viewer is None:
+        app = QApplication.instance() or QApplication([])
 
-    # initialize the viewer
-    viewer = Viewer()
-    window = Window(viewer, show=False)
-    viewer._window = window
+        # initialize the viewer
+        viewer = Viewer()
+        window = Window(viewer, show=False)
+        viewer._window = window
+        new_viewer = True
+    elif isinstance(viewer, Viewer):
+        new_viewer = False
+    else:
+        raise TypeError("viewer must be a napari Viewer or None")
 
     if stack is not None:
         if project_axes is not None:
@@ -231,9 +251,10 @@ def display(
         viewer.add_markers(coords=coords, face_color="white", edge_color="white", symbol="ring",
                            size=sizes * radius_multiplier, n_dimensional=True)
 
-    window.show()
+    if new_viewer:
+        window.show()
 
-    if not INTERACTIVE:
-        app.exec()  # create blocking process to persist windows
+        if not INTERACTIVE:
+            app.exec()  # create blocking process to persist windows
 
     return viewer

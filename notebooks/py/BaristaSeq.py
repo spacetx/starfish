@@ -34,12 +34,10 @@ from starfish.types import Axes
 # EPY: END markdown
 
 # EPY: START code
-exp = starfish.Experiment.from_json(os.path.expanduser("~/scratch/baristaseq/experiment.json"))
-nissl = exp['fov_000'].get_image('dots')
-# EPY: END code
+experiment_json = "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20190319/baristaseq/experiment.json"
+exp = starfish.Experiment.from_json(experiment_json)
 
-# EPY: START code
-# exp = starfish.data.BaristaSeq()
+nissl = exp['fov_000'].get_image('dots')
 img = exp['fov_000'].get_image('primary')
 # EPY: END code
 

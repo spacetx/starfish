@@ -1,7 +1,6 @@
 import copy
 import json
 import pprint
-from collections import OrderedDict
 from typing import (
     Callable,
     Dict,
@@ -26,7 +25,6 @@ from starfish.config import StarfishConfig
 from starfish.imagestack.imagestack import ImageStack
 from starfish.imagestack.parser.crop import CropParameters
 from starfish.spacetx_format import validate_sptx
-from starfish.types import Axes, Coordinates
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
 
@@ -69,7 +67,7 @@ class FieldOfView:
         self._name = name
         self.aligned_coordinate_groups: Dict[str, List[CropParameters]] = dict()
         for name, tileset in image_tilesets.items():
-            self.aligned_coordinate_groups[name] = self.parse_coordinate_groups(tileset)
+            self.aligned_coordinate_groups[name] = CropParameters.parse_coordinate_groups(tileset)
         self._images = image_tilesets
 
     def __repr__(self):
@@ -84,36 +82,6 @@ class FieldOfView:
             f"  Auxiliary Images:\n"
             f"    {images}"
         )
-
-    def parse_coordinate_groups(self, tileset: TileSet) -> List[CropParameters]:
-        """Takes a tileset and compares the physical coordinates on each tile to
-         create aligned coordinate groups (groups of tiles that have the same physical coordinates)
-
-         Returns
-         -------
-         A list of CropParameters. Each entry describes the r/ch/z values of tiles that are aligned
-         (have matching coordinates)
-         """
-        coord_groups: OrderedDict[tuple, CropParameters] = OrderedDict()
-        for tile in tileset.tiles():
-            x_y_coords = (
-                tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
-                tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1]
-            )
-            # A tile with this (x, y) has already been seen, add tile's Indices to CropParameters
-            if x_y_coords in coord_groups:
-                crop_params = coord_groups[x_y_coords]
-                crop_params._add_permitted_axes(Axes.CH, tile.indices[Axes.CH])
-                crop_params._add_permitted_axes(Axes.ROUND, tile.indices[Axes.ROUND])
-                if Axes.ZPLANE in tile.indices:
-                    crop_params._add_permitted_axes(Axes.ZPLANE, tile.indices[Axes.ZPLANE])
-            else:
-                coord_groups[x_y_coords] = CropParameters(
-                    permitted_chs=[tile.indices[Axes.CH]],
-                    permitted_rounds=[tile.indices[Axes.ROUND]],
-                    permitted_zplanes=[tile.indices[Axes.ZPLANE]] if Axes.ZPLANE in tile.indices
-                    else None)
-        return list(coord_groups.values())
 
     @property
     def name(self) -> str:

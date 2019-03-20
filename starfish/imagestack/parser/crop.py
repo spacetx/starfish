@@ -136,7 +136,6 @@ class CropParameters:
                     else None)
         return list(coord_groups.values())
 
-
     def crop_shape(self, shape: Mapping[Axes, int]) -> Mapping[Axes, int]:
         """
         Given the shape of the original tile, return the shape of the cropped tile.

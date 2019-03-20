@@ -25,7 +25,6 @@ from starfish.config import StarfishConfig
 from starfish.imagestack.imagestack import ImageStack
 from starfish.imagestack.parser.crop import CropParameters
 from starfish.spacetx_format import validate_sptx
-from starfish.types import Axes, Coordinates
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
 

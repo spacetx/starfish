@@ -3,14 +3,19 @@ from typing import Type
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
-from starfish.types import Axes
 from starfish.util import click
 from . import _base
-
 import_all_submodules(__file__, __package__)
 
 
+COMPONENT_NAME = "detect_pixels"
+
+
 class PixelSpotDecoder(PipelineComponent):
+
+    @classmethod
+    def pipeline_component_type_name(cls) -> str:
+        return COMPONENT_NAME
 
     @classmethod
     def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
@@ -25,7 +30,7 @@ class PixelSpotDecoder(PipelineComponent):
         intensities.save(output)
 
     @staticmethod
-    @click.group("detect_pixels")
+    @click.group(COMPONENT_NAME)
     @click.option("-i", "--input", required=True, type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
     @click.option(

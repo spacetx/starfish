@@ -4,13 +4,20 @@ from typing import Type
 from skimage.io import imread
 
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.pipeline import AlgorithmBase, PipelineComponent
+from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
 from starfish.util import click
-from . import label
 from ._base import TargetAssignmentAlgorithm
+import_all_submodules(__file__, __package__)
+
+
+COMPONENT_NAME = "target_assignment"
 
 
 class TargetAssignment(PipelineComponent):
+
+    @classmethod
+    def pipeline_component_type_name(cls) -> str:
+        return COMPONENT_NAME
 
     @classmethod
     def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
@@ -26,7 +33,7 @@ class TargetAssignment(PipelineComponent):
         assigned.save(os.path.join(output))
 
     @staticmethod
-    @click.group("target_assignment")
+    @click.group(COMPONENT_NAME)
     @click.option("--label-image", required=True, type=click.Path(exists=True))
     @click.option("--intensities", required=True, type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)

@@ -9,8 +9,6 @@ from semantic_version import Version
 from sklearn.neighbors import NearestNeighbors
 from slicedimage.io import resolve_path_or_url
 
-from sptx_format.util import SpaceTxValidator
-from sptx_format.validate_sptx import _get_absolute_schema_path
 from starfish.codebook._format import (
     CURRENT_VERSION,
     DocumentKeys,
@@ -19,6 +17,8 @@ from starfish.codebook._format import (
 )
 from starfish.config import StarfishConfig
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.spacetx_format.util import SpaceTxValidator
+from starfish.spacetx_format.validate_sptx import _get_absolute_schema_path
 from starfish.types import Axes, Features, Number
 
 

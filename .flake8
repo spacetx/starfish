@@ -1,4 +1,4 @@
 [flake8]
 max-line-length=100
-application-import-names = starfish, examples, sptx_format
+application-import-names = starfish, examples
 import-order-style = smarkets

@@ -42,8 +42,11 @@ class NumpyImageTile(TileData):
         self._selector = selector
 
     @property
-    def tile_shape(self) -> Tuple[int, int]:
-        return self._data.shape
+    def tile_shape(self) -> Mapping[Axes, int]:
+        raw_tile_shape = self._data.shape
+        assert len(raw_tile_shape) == 2
+        tile_shape = {Axes.Y: raw_tile_shape[0], Axes.X: raw_tile_shape[1]}
+        return tile_shape
 
     @property
     def numpy_array(self):
@@ -100,6 +103,10 @@ class NumpyData(TileCollectionData):
             )
 
         return keys
+
+    @property
+    def tile_shape(self) -> Mapping[Axes, int]:
+        return {Axes.Y: self.data.shape[-2], Axes.X: self.data.shape[-1]}
 
     @property
     def extras(self) -> dict:

@@ -61,7 +61,7 @@ help-unit:
 ### DOCS #####################################################
 #
 docs-%:
-	make -C docs $*
+	make -C docs clean && make -C docs $*
 
 help-docs:
 	$(call print_help, docs-TASK, alias for 'make TASK' in the docs subdirectory)

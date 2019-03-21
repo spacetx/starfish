@@ -43,7 +43,7 @@ To see the code or report a bug, please visit the `github repository
 
    introduction/introduction
    installation/installation
-   api/index
+   API/index
    contributing
    debugging
    license/index

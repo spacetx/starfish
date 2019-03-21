@@ -17,13 +17,13 @@ class AlgorithmBaseType(type):
     def run_with_logging(func):
         """
         This method extends each pipeline component.run() method to also log itself and
-        runtime parameters to the IntensityTable and Imagestack objects. There are two
+        runtime parameters to the IntensityTable and ImageStack objects. There are two
         scenarios for this method:
             1.) Filtering:
-                    Imagestack -> Imagestack
+                    ImageStack -> ImageStack
             2.) Spot Detection:
-                    Imagestack -> IntensityTable
-                    Imagestack -> [IntenistyTable, ConnectedComponentDecodingResult]
+                    ImageStack -> IntensityTable
+                    ImageStack -> [IntensityTable, ConnectedComponentDecodingResult]
             TODO segmentation and decoding
         """
         def helper(*args, **kwargs):

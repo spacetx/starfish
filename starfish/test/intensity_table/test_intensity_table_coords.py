@@ -1,3 +1,4 @@
+import random
 from collections import OrderedDict
 from typing import Union
 
@@ -6,8 +7,7 @@ import numpy as np
 from starfish import IntensityTable
 from starfish.intensity_table import intensity_table_coordinates
 from starfish.test import test_utils
-from starfish.types import Axes, Coordinates, PhysicalCoordinateTypes
-
+from starfish.types import Axes, Coordinates, Features, PhysicalCoordinateTypes
 
 NUMBER_SPOTS = 10
 
@@ -95,8 +95,19 @@ def test_tranfering_physical_coords_to_expression_matrix():
     intensities = intensity_table_coordinates. \
         transfer_physical_coords_from_imagestack_to_intensity_table(stack, intensities)
 
-    expression_matrix = intensities.to_expression_matrix()
+    # CHeck that error is thrown before target assignment
+    try:
+        intensities.to_expression_matrix()
+    except RuntimeError as e:
+        # Assert value error is thrown with right message
+        assert e.args[0] == "IntensityTable must have 'cell_id' assignments for each cell before " \
+                            "this function can be called. See starfish.TargetAssignment.Label."
 
+    # mock out come cell_ids
+    cell_ids = random.sample(range(1, 100), NUMBER_SPOTS)
+    intensities[Features.CELL_ID] = (Features.AXIS, cell_ids)
+
+    expression_matrix = intensities.to_expression_matrix()
     # Assert that coords were transferred
     xc = expression_matrix.coords[Coordinates.X]
     yc = expression_matrix.coords[Coordinates.Y]

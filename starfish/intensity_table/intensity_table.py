@@ -1,10 +1,9 @@
 from itertools import product
 from json import loads
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
-import regional
 import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
@@ -431,46 +430,38 @@ class IntensityTable(xr.DataArray):
         df = df.drop(pixel_coordinates.intersection(df.columns), axis=1).drop(Features.AXIS, axis=1)
         return DecodedSpots(df)
 
-    def to_expression_matrix(self, regions: Optional[regional.many]=None) -> ExpressionMatrix:
+    def to_expression_matrix(self) -> ExpressionMatrix:
         """Generates a cell x gene count matrix where each cell is annotated with spatial metadata
 
-        Parameters
-        ----------
-        regions: Optional[regional.Many]
-            cell segmentation results that were used to assign points to cells. If not provided, the
-            centers of the cells will be estimated by taking the midpoint between the extreme-valued
-            spots on each axis.
+        Requires that spots in the IntensityTable have been assigned to cells.
 
         Returns
         -------
         ExpressionMatrix :
             cell x gene expression table
         """
-
-        # create the 2-d counts matrix
-        grouped = self.to_features_dataframe().groupby([Features.AXIS, Features.TARGET])
-        counts = grouped.count().iloc[:, 0].unstack().fillna(0)
-
-        if regions:
-            # counts.index stores cell_id, extract cell information from the regional.many object
-            metadata = {
-                Features.AREA: (Features.CELLS, [regions[id_].area for id_ in counts.index]),
-                Axes.X: (Features.CELLS, [regions[id_].center[0] for id_ in counts.index]),
-                Axes.Y: (Features.CELLS, [regions[id_].center[1] for id_ in counts.index]),
-                Axes.ZPLANE: (Features.CELLS, np.zeros(counts.shape[0]))
-            }
-        else:
-            if self.has_physical_coords:
-                grouped = self.to_features_dataframe().groupby([Features.AXIS])[[
-                    Axes.X, Axes.Y, Axes.ZPLANE, Coordinates.X, Coordinates.Y, Coordinates.Z]]
+        try:
+            grouped = self.to_features_dataframe().groupby([Features.CELL_ID, Features.TARGET])
+        except KeyError as e:
+            if Features.CELL_ID in str(e):
+                raise RuntimeError(
+                    "IntensityTable must have 'cell_id' assignments for each cell before "
+                    "this function can be called. See starfish.TargetAssignment.Label."
+                )
             else:
-                grouped = self.to_features_dataframe().groupby([Features.AXIS])[[
-                    Axes.X, Axes.Y, Axes.ZPLANE]]
-            min_ = grouped.min()
-            max_ = grouped.max()
-            coordinate_df = min_ + (max_ - min_) / 2
-            metadata = {name: (Features.CELLS, data.values) for name, data in coordinate_df.items()}
-            metadata[Features.AREA] = (Features.CELLS, np.full(counts.shape[0], fill_value=np.nan))
+                raise
+        counts = grouped.count().iloc[:, 0].unstack().fillna(0)
+        if self.has_physical_coords:
+            grouped = self.to_features_dataframe().groupby([Features.CELL_ID])[[
+                Axes.X, Axes.Y, Axes.ZPLANE, Coordinates.X, Coordinates.Y, Coordinates.Z]]
+        else:
+            grouped = self.to_features_dataframe().groupby([Features.CELL_ID])[[
+                Axes.X, Axes.Y, Axes.ZPLANE]]
+        min_ = grouped.min()
+        max_ = grouped.max()
+        coordinate_df = min_ + (max_ - min_) / 2
+        metadata = {name: (Features.CELLS, data.values) for name, data in coordinate_df.items()}
+        metadata[Features.AREA] = (Features.CELLS, np.full(counts.shape[0], fill_value=np.nan))
 
         # add genes to the metadata
         metadata.update({Features.GENES: counts.columns.values})

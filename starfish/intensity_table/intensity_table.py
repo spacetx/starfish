@@ -1,6 +1,6 @@
 from itertools import product
 from json import loads
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -8,7 +8,15 @@ import regional
 import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
-from starfish.types import Axes, Coordinates, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
+from starfish.types import (
+    Axes,
+    Coordinates,
+    DecodedSpots,
+    Features,
+    LOG,
+    SpotAttributes,
+    STARFISH_EXTRAS_KEY
+)
 from starfish.util.dtype import preserve_float_range
 
 
@@ -392,6 +400,13 @@ class IntensityTable(xr.DataArray):
 
         return IntensityTable.from_spot_data(intensity_data, pixel_coordinates)
 
+    @staticmethod
+    def concatanate_intensity_tables(intensity_tables: List["IntensityTable"]):
+        # TODO VARY CONCAT LOGIC IF TILES OVERLAP
+        # This method is a starting point for handling tile overlap, right now
+        # it does a simple concat but people want other overlap logic implmented
+        return xr.concat(intensity_tables, dim=Features.AXIS)
+
     def to_features_dataframe(self) -> pd.DataFrame:
         """Generates a dataframe of the underlying features multi-index.
         This is guaranteed to contain the features x, y, z, and radius.
@@ -402,6 +417,19 @@ class IntensityTable(xr.DataArray):
 
         """
         return pd.DataFrame(dict(self[Features.AXIS].coords))
+
+    def to_decoded_spots(self) -> DecodedSpots:
+        """
+        Generates a dataframe containing decoded spot information. Guaranteed to contain physical
+        spot coordinates (z, y, x) and gene target. Does not contain pixel coordinates.
+        """
+        if Features.TARGET not in self.coords.keys():
+            raise RuntimeError(
+                "Intensities must be decoded before a DecodedSpots table can be produced.")
+        df = self.to_features_dataframe()
+        pixel_coordinates = pd.Index([Axes.X, Axes.Y, Axes.ZPLANE])
+        df = df.drop(pixel_coordinates.intersection(df.columns), axis=1).drop(Features.AXIS, axis=1)
+        return DecodedSpots(df)
 
     def to_expression_matrix(self, regions: Optional[regional.many]=None) -> ExpressionMatrix:
         """Generates a cell x gene count matrix where each cell is annotated with spatial metadata

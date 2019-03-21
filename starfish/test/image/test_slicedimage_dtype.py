@@ -9,7 +9,7 @@ from slicedimage import ImageFormat
 from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import FetchedTile, TileFetcher
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Coordinates, Number
+from starfish.types import Axes, Coordinates, Number
 
 NUM_ROUND = 2
 NUM_CH = 2
@@ -24,8 +24,8 @@ class OnesTilesByDtype(FetchedTile):
         self._dtype = dtype
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return HEIGHT, WIDTH
+    def shape(self) -> Mapping[Axes, int]:
+        return {Axes.Y: HEIGHT, Axes.X: WIDTH}
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:

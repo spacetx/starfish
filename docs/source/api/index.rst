@@ -25,9 +25,6 @@ API
    types/index.rst
 
 .. toctree::
-   plot/index.rst
-
-.. toctree::
    validation/index.rst
 
 .. toctree::

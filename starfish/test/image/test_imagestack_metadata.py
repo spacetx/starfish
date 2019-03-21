@@ -11,7 +11,7 @@ NUM_ZPLANE = 12
 
 class OnesTilesWithExtras(OnesTile):
     def __init__(self, extras: dict, *args, **kwargs) -> None:
-        super().__init__((10, 10))
+        super().__init__({Axes.Y: 10, Axes.X: 10})
         self._extras = extras
 
     @property
@@ -46,7 +46,7 @@ def test_missing_extras():
     """
     class OnesTilesWithExtrasMostly(OnesTile):
         def __init__(self, fov, r, ch, z, extras: dict) -> None:
-            super().__init__((10, 10))
+            super().__init__({Axes.Y: 10, Axes.X: 10})
             self.fov = fov
             self._extras = extras
 

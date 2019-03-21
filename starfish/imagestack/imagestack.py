@@ -21,7 +21,6 @@ from typing import (
     Union,
 )
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import skimage.io
@@ -45,7 +44,7 @@ from starfish.imagestack import indexing_utils, physical_coordinate_calculator
 from starfish.imagestack.parser import TileCollectionData, TileKey
 from starfish.imagestack.parser.crop import CropParameters, CroppedTileCollectionData
 from starfish.imagestack.parser.numpy import NumpyData
-from starfish.imagestack.parser.tileset import parse_tileset
+from starfish.imagestack.parser.tileset import TileSetData
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.multiprocessing.pool import Pool
 from starfish.multiprocessing.shmem import SharedMemory
@@ -109,7 +108,6 @@ class ImageStack:
 
     def __init__(
             self,
-            tile_shape: Tuple[int, int],
             tile_data: TileCollectionData,
     ) -> None:
         axes_sizes = {
@@ -148,7 +146,7 @@ class ImageStack:
             data_tick_marks[dim_for_axis.value] = list(
                 sorted(set(tilekey[dim_for_axis] for tilekey in self._tile_data.keys())))
 
-        data_shape.extend(tile_shape)
+        data_shape.extend([tile_data.tile_shape[Axes.Y], tile_data.tile_shape[Axes.X]])
         data_dimensions.extend([Axes.Y.value, Axes.X.value])
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
@@ -244,14 +242,13 @@ class ImageStack:
         ImageStack :
             An ImageStack representing encapsulating the data from the TileSet.
         """
-        tile_shape, tile_data = parse_tileset(tileset)
+        tile_data: TileCollectionData = TileSetData(tileset)
         if crop_parameters is not None:
-            tile_shape = crop_parameters.crop_shape(tile_shape)
             tile_data = CroppedTileCollectionData(tile_data, crop_parameters)
-        return cls(tile_shape, tile_data)
+        return cls(tile_data)
 
     @classmethod
-    def from_url(cls, url: str, baseurl: Optional[str]):
+    def from_url(cls, url: str, baseurl: Optional[str], aligned_group: int = 0):
         """
         Constructs an ImageStack object from a URL and a base URL.
 
@@ -268,14 +265,18 @@ class ImageStack:
         baseurl : Optional[str]
             If url is a relative URL, then this must be provided.  If url is an absolute URL, then
             this parameter is ignored.
+        aligned_group: int
+            Which aligned tile group to load into the Imagestack, only applies if the
+            tileset is unaligned. Default 0 (the first group)
         """
         config = StarfishConfig()
         tileset = Reader.parse_doc(url, baseurl, backend_config=config.slicedimage)
-
-        return cls.from_tileset(tileset)
+        coordinate_groups = CropParameters.parse_coordinate_groups(tileset)
+        crop_params = coordinate_groups[aligned_group]
+        return cls.from_tileset(tileset, crop_parameters=crop_params)
 
     @classmethod
-    def from_path_or_url(cls, url_or_path: str) -> "ImageStack":
+    def from_path_or_url(cls, url_or_path: str, aligned_group: int = 0) -> "ImageStack":
         """
         Constructs an ImageStack object from an absolute URL or a filesystem path.
 
@@ -287,11 +288,14 @@ class ImageStack:
         ----------
         url_or_path : str
             Either an absolute URL or a filesystem path to an imagestack.
+        aligned_group: int
+            Which aligned tile group to load into the Imagestack, only applies if the
+            tileset is unaligned. Default 0 (the first group)
         """
         config = StarfishConfig()
         _, relativeurl, baseurl = resolve_path_or_url(url_or_path,
                                                       backend_config=config.slicedimage)
-        return cls.from_url(relativeurl, baseurl)
+        return cls.from_url(relativeurl, baseurl, aligned_group)
 
     @classmethod
     def from_numpy_array(
@@ -341,10 +345,7 @@ class ImageStack:
             assert len(index_labels[Axes.ZPLANE]) == n_z
 
         tile_data = NumpyData(array, index_labels, coordinates)
-        return cls(
-            (height, width),
-            tile_data,
-        )
+        return cls(tile_data)
 
     @property
     def xarray(self) -> xr.DataArray:
@@ -567,52 +568,6 @@ class ImageStack:
         self._data.loc[slice_list] = data
 
     @staticmethod
-    def _show_matplotlib_notebook(
-            linear_view, labels, n_tiles, figure_size, color_map
-    ):
-        from ipywidgets import interact, fixed
-
-        fig, ax = plt.subplots(figsize=figure_size)
-        im = ax.imshow(linear_view[0], cmap=color_map)
-        ax.set_xticks([])
-        ax.set_yticks([])
-
-        def show_plane(ax, plane, plane_index, cmap="gray", title=None):
-            # Update the image in the current plane
-            im.set_data(plane)
-            if title:
-                ax.set_title(title)
-
-        def display_slice(plane_index, ax):
-            title_str = " ".join(str(lab).upper() for lab in labels[plane_index])
-            show_plane(ax, linear_view[plane_index], plane_index, title=title_str, cmap=color_map)
-
-        interact(display_slice, ax=fixed(ax), plane_index=(0, n_tiles - 1))
-
-    @staticmethod
-    def _show_matplotlib_inline(
-            linear_view, labels, n_tiles, figure_size, color_map
-    ):
-        from ipywidgets import interact
-
-        def show_plane(ax, plane, plane_index, cmap="gray", title=None):
-            ax.imshow(plane, cmap=cmap)
-
-            if title:
-                ax.set_title(title, fontsize=16)
-            ax.set_xticks([])
-            ax.set_yticks([])
-
-        @interact(plane_index=(0, n_tiles - 1))
-        def display_slice(plane_index=0):
-            fig, ax = plt.subplots(figsize=figure_size)
-            title_str = " ".join(str(lab).upper() for lab in labels[plane_index])
-            show_plane(ax, linear_view[plane_index], plane_index, title=title_str, cmap=color_map)
-            plt.show()
-
-        return display_slice
-
-    @staticmethod
     def _build_slice_list(
             selector: Mapping[Axes, Union[int, slice]]
     ) -> Tuple[Tuple[Union[int, slice], ...], Sequence[Axes]]:
@@ -648,7 +603,7 @@ class ImageStack:
         Yields
         ------
         Dict[str, int]
-            Mapping of dimension name to index
+            Mapping of axis name to index
 
         """
         if axes is None:
@@ -977,18 +932,12 @@ class ImageStack:
     def num_zplanes(self):
         return self.xarray.sizes[Axes.ZPLANE]
 
-    AXES_TO_PROPERTY_MAP = {
-        Axes.ROUND: num_rounds,
-        Axes.CH: num_chs,
-        Axes.ZPLANE: num_zplanes,
-    }
-
     def axis_labels(self, axis: Axes) -> Iterable[int]:
         """Given a axis, return the sorted unique values for that axis in this ImageStack.  For
         instance, imagestack.unique_index_values(Axes.ROUND) returns all the round ids in this
         imagestack."""
 
-        return [val for val in self.xarray.coords[axis.value].values]
+        return [int(val) for val in self.xarray.coords[axis.value].values]
 
     @property
     def tile_shape(self):
@@ -1051,7 +1000,7 @@ class ImageStack:
                 Axes.CH: self.num_chs,
                 Axes.ZPLANE: self.num_zplanes,
             },
-            default_tile_shape=self.tile_shape,
+            default_tile_shape={Axes.Y: self.tile_shape[0], Axes.X: self.tile_shape[1]},
             extras=self._tile_data.extras,
         )
         for tilekey in self._tile_data.keys():
@@ -1160,7 +1109,7 @@ class ImageStack:
             tile_fetcher = tile_fetcher_factory(
                 OnesTile,
                 False,
-                (tile_height, tile_width),
+                {Axes.Y: tile_height, Axes.X: tile_width},
             )
 
         collection = build_image(

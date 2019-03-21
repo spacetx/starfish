@@ -52,8 +52,8 @@ class UniqueTiles(FetchedTile):
         self._zplane = zplane
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return HEIGHT, WIDTH
+    def shape(self) -> Mapping[Axes, int]:
+        return {Axes.Y: HEIGHT, Axes.X: WIDTH}
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:

@@ -6,7 +6,7 @@ from typing import Mapping, Tuple, Union
 
 import numpy as np
 
-from starfish.types import Coordinates, Number
+from starfish.types import Axes, Coordinates, Number
 
 
 class FetchedTile:
@@ -17,13 +17,13 @@ class FetchedTile:
         pass
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> Mapping[Axes, int]:
         """Return Tile shape.
 
         Returns
         -------
-        Tuple[int, ...]
-            The tile shape in (y, x)
+        Mapping[Axis, int]
+            The shape of the tile, mapping from Axes to its size.
         """
         raise NotImplementedError()
 
@@ -50,7 +50,7 @@ class FetchedTile:
         return {}
 
     def tile_data(self) -> np.ndarray:
-        """Return the image data representing the tile.
+        """Return the image data representing the tile.  The tile must be row-major.
 
         Returns
         -------

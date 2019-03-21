@@ -9,7 +9,14 @@ from . import _base
 import_all_submodules(__file__, __package__)
 
 
+COMPONENT_NAME = "segment"
+
+
 class Segmentation(PipelineComponent):
+
+    @classmethod
+    def pipeline_component_type_name(cls) -> str:
+        return COMPONENT_NAME
 
     @classmethod
     def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
@@ -27,7 +34,7 @@ class Segmentation(PipelineComponent):
         imsave(output, label_image)
 
     @staticmethod
-    @click.group("segment")
+    @click.group(COMPONENT_NAME)
     @click.option("--primary-images", required=True, type=click.Path(exists=True))
     @click.option("--nuclei", required=True, type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)

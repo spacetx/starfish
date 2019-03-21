@@ -41,8 +41,8 @@ class AlignedTiles(FetchedTile):
         self._zplane = z
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return HEIGHT, WIDTH
+    def shape(self) -> Mapping[Axes, int]:
+        return {Axes.Y: HEIGHT, Axes.X: WIDTH}
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
@@ -87,8 +87,8 @@ class ScalarTiles(FetchedTile):
         self._zplane = z
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return HEIGHT, WIDTH
+    def shape(self) -> Mapping[Axes, int]:
+        return {Axes.Y: HEIGHT, Axes.X: WIDTH}
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
@@ -113,8 +113,8 @@ class OffsettedTiles(FetchedTile):
         self._round = _round
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return HEIGHT, WIDTH
+    def shape(self) -> Mapping[Axes, int]:
+        return {Axes.Y: HEIGHT, Axes.X: WIDTH}
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:

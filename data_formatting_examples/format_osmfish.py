@@ -45,8 +45,16 @@ class osmFISHTile(FetchedTile):
         self._coordinates = coordinates
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return self.tile_data().shape
+    def shape(self) -> Mapping[Axes, int]:
+        """
+        Gets image shape directly from the data. Note that this will result in the data being
+        read twice, since the shape is retrieved from all tiles before the data is read, and thus
+        single-file caching does not resolve the duplicated reads.
+
+        Because the data here isn't tremendously large, this is acceptable in this instance.
+        """
+        raw_shape = self.tile_data().shape
+        return {Axes.Y: raw_shape[0], Axes.X: raw_shape[1]}
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:

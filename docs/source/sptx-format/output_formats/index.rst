@@ -12,4 +12,7 @@ Output Formats
     ExpressionMatrix/index.rst
 
 .. toctree::
+    DecodedSpots/index.rst
+
+.. toctree::
     SegmentationMask/index.rst

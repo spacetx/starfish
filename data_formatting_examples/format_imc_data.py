@@ -19,8 +19,8 @@ class ImagingMassCytometryTile(FetchedTile):
         self._tile_data = imread(self.file_path)
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return self._tile_data.shape
+    def shape(self) -> Mapping[Axes, int]:
+        return {Axes.Y: self._tile_data.shape[0], Axes.X: self._tile_data.shape[1]}
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:

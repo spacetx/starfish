@@ -62,7 +62,7 @@ def build_image(
         chs: Sequence[int],
         zplanes: Sequence[int],
         image_fetcher: TileFetcher,
-        default_shape: Optional[Tuple[int, int]]=None,
+        default_shape: Optional[Mapping[Axes, int]]=None,
         axes_order: Sequence[Axes]=DEFAULT_DIMENSION_ORDER,
 ) -> Collection:
     """
@@ -153,7 +153,7 @@ def write_experiment_json(
         primary_tile_fetcher: Optional[TileFetcher]=None,
         aux_tile_fetcher: Optional[Mapping[str, TileFetcher]]=None,
         postprocess_func: Optional[Callable[[dict], dict]]=None,
-        default_shape: Optional[Tuple[int, int]]=None,
+        default_shape: Optional[Mapping[Axes, int]]=None,
         dimension_order: Sequence[Axes]=(Axes.ZPLANE, Axes.ROUND, Axes.CH),
 ) -> None:
     """

@@ -21,14 +21,11 @@ from typing import (
     Union,
 )
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import skimage.io
 import xarray as xr
 from scipy.ndimage.filters import gaussian_filter
-from scipy.stats import scoreatpercentile
-from skimage import exposure
 from skimage import img_as_float32, img_as_uint
 from slicedimage import (
     ImageFormat,
@@ -47,18 +44,20 @@ from starfish.imagestack import indexing_utils, physical_coordinate_calculator
 from starfish.imagestack.parser import TileCollectionData, TileKey
 from starfish.imagestack.parser.crop import CropParameters, CroppedTileCollectionData
 from starfish.imagestack.parser.numpy import NumpyData
-from starfish.imagestack.parser.tileset import parse_tileset
+from starfish.imagestack.parser.tileset import TileSetData
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.multiprocessing.pool import Pool
 from starfish.multiprocessing.shmem import SharedMemory
 from starfish.types import (
     Axes,
+    Clip,
     Coordinates,
     LOG,
     Number,
     STARFISH_EXTRAS_KEY
 )
 from starfish.util import logging
+from starfish.util.dtype import preserve_float_range
 from ._mp_dataarray import MPDataArray
 from .dataorder import AXES_DATA, N_AXES
 
@@ -109,7 +108,6 @@ class ImageStack:
 
     def __init__(
             self,
-            tile_shape: Tuple[int, int],
             tile_data: TileCollectionData,
     ) -> None:
         axes_sizes = {
@@ -148,7 +146,7 @@ class ImageStack:
             data_tick_marks[dim_for_axis.value] = list(
                 sorted(set(tilekey[dim_for_axis] for tilekey in self._tile_data.keys())))
 
-        data_shape.extend(tile_shape)
+        data_shape.extend([tile_data.tile_shape[Axes.Y], tile_data.tile_shape[Axes.X]])
         data_dimensions.extend([Axes.Y.value, Axes.X.value])
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
@@ -244,14 +242,13 @@ class ImageStack:
         ImageStack :
             An ImageStack representing encapsulating the data from the TileSet.
         """
-        tile_shape, tile_data = parse_tileset(tileset)
+        tile_data: TileCollectionData = TileSetData(tileset)
         if crop_parameters is not None:
-            tile_shape = crop_parameters.crop_shape(tile_shape)
             tile_data = CroppedTileCollectionData(tile_data, crop_parameters)
-        return cls(tile_shape, tile_data)
+        return cls(tile_data)
 
     @classmethod
-    def from_url(cls, url: str, baseurl: Optional[str]):
+    def from_url(cls, url: str, baseurl: Optional[str], aligned_group: int = 0):
         """
         Constructs an ImageStack object from a URL and a base URL.
 
@@ -268,14 +265,18 @@ class ImageStack:
         baseurl : Optional[str]
             If url is a relative URL, then this must be provided.  If url is an absolute URL, then
             this parameter is ignored.
+        aligned_group: int
+            Which aligned tile group to load into the Imagestack, only applies if the
+            tileset is unaligned. Default 0 (the first group)
         """
         config = StarfishConfig()
         tileset = Reader.parse_doc(url, baseurl, backend_config=config.slicedimage)
-
-        return cls.from_tileset(tileset)
+        coordinate_groups = CropParameters.parse_coordinate_groups(tileset)
+        crop_params = coordinate_groups[aligned_group]
+        return cls.from_tileset(tileset, crop_parameters=crop_params)
 
     @classmethod
-    def from_path_or_url(cls, url_or_path: str) -> "ImageStack":
+    def from_path_or_url(cls, url_or_path: str, aligned_group: int = 0) -> "ImageStack":
         """
         Constructs an ImageStack object from an absolute URL or a filesystem path.
 
@@ -287,11 +288,14 @@ class ImageStack:
         ----------
         url_or_path : str
             Either an absolute URL or a filesystem path to an imagestack.
+        aligned_group: int
+            Which aligned tile group to load into the Imagestack, only applies if the
+            tileset is unaligned. Default 0 (the first group)
         """
         config = StarfishConfig()
         _, relativeurl, baseurl = resolve_path_or_url(url_or_path,
                                                       backend_config=config.slicedimage)
-        return cls.from_url(relativeurl, baseurl)
+        return cls.from_url(relativeurl, baseurl, aligned_group)
 
     @classmethod
     def from_numpy_array(
@@ -341,10 +345,7 @@ class ImageStack:
             assert len(index_labels[Axes.ZPLANE]) == n_z
 
         tile_data = NumpyData(array, index_labels, coordinates)
-        return cls(
-            (height, width),
-            tile_data,
-        )
+        return cls(tile_data)
 
     @property
     def xarray(self) -> xr.DataArray:
@@ -566,101 +567,6 @@ class ImageStack:
 
         self._data.loc[slice_list] = data
 
-    def _get_scaled_clipped_linear_view(self, selector, rescale, p_min, p_max):
-
-        # get the requested chunk, linearize the remaining data into a sequence of tiles
-        data, remaining_inds = self.get_slice(selector)
-
-        # identify the dimensionality of data with all dimensions other than x, y linearized
-        if len(data.shape) >= 3:
-            n_tiles = np.product(data.shape[:-2])
-        else:
-            raise ValueError(
-                f'a stack with dimensionality >= 3 is required, the provided indexer produced a '
-                f'stack with shape {data.shape}')
-
-        # linearize the array
-        linear_view: np.ndarray = data.reshape((n_tiles,) + data.shape[-2:])
-
-        # set the labels for the linearized tiles
-        labels: List[List[str]] = []
-        for index, size in zip(remaining_inds, data.shape[:-2]):
-            labels.append([f'{index}{n}' for n in range(size)])
-
-        # mypy thinks this has an incompatible type "Iterator[Tuple[Any, ...]]";
-        # it expects "Iterable[List[str]]"
-        labels = list(product(*labels))  # type: ignore
-
-        n_tiles = linear_view.shape[0]
-
-        if rescale and any((p_min, p_max)):
-            raise ValueError('select one of rescale and p_min/p_max to rescale image, not both.')
-
-        elif rescale:
-            print("Rescaling ...")
-            vmin, vmax = scoreatpercentile(data, (0.5, 99.5))
-            linear_view = exposure.rescale_intensity(
-                linear_view,
-                in_range=(vmin, vmax),
-                out_range=np.float32
-            ).astype(np.float32)
-
-        elif p_min or p_max:
-            print("Clipping ...")
-            a_min, a_max = scoreatpercentile(
-                linear_view,
-                (p_min if p_min else 0, p_max if p_max else 100)
-            )
-            linear_view = np.clip(linear_view, a_min=a_min, a_max=a_max)
-
-        return linear_view, labels, n_tiles
-
-    @staticmethod
-    def _show_matplotlib_notebook(
-            linear_view, labels, n_tiles, figure_size, color_map
-    ):
-        from ipywidgets import interact, fixed
-
-        fig, ax = plt.subplots(figsize=figure_size)
-        im = ax.imshow(linear_view[0], cmap=color_map)
-        ax.set_xticks([])
-        ax.set_yticks([])
-
-        def show_plane(ax, plane, plane_index, cmap="gray", title=None):
-            # Update the image in the current plane
-            im.set_data(plane)
-            if title:
-                ax.set_title(title)
-
-        def display_slice(plane_index, ax):
-            title_str = " ".join(str(lab).upper() for lab in labels[plane_index])
-            show_plane(ax, linear_view[plane_index], plane_index, title=title_str, cmap=color_map)
-
-        interact(display_slice, ax=fixed(ax), plane_index=(0, n_tiles - 1))
-
-    @staticmethod
-    def _show_matplotlib_inline(
-            linear_view, labels, n_tiles, figure_size, color_map
-    ):
-        from ipywidgets import interact
-
-        def show_plane(ax, plane, plane_index, cmap="gray", title=None):
-            ax.imshow(plane, cmap=cmap)
-
-            if title:
-                ax.set_title(title, fontsize=16)
-            ax.set_xticks([])
-            ax.set_yticks([])
-
-        @interact(plane_index=(0, n_tiles - 1))
-        def display_slice(plane_index=0):
-            fig, ax = plt.subplots(figsize=figure_size)
-            title_str = " ".join(str(lab).upper() for lab in labels[plane_index])
-            show_plane(ax, linear_view[plane_index], plane_index, title=title_str, cmap=color_map)
-            plt.show()
-
-        return display_slice
-
     @staticmethod
     def _build_slice_list(
             selector: Mapping[Axes, Union[int, slice]]
@@ -697,7 +603,7 @@ class ImageStack:
         Yields
         ------
         Dict[str, int]
-            Mapping of dimension name to index
+            Mapping of axis name to index
 
         """
         if axes is None:
@@ -715,6 +621,7 @@ class ImageStack:
             in_place=False,
             verbose: bool=False,
             n_processes: Optional[int]=None,
+            clip_method: Union[str, Clip]=Clip.CLIP,
             **kwargs
     ) -> "ImageStack":
         """Split the image along a set of axes and apply a function across all the components.  This
@@ -724,14 +631,14 @@ class ImageStack:
         Parameters
         ----------
         func : Callable
-            Function to apply. must expect a first argument which is a numpy array (see group_by)
-            but may return any object type.
+            Function to apply. must expect a first argument which is a 2d or 3d numpy array and
+            return an array of the same shape.
         group_by : Set[Axes]
             Axes to split the data along.  For instance, splitting a 2D array (axes: X, Y; size:
             3, 4) by X results in 3 arrays of size 4.  (default {Axes.ROUND, Axes.CH,
             Axes.ZPLANE})
         in_place : bool
-            (default True) If True, function is executed in place. If n_proc is not 1, the tile or
+            (Default False) If True, function is executed in place. If n_proc is not 1, the tile or
             volume will be copied once during execution. If false, a new ImageStack object will be
             produced.
         verbose : bool
@@ -741,6 +648,15 @@ class ImageStack:
             (default = None).
         kwargs : dict
             Additional arguments to pass to func
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+            value calculated over the entire ImageStack
+            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+            value calculated over each slice, where slice shapes are determined by the group_by
+            parameters
 
         Returns
         -------
@@ -748,30 +664,53 @@ class ImageStack:
             If inplace is False, return a new ImageStack, otherwise return a reference to the
             original stack with data modified by application of func
         """
+        # default grouping is by (x, y) tile
         if group_by is None:
             group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
 
+        if not isinstance(clip_method, (str, Clip)):
+            raise TypeError("must pass a Clip method. See Starfish.types.Clip for valid options")
+
         if not in_place:
+            # create a copy of the ImageStack, call apply on that stack with in_place=True
             image_stack = deepcopy(self)
             return image_stack.apply(
-                func,
-                group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes, **kwargs
+                func=func,
+                group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes,
+                clip_method=clip_method,
+                **kwargs
             )
-        bound_func = partial(ImageStack._in_place_apply, func)
 
+        # wrapper adds a target `data` parameter where the results from func will be stored
+        # data are clipped or scaled by chunk using preserve_float_range if clip_method != 2
+        bound_func = partial(ImageStack._in_place_apply, func, clip_method=clip_method)
+
+        # execute the processing workflow
         self.transform(
-            bound_func,
+            func=bound_func,
             group_by=group_by,
             verbose=verbose,
             n_processes=n_processes,
             **kwargs)
 
+        # scale based on values of whole image
+        if clip_method == Clip.SCALE_BY_IMAGE:
+            self._data = preserve_float_range(self._data, rescale=True)
+
         return self
 
     @staticmethod
-    def _in_place_apply(apply_func: Callable[..., np.ndarray], data: np.ndarray, **kwargs) -> None:
+    def _in_place_apply(
+        apply_func: Callable[..., Union[xr.DataArray, np.ndarray]], data: np.ndarray,
+        clip_method: Union[str, Clip], **kwargs
+    ) -> None:
         result = apply_func(data, **kwargs)
-        data[:] = result
+        if clip_method == Clip.CLIP:
+            data[:] = preserve_float_range(result, rescale=False)
+        elif clip_method == Clip.SCALE_BY_CHUNK:
+            data[:] = preserve_float_range(result, rescale=True)
+        else:
+            data[:] = result
 
     def transform(
             self,
@@ -805,8 +744,9 @@ class ImageStack:
         List[Any] :
             The results of applying func to stored image data
         """
+        # default grouping is by (x, y) tile
         if group_by is None:
-            group_by = {Axes.X, Axes.Y}
+            group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
 
         selectors = list(self._iter_axes(group_by))
         slice_lists = [self._build_slice_list(index)[0]
@@ -816,15 +756,19 @@ class ImageStack:
         if verbose and StarfishConfig().verbose:
             selectors_and_slice_lists = tqdm(selectors_and_slice_lists)
 
+        mp_applyfunc: Callable = partial(
+            self._processing_workflow, partial(func, **kwargs))
+
         with Pool(
                 processes=n_processes,
                 initializer=SharedMemory.initializer,
                 initargs=((self._data._backing_mp_array,
                            self._data._data.shape,
                            self._data._data.dtype),)) as pool:
-            mp_applyfunc: Callable = partial(
-                self._processing_workflow, partial(func, **kwargs))
             results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
+
+            # Note: results is [None, ...] if executing an in-place workflow
+            # Note: this return must be inside the context manager or the Pool will deadlock
             return list(zip(results, selectors))
 
     @staticmethod
@@ -850,8 +794,8 @@ class ImageStack:
         )
         sliced = data_array.sel(selector_and_slice_list[0])
 
-        # return the result of the function called on the slice
-        return worker_callable(sliced)
+        # pass worker_callable a view into the backing array, which will be overwritten
+        return worker_callable(sliced)  # type: ignore
 
     @property
     def tile_metadata(self) -> pd.DataFrame:
@@ -988,18 +932,12 @@ class ImageStack:
     def num_zplanes(self):
         return self.xarray.sizes[Axes.ZPLANE]
 
-    AXES_TO_PROPERTY_MAP = {
-        Axes.ROUND: num_rounds,
-        Axes.CH: num_chs,
-        Axes.ZPLANE: num_zplanes,
-    }
-
     def axis_labels(self, axis: Axes) -> Iterable[int]:
         """Given a axis, return the sorted unique values for that axis in this ImageStack.  For
         instance, imagestack.unique_index_values(Axes.ROUND) returns all the round ids in this
         imagestack."""
 
-        return [val for val in self.xarray.coords[axis.value].values]
+        return [int(val) for val in self.xarray.coords[axis.value].values]
 
     @property
     def tile_shape(self):
@@ -1062,7 +1000,7 @@ class ImageStack:
                 Axes.CH: self.num_chs,
                 Axes.ZPLANE: self.num_zplanes,
             },
-            default_tile_shape=self.tile_shape,
+            default_tile_shape={Axes.Y: self.tile_shape[0], Axes.X: self.tile_shape[1]},
             extras=self._tile_data.extras,
         )
         for tilekey in self._tile_data.keys():
@@ -1171,7 +1109,7 @@ class ImageStack:
             tile_fetcher = tile_fetcher_factory(
                 OnesTile,
                 False,
-                (tile_height, tile_width),
+                {Axes.Y: tile_height, Axes.X: tile_width},
             )
 
         collection = build_image(

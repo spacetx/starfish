@@ -5,11 +5,17 @@ from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline import AlgorithmBase, import_all_submodules, PipelineComponent
 from starfish.util import click
 from . import _base
-
 import_all_submodules(__file__, __package__)
 
 
+COMPONENT_NAME = "decode"
+
+
 class Decoder(PipelineComponent):
+
+    @classmethod
+    def pipeline_component_type_name(cls) -> str:
+        return COMPONENT_NAME
 
     @classmethod
     def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
@@ -24,7 +30,7 @@ class Decoder(PipelineComponent):
         intensities.save(output)
 
     @staticmethod
-    @click.group("decode")
+    @click.group(COMPONENT_NAME)
     @click.option("-i", "--input", required=True, type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
     @click.option("--codebook", required=True, type=click.Path(exists=True))

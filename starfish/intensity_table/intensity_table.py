@@ -8,9 +8,10 @@ import regional
 import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
-from starfish.image._filter.util import preserve_float_range
-from starfish.types import Axes, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
+
 from starfish.types._constants import OverlapStrategy
+from starfish.types import Axes, DecodedSpots, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
+from starfish.util.dtype import preserve_float_range
 
 
 class IntensityTable(xr.DataArray):
@@ -428,6 +429,7 @@ class IntensityTable(xr.DataArray):
         if overlap_strategy:
             overlap_method = IntensityTable.OVERLAP_STRATEGY_MAP[overlap_strategy]
             overlap_method(intensity_tables)
+
         return xr.concat(intensity_tables, dim=Features.AXIS)
 
     def to_features_dataframe(self) -> pd.DataFrame:
@@ -440,6 +442,19 @@ class IntensityTable(xr.DataArray):
 
         """
         return pd.DataFrame(dict(self[Features.AXIS].coords))
+
+    def to_decoded_spots(self) -> DecodedSpots:
+        """
+        Generates a dataframe containing decoded spot information. Guaranteed to contain physical
+        spot coordinates (z, y, x) and gene target. Does not contain pixel coordinates.
+        """
+        if Features.TARGET not in self.coords.keys():
+            raise RuntimeError(
+                "Intensities must be decoded before a DecodedSpots table can be produced.")
+        df = self.to_features_dataframe()
+        pixel_coordinates = pd.Index([Axes.X, Axes.Y, Axes.ZPLANE])
+        df = df.drop(pixel_coordinates.intersection(df.columns), axis=1).drop(Features.AXIS, axis=1)
+        return DecodedSpots(df)
 
     def to_expression_matrix(self, regions: Optional[regional.many]=None) -> ExpressionMatrix:
         """Generates a cell x gene count matrix where each cell is annotated with spatial metadata

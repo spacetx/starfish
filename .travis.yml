@@ -30,9 +30,6 @@ jobs:
     - name: MERFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: travis_wait make install-dev run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
-    - name: Assay Notebook
-      if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev run__notebooks/py/assay_comparison.py
     - name: osmFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: make install-dev run__notebooks/py/osmFISH.py

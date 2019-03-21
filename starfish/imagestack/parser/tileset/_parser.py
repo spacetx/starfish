@@ -22,11 +22,14 @@ class _TileSetConsistencyDetector:
     trigger a :py:class:`starfish.errors.DataFormatWarning`.
     """
     def __init__(self) -> None:
-        self.tile_shape: Optional[Tuple[int, ...]] = None
+        self.tile_shape: Optional[Mapping[Axes, int]] = None
         self.kind = None
         self.dtype_size = None
 
-    def report_tile_shape(self, r: int, ch: int, zplane: int, tile_shape: Tuple[int, ...]) -> None:
+    def report_tile_shape(
+            self,
+            r: int, ch: int, zplane: int,
+            tile_shape: Mapping[Axes, int]) -> None:
         """As each tile is parsed, the tile shape should be reported via this method.  If an
         inconsistency is detected, a ValueError exception will be raised.
 
@@ -34,8 +37,8 @@ class _TileSetConsistencyDetector:
         ----------
         r, ch, zplane : int
             The indices of the tile, which is used to generate the exception text.
-        tile_shape : Tuple[int, ...]
-            The shape of the tile.
+        tile_shape : Mapping[Axes, int]
+            The shape of the tile, mapping from Axes to its size.
         """
         if self.tile_shape is not None and self.tile_shape != tile_shape:
             raise ValueError(
@@ -99,9 +102,11 @@ class SlicedImageTile(TileData):
         self._expectations.report_dtype(self._r, self._ch, self._zplane, self._numpy_array.dtype)
 
     @property
-    def tile_shape(self) -> Tuple[int, int]:
+    def tile_shape(self) -> Mapping[Axes, int]:
         self._load()
-        tile_shape = self._numpy_array.shape
+        raw_tile_shape = self._numpy_array.shape
+        assert len(raw_tile_shape) == 2
+        tile_shape = {Axes.Y: raw_tile_shape[0], Axes.X: raw_tile_shape[1]}
         self._expectations.report_tile_shape(self._r, self._ch, self._zplane, tile_shape)
         return tile_shape
 
@@ -130,6 +135,8 @@ class TileSetData(TileCollectionData):
     This class presents a simpler API for accessing a TileSet and its constituent tiles.
     """
     def __init__(self, tileset: TileSet) -> None:
+        self._tile_shape = tileset.default_tile_shape
+
         self.tiles: MutableMapping[TileKey, Tile] = dict()
         for tile in tileset.tiles():
             key = TileKey(
@@ -137,6 +144,11 @@ class TileSetData(TileCollectionData):
                 ch=tile.indices[Axes.CH],
                 zplane=tile.indices.get(Axes.ZPLANE, 0))
             self.tiles[key] = tile
+
+            # if we don't have the tile shape, then we peek at the tile and get its shape.
+            if self._tile_shape is None:
+                self._tile_shape = tile.tile_shape
+
         self._extras = tileset.extras
         self._expectations = _TileSetConsistencyDetector()
 
@@ -147,6 +159,10 @@ class TileSetData(TileCollectionData):
     def keys(self) -> Collection[TileKey]:
         """Returns a Collection of the TileKey's for all the tiles."""
         return self.tiles.keys()
+
+    @property
+    def tile_shape(self) -> Mapping[Axes, int]:
+        return self._tile_shape
 
     @property
     def extras(self) -> dict:
@@ -170,7 +186,7 @@ class TileSetData(TileCollectionData):
 
 def parse_tileset(
         tileset: TileSet
-) -> Tuple[Tuple[int, int], TileCollectionData]:
+) -> Tuple[Mapping[Axes, int], TileCollectionData]:
     """
     Parse a :py:class:`slicedimage.TileSet` for formatting into an
     :py:class:`starfish.imagestack.ImageStack`.

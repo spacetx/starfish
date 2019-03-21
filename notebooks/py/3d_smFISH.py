@@ -29,7 +29,6 @@ from typing import Optional, Tuple
 import numpy as np
 
 import starfish
-import starfish.display
 from starfish import data, FieldOfView, IntensityTable
 
 # EPY: END code
@@ -141,5 +140,5 @@ image, intensities = processing_pipeline(experiment, fov_name='fov_001')
 # EPY: END markdown
 
 # EPY: START code
-viewer = starfish.display.stack(image, intensities)
+viewer = starfish.display(image, intensities)
 # EPY: END code

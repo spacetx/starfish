@@ -16,8 +16,8 @@ class IssCroppedBreastTile(FetchedTile):
         self.file_path = file_path
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return 1044, 1390
+    def shape(self) -> Mapping[Axes, int]:
+        return {Axes.Y: 1044, Axes.X: 1390}
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:

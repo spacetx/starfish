@@ -9,8 +9,6 @@ from semantic_version import Version
 from sklearn.neighbors import NearestNeighbors
 from slicedimage.io import resolve_path_or_url
 
-from sptx_format.util import SpaceTxValidator
-from sptx_format.validate_sptx import _get_absolute_schema_path
 from starfish.codebook._format import (
     CURRENT_VERSION,
     DocumentKeys,
@@ -19,6 +17,8 @@ from starfish.codebook._format import (
 )
 from starfish.config import StarfishConfig
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.spacetx_format.util import SpaceTxValidator
+from starfish.spacetx_format.validate_sptx import _get_absolute_schema_path
 from starfish.types import Axes, Features, Number
 
 
@@ -36,10 +36,10 @@ class Codebook(xr.DataArray):
 
     Methods
     -------
-    from_code_array(code_array, n_round, n_ch)
+    from_code_array(code_array, n_round, n_channel)
         construct a codebook from a spaceTx-spec array of codewords
 
-    from_json(json_codebook, n_round, n_ch)
+    from_json(json_codebook, n_round, n_channel)
         load a codebook from a spaceTx spec-compliant json file
 
     to_json(filename)
@@ -64,9 +64,9 @@ class Codebook(xr.DataArray):
     Build a codebook using ``Codebook.synthetic_one_hot_codebook``::
 
         >>> from starfish import Codebook
-        >>> sd = Codebook.synthetic_one_hot_codebook(n_ch=3, n_round=4, n_codes=2)
+        >>> sd = Codebook.synthetic_one_hot_codebook(n_channel=3, n_round=4, n_codes=2)
         >>> sd.codebook()
-        <xarray.Codebook (target: 2, c: 3, h: 4)>
+        <xarray.Codebook (target: 2, c: 3, r: 4)>
         array([[[0, 0, 0, 0],
                 [0, 0, 1, 1],
                 [1, 1, 0, 0]],
@@ -77,7 +77,7 @@ class Codebook(xr.DataArray):
         Coordinates:
           * target     (target) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
           * c          (c) int64 0 1 2
-          * h          (h) int64 0 1 2 3
+          * r          (r) int64 0 1 2 3
 
     See Also
     --------
@@ -91,14 +91,14 @@ class Codebook(xr.DataArray):
         return int(np.dot(*self.shape[1:]))
 
     @classmethod
-    def _empty_codebook(cls, code_names: Sequence[str], n_ch: int, n_round: int):
-        """create an empty codebook of shape (code_names, n_ch, n_round)
+    def _empty_codebook(cls, code_names: Sequence[str], n_channel: int, n_round: int):
+        """create an empty codebook of shape (code_names, n_channel, n_round)
 
         Parameters
         ----------
         code_names : Sequence[str]
             the targets to be coded
-        n_ch : int
+        n_channel : int
             number of channels used to build the codes
         n_round : int
             number of imaging rounds used to build the codes
@@ -106,8 +106,8 @@ class Codebook(xr.DataArray):
         Examples
         --------
         >>> from starfish import Codebook
-        >>> Codebook._empty_codebook(['ACTA', 'ACTB'], n_ch=3, n_round=2)
-        <xarray.Codebook (target: 2, c: 3, h: 2)>
+        >>> Codebook._empty_codebook(['ACTA', 'ACTB'], n_channel=3, n_round=2)
+        <xarray.Codebook (target: 2, c: 3, r: 2)>
         array([[[0, 0],
                 [0, 0],
                 [0, 0]],
@@ -118,7 +118,7 @@ class Codebook(xr.DataArray):
         Coordinates:
           * target     (target) object 'ACTA' 'ACTB'
           * c          (c) int64 0 1 2
-          * h          (h) int64 0 1
+          * r          (r) int64 0 1
 
         Returns
         -------
@@ -126,31 +126,37 @@ class Codebook(xr.DataArray):
             codebook whose values are all zero
 
         """
-        data = np.zeros((len(code_names), n_ch, n_round), dtype=np.uint8)
-        return cls._create_codebook(code_names, n_ch, n_round, data)
+        data = np.zeros((len(code_names), n_channel, n_round), dtype=np.uint8)
+        return cls._create_codebook(code_names, n_channel, n_round, data)
 
     @classmethod
-    def _create_codebook(cls, code_names: Sequence[str], n_ch: int, n_round: int, data: np.ndarray):
-        """create a codebook of shape (code_names, n_ch, n_round) with the given data
+    def _create_codebook(
+            cls,
+            code_names: Sequence[str],
+            n_channel: int,
+            n_round: int,
+            data: np.ndarray,
+    ) -> "Codebook":
+        """create a codebook of shape (code_names, n_channel, n_round) with the given data
 
         Parameters
         ----------
         code_names : Sequence[str]
             the targets to be coded
-        n_ch : int
+        n_channel : int
             number of channels used to build the codes
         n_round : int
             number of imaging rounds used to build the codes
         data : np.ndarray
-            array of unit8 values with len(code_names) x n_ch x _nround elements
+            array of unit8 values with len(code_names) x n_channel x n_round elements
 
         Examples
         --------
         >>> import numpy as np
         >>> from starfish import Codebook
         >>> data = np.zeros((3, 2, 2), dtype=np.uint8)
-        >>> Codebook._create_codebook(['ACTA', 'ACTB'], n_ch=3, n_round=2, data)
-        <xarray.Codebook (target: 2, c: 3, h: 2)>
+        >>> Codebook._create_codebook(['ACTA', 'ACTB'], n_channel=3, n_round=2, data=data)
+        <xarray.Codebook (target: 2, c: 3, r: 2)>
         array([[[0, 0],
                 [0, 0],
                 [0, 0]],
@@ -161,7 +167,7 @@ class Codebook(xr.DataArray):
         Coordinates:
           * target     (target) object 'ACTA' 'ACTB'
           * c          (c) int64 0 1 2
-          * h          (h) int64 0 1
+          * r          (r) int64 0 1
 
         Returns
         -------
@@ -173,7 +179,7 @@ class Codebook(xr.DataArray):
             data=data,
             coords=(
                 pd.Index(code_names, name=Features.TARGET),
-                pd.Index(np.arange(n_ch), name=Axes.CH.value),
+                pd.Index(np.arange(n_channel), name=Axes.CH.value),
                 pd.Index(np.arange(n_round), name=Axes.ROUND.value),
             )
         )
@@ -190,7 +196,7 @@ class Codebook(xr.DataArray):
     @classmethod
     def from_code_array(
             cls, code_array: List[Dict[Union[str, Any], Any]],
-            n_round: Optional[int]=None, n_ch: Optional[int]=None) -> "Codebook":
+            n_round: Optional[int]=None, n_channel: Optional[int]=None) -> "Codebook":
         """construct a codebook from a spaceTx-spec array of codewords
 
         Parameters
@@ -199,7 +205,7 @@ class Codebook(xr.DataArray):
             Array of dictionaries, each containing a codeword and target
         n_round : Optional[int]
             The number of imaging rounds used in the codes. Will be inferred if not provided
-        n_ch : Optional[int]
+        n_channel : Optional[int]
             The number of channels used in the codes. Will be inferred if not provided
 
         Examples
@@ -225,7 +231,7 @@ class Codebook(xr.DataArray):
             >>>     },
             >>> ]
             >>> Codebook.from_code_array(codebook)
-            <xarray.Codebook (target: 2, c: 4, h: 2)>
+            <xarray.Codebook (target: 2, c: 4, r: 2)>
             array([[[0, 0],
                     [0, 0],
                     [0, 0],
@@ -238,7 +244,7 @@ class Codebook(xr.DataArray):
             Coordinates:
               * target     (target) object 'ACTB_human' 'ACTB_mouse'
               * c          (c) int64 0 1 2 3
-              * h          (h) int64 0 1
+              * r          (r) int64 0 1
 
             Codebook.from_json(json_codebook)
 
@@ -257,19 +263,19 @@ class Codebook(xr.DataArray):
                 max_round = max(max_round, entry[Axes.ROUND])
                 max_ch = max(max_ch, entry[Axes.CH])
 
-        # set n_ch and n_round if either were not provided
+        # set n_channel and n_round if either were not provided
         n_round = n_round if n_round is not None else max_round + 1
-        n_ch = n_ch if n_ch is not None else max_ch + 1
+        n_channel = n_channel if n_channel is not None else max_ch + 1
 
-        # raise errors if provided n_round or n_ch are out of range
+        # raise errors if provided n_round or n_channel are out of range
         if max_round + 1 > n_round:
             raise ValueError(
                 f'code detected that requires an imaging round value ({max_round + 1}) that is '
                 f'greater than provided n_round: {max_round}')
-        if max_ch + 1 > n_ch:
+        if max_ch + 1 > n_channel:
             raise ValueError(
                 f'code detected that requires a channel value ({max_ch + 1}) that is greater '
-                f'than provided n_ch: {n_ch}')
+                f'than provided n_channel: {n_channel}')
 
         # verify codebook structure and fields
         for code in code_array:
@@ -288,19 +294,19 @@ class Codebook(xr.DataArray):
         target_names = [w[Features.TARGET] for w in code_array]
 
         # fill the codebook
-        data = np.zeros((len(target_names), n_ch, n_round), dtype=np.uint8)
+        data = np.zeros((len(target_names), n_channel, n_round), dtype=np.uint8)
         for i, code_dict in enumerate(code_array):
             for bit in code_dict[Features.CODEWORD]:
                 ch = int(bit[Axes.CH])
                 r = int(bit[Axes.ROUND])
                 data[i, ch, r] = int(bit[Features.CODE_VALUE])
-        return cls._create_codebook(target_names, n_ch, n_round, data)
+        return cls._create_codebook(target_names, n_channel, n_round, data)
 
     @classmethod
     def from_json(
             cls, json_codebook: str,
             n_round: Optional[int]=None,
-            n_ch: Optional[int]=None,
+            n_channel: Optional[int]=None,
     ) -> "Codebook":
         """Load a codebook from a spaceTx spec-compliant json file or a url pointing to such a file
         Loads configuration from StarfishConfig.
@@ -311,7 +317,7 @@ class Codebook(xr.DataArray):
             path or url to json file containing a spaceTx codebook
         n_round : Optional[int]
             The number of imaging rounds used in the codes. Will be inferred if not provided
-        n_ch : Optional[int]
+        n_channel : Optional[int]
             The number of channels used in the codes. Will be inferred if not provided
 
         Examples
@@ -346,7 +352,7 @@ class Codebook(xr.DataArray):
             >>>     json.dump(codebook, f)
             >>> # read codebook from file
             >>> Codebook.from_json(json_codebook)
-           <xarray.Codebook (target: 2, c: 4, h: 2)>
+           <xarray.Codebook (target: 2, c: 4, r: 2)>
             array([[[0, 0],
                     [0, 0],
                     [0, 0],
@@ -359,7 +365,7 @@ class Codebook(xr.DataArray):
             Coordinates:
               * target     (target) object 'ACTB_human' 'ACTB_mouse'
               * c          (c) int64 0 1 2 3
-              * h          (h) int64 0 1
+              * r          (r) int64 0 1
 
         Returns
         -------
@@ -388,7 +394,7 @@ class Codebook(xr.DataArray):
         version_str = codebook_doc[DocumentKeys.VERSION_KEY]
         cls._verify_version(version_str)
 
-        return cls.from_code_array(codebook_doc[DocumentKeys.MAPPINGS_KEY], n_round, n_ch)
+        return cls.from_code_array(codebook_doc[DocumentKeys.MAPPINGS_KEY], n_round, n_channel)
 
     def to_json(self, filename: str) -> None:
         """save a codebook to json
@@ -610,7 +616,7 @@ class Codebook(xr.DataArray):
             Parameters
             ----------
             array : np.ndarray
-                2-dimensional numpy array of shape (n_observations, (n_ch * n_round)) where
+                2-dimensional numpy array of shape (n_observations, (n_channel * n_round)) where
                 observations may be either features or codes.
 
             Returns
@@ -677,7 +683,7 @@ class Codebook(xr.DataArray):
 
             >>> from starfish import Codebook
             >>> Codebook.synthetic_one_hot_codebook(n_round=2, n_channel=3, n_codes=2)
-            <xarray.Codebook (target: 2, c: 3, h: 2)>
+            <xarray.Codebook (target: 2, c: 3, r: 2)>
             array([[[0, 1],
                     [0, 0],
                     [1, 0]],
@@ -721,4 +727,4 @@ class Codebook(xr.DataArray):
         codebook = [{Features.CODEWORD: w, Features.TARGET: g}
                     for w, g in zip(codewords, target_names)]
 
-        return cls.from_code_array(codebook, n_round=n_round, n_ch=n_channel)
+        return cls.from_code_array(codebook, n_round=n_round, n_channel=n_channel)

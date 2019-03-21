@@ -104,7 +104,7 @@ def test_tranfering_physical_coords_to_expression_matrix():
                             "this function can be called. See starfish.TargetAssignment.Label."
 
     # mock out come cell_ids
-    cell_ids = random.sample(range(1, 100), NUMBER_SPOTS)
+    cell_ids = random.sample(range(1, 20), NUMBER_SPOTS)
     intensities[Features.CELL_ID] = (Features.AXIS, cell_ids)
 
     expression_matrix = intensities.to_expression_matrix()
@@ -112,6 +112,6 @@ def test_tranfering_physical_coords_to_expression_matrix():
     xc = expression_matrix.coords[Coordinates.X]
     yc = expression_matrix.coords[Coordinates.Y]
     zc = expression_matrix.coords[Coordinates.Z]
-    assert xc.size == NUMBER_SPOTS
-    assert yc.size == NUMBER_SPOTS
-    assert zc.size == NUMBER_SPOTS
+    assert xc.size == len(set(cell_ids))
+    assert yc.size == len(set(cell_ids))
+    assert zc.size == len(set(cell_ids))

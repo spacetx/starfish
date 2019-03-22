@@ -38,7 +38,7 @@ def test_learn_transforms_throws_error():
     stack = exp.fov().get_image('primary')
     reference_stack = exp.fov().get_image('dots')
     translation = Translation(reference_stack=reference_stack,
-                              axis=Axes.ROUND)
+                              axes=Axes.ROUND)
     try:
         translation.run(stack)
     except ValueError as e:
@@ -52,7 +52,7 @@ def test_learn_transforms_translation():
     stack = exp.fov().get_image('primary')
     reference_stack = exp.fov().get_image('dots')
     translation = Translation(reference_stack=reference_stack,
-                              axis=Axes.ROUND)
+                              axes=Axes.ROUND)
     # Calculate max_proj accrss CH/Z
     stack = stack.max_proj(Axes.CH, Axes.ZPLANE)
     transform_list = translation.run(stack)
@@ -69,7 +69,7 @@ def test_export_import_transforms_object():
     stack = exp.fov().get_image('primary')
     reference_stack = exp.fov().get_image('dots')
     translation = Translation(reference_stack=reference_stack,
-                              axis=Axes.ROUND)
+                              axes=Axes.ROUND)
     # Calculate max_proj accrss CH/Z
     stack = stack.max_proj(Axes.CH, Axes.ZPLANE)
     transform_list = translation.run(stack)
@@ -89,7 +89,7 @@ def test_calculate_translation_transforms_and_apply():
     stack = exp.fov().get_image('primary')
     reference_stack = exp.fov().get_image('dots')
     translation = Translation(reference_stack=reference_stack,
-                              axis=Axes.ROUND)
+                              axes=Axes.ROUND)
     # Calculate max_proj accrss
     mp = stack.max_proj(Axes.CH, Axes.ZPLANE)
     transform_list = translation.run(mp)

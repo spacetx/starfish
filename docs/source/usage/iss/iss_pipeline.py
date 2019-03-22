@@ -13,7 +13,7 @@ def iss_pipeline(fov, codebook):
 
     # register the raw image
     learn_translation = LearnTransform.Translation(reference_stack=fov.get_image('dots'),
-                                                   axis=Axes.ROUND, upsampling=100)
+                                                   axes=Axes.ROUND, upsampling=100)
     transforms_list = learn_translation.run(primary_image.max_proj(Axes.CH, Axes.ZPLANE))
     warp = ApplyTransform.Warp(transforms_list=transforms_list)
     registered = warp.run(primary_image, in_place=False, verbose=True)

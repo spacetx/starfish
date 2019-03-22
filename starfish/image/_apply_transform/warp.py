@@ -51,11 +51,7 @@ class Warp(ApplyTransformBase):
         if not in_place:
             # create a copy of the ImageStack, call apply on that stack with in_place=True
             image_stack = deepcopy(stack)
-            return self.run(
-                image_stack,
-                in_place=True,
-                **kwargs
-            )
+            return self.run(image_stack, in_place=True, **kwargs)
         if verbose and StarfishConfig().verbose:
             self.transforms_list.transforms = tqdm(self.transforms_list.transforms)
         all_axes = {Axes.ROUND, Axes.CH, Axes.ZPLANE}

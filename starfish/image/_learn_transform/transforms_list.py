@@ -76,14 +76,15 @@ class TransformsList:
         return
 
     @classmethod
-    def from_json(cls, filename: str) -> "TransformsList":
+    def from_json(cls, url_or_path: str) -> "TransformsList":
         """
         Load a TransformsList from a json file or a url pointing to such a file
         Loads configuration from StarfishConfig.
 
         Parameters
         ----------
-        filename : str
+        url_or_path : str
+            Either an absolute URL or a filesystem path to a transformsList.
 
         Returns
         -------
@@ -91,11 +92,11 @@ class TransformsList:
         """
         config = StarfishConfig()
         transforms_list: List[Tuple[Mapping[Axes, int], TransformType, GeometricTransform]] = list()
-        backend, name, _ = resolve_path_or_url(filename, backend_config=config.slicedimage)
+        backend, name, _ = resolve_path_or_url(url_or_path, backend_config=config.slicedimage)
         with backend.read_contextmanager(name) as fh:
             transforms_array = json.load(fh)
         for selectors_str, transform_type_str, transforms_matrix in transforms_array:
-            selectors = {Axes(k): int(v) for k, v in selectors_str.items()}
+            selectors = {Axes(k): v for k, v in selectors_str.items()}
             transform_type = TransformType(transform_type_str)
             transform_object = transformsTypeMapping[transform_type](np.array(transforms_matrix))
             transforms_list.append((selectors, transform_type, transform_object))

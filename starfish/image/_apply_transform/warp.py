@@ -19,17 +19,7 @@ class Warp(ApplyTransformBase):
     """Class that applies a list of arbitrary skimage GeometricTransforms to an ImageStack
      using skimage.transform.warp"""
 
-    def __init__(self, transforms_list: TransformsList):
-        """
-        Parameters
-        ----------
-        transforms_list: TransformsList
-            A list of tuples. Each tuple consists of an ImageStack axis and a GeometricTransform
-            to apply to the portion of the image identified by the selector.
-        """
-        self.transforms_list = transforms_list
-
-    def run(self, stack: ImageStack,
+    def run(self, stack: ImageStack, transforms_list: TransformsList,
             in_place: bool=False, verbose: bool=False, **kwargs) -> ImageStack:
         """Applies a list of transformations to an ImageStack
 
@@ -41,6 +31,9 @@ class Warp(ApplyTransformBase):
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             if True, report on filtering progress (default = False)
+        transforms_list: TransformsList
+            A list of tuples. Each tuple consists of an ImageStack axis and a GeometricTransform
+            to apply to the portion of the image identified by the selector.
 
         Returns
         -------
@@ -51,11 +44,11 @@ class Warp(ApplyTransformBase):
         if not in_place:
             # create a copy of the ImageStack, call apply on that stack with in_place=True
             image_stack = deepcopy(stack)
-            return self.run(image_stack, in_place=True, **kwargs)
+            return self.run(image_stack, transforms_list, in_place=True, **kwargs)
         if verbose and StarfishConfig().verbose:
-            self.transforms_list.transforms = tqdm(self.transforms_list.transforms)
+            transforms_list.transforms = tqdm(transforms_list.transforms)
         all_axes = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
-        for selector, _, transformation_object in self.transforms_list.transforms:
+        for selector, _, transformation_object in transforms_list.transforms:
             other_axes = all_axes - set(selector.keys())
             # iterate through remaining axes
             for axes in stack._iter_axes(other_axes):
@@ -69,12 +62,9 @@ class Warp(ApplyTransformBase):
 
     @staticmethod
     @click.command("Warp")
-    @click.option("--transformation-list", required=True, type=click.Path(exists=True),
-                  help="The list of transformations to apply to the ImageStack.")
     @click.pass_context
-    def _cli(ctx, transformation_list):
-        ctx.obj["component"]._cli_run(ctx, Warp(
-            TransformsList.from_json(filename=transformation_list)))
+    def _cli(ctx):
+        ctx.obj["component"]._cli_run(ctx, Warp())
 
 
 def warp(image: Union[xr.DataArray, np.ndarray],

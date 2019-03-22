@@ -79,9 +79,9 @@ class TestWithIssData(CLITest, unittest.TestCase):
                     tempdir, "formatted/fov_001", "hybridization.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "registered", "hybridization.json"),
-                "Warp",
                 "--transformation-list", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "transforms", "transforms.json"),
+                "Warp",
             ],
             [
                 "starfish", "filter",

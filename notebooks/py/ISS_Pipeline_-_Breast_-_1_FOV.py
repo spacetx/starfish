@@ -133,8 +133,8 @@ from starfish.image import ApplyTransform, LearnTransform
 
 learn_translation = LearnTransform.Translation(reference_stack=dots, axes=Axes.ROUND, upsampling=1000)
 transforms_list = learn_translation.run(primary_image.max_proj(Axes.CH, Axes.ZPLANE))
-warp = ApplyTransform.Warp(transforms_list=transforms_list)
-registered_image = warp.run(primary_image, in_place=False, verbose=True)
+warp = ApplyTransform.Warp()
+registered_image = warp.run(primary_image, transforms_list=transforms_list, in_place=False, verbose=True)
 # EPY: END code
 
 # EPY: START markdown

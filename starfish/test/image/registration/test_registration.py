@@ -93,8 +93,9 @@ def test_calculate_translation_transforms_and_apply():
     # Calculate max_proj accrss
     mp = stack.max_proj(Axes.CH, Axes.ZPLANE)
     transform_list = translation.run(mp)
-    apply_transform = Warp(transform_list)
-    warped_stack = apply_transform.run(stack)
+    apply_transform = Warp()
+    warped_stack = apply_transform.run(stack=stack,
+                                       transforms_list=transform_list)
     assert np.allclose(
         expected_registered_values,
         warped_stack.xarray[2, 2, 0, 40:50, 40:50])

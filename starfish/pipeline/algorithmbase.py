@@ -1,17 +1,31 @@
+import inspect
+from abc import ABCMeta, abstractmethod
+from typing import Type
+
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.types import LOG
 from starfish.types._constants import STARFISH_EXTRAS_KEY
 from starfish.util.logging import LogEncoder
+from .pipelinecomponent import PipelineComponent
 
 
-class AlgorithmBaseType(type):
-
+class AlgorithmBaseType(ABCMeta):
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
-        if len(bases) != 0:
-            # this is _not_ AlgorithmBase.  Instead, it's a subclass of AlgorithmBase.
+        if not inspect.isabstract(cls):
+            AlgorithmBaseType.register_with_pipeline_component(cls)
             cls.run = AlgorithmBaseType.run_with_logging(cls.run)
+
+    @staticmethod
+    def register_with_pipeline_component(algorithm_cls):
+        pipeline_component_cls = algorithm_cls.get_pipeline_component_class()
+        if pipeline_component_cls._algorithm_to_class_map_int is None:
+            pipeline_component_cls._algorithm_to_class_map_int = {}
+        pipeline_component_cls._algorithm_to_class_map_int[algorithm_cls.__name__] = algorithm_cls
+        setattr(pipeline_component_cls, algorithm_cls._get_algorithm_name(), algorithm_cls)
+
+        pipeline_component_cls._cli.add_command(algorithm_cls._cli)
 
     @staticmethod
     def run_with_logging(func):
@@ -91,3 +105,11 @@ class AlgorithmBase(metaclass=AlgorithmBaseType):
         https://docs.python.org/3/reference/lexical_analysis.html#identifiers
         """
         return cls.__name__
+
+    @classmethod
+    @abstractmethod
+    def get_pipeline_component_class(cls) -> Type[PipelineComponent]:
+        """
+        Returns the class of PipelineComponent this algorithm implements.
+        """
+        raise NotImplementedError()

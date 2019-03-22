@@ -5,7 +5,7 @@ import numpy as np
 from starfish import data
 from starfish.image._apply_transform.warp import Warp
 from starfish.image._learn_transform.translation import TransformsList, Translation
-from starfish.types import Axes
+from starfish.types import Axes, TransformType
 
 
 ISS_SHIFTS = [[-23, 6], [-22, 2], [-22, -3], [-15, -4]]
@@ -44,7 +44,7 @@ def test_learn_transforms_throws_error():
     except ValueError as e:
         # Assert value error is thrown when the stack is not max projected
         # across all other axes.
-        assert e.args[0] == "Only axes: r can have a length > 1, please max project."
+        assert e.args[0] == "Only axes: r can have a length > 1, please us the MaxProj filter."
 
 
 def test_learn_transforms_translation():
@@ -58,7 +58,7 @@ def test_learn_transforms_translation():
     transform_list = translation.run(stack)
     # assert there's a transofrmation object for each round
     assert len(transform_list.transforms) == stack.num_rounds
-    for (_, transform), shift in zip(transform_list.transforms, ISS_SHIFTS):
+    for (_, _, transform), shift in zip(transform_list.transforms, ISS_SHIFTS):
         # assert that each TransformationObject has the correct translation
         # shift
         assert np.array_equal(transform.translation, shift)
@@ -77,9 +77,10 @@ def test_export_import_transforms_object():
     # save to tempfile and import
     transform_list.to_json(filename)
     imported = TransformsList.from_json(filename)
-    for (_, transform), shift in zip(imported.transforms, ISS_SHIFTS):
+    for (_, transform_type, transform), shift in zip(imported.transforms, ISS_SHIFTS):
         # assert that each TransformationObject has the correct translation
         # shift
+        assert transform_type == TransformType.SIMILARITY
         assert np.array_equal(transform.translation, shift)
 
 

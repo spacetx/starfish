@@ -19,21 +19,17 @@ class Warp(ApplyTransformBase):
     """Class that applies a list of arbitrary skimage GeometricTransforms to an ImageStack
      using skimage.transform.warp"""
 
-    def __init__(self, transforms_list: Union[str, TransformsList]):
+    def __init__(self, transforms_list: TransformsList):
         """
         Parameters
         ----------
         transforms_list: TransformsList
-            A list of tuples that describe a subset of an ImageStack axis and a GeometricTransform
-            to apply to it.
+            A list of tuples. Each tuple consists of an ImageStack axis and a GeometricTransform
+            to apply to the portion of the image identified by the selector.
         """
-        if isinstance(transforms_list, TransformsList):
-            self.transforms_list = transforms_list
-        else:
-            self.transforms_list = TransformsList.from_json(filename=transforms_list)
+        self.transforms_list = transforms_list
 
-    def run(
-            self, stack: ImageStack,
+    def run(self, stack: ImageStack,
             in_place: bool=False, verbose: bool=False, **kwargs) -> ImageStack:
         """Applies a list of transformations to an ImageStack
 
@@ -63,7 +59,7 @@ class Warp(ApplyTransformBase):
         if verbose and StarfishConfig().verbose:
             self.transforms_list.transforms = tqdm(self.transforms_list.transforms)
         all_axes = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
-        for selector, transformation_object in self.transforms_list.transforms:
+        for selector, _, transformation_object in self.transforms_list.transforms:
             other_axes = all_axes - set(selector.keys())
             # iterate through remaining axes
             for axes in stack._iter_axes(other_axes):
@@ -81,7 +77,8 @@ class Warp(ApplyTransformBase):
                   help="The list of transformations to apply to the ImageStack.")
     @click.pass_context
     def _cli(ctx, transformation_list):
-        ctx.obj["component"]._cli_run(ctx, Warp(transformation_list))
+        ctx.obj["component"]._cli_run(ctx, Warp(
+            TransformsList.from_json(filename=transformation_list)))
 
 
 def warp(image: Union[xr.DataArray, np.ndarray],

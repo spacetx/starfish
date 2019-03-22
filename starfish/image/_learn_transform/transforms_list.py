@@ -2,11 +2,16 @@ import json
 from typing import List, Mapping, Tuple
 
 import numpy as np
-from skimage.transform._geometric import SimilarityTransform
+from skimage.transform._geometric import GeometricTransform, SimilarityTransform
 from slicedimage.io import resolve_path_or_url
 
 from starfish.config import StarfishConfig
-from starfish.types import Axes
+from starfish.types import Axes, TransformType
+
+
+transformsTypeMapping = {
+    TransformType.SIMILARITY: SimilarityTransform
+}
 
 
 class TransformsList:
@@ -14,7 +19,9 @@ class TransformsList:
     objects to apply to an Imagestack"""
 
     def __init__(self,
-                 transforms_list: List[Tuple[Mapping[Axes, int], SimilarityTransform]] = None
+                 transforms_list: List[Tuple[Mapping[Axes, int],
+                                             TransformType,
+                                             GeometricTransform]] = None
                  ):
         """
         Parameters
@@ -27,10 +34,13 @@ class TransformsList:
         if transforms_list:
             self.transforms = transforms_list
         else:
-            self.transforms: List[Tuple[Mapping[Axes, int], SimilarityTransform]] = list()
+            self.transforms: List[Tuple[Mapping[Axes, int],
+                                        TransformType, GeometricTransform]] = list()
 
     def append(self,
-               selectors: Mapping[Axes, int], transform_object: SimilarityTransform
+               selectors: Mapping[Axes, int],
+               transform_type: TransformType,
+               transform_object: GeometricTransform
                ) -> None:
         """
         Adds a new TransformationObject to the list
@@ -39,11 +49,13 @@ class TransformsList:
         ----------
         transform_object:
             The TransformationObject to add
+        transform_type:
+            The type of transform
         selectors:
             The axes associated with the transform.
 
         """
-        self.transforms.append((selectors, transform_object))
+        self.transforms.append((selectors, transform_type, transform_object))
 
     def to_json(self, filename: str) -> None:
         """
@@ -53,14 +65,14 @@ class TransformsList:
         ----------
         filename : str
         """
-        tranforms_array = []
+        transforms_array = []
         # Need to convert Axes to str values, and TransformationObjects to array
-        for selectors, transforms_object in self.transforms:
+        for selectors, transform_type, transforms_object in self.transforms:
             transforms_matrix = transforms_object.params.tolist()
             selectors_str = {k.value: v for k, v in selectors.items()}
-            tranforms_array.append((selectors_str, transforms_matrix))
+            transforms_array.append((selectors_str, transform_type.value, transforms_matrix))
         with open(filename, 'w') as f:
-            json.dump(tranforms_array, f)
+            json.dump(transforms_array, f)
         return
 
     @classmethod
@@ -78,12 +90,13 @@ class TransformsList:
         TransformsList
         """
         config = StarfishConfig()
-        transforms_list: List[Tuple[Mapping[Axes, int], SimilarityTransform]] = list()
+        transforms_list: List[Tuple[Mapping[Axes, int], TransformType, GeometricTransform]] = list()
         backend, name, _ = resolve_path_or_url(filename, backend_config=config.slicedimage)
         with backend.read_contextmanager(name) as fh:
             transforms_array = json.load(fh)
-        for selectors_str, transforms_matrix in transforms_array:
+        for selectors_str, transform_type_str, transforms_matrix in transforms_array:
             selectors = {Axes(k): int(v) for k, v in selectors_str.items()}
-            transform_object = SimilarityTransform(np.array(transforms_matrix))
-            transforms_list.append((selectors, transform_object))
+            transform_type = TransformType(transform_type_str)
+            transform_object = transformsTypeMapping[transform_type](np.array(transforms_matrix))
+            transforms_list.append((selectors, transform_type, transform_object))
         return cls(transforms_list)

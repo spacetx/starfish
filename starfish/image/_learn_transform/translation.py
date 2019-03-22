@@ -6,7 +6,7 @@ from skimage.transform._geometric import SimilarityTransform
 
 from starfish.image._learn_transform.transforms_list import TransformsList
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Axes
+from starfish.types import Axes, TransformType
 from starfish.util import click
 from ._base import LearnTransformBase
 
@@ -34,7 +34,7 @@ class Translation(LearnTransformBase):
     def run(self, stack: ImageStack) -> TransformsList:
         """
         Iterate over the given axis of an ImageStack and learn the Similarity transform
-         based off the instantiated reference_image.
+        based off the instantiated reference_image.
 
         Parameters
         ----------
@@ -55,7 +55,7 @@ class Translation(LearnTransformBase):
             if len(target_image.shape) != 2:
                 raise ValueError(
                     "Only axes: " + self.axis.value + " can have a length > 1, "
-                                                      "please max project."
+                                                      "please us the MaxProj filter."
                 )
 
             shift, error, phasediff = register_translation(src_image=target_image,
@@ -65,7 +65,9 @@ class Translation(LearnTransformBase):
             selectors = {self.axis: a}
             # reverse shift because SimilarityTransform stores in y,x format
             shift = shift[::-1]
-            transforms.append(selectors, SimilarityTransform(translation=shift))
+            transforms.append(selectors,
+                              TransformType.SIMILARITY,
+                              SimilarityTransform(translation=shift))
 
         return transforms
 

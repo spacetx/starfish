@@ -19,7 +19,7 @@ class AlgorithmBaseType(type):
         This method extends each pipeline component.run() method to also log itself and
         runtime parameters to the IntensityTable and Imagestack objects. There are two
         scenarios for this method:
-            1.) Filtering/Registration:
+            1.) Filtering/ApplyTransform:
                     Imagestack -> Imagestack
             2.) Spot Detection:
                     Imagestack -> IntensityTable

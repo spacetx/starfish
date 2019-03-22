@@ -390,34 +390,50 @@ class IntensityTable(xr.DataArray):
 
         return IntensityTable.from_spot_data(intensity_data, pixel_coordinates)
 
+
+
     @staticmethod
-    def take_max(intensity_table1: "IntensityTable", intensityTable2: "IntensityTable") -> None:
+    def take_max(i1: "IntensityTable", i2: "IntensityTable") -> None:
         """Find the overlapping sections between IntensityTables
-        and eliminate spots from sections with less spots.
+        and eliminate spots from whichever section has less spots.
         """
 
-        # Find intersection of two arrays
-        i1_min_x, i1_max_x, i1_min_y, i1_max_y = min(intensity_table1['xc']).data, \
-                                                 max(intensity_table1['xc']).data, \
-                                                 min(intensity_table1['yc']).data,\
-                                                 max(intensity_table1['yc']).data
+        # Get bounding physical coords
+        i1_min_x, i1_max_x, i1_min_y, i1_max_y = min(i1['xc']).data, \
+                                                 max(i1['xc']).data, \
+                                                 min(i1['yc']).data,\
+                                                 max(i1['yc']).data
 
-        i2_min_x, i2_max_x, i2_min_y, i2_max_y = min(intensity_table1['xc']).data, \
-                                                 max(intensity_table1['xc']).data, \
-                                                 min(intensity_table1['yc']).data, \
-                                                 max(intensity_table1['yc']).data
+        i2_min_x, i2_max_x, i2_min_y, i2_max_y = min(i2['xc']).data, \
+                                                 max(i2['xc']).data, \
+                                                 min(i2['yc']).data, \
+                                                 max(i2['yc']).data
 
-        # select from i1 where coord values in 12min/max
+
+        overlap_xmin = max(i1_min_x, i2_min_x)
+        overlap_xmax = min(i1_max_x, i2_max_y)
+        overlap_ymin = max(i1_min_y, i2_min_y)
+        overlap_ymax = min(i1_max_y, i2_max_y)
+
+        intersect1 = i1.where((i1.xc > overlap_xmin) &
+                              (i1.xc < overlap_xmax) &
+                              (i1.yc > overlap_ymin) &
+                              (i1.yc < overlap_ymax), drop=True)
 
         # select from 12 where coord values in i1 min/mx
+        intersect2 = i1.where((i1.xc > overlap_xmin) &
+                              (i1.xc < overlap_xmax) &
+                              (i1.yc > overlap_ymin) &
+                              (i1.yc < overlap_ymax), drop=True)
 
 
 
-        # Count spots in intersection for both
-        # Whichever has the least spots, convert values to nan
+        if intersect1.sizes[Features.AXIS] > intersect2.sizes[Features.AXIS]:
+            # zero out spots in intersect1
+        else:
+            # zero out spots in interset2
 
-
-        return None
+        return intersect1
 
     OVERLAP_STRATEGY_MAP = {
         OverlapStrategy.TAKE_MAX: take_max

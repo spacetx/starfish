@@ -1,9 +1,10 @@
 import importlib
+from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import Mapping, MutableMapping, Optional, Set, Type
 
 
-class PipelineComponentType(type):
+class PipelineComponentType(ABCMeta):
     """
     This is the metaclass for PipelineComponent.  As each subclass that is _not_ PipelineComponent
     is created, it sets up a map between the algorithm name and the class that implements it.
@@ -58,6 +59,7 @@ class PipelineComponent(metaclass=PipelineComponentType):
         return PipelineComponentType.get_pipeline_component_type_by_name(name)
 
     @classmethod
+    @abstractmethod
     def pipeline_component_type_name(cls) -> str:
         """
         Returns the name of the pipeline component type.
@@ -71,6 +73,7 @@ class PipelineComponent(metaclass=PipelineComponentType):
         return cls._algorithm_to_class_map_int
 
     @classmethod
+    @abstractmethod
     def _cli_run(cls, ctx, instance):
         raise NotImplementedError()
 

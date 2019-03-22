@@ -1,6 +1,8 @@
-from typing import Collection, Mapping, MutableSequence, Optional, Tuple, Union
+from collections import OrderedDict
+from typing import Collection, List, Mapping, MutableSequence, Optional, Tuple, Union
 
 import numpy as np
+from slicedimage import TileSet
 
 from starfish.imagestack.parser import TileCollectionData, TileData, TileKey
 from starfish.imagestack.physical_coordinate_calculator import recalculate_physical_coordinate_range
@@ -103,16 +105,47 @@ class CropParameters:
 
         return start, stop
 
-    def crop_shape(self, shape: Tuple[int, int]) -> Tuple[int, int]:
+    @staticmethod
+    def parse_coordinate_groups(tileset: TileSet) -> List["CropParameters"]:
+        """Takes a tileset and compares the physical coordinates on each tile to
+         create aligned coordinate groups (groups of tiles that have the same physical coordinates)
+
+         Returns
+         -------
+         A list of CropParameters. Each entry describes the r/ch/z values of tiles that are aligned
+         (have matching coordinates)
+         """
+        coord_groups: OrderedDict[tuple, CropParameters] = OrderedDict()
+        for tile in tileset.tiles():
+            x_y_coords = (
+                tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
+                tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1]
+            )
+            # A tile with this (x, y) has already been seen, add tile's Indices to CropParameters
+            if x_y_coords in coord_groups:
+                crop_params = coord_groups[x_y_coords]
+                crop_params._add_permitted_axes(Axes.CH, tile.indices[Axes.CH])
+                crop_params._add_permitted_axes(Axes.ROUND, tile.indices[Axes.ROUND])
+                if Axes.ZPLANE in tile.indices:
+                    crop_params._add_permitted_axes(Axes.ZPLANE, tile.indices[Axes.ZPLANE])
+            else:
+                coord_groups[x_y_coords] = CropParameters(
+                    permitted_chs=[tile.indices[Axes.CH]],
+                    permitted_rounds=[tile.indices[Axes.ROUND]],
+                    permitted_zplanes=[tile.indices[Axes.ZPLANE]] if Axes.ZPLANE in tile.indices
+                    else None)
+        return list(coord_groups.values())
+
+    def crop_shape(self, shape: Mapping[Axes, int]) -> Mapping[Axes, int]:
         """
         Given the shape of the original tile, return the shape of the cropped tile.
         """
-        output_x_shape = CropParameters._crop_axis(shape[1], self._x_slice)
-        output_y_shape = CropParameters._crop_axis(shape[0], self._y_slice)
+        output_x_shape = CropParameters._crop_axis(shape[Axes.X], self._x_slice)
+        output_y_shape = CropParameters._crop_axis(shape[Axes.Y], self._y_slice)
         width = output_x_shape[1] - output_x_shape[0]
         height = output_y_shape[1] - output_y_shape[0]
 
-        return height, width
+        return {Axes.Y: height, Axes.X: width}
 
     def crop_image(self, image: np.ndarray) -> np.ndarray:
         """
@@ -126,7 +159,7 @@ class CropParameters:
     def crop_coordinates(
             self,
             coordinates: Mapping[Coordinates, Tuple[Number, Number]],
-            shape: Tuple[int, int],
+            shape: Mapping[Axes, int],
     ) -> Mapping[Coordinates, Tuple[Number, Number]]:
         """
         Given a mapping of coordinate to coordinate values, return a mapping of the coordinate to
@@ -137,12 +170,12 @@ class CropParameters:
         if self._x_slice is not None:
             xmin, xmax = recalculate_physical_coordinate_range(
                 xmin, xmax,
-                shape[1],
+                shape[Axes.X],
                 self._x_slice)
         if self._y_slice is not None:
             ymin, ymax = recalculate_physical_coordinate_range(
                 ymin, ymax,
-                shape[0],
+                shape[Axes.Y],
                 self._y_slice)
 
         return_coords = {
@@ -161,7 +194,7 @@ class CroppedTileData(TileData):
         self.cropping_parameters = cropping_parameters
 
     @property
-    def tile_shape(self) -> Tuple[int, int]:
+    def tile_shape(self) -> Mapping[Axes, int]:
         return self.cropping_parameters.crop_shape(self.backing_tile_data.tile_shape)
 
     @property
@@ -195,6 +228,10 @@ class CroppedTileCollectionData(TileCollectionData):
 
     def keys(self) -> Collection[TileKey]:
         return self.crop_parameters.filter_tilekeys(self.backing_tile_collection_data.keys())
+
+    @property
+    def tile_shape(self) -> Mapping[Axes, int]:
+        return self.crop_parameters.crop_shape(self.backing_tile_collection_data.tile_shape)
 
     @property
     def extras(self) -> dict:

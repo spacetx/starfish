@@ -17,7 +17,7 @@ from starfish.experiment.builder import (FetchedTile, TileFetcher,
                                          write_experiment_json)
 from starfish.types import Axes, Coordinates, Number
 
-DEFAULT_TILE_SHAPE = 1000, 800
+DEFAULT_TILE_SHAPE = {Axes.Y: 1000, Axes.X: 800}
 
 
 class BaristaSeqTile(FetchedTile):
@@ -25,7 +25,7 @@ class BaristaSeqTile(FetchedTile):
         self.file_path = file_path
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> Mapping[Axes, int]:
         return DEFAULT_TILE_SHAPE
 
     @property

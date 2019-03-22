@@ -6,7 +6,6 @@ from pstats import Stats
 
 import pkg_resources
 
-from sptx_format.cli import validate as validate_cli
 from starfish.experiment.builder.cli import build as build_cli
 from starfish.image import (
     ApplyTransform,
@@ -14,6 +13,7 @@ from starfish.image import (
     LearnTransform,
     Segmentation,
 )
+from starfish.spacetx_format.cli import validate as validate_cli
 from starfish.spots import (
     Decoder,
     PixelSpotDecoder,

@@ -28,7 +28,7 @@ class SpotAttributes(ValidatedTable):
         super().__init__(spot_attributes, SpotAttributes.required_fields)
 
     @classmethod
-    def empty(cls, extra_fields: Iterable=tuple()) -> "SpotAttributes":
+    def empty(cls, extra_fields: Iterable = tuple()) -> "SpotAttributes":
         """return an empty SpotAttributes object"""
         fields = list(cls.required_fields.union(extra_fields))
         dtype = list(zip(fields, [np.object] * len(fields)))
@@ -54,18 +54,3 @@ class SpotAttributes(ValidatedTable):
 
         with open(output_file_name, 'w') as f:
             f.write(json.dumps(geojson))
-
-    def display(self, background_image: np.ndarray) -> None:
-        """
-
-        Parameters
-        ----------
-        background_image : np.ndarray
-            image on which to plot spots. If 3d, take a max projection
-
-        Returns
-        -------
-
-        """
-        # TODO ambrosejcarr: re-implement this from the show() method
-        pass

@@ -11,11 +11,18 @@ class TileData:
     Base class for a parser to implement that provides the data for a single tile.
     """
     @property
-    def tile_shape(self) -> Tuple[int, int]:
+    def tile_shape(self) -> Mapping[Axes, int]:
         raise NotImplementedError()
 
     @property
     def numpy_array(self) -> np.ndarray:
+        """Return the image data representing the tile.  The tile must be row-major.
+
+        Returns
+        -------
+        ndarray :
+            The image data
+        """
         raise NotImplementedError()
 
     @property
@@ -38,6 +45,11 @@ class TileCollectionData:
 
     def keys(self) -> Collection[TileKey]:
         """Returns a Collection of the TileKey's for all the tiles."""
+        raise NotImplementedError()
+
+    @property
+    def tile_shape(self) -> Mapping[Axes, int]:
+        """Returns the shape of a tile."""
         raise NotImplementedError()
 
     @property

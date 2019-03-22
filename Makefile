@@ -29,7 +29,7 @@ all:	fast
 
 ### UNIT #####################################################
 #
-fast:	lint mypy fast-test docs-html
+fast:	lint mypy fast-test clean-docs docs-html
 
 lint:   lint-non-init lint-init
 
@@ -61,7 +61,10 @@ help-unit:
 ### DOCS #####################################################
 #
 docs-%:
-	make -C docs clean && make -C docs $*
+	make -C docs $*
+
+clean-docs:
+	make -C docs clean
 
 help-docs:
 	$(call print_help, docs-TASK, alias for 'make TASK' in the docs subdirectory)

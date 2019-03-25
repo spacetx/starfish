@@ -71,7 +71,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "--reference-stack", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "formatted/fov_001", "dots.json"),
                 "--upsampling", "1000",
-                "--axis", "r"
+                "--axes", "r"
             ],
             [
                 "starfish", "apply_transform",

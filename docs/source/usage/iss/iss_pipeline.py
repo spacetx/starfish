@@ -15,8 +15,8 @@ def iss_pipeline(fov, codebook):
     learn_translation = LearnTransform.Translation(reference_stack=fov.get_image('dots'),
                                                    axes=Axes.ROUND, upsampling=100)
     transforms_list = learn_translation.run(primary_image.max_proj(Axes.CH, Axes.ZPLANE))
-    warp = ApplyTransform.Warp(transforms_list=transforms_list)
-    registered = warp.run(primary_image, in_place=False, verbose=True)
+    warp = ApplyTransform.Warp()
+    registered = warp.run(primary_image, transforms_list=transforms_list,  in_place=False, verbose=True)
 
     # filter raw data
     masking_radius = 15

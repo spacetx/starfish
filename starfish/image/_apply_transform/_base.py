@@ -21,8 +21,8 @@ class ApplyTransform(PipelineComponent):
     def _cli_run(cls, ctx, instance):
         output = ctx.obj["output"]
         stack = ctx.obj["stack"]
-        transforms_list = ctx["transforms_list"]
-        transformed = instance.run(stack, transforms_list)
+        transformation_list = ctx.obj["transformation_list"]
+        transformed = instance.run(stack, transformation_list)
         transformed.export(output)
 
     @staticmethod
@@ -32,14 +32,14 @@ class ApplyTransform(PipelineComponent):
     @click.option("--transformation-list", required=True, type=click.Path(exists=True),
                   help="The list of transformations to apply to the ImageStack.")
     @click.pass_context
-    def _cli(ctx, input, output, transforms_list):
+    def _cli(ctx, input, output, transformation_list):
         print("Applying Transform to images...")
         ctx.obj = dict(
             component=ApplyTransform,
             input=input,
             output=output,
             stack=ImageStack.from_path_or_url(input),
-            transforms_list=TransformsList.from_json(transforms_list)
+            transformation_list=TransformsList.from_json(transformation_list)
         )
 
 

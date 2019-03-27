@@ -81,6 +81,7 @@ class SpotFinderAlgorithmBase(AlgorithmBase):
     def run(
             self,
             primary_image: ImageStack,
+            *args,
     ) -> Union[IntensityTable, Tuple[IntensityTable, Any]]:
         """Finds spots in an ImageStack"""
         raise NotImplementedError()

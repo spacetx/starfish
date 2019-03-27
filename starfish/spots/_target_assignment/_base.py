@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import Type
 
 import click
-import regional
+import numpy as np
 from skimage.io import imread
 
 from starfish.intensity_table.intensity_table import IntensityTable
@@ -53,6 +53,12 @@ class TargetAssignmentAlgorithm(AlgorithmBase):
         return TargetAssignment
 
     @abstractmethod
-    def run(self, spots: IntensityTable, regions: regional.many) -> IntensityTable:
+    def run(
+            self,
+            label_image: np.ndarray,
+            intensity_table: IntensityTable,
+            verbose: bool=False,
+            in_place: bool=False,
+    ) -> IntensityTable:
         """Performs target (e.g. gene) assignment given the spots and the regions."""
         raise NotImplementedError()

@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Optional, Type
+from typing import Type
 
 import click
 
@@ -46,6 +46,6 @@ class RegistrationAlgorithmBase(AlgorithmBase):
         return Registration
 
     @abstractmethod
-    def run(self, stack) -> Optional[ImageStack]:
+    def run(self, stack: ImageStack, *args) -> ImageStack:
         """Performs registration on the stack provided."""
         raise NotImplementedError()

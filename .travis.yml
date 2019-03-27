@@ -20,6 +20,7 @@ jobs:
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Install Napari
+      if: type = push and branch =~ /^(master|merge)/
       script: pip install .[napari]
     - name: Docker
       if: type = push and branch =~ /^(master|merge)/

@@ -12,11 +12,9 @@ from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.types._constants import OverlapStrategy
 from starfish.types import Axes, DecodedSpots, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
 from starfish.util.dtype import preserve_float_range
-from starfish.util.geometry import(
+from starfish.util.overlap_utils import(
     find_overlaps_of_xarrays,
     OVERLAP_STRATEGY_MAP,
-    sel_area_of_xarray,
-    take_max
 )
 
 
@@ -396,8 +394,6 @@ class IntensityTable(xr.DataArray):
 
         return IntensityTable.from_spot_data(intensity_data, pixel_coordinates)
 
-
-
     @staticmethod
     def process_overlaps(its: List["IntensityTable"],
                          overlap_strategy: OverlapStrategy
@@ -407,17 +403,12 @@ class IntensityTable(xr.DataArray):
         """
         overlap_pairs = find_overlaps_of_xarrays(its)
         for idx1, idx2, intersection_rect in overlap_pairs:
-            intersect1 = sel_area_of_xarray(its[idx1], intersection_rect)
-            intersect2 = sel_area_of_xarray(its[idx2], intersection_rect)
-            # compare
-            overlap_mathod = OVERLAP_STRATEGY_MAP[overlap_strategy]
-            it1, it2 = overlap_mathod(intersection_rect,
-                                      its[idx1], intersect1,
-                                      its[idx2], intersect2)
+            overlap_method = OVERLAP_STRATEGY_MAP[overlap_strategy]
+            # modify intensity tables based on overlap strategy
+            it1, it2 = overlap_method(intersection_rect, its[idx1], its[idx2])
             its[idx1] = it1
             its[idx2] = it2
         return its
-
 
     @staticmethod
     def concatanate_intensity_tables(intensity_tables: List["IntensityTable"],

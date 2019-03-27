@@ -12,6 +12,12 @@ from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.types._constants import OverlapStrategy
 from starfish.types import Axes, DecodedSpots, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
 from starfish.util.dtype import preserve_float_range
+from starfish.util.geometry import(
+    find_overlaps_of_xarrays,
+    OVERLAP_STRATEGY_MAP,
+    sel_area_of_xarray,
+    take_max
+)
 
 
 class IntensityTable(xr.DataArray):
@@ -393,59 +399,33 @@ class IntensityTable(xr.DataArray):
 
 
     @staticmethod
-    def take_max(i1: "IntensityTable", i2: "IntensityTable") -> None:
+    def process_overlaps(its: List["IntensityTable"],
+                         overlap_strategy: OverlapStrategy
+                         ) -> List["IntensityTable"]:
         """Find the overlapping sections between IntensityTables
-        and eliminate spots from whichever section has less spots.
+        and process them according to the give overlap strategy
         """
+        overlap_pairs = find_overlaps_of_xarrays(its)
+        for idx1, idx2, intersection_rect in overlap_pairs:
+            intersect1 = sel_area_of_xarray(its[idx1], intersection_rect)
+            intersect2 = sel_area_of_xarray(its[idx2], intersection_rect)
+            # compare
+            overlap_mathod = OVERLAP_STRATEGY_MAP[overlap_strategy]
+            it1, it2 = overlap_mathod(intersection_rect,
+                                      its[idx1], intersect1,
+                                      its[idx2], intersect2)
+            its[idx1] = it1
+            its[idx2] = it2
+        return its
 
-        # Get bounding physical coords
-        i1_min_x, i1_max_x, i1_min_y, i1_max_y = min(i1['xc']).data, \
-                                                 max(i1['xc']).data, \
-                                                 min(i1['yc']).data,\
-                                                 max(i1['yc']).data
-
-        i2_min_x, i2_max_x, i2_min_y, i2_max_y = min(i2['xc']).data, \
-                                                 max(i2['xc']).data, \
-                                                 min(i2['yc']).data, \
-                                                 max(i2['yc']).data
-
-
-        overlap_xmin = max(i1_min_x, i2_min_x)
-        overlap_xmax = min(i1_max_x, i2_max_y)
-        overlap_ymin = max(i1_min_y, i2_min_y)
-        overlap_ymax = min(i1_max_y, i2_max_y)
-
-        intersect1 = i1.where((i1.xc > overlap_xmin) &
-                              (i1.xc < overlap_xmax) &
-                              (i1.yc > overlap_ymin) &
-                              (i1.yc < overlap_ymax), drop=True)
-
-        # select from 12 where coord values in i1 min/mx
-        intersect2 = i1.where((i1.xc > overlap_xmin) &
-                              (i1.xc < overlap_xmax) &
-                              (i1.yc > overlap_ymin) &
-                              (i1.yc < overlap_ymax), drop=True)
-
-
-
-        if intersect1.sizes[Features.AXIS] > intersect2.sizes[Features.AXIS]:
-            # zero out spots in intersect1
-        else:
-            # zero out spots in interset2
-
-        return intersect1
-
-    OVERLAP_STRATEGY_MAP = {
-        OverlapStrategy.TAKE_MAX: take_max
-    }
 
     @staticmethod
     def concatanate_intensity_tables(intensity_tables: List["IntensityTable"],
+                                     process_overlaps: bool = False,
                                      overlap_strategy: OverlapStrategy = None):
-        if overlap_strategy:
-            overlap_method = IntensityTable.OVERLAP_STRATEGY_MAP[overlap_strategy]
-            overlap_method(intensity_tables)
-
+        if process_overlaps:
+            intensity_tables = IntensityTable.process_overlaps(intensity_tables,
+                                                               overlap_strategy)
         return xr.concat(intensity_tables, dim=Features.AXIS)
 
     def to_features_dataframe(self) -> pd.DataFrame:

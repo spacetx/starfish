@@ -82,6 +82,7 @@ class OverlapStrategy:
     TAKE_MAX = 'take_max'
 
 
+
 class Clip(AugmentedEnum):
     """
     contains clipping options that determine how out-of-bounds values produced by filters are

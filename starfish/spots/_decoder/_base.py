@@ -48,6 +48,6 @@ class DecoderAlgorithmBase(AlgorithmBase):
         return Decoder
 
     @abstractmethod
-    def run(self, encoded, codebook):
+    def run(self, intensities: IntensityTable, codebook: Codebook, *args):
         """Performs decoding on the spots found, using the codebook specified."""
         raise NotImplementedError()

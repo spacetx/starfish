@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Optional, Tuple, Union
+from typing import Tuple, Union
 
 import numpy as np
 from scipy.ndimage import fourier_shift
@@ -42,7 +42,7 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
         else:
             self.reference_stack = ImageStack.from_path_or_url(reference_stack)
 
-    def run(self, image: ImageStack, in_place: bool=False) -> Optional[ImageStack]:
+    def run(self, image: ImageStack, in_place: bool=False, *args) -> ImageStack:
         """Register an ImageStack against a reference image.
 
         Parameters
@@ -54,7 +54,7 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
 
         Returns
         -------
-
+        ImageStack : The registered image
 
         """
 
@@ -87,9 +87,7 @@ class FourierShiftRegistration(RegistrationAlgorithmBase):
 
                     image.set_slice(selector=selector, data=result)
 
-        if not in_place:
-            return image
-        return None
+        return image
 
     @staticmethod
     @click.command("FourierShiftRegistration")

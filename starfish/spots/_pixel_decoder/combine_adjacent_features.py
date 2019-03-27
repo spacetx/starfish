@@ -296,7 +296,7 @@ class CombineAdjacentFeatures:
 
     def run(
             self, intensities: IntensityTable,
-            n_processes: Optional[int] = None
+            n_processes: Optional[int] = None,
     ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """
         Execute the combine_adjacent_features method on an IntensityTable containing pixel
@@ -306,6 +306,8 @@ class CombineAdjacentFeatures:
         ----------
         intensities : IntensityTable
             Pixel intensities of an imaging experiment
+        n_processes : Optional[int]
+            Number of parallel processes to devote to calculating the filter
 
         Returns
         -------

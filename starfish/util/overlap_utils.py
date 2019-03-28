@@ -7,11 +7,11 @@ from starfish.types._constants import OverlapStrategy
 
 
 class Area:
+    """
+    Small class that defines rectangular area of physical space by
+    its bottom left and top right coordinates.
+    """
     def __init__(self, min_x, max_x, min_y, max_y):
-        """
-        Small class that defines an area of physical space by its bottom left
-        and top right coordinates.
-        """
         self.min_x = min_x
         self.max_x = max_x
         self.min_y = min_y
@@ -28,7 +28,7 @@ class Area:
     @staticmethod
     def find_intersection(area1: "Area", area2: "Area") -> Union[None, "Area"]:
         """
-        Find the intersection area of two areas and return as new Area object.
+        Find the overlap area of two rectangles and return as new Area object.
         If no overlap return none.
         """
         if Area.no_overlap(area1, area2):
@@ -42,8 +42,19 @@ class Area:
 def find_overlaps_of_xarrays(xarrays: List[xr.DataArray]
                              ) -> List[Tuple[int, int, "Area"]]:
     """
-    Takes a list of xarrays and returns a list of xarray index pairs that overlap physically
-    and their area of overlap defined by an Area object.
+    Find all the overlap areas within a list of xarrays.
+
+    Parameters
+    ----------
+    xarrays : List[xr.DataArray]
+        The list of xarrays to find overlaps in.
+
+    Returns
+    -------
+    List[Tuple[int, int, "Area"]] :
+        A list of tuples containing the indices of two overlapping
+        IntensityTables and their Area of intersection.
+
     """
     all_overlaps:  List[Tuple[int, int, "Area"]] = list()
     for idx1, idx2 in itertools.combinations(range(len(xarrays)), 2):
@@ -65,7 +76,20 @@ def find_overlaps_of_xarrays(xarrays: List[xr.DataArray]
 
 
 def remove_area_of_xarray(it: xr.DataArray, area: Area) -> xr.DataArray:
-    """Remove area from xarray"""
+    """Return everything in the xarray defined OUTSIDE the input area
+
+    Parameters
+    ----------
+    it: xr.DataArray
+        The xarray to modify
+    area: Area
+        The area to not include in the modified xarray
+
+    Returns
+    -------
+     xr.DataArray :
+        The xarray without the defined area.
+    """
     return it.where((it.xc <= area.min_x) |
                     (it.xc >= area.max_x) |
                     (it.yc <= area.min_y) |
@@ -73,7 +97,20 @@ def remove_area_of_xarray(it: xr.DataArray, area: Area) -> xr.DataArray:
 
 
 def sel_area_of_xarray(it: xr.DataArray, area: Area) -> xr.DataArray:
-    """Select on xarray within a defined area"""
+    """Return everything in the xarray defined WITHIN the input area
+
+    Parameters
+    ----------
+    it: xr.DataArray
+        The xarray to modify
+    area: Area
+        The area to include in the modified xarray
+
+    Returns
+    -------
+     xr.DataArray :
+        The xarray within the defined area.
+    """
     return it.where((it.xc > area.min_x) &
                     (it.xc < area.max_x) &
                     (it.yc > area.min_y) &
@@ -84,6 +121,19 @@ def take_max(intersection_rect: Area,
              it1: xr.DataArray,
              it2: xr.DataArray
              ):
+    """
+    Compare two overlapping xarrays and remove spots from whichever
+    has less int the overlapping section.
+
+    Parameters
+    ----------
+    intersection_rect : Area
+        The area of physical overalp between two xarrays
+    it1 : xr.DataArray
+        The firs overlapping xarray
+    it2 : xr.DataArray
+        The second overlapping xarray
+    """
     # # compare to see which section has more spots
     intersect1 = sel_area_of_xarray(it1, intersection_rect)
     intersect2 = sel_area_of_xarray(it2, intersection_rect)
@@ -95,6 +145,9 @@ def take_max(intersection_rect: Area,
     return it1, it2
 
 
+"""
+The mapping between OverlapStrategy type and the method to use for each.
+"""
 OVERLAP_STRATEGY_MAP = {
     OverlapStrategy.TAKE_MAX: take_max
 }

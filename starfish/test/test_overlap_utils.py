@@ -7,7 +7,23 @@ from starfish.types import Coordinates, Features
 from starfish.types._constants import OverlapStrategy
 
 
-def test_overlap():
+def test_find_intersection():
+    return None
+
+
+def test_test_no_overlap():
+    return None
+
+
+def test_remove_area_of_xarray():
+    return None
+
+
+def test_sel_area_of_xarray():
+    return None
+
+
+def test_take_max():
     codebook = test_utils.codebook_array_factory()
     it1 = IntensityTable.synthetic_intensities(
         codebook,
@@ -36,4 +52,3 @@ def test_overlap():
                                                                overlap_strategy=OverlapStrategy.TAKE_MAX)
 
     assert concatenated.sizes[Features.AXIS] == 26
-

@@ -78,9 +78,12 @@ class Features:
     INTENSITY = 'intensity'
 
 
-class OverlapStrategy:
+class OverlapStrategy(AugmentedEnum):
+    """
+    contains options to use when processes physically overlapping IntensityTables
+    or ImageStacks
+    """
     TAKE_MAX = 'take_max'
-
 
 
 class Clip(AugmentedEnum):

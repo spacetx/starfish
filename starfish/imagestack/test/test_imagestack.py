@@ -11,7 +11,8 @@ from starfish.intensity_table.intensity_table import IntensityTable
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test import test_utils
-from starfish.test.dataset_fixtures import (  # noqa: F401
+from starfish.types import Axes, PhysicalCoordinateTypes
+from .dataset_fixtures import (  # noqa: F401
     codebook_intensities_image_for_single_synthetic_spot,
     loaded_codebook,
     simple_codebook_array,
@@ -20,7 +21,6 @@ from starfish.test.dataset_fixtures import (  # noqa: F401
     synthetic_intensity_table,
     synthetic_spot_pass_through_stack,
 )
-from starfish.types import Axes, PhysicalCoordinateTypes
 from .imagestack_test_utils import verify_physical_coordinates
 
 X_COORDS = 1, 2

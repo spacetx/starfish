@@ -130,7 +130,7 @@ def test_sel_area_of_xarray():
     area = Area(min_x=1, max_x=2, min_y=1, max_y=3)
     it = sel_area_of_xarray(it, area)
 
-    # Assert noew min/max values
+    # Assert new min/max values
     assert min(it[Coordinates.X.value]).data >= 1
     assert max(it[Coordinates.X.value]).data <= 2
     assert min(it[Coordinates.Y.value]).data >= 1

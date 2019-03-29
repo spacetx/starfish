@@ -26,8 +26,7 @@ class Area:
 
     @staticmethod
     def _overlap(area1: "Area", area2: "Area") -> bool:
-        """Return True if two rectangles do not overlap"""
-        # TODO ACCOUNT FOR NEGATIVES
+        """Return True if two rectangles overlap"""
         if (area1.max_x < area2.min_x) or (area1.min_x > area2.max_x):
             return False
         if (area1.max_y < area2.min_y) or (area1.min_y > area2.max_y):
@@ -60,8 +59,8 @@ def find_overlaps_of_xarrays(xarrays: List[xr.DataArray]
 
     Returns
     -------
-    List[Tuple[int, int, "Area"]] :
-        A list of tuples containing the indices of two overlapping
+    Dict[Tuple[int, int], "Area"]] :
+        A dictionary of tuples containing the indices of two overlapping
         IntensityTables and their Area of intersection.
 
     """
@@ -133,14 +132,14 @@ def take_max(intersection_rect: Area,
              ):
     """
     Compare two overlapping xarrays and remove spots from whichever
-    has less int the overlapping section.
+    has less in the overlapping section.
 
     Parameters
     ----------
     intersection_rect : Area
-        The area of physical overalp between two xarrays
+        The area of physical overalap between two xarrays
     it1 : xr.DataArray
-        The firs overlapping xarray
+        The first overlapping xarray
     it2 : xr.DataArray
         The second overlapping xarray
     """

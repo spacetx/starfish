@@ -401,11 +401,12 @@ class IntensityTable(xr.DataArray):
         and process them according to the give overlap strategy
         """
         overlap_pairs = find_overlaps_of_xarrays(its)
-        for indexes, intersection_rect in overlap_pairs.items():
+        for indices, intersection_area in overlap_pairs.items():
             overlap_method = OVERLAP_STRATEGY_MAP[overlap_strategy]
-            # modify intensity tables based on overlap strategy
-            idx1, idx2 = indexes
-            it1, it2 = overlap_method(intersection_rect, its[idx1], its[idx2])
+            idx1, idx2 = indices
+            # modify IntensityTables based on overlap strategy
+            it1, it2 = overlap_method(intersection_area, its[idx1], its[idx2])
+            # replace IntensityTables in list
             its[idx1] = it1
             its[idx2] = it2
         return its

@@ -1,5 +1,5 @@
 import itertools
-from typing import List, Union, Tuple
+from typing import List, Dict, Union, Tuple
 import xarray as xr
 
 from starfish.types import Coordinates, Features
@@ -17,9 +17,16 @@ class Area:
         self.min_y = min_y
         self.max_y = max_y
 
+    def __eq__(self, other):
+        return self.min_x == other.min_x and \
+               self.min_y == other.min_y and \
+               self.max_x == other.max_x and\
+               self.max_y == other.max_y
+
     @staticmethod
-    def no_overlap(area1: "Area", area2: "Area") -> bool:
+    def _no_overlap(area1: "Area", area2: "Area") -> bool:
         """Return True if two rectangles do not overlap"""
+        # TODO ACCOUNT FOR NEGATIVES
         return (area1.max_x < area2.min_x) | \
                (area1.min_x > area2.max_x) | \
                (area1.max_y < area2.min_y) | \
@@ -31,7 +38,7 @@ class Area:
         Find the overlap area of two rectangles and return as new Area object.
         If no overlap return none.
         """
-        if Area.no_overlap(area1, area2):
+        if Area._no_overlap(area1, area2):
             return None
         return Area(max(area1.min_x, area2.min_x),
                     min(area1.max_x, area2.max_x),
@@ -40,7 +47,7 @@ class Area:
 
 
 def find_overlaps_of_xarrays(xarrays: List[xr.DataArray]
-                             ) -> List[Tuple[int, int, "Area"]]:
+                             ) -> Dict[Tuple[int, int], "Area"]:
     """
     Find all the overlap areas within a list of xarrays.
 
@@ -56,7 +63,7 @@ def find_overlaps_of_xarrays(xarrays: List[xr.DataArray]
         IntensityTables and their Area of intersection.
 
     """
-    all_overlaps:  List[Tuple[int, int, "Area"]] = list()
+    all_overlaps:  Dict[Tuple[int, int], "Area"] = dict()
     for idx1, idx2 in itertools.combinations(range(len(xarrays)), 2):
         xr1 = xarrays[idx1]
         xr2 = xarrays[idx2]
@@ -71,7 +78,7 @@ def find_overlaps_of_xarrays(xarrays: List[xr.DataArray]
                      max(xr2[Coordinates.Y.value]).data)
         intersection = Area.find_intersection(area1, area2)
         if intersection:
-            all_overlaps.append((idx1, idx2, intersection))
+            all_overlaps[(idx1, idx2)] = intersection
     return all_overlaps
 
 
@@ -111,10 +118,10 @@ def sel_area_of_xarray(it: xr.DataArray, area: Area) -> xr.DataArray:
      xr.DataArray :
         The xarray within the defined area.
     """
-    return it.where((it.xc > area.min_x) &
-                    (it.xc < area.max_x) &
-                    (it.yc > area.min_y) &
-                    (it.yc < area.max_y), drop=True)
+    return it.where((it.xc >= area.min_x) &
+                    (it.xc <= area.max_x) &
+                    (it.yc >= area.min_y) &
+                    (it.yc <= area.max_y), drop=True)
 
 
 def take_max(intersection_rect: Area,

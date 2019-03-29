@@ -8,11 +8,10 @@ import regional
 import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
-
-from starfish.types._constants import OverlapStrategy
 from starfish.types import Axes, DecodedSpots, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
+from starfish.types._constants import OverlapStrategy
 from starfish.util.dtype import preserve_float_range
-from starfish.util.overlap_utils import(
+from starfish.util.overlap_utils import (
     find_overlaps_of_xarrays,
     OVERLAP_STRATEGY_MAP,
 )
@@ -413,9 +412,8 @@ class IntensityTable(xr.DataArray):
 
     @staticmethod
     def concatanate_intensity_tables(intensity_tables: List["IntensityTable"],
-                                     process_overlaps: bool = False,
                                      overlap_strategy: OverlapStrategy = None):
-        if process_overlaps:
+        if overlap_strategy:
             intensity_tables = IntensityTable.process_overlaps(intensity_tables,
                                                                overlap_strategy)
         return xr.concat(intensity_tables, dim=Features.AXIS)

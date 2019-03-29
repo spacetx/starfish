@@ -1,5 +1,6 @@
 import itertools
-from typing import List, Dict, Union, Tuple
+from typing import Dict, List, Tuple, Union
+
 import xarray as xr
 
 from starfish.types import Coordinates, Features
@@ -18,19 +19,20 @@ class Area:
         self.max_y = max_y
 
     def __eq__(self, other):
-        return self.min_x == other.min_x and \
-               self.min_y == other.min_y and \
-               self.max_x == other.max_x and\
-               self.max_y == other.max_y
+        return (self.min_x == other.min_x
+                and self.min_y == other.min_y
+                and self.max_x == other.max_x
+                and self.max_y == other.max_y)
 
     @staticmethod
-    def _no_overlap(area1: "Area", area2: "Area") -> bool:
+    def _overlap(area1: "Area", area2: "Area") -> bool:
         """Return True if two rectangles do not overlap"""
         # TODO ACCOUNT FOR NEGATIVES
-        return (area1.max_x < area2.min_x) | \
-               (area1.min_x > area2.max_x) | \
-               (area1.max_y < area2.min_y) | \
-               (area1.min_y > area2.max_y)
+        if (area1.max_x < area2.min_x) or (area1.min_x > area2.max_x):
+            return False
+        if (area1.max_y < area2.min_y) or (area1.min_y > area2.max_y):
+            return False
+        return True
 
     @staticmethod
     def find_intersection(area1: "Area", area2: "Area") -> Union[None, "Area"]:
@@ -38,12 +40,12 @@ class Area:
         Find the overlap area of two rectangles and return as new Area object.
         If no overlap return none.
         """
-        if Area._no_overlap(area1, area2):
-            return None
-        return Area(max(area1.min_x, area2.min_x),
-                    min(area1.max_x, area2.max_x),
-                    max(area1.min_y, area2.min_y),
-                    min(area1.max_y, area2.max_y))
+        if Area._overlap(area1, area2):
+            return Area(max(area1.min_x, area2.min_x),
+                        min(area1.max_x, area2.max_x),
+                        max(area1.min_y, area2.min_y),
+                        min(area1.max_y, area2.max_y))
+        return None
 
 
 def find_overlaps_of_xarrays(xarrays: List[xr.DataArray]
@@ -63,7 +65,7 @@ def find_overlaps_of_xarrays(xarrays: List[xr.DataArray]
         IntensityTables and their Area of intersection.
 
     """
-    all_overlaps:  Dict[Tuple[int, int], "Area"] = dict()
+    all_overlaps: Dict[Tuple[int, int], "Area"] = dict()
     for idx1, idx2 in itertools.combinations(range(len(xarrays)), 2):
         xr1 = xarrays[idx1]
         xr2 = xarrays[idx2]
@@ -97,10 +99,11 @@ def remove_area_of_xarray(it: xr.DataArray, area: Area) -> xr.DataArray:
      xr.DataArray :
         The xarray without the defined area.
     """
-    return it.where((it.xc <= area.min_x) |
-                    (it.xc >= area.max_x) |
-                    (it.yc <= area.min_y) |
-                    (it.yc >= area.max_y), drop=True)
+    return it.where((it.xc <= area.min_x)
+                    | (it.xc >= area.max_x)
+                    | (it.yc <= area.min_y)
+                    | (it.yc >= area.max_y),
+                    drop=True)
 
 
 def sel_area_of_xarray(it: xr.DataArray, area: Area) -> xr.DataArray:
@@ -118,10 +121,10 @@ def sel_area_of_xarray(it: xr.DataArray, area: Area) -> xr.DataArray:
      xr.DataArray :
         The xarray within the defined area.
     """
-    return it.where((it.xc >= area.min_x) &
-                    (it.xc <= area.max_x) &
-                    (it.yc >= area.min_y) &
-                    (it.yc <= area.max_y), drop=True)
+    return it.where((it.xc >= area.min_x)
+                    & (it.xc <= area.max_x)
+                    & (it.yc >= area.min_y)
+                    & (it.yc <= area.max_y), drop=True)
 
 
 def take_max(intersection_rect: Area,
@@ -158,7 +161,3 @@ The mapping between OverlapStrategy type and the method to use for each.
 OVERLAP_STRATEGY_MAP = {
     OverlapStrategy.TAKE_MAX: take_max
 }
-
-
-
-

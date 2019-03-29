@@ -94,4 +94,3 @@ class Clip(AugmentedEnum):
     CLIP = 'clip'
     SCALE_BY_IMAGE = 'scale_by_image'
     SCALE_BY_CHUNK = 'scale_by_chunk'
-

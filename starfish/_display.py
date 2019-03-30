@@ -107,6 +107,10 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
     coords[:, 4] = np.repeat(intensity_table[Features.AXIS][Axes.ZPLANE.value].values, code_length)
 
     sizes = np.repeat(intensity_table.radius.values, code_length)
+    xy = np.tile(sizes[:, np.newaxis], (1, 2))
+    rc = np.zeros((sizes.shape[0], 2), dtype=int)
+    z = sizes[:, np.newaxis]
+    sizes = np.concatenate((xy, rc, z), axis=1)
 
     return coords, sizes
 
@@ -117,7 +121,8 @@ def display(
         viewer: Optional[Viewer] = None,
         project_axes: Optional[Set[Axes]] = None,
         mask_intensities: float = 0.,
-        radius_multiplier: int = 1
+        radius_multiplier: int = 1,
+        z_multiplier: float = 1
 ):
     """
     Displays an image stack and/or detected spots using Napari (https://github.com/napari/Napari).
@@ -141,6 +146,8 @@ def display(
         (see documentation on IntensityTable.where() for more details) (default 0, no masking)
     radius_multiplier : int
         Multiplies the radius of the displayed spots (default 1, no scaling)
+    z_multiplier : int
+        Multiplies the radius of the spots in z, to account for anisotropy.
 
     Examples
     --------
@@ -225,10 +232,10 @@ def display(
             Axes.ZPLANE.value
         ).values
 
-        viewer.add_image(reordered_array, multichannel=False)
+        layer = viewer.add_image(np.squeeze(reordered_array), multichannel=False)
+        layer.colormap = "gray"
 
     if spots is not None:
-        # _detect_per_round_spot_finding_intensity_tables(spots)
         if project_axes is not None:
             spots = _max_intensity_table_maintain_dims(spots, project_axes)
 
@@ -246,9 +253,12 @@ def display(
             return viewer
 
         coords = coords[mask, :]
-        sizes = sizes[mask]
+        sizes = sizes[mask, :]
 
-        viewer.add_markers(coords=coords, face_color="white", edge_color="white", symbol="ring",
+        # adjust z-size
+        sizes[:, 4] *= z_multiplier
+
+        viewer.add_markers(coords=coords, face_color="red", edge_color="red", symbol="ring",
                            size=sizes * radius_multiplier, n_dimensional=True)
 
     if new_viewer:

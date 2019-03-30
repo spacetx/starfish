@@ -15,8 +15,8 @@ from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedCompone
 class PixelSpotDecoder(PixelDecoderAlgorithmBase):
     def __init__(
             self, codebook: Codebook, metric: str, distance_threshold: float,
-            magnitude_threshold: int, min_area: int, max_area: int, norm_order: int=2,
-            crop_x: int=0, crop_y: int=0, crop_z: int=0) -> None:
+            magnitude_threshold: int, min_area: int, max_area: int, norm_order: int = 2
+    ) -> None:
         """Decode an image by first coding each pixel, then combining the results into spots
 
         Parameters
@@ -37,10 +37,6 @@ class PixelSpotDecoder(PixelDecoderAlgorithmBase):
         norm_order : int
             order of L_p norm to apply to intensities and codes when using metric_decode to pair
             each intensities to its closest target (default = 2)
-        crop_x, crop_y, crop_z : int
-            number of pixels to crop from the top and bottom of each of the x, y, and z axes of
-            an ImageStack (default = 0)
-
         """
         self.codebook = codebook
         self.metric = metric
@@ -49,9 +45,6 @@ class PixelSpotDecoder(PixelDecoderAlgorithmBase):
         self.min_area = min_area
         self.max_area = max_area
         self.norm_order = norm_order
-        self.crop_x = crop_x
-        self.crop_y = crop_y
-        self.crop_z = crop_z
 
     def run(
             self,
@@ -77,8 +70,7 @@ class PixelSpotDecoder(PixelDecoderAlgorithmBase):
             Results of connected component labeling
 
         """
-        pixel_intensities = IntensityTable.from_image_stack(
-            primary_image, crop_x=self.crop_x, crop_y=self.crop_y, crop_z=self.crop_z)
+        pixel_intensities = IntensityTable.from_image_stack(primary_image)
         decoded_intensities = self.codebook.metric_decode(
             pixel_intensities,
             max_distance=self.distance_threshold,
@@ -122,12 +114,10 @@ class PixelSpotDecoder(PixelDecoderAlgorithmBase):
         help="order of L_p norm to apply to intensities "
         "and codes when using metric_decode to pair each intensities to its closest target"
     )
-    @click.option('--crop-x', type=int, default=0)
-    @click.option('--crop-y', type=int, default=0)
-    @click.option('--crop-z', type=int, default=0)
     @click.pass_context
-    def _cli(ctx, metric, distance_threshold, magnitude_threshold,
-             min_area, max_area, norm_order, crop_x, crop_y, crop_z):
+    def _cli(
+        ctx, metric, distance_threshold, magnitude_threshold, min_area, max_area, norm_order
+    ):
         codebook = ctx.obj["codebook"]
         instance = PixelSpotDecoder(
             codebook=codebook,
@@ -137,8 +127,5 @@ class PixelSpotDecoder(PixelDecoderAlgorithmBase):
             min_area=min_area,
             max_area=max_area,
             norm_order=norm_order,
-            crop_x=crop_x,
-            crop_y=crop_y,
-            crop_z=crop_z
         )
         ctx.obj["component"]._cli_run(ctx, instance)

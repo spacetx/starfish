@@ -152,6 +152,13 @@ for selector in primary_image._iter_axes():
 # EPY: END markdown
 
 # EPY: START markdown
+#### Crop size
+#It can be a good idea to eliminate parts of the image that suffer from boundary effects 
+#from signal aquisition (e.g., FOV overlap) and image processing. In this example we do
+#not crop, but a good default value would be about 40 pixels. 
+# EPY: END markdown
+
+# EPY: START markdown
 ### Decode
 #
 #Each assay type also exposes a decoder. A decoder translates each spot (spot_id) in the encoded table into a gene that matches a barcode in the codebook. The goal is to decode and output a quality score, per spot, that describes the confidence in the decoding. Recall that in the MERFISH pipeline, each 'spot' is actually a 16 dimensional vector, one per pixel in the image. From here on, we will refer to these as pixel vectors. Once these pixel vectors are decoded into gene values, contiguous pixels that are decoded to the same gene are labeled as 'spots' via a connected components labeler. We shall refer to the latter as spots.
@@ -169,14 +176,10 @@ for selector in primary_image._iter_axes():
 #### Area threshold
 #Contiguous pixels that decode to the same gene are called as spots via connected components labeling. The minimum area of these spots are set by this parameter. The intuition is that pixel vectors, that pass the distance and magnitude thresholds, shold probably not be trusted as genes as the mRNA transcript would be too small for them to be real. This parameter can be set based on microscope resolution and signal amplification strategy.
 #
-#### Crop size
-#The crop size crops the image by a number of pixels large enough to eliminate parts of the image that suffer from boundary effects from both signal aquisition (e.g., FOV overlap) and image processing. Here this value is 40.
-#
 #Given these three thresholds, for each pixel vector, the decoder picks the closest code (minimum distance) that satisfies each of the above thresholds, where the distance is calculated between the code and a normalized intensity vector and throws away subsequent spots that are too small.
 # EPY: END markdown
 
 # EPY: START code
-# TODO this crop should be (x, y) = (40, 40) but it was getting eaten by kwargs
 from starfish.spots import PixelSpotDecoder
 psd = PixelSpotDecoder.PixelSpotDecoder(
     codebook=experiment.codebook,
@@ -186,9 +189,6 @@ psd = PixelSpotDecoder.PixelSpotDecoder(
     min_area=2,
     max_area=np.inf,
     norm_order=2,
-    crop_z=0,
-    crop_y=0,
-    crop_x=0
 )
 
 initial_spot_intensities, prop_results = psd.run(scaled_image)

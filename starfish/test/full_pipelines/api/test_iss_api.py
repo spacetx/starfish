@@ -106,7 +106,7 @@ def test_iss_pipeline_cropped_data():
                                            'TFRC', 'TP53', 'VEGF']))
     assert np.array_equal(gene_counts, [20, 1, 5, 2, 1, 11, 1, 3, 2, 1, 1, 2])
 
-    label_image = iss.label_image
+    masks = iss.masks
 
     seg = iss.seg
 
@@ -115,7 +115,7 @@ def test_iss_pipeline_cropped_data():
 
     # assign targets
     lab = TargetAssignment.Label()
-    assigned = lab.run(label_image, decoded)
+    assigned = lab.run(masks, decoded)
 
     pipeline_log = assigned.get_log()
 
@@ -139,4 +139,4 @@ def test_iss_pipeline_cropped_data():
     assert pipeline_log[3]['method'] == 'BlobDetector'
 
     # 28 of the spots are assigned to cell 1 (although most spots do not decode!)
-    assert np.sum(assigned['cell_id'] == 1) == 28
+    assert np.sum(assigned['cell_id'] == '1') == 28

@@ -1,6 +1,5 @@
-import numpy as np
-
 from starfish.intensity_table.intensity_table import IntensityTable
+from starfish.segmentation_mask import SegmentationMaskCollection
 from starfish.types import Axes, Features
 from starfish.util import click
 from ._base import TargetAssignmentAlgorithm
@@ -19,26 +18,29 @@ class Label(TargetAssignmentAlgorithm):
 
     @staticmethod
     def _assign(
-        label_image: np.ndarray,
+        masks: SegmentationMaskCollection,
         intensities: IntensityTable,
         in_place: bool,
     ) -> IntensityTable:
+        cell_ids = []
 
-        if len(label_image.shape) == 3:
-            cell_ids = label_image[
-                intensities[Axes.ZPLANE.value].values,
-                intensities[Axes.Y.value].values,
-                intensities[Axes.X.value].values
-            ]
-        elif len(label_image.shape) == 2:
-            cell_ids = label_image[
-                intensities[Axes.Y.value].values,
-                intensities[Axes.X.value].values
-            ]
-        else:
-            raise ValueError(
-                f"`label_image` must be 2 or 3 dimensional, not {len(label_image.shape)}D."
-            )
+        for spot in intensities:
+            for mask in masks:
+                sel = {Axes.X.value: spot[Axes.X.value],
+                       Axes.Y.value: spot[Axes.Y.value]}
+                if mask.ndim == 3:
+                    sel[Axes.ZPLANE.value] = spot[Axes.ZPLANE.value]
+
+                try:
+                    if mask.sel(sel):
+                        cell_id = mask.name
+                        break
+                except KeyError:
+                    pass
+            else:
+                cell_id = ''
+
+            cell_ids.append(cell_id)
 
         if not in_place:
             intensities = intensities.copy()
@@ -49,18 +51,17 @@ class Label(TargetAssignmentAlgorithm):
 
     def run(
             self,
-            label_image: np.ndarray,
+            masks: SegmentationMaskCollection,
             intensity_table: IntensityTable,
-            verbose: bool=False,
-            in_place: bool=False,
+            verbose: bool = False,
+            in_place: bool = False,
     ) -> IntensityTable:
         """Extract cell ids for features in IntensityTable from a segmentation label image
 
         Parameters
         ----------
-        label_image : np.ndarray[np.uint32]
-            integer array produced from segmentation where each pixel in a cell is labeled by the
-            same integer, and each cell is labeled by a different integer
+        masks : SegmentaionMaskCollection
+            binary masks segmenting each cell
         intensity_table : IntensityTable
             spot information
         in_place : bool
@@ -75,7 +76,7 @@ class Label(TargetAssignmentAlgorithm):
             cells will be assigned zero.
 
         """
-        return self._assign(label_image, intensity_table, in_place=in_place)
+        return self._assign(masks, intensity_table, in_place=in_place)
 
     @staticmethod
     @click.command("Label")

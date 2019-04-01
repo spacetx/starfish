@@ -6,6 +6,7 @@ from skimage.io import imsave
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import PipelineComponent
 from starfish.pipeline.algorithmbase import AlgorithmBase
+from starfish.segmentation_mask import SegmentationMaskCollection
 from starfish.util import click
 
 
@@ -50,8 +51,12 @@ class SegmentationAlgorithmBase(AlgorithmBase):
     @classmethod
     def get_pipeline_component_class(cls) -> Type[PipelineComponent]:
         return Segmentation
-
     @abstractmethod
-    def run(self, primary_image_stack: ImageStack, nuclei_stack: ImageStack, *args):
+    def run(
+            self,
+            primary_image_stack: ImageStack,
+            nuclei_stack: ImageStack,
+            *args
+    ) -> SegmentationMaskCollection:
         """Performs registration on the stack provided."""
         raise NotImplementedError()

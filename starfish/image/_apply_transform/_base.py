@@ -49,6 +49,6 @@ class ApplyTransformBase(AlgorithmBase):
         return ApplyTransform
 
     @abstractmethod
-    def run(self, stack, transforms_list) -> ImageStack:
+    def run(self, stack, transforms_list, *args) -> ImageStack:
         """Performs registration on the stack provided."""
         raise NotImplementedError()

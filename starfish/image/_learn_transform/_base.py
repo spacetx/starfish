@@ -46,6 +46,6 @@ class LearnTransformBase(AlgorithmBase):
         return LearnTransform
 
     @abstractmethod
-    def run(self, stack) -> TransformsList:
+    def run(self, stack, *args) -> TransformsList:
         """Learns Transforms for a given stack."""
         raise NotImplementedError()

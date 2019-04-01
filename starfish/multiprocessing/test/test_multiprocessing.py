@@ -66,7 +66,7 @@ def _decode_array_to_numpy_array(array):
     return np.frombuffer(array.get_obj(), dtype=np.uint8)
 
 
-class TestWrappedArray:
+class WrappedArray:
     """
     Dummy class that wraps a multiprocessing array in an object.
     """
@@ -85,14 +85,14 @@ def test_wrapped_shmem_numpy_array(nitems: int=10):
     array = _decode_array_to_numpy_array(buffer)
     array.fill(0)
     _start_process_to_test_shmem(
-        array_holder=TestWrappedArray(buffer),
+        array_holder=WrappedArray(buffer),
         decoder=_decode_wrapped_array_to_numpy_array,
         nitems=nitems)
     for ix in range(nitems):
         assert array[ix] == ix
 
 
-def _decode_wrapped_array_to_numpy_array(wrapped_array: TestWrappedArray) -> np.ndarray:
+def _decode_wrapped_array_to_numpy_array(wrapped_array: WrappedArray) -> np.ndarray:
     return np.frombuffer(wrapped_array.array.get_obj(), dtype=np.uint8)
 
 

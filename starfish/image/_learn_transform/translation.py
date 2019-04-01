@@ -28,7 +28,7 @@ class Translation(LearnTransformBase):
         self.axes = axes
         self.reference_stack = reference_stack
 
-    def run(self, stack: ImageStack) -> TransformsList:
+    def run(self, stack: ImageStack, *args) -> TransformsList:
         """
         Iterate over the given axes of an ImageStack and learn the Similarity transform
         based off the reference_stack passed into :py:class:`Translation`'s constructor.

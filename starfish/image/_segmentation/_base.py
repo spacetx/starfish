@@ -52,6 +52,6 @@ class SegmentationAlgorithmBase(AlgorithmBase):
         return Segmentation
 
     @abstractmethod
-    def run(self, primary_image_stack: ImageStack, nuclei_stack: ImageStack):
+    def run(self, primary_image_stack: ImageStack, nuclei_stack: ImageStack, *args):
         """Performs registration on the stack provided."""
         raise NotImplementedError()

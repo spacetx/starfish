@@ -44,6 +44,6 @@ class FilterAlgorithmBase(AlgorithmBase):
         return Filter
 
     @abstractmethod
-    def run(self, stack: ImageStack) -> ImageStack:
+    def run(self, stack: ImageStack, *args) -> ImageStack:
         """Performs filtering on an ImageStack."""
         raise NotImplementedError()

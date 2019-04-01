@@ -9,7 +9,7 @@ class PerRoundMaxChannelDecoder(DecoderAlgorithmBase):
     def __init__(self):
         pass
 
-    def run(self, intensities: IntensityTable, codebook: Codebook) -> IntensityTable:
+    def run(self, intensities: IntensityTable, codebook: Codebook, *args) -> IntensityTable:
         """Decode spots by selecting the max-valued channel in each sequencing round
 
         Parameters

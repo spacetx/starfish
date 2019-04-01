@@ -20,7 +20,7 @@ class Warp(ApplyTransformBase):
      using skimage.transform.warp"""
 
     def run(self, stack: ImageStack, transforms_list: TransformsList,
-            in_place: bool=False, verbose: bool=False, **kwargs) -> ImageStack:
+            in_place: bool=False, verbose: bool=False, *args, **kwargs) -> ImageStack:
         """Applies a list of transformations to an ImageStack
 
         Parameters

@@ -90,10 +90,15 @@ class Laplace(FilterAlgorithmBase):
         return filtered
 
     def run(
-            self, stack: ImageStack, in_place: bool = True, verbose: bool = True,
-            n_processes: Optional[int]=None
+            self,
+            stack: ImageStack,
+            in_place: bool=False,
+            verbose: bool=False,
+            n_processes: Optional[int]=None,
+            *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
+
         Parameters
         ----------
         stack : ImageStack
@@ -102,10 +107,15 @@ class Laplace(FilterAlgorithmBase):
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             if True, report on filtering progress (default = False)
+        n_processes : Optional[int]
+            Number of parallel processes to devote to calculating the filter
+
         Returns
         -------
         ImageStack :
-            if in-place is False, return the results of filter as a new stack
+            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            original stack.
+
         """
         group_by = determine_axes_to_group_by(self.is_volume)
         apply_filtering: Callable = partial(self._gaussian_laplace, sigma=self.sigma)

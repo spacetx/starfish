@@ -74,8 +74,12 @@ class MatchHistograms(FilterAlgorithmBase):
         return match_histograms(image, reference=reference)
 
     def run(
-            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
-            n_processes: Optional[int]=None
+            self,
+            stack: ImageStack,
+            in_place: bool=False,
+            verbose: bool=False,
+            n_processes: Optional[int]=None,
+            *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -84,9 +88,9 @@ class MatchHistograms(FilterAlgorithmBase):
         stack : ImageStack
             Stack to be filtered.
         in_place : bool
-            if True, process ImageStack in-place, otherwise return a new stack (default False)
+            if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
-            if True, report on filtering progress (default False)
+            if True, report on filtering progress (default = False)
         n_processes : Optional[int]
             Number of parallel processes to devote to calculating the filter
 

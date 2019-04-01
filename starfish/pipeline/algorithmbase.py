@@ -42,7 +42,7 @@ class AlgorithmBaseType(ABCMeta):
         """
         def helper(*args, **kwargs):
             result = func(*args, **kwargs)
-            # Scenario 1, Filtering, Registration
+            # Scenario 1, Filtering, ApplyTransform
             if isinstance(result, ImageStack):
                 result.update_log(args[0])
             # Scenario 2, Spot detection

@@ -26,7 +26,7 @@ class TransformsList:
         """
         Parameters
         ----------
-        transforms_list: List[Tuple[Mapping[Axes, int], SimilarityTransform]]
+        transforms_list: List[Tuple[Mapping[Axes, int], TransformType, GeometricTransform]]
             A list of tuples containing axes of an Imagestack and associated
             transform to apply.
         """
@@ -43,7 +43,7 @@ class TransformsList:
                transform_object: GeometricTransform
                ) -> None:
         """
-        Adds a new TransformationObject to the list
+        Adds a new GoemetricTransform object to the list
 
         Parameters
         ----------
@@ -73,13 +73,12 @@ class TransformsList:
             transforms_array.append((selectors_str, transform_type.value, transforms_matrix))
         with open(filename, 'w') as f:
             json.dump(transforms_array, f)
-        return
 
     @classmethod
     def from_json(cls, url_or_path: str) -> "TransformsList":
         """
         Load a TransformsList from a json file or a url pointing to such a file
-        Loads configuration from StarfishConfig.
+        Loads configuration from :py:class:`starfish.config.StarfishConfig`
 
         Parameters
         ----------

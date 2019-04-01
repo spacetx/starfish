@@ -27,13 +27,12 @@ class Warp(ApplyTransformBase):
         ----------
         stack : ImageStack
             Stack to be transformed.
+        transforms_list: TransformsList
+            The list of transform objects to apply to the ImageStack.
         in_place : bool
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
             if True, report on filtering progress (default = False)
-        transforms_list: TransformsList
-            A list of tuples. Each tuple consists of an ImageStack axis and a GeometricTransform
-            to apply to the portion of the image identified by the selector.
 
         Returns
         -------

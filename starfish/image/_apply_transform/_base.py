@@ -26,7 +26,7 @@ class ApplyTransform(PipelineComponent):
         transformed.export(output)
 
     @staticmethod
-    @click.group("apply_transform")
+    @click.group(COMPONENT_NAME)
     @click.option("-i", "--input", type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
     @click.option("--transformation-list", required=True, type=click.Path(exists=True),

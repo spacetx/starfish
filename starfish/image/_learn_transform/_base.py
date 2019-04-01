@@ -9,7 +9,7 @@ from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util import click
 
 
-COMPONENT_NAME = "lean_transform"
+COMPONENT_NAME = "learn_transform"
 
 
 class LearnTransform(PipelineComponent):
@@ -25,12 +25,12 @@ class LearnTransform(PipelineComponent):
         transformation_list.to_json(output)
 
     @staticmethod
-    @click.group("learn_transform")
+    @click.group(COMPONENT_NAME)
     @click.option("-i", "--input", type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, input, output):
-        """learn a set of transforms for an ImageStack."""
+        """Learn a set of transforms for an ImageStack."""
         print("Learning Transforms for images...")
         ctx.obj = dict(
             component=LearnTransform,

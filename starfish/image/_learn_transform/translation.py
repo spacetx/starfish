@@ -20,7 +20,9 @@ class Translation(LearnTransformBase):
         reference_stack: ImageStack
             The target image used in skimage.feature.register_translation
         upsampling: int
-            upsampling factor, defualt 1
+            upsampling factor (default=1). See
+            http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.register_translation
+            for an explanation of this parameter.
         """
         self.upsampling = upsampling
         self.axes = axes
@@ -29,7 +31,8 @@ class Translation(LearnTransformBase):
     def run(self, stack: ImageStack) -> TransformsList:
         """
         Iterate over the given axes of an ImageStack and learn the Similarity transform
-        based off the instantiated reference_image.
+        based off the reference_stack passed into :py:class:`Translation`'s constructor.
+
 
         Parameters
         ----------
@@ -49,8 +52,8 @@ class Translation(LearnTransformBase):
             target_image = np.squeeze(stack.sel({self.axes: a}).xarray)
             if len(target_image.shape) != 2:
                 raise ValueError(
-                    "Only axes: " + self.axes.value + " can have a length > 1, "
-                                                      "please us the MaxProj filter."
+                    f"Only axes: {self.axes.value} can have a length > 1, "
+                    f"please use the MaxProj filter."
                 )
 
             shift, error, phasediff = register_translation(src_image=target_image,

@@ -53,6 +53,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.napoleon',
     'sphinxcontrib.programoutput',
+    'sphinx_gallery.gen_gallery',
     'm2r',
     # 'sphinx_gallery.gen_gallery',
 ]
@@ -225,3 +226,8 @@ napoleon_use_rtype = True
 
 # See https://stackoverflow.com/a/45565445/56887
 autodoc_mock_imports = ['_tkinter']
+
+sphinx_gallery_conf = {
+    'examples_dirs': '_static/data_processing_examples',   # path to your example scripts
+    'gallery_dirs': 'data_processing_examples',  # path where to save gallery generated examples
+}

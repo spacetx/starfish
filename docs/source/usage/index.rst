@@ -222,3 +222,16 @@ transcriptomics data. The first vignette provides an example of using starfish t
 
 .. toctree::
    iss/iss_cli_vignette.rst
+
+Data Processing examples
+========================
+
+This section provides several examples of how to apply starfish to data from a variety of assay
+types assuming your data is already in spaceTx format.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Vignettes:
+
+.. toctree::
+   ../data_processing_examples/index.rst

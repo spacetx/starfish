@@ -13,4 +13,5 @@ seaborn
 sphinx
 sphinx_bootstrap_theme
 sphinxcontrib-programoutput
+sphinx-gallery
 twine

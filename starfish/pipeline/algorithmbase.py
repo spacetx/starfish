@@ -33,8 +33,8 @@ class AlgorithmBaseType(ABCMeta):
         This method extends each pipeline component.run() method to also log itself and
         runtime parameters to the IntensityTable and ImageStack objects. There are two
         scenarios for this method:
-            1.) Filtering:
-                    ImageStack -> ImageStack
+            1.) Filtering/ApplyTransform:
+                    Imagestack -> Imagestack
             2.) Spot Detection:
                     ImageStack -> IntensityTable
                     ImageStack -> [IntensityTable, ConnectedComponentDecodingResult]
@@ -42,7 +42,7 @@ class AlgorithmBaseType(ABCMeta):
         """
         def helper(*args, **kwargs):
             result = func(*args, **kwargs)
-            # Scenario 1, Filtering
+            # Scenario 1, Filtering, ApplyTransform
             if isinstance(result, ImageStack):
                 result.update_log(args[0])
             # Scenario 2, Spot detection

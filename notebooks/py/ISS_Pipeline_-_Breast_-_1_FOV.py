@@ -129,13 +129,12 @@ for img in images:
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image import Registration
+from starfish.image import ApplyTransform, LearnTransform
 
-registration = Registration.FourierShiftRegistration(
-    upsampling=1000,
-    reference_stack=dots,
-    verbose=True)
-registered_image = registration.run(primary_image, in_place=False)
+learn_translation = LearnTransform.Translation(reference_stack=dots, axes=Axes.ROUND, upsampling=1000)
+transforms_list = learn_translation.run(primary_image.max_proj(Axes.CH, Axes.ZPLANE))
+warp = ApplyTransform.Warp()
+registered_image = warp.run(primary_image, transforms_list=transforms_list, in_place=False, verbose=True)
 # EPY: END code
 
 # EPY: START markdown

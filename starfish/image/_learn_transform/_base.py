@@ -1,28 +1,28 @@
 from abc import abstractmethod
 from typing import Type
 
-import click
 
+from starfish.image._learn_transform.transforms_list import TransformsList
 from starfish.imagestack.imagestack import ImageStack
-from starfish.pipeline import PipelineComponent
 from starfish.pipeline.algorithmbase import AlgorithmBase
+from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.util import click
 
 
-COMPONENT_NAME = "registration"
+COMPONENT_NAME = "learn_transform"
 
 
-class Registration(PipelineComponent):
-
+class LearnTransform(PipelineComponent):
     @classmethod
     def pipeline_component_type_name(cls) -> str:
         return COMPONENT_NAME
 
     @classmethod
-    def _cli_run(cls, ctx, instance):
+    def _cli_run(cls, ctx, instance, *args, **kwargs):
         output = ctx.obj["output"]
         stack = ctx.obj["stack"]
-        instance.run(stack)
-        stack.export(output)
+        transformation_list = instance.run(stack)
+        transformation_list.to_json(output)
 
     @staticmethod
     @click.group(COMPONENT_NAME)
@@ -30,22 +30,22 @@ class Registration(PipelineComponent):
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, input, output):
-        """translation correction of image stacks"""
-        print("Registering...")
+        """Learn a set of transforms for an ImageStack."""
+        print("Learning Transforms for images...")
         ctx.obj = dict(
-            component=Registration,
+            component=LearnTransform,
             input=input,
             output=output,
             stack=ImageStack.from_path_or_url(input),
         )
 
 
-class RegistrationAlgorithmBase(AlgorithmBase):
+class LearnTransformBase(AlgorithmBase):
     @classmethod
     def get_pipeline_component_class(cls) -> Type[PipelineComponent]:
-        return Registration
+        return LearnTransform
 
     @abstractmethod
-    def run(self, stack: ImageStack, *args) -> ImageStack:
-        """Performs registration on the stack provided."""
+    def run(self, stack, *args) -> TransformsList:
+        """Learns Transforms for a given stack."""
         raise NotImplementedError()

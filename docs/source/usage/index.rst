@@ -234,4 +234,4 @@ types assuming your data is already in spaceTx format.
    :caption: Vignettes:
 
 .. toctree::
-   ../data_processing_examples/index.rst
+   data_processing_examples/index.rst

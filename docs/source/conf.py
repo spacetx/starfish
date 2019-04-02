@@ -229,5 +229,5 @@ autodoc_mock_imports = ['_tkinter']
 
 sphinx_gallery_conf = {
     'examples_dirs': '_static/data_processing_examples',   # path to your example scripts
-    'gallery_dirs': 'data_processing_examples',  # path where to save gallery generated examples
+    'gallery_dirs': 'usage/data_processing_examples',  # path where to save gallery generated examples
 }

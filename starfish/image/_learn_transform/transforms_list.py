@@ -78,7 +78,7 @@ class TransformsList:
     def from_json(cls, url_or_path: str) -> "TransformsList":
         """
         Load a TransformsList from a json file or a url pointing to such a file
-        Loads configuration from :py:class:`starfish.config.StarfishConfig`
+        Loads slicedimage version configuration from :py:class:`starfish.config.StarfishConfig`
 
         Parameters
         ----------

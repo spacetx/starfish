@@ -28,16 +28,19 @@ class Translation(LearnTransformBase):
         self.axes = axes
         self.reference_stack = reference_stack
 
-    def run(self, stack: ImageStack, *args) -> TransformsList:
+    def run(self, stack: ImageStack, verbose: bool=False, *args) -> TransformsList:
         """
         Iterate over the given axes of an ImageStack and learn the Similarity transform
         based off the reference_stack passed into :py:class:`Translation`'s constructor.
+        Only supports 2d data.
 
 
         Parameters
         ----------
         stack : ImageStack
             Stack to calculate the transforms on.
+        verbose : bool
+            if True, report on transformation progress (default = False)
 
         Returns
         -------
@@ -59,7 +62,8 @@ class Translation(LearnTransformBase):
             shift, error, phasediff = register_translation(src_image=target_image,
                                                            target_image=reference_image,
                                                            upsample_factor=self.upsampling)
-            print(f"For {self.axes}: {a}, Shift: {shift}, Error: {error}")
+            if verbose:
+                print(f"For {self.axes}: {a}, Shift: {shift}, Error: {error}")
             selectors = {self.axes: a}
             # reverse shift because SimilarityTransform stores in y,x format
             shift = shift[::-1]

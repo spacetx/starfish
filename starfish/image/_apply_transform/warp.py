@@ -32,7 +32,7 @@ class Warp(ApplyTransformBase):
         in_place : bool
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
-            if True, report on filtering progress (default = False)
+            if True, report on transformation progress (default = False)
 
         Returns
         -------

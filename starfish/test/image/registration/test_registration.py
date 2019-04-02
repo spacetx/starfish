@@ -37,8 +37,7 @@ def test_learn_transforms_throws_error():
     exp = data.ISS(use_test_data=True)
     stack = exp.fov().get_image('primary')
     reference_stack = exp.fov().get_image('dots')
-    translation = Translation(reference_stack=reference_stack,
-                              axes=Axes.ROUND)
+    translation = Translation(reference_stack=reference_stack, axes=Axes.ROUND)
     try:
         translation.run(stack)
     except ValueError as e:
@@ -52,8 +51,7 @@ def test_learn_transforms_translation():
     exp = data.ISS(use_test_data=True)
     stack = exp.fov().get_image('primary')
     reference_stack = exp.fov().get_image('dots')
-    translation = Translation(reference_stack=reference_stack,
-                              axes=Axes.ROUND)
+    translation = Translation(reference_stack=reference_stack, axes=Axes.ROUND)
     # Calculate max_proj accrss CH/Z
     stack = stack.max_proj(Axes.CH, Axes.ZPLANE)
     transform_list = translation.run(stack)
@@ -69,8 +67,7 @@ def test_export_import_transforms_object():
     exp = data.ISS(use_test_data=True)
     stack = exp.fov().get_image('primary')
     reference_stack = exp.fov().get_image('dots')
-    translation = Translation(reference_stack=reference_stack,
-                              axes=Axes.ROUND)
+    translation = Translation(reference_stack=reference_stack, axes=Axes.ROUND)
     # Calculate max_proj accrss CH/Z
     stack = stack.max_proj(Axes.CH, Axes.ZPLANE)
     transform_list = translation.run(stack)
@@ -89,14 +86,12 @@ def test_calculate_translation_transforms_and_apply():
     exp = data.ISS(use_test_data=True)
     stack = exp.fov().get_image('primary')
     reference_stack = exp.fov().get_image('dots')
-    translation = Translation(reference_stack=reference_stack,
-                              axes=Axes.ROUND)
+    translation = Translation(reference_stack=reference_stack, axes=Axes.ROUND)
     # Calculate max_proj accrss
     mp = stack.max_proj(Axes.CH, Axes.ZPLANE)
     transform_list = translation.run(mp)
     apply_transform = Warp()
-    warped_stack = apply_transform.run(stack=stack,
-                                       transforms_list=transform_list)
+    warped_stack = apply_transform.run(stack=stack, transforms_list=transform_list)
     assert np.allclose(
         expected_registered_values,
         warped_stack.xarray[2, 2, 0, 40:50, 40:50])

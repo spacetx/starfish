@@ -1,5 +1,3 @@
-from typing import Any, Sequence
-
 from click import (
     argument,
     command,
@@ -13,13 +11,6 @@ from click import (
     Path,
 )
 from click import option as _click_option
-
-
-# Workaround for F401
-__click_imports: Sequence[Any] = [
-    argument, command, Context, echo, group, Group,
-    Option, _click_option, ParamType, pass_context, Path
-]
 
 
 class RequiredParentOption(Option):

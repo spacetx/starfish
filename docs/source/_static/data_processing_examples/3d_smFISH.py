@@ -123,4 +123,5 @@ experiment = starfish.data.allen_smFISH(use_test_data=True)
 
 image, intensities = processing_pipeline(experiment, fov_name='fov_001')
 
-viewer = starfish.display(image, intensities)
+# uncomment the below line to visualize the output with the spot calls.
+# viewer = starfish.display(image, intensities)

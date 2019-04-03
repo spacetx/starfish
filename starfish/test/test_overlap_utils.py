@@ -13,7 +13,7 @@ from starfish.util.overlap_utils import (
 )
 
 
-def create_intenisty_table_with_coords(area: Area, n_spots=10):
+def create_intensity_table_with_coords(area: Area, n_spots: int=10) -> IntensityTable:
     """
     Creates a 50X50 intensity table with physical coordinates within
     the given Area.
@@ -78,36 +78,32 @@ def test_find_overlaps_of_xarrays():
     overlapping sections
     """
     # Create some overlapping intensity tables
-    it0 = create_intenisty_table_with_coords(Area(min_x=0, max_x=1,
+    it0 = create_intensity_table_with_coords(Area(min_x=0, max_x=1,
                                                   min_y=0, max_y=1))
-    it1 = create_intenisty_table_with_coords(Area(min_x=.5, max_x=2,
+    it1 = create_intensity_table_with_coords(Area(min_x=.5, max_x=2,
                                                   min_y=.5, max_y=1.5))
-    it2 = create_intenisty_table_with_coords(Area(min_x=1.5, max_x=2.5,
+    it2 = create_intensity_table_with_coords(Area(min_x=1.5, max_x=2.5,
                                                   min_y=0, max_y=1))
-    it3 = create_intenisty_table_with_coords(Area(min_x=0, max_x=1,
+    it3 = create_intensity_table_with_coords(Area(min_x=0, max_x=1,
                                                   min_y=1, max_y=2))
     overlaps = find_overlaps_of_xarrays([it0, it1, it2, it3])
     # should have 4 total overlaps
     assert len(overlaps) == 4
     # overlap 1 between it0 and it1:
-    overlap_1 = Area(min_x=.5, max_x=1, min_y=.5, max_y=1)
-    assert overlap_1 == overlaps[(0, 1)]
-    # overlap 2 between it1 and it2
-    overlap_2 = Area(min_x=1.5, max_x=2, min_y=.5, max_y=1)
-    assert overlap_2 == overlaps[(1, 2)]
+    assert (0, 1) in overlaps
+    # overlap 1 between it0 and it1:
+    assert (1, 2) in overlaps
     # overlap 3 between it1 and it3
-    overlap_3 = Area(min_x=.5, max_x=1, min_y=1, max_y=1.5)
-    assert overlap_3 == overlaps[(1, 3)]
+    assert (1, 3) in overlaps
     # overlap 4 between it0 and it3
-    overlap_4 = Area(min_x=0, max_x=1, min_y=1, max_y=1)
-    assert overlap_4 == overlaps[(0, 3)]
+    assert (0, 3) in overlaps
 
 
 def test_remove_area_of_xarray():
     """
     Tests removing a section of an IntensityTable defined by its physical area
     """
-    it = create_intenisty_table_with_coords(Area(min_x=0, max_x=2,
+    it = create_intensity_table_with_coords(Area(min_x=0, max_x=2,
                                                  min_y=0, max_y=2), n_spots=10)
 
     area = Area(min_x=1, max_x=2, min_y=1, max_y=3)
@@ -125,7 +121,7 @@ def test_sel_area_of_xarray():
     """
     Tests selecting a section of an IntensityTable defined by its physical area
     """
-    it = create_intenisty_table_with_coords(Area(min_x=0, max_x=2, min_y=0, max_y=2), n_spots=10)
+    it = create_intensity_table_with_coords(Area(min_x=0, max_x=2, min_y=0, max_y=2), n_spots=10)
 
     area = Area(min_x=1, max_x=2, min_y=1, max_y=3)
     it = sel_area_of_xarray(it, area)
@@ -143,9 +139,9 @@ def test_take_max():
     by concatenating them with the TAKE_MAX strategy we only include spots in the overlapping
     section from the IntensityTable that had the most.
     """
-    it1 = create_intenisty_table_with_coords(Area(min_x=0, max_x=2,
+    it1 = create_intensity_table_with_coords(Area(min_x=0, max_x=2,
                                                   min_y=0, max_y=2), n_spots=10)
-    it2 = create_intenisty_table_with_coords(Area(min_x=1, max_x=2,
+    it2 = create_intensity_table_with_coords(Area(min_x=1, max_x=2,
                                                   min_y=1, max_y=3), n_spots=20)
 
     concatenated = IntensityTable.concatanate_intensity_tables(
@@ -153,5 +149,5 @@ def test_take_max():
 
     # The overlap section hits half of the spots from each intensity table, 5 from it1
     # and 10 from i21. It2 wins and the resulting concatenated table should have all the
-    # spots from it2 (20) and 6 from it1 (6) for a total of 26 spots
+    # spots from it2 (20) and 6 (one on the boarder) from it1 (6) for a total of 26 spots
     assert concatenated.sizes[Features.AXIS] == 26

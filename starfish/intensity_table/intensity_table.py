@@ -397,15 +397,15 @@ class IntensityTable(xr.DataArray):
     def process_overlaps(its: List["IntensityTable"],
                          overlap_strategy: OverlapStrategy
                          ) -> List["IntensityTable"]:
-        """Find the overlapping sections between IntensityTables
-        and process them according to the give overlap strategy
+        """Find the overlapping sections between IntensityTables and process them according
+        to the given overlap strategy
         """
         overlap_pairs = find_overlaps_of_xarrays(its)
-        for indices, intersection_area in overlap_pairs.items():
+        for indices in overlap_pairs:
             overlap_method = OVERLAP_STRATEGY_MAP[overlap_strategy]
             idx1, idx2 = indices
             # modify IntensityTables based on overlap strategy
-            it1, it2 = overlap_method(intersection_area, its[idx1], its[idx2])
+            it1, it2 = overlap_method(its[idx1], its[idx2])
             # replace IntensityTables in list
             its[idx1] = it1
             its[idx2] = it2

@@ -12,7 +12,7 @@ from ._base import FilterAlgorithmBase
 
 class LinearUnmixing(FilterAlgorithmBase):
 
-    def __init__(self, coeff_mat: np.ndarray, clip_method: int=1) -> None:
+    def __init__(self, coeff_mat: np.ndarray) -> None:
         """Image scaling filter
 
         Parameters
@@ -21,15 +21,6 @@ class LinearUnmixing(FilterAlgorithmBase):
             matrix of the linear unmixing coefficients. Should take the form:
             B = AX, where B are the unmixed values, A is coeff_mat and X are
             the observed values.
-        clip_method : int
-            (Default 1) Controls the way that data are scaled to retain skimage dtype
-            requirements that float data fall in [0, 1].
-            0: data above 1 are set to 1, and below 0 are set to 0
-            1: data above 1 are scaled by the maximum value, with the maximum value calculated
-               over the entire ImageStack
-            2: data above 1 are scaled by the maximum value, with the maximum value calculated
-               over each slice, where slice shapes are determined by the group_by parameters
-
         """
         self.coeff_mat = coeff_mat
 
@@ -69,8 +60,12 @@ class LinearUnmixing(FilterAlgorithmBase):
         return unmixed_image
 
     def run(
-            self, stack: ImageStack, in_place: bool=False, verbose: bool=False,
-            n_processes: Optional[int]=None
+            self,
+            stack: ImageStack,
+            in_place: bool=False,
+            verbose: bool=False,
+            n_processes: Optional[int]=None,
+            *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -81,7 +76,7 @@ class LinearUnmixing(FilterAlgorithmBase):
         in_place : bool
             if True, process ImageStack in-place, otherwise return a new stack
         verbose : bool
-            If True, report on the percentage completed (default = False) during processing
+            if True, report on filtering progress (default = False)
         n_processes : Optional[int]
             Number of parallel processes to devote to calculating the filter
 

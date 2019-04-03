@@ -133,6 +133,7 @@ class BlobDetector(SpotFinderAlgorithmBase):
             data_stack: ImageStack,
             blobs_image: Optional[Union[np.ndarray, xr.DataArray]]=None,
             reference_image_from_max_projection: bool=False,
+            *args,
     ) -> IntensityTable:
         """find spots in an ImageStack
 

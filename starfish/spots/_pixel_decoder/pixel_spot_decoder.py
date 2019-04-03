@@ -54,14 +54,16 @@ class PixelSpotDecoder(PixelDecoderAlgorithmBase):
         self.crop_z = crop_z
 
     def run(
-        self, stack: ImageStack,
-        n_processes: Optional[int] = None
+            self,
+            primary_image: ImageStack,
+            n_processes: Optional[int] = None,
+            *args,
     ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """decode pixels and combine them into spots using connected component labeling
 
         Parameters
         ----------
-        stack : ImageStack
+        primary_image : ImageStack
             ImageStack containing spots
         n_processes : Optional[int]
             The number of processes to use for CombineAdjacentFeatures.
@@ -76,7 +78,7 @@ class PixelSpotDecoder(PixelDecoderAlgorithmBase):
 
         """
         pixel_intensities = IntensityTable.from_image_stack(
-            stack, crop_x=self.crop_x, crop_y=self.crop_y, crop_z=self.crop_z)
+            primary_image, crop_x=self.crop_x, crop_y=self.crop_y, crop_z=self.crop_z)
         decoded_intensities = self.codebook.metric_decode(
             pixel_intensities,
             max_distance=self.distance_threshold,
@@ -92,7 +94,7 @@ class PixelSpotDecoder(PixelDecoderAlgorithmBase):
         decoded_spots, image_decoding_results = caf.run(intensities=decoded_intensities,
                                                         n_processes=n_processes)
 
-        transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=stack,
+        transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=primary_image,
                                                                     intensity_table=decoded_spots)
         return decoded_spots, image_decoding_results
 

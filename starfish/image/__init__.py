@@ -1,3 +1,4 @@
+from ._apply_transform import ApplyTransform
 from ._filter import Filter
-from ._registration import Registration
+from ._learn_transform import LearnTransform
 from ._segmentation import Segmentation

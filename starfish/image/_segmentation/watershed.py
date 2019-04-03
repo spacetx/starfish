@@ -21,7 +21,6 @@ class Watershed(SegmentationAlgorithmBase):
         nuclei_threshold: Number,
         input_threshold: Number,
         min_distance: int,
-        **kwargs
     ) -> None:
         """Implements watershed segmentation of cells.
 
@@ -50,7 +49,7 @@ class Watershed(SegmentationAlgorithmBase):
         self.min_distance = min_distance
         self._segmentation_instance: Optional[_WatershedSegmenter] = None
 
-    def run(self, primary_images: ImageStack, nuclei: ImageStack) -> np.ndarray:
+    def run(self, primary_images: ImageStack, nuclei: ImageStack, *args) -> np.ndarray:
         """Segments nuclei in 2-d using a nuclei ImageStack
 
         Primary images are used to expand the nuclear mask, but only in cases where there are

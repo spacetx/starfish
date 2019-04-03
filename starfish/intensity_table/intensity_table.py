@@ -456,7 +456,6 @@ class IntensityTable(xr.DataArray):
         coordinate_df = min_ + (max_ - min_) / 2
         metadata = {name: (Features.CELLS, data.values) for name, data in coordinate_df.items()}
         metadata[Features.AREA] = (Features.CELLS, np.full(counts.shape[0], fill_value=np.nan))
-
         # add genes to the metadata
         metadata.update({Features.GENES: counts.columns.values})
         metadata.update({Features.CELL_ID: (Features.CELLS, counts.index.values)})

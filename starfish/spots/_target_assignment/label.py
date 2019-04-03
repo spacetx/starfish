@@ -48,7 +48,10 @@ class Label(TargetAssignmentAlgorithm):
         return intensities
 
     def run(
-            self, label_image: np.ndarray, intensity_table: IntensityTable, verbose: bool=False,
+            self,
+            label_image: np.ndarray,
+            intensity_table: IntensityTable,
+            verbose: bool=False,
             in_place: bool=False,
     ) -> IntensityTable:
         """Extract cell ids for features in IntensityTable from a segmentation label image
@@ -58,8 +61,12 @@ class Label(TargetAssignmentAlgorithm):
         label_image : np.ndarray[np.uint32]
             integer array produced from segmentation where each pixel in a cell is labeled by the
             same integer, and each cell is labeled by a different integer
-        intensities : IntensityTable
+        intensity_table : IntensityTable
             spot information
+        in_place : bool
+            if True, process ImageStack in-place, otherwise return a new stack
+        verbose : bool
+            if True, report on the percentage completed during processing (default = False)
 
         Returns
         -------

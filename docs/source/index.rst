@@ -59,7 +59,6 @@ To see the code or report a bug, please visit the `github repository
   <div class="col-md-3">
   <h2>Features</h2>
 
-* Registration: :ref:`API <registration>`
 * Filtering: :ref:`API <filtering>`
 * Spot-Finding: :ref:`API <detection>`
 * Decoding: :ref:`API <decoding>`

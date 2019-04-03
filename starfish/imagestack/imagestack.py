@@ -1,10 +1,10 @@
 import collections
-import os
 import warnings
 from copy import deepcopy
 from functools import partial
 from itertools import product
 from json import loads
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -1036,8 +1036,8 @@ class ImageStack:
             tileset.add_tile(tile)
 
         if tile_opener is None:
-            def tile_opener(tileset_path, tile, ext):
-                tile_basename = os.path.splitext(tileset_path)[0]
+            def tile_opener(tileset_path: Path, tile, ext):
+                base = tileset_path.parent / tileset_path.stem
                 if Axes.ZPLANE in tile.indices:
                     zval = tile.indices[Axes.ZPLANE]
                     zstr = "-Z{}".format(zval)
@@ -1045,7 +1045,7 @@ class ImageStack:
                     zstr = ""
                 return open(
                     "{}-H{}-C{}{}.{}".format(
-                        tile_basename,
+                        str(base),
                         tile.indices[Axes.ROUND],
                         tile.indices[Axes.CH],
                         zstr,

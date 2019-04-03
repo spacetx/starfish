@@ -76,6 +76,9 @@ class Features:
     CELL_ID = 'cell_id'
     SPOT_ID = 'spot_id'
     INTENSITY = 'intensity'
+    AREA = 'area'
+    CELLS = 'cells'
+    GENES = 'genes'
 
 
 class Clip(AugmentedEnum):

@@ -7,7 +7,15 @@ import pandas as pd
 import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
-from starfish.types import Axes, DecodedSpots, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
+from starfish.types import (
+    Axes,
+    Coordinates,
+    DecodedSpots,
+    Features,
+    LOG,
+    SpotAttributes,
+    STARFISH_EXTRAS_KEY
+)
 from starfish.util.dtype import preserve_float_range
 
 
@@ -171,6 +179,10 @@ class IntensityTable(xr.DataArray):
             return loads(self.attrs[STARFISH_EXTRAS_KEY])[LOG]
         else:
             raise RuntimeError('No log info found.')
+
+    @property
+    def has_physical_coords(self):
+        return Coordinates.X in self.coords and Coordinates.Y in self.coords
 
     def save(self, filename: str) -> None:
         """Save an IntensityTable as a Netcdf File
@@ -428,33 +440,29 @@ class IntensityTable(xr.DataArray):
         ExpressionMatrix :
             cell x gene expression table
         """
-        try:
-            grouped = self.to_features_dataframe().groupby(['cell_id', 'target'])
-        except KeyError as e:
-            if "cell_id" in str(e):
-                raise RuntimeError(
-                    "IntensityTable must have 'cell_id' assignments for each cell before "
-                    "this function can be called. See starfish.TargetAssignment.Label."
-                )
-            else:
-                raise
-
+        if Features.CELL_ID not in self.coords:
+            raise KeyError("IntensityTable must have 'cell_id' assignments for each cell before "
+                           "this function can be called. See starfish.TargetAssignment.Label.")
+        grouped = self.to_features_dataframe().groupby([Features.CELL_ID, Features.TARGET])
         counts = grouped.count().iloc[:, 0].unstack().fillna(0)
-
-        grouped = self.to_features_dataframe().groupby(['cell_id'])[['x', 'y', 'z']]
+        if self.has_physical_coords:
+            grouped = self.to_features_dataframe().groupby([Features.CELL_ID])[[
+                Axes.X, Axes.Y, Axes.ZPLANE, Coordinates.X, Coordinates.Y, Coordinates.Z]]
+        else:
+            grouped = self.to_features_dataframe().groupby([Features.CELL_ID])[[
+                Axes.X, Axes.Y, Axes.ZPLANE]]
         min_ = grouped.min()
         max_ = grouped.max()
         coordinate_df = min_ + (max_ - min_) / 2
-        metadata = {name: ("cells", data.values) for name, data in coordinate_df.items()}
-        metadata['area'] = ("cells", np.full(counts.shape[0], fill_value=np.nan))
-
+        metadata = {name: (Features.CELLS, data.values) for name, data in coordinate_df.items()}
+        metadata[Features.AREA] = (Features.CELLS, np.full(counts.shape[0], fill_value=np.nan))
         # add genes to the metadata
-        metadata.update({"genes": counts.columns.values})
-        metadata.update({"cell_id": ("cells", counts.index.values)})
+        metadata.update({Features.GENES: counts.columns.values})
+        metadata.update({Features.CELL_ID: (Features.CELLS, counts.index.values)})
 
         mat = ExpressionMatrix(
             data=counts.values,
-            dims=('cells', 'genes'),
+            dims=(Features.CELLS, Features.GENES),
             coords=metadata,
             name='expression_matrix'
         )

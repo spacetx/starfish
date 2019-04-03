@@ -95,10 +95,10 @@ def test_tranfering_physical_coords_to_expression_matrix():
     intensities = intensity_table_coordinates. \
         transfer_physical_coords_from_imagestack_to_intensity_table(stack, intensities)
 
-    # CHeck that error is thrown before target assignment
+    # Check that error is thrown before target assignment
     try:
         intensities.to_expression_matrix()
-    except RuntimeError as e:
+    except KeyError as e:
         # Assert value error is thrown with right message
         assert e.args[0] == "IntensityTable must have 'cell_id' assignments for each cell before " \
                             "this function can be called. See starfish.TargetAssignment.Label."

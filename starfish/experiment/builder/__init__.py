@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 from typing import (
     Any,
     BinaryIO,
@@ -8,7 +9,6 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
-    Tuple,
     Union,
 )
 
@@ -35,11 +35,11 @@ AUX_IMAGE_NAMES = {
 DEFAULT_DIMENSION_ORDER = (Axes.ZPLANE, Axes.ROUND, Axes.CH)
 
 
-def _tile_opener(toc_path: str, tile: Tile, file_ext: str) -> BinaryIO:
-    tile_basename = os.path.splitext(toc_path)[0]
+def _tile_opener(toc_path: Path, tile: Tile, file_ext: str) -> BinaryIO:
+    base = toc_path.parent / toc_path.stem
     return open(
         "{}-Z{}-H{}-C{}.{}".format(
-            tile_basename,
+            str(base),
             tile.indices[Axes.ZPLANE],
             tile.indices[Axes.ROUND],
             tile.indices[Axes.CH],
@@ -48,12 +48,8 @@ def _tile_opener(toc_path: str, tile: Tile, file_ext: str) -> BinaryIO:
         "wb")
 
 
-def _fov_path_generator(parent_toc_path: str, toc_name: str) -> str:
-    toc_basename = os.path.splitext(os.path.basename(parent_toc_path))[0]
-    return os.path.join(
-        os.path.dirname(parent_toc_path),
-        "{}-{}.json".format(toc_basename, toc_name),
-    )
+def _fov_path_generator(parent_toc_path: Path, toc_name: str) -> Path:
+    return parent_toc_path.parent / "{}-{}.json".format(parent_toc_path.stem, toc_name)
 
 
 def build_image(
@@ -165,6 +161,8 @@ def write_experiment_json(
         Directory to write the files to.
     fov_count : int
         Number of fields of view in this experiment.
+    tile_format : ImageFormat
+        File format to write the tiles as.
     primary_image_dimensions : Mapping[Union[str, Axes], int]
         Dictionary mapping dimension name to dimension size for the primary image.
     aux_name_to_dimensions : Mapping[str, Mapping[Union[str, Axes], int]]

@@ -29,7 +29,7 @@ all:	fast
 
 ### UNIT #####################################################
 #
-fast:	lint mypy fast-test clean-docs docs-html
+fast:	diff-requirements lint mypy fast-test clean-docs docs-html
 
 lint:   lint-non-init lint-init
 
@@ -95,6 +95,9 @@ REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
 	.$<-env/bin/pip freeze >> $@
 	cp -f $@ starfish/REQUIREMENTS-STRICT.txt
 	rm -rf .$<-env
+
+diff-requirements :
+	diff -q REQUIREMENTS-STRICT.txt starfish/REQUIREMENTS-STRICT.txt
 
 help-requirements:
 	$(call print_help, refresh_all_requirements, regenerate requirements files)

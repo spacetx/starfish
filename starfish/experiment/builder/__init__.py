@@ -134,6 +134,11 @@ def build_image(
                 extras=image.extras,
             )
             tile.set_numpy_array_future(image.tile_data)
+            # Astute readers might wonder why we set this variable.  This is to support in-place
+            # experiment construction.  We monkey-patch slicedimage's Tile class such that checksum
+            # computation is done by finding the FetchedTile object, which allows us to calculate
+            # the checksum of the original file.
+            tile.provider = image
             fov_images.add_tile(tile)
         collection.add_partition("fov_{:03}".format(fov_id), fov_images)
     return collection
@@ -151,6 +156,8 @@ def write_experiment_json(
         postprocess_func: Optional[Callable[[dict], dict]]=None,
         default_shape: Optional[Mapping[Axes, int]]=None,
         dimension_order: Sequence[Axes]=(Axes.ZPLANE, Axes.ROUND, Axes.CH),
+        fov_path_generator: Callable[[Path, str], Path] = _fov_path_generator,
+        tile_opener: Callable[[Path, Tile, str], BinaryIO] = _tile_opener,
 ) -> None:
     """
     Build and returns a top-level experiment description with the following characteristics:
@@ -195,6 +202,10 @@ def write_experiment_json(
           (ROUND=1, CH=0, Z=1)
           (ROUND=1, CH=1, Z=1)
         (default = (Axes.Z, Axes.ROUND, Axes.CH))
+    fov_path_generator : Callable[[Path, str], Path]
+        Generates the path for a FOV's json file.  If one is not provided, the default generates
+        the FOV's json file at the same level as the top-level json file for an image.
+    tile_opener : Callable[[Path, Tile, str], BinaryIO]
     """
     if primary_tile_fetcher is None:
         primary_tile_fetcher = tile_fetcher_factory(RandomNoiseTile)
@@ -221,8 +232,8 @@ def write_experiment_json(
         primary_image,
         os.path.join(path, "primary_images.json"),
         pretty=True,
-        partition_path_generator=_fov_path_generator,
-        tile_opener=_tile_opener,
+        partition_path_generator=fov_path_generator,
+        tile_opener=tile_opener,
         tile_format=tile_format,
     )
     experiment_doc['images']['primary'] = "primary_images.json"
@@ -243,8 +254,8 @@ def write_experiment_json(
             auxiliary_image,
             os.path.join(path, "{}.json".format(aux_name)),
             pretty=True,
-            partition_path_generator=_fov_path_generator,
-            tile_opener=_tile_opener,
+            partition_path_generator=fov_path_generator,
+            tile_opener=tile_opener,
             tile_format=tile_format,
         )
         experiment_doc['images'][aux_name] = "{}.json".format(aux_name)

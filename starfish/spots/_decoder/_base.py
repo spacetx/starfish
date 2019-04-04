@@ -1,12 +1,11 @@
 from abc import abstractmethod
 from typing import Type
 
-import click
-
 from starfish.codebook.codebook import Codebook
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.util import click
 
 
 COMPONENT_NAME = "decode"

@@ -1,7 +1,6 @@
 from abc import abstractmethod
 from typing import Any, Callable, Sequence, Tuple, Type, Union
 
-import click
 import numpy as np
 import xarray as xr
 
@@ -10,6 +9,7 @@ from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.types import Axes, Number, SpotAttributes
+from starfish.util import click
 
 COMPONENT_NAME = "detect_spots"
 

@@ -1,12 +1,12 @@
 from abc import abstractmethod
 from typing import Type
 
-import click
 from skimage.io import imsave
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import PipelineComponent
 from starfish.pipeline.algorithmbase import AlgorithmBase
+from starfish.util import click
 
 
 COMPONENT_NAME = "segment"

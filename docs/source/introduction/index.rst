@@ -7,17 +7,23 @@ Introduction
 transcriptomics data. This is a **work in progress** and is being developed in collaboration
 with users and developers of image-based transcriptomics assays.
 
-Is starfish for me?
-~~~~~~~~~~~~~~~~~~~
+What is *starfish*?
+-------------------
 
-Starfish exposes an general data model that supports processing of microscopy data that detects RNA
-or proteins as discrete spots. Starfish breaks up processing into fields of view that correspond
-to the data produced by a microscope at a single location on a microscope slide, and is currently
+**Starfish is a library for counting spots in image data**. To achieve this generality, starfish
+exposes a set of objects that allow it to work both for discrete assays where each spot represents
+a molecule, and for assays that build codes across many images. Starfish breaks up processing into
+fields of view that correspond to the data produced by a microscope at a single location on a
+microscope slide, and is
 able to process single fields of view for each of the below assays. To enable this generality
 across assays, starfish requires data be converted into SpaceTx-Format, a lightweight JSON wrapper
 around 2-dimensional TIFF images.
 
-Our users leverage a large variety of computational infrastructures (high performance computing
+**Starfish is agnostic to the workflow runner, but does not expose a solution for processing
+complete experiments -- you will need to decide how to orchestrate the processing of multiple fields
+of view**.
+We made this decision because our users leverage a large variety of computational infrastructures
+(high performance computing
 clusters, amazon web services, and google cloud) and workflow engines (snakemake, Nextflow, and
 Cromwell). As a result, starfish is focusing on ensuring it is feature complete for processing
 individual fields of view, exposing methods to merge data across fields of view, and has left
@@ -28,8 +34,8 @@ through the `Windows Subsystem for Linux <wsl>`_.
 
 To validate starfish's performance, we are working in collaboration with the
 :ref:`SpaceTx consortium <spacetx consortium>` to reproduce author's pipelines for each of the
-following assays. This list is not comprehensive, and starfish's developers are always excited
-to learn about new assays.
+following assays. This list is not comprehensive, and starfish's development team are
+always excited to learn about new assays. If you want to chat, please :ref:`contact us <contact>`
 
 ====================  ==========  ===================  ==================
  Assay                Loads Data  Single-FoV Pipeline  Multi-FoV Pipeline
@@ -60,13 +66,5 @@ Legend:
 .. |todo| unicode:: U+1F532 .. Black Square Button
 .. |none| unicode:: U+274C .. Cross Mark
 
-Concept
-~~~~~~~
-
-See this document_ for details. The diagram below describes the core pipeline components and
-associated file manifests that this package plans to standardize and implement.
-
-.. _document: https://docs.google.com/document/d/1IHIngoMKr-Tnft2xOI3Q-5rL3GSX2E3PnJrpsOX5ZWs/edit?usp=sharing
-
-.. image:: /_static/design/pipeline-diagram.png
-    :alt: pipeline diagram
+To dive into starfish in more detail, please proceed to the :ref:`getting started <getting started>`
+section.

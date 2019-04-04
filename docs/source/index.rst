@@ -53,15 +53,7 @@ To see the code or report a bug, please visit the `github repository
    data_structures/index
    help_and_reference/index
    community/index
-   installation/installation
-   api/index
-   contributing
-   debugging
-   license/index
-   sptx-format/index
-   glossary/glossary
-   roadmap
-   citation
+   contributing/index
    usage/index
 
 .. raw:: html

@@ -3,4 +3,7 @@
 Getting Started
 ===============
 
+.. toctree::
+    installation/index
+
 Add notes.

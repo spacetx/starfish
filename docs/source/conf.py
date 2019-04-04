@@ -24,7 +24,7 @@ matplotlib.use('agg')
 # -- Project information -----------------------------------------------------
 
 project = 'starfish'
-copyright = '2018, The Chan Zuckerberg Initiative'
+copyright = '2017-2019, The Chan Zuckerberg Initiative'
 author = 'Ambrose J. Carr, Tony Tung, Shannon Axelrod, Brian Long, Jeremy Freeman, Deep Ganguli'
 
 # The short X.Y version

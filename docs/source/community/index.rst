@@ -7,3 +7,4 @@ Community
     :maxdepth: 1
 
     spacetx_consortium/index
+    contact/index

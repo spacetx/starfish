@@ -101,9 +101,10 @@ def test_sel_by_physical_coords():
     assert indexing_utils.find_nearest(stack.xarray[Coordinates.Y.value], (4, 5.1)) == (0, 5)
     new_y_size = 5 - 0
 
-    indexed_stack = stack.sel_by_physical_coords({Coordinates.X: (1.2, 1.5),
-                                                  Coordinates.Y: (4, 5.1)})
-    expected_shape = OrderedDict([(Axes.ROUND, 3), (Axes.CH, 2),
+    indexed_stack = stack.sel({Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0,
+                               Coordinates.X: (1.2, 1.5), Coordinates.Y: (4, 5.1)})
+    
+    expected_shape = OrderedDict([(Axes.ROUND, 1), (Axes.CH, 1),
                                   (Axes.ZPLANE, 1), (Axes.Y, new_y_size), (Axes.X, new_x_size)])
     assert indexed_stack.shape == expected_shape
 

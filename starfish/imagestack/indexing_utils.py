@@ -3,7 +3,7 @@ from typing import Mapping, MutableMapping, Union
 import numpy as np
 import xarray as xr
 
-from starfish.types import Axes
+from starfish.types import Axes, Coordinates
 
 
 def convert_to_selector(
@@ -25,6 +25,32 @@ def convert_to_selector(
         else:
             return_dict[key.value] = value
     return return_dict
+
+
+def convert_coords_to_indices(array: xr.DataArray, indexers
+                              ) -> Mapping[Axes, Union[int, tuple]]:
+    if Coordinates.X in indexers:
+        if Axes.X in indexers:
+            raise KeyError("Cannot index by both pixel and physical value of X")
+        idx_x = find_nearest(array[Coordinates.X.value],
+                             indexers[Coordinates.X])
+        del indexers[Coordinates.X]
+        indexers[Axes.X] = idx_x
+    if Coordinates.Y in indexers:
+        if Axes.Y in indexers:
+            raise KeyError("Cannot index by both pixel and physical value of Y")
+        idx_y = find_nearest(array[Coordinates.Y.value],
+                             indexers[Coordinates.Y])
+        del indexers[Coordinates.Y]
+        indexers[Axes.Y] = idx_y
+    if Coordinates.Z in indexers:
+        if Axes.ZPLANE in indexers:
+            raise KeyError("Cannot index by both pixel and physical value of Z")
+        idx_z = find_nearest(array[Coordinates.Z.value],
+                             indexers[Coordinates.Z])
+        del indexers[Coordinates.Z]
+        indexers[Axes.ZPLANE] = idx_z
+    return indexers
 
 
 def index_keep_dimensions(data: xr.DataArray,

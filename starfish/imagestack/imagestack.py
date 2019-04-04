@@ -352,13 +352,13 @@ class ImageStack:
         """Retrieves the image data as an xarray.DataArray"""
         return self._data.data
 
-    def sel(self, indexers: Mapping[Axes, Union[int, tuple]]):
+    def sel(self, indexers: Mapping[Union[Axes, Coordinates], Union[int, tuple]]):
         """Given a dictionary mapping the index name to either a value or a range represented as a
         tuple, return an Imagestack with each dimension indexed accordingly
 
         Parameters
         ----------
-        indexers : Dict[Axes, (int/tuple)]
+        indexers : Dict[Union[Axes, Coordinates], (int/tuple)]
             A dictionary of dim:index where index is the value or range to index the dimension
 
         Examples
@@ -384,41 +384,10 @@ class ImageStack:
             a new image stack indexed by given value or range.
         """
         stack = deepcopy(self)
+        indexers = indexing_utils.convert_coords_to_indices(self.xarray, indexers)
         selector = indexing_utils.convert_to_selector(indexers)
         stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector)
         return stack
-
-    def sel_by_physical_coords(self, indexers: Mapping[Coordinates, Union[float, tuple]]):
-        """
-        Given a dictionary mapping the coordinate name to either a value or a range represented as a
-        tuple, return an Imagestack with each the Coordinate dimension indexed accordingly.
-
-        Parameters
-        ----------
-        indexers : Dict[Axes, (float/tuple)]:
-            A dictionary of coord:index where index is the value or range to index the coordinate
-            dimension.
-
-        Returns
-        -------
-         ImageStack :
-            a new image stack indexed by given value or range.
-        """
-        new_indexers = {}
-        for key, value in indexers.items():
-            if key == Coordinates.X:
-                idx_x = indexing_utils.find_nearest(self.xarray[Coordinates.X.value],
-                                                    indexers[Coordinates.X])
-                new_indexers[Axes.X] = idx_x
-            if key == Coordinates.Y:
-                idx_y = indexing_utils.find_nearest(self.xarray[Coordinates.Y.value],
-                                                    indexers[Coordinates.Y])
-                new_indexers[Axes.Y] = idx_y
-            if key == Coordinates.Z:
-                idx_z = indexing_utils.find_nearest(self.xarray[Coordinates.Z.value],
-                                                    indexers[Coordinates.Z])
-                new_indexers[Axes.ZPLANE] = idx_z
-        return self.sel(new_indexers)
 
     def get_slice(
             self,

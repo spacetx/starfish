@@ -1,7 +1,8 @@
 from collections import OrderedDict
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Axes
+from starfish.test import test_utils
+from starfish.types import Axes, PhysicalCoordinateTypes, Coordinates
 
 
 def test_imagestack_indexing():
@@ -66,3 +67,25 @@ def test_imagestack_indexing():
     expected_shape = OrderedDict([(Axes.ROUND, 1), (Axes.CH, 1),
                                   (Axes.ZPLANE, 1), (Axes.Y, 190), (Axes.X, 190)])
     assert indexed_stack.shape == expected_shape
+
+
+X_COORDS = 1, 2
+Y_COORDS = 4, 6
+Z_COORDS = 1, 3
+
+
+def test_sel_by_physical_coords():
+    stack_shape = OrderedDict([(Axes.ROUND, 3), (Axes.CH, 2),
+                               (Axes.ZPLANE, 1), (Axes.Y, 50), (Axes.X, 40)])
+
+    physical_coords = OrderedDict([(PhysicalCoordinateTypes.X_MIN, X_COORDS[0]),
+                                   (PhysicalCoordinateTypes.X_MAX, X_COORDS[1]),
+                                   (PhysicalCoordinateTypes.Y_MIN, Y_COORDS[0]),
+                                   (PhysicalCoordinateTypes.Y_MAX, Y_COORDS[1]),
+                                   (PhysicalCoordinateTypes.Z_MIN, Z_COORDS[0]),
+                                   (PhysicalCoordinateTypes.Z_MAX, Z_COORDS[1])])
+
+    stack = test_utils.imagestack_with_coords_factory(stack_shape, physical_coords)
+
+    stack.sel_by_physical_coords({Coordinates.X: (1.2, 1.5)})
+    assert stack

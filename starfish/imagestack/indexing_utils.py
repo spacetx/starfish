@@ -1,5 +1,6 @@
 from typing import Mapping, MutableMapping, Union
 
+import numpy as np
 import xarray as xr
 
 from starfish.types import Axes
@@ -26,8 +27,9 @@ def convert_to_selector(
     return return_dict
 
 
-def index_keep_dimensions(
-        data: xr.DataArray, indexers: Mapping[str, Union[int, slice]]) -> xr.DataArray:
+def index_keep_dimensions(data: xr.DataArray,
+                          indexers: Mapping[str, Union[int, slice]],
+                          ) -> xr.DataArray:
     """Takes an xarray and key to index it. Indexes then adds back in lost dimensions"""
     # store original dims
     original_dims = data.dims
@@ -39,3 +41,14 @@ def index_keep_dimensions(
     data = data.expand_dims(tuple(missing_dims))
     # Reorder to correct format
     return data.transpose(*original_dims)
+
+
+def find_nearest(array: xr.DataArray, value: Union[float, tuple]
+                 ) -> Union[int, tuple]:
+    array = np.asarray(array)
+    if isinstance(value, tuple):
+        idx1 = (np.abs(array - value[0])).argmin()
+        idx2 = (np.abs(array - value[1])).argmin()
+        return idx1, idx2
+    idx = (np.abs(array - value)).argmin()
+    return idx

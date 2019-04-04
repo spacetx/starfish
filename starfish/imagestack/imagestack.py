@@ -383,13 +383,24 @@ class ImageStack:
         ImageStack :
             a new image stack indexed by given value or range.
         """
-
-        # convert indexers to Dict[str, (int/slice)] format
-        # TODO shanaxel42 check if this can be changed to xarray.copy(deep=false)
         stack = deepcopy(self)
         selector = indexing_utils.convert_to_selector(indexers)
         stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector)
         return stack
+
+    def sel_by_physical_coords(self, indexers: Mapping[Coordinates, Union[float, tuple]]):
+        new_indexers = {}
+        for key, value in indexers.items():
+            if key == Coordinates.X:
+                idx_x = indexing_utils.find_nearest(self.xarray[Coordinates.X.value].values, indexers[Coordinates.X])
+                new_indexers[Axes.X] = idx_x
+            if key == Coordinates.Y:
+                idx_y = indexing_utils.find_nearest(self.xarray[Coordinates.Y.value], indexers[Coordinates.Y])
+                new_indexers[Axes.Y] = idx_y
+            if key == Coordinates.Z:
+                idx_z = indexing_utils.find_nearest(self.xarray[Coordinates.Z.value], indexers[Coordinates.Z])
+                new_indexers[Axes.ZPLANE] = idx_z
+        return self.sel(new_indexers)
 
     def get_slice(
             self,

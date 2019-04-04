@@ -1,7 +1,6 @@
 from abc import abstractmethod
 from typing import Callable, Sequence, Tuple, Type
 
-import click
 import numpy as np
 
 from starfish.codebook.codebook import Codebook
@@ -10,6 +9,7 @@ from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.types import Number
+from starfish.util import click
 from .combine_adjacent_features import ConnectedComponentDecodingResult
 
 

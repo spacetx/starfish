@@ -45,6 +45,23 @@ def index_keep_dimensions(data: xr.DataArray,
 
 def find_nearest(array: xr.DataArray, value: Union[float, tuple]
                  ) -> Union[int, tuple]:
+    """
+    Given an xarray and value or tuple range return the indices of the closest corresponding
+    value/values in the array.
+
+    Parameters
+    ----------
+    array: xr.DataArray
+        he array to do lookups in.
+
+    value:  Union[float, tuple]
+        The value or values to lookup.
+
+    Returns
+    -------
+    Union[int, tuple]:
+        The index or indicies of the entries closest to the given values in the array.
+    """
     array = np.asarray(array)
     if isinstance(value, tuple):
         idx1 = (np.abs(array - value[0])).argmin()

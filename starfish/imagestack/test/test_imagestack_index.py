@@ -1,8 +1,9 @@
 from collections import OrderedDict
 
+from starfish.imagestack import indexing_utils
 from starfish.imagestack.imagestack import ImageStack
 from starfish.test import test_utils
-from starfish.types import Axes, PhysicalCoordinateTypes, Coordinates
+from starfish.types import Axes, Coordinates, PhysicalCoordinateTypes
 
 
 def test_imagestack_indexing():
@@ -76,7 +77,7 @@ Z_COORDS = 1, 3
 
 def test_sel_by_physical_coords():
     stack_shape = OrderedDict([(Axes.ROUND, 3), (Axes.CH, 2),
-                               (Axes.ZPLANE, 1), (Axes.Y, 50), (Axes.X, 40)])
+                               (Axes.ZPLANE, 1), (Axes.Y, 10), (Axes.X, 10)])
 
     physical_coords = OrderedDict([(PhysicalCoordinateTypes.X_MIN, X_COORDS[0]),
                                    (PhysicalCoordinateTypes.X_MAX, X_COORDS[1]),
@@ -86,6 +87,26 @@ def test_sel_by_physical_coords():
                                    (PhysicalCoordinateTypes.Z_MAX, Z_COORDS[1])])
 
     stack = test_utils.imagestack_with_coords_factory(stack_shape, physical_coords)
+    # x_coords = [1. 1.11111111 1.22222222 1.33333333 1.44444444 1.55555556
+    #  1.66666667 1.77777778 1.88888889 2.]
+    assert indexing_utils.find_nearest(stack.xarray[Coordinates.X.value], 1.2) == 2
+    assert indexing_utils.find_nearest(stack.xarray[Coordinates.X.value], 1.5) == 4
+    assert indexing_utils.find_nearest(stack.xarray[Coordinates.X.value], (1.2, 1.5)) == (2, 4)
+    new_x_size = 4 - 2
 
-    stack.sel_by_physical_coords({Coordinates.X: (1.2, 1.5)})
-    assert stack
+    # y_coords = [4. 4.22222222 4.44444444 4.66666667 4.88888889 5.11111111
+    #  5.33333333 5.55555556 5.77777778 6. ]
+    assert indexing_utils.find_nearest(stack.xarray[Coordinates.Y.value], 4) == 0
+    assert indexing_utils.find_nearest(stack.xarray[Coordinates.Y.value], 5.1) == 5
+    assert indexing_utils.find_nearest(stack.xarray[Coordinates.Y.value], (4, 5.1)) == (0, 5)
+    new_y_size = 5 - 0
+
+    indexed_stack = stack.sel_by_physical_coords({Coordinates.X: (1.2, 1.5),
+                                                  Coordinates.Y: (4, 5.1)})
+    expected_shape = OrderedDict([(Axes.ROUND, 3), (Axes.CH, 2),
+                                  (Axes.ZPLANE, 1), (Axes.Y, new_y_size), (Axes.X, new_x_size)])
+    assert indexed_stack.shape == expected_shape
+
+    # assert values outside the range are given min/max of array
+    assert indexing_utils.find_nearest(stack.xarray[Coordinates.X.value], 5) == 9
+    assert indexing_utils.find_nearest(stack.xarray[Coordinates.X.value], -5) == 0

@@ -1,4 +1,7 @@
 """
+Format BaristaSeq
+=================
+
 This script contains TileFetchers and FetchedTile objects to convert data donated by the Zador lab
 to SpaceTx format. The locations of the data files for use with this script can be found in the
 docstring for `format_data`

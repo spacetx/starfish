@@ -1,3 +1,9 @@
+"""
+Format Imaging Cytof Data
+=========================
+
+The following script converts Imaging Cytof Data in SpaceTx-Format
+"""
 import json
 import os
 from typing import List, Mapping, Tuple, Union

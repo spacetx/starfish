@@ -228,6 +228,13 @@ napoleon_use_rtype = True
 autodoc_mock_imports = ['_tkinter']
 
 sphinx_gallery_conf = {
-    'examples_dirs': '_static/data_processing_examples',   # path to your example scripts
-    'gallery_dirs': 'usage/data_processing_examples',  # path to save gallery generated examples
+    'examples_dirs': [
+        '_static/data_processing_examples',
+        '_static/data_formatting_examples',
+    ],
+    'gallery_dirs': [
+        'usage/data_processing_examples',
+        'usage/data_formatting_examples',
+    ]
+
 }

@@ -1,3 +1,9 @@
+"""
+Format In Situ Sequencing Mouse x Human Experiment
+==================================================
+
+The following script formats ISS data of co-cultured mouse and human fibroblasts in SpaceTx-Format.
+"""
 import argparse
 import io
 import json

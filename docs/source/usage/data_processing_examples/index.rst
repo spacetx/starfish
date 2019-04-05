@@ -13,6 +13,26 @@ Below are some data processing examples.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="ISS Processing Workflow">
+
+.. only:: html
+
+    .. figure:: /usage/data_processing_examples/images/thumb/sphx_glr_iss_pipeline_thumb.png
+
+        :ref:`sphx_glr_usage_data_processing_examples_iss_pipeline.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /usage/data_processing_examples/iss_pipeline
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This notebook walks through a work flow that analyzes one field of view of a mouse gene panel f...">
 
 .. only:: html

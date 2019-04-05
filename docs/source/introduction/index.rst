@@ -10,11 +10,15 @@ with users and developers of image-based transcriptomics assays.
 What is *starfish*?
 -------------------
 
-**Starfish is a library for counting spots in image data**. To achieve this generality, starfish
-exposes a set of objects that allow it to work both for discrete assays where each spot represents
-a molecule, and for assays that build codes across many images. Starfish breaks up processing into
-fields of view that correspond to the data produced by a microscope at a single location on a
-microscope slide, and is
+**Starfish is a library for counting spots in image data**. It transforms potentially-multiplex
+imaging experiments over panoramic images broken up by microscope field of view into a table of
+spots (genes, proteins) localized in 3D, and can aggregate those localized spots into a cell x gene
+table by comparing the physical positions of spots and cells.
+
+To achieve this generality, starfish exposes a set of objects that allow it to work both for
+discrete assays where each spot represents a molecule, and for assays that build codes across many
+images. Starfish breaks up processing into fields of view that correspond to the data produced by a
+microscope at a single location on a microscope slide, and is
 able to process single fields of view for each of the below assays. To enable this generality
 across assays, starfish requires data be converted into SpaceTx-Format, a lightweight JSON wrapper
 around 2-dimensional TIFF images.

@@ -1,3 +1,9 @@
+"""
+Format In-Situ Sequencing Data
+==============================
+
+The following script formats In-Situ Sequencing data in SpaceTx-Format
+"""
 import argparse
 import os
 from typing import Mapping, Tuple, Union

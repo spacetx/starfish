@@ -1,3 +1,10 @@
+"""
+Format osmFISH Data
+===================
+
+The following script formats osmFISH data from primary human visual cortex in SpaceTx-Format.
+"""
+
 import functools
 import json
 import os

@@ -1,3 +1,9 @@
+"""
+Format MERFISH data
+===================
+
+The following script formats MERFISH data acquired from cultured U2-OS cells.
+"""
 import argparse
 import functools
 import os

@@ -1,5 +1,8 @@
 """
-The raw StarMap data received by SpaceTx is organized as z-stack TIFF files that contain all
+Format STARmap data
+===================
+
+The raw STARmap data received by SpaceTx is organized as z-stack TIFF files that contain all
 z-sections for each (round, channel) pair. This TileFetcher breaks these up into individual 2-d
 TIFF files, reformats the CSV codebook, and adds the necessary SpaceTx metadata.
 """

@@ -1,3 +1,9 @@
+"""
+Format SeqFISH Data
+===================
+
+The following script formats SeqFISH data in SpaceTx-Format
+"""
 import functools
 import os
 from typing import Mapping, Tuple, Union

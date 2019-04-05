@@ -1,3 +1,8 @@
+"""
+ISS Processing Workflow
+=======================
+
+"""
 import os
 
 import starfish

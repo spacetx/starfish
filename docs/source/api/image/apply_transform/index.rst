@@ -16,5 +16,5 @@ ApplyTransform can be imported using ``starfish.image.ApplyTransform``, the subc
 Warp
 -----
 
-.. autoclass:: starfish.image._apply_transform.warp.Warp
+.. autoclass:: starfish.image._registration._apply_transform.warp.Warp
    :members:

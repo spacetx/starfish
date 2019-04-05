@@ -2,7 +2,7 @@ import numpy as np
 from skimage.feature import register_translation
 from skimage.transform._geometric import SimilarityTransform
 
-from starfish.image._learn_transform.transforms_list import TransformsList
+from starfish.image._registration.transforms_list import TransformsList
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes, TransformType
 from starfish.util import click

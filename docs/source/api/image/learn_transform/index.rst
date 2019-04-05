@@ -16,5 +16,5 @@ LearnTransform can be imported using ``starfish.image.LearnTransform``, the subc
 Translation
 ------------
 
-.. autoclass:: starfish.image._learn_transform.translation.Translation
+.. autoclass:: starfish.image._registration._learn_transform.translation.Translation
    :members:

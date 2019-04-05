@@ -8,8 +8,8 @@ from skimage.transform._geometric import GeometricTransform
 from tqdm import tqdm
 
 from starfish.config import StarfishConfig
-from starfish.image._apply_transform._base import ApplyTransformBase
-from starfish.image._learn_transform.transforms_list import TransformsList
+from starfish.image._registration._apply_transform._base import ApplyTransformBase
+from starfish.image._registration.transforms_list import TransformsList
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
 from starfish.util import click

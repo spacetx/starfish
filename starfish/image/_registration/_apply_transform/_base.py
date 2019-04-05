@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Type
 
-from starfish.image._learn_transform.transforms_list import TransformsList
+from starfish.image._registration.transforms_list import TransformsList
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import PipelineComponent
 from starfish.pipeline.algorithmbase import AlgorithmBase

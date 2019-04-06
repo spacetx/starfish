@@ -12,10 +12,12 @@ stages:
 jobs:
   include:
     - name: Syntax and Fast Tests
+      if: type != cron
       script: make install-dev fast
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Slow Tests
+      if: type != cron
       script: make install-dev && make -j check-notebooks slow-test
       after_success:
         - bash <(curl -s https://codecov.io/bash)
@@ -48,10 +50,10 @@ jobs:
       script: make install-dev run__notebooks/py/SeqFISH.py
     - name: Released Notebooks
       if: type = cron and branch =~ /^(master|merge)/
-      script: make check_notebooks install-released-notebooks-support run_notebooks
+      script: make check-notebooks install-released-notebooks-support run-notebooks
     - name: Check Requirements
-      if: type = cron AND branch = /^master$/
-      script: make refresh_all_requirements check_requirements
+      if: type = cron and branch = /^master$/
+      script: make refresh-all-requirements check-requirements
 cache:
   directories:
   - $HOME/.cache/pip

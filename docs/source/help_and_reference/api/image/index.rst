@@ -8,10 +8,8 @@ Image Manipulation
    :caption: Contents:
 
 .. toctree::
-   filtering/index.rst
+   filtering/index
+   registration/index
+   segmentation/index
+   deconvolution/index
 
-.. toctree::
-   registration/index.rst
-
-.. toctree::
-   segmentation/index.rst

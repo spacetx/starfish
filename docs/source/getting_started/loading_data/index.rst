@@ -126,9 +126,13 @@ to enable the :code:`qt` environment in IPython:
     In[13]: starfish.display(image)
     Out[13]: <napari.components._viewer.model.Viewer at 0x15f7b44e0>
 
-Typing the above code should display an image viewer that looks something like this, which enables
-the user to scroll through the rounds and channels and change the minimum and maximum values on the
-colormap to visually filter the image by intensity. Later sections that deal with spot finding
+Typing the above code should display an image viewer that looks something like this:,
+
+#TODO ambrosejcarr annotate an image of the napari viewer.
+
+This viewer enables the user to scroll through the rounds and channels and change the minimum and
+maximum values on the colormap to visually filter the image by intensity. Later sections that deal
+with spot finding
 will demonstrate how :py:func:`starfish.display` can be used to visually inspect and refine the
 results of spot calling.
 

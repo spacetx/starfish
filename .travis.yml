@@ -46,6 +46,9 @@ jobs:
     - name: SeqFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: make install-dev run__notebooks/py/SeqFISH.py
+    - name: STARmap Notebook
+      if: type = push and branch =~ /^(master|merge)/
+      script: make install-dev run__notebooks/py/STARmap.py
     - name: Released Notebooks
       if: type = cron and branch =~ /^(master|merge)/
       script: make check_notebooks install-released-notebooks-support run_notebooks

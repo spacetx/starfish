@@ -112,3 +112,29 @@ def SeqFISH(use_test_data: bool=False):
         f"seqfish{suffix}/experiment.json"
     )
     return Experiment.from_json(url)
+
+
+def STARmap(use_test_data: bool=False):
+    """Loads a STARmap field of view generated from mouse primary visual cortext.
+
+    Parameters
+    ----------
+    use_test_data : bool
+        If true, return a small region of testing data that was visually determined to contain two
+        cells.
+
+    Notes
+    -----
+    starfish received stitched STARmap images. To make it compatible with starfish, we extracted a
+    single field of view with shape (r=6, c=4, z=29, y=1024, x=1024).
+
+    See Also
+    --------
+    Manuscript for STARmap: https://doi.org/10.1126/science.aat5691
+
+    """
+    url = (
+        "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20190309/"
+        "starmap/experiment.json"
+    )
+    return Experiment.from_json(url)

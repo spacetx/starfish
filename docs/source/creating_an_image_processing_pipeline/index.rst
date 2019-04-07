@@ -17,7 +17,9 @@ of the imaging system, or the optical characteristics of the tissue sample being
 might bias the resulting spot calling, decoding, or cell segmentation decisions. Not all parts of
 image processing are always needed; some are dependent on the specific characteristics of the
 tissues. In addition, not all components are always found in the same order. *Starfish* is flexible
-enough to omit some pipeline stages or disorder them, but the typical order is as follows:
+enough to omit some pipeline stages or disorder them, but the typical order might match the
+following. The links show how and when to use each component of *starfish*, and the final section
+demonstrates putting together a "pipeline recipe" and running it on an experiment.
 
 #TODO ask kevin to tell me if I've got these in the right order
 
@@ -26,13 +28,13 @@ Imaging Corrections
 
 These stages are typically specific to the microscope, camera, filters, chemistry, and any tissue
 handling or microfluidices that are involved in capturing the images. These steps are typically
-*independent* of the *Starfish* enables the user to design a pipeline that matches their imaging
-system
+*independent* of the assay. *Starfish* enables the user to design a pipeline that matches their
+imaging system
 
 .. toctree::
     :maxdepth: 1
 
-    image_correction/index
+    /usage/tutorials/exec_image_corrections.rst
 
 
 Basic Image Manipulations
@@ -45,7 +47,7 @@ image, as this produces a much faster processing routine.
 .. toctree::
     :maxdepth: 1
 
-    image_manipulations/index
+    tutorials/exec_image_manipulations.rst
 
 Tissue/Substrate-specific Corrections
 -------------------------------------
@@ -58,7 +60,7 @@ These approaches ameliorate these problems.
 .. toctree::
     :maxdepth: 1
 
-    tissue_specific_corrections/index
+    tutorials/exec_tissue_specific_corrections.rst
 
 Feature Identification and Assignment
 -------------------------------------
@@ -72,7 +74,17 @@ origin. At this point, it's trivial to create a cell x gene matrix.
 .. toctree::
     :maxdepth: 1
 
-    feature_identification_and_assignment/index
+    tutorials/exec_feature_identification_and_annotation.rst
+
+Putting Together a Pipeline Recipe and Running it
+-------------------------------------------------
+
+# TODO add blurb here.
+
+.. toctree::
+    :maxdepth: 1
+
+    tutorials/exec_running_a_pipeline.rst
 
 Old Content not to be deleted yet.
 ----------------------------------
@@ -81,5 +93,3 @@ Old Content not to be deleted yet.
 
 .. image:: /_static/design/pipeline-diagram.png
     :alt: pipeline diagram
-
-Add notes.

@@ -231,10 +231,12 @@ sphinx_gallery_conf = {
     'examples_dirs': [
         '_static/data_processing_examples',
         '_static/data_formatting_examples',
+        '_static/tutorials',
     ],
     'gallery_dirs': [
         'usage/data_processing_examples',
         'usage/data_formatting_examples',
-    ]
-
+        'creating_an_image_processing_pipeline/tutorials',
+    ],
+    'filename_pattern': '/exec_',
 }

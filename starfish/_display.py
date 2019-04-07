@@ -252,8 +252,8 @@ def display(
             warnings.warn(f"No spots passed provided intensity threshold of {mask_intensities}")
             return viewer
 
-        coords = coords[mask, :]
-        sizes = sizes[mask, :]
+        coords = coords[mask]
+        sizes = sizes[mask]
 
         # adjust z-size
         sizes[:, 4] *= z_multiplier

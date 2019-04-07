@@ -75,9 +75,6 @@ class TestWithMerfishData(CLITest, unittest.TestCase):
                 "--distance-threshold", "0.5176",
                 "--magnitude-threshold", "5e-5",
                 "--norm-order", "2",
-                "--crop-x", "0",
-                "--crop-y", "40",
-                "--crop-z", "40"
             ],
         )
 

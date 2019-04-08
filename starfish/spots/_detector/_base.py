@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Any, Callable, Sequence, Tuple, Type, Union
+from typing import Any, Callable, Optional, Sequence, Tuple, Type, Union
 
 import numpy as np
 import xarray as xr
@@ -22,20 +22,15 @@ class SpotFinder(PipelineComponent):
     @classmethod
     def _cli_run(cls, ctx, instance):
         output = ctx.obj["output"]
-        blobs_stack = ctx.obj["blobs_stack"]
         image_stack = ctx.obj["image_stack"]
-        ref_image = ctx.obj["reference_image_from_max_projection"]
-        if blobs_stack is not None:
-            blobs_stack = ImageStack.from_path_or_url(blobs_stack)  # type: ignore
-            mp = blobs_stack.max_proj(Axes.ROUND, Axes.CH)
-            mp_numpy = mp._squeezed_numpy(Axes.ROUND, Axes.CH)
-            intensities = instance.run(
-                image_stack,
-                blobs_image=mp_numpy,
-                reference_image_from_max_projection=ref_image,
-            )
-        else:
-            intensities = instance.run(image_stack)
+        blobs_stack = ctx.obj["blobs_stack"]
+        blobs_axes = ctx.obj["blobs_axes"]
+
+        intensities = instance.run(
+            image_stack,
+            blobs_stack,
+            blobs_axes,
+        )
 
         # When run() returns a tuple, we only save the intensities for now
         # TODO ambrosejcarr find a way to save arbitrary detector results
@@ -48,27 +43,31 @@ class SpotFinder(PipelineComponent):
     @click.option("-i", "--input", required=True, type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
     @click.option(
-        '--blobs-stack', default=None, required=False, help=(
-            'ImageStack that contains the blobs. Will be max-projected across imaging round '
-            'and channel to produce the blobs_image'
-        )
+        "--blobs-stack",
+        default=None,
+        required=False,
+        help="ImageStack that contains the blobs."
     )
     @click.option(
-        '--reference-image-from-max-projection', default=False, is_flag=True, help=(
-            'Construct a reference image by max projecting imaging rounds and channels. Spots '
-            'are found in this image and then measured across all images in the input stack.'
-        )
+        "--blobs-axis",
+        type=click.Choice([Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE.value]),
+        multiple=True,
+        required=False,
+        help="The axes that the blobs image will be maj-projected to produce the blobs_image"
     )
     @click.pass_context
-    def _cli(ctx, input, output, blobs_stack, reference_image_from_max_projection):
+    def _cli(ctx, input, output, blobs_stack, blobs_axis):
         """detect spots"""
         print('Detecting Spots ...')
+        _blobs_stack = None if blobs_stack is None else ImageStack.from_path_or_url(blobs_stack)
+        _blobs_axes = tuple(Axes(_blobs_axis) for _blobs_axis in blobs_axis)
+
         ctx.obj = dict(
             component=SpotFinder,
             image_stack=ImageStack.from_path_or_url(input),
             output=output,
-            blobs_stack=blobs_stack,
-            reference_image_from_max_projection=reference_image_from_max_projection,
+            blobs_stack=_blobs_stack,
+            blobs_axes=_blobs_axes,
         )
 
 
@@ -81,6 +80,8 @@ class SpotFinderAlgorithmBase(AlgorithmBase):
     def run(
             self,
             primary_image: ImageStack,
+            blobs_image: Optional[ImageStack] = None,
+            blobs_axes: Optional[Tuple[Axes, ...]] = None,
             *args,
     ) -> Union[IntensityTable, Tuple[IntensityTable, Any]]:
         """Finds spots in an ImageStack"""

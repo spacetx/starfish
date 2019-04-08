@@ -1,5 +1,6 @@
 from click import (
     argument,
+    Choice,
     command,
     Context,
     echo,

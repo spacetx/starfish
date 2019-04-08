@@ -81,13 +81,11 @@ def test_spot_detection_with_reference_image(
 
     def call_detect_spots(stack):
 
-        reference_image_mp = stack.max_proj(Axes.CH, Axes.ROUND)
-        reference_image_mp_numpy = reference_image_mp._squeezed_numpy(Axes.CH, Axes.ROUND)
-
         return detect_spots(
             data_stack=stack,
             spot_finding_method=spot_detector.image_to_spots,
-            reference_image=reference_image_mp_numpy,
+            reference_image=stack,
+            reference_image_max_projection_axes=(Axes.ROUND, Axes.CH),
             measurement_function=np.max,
             radius_is_gyration=radius_is_gyration,
             n_processes=1,
@@ -117,7 +115,8 @@ def test_spot_detection_with_reference_image_from_max_projection(
         return detect_spots(
             data_stack=stack,
             spot_finding_method=spot_detector.image_to_spots,
-            reference_image_from_max_projection=True,
+            reference_image=stack,
+            reference_image_max_projection_axes=(Axes.ROUND, Axes.CH),
             measurement_function=np.max,
             radius_is_gyration=radius_is_gyration,
             n_processes=1,

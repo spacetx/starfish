@@ -18,28 +18,30 @@ def test_fov():
 
 def test_nuclei_must_be_present():
     wrong_nuclei = validator.load_json(example)
-    wrong_nuclei['auxiliary_images'] = {'not_nuclei': 'nuclei.json'}
+    wrong_nuclei["auxiliary_images"] = {"not_nuclei": "nuclei.json"}
     with pytest.warns(UserWarning):
         assert not validator.validate_object(wrong_nuclei)
 
 
 def test_version_must_be_semantic():
     wrong_version = validator.load_json(example)
-    wrong_version['version'] = '10a'
+    wrong_version["version"] = "10a"
     with pytest.warns(UserWarning):
         assert not validator.validate_object(wrong_version)
 
 
 def test_dartfish_example_experiment():
     dartfish_example = resource_filename(
-        package_name, "spacetx_format/examples/experiment/dartfish_experiment.json")
+        package_name, "spacetx_format/examples/experiment/dartfish_experiment.json"
+    )
     assert validator.validate_file(dartfish_example)
 
 
 # see #614
 def test_no_manifest_example_experiment():
     no_manifest_example = resource_filename(
-        package_name, "spacetx_format/examples/experiment/no_fov_manifest.json")
+        package_name, "spacetx_format/examples/experiment/no_fov_manifest.json"
+    )
 
     # SpaceTxValidator doesn't handle multiple files so this passes
     assert validator.validate_file(no_manifest_example)

@@ -11,8 +11,7 @@ from .util import determine_axes_to_group_by
 
 
 class Clip(FilterAlgorithmBase):
-
-    def __init__(self, p_min: int=0, p_max: int=100, is_volume: bool=False) -> None:
+    def __init__(self, p_min: int = 0, p_max: int = 100, is_volume: bool = False) -> None:
         """Image clipping filter
 
         Parameters
@@ -59,12 +58,12 @@ class Clip(FilterAlgorithmBase):
         return image.clip(min=v_min, max=v_max)
 
     def run(
-            self,
-            stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose: bool = False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -89,17 +88,14 @@ class Clip(FilterAlgorithmBase):
         group_by = determine_axes_to_group_by(self.is_volume)
         clip = partial(self._clip, p_min=self.p_min, p_max=self.p_max)
         result = stack.apply(
-            clip,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            clip, group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
 
     @staticmethod
     @click.command("Clip")
-    @click.option(
-        "--p-min", default=0, type=int, help="clip intensities below this percentile")
-    @click.option(
-        "--p-max", default=100, type=int, help="clip intensities above this percentile")
+    @click.option("--p-min", default=0, type=int, help="clip intensities below this percentile")
+    @click.option("--p-max", default=100, type=int, help="clip intensities above this percentile")
     @click.pass_context
     def _cli(ctx, p_min, p_max):
         ctx.obj["component"]._cli_run(ctx, Clip(p_min, p_max))

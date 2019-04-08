@@ -7,19 +7,9 @@ from pstats import Stats
 import pkg_resources
 
 from starfish.experiment.builder.cli import build as build_cli
-from starfish.image import (
-    ApplyTransform,
-    Filter,
-    LearnTransform,
-    Segmentation,
-)
+from starfish.image import ApplyTransform, Filter, LearnTransform, Segmentation
 from starfish.spacetx_format.cli import validate as validate_cli
-from starfish.spots import (
-    Decoder,
-    PixelSpotDecoder,
-    SpotFinder,
-    TargetAssignment,
-)
+from starfish.spots import Decoder, PixelSpotDecoder, SpotFinder, TargetAssignment
 from starfish.util import click
 
 
@@ -39,6 +29,7 @@ def art_string():
     |___/\__\__,_|_|  |_| |_|___/_| |_|
 
     """
+
 
 @click.group()
 @click.option("--profile", is_flag=True)
@@ -61,7 +52,7 @@ def starfish(ctx, profile):
 
         def print_profile():
             stats = Stats(profiler)
-            stats.sort_stats('tottime').print_stats(PROFILER_LINES)
+            stats.sort_stats("tottime").print_stats(PROFILER_LINES)
 
         ctx.call_on_close(print_profile)
 
@@ -69,7 +60,10 @@ def starfish(ctx, profile):
 @starfish.command()
 def version():
     from starfish import __version__
+
     print(__version__)
+
+
 version.no_art = True  # type: ignore
 
 
@@ -80,16 +74,16 @@ def util():
     """
     pass
 
+
 @util.command()
 def install_strict_dependencies():
     """
     warning! updates different packages in your local installation
     """
     strict_requirements_file = pkg_resources.resource_filename(
-        "starfish", "REQUIREMENTS-STRICT.txt")
-    subprocess.check_call([
-        sys.executable, "-m", "pip", "install", "-r", strict_requirements_file
-    ])
+        "starfish", "REQUIREMENTS-STRICT.txt"
+    )
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", strict_requirements_file])
 
 
 # Pipelines

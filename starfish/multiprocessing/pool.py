@@ -8,11 +8,13 @@ class Pool:
     thread for debugging purposes """
 
     def __init__(
-            self,
-            processes: Optional[int]=None,
-            initializer: Optional[Callable]=None,
-            initargs: Optional[Iterable]=None,
-            *args, **kwargs):
+        self,
+        processes: Optional[int] = None,
+        initializer: Optional[Callable] = None,
+        initargs: Optional[Iterable] = None,
+        *args,
+        **kwargs
+    ):
         self.initializer = initializer
         self.initargs = initargs or []
         if processes == 1 or os.name == "nt":

@@ -12,7 +12,7 @@ from typing import (
     Optional,
     Sequence,
     Set,
-    Union
+    Union,
 )
 
 from semantic_version import Version
@@ -47,12 +47,9 @@ class FieldOfView:
         A set of all the image types.
     """
 
-    PRIMARY_IMAGES = 'primary'
+    PRIMARY_IMAGES = "primary"
 
-    def __init__(
-            self, name: str,
-            image_tilesets: MutableMapping[str, TileSet]
-    ) -> None:
+    def __init__(self, name: str, image_tilesets: MutableMapping[str, TileSet]) -> None:
         """
         Fields of views can obtain their primary image from either an ImageStack or a TileSet (but
         only one).  It can obtain their auxiliary image dictionary from either a dictionary of
@@ -71,10 +68,8 @@ class FieldOfView:
         self._images = image_tilesets
 
     def __repr__(self):
-        images = '\n    '.join(
-            f'{k}: {v}'
-            for k, v in self._images.items()
-            if k != FieldOfView.PRIMARY_IMAGES
+        images = "\n    ".join(
+            f"{k}: {v}" for k, v in self._images.items() if k != FieldOfView.PRIMARY_IMAGES
         )
         return (
             f"<starfish.FieldOfView>\n"
@@ -107,7 +102,7 @@ class FieldOfView:
         for name, groups in self.aligned_coordinate_groups.items():
             y_size = self._images[name].default_tile_shape[0]
             x_size = self._images[name].default_tile_shape[1]
-            info = '\n'.join(
+            info = "\n".join(
                 f" Group {k}: "
                 f" <starfish.ImageStack "
                 f"r={v._permitted_rounds if v._permitted_rounds else 1}, "
@@ -116,17 +111,20 @@ class FieldOfView:
                 f"(y, x)={y_size, x_size}>"
                 for k, v in enumerate(groups)
             )
-            all_groups[name] = f'{info}'
+            all_groups[name] = f"{info}"
         pprint.pprint(all_groups)
 
     def iterate_image_type(self, image_type: str) -> Iterator[ImageStack]:
         for aligned_group, _ in enumerate(self.aligned_coordinate_groups[image_type]):
             yield self.get_image(item=image_type, aligned_group=aligned_group)
 
-    def get_image(self, item: str, aligned_group: int = 0,
-                  x_slice: Optional[Union[int, slice]] = None,
-                  y_slice: Optional[Union[int, slice]] = None,
-                  ) -> ImageStack:
+    def get_image(
+        self,
+        item: str,
+        aligned_group: int = 0,
+        x_slice: Optional[Union[int, slice]] = None,
+        y_slice: Optional[Union[int, slice]] = None,
+    ) -> ImageStack:
         """
         Parameters
         ----------
@@ -177,13 +175,9 @@ class Experiment:
     extras : Dict
         Returns the extras dictionary associated with this experiment.
     """
+
     def __init__(
-            self,
-            fovs: Sequence[FieldOfView],
-            codebook: Codebook,
-            extras: dict,
-            *,
-            src_doc: dict=None,
+        self, fovs: Sequence[FieldOfView], codebook: Codebook, extras: dict, *, src_doc: dict = None
     ) -> None:
         self._fovs = fovs
         self._codebook = codebook
@@ -195,9 +189,7 @@ class Experiment:
         # truncate the list of fields of view if it is longer than print_n_fov
         print_n_fov = 4
         n_fields_of_view = list(self.items())[:print_n_fov]
-        fields_of_view_str = "\n".join(
-            f'{k}: {v}' for k, v in n_fields_of_view
-        )
+        fields_of_view_str = "\n".join(f"{k}: {v}" for k, v in n_fields_of_view)
 
         # add an ellipsis if not all fields of view are being printed
         if len(self._fovs) > print_n_fov:
@@ -238,24 +230,27 @@ class Experiment:
         with backend.read_contextmanager(name) as fh:
             experiment_document = json.load(fh)
 
-        version = cls.verify_version(experiment_document['version'])
+        version = cls.verify_version(experiment_document["version"])
 
-        _, codebook_name, codebook_baseurl = resolve_url(experiment_document['codebook'],
-                                                         baseurl, config.slicedimage)
+        _, codebook_name, codebook_baseurl = resolve_url(
+            experiment_document["codebook"], baseurl, config.slicedimage
+        )
         codebook_absolute_url = pathjoin(codebook_baseurl, codebook_name)
         codebook = Codebook.from_json(codebook_absolute_url)
 
-        extras = experiment_document['extras']
+        extras = experiment_document["extras"]
 
         fovs: MutableSequence[FieldOfView] = list()
         fov_tilesets: MutableMapping[str, TileSet]
         if version < Version("5.0.0"):
-            primary_image: Collection = Reader.parse_doc(experiment_document['primary_images'],
-                                                         baseurl, config.slicedimage)
+            primary_image: Collection = Reader.parse_doc(
+                experiment_document["primary_images"], baseurl, config.slicedimage
+            )
             auxiliary_images: MutableMapping[str, Collection] = dict()
-            for aux_image_type, aux_image_url in experiment_document['auxiliary_images'].items():
+            for aux_image_type, aux_image_url in experiment_document["auxiliary_images"].items():
                 auxiliary_images[aux_image_type] = Reader.parse_doc(
-                    aux_image_url, baseurl, config.slicedimage)
+                    aux_image_url, baseurl, config.slicedimage
+                )
 
             for fov_name, primary_tileset in primary_image.all_tilesets():
                 fov_tilesets = dict()
@@ -270,7 +265,7 @@ class Experiment:
         else:
             images: MutableMapping[str, Collection] = dict()
             all_fov_names: MutableSet[str] = set()
-            for image_type, image_url in experiment_document['images'].items():
+            for image_type, image_url in experiment_document["images"].items():
                 image = Reader.parse_doc(image_url, baseurl, config.slicedimage)
                 images[image_type] = image
                 for fov_name, _ in image.all_tilesets():
@@ -295,13 +290,14 @@ class Experiment:
             raise ValueError(
                 f"version {version} not supported.  This version of the starfish library only "
                 f"supports formats from {MIN_SUPPORTED_VERSION} to "
-                f"{MAX_SUPPORTED_VERSION}")
+                f"{MAX_SUPPORTED_VERSION}"
+            )
         return version
 
     def fov(
-            self,
-            filter_fn: Callable[[FieldOfView], bool]=lambda _: True,
-            key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
+        self,
+        filter_fn: Callable[[FieldOfView], bool] = lambda _: True,
+        key_fn: Callable[[FieldOfView], str] = lambda fov: fov.name,
     ) -> FieldOfView:
         """
         Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return the first
@@ -316,9 +312,9 @@ class Experiment:
         raise LookupError("Cannot find any FOV that the filter allows.")
 
     def fovs(
-            self,
-            filter_fn: Callable[[FieldOfView], bool]=lambda _: True,
-            key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
+        self,
+        filter_fn: Callable[[FieldOfView], bool] = lambda _: True,
+        key_fn: Callable[[FieldOfView], str] = lambda fov: fov.name,
     ) -> Sequence[FieldOfView]:
         """
         Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return a list of
@@ -335,9 +331,7 @@ class Experiment:
         return results
 
     def fovs_by_name(
-        self,
-        *names,
-        key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
+        self, *names, key_fn: Callable[[FieldOfView], str] = lambda fov: fov.name
     ) -> Sequence[FieldOfView]:
         """
         Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return a list of
@@ -349,7 +343,7 @@ class Experiment:
     def __getitem__(self, item):
         fovs = self.fovs_by_name(item)
         if len(fovs) == 0:
-            raise IndexError(f"No field of view with name \"{item}\"")
+            raise IndexError(f'No field of view with name "{item}"')
         return fovs[0]
 
     def keys(self):

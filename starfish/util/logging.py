@@ -31,9 +31,11 @@ def get_release_tag() -> str:
 
 @lru_cache(maxsize=1)
 def get_os_info() -> Mapping[str, str]:
-    return {"Platform": platform.system(),
-            "Version:": platform.version(),
-            "Python Version": platform.python_version()}
+    return {
+        "Platform": platform.system(),
+        "Version:": platform.version(),
+        "Python Version": platform.python_version(),
+    }
 
 
 class LogEncoder(JSONEncoder):
@@ -42,6 +44,7 @@ class LogEncoder(JSONEncoder):
     objects use default JSON encoding. For more complex objects
     (ex. Imagestack, Codebook) encode the repr of the object.
     """
+
     def default(self, o):
         try:
             return super(LogEncoder, self).default(o)

@@ -61,23 +61,22 @@ class SyntheticData:
     """
 
     def __init__(
-            self,
-            n_round: int=4,
-            n_ch: int=4,
-            n_z: int=10,
-            height: int=50,
-            width: int=45,
-            n_codes: int=16,
-            n_spots: int=20,
-            n_photons_background: int=1000,
-            background_electrons: int=1,
-            point_spread_function: Tuple[int, ...]=(4, 2, 2),
-            camera_detection_efficiency: float=0.25,
-            gray_level: float=37000.0 / 2 ** 16,
-            ad_conversion_bits: int=16,
-            mean_fluor_per_spot: int=200,
-            mean_photons_per_fluor: int=50,
-
+        self,
+        n_round: int = 4,
+        n_ch: int = 4,
+        n_z: int = 10,
+        height: int = 50,
+        width: int = 45,
+        n_codes: int = 16,
+        n_spots: int = 20,
+        n_photons_background: int = 1000,
+        background_electrons: int = 1,
+        point_spread_function: Tuple[int, ...] = (4, 2, 2),
+        camera_detection_efficiency: float = 0.25,
+        gray_level: float = 37000.0 / 2 ** 16,
+        ad_conversion_bits: int = 16,
+        mean_fluor_per_spot: int = 200,
+        mean_photons_per_fluor: int = 50,
     ) -> None:
         self.n_round = n_round
         self.n_ch = n_ch
@@ -102,8 +101,14 @@ class SyntheticData:
         if codebook is None:
             codebook = self.codebook()
         intensities = IntensityTable.synthetic_intensities(
-            codebook, self.n_z, self.height, self.width, self.n_spots,
-            self.mean_fluor_per_spot, self.mean_photons_per_fluor)
+            codebook,
+            self.n_z,
+            self.height,
+            self.width,
+            self.n_spots,
+            self.mean_fluor_per_spot,
+            self.mean_photons_per_fluor,
+        )
         assert intensities.dtype == np.float32 and intensities.max() <= 1
         return intensities
 
@@ -111,8 +116,16 @@ class SyntheticData:
         if intensities is None:
             intensities = self.intensities()
         stack = ImageStack.synthetic_spots(
-            intensities, self.n_z, self.height, self.width, self.n_photons_background,
-            self.point_spread_function, self.camera_detection_efficiency,
-            self.background_electrons, self.gray_level, self.ad_coversion_bits)
+            intensities,
+            self.n_z,
+            self.height,
+            self.width,
+            self.n_photons_background,
+            self.point_spread_function,
+            self.camera_detection_efficiency,
+            self.background_electrons,
+            self.gray_level,
+            self.ad_coversion_bits,
+        )
         assert stack.xarray.dtype == np.float32
         return stack

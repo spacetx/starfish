@@ -14,4 +14,4 @@ sys.path.append(os.path.join(ROOT_DIR, "docs", "source", "usage", "iss"))
 @pytest.mark.slow
 def test_iss_pipeline_in_docs():
     # Just importing the file and verifying it runs for now
-    __import__('iss_pipeline')
+    __import__("iss_pipeline")

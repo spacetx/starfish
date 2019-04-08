@@ -40,10 +40,7 @@ class CodebookParam(IndirectFile[Codebook]):
         self.name = "codebook"
 
     def get_conversion_recipes(self) -> Iterable[ConversionRecipe[Codebook]]:
-        return [
-            GetCodebookFromExperiment(),
-            GetCodebook(),
-        ]
+        return [GetCodebookFromExperiment(), GetCodebook()]
 
 
 CodebookParamType = CodebookParam()
@@ -54,10 +51,7 @@ class ImageStackParam(IndirectFile[ImageStack]):
         self.name = "imagestack"
 
     def get_conversion_recipes(self) -> Iterable[ConversionRecipe[ImageStack]]:
-        return [
-            GetImageStackFromExperiment(),
-            GetImageStack(),
-        ]
+        return [GetImageStackFromExperiment(), GetImageStack()]
 
 
 ImageStackParamType = ImageStackParam()

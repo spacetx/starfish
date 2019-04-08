@@ -23,11 +23,19 @@ from .detect import detect_spots
 # spot finder confusing. One would expect to have access to the private parameters
 # however, they are lost due to the memory-space forking induced by multi-processing.
 
+
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
     def __init__(
-        self, min_distance: int, stringency: int, min_obj_area: int, max_obj_area: int,
-        threshold: Optional[Number]=None, measurement_type: str='max',
-        min_num_spots_detected: int=3, is_volume: bool=False, verbose: bool=True
+        self,
+        min_distance: int,
+        stringency: int,
+        min_obj_area: int,
+        max_obj_area: int,
+        threshold: Optional[Number] = None,
+        measurement_type: str = "max",
+        min_num_spots_detected: int = 3,
+        is_volume: bool = False,
+        verbose: bool = True,
     ) -> None:
         """2-dimensional local-max peak finder that wraps skimage.feature.peak_local_max
 
@@ -102,7 +110,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
         if self.verbose and StarfishConfig().verbose:
             threshold_iter = tqdm(thresholds)
-            print('Determining optimal threshold ...')
+            print("Determining optimal threshold ...")
         else:
             threshold_iter = thresholds
 
@@ -115,15 +123,17 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
                 indices=True,
                 num_peaks=np.inf,
                 footprint=None,
-                labels=None
+                labels=None,
             )
 
             # stop spot finding when the number of detected spots falls below min_num_spots_detected
             if len(spots) <= self.min_num_spots_detected:
                 stop_threshold = threshold
                 if self.verbose:
-                    print(f'Stopping early at threshold={threshold}. Number of spots fell below: '
-                          f'{self.min_num_spots_detected}')
+                    print(
+                        f"Stopping early at threshold={threshold}. Number of spots fell below: "
+                        f"{self.min_num_spots_detected}"
+                    )
                 break
             else:
                 spot_counts.append(len(spots))
@@ -240,7 +250,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self._spot_props = regionprops(np.squeeze(self._labels))
 
         if self.verbose:
-            print('computing final spots ...')
+            print("computing final spots ...")
 
         self._spot_coords = peak_local_max(
             data_image,
@@ -250,30 +260,31 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             indices=True,
             num_peaks=np.inf,
             footprint=None,
-            labels=self._labels
+            labels=self._labels,
         )
 
         # TODO how to get the radius? unlikely that this can be pulled out of
         # self._spot_props, since the last call to peak_local_max can find multiple
         # peaks per label
-        res = {Axes.X.value: self._spot_coords[:, 2],
-               Axes.Y.value: self._spot_coords[:, 1],
-               Axes.ZPLANE.value: self._spot_coords[:, 0],
-               Features.SPOT_RADIUS: 1,
-               Features.SPOT_ID: np.arange(self._spot_coords.shape[0]),
-               Features.INTENSITY: data_image[self._spot_coords[:, 0],
-                                              self._spot_coords[:, 1],
-                                              self._spot_coords[:, 2]]
-               }
+        res = {
+            Axes.X.value: self._spot_coords[:, 2],
+            Axes.Y.value: self._spot_coords[:, 1],
+            Axes.ZPLANE.value: self._spot_coords[:, 0],
+            Features.SPOT_RADIUS: 1,
+            Features.SPOT_ID: np.arange(self._spot_coords.shape[0]),
+            Features.INTENSITY: data_image[
+                self._spot_coords[:, 0], self._spot_coords[:, 1], self._spot_coords[:, 2]
+            ],
+        }
 
         return SpotAttributes(pd.DataFrame(res))
 
     def run(
-            self,
-            data_stack: ImageStack,
-            blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
-            reference_image_from_max_projection: bool = False,
-            *args,
+        self,
+        data_stack: ImageStack,
+        blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
+        reference_image_from_max_projection: bool = False,
+        *args,
     ) -> IntensityTable:
         """Find spots.
 
@@ -300,44 +311,75 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
             reference_image=blobs_image,
             reference_image_from_max_projection=reference_image_from_max_projection,
             measurement_function=self.measurement_function,
-            radius_is_gyration=False)
+            radius_is_gyration=False,
+        )
 
         return intensity_table
 
     @staticmethod
     @click.command("LocalMaxPeakFinder")
     @click.option(
-        "--min-distance", default=4, type=int,
-        help="Minimum spot size (in number of pixels deviation)")
+        "--min-distance",
+        default=4,
+        type=int,
+        help="Minimum spot size (in number of pixels deviation)",
+    )
     @click.option(
-        "--min-obj-area", default=6, type=int,
-        help="Maximum spot size (in number of pixels")
+        "--min-obj-area", default=6, type=int, help="Maximum spot size (in number of pixels"
+    )
     @click.option(
-        "--max_obj_area", default=300, type=int,
-        help="Maximum spot size (in number of pixels)")
+        "--max_obj_area", default=300, type=int, help="Maximum spot size (in number of pixels)"
+    )
     @click.option(
-        "--stringency", default=0, type=int,
+        "--stringency",
+        default=0,
+        type=int,
         help="Number of indices in threshold list to look past "
-             "for the threhsold finding algorithm")
+        "for the threhsold finding algorithm",
+    )
     @click.option(
-        "--threshold", default=None, type=float,
-        help="Threshold on which to threshold "
-             "image prior to spot detection")
+        "--threshold",
+        default=None,
+        type=float,
+        help="Threshold on which to threshold " "image prior to spot detection",
+    )
     @click.option(
-        "--min-num-spots-detected", default=3, type=int,
+        "--min-num-spots-detected",
+        default=3,
+        type=int,
         help="Minimum number of spots detected at which to stop a"
-             "utomatic thresholding algorithm")
+        "utomatic thresholding algorithm",
+    )
     @click.option(
-        "--measurement-type", default='max', type=str,
-        help="How to aggregate pixel intensities in a spot")
-    @click.option(
-        "--is-volume", default=False, help="Find spots in 3D or not")
-    @click.option(
-        "--verbose", default=True, help="Verbosity flag")
+        "--measurement-type",
+        default="max",
+        type=str,
+        help="How to aggregate pixel intensities in a spot",
+    )
+    @click.option("--is-volume", default=False, help="Find spots in 3D or not")
+    @click.option("--verbose", default=True, help="Verbosity flag")
     @click.pass_context
-    def _cli(ctx, min_distance, min_obj_area, max_obj_area, stringency, threshold,
-             min_num_spots_detected, measurement_type, is_volume, verbose):
-        instance = LocalMaxPeakFinder(min_distance, min_obj_area, max_obj_area,
-                                      stringency, threshold,
-                                      min_num_spots_detected, measurement_type, is_volume, verbose)
+    def _cli(
+        ctx,
+        min_distance,
+        min_obj_area,
+        max_obj_area,
+        stringency,
+        threshold,
+        min_num_spots_detected,
+        measurement_type,
+        is_volume,
+        verbose,
+    ):
+        instance = LocalMaxPeakFinder(
+            min_distance,
+            min_obj_area,
+            max_obj_area,
+            stringency,
+            threshold,
+            min_num_spots_detected,
+            measurement_type,
+            is_volume,
+            verbose,
+        )
         ctx.obj["component"]._cli_run(ctx, instance)

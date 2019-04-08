@@ -10,14 +10,14 @@ from starfish import Codebook, IntensityTable
 from starfish.types import Axes, Features, SpotAttributes
 
 
-def intensity_table_factory(data: np.ndarray=np.array([[[0, 3], [4, 0]]])) -> IntensityTable:
+def intensity_table_factory(data: np.ndarray = np.array([[[0, 3], [4, 0]]])) -> IntensityTable:
     """IntensityTable with a single feature that was measured over 2 channels and 2 rounds."""
 
     # generates spot attributes equal in size to the number of passed features.
     # each attribute has coordinates (z, y, x) equal to the feature index, and radius 1.
     spot_attributes_data = pd.DataFrame(
         data=np.array([[i, i, i, 1] for i in np.arange(data.shape[0])]),
-        columns=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
+        columns=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS],
     )
 
     spot_attributes = SpotAttributes(spot_attributes_data)
@@ -34,16 +34,16 @@ def codebook_factory() -> Codebook:
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 0, Axes.CH.value: 1, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1},
             ],
-            Features.TARGET: 'GENE_A'
+            Features.TARGET: "GENE_A",
         },
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 0, Axes.CH.value: 1, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1},
             ],
-            Features.TARGET: 'GENE_B'
+            Features.TARGET: "GENE_B",
         },
     ]
     return Codebook.from_code_array(codebook_array)
@@ -54,10 +54,7 @@ def test_intensity_tables_with_different_nubmers_of_codes_or_channels_throw_valu
     The test passes a 3-round and 1-round IntensityTable to a 2-round codebook. Both should
     raise a ValueError.
     """
-    data = np.array(
-        [[[4, 3, 1],
-          [4, 0, 2]]]
-    )
+    data = np.array([[[4, 3, 1], [4, 0, 2]]])
     codebook = codebook_factory()
     intensities = intensity_table_factory(data)
     with pytest.raises(ValueError):
@@ -74,7 +71,7 @@ def test_example_intensity_decodes_to_gene_a():
 
     decoded_intensities = codebook.decode_per_round_max(intensities)
 
-    assert decoded_intensities[Features.TARGET] == 'GENE_A'
+    assert decoded_intensities[Features.TARGET] == "GENE_A"
     assert np.array_equal(decoded_intensities[Features.PASSES_THRESHOLDS], [True])
     assert np.array_equal(decoded_intensities[Features.DISTANCE], [0])
 
@@ -94,7 +91,7 @@ def test_example_intensity_that_has_no_match_is_assigned_nan():
     assert decoded_intensities.sizes[Features.AXIS] == 1
 
     # assert that the feature did not decode
-    assert decoded_intensities[Features.TARGET] == 'nan'
+    assert decoded_intensities[Features.TARGET] == "nan"
     assert np.array_equal(decoded_intensities[Features.PASSES_THRESHOLDS], [False])
 
     # distance is calculated as the fraction of signal NOT in the selected channel. Here all of
@@ -137,13 +134,13 @@ def test_argmax_selects_the_last_equal_intensity_channel_and_decodes_consistentl
     """
 
     data = np.array(
-        [[[4, 3],  # this code is decoded "wrong"
-          [4, 0]],
-         [[0, 3],  # this code is decoded "right"
-          [4, 3]]]
+        [
+            [[4, 3], [4, 0]],  # this code is decoded "wrong"
+            [[0, 3], [4, 3]],  # this code is decoded "right"
+        ]
     )
     intensities = intensity_table_factory(data)
     codebook = codebook_factory()
 
     decoded_intensities = codebook.decode_per_round_max(intensities)
-    assert np.array_equal(decoded_intensities[Features.TARGET].values, ['nan', 'GENE_A'])
+    assert np.array_equal(decoded_intensities[Features.TARGET].values, ["nan", "GENE_A"])

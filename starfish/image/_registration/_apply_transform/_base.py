@@ -12,7 +12,6 @@ COMPONENT_NAME = "apply_transform"
 
 
 class ApplyTransform(PipelineComponent):
-
     @classmethod
     def pipeline_component_type_name(cls) -> str:
         return COMPONENT_NAME
@@ -29,8 +28,12 @@ class ApplyTransform(PipelineComponent):
     @click.group(COMPONENT_NAME)
     @click.option("-i", "--input", type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
-    @click.option("--transformation-list", required=True, type=click.Path(exists=True),
-                  help="The list of transformations to apply to the ImageStack.")
+    @click.option(
+        "--transformation-list",
+        required=True,
+        type=click.Path(exists=True),
+        help="The list of transformations to apply to the ImageStack.",
+    )
     @click.pass_context
     def _cli(ctx, input, output, transformation_list):
         print("Applying Transform to images...")
@@ -39,7 +42,7 @@ class ApplyTransform(PipelineComponent):
             input=input,
             output=output,
             stack=ImageStack.from_path_or_url(input),
-            transformation_list=TransformsList.from_json(transformation_list)
+            transformation_list=TransformsList.from_json(transformation_list),
         )
 
 

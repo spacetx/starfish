@@ -3,6 +3,7 @@ from packaging import version
 
 if version.parse(skimage.__version__) > version.parse("0.14.2"):
     import skimage.transform
+
     match_histograms = skimage.transform.match_histograms
 else:
 
@@ -47,7 +48,8 @@ else:
         its values matches the cumulative density function of the template.
         """
         src_values, src_unique_indices, src_counts = np.unique(
-            source.ravel(), return_inverse=True, return_counts=True)
+            source.ravel(), return_inverse=True, return_counts=True
+        )
         tmpl_values, tmpl_counts = np.unique(template.ravel(), return_counts=True)
 
         # calculate normalized quantiles for each array
@@ -83,25 +85,29 @@ else:
         .. [1] http://paulbourke.net/miscellaneous/equalisation/
         """
         if image.ndim != reference.ndim:
-            raise ValueError('Image and reference must have the same number of channels.')
+            raise ValueError("Image and reference must have the same number of channels.")
 
         if multichannel:
             if image.shape[-1] != reference.shape[-1]:
-                raise ValueError('Number of channels in the input image and reference '
-                                 'image must match!')
+                raise ValueError(
+                    "Number of channels in the input image and reference " "image must match!"
+                )
 
             matched = np.empty(image.shape, dtype=image.dtype)
             for channel in range(image.shape[-1]):
                 matched_channel = _match_cumulative_cdf(
-                    image[..., channel], reference[..., channel])
+                    image[..., channel], reference[..., channel]
+                )
                 matched[..., channel] = matched_channel
         else:
             matched = _match_cumulative_cdf(image, reference)
 
         return matched
 
+
 if version.parse(skimage.__version__) > version.parse("0.14.2"):
     import skimage.feature
+
     blob_log = skimage.feature.blob_log
     blob_dog = skimage.feature.blob_dog
 else:
@@ -111,8 +117,16 @@ else:
     from skimage import img_as_float
     from skimage.feature import peak_local_max
 
-    def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
-                 overlap=.5, *, exclude_border=False):
+    def blob_dog(
+        image,
+        min_sigma=1,
+        max_sigma=50,
+        sigma_ratio=1.6,
+        threshold=2.0,
+        overlap=0.5,
+        *,
+        exclude_border=False
+    ):
         r"""Finds blobs in the given grayscale image.
         Blobs are found using the Difference of Gaussian (DoG) method [1]_.
         For each blob found, the method returns its coordinates and the standard
@@ -213,23 +227,26 @@ else:
         k = int(np.mean(np.log(max_sigma / min_sigma) / np.log(sigma_ratio) + 1))
 
         # a geometric progression of standard deviations for gaussian kernels
-        sigma_list = np.array([min_sigma * (sigma_ratio ** i)
-                              for i in range(k + 1)])
+        sigma_list = np.array([min_sigma * (sigma_ratio ** i) for i in range(k + 1)])
 
         gaussian_images = [gaussian_filter(image, s) for s in sigma_list]
 
         # computing difference between two successive Gaussian blurred images
         # multiplying with average standard deviation provides scale invariance
-        dog_images = [(gaussian_images[i] - gaussian_images[i + 1])
-                      * np.mean(sigma_list[i]) for i in range(k)]
+        dog_images = [
+            (gaussian_images[i] - gaussian_images[i + 1]) * np.mean(sigma_list[i]) for i in range(k)
+        ]
 
         image_cube = np.stack(dog_images, axis=-1)
 
         # local_maxima = get_local_maxima(image_cube, threshold)
-        local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
-                                      footprint=np.ones((3,) * (image.ndim + 1)),
-                                      threshold_rel=0.0,
-                                      exclude_border=exclude_border)
+        local_maxima = peak_local_max(
+            image_cube,
+            threshold_abs=threshold,
+            footprint=np.ones((3,) * (image.ndim + 1)),
+            threshold_rel=0.0,
+            exclude_border=exclude_border,
+        )
         # Catch no peaks
         if local_maxima.size == 0:
             return np.empty((0, 3))
@@ -250,8 +267,17 @@ else:
 
         return _prune_blobs(lm, overlap)
 
-    def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
-                 overlap=.5, log_scale=False, *, exclude_border=False):
+    def blob_log(
+        image,
+        min_sigma=1,
+        max_sigma=50,
+        num_sigma=10,
+        threshold=0.2,
+        overlap=0.5,
+        log_scale=False,
+        *,
+        exclude_border=False
+    ):
         r"""Finds blobs in the given grayscale image.
         Blobs are found using the Laplacian of Gaussian (LoG) method [1]_.
         For each blob found, the method returns its coordinates and the standard
@@ -333,9 +359,7 @@ else:
         image = img_as_float(image)
 
         # if both min and max sigma are scalar, function returns only one sigma
-        scalar_sigma = (
-            True if np.isscalar(max_sigma) and np.isscalar(min_sigma) else False
-        )
+        scalar_sigma = True if np.isscalar(max_sigma) and np.isscalar(min_sigma) else False
 
         # Gaussian filter requires that sequence-type sigmas have same
         # dimensionality as image. This broadcasts scalar kernels
@@ -350,8 +374,7 @@ else:
 
         if log_scale:
             start, stop = np.log10(min_sigma)[:, None], np.log10(max_sigma)[:, None]
-            space = np.concatenate(
-                [start, stop, np.full_like(start, num_sigma)], axis=1)
+            space = np.concatenate([start, stop, np.full_like(start, num_sigma)], axis=1)
             sigma_list = np.stack([np.logspace(*s) for s in space], axis=1)
         else:
             scale = np.linspace(0, 1, num_sigma)[:, None]
@@ -359,15 +382,17 @@ else:
 
         # computing gaussian laplace
         # average s**2 provides scale invariance
-        gl_images = [-gaussian_laplace(image, s) * s ** 2
-                     for s in np.mean(sigma_list, axis=1)]
+        gl_images = [-gaussian_laplace(image, s) * s ** 2 for s in np.mean(sigma_list, axis=1)]
 
         image_cube = np.stack(gl_images, axis=-1)
 
-        local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
-                                      footprint=np.ones((3,) * (image.ndim + 1)),
-                                      threshold_rel=0.0,
-                                      exclude_border=exclude_border)
+        local_maxima = peak_local_max(
+            image_cube,
+            threshold_abs=threshold,
+            footprint=np.ones((3,) * (image.ndim + 1)),
+            threshold_rel=0.0,
+            exclude_border=exclude_border,
+        )
 
         # Catch no peaks
         if local_maxima.size == 0:

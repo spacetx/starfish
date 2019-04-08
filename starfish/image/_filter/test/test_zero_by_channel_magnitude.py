@@ -3,6 +3,7 @@ import numpy as np
 from starfish import ImageStack
 from starfish.image._filter.zero_by_channel_magnitude import ZeroByChannelMagnitude
 
+
 def create_imagestack_with_magnitude_scale():
     """create an imagestack with increasing magnitudes"""
     data = np.linspace(0, 1, 11, dtype=np.float32)

@@ -27,13 +27,7 @@ import skimage.io
 import xarray as xr
 from scipy.ndimage.filters import gaussian_filter
 from skimage import img_as_float32, img_as_uint
-from slicedimage import (
-    ImageFormat,
-    Reader,
-    Tile,
-    TileSet,
-    Writer,
-)
+from slicedimage import ImageFormat, Reader, Tile, TileSet, Writer
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
@@ -48,14 +42,7 @@ from starfish.imagestack.parser.tileset import TileSetData
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.multiprocessing.pool import Pool
 from starfish.multiprocessing.shmem import SharedMemory
-from starfish.types import (
-    Axes,
-    Clip,
-    Coordinates,
-    LOG,
-    Number,
-    STARFISH_EXTRAS_KEY
-)
+from starfish.types import Axes, Clip, Coordinates, LOG, Number, STARFISH_EXTRAS_KEY
 from starfish.util import logging
 from starfish.util.dtype import preserve_float_range
 from ._mp_dataarray import MPDataArray
@@ -106,10 +93,7 @@ class ImageStack:
         save the (potentially modified) image tensor to disk
     """
 
-    def __init__(
-            self,
-            tile_data: TileCollectionData,
-    ) -> None:
+    def __init__(self, tile_data: TileCollectionData) -> None:
         axes_sizes = {
             Axes.ROUND: len(set(tilekey.round for tilekey in tile_data.keys())),
             Axes.CH: len(set(tilekey.ch for tilekey in tile_data.keys())),
@@ -138,13 +122,13 @@ class ImageStack:
                     break
 
             if size_for_axis is None or dim_for_axis is None:
-                raise ValueError(
-                    f"Could not find entry for the {ix}th axis in AXES_DATA")
+                raise ValueError(f"Could not find entry for the {ix}th axis in AXES_DATA")
 
             data_shape.append(size_for_axis)
             data_dimensions.append(dim_for_axis.value)
             data_tick_marks[dim_for_axis.value] = list(
-                sorted(set(tilekey[dim_for_axis] for tilekey in self._tile_data.keys())))
+                sorted(set(tilekey[dim_for_axis] for tilekey in self._tile_data.keys()))
+            )
 
         data_shape.extend([tile_data.tile_shape[Axes.Y], tile_data.tile_shape[Axes.X]])
         data_dimensions.extend([Axes.Y.value, Axes.X.value])
@@ -160,48 +144,63 @@ class ImageStack:
 
         all_selectors = list(self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}))
         first_selector = all_selectors[0]
-        tile = tile_data.get_tile(r=first_selector[Axes.ROUND],
-                                  ch=first_selector[Axes.CH],
-                                  z=first_selector[Axes.ZPLANE])
+        tile = tile_data.get_tile(
+            r=first_selector[Axes.ROUND], ch=first_selector[Axes.CH], z=first_selector[Axes.ZPLANE]
+        )
 
         # Set up coordinates
         self._data[Coordinates.X.value] = xr.DataArray(
-            np.linspace(tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
-                        self.xarray.sizes[Axes.X.value]), dims=Axes.X.value)
+            np.linspace(
+                tile.coordinates[Coordinates.X][0],
+                tile.coordinates[Coordinates.X][1],
+                self.xarray.sizes[Axes.X.value],
+            ),
+            dims=Axes.X.value,
+        )
         self._data[Coordinates.Y.value] = xr.DataArray(
-            np.linspace(tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
-                        self.xarray.sizes[Axes.Y.value]), dims=Axes.Y.value)
+            np.linspace(
+                tile.coordinates[Coordinates.Y][0],
+                tile.coordinates[Coordinates.Y][1],
+                self.xarray.sizes[Axes.Y.value],
+            ),
+            dims=Axes.Y.value,
+        )
         if Coordinates.Z in tile.coordinates:
             # Fill with zeros for now, then replace with calculated midpoints
-            self._data[Coordinates.Z.value] = xr.DataArray(np.zeros(
-                self.xarray.sizes[Axes.ZPLANE.value]),
-                dims=Axes.ZPLANE.value)
+            self._data[Coordinates.Z.value] = xr.DataArray(
+                np.zeros(self.xarray.sizes[Axes.ZPLANE.value]), dims=Axes.ZPLANE.value
+            )
 
         # Get coords on first tile, then verify all subsequent tiles are aligned
         starting_coords = [
-            tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
-            tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
+            tile.coordinates[Coordinates.X][0],
+            tile.coordinates[Coordinates.X][1],
+            tile.coordinates[Coordinates.Y][0],
+            tile.coordinates[Coordinates.Y][1],
         ]
 
         for selector in tqdm(all_selectors):
             tile = tile_data.get_tile(
-                r=selector[Axes.ROUND], ch=selector[Axes.CH], z=selector[Axes.ZPLANE])
+                r=selector[Axes.ROUND], ch=selector[Axes.CH], z=selector[Axes.ZPLANE]
+            )
 
             data = img_as_float32(tile.numpy_array)
             self.set_slice(selector=selector, data=data)
 
             coordinates_values = [
-                tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
-                tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
+                tile.coordinates[Coordinates.X][0],
+                tile.coordinates[Coordinates.X][1],
+                tile.coordinates[Coordinates.Y][0],
+                tile.coordinates[Coordinates.Y][1],
             ]
             if starting_coords != coordinates_values:
-                raise ValueError(
-                    f"Tiles must be aligned")
+                raise ValueError(f"Tiles must be aligned")
             if Coordinates.Z in tile.coordinates:
                 z_range = (tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1])
                 # Use mid-point of the z range for a tile for the z-coordinate
-                self._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = \
-                    physical_coordinate_calculator.get_physical_coordinates_of_z_plane(z_range)
+                self._data[Coordinates.Z.value].loc[
+                    selector[Axes.ZPLANE]
+                ] = physical_coordinate_calculator.get_physical_coordinates_of_z_plane(z_range)
 
     @staticmethod
     def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
@@ -218,14 +217,12 @@ class ImageStack:
             )
 
     def __repr__(self):
-        shape = ', '.join(f'{k}: {v}' for k, v in self._data.sizes.items())
+        shape = ", ".join(f"{k}: {v}" for k, v in self._data.sizes.items())
         return f"<starfish.ImageStack ({shape})>"
 
     @classmethod
     def from_tileset(
-            cls,
-            tileset: TileSet,
-            crop_parameters: Optional[CropParameters]=None,
+        cls, tileset: TileSet, crop_parameters: Optional[CropParameters] = None
     ) -> "ImageStack":
         """
         Parse a :py:class:`slicedimage.TileSet` into an ImageStack.
@@ -293,16 +290,17 @@ class ImageStack:
             tileset is unaligned. Default 0 (the first group)
         """
         config = StarfishConfig()
-        _, relativeurl, baseurl = resolve_path_or_url(url_or_path,
-                                                      backend_config=config.slicedimage)
+        _, relativeurl, baseurl = resolve_path_or_url(
+            url_or_path, backend_config=config.slicedimage
+        )
         return cls.from_url(relativeurl, baseurl, aligned_group)
 
     @classmethod
     def from_numpy_array(
-            cls,
-            array: np.ndarray,
-            index_labels: Optional[Mapping[Axes, Sequence[int]]]=None,
-            coordinates: Optional[xr.DataArray]=None,
+        cls,
+        array: np.ndarray,
+        index_labels: Optional[Mapping[Axes, Sequence[int]]] = None,
+        coordinates: Optional[xr.DataArray] = None,
     ) -> "ImageStack":
         """Create an ImageStack from a 5d numpy array with shape (n_round, n_ch, n_z, y, x)
 
@@ -324,7 +322,7 @@ class ImageStack:
 
         """
         if len(array.shape) != 5:
-            raise ValueError('a 5-d tensor with shape (n_round, n_ch, n_z, y, x) must be provided.')
+            raise ValueError("a 5-d tensor with shape (n_round, n_ch, n_z, y, x) must be provided.")
         try:
             cls._validate_data_dtype_and_range(array)
         except TypeError:
@@ -392,8 +390,7 @@ class ImageStack:
         return stack
 
     def get_slice(
-            self,
-            selector: Mapping[Axes, Union[int, slice]]
+        self, selector: Mapping[Axes, Union[int, slice]]
     ) -> Tuple[np.ndarray, Sequence[Axes]]:
         """
         Given a dictionary mapping the index name to either a value or a slice range, return a
@@ -456,15 +453,17 @@ class ImageStack:
                 f"Non-float32 dtype: {result.dtype} detected. Data has likely been set using "
                 f"private attributes of ImageStack. ImageStack only supports float data in the "
                 f"range [0, 1]. Many algorithms will not function properly if provided other "
-                f"DataTypes. See: http://scikit-image.org/docs/dev/user_guide/data_types.html")
+                f"DataTypes. See: http://scikit-image.org/docs/dev/user_guide/data_types.html"
+            )
 
         return result, axes
 
     def set_slice(
-            self,
-            selector: Mapping[Axes, Union[int, slice]],
-            data: np.ndarray,
-            axes: Optional[Sequence[Axes]]=None):
+        self,
+        selector: Mapping[Axes, Union[int, slice]],
+        data: np.ndarray,
+        axes: Optional[Sequence[Axes]] = None,
+    ):
         """
         Given a dictionary mapping the index name to either a value or a slice range and a source
         numpy array, set the slice of the array of this ImageStack to the values in the source
@@ -545,7 +544,8 @@ class ImageStack:
             axes = list()
         if len(axes) != len(data.shape) - 2:
             raise ValueError(
-                "data shape ({}) should be the axes ({}) and (Y,X).".format(data.shape, axes))
+                "data shape ({}) should be the axes ({}) and (Y,X).".format(data.shape, axes)
+            )
         move_src = list()
         move_dst = list()
         for src_idx, axis in enumerate(axes):
@@ -553,7 +553,8 @@ class ImageStack:
                 dst_idx = expected_axes.index(axis)
             except ValueError:
                 raise ValueError(
-                    "Unexpected axis {}.  Expecting only {}.".format(axis, expected_axes))
+                    "Unexpected axis {}.  Expecting only {}.".format(axis, expected_axes)
+                )
             if src_idx != dst_idx:
                 move_src.append(src_idx)
                 move_dst.append(dst_idx)
@@ -562,18 +563,20 @@ class ImageStack:
             data = np.moveaxis(data, move_src, move_dst)
 
         if self._data.loc[slice_list].shape != data.shape:
-            raise ValueError("source shape {} mismatches destination shape {}".format(
-                data.shape, self._data[slice_list].shape))
+            raise ValueError(
+                "source shape {} mismatches destination shape {}".format(
+                    data.shape, self._data[slice_list].shape
+                )
+            )
 
         self._data.loc[slice_list] = data
 
     @staticmethod
     def _build_slice_list(
-            selector: Mapping[Axes, Union[int, slice]]
+        selector: Mapping[Axes, Union[int, slice]]
     ) -> Tuple[Tuple[Union[int, slice], ...], Sequence[Axes]]:
         slice_list: MutableSequence[Union[int, slice]] = [
-            slice(None, None, None)
-            for _ in range(N_AXES)
+            slice(None, None, None) for _ in range(N_AXES)
         ]
         axes = []
         removed_axes = set()
@@ -583,16 +586,18 @@ class ImageStack:
                 removed_axes.add(name)
             slice_list[idx] = value
 
-        for dimension_value, dimension_name in sorted([
-            (dimension_value.order, dimension_name)
-            for dimension_name, dimension_value in AXES_DATA.items()
-        ]):
+        for dimension_value, dimension_name in sorted(
+            [
+                (dimension_value.order, dimension_name)
+                for dimension_name, dimension_value in AXES_DATA.items()
+            ]
+        ):
             if dimension_name not in removed_axes:
                 axes.append(dimension_name)
 
         return tuple(slice_list), axes
 
-    def _iter_axes(self, axes: Set[Axes]=None) -> Iterator[Mapping[Axes, int]]:
+    def _iter_axes(self, axes: Set[Axes] = None) -> Iterator[Mapping[Axes, int]]:
         """Iterate over provided axes.
 
         Parameters
@@ -615,14 +620,14 @@ class ImageStack:
             yield {ind: val for (ind, val) in a}
 
     def apply(
-            self,
-            func: Callable,
-            group_by: Set[Axes]=None,
-            in_place=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
-            clip_method: Union[str, Clip]=Clip.CLIP,
-            **kwargs
+        self,
+        func: Callable,
+        group_by: Set[Axes] = None,
+        in_place=False,
+        verbose: bool = False,
+        n_processes: Optional[int] = None,
+        clip_method: Union[str, Clip] = Clip.CLIP,
+        **kwargs,
     ) -> "ImageStack":
         """Split the image along a set of axes and apply a function across all the components.  This
         function should yield data of the same dimensionality as the input components.  These
@@ -676,9 +681,12 @@ class ImageStack:
             image_stack = deepcopy(self)
             return image_stack.apply(
                 func=func,
-                group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes,
+                group_by=group_by,
+                in_place=True,
+                verbose=verbose,
+                n_processes=n_processes,
                 clip_method=clip_method,
-                **kwargs
+                **kwargs,
             )
 
         # wrapper adds a target `data` parameter where the results from func will be stored
@@ -687,11 +695,8 @@ class ImageStack:
 
         # execute the processing workflow
         self.transform(
-            func=bound_func,
-            group_by=group_by,
-            verbose=verbose,
-            n_processes=n_processes,
-            **kwargs)
+            func=bound_func, group_by=group_by, verbose=verbose, n_processes=n_processes, **kwargs
+        )
 
         # scale based on values of whole image
         if clip_method == Clip.SCALE_BY_IMAGE:
@@ -701,8 +706,10 @@ class ImageStack:
 
     @staticmethod
     def _in_place_apply(
-        apply_func: Callable[..., Union[xr.DataArray, np.ndarray]], data: np.ndarray,
-        clip_method: Union[str, Clip], **kwargs
+        apply_func: Callable[..., Union[xr.DataArray, np.ndarray]],
+        data: np.ndarray,
+        clip_method: Union[str, Clip],
+        **kwargs,
     ) -> None:
         result = apply_func(data, **kwargs)
         if clip_method == Clip.CLIP:
@@ -713,12 +720,12 @@ class ImageStack:
             data[:] = result
 
     def transform(
-            self,
-            func: Callable,
-            group_by: Set[Axes]=None,
-            verbose=False,
-            n_processes: Optional[int]=None,
-            **kwargs
+        self,
+        func: Callable,
+        group_by: Set[Axes] = None,
+        verbose=False,
+        n_processes: Optional[int] = None,
+        **kwargs,
     ) -> List[Any]:
         """Split the image along a set of axes, and apply a function across all the components.
 
@@ -749,22 +756,21 @@ class ImageStack:
             group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
 
         selectors = list(self._iter_axes(group_by))
-        slice_lists = [self._build_slice_list(index)[0]
-                       for index in selectors]
+        slice_lists = [self._build_slice_list(index)[0] for index in selectors]
 
         selectors_and_slice_lists = zip(selectors, slice_lists)
         if verbose and StarfishConfig().verbose:
             selectors_and_slice_lists = tqdm(selectors_and_slice_lists)
 
-        mp_applyfunc: Callable = partial(
-            self._processing_workflow, partial(func, **kwargs))
+        mp_applyfunc: Callable = partial(self._processing_workflow, partial(func, **kwargs))
 
         with Pool(
-                processes=n_processes,
-                initializer=SharedMemory.initializer,
-                initargs=((self._data._backing_mp_array,
-                           self._data._data.shape,
-                           self._data._data.dtype),)) as pool:
+            processes=n_processes,
+            initializer=SharedMemory.initializer,
+            initargs=(
+                (self._data._backing_mp_array, self._data._data.shape, self._data._data.dtype),
+            ),
+        ) as pool:
             results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
 
             # Note: results is [None, ...] if executing an in-place workflow
@@ -773,9 +779,8 @@ class ImageStack:
 
     @staticmethod
     def _processing_workflow(
-            worker_callable: Callable[[np.ndarray], Any],
-            selector_and_slice_list: Tuple[Mapping[Axes, int],
-                                           Tuple[Union[int, slice], ...]],
+        worker_callable: Callable[[np.ndarray], Any],
+        selector_and_slice_list: Tuple[Mapping[Axes, int], Tuple[Union[int, slice], ...]],
     ):
         # build the numpy array from the shared memory object
         backing_mp_array, shape, dtype = SharedMemory.get_payload()
@@ -783,15 +788,11 @@ class ImageStack:
 
         # get the correct dimension order for the imagestack based on AXES_DATA
         dims = [
-            name.value for (name, data) in
-            sorted(AXES_DATA.items(), key=lambda kv: kv[1].order)
+            name.value for (name, data) in sorted(AXES_DATA.items(), key=lambda kv: kv[1].order)
         ] + [Axes.Y.value, Axes.X.value]
 
         # build and then slice the xarray to get the piece needed for this worker
-        data_array = xr.DataArray(
-            data=unshaped_numpy_array.reshape(shape),
-            dims=dims,
-        )
+        data_array = xr.DataArray(data=unshaped_numpy_array.reshape(shape), dims=dims)
         sliced = data_array.sel(selector_and_slice_list[0])
 
         # pass worker_callable a view into the backing array, which will be overwritten
@@ -812,26 +813,20 @@ class ImageStack:
 
         data: collections.defaultdict = collections.defaultdict(list)
         keys = self._tile_data.keys()
-        index_keys = set(
-            key.value
-            for key in AXES_DATA.keys()
-        )
-        extras_keys = set(
-            key
-            for tilekey in keys
-            for key in self._tile_data[tilekey].keys())
+        index_keys = set(key.value for key in AXES_DATA.keys())
+        extras_keys = set(key for tilekey in keys for key in self._tile_data[tilekey].keys())
         duplicate_keys = index_keys.intersection(extras_keys)
         if len(duplicate_keys) > 0:
             duplicate_keys_str = ", ".join([str(key) for key in duplicate_keys])
             raise ValueError(
                 f"keys ({duplicate_keys_str}) was found in both the Tile specification and extras "
-                f"field. Tile specification keys may not be duplicated in the extras field.")
+                f"field. Tile specification keys may not be duplicated in the extras field."
+            )
 
         for selector in self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
             tilekey = TileKey(
-                round=selector[Axes.ROUND],
-                ch=selector[Axes.CH],
-                zplane=selector[Axes.ZPLANE])
+                round=selector[Axes.ROUND], ch=selector[Axes.CH], zplane=selector[Axes.ZPLANE]
+            )
             extras = self._tile_data[tilekey]
 
             for index, index_value in selector.items():
@@ -840,12 +835,13 @@ class ImageStack:
             for k in extras_keys:
                 data[k].append(extras.get(k, None))
 
-            if 'barcode_index' not in extras:
-                barcode_index = ((((selector[Axes.ZPLANE]
-                                    * self.num_rounds) + selector[Axes.ROUND])
-                                  * self.num_chs) + selector[Axes.CH])
+            if "barcode_index" not in extras:
+                barcode_index = (
+                    ((selector[Axes.ZPLANE] * self.num_rounds) + selector[Axes.ROUND])
+                    * self.num_chs
+                ) + selector[Axes.CH]
 
-                data['barcode_index'].append(barcode_index)
+                data["barcode_index"].append(barcode_index)
 
         return pd.DataFrame(data)
 
@@ -876,13 +872,14 @@ class ImageStack:
         ----------
         class_instance: The instance of a class being applied to the imagestack
         """
-        entry = {"method": class_instance.__class__.__name__,
-                 "arguments": class_instance.__dict__,
-                 "os": logging.get_os_info(),
-                 "dependencies": logging.get_core_dependency_info(),
-                 "release tag": logging.get_release_tag(),
-                 "starfish version": logging.get_dependency_version('starfish')
-                 }
+        entry = {
+            "method": class_instance.__class__.__name__,
+            "arguments": class_instance.__dict__,
+            "os": logging.get_os_info(),
+            "dependencies": logging.get_core_dependency_info(),
+            "release tag": logging.get_release_tag(),
+            "starfish version": logging.get_dependency_version("starfish"),
+        }
         self._log.append(entry)
 
     @property
@@ -915,8 +912,8 @@ class ImageStack:
         result: collections.OrderedDict[Any, str] = collections.OrderedDict()
         for name, data in AXES_DATA.items():
             result[name] = self._data.shape[data.order]
-        result['y'] = self._data.shape[-2]
-        result['x'] = self._data.shape[-1]
+        result["y"] = self._data.shape[-2]
+        result["x"] = self._data.shape[-1]
 
         return result
 
@@ -958,11 +955,8 @@ class ImageStack:
 
         # RZCYX is the order expected by FIJI
         data = self.xarray.transpose(
-            Axes.ROUND.value,
-            Axes.ZPLANE.value,
-            Axes.CH.value,
-            Axes.Y.value,
-            Axes.X.value)
+            Axes.ROUND.value, Axes.ZPLANE.value, Axes.CH.value, Axes.Y.value, Axes.X.value
+        )
 
         # Any float32 image with low dynamic range will provoke a warning that the image is
         # low contrast because the data must be converted to uint16 for compatibility with FIJI.
@@ -970,10 +964,9 @@ class ImageStack:
             warnings.simplefilter("ignore", UserWarning)
             skimage.io.imsave(filepath, data.values, imagej=True)
 
-    def export(self,
-               filepath: str,
-               tile_opener=None,
-               tile_format: ImageFormat=ImageFormat.NUMPY) -> None:
+    def export(
+        self, filepath: str, tile_opener=None, tile_format: ImageFormat = ImageFormat.NUMPY
+    ) -> None:
         """write the image tensor to disk in spaceTx format
 
         Parameters
@@ -988,13 +981,7 @@ class ImageStack:
         # Add log data to extras
         self._tile_data.extras[STARFISH_EXTRAS_KEY] = logging.LogEncoder().encode({LOG: self.log})
         tileset = TileSet(
-            dimensions={
-                Axes.ROUND,
-                Axes.CH,
-                Axes.ZPLANE,
-                Axes.Y,
-                Axes.X,
-            },
+            dimensions={Axes.ROUND, Axes.CH, Axes.ZPLANE, Axes.Y, Axes.X},
             shape={
                 Axes.ROUND: self.num_rounds,
                 Axes.CH: self.num_chs,
@@ -1007,17 +994,17 @@ class ImageStack:
             round_, ch, zplane = tilekey.round, tilekey.ch, tilekey.z
             extras: dict = self._tile_data[tilekey]
 
-            selector = {
-                Axes.ROUND: round_,
-                Axes.CH: ch,
-                Axes.ZPLANE: zplane,
-            }
+            selector = {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane}
 
             coordinates: MutableMapping[Coordinates, Union[Tuple[Number, Number], Number]] = dict()
-            x_coordinates = (float(self.xarray[Coordinates.X.value][0]),
-                             float(self.xarray[Coordinates.X.value][-1]))
-            y_coordinates = (float(self.xarray[Coordinates.Y.value][0]),
-                             float(self.xarray[Coordinates.Y.value][-1]))
+            x_coordinates = (
+                float(self.xarray[Coordinates.X.value][0]),
+                float(self.xarray[Coordinates.X.value][-1]),
+            )
+            y_coordinates = (
+                float(self.xarray[Coordinates.Y.value][0]),
+                float(self.xarray[Coordinates.Y.value][-1]),
+            )
             coordinates[Coordinates.X] = x_coordinates
             coordinates[Coordinates.Y] = y_coordinates
             if Coordinates.Z in self.xarray.coords:
@@ -1025,17 +1012,14 @@ class ImageStack:
                 z_coordinates = float(self.xarray[Coordinates.Z.value][zplane])
                 coordinates[Coordinates.Z] = z_coordinates
 
-            tile = Tile(
-                coordinates=coordinates,
-                indices=selector,
-                extras=extras,
-            )
+            tile = Tile(coordinates=coordinates, indices=selector, extras=extras)
             tile.numpy_array, _ = self.get_slice(
                 selector={Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane}
             )
             tileset.add_tile(tile)
 
         if tile_opener is None:
+
             def tile_opener(tileset_path: Path, tile, ext):
                 base = tileset_path.parent / tileset_path.stem
                 if Axes.ZPLANE in tile.indices:
@@ -1045,22 +1029,16 @@ class ImageStack:
                     zstr = ""
                 return open(
                     "{}-H{}-C{}{}.{}".format(
-                        str(base),
-                        tile.indices[Axes.ROUND],
-                        tile.indices[Axes.CH],
-                        zstr,
-                        ext,
+                        str(base), tile.indices[Axes.ROUND], tile.indices[Axes.CH], zstr, ext
                     ),
-                    "wb")
+                    "wb",
+                )
 
-        if not filepath.endswith('.json'):
-            filepath += '.json'
+        if not filepath.endswith(".json"):
+            filepath += ".json"
         Writer.write_to_path(
-            tileset,
-            filepath,
-            pretty=True,
-            tile_opener=tile_opener,
-            tile_format=tile_format)
+            tileset, filepath, pretty=True, tile_opener=tile_opener, tile_format=tile_format
+        )
 
     def max_proj(self, *dims: Axes) -> "ImageStack":
         """return a max projection over one or more axis of the image tensor
@@ -1088,13 +1066,13 @@ class ImageStack:
 
     @classmethod
     def synthetic_stack(
-            cls,
-            num_round: int=4,
-            num_ch: int=4,
-            num_z: int=12,
-            tile_height: int=50,
-            tile_width: int=40,
-            tile_fetcher: TileFetcher=None,
+        cls,
+        num_round: int = 4,
+        num_ch: int = 4,
+        num_z: int = 12,
+        tile_height: int = 50,
+        tile_width: int = 40,
+        tile_fetcher: TileFetcher = None,
     ) -> "ImageStack":
         """generate a synthetic ImageStack
 
@@ -1107,17 +1085,11 @@ class ImageStack:
         """
         if tile_fetcher is None:
             tile_fetcher = tile_fetcher_factory(
-                OnesTile,
-                False,
-                {Axes.Y: tile_height, Axes.X: tile_width},
+                OnesTile, False, {Axes.Y: tile_height, Axes.X: tile_width}
             )
 
         collection = build_image(
-            range(1),
-            range(num_round),
-            range(num_ch),
-            range(num_z),
-            tile_fetcher,
+            range(1), range(num_round), range(num_ch), range(num_z), tile_fetcher
         )
         tileset = list(collection.all_tilesets())[0][1]
 
@@ -1125,10 +1097,17 @@ class ImageStack:
 
     @classmethod
     def synthetic_spots(
-            cls, intensities: IntensityTable, num_z: int, height: int, width: int,
-            n_photons_background=1000, point_spread_function=(4, 2, 2),
-            camera_detection_efficiency=0.25, background_electrons=1,
-            graylevel: float=37000.0 / 2 ** 16, ad_conversion_bits=16,
+        cls,
+        intensities: IntensityTable,
+        num_z: int,
+        height: int,
+        width: int,
+        n_photons_background=1000,
+        point_spread_function=(4, 2, 2),
+        camera_detection_efficiency=0.25,
+        background_electrons=1,
+        graylevel: float = 37000.0 / 2 ** 16,
+        ad_conversion_bits=16,
     ) -> "ImageStack":
         """Generate a synthetic ImageStack from a set of Features stored in an IntensityTable
 
@@ -1171,8 +1150,9 @@ class ImageStack:
         # check some params
         if not 0 < camera_detection_efficiency <= 1:
             raise ValueError(
-                f'invalid camera_detection_efficiency value: {camera_detection_efficiency}. '
-                f'Must be in the interval (0, 1].')
+                f"invalid camera_detection_efficiency value: {camera_detection_efficiency}. "
+                f"Must be in the interval (0, 1]."
+            )
 
         def select_uint_dtype(array):
             """choose appropriate dtype based on values of an array"""
@@ -1180,7 +1160,7 @@ class ImageStack:
             for dtype in (np.uint8, np.uint16, np.uint32):
                 if max_val <= np.iinfo(dtype).max:
                     return array.astype(dtype)
-            raise ValueError('value exceeds dynamic range of largest skimage-supported type')
+            raise ValueError("value exceeds dynamic range of largest skimage-supported type")
 
         # make sure requested dimensions are large enough to support intensity values
         axis_to_size = zip((Axes.ZPLANE.value, Axes.Y.value, Axes.X.value), (num_z, height, width))
@@ -1188,8 +1168,9 @@ class ImageStack:
             required_size = intensities.coords[axis].values.max() + 1
             if required_size > requested_size:
                 raise ValueError(
-                    f'locations of intensities contained in table exceed the size of requested '
-                    f'axis {axis}. Required size {required_size} > {requested_size}.')
+                    f"locations of intensities contained in table exceed the size of requested "
+                    f"axis {axis}. Required size {required_size} > {requested_size}."
+                )
 
         # create an empty array of the correct size
         image = np.zeros(
@@ -1198,8 +1179,9 @@ class ImageStack:
                 intensities.sizes[Axes.CH.value],
                 num_z,
                 height,
-                width
-            ), dtype=np.uint32
+                width,
+            ),
+            dtype=np.uint32,
         )
 
         # starfish uses float images, but the logic here requires uint. We cast, and will cast back
@@ -1211,7 +1193,7 @@ class ImageStack:
 
             # numpy deprecated casting a specific way of casting floats that is triggered in xarray
             with warnings.catch_warnings():
-                warnings.simplefilter('ignore', FutureWarning)
+                warnings.simplefilter("ignore", FutureWarning)
                 values = spots.where(spots, drop=True)
 
             image[round_, ch, values.z, values.y, values.x] = values
@@ -1223,7 +1205,7 @@ class ImageStack:
 
         # blur image over coordinates, but not over round_/channels (dim 0, 1)
         sigma = (0, 0) + point_spread_function
-        image = gaussian_filter(image, sigma=sigma, mode='nearest')
+        image = gaussian_filter(image, sigma=sigma, mode="nearest")
 
         image = image * camera_detection_efficiency
 
@@ -1241,7 +1223,7 @@ class ImageStack:
         # convert to float for ImageStack
         with warnings.catch_warnings():
             # possible precision loss when casting from uint to float is acceptable
-            warnings.simplefilter('ignore', UserWarning)
+            warnings.simplefilter("ignore", UserWarning)
             image = img_as_float32(image)
 
         return cls.from_numpy_array(image)

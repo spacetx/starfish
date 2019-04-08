@@ -19,11 +19,7 @@ def testing_data():
     codebook = test_utils.codebook_array_factory()
     num_z, height, width = 3, 4, 5
     intensities = IntensityTable.synthetic_intensities(
-        codebook,
-        num_z=num_z,
-        height=height,
-        width=width,
-        n_spots=4
+        codebook, num_z=num_z, height=height, width=width, n_spots=4
     )
     return intensities
 
@@ -39,9 +35,7 @@ def test_max_intensity_maintains_each_combination_of_dimensions():
     assert results.shape == (4, 1, 1)
     results = _max_intensity_table_maintain_dims(intensities, {Features.AXIS, Axes.CH})
     assert results.shape == (1, 1, 2)
-    results = _max_intensity_table_maintain_dims(
-        intensities, {Axes.ROUND, Axes.CH, Features.AXIS}
-    )
+    results = _max_intensity_table_maintain_dims(intensities, {Axes.ROUND, Axes.CH, Features.AXIS})
     assert results.shape == (1, 1, 1)
 
 

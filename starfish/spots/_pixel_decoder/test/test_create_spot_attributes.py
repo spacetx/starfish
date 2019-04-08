@@ -6,7 +6,8 @@ import numpy as np
 from skimage.measure import regionprops
 
 from starfish.spots._pixel_decoder.combine_adjacent_features import (
-    CombineAdjacentFeatures, TargetsMap
+    CombineAdjacentFeatures,
+    TargetsMap,
 )
 from starfish.types import Axes, Features, SpotAttributes
 from .test_calculate_mean_pixel_traces import labeled_intensities_factory  # reuse this fixture
@@ -21,7 +22,7 @@ def test_create_spot_attributes():
     # make some fixtures
     intensity_table, label_image, decoded_image = labeled_intensities_factory()
     region_properties = regionprops(np.squeeze(label_image))
-    target_map = TargetsMap(np.array(list('abcdef')))
+    target_map = TargetsMap(np.array(list("abcdef")))
     caf = CombineAdjacentFeatures(min_area=1, max_area=3, connectivity=2)
     spot_attributes, passes_filters = caf._create_spot_attributes(
         region_properties, decoded_image, target_map
@@ -41,4 +42,4 @@ def test_create_spot_attributes():
     # spots should map to edcb -- the decoded image has 4 values: [5, 4, 3, 2]. The target map
     # starts at np.nan, then counts sequentially from 1. Thus, 2 should map to b, and from there
     # the values are sequential. f=6 is not present.
-    assert np.array_equal(spot_attributes.data[Features.TARGET].values, list('edcb'))
+    assert np.array_equal(spot_attributes.data[Features.TARGET].values, list("edcb"))

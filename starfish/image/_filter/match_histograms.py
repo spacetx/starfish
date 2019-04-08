@@ -12,10 +12,7 @@ from ._base import FilterAlgorithmBase
 
 
 class MatchHistograms(FilterAlgorithmBase):
-
-    def __init__(
-            self, group_by: Set[Axes]
-    ) -> None:
+    def __init__(self, group_by: Set[Axes]) -> None:
         """Normalize data by matching distributions of each tile or volume to a reference volume
 
         Chunks sharing the same values for axes specified by group_by will be quantile
@@ -53,9 +50,7 @@ class MatchHistograms(FilterAlgorithmBase):
         return reference
 
     @staticmethod
-    def _match_histograms(
-        image: xr.DataArray, reference: np.ndarray
-    ) -> np.ndarray:
+    def _match_histograms(image: xr.DataArray, reference: np.ndarray) -> np.ndarray:
         """
         matches the intensity distribution of image to reference
 
@@ -74,12 +69,12 @@ class MatchHistograms(FilterAlgorithmBase):
         return match_histograms(image, reference=reference)
 
     def run(
-            self,
-            stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose: bool = False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -107,17 +102,24 @@ class MatchHistograms(FilterAlgorithmBase):
         apply_function = partial(self._match_histograms, reference=reference_image)
         result = stack.apply(
             apply_function,
-            group_by=self.group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            group_by=self.group_by,
+            verbose=verbose,
+            in_place=in_place,
+            n_processes=n_processes,
         )
         return result
 
     @staticmethod
     @click.command("MatchHistograms")
     @click.option(
-        "--group-by", type=set, required=True,
-        help=("set that specifies the grouping over which to match the image intensity "
-              "e.g. {'c', 'r'} would equalize each volume, whereas {'c',} would equalize all "
-              "volumes within a channel.")
+        "--group-by",
+        type=set,
+        required=True,
+        help=(
+            "set that specifies the grouping over which to match the image intensity "
+            "e.g. {'c', 'r'} would equalize each volume, whereas {'c',} would equalize all "
+            "volumes within a channel."
+        ),
     )
     @click.pass_context
     def _cli(ctx, group_by):

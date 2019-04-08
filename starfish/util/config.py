@@ -4,7 +4,6 @@ from typing import Any, Dict, Sequence, Union
 
 
 class NestedDict(dict):
-
     def __missing__(self, key):
         self[key] = NestedDict()
         return self[key]
@@ -23,7 +22,7 @@ class Config(object):
 
     __NO_VALUE_PASSED = object()
 
-    def __init__(self, value: Union[str, Dict]=None) -> None:
+    def __init__(self, value: Union[str, Dict] = None) -> None:
         """
         Parse user arguments, environment variables, and external files to
         generate a nested configuration object.
@@ -56,9 +55,9 @@ class Config(object):
 
         self.data = data
 
-    def lookup(self, keys: Sequence[str],
-               value: Any=__NO_VALUE_PASSED,
-               remove: bool=False) -> Any:
+    def lookup(
+        self, keys: Sequence[str], value: Any = __NO_VALUE_PASSED, remove: bool = False
+    ) -> Any:
         """
         Parameters
         ----------

@@ -8,6 +8,7 @@ from slicedimage import ImageFormat
 from starfish.imagestack.imagestack import ImageStack
 from starfish.imagestack.physical_coordinate_calculator import get_physical_coordinates_of_z_plane
 from starfish.intensity_table.intensity_table import IntensityTable
+
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
 from starfish.test import test_utils
@@ -36,9 +37,7 @@ def test_get_slice_simple_index():
     """
     stack = ImageStack.synthetic_stack()
     round_ = 1
-    imageslice, axes = stack.get_slice(
-        {Axes.ROUND: round_}
-    )
+    imageslice, axes = stack.get_slice({Axes.ROUND: round_})
     assert axes == [Axes.CH, Axes.ZPLANE]
 
     y, x = stack.tile_shape
@@ -59,9 +58,7 @@ def test_get_slice_middle_index():
     """
     stack = ImageStack.synthetic_stack()
     ch = 1
-    imageslice, axes = stack.get_slice(
-        {Axes.CH: ch}
-    )
+    imageslice, axes = stack.get_slice({Axes.CH: ch})
     assert axes == [Axes.ROUND, Axes.ZPLANE]
 
     y, x = stack.tile_shape
@@ -80,9 +77,7 @@ def test_get_slice_range():
     """
     stack = ImageStack.synthetic_stack()
     zrange = slice(1, 3)
-    imageslice, axes = stack.get_slice(
-        {Axes.ZPLANE: zrange}
-    )
+    imageslice, axes = stack.get_slice({Axes.ZPLANE: zrange})
     y, x = stack.tile_shape
     assert axes == [Axes.ROUND, Axes.CH, Axes.ZPLANE]
 
@@ -90,8 +85,10 @@ def test_get_slice_range():
         for ch in range(stack.shape[Axes.CH]):
             for z in range(zrange.stop - zrange.start):
                 data = np.empty((y, x))
-                data.fill((round_ * stack.shape[Axes.CH] + ch) * stack.shape[Axes.ZPLANE]
-                          + (z + zrange.start))
+                data.fill(
+                    (round_ * stack.shape[Axes.CH] + ch) * stack.shape[Axes.ZPLANE]
+                    + (z + zrange.start)
+                )
 
                 assert data.all() == imageslice[round_, ch, z].all()
 
@@ -107,9 +104,7 @@ def test_set_slice_simple_index():
     y, x = stack.tile_shape
 
     expected = np.full(
-        (stack.shape[Axes.CH], stack.shape[Axes.ZPLANE], y, x),
-        fill_value=0.5,
-        dtype=np.float32
+        (stack.shape[Axes.CH], stack.shape[Axes.ZPLANE], y, x), fill_value=0.5, dtype=np.float32
     )
     index = {Axes.ROUND: round_}
 
@@ -129,9 +124,7 @@ def test_set_slice_middle_index():
     y, x = stack.tile_shape
 
     expected = np.full(
-        (stack.shape[Axes.ROUND], stack.shape[Axes.ZPLANE], y, x),
-        fill_value=0.5,
-        dtype=np.float32
+        (stack.shape[Axes.ROUND], stack.shape[Axes.ZPLANE], y, x), fill_value=0.5, dtype=np.float32
     )
     index = {Axes.CH: ch}
 
@@ -151,16 +144,12 @@ def test_set_slice_reorder():
     index = {Axes.ROUND: round_}
 
     written = np.full(
-        (stack.shape[Axes.ZPLANE], stack.shape[Axes.CH], y, x),
-        fill_value=0.5,
-        dtype=np.float32
+        (stack.shape[Axes.ZPLANE], stack.shape[Axes.CH], y, x), fill_value=0.5, dtype=np.float32
     )
     stack.set_slice(index, written, [Axes.ZPLANE, Axes.CH])
 
     expected = np.full(
-        (stack.shape[Axes.CH], stack.shape[Axes.ZPLANE], y, x),
-        fill_value=0.5,
-        dtype=np.float32
+        (stack.shape[Axes.CH], stack.shape[Axes.ZPLANE], y, x), fill_value=0.5, dtype=np.float32
     )
     assert np.array_equal(stack.get_slice(index)[0], expected)
 
@@ -176,7 +165,7 @@ def test_set_slice_range():
     expected = np.full(
         (stack.shape[Axes.ROUND], stack.shape[Axes.CH], zrange.stop - zrange.start + 1, y, x),
         fill_value=0.5,
-        dtype=np.float32
+        dtype=np.float32,
     )
     index = {Axes.ZPLANE: zrange}
 
@@ -230,7 +219,8 @@ def test_synthetic_spot_creation_produces_an_imagestack(synthetic_intensity_tabl
 
 
 def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_location(
-        synthetic_spot_pass_through_stack):
+    synthetic_spot_pass_through_stack
+):
 
     codebook, true_intensities, image = synthetic_spot_pass_through_stack
 
@@ -239,28 +229,23 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
     x = np.empty_like(g)
     y = np.empty_like(g)
     z = np.empty_like(g)
-    breaks = np.concatenate([
-        np.array([0]),
-        np.where(np.diff(g))[0] + 1,
-        np.array([g.shape[0]])
-    ])
+    breaks = np.concatenate([np.array([0]), np.where(np.diff(g))[0] + 1, np.array([g.shape[0]])])
     for i in np.arange(len(breaks) - 1):
-        x[breaks[i]: breaks[i + 1]] = true_intensities.coords[Axes.X.value][i]
-        y[breaks[i]: breaks[i + 1]] = true_intensities.coords[Axes.Y.value][i]
-        z[breaks[i]: breaks[i + 1]] = true_intensities.coords[Axes.ZPLANE.value][i]
+        x[breaks[i] : breaks[i + 1]] = true_intensities.coords[Axes.X.value][i]
+        y[breaks[i] : breaks[i + 1]] = true_intensities.coords[Axes.Y.value][i]
+        z[breaks[i] : breaks[i + 1]] = true_intensities.coords[Axes.ZPLANE.value][i]
 
     # only 8 values should be set, since there are only 8 locations across the tensor
     assert np.sum(image.xarray != 0) == 8
 
     intensities = image.xarray.sel(
-        x=xr.DataArray(x, dims=['intensity']),
-        y=xr.DataArray(y, dims=['intensity']),
-        z=xr.DataArray(z, dims=['intensity']),
-        r=xr.DataArray(r, dims=['intensity']),
-        c=xr.DataArray(c, dims=['intensity']))
-    assert np.allclose(
-        intensities,
-        true_intensities.values[np.where(true_intensities)])
+        x=xr.DataArray(x, dims=["intensity"]),
+        y=xr.DataArray(y, dims=["intensity"]),
+        z=xr.DataArray(z, dims=["intensity"]),
+        r=xr.DataArray(r, dims=["intensity"]),
+        c=xr.DataArray(c, dims=["intensity"]),
+    )
+    assert np.allclose(intensities, true_intensities.values[np.where(true_intensities)])
 
 
 # TODO ambrosejcarr: improve the tests here.
@@ -268,7 +253,8 @@ def test_imagestack_to_intensity_table():
     codebook, intensity_table, image = codebook_intensities_image_for_single_synthetic_spot()
     pixel_intensities = IntensityTable.from_image_stack(image)
     pixel_intensities = codebook.metric_decode(
-        pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2)
+        pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2
+    )
     assert isinstance(pixel_intensities, IntensityTable)
 
 
@@ -276,27 +262,30 @@ def test_imagestack_to_intensity_table_no_noise(synthetic_spot_pass_through_stac
     codebook, intensity_table, image = synthetic_spot_pass_through_stack
     pixel_intensities = IntensityTable.from_image_stack(image)
     pixel_intensities = codebook.metric_decode(
-        pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2)
+        pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2
+    )
     assert isinstance(pixel_intensities, IntensityTable)
 
 
-@pytest.mark.parametrize("format,count", (
-    (ImageFormat.TIFF, 6),
-    (ImageFormat.NUMPY, 6),
-))
+@pytest.mark.parametrize("format,count", ((ImageFormat.TIFF, 6), (ImageFormat.NUMPY, 6)))
 def test_imagestack_export(tmpdir, format, count, recwarn):
     """
     Save a synthetic stack to files and check the results
     """
-    stack_shape = OrderedDict([(Axes.ROUND, 3), (Axes.CH, 2),
-                               (Axes.ZPLANE, 1), (Axes.Y, 50), (Axes.X, 40)])
+    stack_shape = OrderedDict(
+        [(Axes.ROUND, 3), (Axes.CH, 2), (Axes.ZPLANE, 1), (Axes.Y, 50), (Axes.X, 40)]
+    )
 
-    physical_coords = OrderedDict([(PhysicalCoordinateTypes.X_MIN, X_COORDS[0]),
-                                   (PhysicalCoordinateTypes.X_MAX, X_COORDS[1]),
-                                   (PhysicalCoordinateTypes.Y_MIN, Y_COORDS[0]),
-                                   (PhysicalCoordinateTypes.Y_MAX, Y_COORDS[1]),
-                                   (PhysicalCoordinateTypes.Z_MIN, Z_COORDS[0]),
-                                   (PhysicalCoordinateTypes.Z_MAX, Z_COORDS[1])])
+    physical_coords = OrderedDict(
+        [
+            (PhysicalCoordinateTypes.X_MIN, X_COORDS[0]),
+            (PhysicalCoordinateTypes.X_MAX, X_COORDS[1]),
+            (PhysicalCoordinateTypes.Y_MIN, Y_COORDS[0]),
+            (PhysicalCoordinateTypes.Y_MAX, Y_COORDS[1]),
+            (PhysicalCoordinateTypes.Z_MIN, Z_COORDS[0]),
+            (PhysicalCoordinateTypes.Z_MAX, Z_COORDS[1]),
+        ]
+    )
 
     stack = test_utils.imagestack_with_coords_factory(stack_shape, physical_coords)
 
@@ -305,10 +294,7 @@ def test_imagestack_export(tmpdir, format, count, recwarn):
     files = list([x for x in tmpdir.listdir() if str(x).endswith(format.file_ext)])
     loaded_stack = ImageStack.from_path_or_url(str(stack_json))
     verify_physical_coordinates(
-        loaded_stack,
-        X_COORDS,
-        Y_COORDS,
-        get_physical_coordinates_of_z_plane(Z_COORDS),
+        loaded_stack, X_COORDS, Y_COORDS, get_physical_coordinates_of_z_plane(Z_COORDS)
     )
     assert count == len(files)
     with open(files[0], "rb") as fh:

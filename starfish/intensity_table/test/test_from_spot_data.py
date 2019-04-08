@@ -18,7 +18,7 @@ def spot_attribute_factory(n: int) -> SpotAttributes:
     return SpotAttributes(
         pd.DataFrame(
             data=np.array([[i, i, i, 1] for i in np.arange(n)]),
-            columns=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
+            columns=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS],
         )
     )
 

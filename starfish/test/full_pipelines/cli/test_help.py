@@ -17,24 +17,14 @@ class TestHelpReturnCode(unittest.TestCase):
     """
 
     STAGES = (
-        [
-            "starfish", "--help",
-            lambda tempdir: tempdir
-        ],
-        [
-            "starfish", "detect_spots", "--help",
-            lambda tempdir: tempdir
-        ],
-        [
-            "starfish", "detect_spots", "BlobDetector", "--help",
-            lambda tempdir: tempdir
-        ],
+        ["starfish", "--help", lambda tempdir: tempdir],
+        ["starfish", "detect_spots", "--help", lambda tempdir: tempdir],
+        ["starfish", "detect_spots", "BlobDetector", "--help", lambda tempdir: tempdir],
     )
 
     def test_run_build(self):
-        exec.stages(
-            TestHelpReturnCode.STAGES,
-            keep_data=False)
+        exec.stages(TestHelpReturnCode.STAGES, keep_data=False)
+
 
 class TestHelpStandardOut(unittest.TestCase):
     """

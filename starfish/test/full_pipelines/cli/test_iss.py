@@ -18,7 +18,6 @@ from starfish.types import Features
 
 @pytest.mark.slow
 class TestWithIssData(CLITest, unittest.TestCase):
-
     @property
     def spots_file(self):
         return "decoded-spots.nc"
@@ -43,144 +42,214 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "starfish/test/full_pipelines/cli/get_cli_test_data.py",
                 "--primary-name=hybridization.json",
                 "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS-TEST/",
-                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted")
+                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted"),
             ],
             [
-                "starfish", "validate", "experiment",
+                "starfish",
+                "validate",
+                "experiment",
                 lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted", "experiment.json")
+                    tempdir, "formatted", "experiment.json"
+                ),
             ],
             [
-                "starfish", "filter",
-                "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted/fov_001", "hybridization.json"),
-                "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "max_projected", "hybridization.json"),
+                "starfish",
+                "filter",
+                "--input",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted/fov_001", "hybridization.json"
+                ),
+                "--output",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "max_projected", "hybridization.json"
+                ),
                 "MaxProj",
-                "--dims", "c",
-                "--dims", "z"
-
+                "--dims",
+                "c",
+                "--dims",
+                "z",
             ],
             [
-                "starfish", "learn_transform",
-                "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "max_projected", "hybridization.json"),
-                "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "transforms", "transforms.json"),
+                "starfish",
+                "learn_transform",
+                "--input",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "max_projected", "hybridization.json"
+                ),
+                "--output",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "transforms", "transforms.json"
+                ),
                 "Translation",
-                "--reference-stack", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted/fov_001", "dots.json"),
-                "--upsampling", "1000",
-                "--axes", "r"
+                "--reference-stack",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted/fov_001", "dots.json"
+                ),
+                "--upsampling",
+                "1000",
+                "--axes",
+                "r",
             ],
             [
-                "starfish", "apply_transform",
-                "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted/fov_001", "hybridization.json"),
-                "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered", "hybridization.json"),
-                "--transformation-list", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "transforms", "transforms.json"),
+                "starfish",
+                "apply_transform",
+                "--input",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted/fov_001", "hybridization.json"
+                ),
+                "--output",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "registered", "hybridization.json"
+                ),
+                "--transformation-list",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "transforms", "transforms.json"
+                ),
                 "Warp",
             ],
             [
-                "starfish", "filter",
-                "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered", "hybridization.json"),
-                "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "hybridization.json"),
+                "starfish",
+                "filter",
+                "--input",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "registered", "hybridization.json"
+                ),
+                "--output",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "hybridization.json"
+                ),
                 "WhiteTophat",
-                "--masking-radius", "15",
+                "--masking-radius",
+                "15",
             ],
             [
-                "starfish", "filter",
-                "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted/fov_001", "nuclei.json"),
-                "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "nuclei.json"),
+                "starfish",
+                "filter",
+                "--input",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted/fov_001", "nuclei.json"
+                ),
+                "--output",
+                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "nuclei.json"),
                 "WhiteTophat",
-                "--masking-radius", "15",
+                "--masking-radius",
+                "15",
             ],
             [
-                "starfish", "filter",
-                "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted/fov_001", "dots.json"),
-                "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "dots.json"),
+                "starfish",
+                "filter",
+                "--input",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted/fov_001", "dots.json"
+                ),
+                "--output",
+                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "dots.json"),
                 "WhiteTophat",
-                "--masking-radius", "15",
+                "--masking-radius",
+                "15",
             ],
             [
-                "starfish", "detect_spots",
-                "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "hybridization.json"),
-                "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "spots.nc"),
-                "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "dots.json"),
+                "starfish",
+                "detect_spots",
+                "--input",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "hybridization.json"
+                ),
+                "--output",
+                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
+                "--blobs-stack",
+                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "dots.json"),
                 "BlobDetector",
-                "--min-sigma", "4",
-                "--max-sigma", "6",
-                "--num-sigma", "20",
-                "--threshold", "0.01",
+                "--min-sigma",
+                "4",
+                "--max-sigma",
+                "6",
+                "--num-sigma",
+                "20",
+                "--threshold",
+                "0.01",
             ],
             [
-                "starfish", "segment",
-                "--primary-images", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "hybridization.json"),
-                "--nuclei", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "nuclei.json"),
-                "-o", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "label_image.png"),
+                "starfish",
+                "segment",
+                "--primary-images",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "filtered", "hybridization.json"
+                ),
+                "--nuclei",
+                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "filtered", "nuclei.json"),
+                "-o",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "label_image.png"
+                ),
                 "Watershed",
-                "--nuclei-threshold", ".16",
-                "--input-threshold", ".22",
-                "--min-distance", "57",
+                "--nuclei-threshold",
+                ".16",
+                "--input-threshold",
+                ".22",
+                "--min-distance",
+                "57",
             ],
             [
-                "starfish", "target_assignment",
+                "starfish",
+                "target_assignment",
                 "--label-image",
                 lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "label_image.png"),
-                "--intensities", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "spots.nc"),
-                "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "targeted-spots.nc"),
+                    tempdir, "results", "label_image.png"
+                ),
+                "--intensities",
+                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
+                "--output",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "targeted-spots.nc"
+                ),
                 "Label",
             ],
             [
-                "starfish", "decode",
-                "-i", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "targeted-spots.nc"),
-                "--codebook", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted", "codebook.json"),
-                "-o", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "decoded-spots.nc"),
+                "starfish",
+                "decode",
+                "-i",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "targeted-spots.nc"
+                ),
+                "--codebook",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "formatted", "codebook.json"
+                ),
+                "-o",
+                lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "results", "decoded-spots.nc"
+                ),
                 "PerRoundMaxChannelDecoder",
             ],
-
             # Validate results/{spots,targeted-spots,decoded-spots}.nc
             [
-                "starfish", "validate", "xarray",
-                lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "spots.nc")
+                "starfish",
+                "validate",
+                "xarray",
+                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results", "spots.nc"),
             ],
             [
-                "starfish", "validate", "xarray",
+                "starfish",
+                "validate",
+                "xarray",
                 lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "targeted-spots.nc")
+                    tempdir, "results", "targeted-spots.nc"
+                ),
             ],
             [
-                "starfish", "validate", "xarray",
+                "starfish",
+                "validate",
+                "xarray",
                 lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "decoded-spots.nc")
+                    tempdir, "results", "decoded-spots.nc"
+                ),
             ],
         )
 
     def verify_results(self, intensities):
         # TODO make this test stronger
-        genes, counts = np.unique(
-            intensities.coords[Features.TARGET], return_counts=True)
+        genes, counts = np.unique(intensities.coords[Features.TARGET], return_counts=True)
         gene_counts = pd.Series(counts, genes)
         # TODO THERE"S NO HUMAN/MOUSE KEYS?
-        assert gene_counts['ACTB']
+        assert gene_counts["ACTB"]

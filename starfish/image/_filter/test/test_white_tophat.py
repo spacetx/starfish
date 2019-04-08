@@ -18,7 +18,7 @@ def simple_spot_3d():
     return big_spot + small_spot
 
 
-@pytest.mark.parametrize('is_volume', [True, False])
+@pytest.mark.parametrize("is_volume", [True, False])
 def test_white_tophat(is_volume: bool):
     """
     white tophat filters should reduce the intensity of spots that are larger than the masking

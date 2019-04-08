@@ -7,9 +7,9 @@ from .util import Fuzzer, SpaceTxValidator
 
 package_name = "starfish"
 codebook_schema_path = resource_filename(
-    package_name, "spacetx_format/schema/codebook/codebook.json")
-experiment_schema_path = resource_filename(
-    package_name, "spacetx_format/schema/experiment.json")
+    package_name, "spacetx_format/schema/codebook/codebook.json"
+)
+experiment_schema_path = resource_filename(package_name, "spacetx_format/schema/experiment.json")
 codebook_validator = SpaceTxValidator(codebook_schema_path)
 experiment_validator = SpaceTxValidator(experiment_schema_path)
 
@@ -22,9 +22,7 @@ def test_fuzz_mock():
     order, and compare what it is being given. For testing
     purposes, it will always return true.
     """
-    obj = {
-        "list": [1, 2, 3]
-    }
+    obj = {"list": [1, 2, 3]}
     values = [
         {"list": [1, 2, 3], "fake": "!"},
         {},
@@ -32,7 +30,7 @@ def test_fuzz_mock():
         {"list": "fake"},
         {"list": {}},
         {"list": []},
-        {"list": [1, 2, 3, '!']},
+        {"list": [1, 2, 3, "!"]},
         {"list": [2, 3]},
         {"list": [123456789, 2, 3]},
         {"list": ["fake", 2, 3]},
@@ -44,7 +42,7 @@ def test_fuzz_mock():
         {"list": [1, "fake", 3]},
         {"list": [1, {}, 3]},
         {"list": [1, [], 3]},
-        {"list": [1, 2, 3, '!']},
+        {"list": [1, 2, 3, "!"]},
         {"list": [1, 2]},
         {"list": [1, 2, 123456789]},
         {"list": [1, 2, "fake"]},
@@ -78,11 +76,11 @@ def test_fuzz_codebook():
                 "codeword": [
                     {"r": 0, "c": 0, "v": 1},
                     {"r": 0, "c": 1, "v": 1},
-                    {"r": 1, "c": 1, "v": 1}
+                    {"r": 1, "c": 1, "v": 1},
                 ],
-                "target": "SCUBE2"
+                "target": "SCUBE2",
             }
-        ]
+        ],
     }
     out = io.StringIO()
     codebook_validator.fuzz_object(codebook, out=out)
@@ -126,14 +124,9 @@ def test_fuzz_experiment():
     """
     experiment = {
         "version": "0.0.0",
-        "images": {
-            "primary": "primary_images.json",
-            "nuclei": "nuclei.json",
-        },
+        "images": {"primary": "primary_images.json", "nuclei": "nuclei.json"},
         "codebook": "codebook.json",
-        "extras": {
-            "is_space_tx_cool": True
-        }
+        "extras": {"is_space_tx_cool": True},
     }
     out = io.StringIO()
     experiment_validator.fuzz_object(experiment, out=out)

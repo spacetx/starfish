@@ -32,11 +32,12 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
     _DEFAULT_TESTING_PARAMETERS = {"thresh": 0, "normalize": True}
 
     def run(
-            self, stack: ImageStack,
-            in_place: bool=False,
-            verbose=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose=False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -70,11 +71,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
         # compute channel magnitude mask
         for r, dat in channels_per_round:
             # nervous about how xarray orders dimensions so i put this here explicitly ....
-            dat = dat.transpose(Axes.CH.value,
-                                Axes.ZPLANE.value,
-                                Axes.Y.value,
-                                Axes.X.value
-                                )
+            dat = dat.transpose(Axes.CH.value, Axes.ZPLANE.value, Axes.Y.value, Axes.X.value)
             # ... to account for this line taking the norm across axis 0, or the channel axis
             ch_magnitude = np.linalg.norm(dat, ord=2, axis=0)
             magnitude_mask = ch_magnitude >= self.thresh
@@ -85,20 +82,19 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                 stack._data[ind] = stack._data[ind] * magnitude_mask
 
                 if self.normalize:
-                    stack._data[ind] = np.divide(stack._data[ind],
-                                                 ch_magnitude,
-                                                 where=magnitude_mask
-                                                 )
+                    stack._data[ind] = np.divide(
+                        stack._data[ind], ch_magnitude, where=magnitude_mask
+                    )
         return stack
 
     @staticmethod
     @click.command("ZeroByChannelMagnitude")
     @click.option(
-        '--thresh', type=float,
-        help='minimum magnitude threshold for pixels across channels')
+        "--thresh", type=float, help="minimum magnitude threshold for pixels across channels"
+    )
     @click.option(
-        '--normalize', is_flag=True,
-        help='Scales all rounds to have unit L2 norm across channels')
+        "--normalize", is_flag=True, help="Scales all rounds to have unit L2 norm across channels"
+    )
     @click.pass_context
     def _cli(ctx, thresh, normalize):
         ctx.obj["component"]._cli_run(ctx, ZeroByChannelMagnitude(thresh, normalize))

@@ -14,7 +14,7 @@ from starfish.types import (
     Features,
     LOG,
     SpotAttributes,
-    STARFISH_EXTRAS_KEY
+    STARFISH_EXTRAS_KEY,
 )
 from starfish.util.dtype import preserve_float_range
 
@@ -75,22 +75,24 @@ class IntensityTable(xr.DataArray):
 
     @staticmethod
     def _build_xarray_coords(
-            spot_attributes: SpotAttributes, channel_index: np.ndarray, round_index: np.ndarray
+        spot_attributes: SpotAttributes, channel_index: np.ndarray, round_index: np.ndarray
     ) -> Dict[str, np.ndarray]:
         """build a non-multi-index set of coordinates for intensity-table"""
         coordinates = {
-            k: (Features.AXIS, spot_attributes.data[k].values)
-            for k in spot_attributes.data}
-        coordinates.update({
-            Features.AXIS: np.arange(len(spot_attributes.data)),
-            Axes.CH.value: channel_index,
-            Axes.ROUND.value: round_index
-        })
+            k: (Features.AXIS, spot_attributes.data[k].values) for k in spot_attributes.data
+        }
+        coordinates.update(
+            {
+                Features.AXIS: np.arange(len(spot_attributes.data)),
+                Axes.CH.value: channel_index,
+                Axes.ROUND.value: round_index,
+            }
+        )
         return coordinates
 
     @classmethod
     def empty_intensity_table(
-            cls, spot_attributes: SpotAttributes, n_ch: int, n_round: int,
+        cls, spot_attributes: SpotAttributes, n_ch: int, n_round: int
     ) -> "IntensityTable":
         """Create an empty intensity table with pre-set axis whose values are zero
 
@@ -111,7 +113,7 @@ class IntensityTable(xr.DataArray):
 
         """
         if not isinstance(spot_attributes, SpotAttributes):
-            raise TypeError('parameter spot_attributes must be a starfish SpotAttributes object.')
+            raise TypeError("parameter spot_attributes must be a starfish SpotAttributes object.")
 
         channel_index = np.arange(n_ch)
         round_index = np.arange(n_round)
@@ -119,16 +121,18 @@ class IntensityTable(xr.DataArray):
         dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
         coords = cls._build_xarray_coords(spot_attributes, channel_index, round_index)
 
-        intensity_table = cls(
-            data=data, coords=coords, dims=dims,
-        )
+        intensity_table = cls(data=data, coords=coords, dims=dims)
 
         return intensity_table
 
     @classmethod
     def from_spot_data(
-            cls, intensities: Union[xr.DataArray, np.ndarray], spot_attributes: SpotAttributes,
-            *args, **kwargs) -> "IntensityTable":
+        cls,
+        intensities: Union[xr.DataArray, np.ndarray],
+        spot_attributes: SpotAttributes,
+        *args,
+        **kwargs,
+    ) -> "IntensityTable":
         """Table to store image feature intensities and associated metadata
 
         Parameters
@@ -155,16 +159,16 @@ class IntensityTable(xr.DataArray):
 
         if len(intensities.shape) != 3:
             raise ValueError(
-                f'intensities must be a (features * ch * round) 3-d tensor. Provided intensities '
-                f'shape ({intensities.shape}) is invalid.')
+                f"intensities must be a (features * ch * round) 3-d tensor. Provided intensities "
+                f"shape ({intensities.shape}) is invalid."
+            )
 
         if not isinstance(spot_attributes, SpotAttributes):
-            raise TypeError('parameter spot_attributes must be a starfish SpotAttributes object.')
+            raise TypeError("parameter spot_attributes must be a starfish SpotAttributes object.")
 
         coords = cls._build_xarray_coords(
-            spot_attributes,
-            np.arange(intensities.shape[1]),
-            np.arange(intensities.shape[2]))
+            spot_attributes, np.arange(intensities.shape[1]), np.arange(intensities.shape[2])
+        )
 
         dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
 
@@ -178,7 +182,7 @@ class IntensityTable(xr.DataArray):
         if STARFISH_EXTRAS_KEY in self.attrs and LOG in self.attrs[STARFISH_EXTRAS_KEY]:
             return loads(self.attrs[STARFISH_EXTRAS_KEY])[LOG]
         else:
-            raise RuntimeError('No log info found.')
+            raise RuntimeError("No log info found.")
 
     @property
     def has_physical_coords(self):
@@ -217,7 +221,7 @@ class IntensityTable(xr.DataArray):
         # verify the IntensityTable has been decoded
         if Features.TARGET not in self.coords.keys():
             raise RuntimeError(
-                'IntensityTable must be decoded before it can be converted to MERMAID input.'
+                "IntensityTable must be decoded before it can be converted to MERMAID input."
             )
 
         # construct the MERMAID dataframe. As MERMAID adds support for non-categorical variables,
@@ -232,7 +236,7 @@ class IntensityTable(xr.DataArray):
         mermaid_data = df[column_order]
 
         # write to disk
-        mermaid_data.to_csv(filename, compression='gzip', index=False)
+        mermaid_data.to_csv(filename, compression="gzip", index=False)
 
     @classmethod
     def load(cls, filename: str) -> "IntensityTable":
@@ -249,12 +253,7 @@ class IntensityTable(xr.DataArray):
 
         """
         loaded = xr.open_dataarray(filename)
-        intensity_table = cls(
-            loaded.data,
-            loaded.coords,
-            loaded.dims,
-            attrs=loaded.attrs,
-        )
+        intensity_table = cls(loaded.data, loaded.coords, loaded.dims, attrs=loaded.attrs)
         return intensity_table
 
     def show(self, background_image: np.ndarray) -> None:
@@ -263,8 +262,14 @@ class IntensityTable(xr.DataArray):
 
     @classmethod
     def synthetic_intensities(
-            cls, codebook, num_z: int=12, height: int=50, width: int=40, n_spots=10,
-            mean_fluor_per_spot=200, mean_photons_per_fluor=50
+        cls,
+        codebook,
+        num_z: int = 12,
+        height: int = 50,
+        width: int = 40,
+        n_spots=10,
+        mean_fluor_per_spot=200,
+        mean_photons_per_fluor=50,
     ) -> "IntensityTable":
         """Create an IntensityTable containing synthetic spots with random locations
 
@@ -299,18 +304,14 @@ class IntensityTable(xr.DataArray):
         r.fill(np.nan)  # radius is a function of the point-spread gaussian size
         spot_attributes = SpotAttributes(
             pd.DataFrame(
-                {Axes.ZPLANE.value: z,
-                 Axes.Y.value: y,
-                 Axes.X.value: x,
-                 Features.SPOT_RADIUS: r}
+                {Axes.ZPLANE.value: z, Axes.Y.value: y, Axes.X.value: x, Features.SPOT_RADIUS: r}
             )
         )
 
         # empty data tensor
         data = np.zeros(shape=(n_spots, *codebook.shape[1:]))
 
-        targets = np.random.choice(
-            codebook.coords[Features.TARGET], size=n_spots, replace=True)
+        targets = np.random.choice(codebook.coords[Features.TARGET], size=n_spots, replace=True)
         expected_bright_locations = np.where(codebook.loc[targets])
 
         # create a binary matrix where "on" spots are 1
@@ -331,9 +332,7 @@ class IntensityTable(xr.DataArray):
 
     @classmethod
     def from_image_stack(
-            cls,
-            image_stack,
-            crop_x: int=0, crop_y: int=0, crop_z: int=0
+        cls, image_stack, crop_x: int = 0, crop_y: int = 0, crop_z: int = 0
     ) -> "IntensityTable":
         """Generate an IntensityTable from all the pixels in the ImageStack
 
@@ -356,31 +355,26 @@ class IntensityTable(xr.DataArray):
         """
 
         # verify the image is large enough to crop
-        assert crop_z * 2 < image_stack.shape['z']
-        assert crop_y * 2 < image_stack.shape['y']
-        assert crop_x * 2 < image_stack.shape['x']
+        assert crop_z * 2 < image_stack.shape["z"]
+        assert crop_y * 2 < image_stack.shape["y"]
+        assert crop_x * 2 < image_stack.shape["x"]
 
         zmin = crop_z
         ymin = crop_y
         xmin = crop_x
-        zmax = image_stack.shape['z'] - crop_z
-        ymax = image_stack.shape['y'] - crop_y
-        xmax = image_stack.shape['x'] - crop_x
-        cropped_stack = image_stack.sel({Axes.ZPLANE: (zmin, zmax),
-                                         Axes.Y: (ymin, ymax),
-                                         Axes.X: (xmin, xmax)})
+        zmax = image_stack.shape["z"] - crop_z
+        ymax = image_stack.shape["y"] - crop_y
+        xmax = image_stack.shape["x"] - crop_x
+        cropped_stack = image_stack.sel(
+            {Axes.ZPLANE: (zmin, zmax), Axes.Y: (ymin, ymax), Axes.X: (xmin, xmax)}
+        )
 
         data = cropped_stack.xarray.transpose(
-            Axes.ZPLANE.value,
-            Axes.Y.value,
-            Axes.X.value,
-            Axes.CH.value,
-            Axes.ROUND.value,
+            Axes.ZPLANE.value, Axes.Y.value, Axes.X.value, Axes.CH.value, Axes.ROUND.value
         )
 
         # (pixels, ch, round)
-        intensity_data = data.values.reshape(
-            -1, image_stack.num_chs, image_stack.num_rounds)
+        intensity_data = data.values.reshape(-1, image_stack.num_chs, image_stack.num_rounds)
 
         # IntensityTable pixel coordinates
         z = np.arange(zmin, zmax)
@@ -388,8 +382,7 @@ class IntensityTable(xr.DataArray):
         x = np.arange(xmin, xmax)
 
         feature_attribute_data = pd.DataFrame(
-            data=np.array(list(product(z, y, x))),
-            columns=['z', 'y', 'x']
+            data=np.array(list(product(z, y, x))), columns=["z", "y", "x"]
         )
         feature_attribute_data[Features.SPOT_RADIUS] = np.full(
             feature_attribute_data.shape[0], fill_value=0.5
@@ -424,7 +417,8 @@ class IntensityTable(xr.DataArray):
         """
         if Features.TARGET not in self.coords.keys():
             raise RuntimeError(
-                "Intensities must be decoded before a DecodedSpots table can be produced.")
+                "Intensities must be decoded before a DecodedSpots table can be produced."
+            )
         df = self.to_features_dataframe()
         pixel_coordinates = pd.Index([Axes.X, Axes.Y, Axes.ZPLANE])
         df = df.drop(pixel_coordinates.intersection(df.columns), axis=1).drop(Features.AXIS, axis=1)
@@ -441,16 +435,20 @@ class IntensityTable(xr.DataArray):
             cell x gene expression table
         """
         if Features.CELL_ID not in self.coords:
-            raise KeyError("IntensityTable must have 'cell_id' assignments for each cell before "
-                           "this function can be called. See starfish.TargetAssignment.Label.")
+            raise KeyError(
+                "IntensityTable must have 'cell_id' assignments for each cell before "
+                "this function can be called. See starfish.TargetAssignment.Label."
+            )
         grouped = self.to_features_dataframe().groupby([Features.CELL_ID, Features.TARGET])
         counts = grouped.count().iloc[:, 0].unstack().fillna(0)
         if self.has_physical_coords:
-            grouped = self.to_features_dataframe().groupby([Features.CELL_ID])[[
-                Axes.X, Axes.Y, Axes.ZPLANE, Coordinates.X, Coordinates.Y, Coordinates.Z]]
+            grouped = self.to_features_dataframe().groupby([Features.CELL_ID])[
+                [Axes.X, Axes.Y, Axes.ZPLANE, Coordinates.X, Coordinates.Y, Coordinates.Z]
+            ]
         else:
-            grouped = self.to_features_dataframe().groupby([Features.CELL_ID])[[
-                Axes.X, Axes.Y, Axes.ZPLANE]]
+            grouped = self.to_features_dataframe().groupby([Features.CELL_ID])[
+                [Axes.X, Axes.Y, Axes.ZPLANE]
+            ]
         min_ = grouped.min()
         max_ = grouped.max()
         coordinate_df = min_ + (max_ - min_) / 2
@@ -464,7 +462,7 @@ class IntensityTable(xr.DataArray):
             data=counts.values,
             dims=(Features.CELLS, Features.GENES),
             coords=metadata,
-            name='expression_matrix'
+            name="expression_matrix",
         )
         return mat
 

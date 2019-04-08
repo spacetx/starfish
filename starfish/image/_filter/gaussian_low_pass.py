@@ -10,17 +10,15 @@ from starfish.types import Clip, Number
 from starfish.util import click
 from starfish.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
-from .util import (
-    determine_axes_to_group_by,
-    validate_and_broadcast_kernel_size,
-)
+from .util import determine_axes_to_group_by, validate_and_broadcast_kernel_size
 
 
 class GaussianLowPass(FilterAlgorithmBase):
-
     def __init__(
-        self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False,
-        clip_method: Union[str, Clip]=Clip.CLIP
+        self,
+        sigma: Union[Number, Tuple[Number]],
+        is_volume: bool = False,
+        clip_method: Union[str, Clip] = Clip.CLIP,
     ) -> None:
         """Multi-dimensional low-pass gaussian filter.
 
@@ -49,9 +47,9 @@ class GaussianLowPass(FilterAlgorithmBase):
 
     @staticmethod
     def _low_pass(
-            image: Union[xr.DataArray, np.ndarray],
-            sigma: Union[Number, Tuple[Number]],
-            rescale: bool=False
+        image: Union[xr.DataArray, np.ndarray],
+        sigma: Union[Number, Tuple[Number]],
+        rescale: bool = False,
     ) -> np.ndarray:
         """
         Apply a Gaussian blur operation over a multi-dimensional image.
@@ -75,7 +73,12 @@ class GaussianLowPass(FilterAlgorithmBase):
 
         filtered = gaussian(
             image,
-            sigma=sigma, output=None, cval=0, multichannel=False, preserve_range=True, truncate=4.0
+            sigma=sigma,
+            output=None,
+            cval=0,
+            multichannel=False,
+            preserve_range=True,
+            truncate=4.0,
         )
 
         filtered = preserve_float_range(filtered, rescale)
@@ -83,12 +86,12 @@ class GaussianLowPass(FilterAlgorithmBase):
         return filtered
 
     def run(
-            self,
-            stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose: bool = False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -114,20 +117,27 @@ class GaussianLowPass(FilterAlgorithmBase):
         low_pass: Callable = partial(self._low_pass, sigma=self.sigma)
         result = stack.apply(
             low_pass,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
-            clip_method=self.clip_method
+            group_by=group_by,
+            verbose=verbose,
+            in_place=in_place,
+            n_processes=n_processes,
+            clip_method=self.clip_method,
         )
         return result
 
     @staticmethod
     @click.command("GaussianLowPass")
     @click.option("--sigma", type=float, help="standard deviation of gaussian kernel")
-    @click.option("--is-volume", is_flag=True,
-                  help="indicates that the image stack should be filtered in 3d")
     @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
+        "--is-volume", is_flag=True, help="indicates that the image stack should be filtered in 3d"
+    )
+    @click.option(
+        "--clip-method",
+        default=Clip.CLIP,
+        type=Clip,
         help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
+        "'scale_by_chunk'",
+    )
     @click.pass_context
     def _cli(ctx, sigma, is_volume, clip_method):
         ctx.obj["component"]._cli_run(ctx, GaussianLowPass(sigma, is_volume, clip_method))

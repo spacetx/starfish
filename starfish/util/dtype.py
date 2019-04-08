@@ -3,9 +3,10 @@ from typing import Union
 import numpy as np
 import xarray as xr
 
+
 def preserve_float_range(
-        array: Union[xr.DataArray, np.ndarray],
-        rescale: bool=False) -> Union[xr.DataArray, np.ndarray]:
+    array: Union[xr.DataArray, np.ndarray], rescale: bool = False
+) -> Union[xr.DataArray, np.ndarray]:
     """
     Clips values below zero to zero. If values above one are detected, clips them
     to 1 unless `rescale` is True, in which case the input is scaled by

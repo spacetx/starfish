@@ -22,7 +22,10 @@ class WhiteTophat(FilterAlgorithmBase):
     """
 
     def __init__(
-        self, masking_radius: int, is_volume: bool=False, clip_method: Union[str, Clip]=Clip.CLIP
+        self,
+        masking_radius: int,
+        is_volume: bool = False,
+        clip_method: Union[str, Clip] = Clip.CLIP,
     ) -> None:
         """
         Instance of a white top hat morphological masking filter which masks objects larger
@@ -59,12 +62,12 @@ class WhiteTophat(FilterAlgorithmBase):
         return white_tophat(image, selem=structuring_element)
 
     def run(
-            self,
-            stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose: bool = False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -89,22 +92,32 @@ class WhiteTophat(FilterAlgorithmBase):
         group_by = determine_axes_to_group_by(self.is_volume)
         result = stack.apply(
             self._white_tophat,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
-            clip_method=self.clip_method
+            group_by=group_by,
+            verbose=verbose,
+            in_place=in_place,
+            n_processes=n_processes,
+            clip_method=self.clip_method,
         )
         return result
 
     @staticmethod
     @click.command("WhiteTophat")
     @click.option(
-        "--masking-radius", default=15, type=int,
-        help="diameter of morphological masking disk in pixels")
+        "--masking-radius",
+        default=15,
+        type=int,
+        help="diameter of morphological masking disk in pixels",
+    )
     @click.option(  # FIXME: was this intentionally missed?
-        "--is-volume", is_flag=True, help="filter 3D volumes")
+        "--is-volume", is_flag=True, help="filter 3D volumes"
+    )
     @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
+        "--clip-method",
+        default=Clip.CLIP,
+        type=Clip,
         help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
+        "'scale_by_chunk'",
+    )
     @click.pass_context
     def _cli(ctx, masking_radius, is_volume, clip_method):
         ctx.obj["component"]._cli_run(ctx, WhiteTophat(masking_radius, is_volume, clip_method))

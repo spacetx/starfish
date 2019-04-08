@@ -34,7 +34,7 @@ def _normalize_axes(axes: Iterable[Union[Axes, str]]) -> List[str]:
 
 
 def _max_intensity_table_maintain_dims(
-    intensity_table: IntensityTable, dimensions: Set[Axes],
+    intensity_table: IntensityTable, dimensions: Set[Axes]
 ) -> IntensityTable:
     """
     Maximum project an IntensityTable over dimensions, retaining singletons in place of dimensions
@@ -65,8 +65,7 @@ def _max_intensity_table_maintain_dims(
 
 
 def _mask_low_intensity_spots(
-    intensity_table: IntensityTable,
-    intensity_threshold: float
+    intensity_table: IntensityTable, intensity_threshold: float
 ) -> np.ndarray:
     """
     returns a flattened boolean mask (c order flattening) that is True where
@@ -116,13 +115,13 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
 
 
 def display(
-        stack: Optional[ImageStack] = None,
-        spots: Optional[IntensityTable] = None,
-        viewer: Optional[Viewer] = None,
-        project_axes: Optional[Set[Axes]] = None,
-        mask_intensities: float = 0.,
-        radius_multiplier: int = 1,
-        z_multiplier: float = 1
+    stack: Optional[ImageStack] = None,
+    spots: Optional[IntensityTable] = None,
+    viewer: Optional[Viewer] = None,
+    project_axes: Optional[Set[Axes]] = None,
+    mask_intensities: float = 0.0,
+    radius_multiplier: int = 1,
+    z_multiplier: float = 1,
 ):
     """
     Displays an image stack and/or detected spots using Napari (https://github.com/napari/Napari).
@@ -199,8 +198,10 @@ def display(
         raise TypeError("expected a stack and/or spots; got nothing")
 
     if Window is None or Viewer is None:
-        warnings.warn("Requires napari 0.0.6. Run `pip install starfish[napari]` to install the "
-                      "necessary requirements.")
+        warnings.warn(
+            "Requires napari 0.0.6. Run `pip install starfish[napari]` to install the "
+            "necessary requirements."
+        )
         return
 
     from PyQt5.QtWidgets import QApplication
@@ -225,11 +226,7 @@ def display(
 
         # Switch axes to match napari expected order [x, y, round, channel, z]
         reordered_array: np.ndarray = stack.xarray.transpose(
-            Axes.Y.value,
-            Axes.X.value,
-            Axes.ROUND.value,
-            Axes.CH.value,
-            Axes.ZPLANE.value
+            Axes.Y.value, Axes.X.value, Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE.value
         ).values
 
         layer = viewer.add_image(np.squeeze(reordered_array), multichannel=False)
@@ -258,8 +255,14 @@ def display(
         # adjust z-size
         sizes[:, 4] *= z_multiplier
 
-        viewer.add_markers(coords=coords, face_color="red", edge_color="red", symbol="ring",
-                           size=sizes * radius_multiplier, n_dimensional=True)
+        viewer.add_markers(
+            coords=coords,
+            face_color="red",
+            edge_color="red",
+            symbol="ring",
+            size=sizes * radius_multiplier,
+            n_dimensional=True,
+        )
 
     if new_viewer:
         window.show()

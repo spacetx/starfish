@@ -20,7 +20,6 @@ class ConnectedComponentDecodingResult(NamedTuple):
 
 
 class TargetsMap:
-
     def __init__(self, targets: np.ndarray) -> None:
         """
         Creates an invertible mapping between string names of Codebook targets and integer IDs
@@ -32,10 +31,10 @@ class TargetsMap:
             array of string target IDs
 
         """
-        unique_targets = set(targets) - {'nan'}
+        unique_targets = set(targets) - {"nan"}
         sorted_targets = sorted(unique_targets)
         self._int_to_target = dict(zip(range(1, np.iinfo(np.int).max), sorted_targets))
-        self._int_to_target[0] = 'nan'
+        self._int_to_target[0] = "nan"
         self._target_to_int = {v: k for (k, v) in self._int_to_target.items()}
 
     def targets_as_int(self, targets: np.ndarray) -> np.ndarray:
@@ -75,13 +74,12 @@ class TargetsMap:
 
 
 class CombineAdjacentFeatures:
-
     def __init__(
-            self,
-            min_area: Number,
-            max_area: Number,
-            connectivity: int=2,
-            mask_filtered_features: bool=True
+        self,
+        min_area: Number,
+        max_area: Number,
+        connectivity: int = 2,
+        mask_filtered_features: bool = True,
     ) -> None:
         """Combines pixel-wise adjacent features into single larger features using skimage.measure
 
@@ -107,9 +105,7 @@ class CombineAdjacentFeatures:
 
     @staticmethod
     def _intensities_to_decoded_image(
-            intensities: IntensityTable,
-            target_map: TargetsMap,
-            mask_filtered_features: bool=True
+        intensities: IntensityTable, target_map: TargetsMap, mask_filtered_features: bool = True
     ) -> np.ndarray:
         """
         Construct an image where each pixel corresponds to its decoded target, mapped to a unique
@@ -147,8 +143,7 @@ class CombineAdjacentFeatures:
 
     @staticmethod
     def _calculate_mean_pixel_traces(
-            label_image: np.ndarray,
-            intensities: IntensityTable,
+        label_image: np.ndarray, intensities: IntensityTable
     ) -> IntensityTable:
         """
         For all pixels that contribute to a connected component, calculate the mean value for
@@ -169,17 +164,14 @@ class CombineAdjacentFeatures:
 
         """
         pixel_labels = label_image.reshape(-1)
-        intensities['spot_id'] = (Features.AXIS, pixel_labels)
-        mean_pixel_traces = intensities.groupby('spot_id').mean(Features.AXIS)
-        mean_distances = intensities[Features.DISTANCE].groupby('spot_id').mean(Features.AXIS)
-        mean_pixel_traces[Features.DISTANCE] = (
-            'spot_id',
-            np.ravel(mean_distances)
-        )
+        intensities["spot_id"] = (Features.AXIS, pixel_labels)
+        mean_pixel_traces = intensities.groupby("spot_id").mean(Features.AXIS)
+        mean_distances = intensities[Features.DISTANCE].groupby("spot_id").mean(Features.AXIS)
+        mean_pixel_traces[Features.DISTANCE] = ("spot_id", np.ravel(mean_distances))
 
         # the 0th pixel trace corresponds to background. If present, drop it.
         try:
-            mean_pixel_traces = mean_pixel_traces.drop(0, dim='spot_id')
+            mean_pixel_traces = mean_pixel_traces.drop(0, dim="spot_id")
         except KeyError:
             pass
 
@@ -187,11 +179,11 @@ class CombineAdjacentFeatures:
 
     @staticmethod
     def _single_spot_attributes(
-            spot_property: _RegionProperties,
-            decoded_image: np.ndarray,
-            target_map: TargetsMap,
-            min_area: Number,
-            max_area: Number,
+        spot_property: _RegionProperties,
+        decoded_image: np.ndarray,
+        target_map: TargetsMap,
+        min_area: Number,
+        max_area: Number,
     ) -> Tuple[Dict[str, int], int]:
         """
         Calculate starfish SpotAttributes from the RegionProperties of a connected component
@@ -223,19 +215,19 @@ class CombineAdjacentFeatures:
         # because of the above skimage issue, we need to support both 2d and 3d properties
         if len(spot_property.centroid) == 3:
             spot_attrs = {
-                'z': int(spot_property.centroid[0]),
-                'y': int(spot_property.centroid[1]),
-                'x': int(spot_property.centroid[2])
+                "z": int(spot_property.centroid[0]),
+                "y": int(spot_property.centroid[1]),
+                "x": int(spot_property.centroid[2]),
             }
         else:  # data is 2d
             spot_attrs = {
-                'z': 0,
-                'y': int(spot_property.centroid[0]),
-                'x': int(spot_property.centroid[1])
+                "z": 0,
+                "y": int(spot_property.centroid[0]),
+                "x": int(spot_property.centroid[1]),
             }
 
         # we're back to 3d or fake-3d here
-        target_index = decoded_image[spot_attrs['z'], spot_attrs['y'], spot_attrs['x']]
+        target_index = decoded_image[spot_attrs["z"], spot_attrs["y"], spot_attrs["x"]]
         spot_attrs[Features.TARGET] = target_map.target_as_str(target_index)
         spot_attrs[Features.SPOT_RADIUS] = spot_property.equivalent_diameter / 2
 
@@ -244,11 +236,11 @@ class CombineAdjacentFeatures:
         return spot_attrs, passes_area_filter
 
     def _create_spot_attributes(
-            self,
-            region_properties: List[_RegionProperties],
-            decoded_image: np.ndarray,
-            target_map: TargetsMap,
-            n_processes: Optional[int]=None
+        self,
+        region_properties: List[_RegionProperties],
+        decoded_image: np.ndarray,
+        target_map: TargetsMap,
+        n_processes: Optional[int] = None,
     ) -> Tuple[SpotAttributes, np.ndarray]:
         """
 
@@ -281,7 +273,7 @@ class CombineAdjacentFeatures:
             decoded_image=decoded_image,
             target_map=target_map,
             min_area=self._min_area,
-            max_area=self._max_area
+            max_area=self._max_area,
         )
 
         iterable = tqdm(region_properties, disable=(not StarfishConfig().verbose))
@@ -295,8 +287,7 @@ class CombineAdjacentFeatures:
         return spot_attributes, passes_filter
 
     def run(
-            self, intensities: IntensityTable,
-            n_processes: Optional[int] = None,
+        self, intensities: IntensityTable, n_processes: Optional[int] = None
     ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """
         Execute the combine_adjacent_features method on an IntensityTable containing pixel
@@ -334,9 +325,7 @@ class CombineAdjacentFeatures:
 
         # create the decoded_image
         decoded_image = self._intensities_to_decoded_image(
-            intensities,
-            target_map,
-            self._mask_filtered,
+            intensities, target_map, self._mask_filtered
         )
 
         # label the decoded image to extract connected component features
@@ -346,17 +335,11 @@ class CombineAdjacentFeatures:
         props: List = regionprops(np.squeeze(label_image))
 
         # calculate mean intensities across the pixels of each feature
-        mean_pixel_traces = self._calculate_mean_pixel_traces(
-            label_image,
-            intensities,
-        )
+        mean_pixel_traces = self._calculate_mean_pixel_traces(label_image, intensities)
 
         # Create SpotAttributes and determine feature filtering outcomes
         spot_attributes, passes_filter = self._create_spot_attributes(
-            props,
-            decoded_image,
-            target_map,
-            n_processes=n_processes
+            props, decoded_image, target_map, n_processes=n_processes
         )
 
         # augment the SpotAttributes with filtering results and distances from nearest codes
@@ -370,9 +353,7 @@ class CombineAdjacentFeatures:
 
         # create the output IntensityTable
         dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
-        intensity_table = IntensityTable(
-            data=mean_pixel_traces, coords=coords, dims=dims
-        )
+        intensity_table = IntensityTable(data=mean_pixel_traces, coords=coords, dims=dims)
 
         # combine the various non-IntensityTable results into a NamedTuple before returning
         ccdr = ConnectedComponentDecodingResult(props, label_image, decoded_image)

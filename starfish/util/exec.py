@@ -6,10 +6,11 @@ from typing import Callable, Sequence, Union
 from starfish.util import clock
 
 
-def stages(commands: Sequence[Sequence[Union[str, Callable]]],
-           subdirs: Sequence[str]=None,
-
-           keep_data: bool=False) -> str:
+def stages(
+    commands: Sequence[Sequence[Union[str, Callable]]],
+    subdirs: Sequence[str] = None,
+    keep_data: bool = False,
+) -> str:
     """
     Execute a list of commands in a temporary directory
     cleaning them up unless otherwise requested.
@@ -52,8 +53,7 @@ def stages(commands: Sequence[Sequence[Union[str, Callable]]],
 
         if subdirs:
             for subdir in subdirs:
-                os.makedirs("{tempdir}".format(
-                    tempdir=os.path.join(tempdir, subdir)))
+                os.makedirs("{tempdir}".format(tempdir=os.path.join(tempdir, subdir)))
 
         for stage in commands:
             cmdline = prepare_stage(stage, tempdir)
@@ -70,8 +70,7 @@ def stages(commands: Sequence[Sequence[Union[str, Callable]]],
             print(tempdir)
 
 
-def prepare_stage(stage: Sequence[Union[str, Callable]],
-                  tempdir: str) -> Sequence[str]:
+def prepare_stage(stage: Sequence[Union[str, Callable]], tempdir: str) -> Sequence[str]:
     """
     Loop through elements of stage, building them into a commandline.
     If an element is a callable, it will be invoked with the "tempdir"
@@ -96,17 +95,9 @@ def prepare_stage(stage: Sequence[Union[str, Callable]],
 
     """
     coverage_enabled = "STARFISH_COVERAGE" in os.environ
-    cmdline = [
-        element(tempdir=tempdir) if callable(element) else element
-        for element in stage
-    ]
+    cmdline = [element(tempdir=tempdir) if callable(element) else element for element in stage]
     if cmdline[0] == "starfish" and coverage_enabled:
-        coverage_cmdline = [
-            "coverage", "run",
-            "-p",
-            "--source", "starfish",
-            "-m", "starfish",
-        ]
+        coverage_cmdline = ["coverage", "run", "-p", "--source", "starfish", "-m", "starfish"]
         coverage_cmdline.extend(cmdline[1:])
         cmdline = coverage_cmdline
     return cmdline

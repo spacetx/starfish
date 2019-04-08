@@ -9,17 +9,16 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Clip, Number
 from starfish.util import click
 from ._base import FilterAlgorithmBase
-from .util import (
-    determine_axes_to_group_by,
-    gaussian_kernel,
-)
+from .util import determine_axes_to_group_by, gaussian_kernel
 
 
 class DeconvolvePSF(FilterAlgorithmBase):
-
     def __init__(
-        self, num_iter: int, sigma: Number, is_volume: bool = False,
-        clip_method: Union[str, Clip]=Clip.CLIP
+        self,
+        num_iter: int,
+        sigma: Number,
+        is_volume: bool = False,
+        clip_method: Union[str, Clip] = Clip.CLIP,
     ) -> None:
         """Deconvolve a point spread function
 
@@ -47,8 +46,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
         self.sigma = sigma
         self.kernel_size: int = int(2 * np.ceil(2 * sigma) + 1)
         self.psf: np.ndarray = gaussian_kernel(
-            shape=(self.kernel_size, self.kernel_size),
-            sigma=sigma
+            shape=(self.kernel_size, self.kernel_size), sigma=sigma
         )
         self.is_volume = is_volume
         self.clip_method = clip_method
@@ -59,7 +57,7 @@ class DeconvolvePSF(FilterAlgorithmBase):
     # and the results look bad. #548 addresses this problem.
     @staticmethod
     def _richardson_lucy_deconv(
-            image: Union[xr.DataArray, np.ndarray], iterations: int, psf: np.ndarray
+        image: Union[xr.DataArray, np.ndarray], iterations: int, psf: np.ndarray
     ) -> np.ndarray:
         """
         Deconvolves input image with a specified point spread function.
@@ -124,25 +122,26 @@ class DeconvolvePSF(FilterAlgorithmBase):
 
         eps = np.finfo(image.dtype).eps
         for _ in range(iterations):
-            x = convolve_method(im_deconv, psf, 'same')
+            x = convolve_method(im_deconv, psf, "same")
             np.place(x, x == 0, eps)
             relative_blur = image / x + eps
-            im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
+            im_deconv *= convolve_method(relative_blur, psf_mirror, "same")
 
         if np.all(np.isnan(im_deconv)):
             raise RuntimeError(
-                'All-NaN output data detected. Likely cause is that deconvolution has been run for '
-                'too many iterations.')
+                "All-NaN output data detected. Likely cause is that deconvolution has been run for "
+                "too many iterations."
+            )
 
         return im_deconv
 
     def run(
-            self,
-            stack: ImageStack,
-            in_place: bool=False,
-            verbose=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose=False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -165,31 +164,26 @@ class DeconvolvePSF(FilterAlgorithmBase):
 
         """
         group_by = determine_axes_to_group_by(self.is_volume)
-        func = partial(
-            self._richardson_lucy_deconv,
-            iterations=self.num_iter, psf=self.psf
-        )
+        func = partial(self._richardson_lucy_deconv, iterations=self.num_iter, psf=self.psf)
         result = stack.apply(
-            func,
-            group_by=group_by,
-            verbose=verbose,
-            n_processes=n_processes,
-            in_place=in_place,
+            func, group_by=group_by, verbose=verbose, n_processes=n_processes, in_place=in_place
         )
         return result
 
     @staticmethod
     @click.command("DeconvolvePSF")
+    @click.option("--num-iter", type=int, help="number of iterations to run")
+    @click.option("--sigma", type=float, help="standard deviation of gaussian kernel")
     @click.option(
-        '--num-iter', type=int, help='number of iterations to run')
+        "--is-volume", is_flag=True, help="indicates that the image stack should be filtered in 3d"
+    )
     @click.option(
-        '--sigma', type=float, help='standard deviation of gaussian kernel')
-    @click.option("--is-volume", is_flag=True,
-                  help="indicates that the image stack should be filtered in 3d")
-    @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
+        "--clip-method",
+        default=Clip.CLIP,
+        type=Clip,
         help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
+        "'scale_by_chunk'",
+    )
     @click.pass_context
     def _cli(ctx, num_iter, sigma, is_volume, clip_method):
         ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, is_volume, clip_method))

@@ -7,19 +7,18 @@ from ._base import FilterAlgorithmBase
 
 
 class MaxProj(FilterAlgorithmBase):
-
     def __init__(self, dims) -> None:
         self.dims = dims
 
-    _DEFAULT_TESTING_PARAMETERS = {"dims": 'r'}
+    _DEFAULT_TESTING_PARAMETERS = {"dims": "r"}
 
     def run(
-            self,
-            stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose: bool = False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -45,10 +44,14 @@ class MaxProj(FilterAlgorithmBase):
 
     @staticmethod
     @click.command("MaxProj")
-    @click.option("--dims", type=str, multiple=True,
-                  help="The dimensions the Imagestack should max project over. Options:"
-                       "(r, c, z, y, or x) For multiple dimensions add multiple --dims. Ex."
-                       "--dims r --dims c")
+    @click.option(
+        "--dims",
+        type=str,
+        multiple=True,
+        help="The dimensions the Imagestack should max project over. Options:"
+        "(r, c, z, y, or x) For multiple dimensions add multiple --dims. Ex."
+        "--dims r --dims c",
+    )
     @click.pass_context
     def _cli(ctx, dims):
         ctx.obj["component"]._cli_run(ctx, MaxProj(dims))

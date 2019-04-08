@@ -17,7 +17,7 @@ WIDTH = 10
 
 
 X_COORDS = 100, 1000
-Y_COORDS = .1, 10
+Y_COORDS = 0.1, 10
 
 
 def zplane_to_z(z: int) -> Tuple[float, float]:
@@ -65,22 +65,26 @@ def test_coordinates():
     retrieved match.
     """
     stack = ImageStack.synthetic_stack(
-        NUM_ROUND, NUM_CH, NUM_Z,
-        HEIGHT, WIDTH,
-        tile_fetcher=tile_fetcher_factory(
-            AlignedTiles,
-            True,
-        )
+        NUM_ROUND,
+        NUM_CH,
+        NUM_Z,
+        HEIGHT,
+        WIDTH,
+        tile_fetcher=tile_fetcher_factory(AlignedTiles, True),
     )
     for selectors in stack._iter_axes({Axes.ZPLANE}):
-        verify_physical_coordinates(stack, X_COORDS, Y_COORDS,
-                                    get_physical_coordinates_of_z_plane(
-                                        zplane_to_z(selectors[Axes.ZPLANE])),
-                                    selectors[Axes.ZPLANE])
+        verify_physical_coordinates(
+            stack,
+            X_COORDS,
+            Y_COORDS,
+            get_physical_coordinates_of_z_plane(zplane_to_z(selectors[Axes.ZPLANE])),
+            selectors[Axes.ZPLANE],
+        )
 
 
 class ScalarTiles(FetchedTile):
     """Tiles that have a single scalar coordinate."""
+
     def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
         super().__init__()
         self._round = _round
@@ -108,6 +112,7 @@ class ScalarTiles(FetchedTile):
 
 class OffsettedTiles(FetchedTile):
     """Tiles that are physically offset based on round."""
+
     def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
         super().__init__()
         self._round = _round
@@ -137,12 +142,12 @@ def test_unaligned_tiles():
 
     try:
         ImageStack.synthetic_stack(
-            NUM_ROUND, NUM_CH, NUM_Z,
-            HEIGHT, WIDTH,
-            tile_fetcher=tile_fetcher_factory(
-                OffsettedTiles,
-                True,
-            )
+            NUM_ROUND,
+            NUM_CH,
+            NUM_Z,
+            HEIGHT,
+            WIDTH,
+            tile_fetcher=tile_fetcher_factory(OffsettedTiles, True),
         )
     except ValueError as e:
         # Assert value error is thrown with right message
@@ -155,12 +160,12 @@ def test_scalar_coordinates():
     physical coordinate provided.
     """
     stack = ImageStack.synthetic_stack(
-        NUM_ROUND, NUM_CH, NUM_Z,
-        HEIGHT, WIDTH,
-        tile_fetcher=tile_fetcher_factory(
-            ScalarTiles,
-            True,
-        )
+        NUM_ROUND,
+        NUM_CH,
+        NUM_Z,
+        HEIGHT,
+        WIDTH,
+        tile_fetcher=tile_fetcher_factory(ScalarTiles, True),
     )
 
     expected_x = X_COORDS[0]
@@ -168,8 +173,10 @@ def test_scalar_coordinates():
 
     for selectors in stack._iter_axes({Axes.ZPLANE}):
         expected_z = zplane_to_z(selectors[Axes.ZPLANE])[0]
-        verify_physical_coordinates(stack,
-                                    (expected_x, expected_x),
-                                    (expected_y, expected_y),
-                                    get_physical_coordinates_of_z_plane((expected_z, expected_z)),
-                                    selectors[Axes.ZPLANE])
+        verify_physical_coordinates(
+            stack,
+            (expected_x, expected_x),
+            (expected_y, expected_y),
+            get_physical_coordinates_of_z_plane((expected_z, expected_z)),
+            selectors[Axes.ZPLANE],
+        )

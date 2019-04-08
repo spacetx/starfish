@@ -7,9 +7,9 @@ from ._validated_table import ValidatedTable
 class DecodedSpots(ValidatedTable):
 
     required_fields = {
-        Coordinates.X.value,          # spot x-coordinate
-        Coordinates.Y.value,          # spot y-coordinate
-        Features.TARGET,     # spot gene target
+        Coordinates.X.value,  # spot x-coordinate
+        Coordinates.Y.value,  # spot y-coordinate
+        Features.TARGET,  # spot gene target
     }
 
     def __init__(self, decoded_spots: pd.DataFrame) -> None:

@@ -34,16 +34,19 @@ class PixelSpotDecoder(PipelineComponent):
     @click.option("-i", "--input", required=True, type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
     @click.option(
-        '--codebook', default=None, required=True, help=(
-            'A spaceTx spec-compliant json file that describes a three dimensional tensor '
-            'whose values are the expected intensity of a spot for each code in each imaging '
-            'round and each color channel.'
-        )
+        "--codebook",
+        default=None,
+        required=True,
+        help=(
+            "A spaceTx spec-compliant json file that describes a three dimensional tensor "
+            "whose values are the expected intensity of a spot for each code in each imaging "
+            "round and each color channel."
+        ),
     )
     @click.pass_context
     def _cli(ctx, input, output, codebook):
         """pixel-wise spot detection and decoding"""
-        print('Detecting Spots ...')
+        print("Detecting Spots ...")
         ctx.obj = dict(
             component=PixelSpotDecoder,
             image_stack=ImageStack.from_path_or_url(input),
@@ -59,9 +62,7 @@ class PixelDecoderAlgorithmBase(AlgorithmBase):
 
     @abstractmethod
     def run(
-            self,
-            primary_image: ImageStack,
-            *args,
+        self, primary_image: ImageStack, *args
     ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """Finds spots in an ImageStack"""
         raise NotImplementedError()
@@ -73,5 +74,6 @@ class PixelDecoderAlgorithmBase(AlgorithmBase):
         except AttributeError:
             raise ValueError(
                 f'measurement_type must be a numpy reduce function such as "max" or "mean". '
-                f'{measurement_type} not found.')
+                f"{measurement_type} not found."
+            )
         return measurement_function

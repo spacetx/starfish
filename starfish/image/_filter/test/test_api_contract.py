@@ -34,7 +34,7 @@ def generate_default_data():
     return ImageStack.from_numpy_array(data)
 
 
-@pytest.mark.parametrize('filter_class', methods.values())
+@pytest.mark.parametrize("filter_class", methods.values())
 def test_all_methods_adhere_to_contract(filter_class):
     """Test that all filter algorithms adhere to the filtering contract"""
 
@@ -58,18 +58,20 @@ def test_all_methods_adhere_to_contract(filter_class):
     try:
         filtered = instance.run(data, in_place=True)
     except TypeError:
-        raise AssertionError(f'{filter_class} must accept in_place parameter')
+        raise AssertionError(f"{filter_class} must accept in_place parameter")
     assert isinstance(filtered, ImageStack)
     if filter_class is not MaxProj:
         # Max Proj does not have an in place option, so we need to skip this assertion
-        assert data is filtered, \
-            f'{filter_class} should return a reference to the input ImageStack when run in_place'
+        assert (
+            data is filtered
+        ), f"{filter_class} should return a reference to the input ImageStack when run in_place"
 
     # operates out of place
     data = generate_default_data()
     filtered = instance.run(data, in_place=False)
-    assert data is not filtered, \
-        f'{filter_class} should output a new ImageStack when run out-of-place'
+    assert (
+        data is not filtered
+    ), f"{filter_class} should output a new ImageStack when run out-of-place"
 
     # accepts n_processes
     # TODO shanaxel: verify that this causes more than one process to be generated
@@ -77,18 +79,20 @@ def test_all_methods_adhere_to_contract(filter_class):
     try:
         instance.run(data, n_processes=1)
     except TypeError:
-        raise AssertionError(f'{filter_class} must accept n_processes parameter')
+        raise AssertionError(f"{filter_class} must accept n_processes parameter")
 
     # accepts verbose, and if passed, prints progress
     data = generate_default_data()
     try:
         instance.run(data, verbose=True)
     except TypeError:
-        raise AssertionError(f'{filter_class} must accept verbose parameter')
+        raise AssertionError(f"{filter_class} must accept verbose parameter")
 
     # output is dtype float and within the expected interval of [0, 1]
-    assert filtered.xarray.dtype == np.float32, f'{filter_class} must output float32 data'
-    assert np.all(filtered.xarray >= 0), \
-        f'{filter_class} must output a result where all values are >= 0'
-    assert np.all(filtered.xarray <= 1), \
-        f'{filter_class} must output a result where all values are <= 1'
+    assert filtered.xarray.dtype == np.float32, f"{filter_class} must output float32 data"
+    assert np.all(
+        filtered.xarray >= 0
+    ), f"{filter_class} must output a result where all values are >= 0"
+    assert np.all(
+        filtered.xarray <= 1
+    ), f"{filter_class} must output a result where all values are <= 1"

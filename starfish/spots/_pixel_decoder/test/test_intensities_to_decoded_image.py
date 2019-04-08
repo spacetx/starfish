@@ -8,7 +8,8 @@ import numpy as np
 
 from starfish import ImageStack, IntensityTable
 from starfish.spots._pixel_decoder.combine_adjacent_features import (
-    CombineAdjacentFeatures, TargetsMap
+    CombineAdjacentFeatures,
+    TargetsMap,
 )
 from starfish.types import Features
 
@@ -20,16 +21,10 @@ def decoded_intensity_table_factory() -> Tuple[IntensityTable, np.ndarray]:
     """
     data = np.zeros((1, 1, 2, 3, 3), dtype=np.float32)
     labels = np.array(
-        [[[0, 1, 1],
-          [0, 2, 2],
-          [1, 1, 1]],
-         [[0, 1, 1],
-          [1, 1, 1],
-          [0, 1, 2]]],
-        dtype='<U3'
+        [[[0, 1, 1], [0, 2, 2], [1, 1, 1]], [[0, 1, 1], [1, 1, 1], [0, 1, 2]]], dtype="<U3"
     )
     labels_with_nan = labels.copy()
-    labels_with_nan[labels == '0'] = 'nan'
+    labels_with_nan[labels == "0"] = "nan"
 
     # create an intensity table and add the labels
     image_stack = ImageStack.from_numpy_array(data)
@@ -52,9 +47,7 @@ def test_intensities_to_decoded_image():
     # test producing a decoded image
     targets_map = TargetsMap(intensities[Features.TARGET].values)
     decoded_image = CombineAdjacentFeatures._intensities_to_decoded_image(
-        intensities,
-        targets_map,
-        mask_filtered_features=False
+        intensities, targets_map, mask_filtered_features=False
     )
 
     # we should be able to map the results back to labels_with_nan using the targets dict
@@ -73,9 +66,7 @@ def test_intensities_failing_filters_are_masked_when_requested():
     # test producing a decoded image
     targets_map = TargetsMap(intensities[Features.TARGET].values)
     decoded_image = CombineAdjacentFeatures._intensities_to_decoded_image(
-        intensities,
-        targets_map,
-        mask_filtered_features=True
+        intensities, targets_map, mask_filtered_features=True
     )
 
     # the third column should now be masked

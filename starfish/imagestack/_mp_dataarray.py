@@ -23,13 +23,14 @@ class MPDataArray:
     multiprocessing.Array object back out of the numpy array or the xarray.  Therefore, we need to
     explicitly maintain a reference to it and keep the two items together.
     """
+
     def __init__(self, data: xr.DataArray, backing_mp_array: mp_array) -> None:
         self._data = data
         self._backing_mp_array = backing_mp_array
 
     @classmethod
     def from_shape_and_dtype(
-            cls, shape: Sequence[int], dtype, initial_value: Number=None, *args, **kwargs
+        cls, shape: Sequence[int], dtype, initial_value: Number = None, *args, **kwargs
     ) -> "MPDataArray":
         np_array, backing_mp_array = np_array_backed_by_mp_array(shape, dtype)
         if initial_value is not None and initial_value != 0:
@@ -56,8 +57,7 @@ class MPDataArray:
         return MPDataArray(xarray_copy, backing_mp_array_copy)
 
 
-def np_array_backed_by_mp_array(
-        shape: Sequence[int], dtype) -> Tuple[np.ndarray, mp_array]:
+def np_array_backed_by_mp_array(shape: Sequence[int], dtype) -> Tuple[np.ndarray, mp_array]:
     """Returns a np_array backed by a multiproceessing.Array buffer."""
     ctype_type = np.ctypeslib.as_ctypes(np.empty((1,), dtype=np.dtype(dtype))).__class__
     length = int(np.product(shape))  # the cast to int is required by multiprocessing.Array.
@@ -73,7 +73,8 @@ def xr_deepcopy(source: xr.DataArray) -> Tuple[xr.DataArray, mp_array]:
     backed by a multiprocessing.Array buffer.
     """
     shaped_np_array, backing_array = np_array_backed_by_mp_array(
-        source.variable.shape, source.variable.dtype)
+        source.variable.shape, source.variable.dtype
+    )
 
     shaped_np_array[:] = source.variable.data
 
@@ -86,15 +87,9 @@ def xr_deepcopy(source: xr.DataArray) -> Tuple[xr.DataArray, mp_array]:
         source.variable.attrs,
         source.variable.encoding,
     )
-    coords = OrderedDict((k, v.copy(deep=True))
-                         for k, v in source._coords.items())
+    coords = OrderedDict((k, v.copy(deep=True)) for k, v in source._coords.items())
 
-    result = xr.DataArray(
-        variable,
-        coords=coords,
-        name=source.name,
-        fastpath=True,
-    )
+    result = xr.DataArray(variable, coords=coords, name=source.name, fastpath=True)
 
     return result, backing_array
 

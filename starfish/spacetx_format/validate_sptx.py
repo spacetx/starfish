@@ -18,11 +18,12 @@ def _get_absolute_schema_path(schema_name: str) -> str:
 
 
 @click.command()
-@click.option('--experiment-json', help='image metadata file to validate')
-def validate_sptx(experiment_json: str, fuzz: bool=False) -> bool:
+@click.option("--experiment-json", help="image metadata file to validate")
+def validate_sptx(experiment_json: str, fuzz: bool = False) -> bool:
     return validate(experiment_json, fuzz)
 
-def validate(experiment_json: str, fuzz: bool=False) -> bool:
+
+def validate(experiment_json: str, fuzz: bool = False) -> bool:
     """validate a spaceTx formatted experiment.
     Accepts local filepaths or files hosted at http links.
     Loads configuration from StarfishConfig.
@@ -56,7 +57,8 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     # use slicedimage to read the top-level experiment json file passed by the user
     try:
         backend, name, baseurl = resolve_path_or_url(
-            experiment_json, backend_config=config.slicedimage)
+            experiment_json, backend_config=config.slicedimage
+        )
     except ValueError as exception:
         raise Exception(f"could not load {experiment_json}:\n{exception}")
 
@@ -68,23 +70,24 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
 
     # loop over all the manifests that are stored in images. Disallowed names will have already been
     # excluded by experiment validation.
-    for manifest in experiment['images'].values():
+    for manifest in experiment["images"].values():
         obj: Dict = dict()
         if not validate_file(manifest, "fov_manifest.json", fuzz, backend, obj):
             valid = False
         else:
-            for key, fov in obj['contents'].items():
-                valid &= validate_file(fov, 'field_of_view/field_of_view.json', fuzz, backend)
+            for key, fov in obj["contents"].items():
+                valid &= validate_file(fov, "field_of_view/field_of_view.json", fuzz, backend)
 
-    codebook_file = experiment.get('codebook')
+    codebook_file = experiment.get("codebook")
     if codebook_file is not None:
         valid &= validate_file(codebook_file, "codebook/codebook.json", fuzz, backend)
 
     return valid
 
 
-def validate_file(file: str, schema: str, fuzz: bool=False,
-                  backend: Backend=None, output: Dict=None) -> bool:
+def validate_file(
+    file: str, schema: str, fuzz: bool = False, backend: Backend = None, output: Dict = None
+) -> bool:
     """validate a spaceTx formatted file with a given schema.
     Accepts local filepaths or files hosted at http links.
 

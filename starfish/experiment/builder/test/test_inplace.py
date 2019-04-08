@@ -10,7 +10,9 @@ from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.experiment.builder.inplace import (
-    enable_inplace_mode, inplace_tile_opener, InplaceFetchedTile
+    enable_inplace_mode,
+    inplace_tile_opener,
+    InplaceFetchedTile,
 )
 from starfish.experiment.experiment import Experiment, FieldOfView
 from starfish.types import Axes, Coordinates, Number
@@ -56,7 +58,7 @@ class InplaceFetcher(TileFetcher):
         self.prefix = prefix
 
     def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
-        filename = '{}-Z{}-H{}-C{}.tiff'.format(self.prefix, z, r, ch)
+        filename = "{}-Z{}-H{}-C{}.tiff".format(self.prefix, z, r, ch)
         file_path = self.input_dir / f"fov_{fov:03}" / filename
         return InplaceTile(file_path)
 
@@ -66,12 +68,13 @@ def fov_path_generator(parent_toc_path: Path, toc_name: str) -> Path:
 
 
 def format_data(
-        image_dir: Path,
-        primary_image_dimensions: Mapping[Union[Axes, str], int],
-        aux_name_to_dimensions: Mapping[str, Mapping[Union[Axes, str], int]],
-        num_fovs):
+    image_dir: Path,
+    primary_image_dimensions: Mapping[Union[Axes, str], int],
+    aux_name_to_dimensions: Mapping[str, Mapping[Union[Axes, str], int]],
+    num_fovs,
+):
     def add_codebook(experiment_json_doc):
-        experiment_json_doc['codebook'] = "codebook.json"
+        experiment_json_doc["codebook"] = "codebook.json"
         return experiment_json_doc
 
     enable_inplace_mode()
@@ -109,19 +112,9 @@ def write_image(num_fovs: int, image_dimensions: Mapping[Axes, int], fetcher: In
 
 
 def test_inplace(num_fovs=2):
-    primary_image_dimensions = {
-        Axes.ROUND: 4,
-        Axes.CH: 4,
-        Axes.ZPLANE: 1,
-    }
+    primary_image_dimensions = {Axes.ROUND: 4, Axes.CH: 4, Axes.ZPLANE: 1}
 
-    aux_name_to_dimensions = {
-        'nuclei': {
-            Axes.ROUND: 1,
-            Axes.CH: 1,
-            Axes.ZPLANE: 1,
-        },
-    }
+    aux_name_to_dimensions = {"nuclei": {Axes.ROUND: 1, Axes.CH: 1, Axes.ZPLANE: 1}}
 
     with tempfile.TemporaryDirectory() as tmpdir_str:
         tmpdir = Path(tmpdir_str)

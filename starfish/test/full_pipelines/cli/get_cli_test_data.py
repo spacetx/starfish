@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # get codebook from url and save locally to tmp dir
     codebook = requests.get(posixpath.join(args.experiment_url, "codebook.json"))
     data = codebook.json()
-    with open(pathlib.Path(args.output_dir, 'codebook.json'), 'w') as f:
+    with open(pathlib.Path(args.output_dir, "codebook.json"), "w") as f:
         json.dump(data, f)
 
     # get json files from url and save locally to tmp dir
@@ -39,5 +39,5 @@ if __name__ == "__main__":
         # download file if it exists
         if obj.status_code == 200:
             data = obj.json()
-            with open(pathlib.Path(args.output_dir, filename), 'w') as f:
+            with open(pathlib.Path(args.output_dir, filename), "w") as f:
                 json.dump(data, f)

@@ -49,8 +49,7 @@ class RequiredParentOption(Option):
                                 echo(help)
                                 sub_ctx.exit()
         if depth == 0:
-            return super(RequiredParentOption, self).handle_parse_result(
-                ctx, opts, args)
+            return super(RequiredParentOption, self).handle_parse_result(ctx, opts, args)
 
 
 def option(*args, **kwargs):

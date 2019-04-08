@@ -30,10 +30,7 @@ def test_round_trip_synthetic_data():
     gsd = BlobDetector(min_sigma=1, max_sigma=4, num_sigma=5, threshold=0)
     calculated_intensities = gsd.run(spots, blobs_image=spots_mp_numpy)
     decoded_intensities = codebook.metric_decode(
-        calculated_intensities,
-        max_distance=1,
-        min_intensity=0,
-        norm_order=2
+        calculated_intensities, max_distance=1, min_intensity=0, norm_order=2
     )
 
     # applying the gaussian blur to the intensities causes them to be reduced in magnitude, so
@@ -45,8 +42,7 @@ def test_round_trip_synthetic_data():
     assert np.array_equal(ch1, ch2)
     assert np.array_equal(round1, round2)
     assert np.array_equal(
-        intensities.coords[Features.TARGET],
-        decoded_intensities.coords[Features.TARGET]
+        intensities.coords[Features.TARGET], decoded_intensities.coords[Features.TARGET]
     )
 
 
@@ -78,12 +74,15 @@ def test_medium_synthetic_stack():
 
     spot_radius = sigma * np.sqrt(2)  # this is the radius of the spot in pixels
 
-    valid_z = np.logical_and(intensities.z.values > spot_radius,
-                             intensities.z.values < (n_z - spot_radius))
-    valid_y = np.logical_and(intensities.y.values > spot_radius,
-                             intensities.y.values < (height - spot_radius))
-    valid_x = np.logical_and(intensities.x.values > spot_radius,
-                             intensities.x.values < (width - spot_radius))
+    valid_z = np.logical_and(
+        intensities.z.values > spot_radius, intensities.z.values < (n_z - spot_radius)
+    )
+    valid_y = np.logical_and(
+        intensities.y.values > spot_radius, intensities.y.values < (height - spot_radius)
+    )
+    valid_x = np.logical_and(
+        intensities.x.values > spot_radius, intensities.x.values < (width - spot_radius)
+    )
 
     valid_locations = valid_z & valid_y & valid_x
     intensities = intensities[np.where(valid_locations)]
@@ -105,5 +104,5 @@ def test_medium_synthetic_stack():
     # verify that the spots are all detected, and decode to the correct targets
     assert np.array_equal(
         sorted_intensities[Features.TARGET].values,
-        sorted_calculated_intensities[Features.TARGET].values
+        sorted_calculated_intensities[Features.TARGET].values,
     )

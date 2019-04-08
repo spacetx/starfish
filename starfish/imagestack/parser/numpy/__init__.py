@@ -31,11 +31,12 @@ class NumpyImageTile(TileData):
     This is a specialization of :py:class:`starfish.imagestack.parser.TileData` for serving data
     about a single tile coming from a numpy array.
     """
+
     def __init__(
-            self,
-            data: np.ndarray,
-            coordinates: Mapping[Coordinates, Tuple[Number, Number]],
-            selector: Mapping[Axes, int],
+        self,
+        data: np.ndarray,
+        coordinates: Mapping[Coordinates, Tuple[Number, Number]],
+        selector: Mapping[Axes, int],
     ) -> None:
         self._data = data
         self._coordinates = coordinates
@@ -66,11 +67,12 @@ class NumpyData(TileCollectionData):
     This is a specialization of :py:class:`starfish.imagestack.parser.TileCollectionData` for
     serving tile data from a numpy array.
     """
+
     def __init__(
-            self,
-            data: np.ndarray,
-            index_labels: Mapping[Axes, Sequence[int]],
-            coordinates: Optional[xr.DataArray],
+        self,
+        data: np.ndarray,
+        index_labels: Mapping[Axes, Sequence[int]],
+        coordinates: Optional[xr.DataArray],
     ) -> None:
         self.data = data
         self.index_labels = index_labels
@@ -96,9 +98,7 @@ class NumpyData(TileCollectionData):
 
             keys.append(
                 TileKey(
-                    round=selector[Axes.ROUND],
-                    ch=selector[Axes.CH],
-                    zplane=selector[Axes.ZPLANE],
+                    round=selector[Axes.ROUND], ch=selector[Axes.CH], zplane=selector[Axes.ZPLANE]
                 )
             )
 
@@ -132,9 +132,9 @@ class NumpyData(TileCollectionData):
 
         if self.coordinates is not None:
             for coordinate_type, min_selector_value, max_selector_value in (
-                    (Coordinates.X, PhysicalCoordinateTypes.X_MIN, PhysicalCoordinateTypes.X_MAX),
-                    (Coordinates.Y, PhysicalCoordinateTypes.Y_MIN, PhysicalCoordinateTypes.Y_MAX),
-                    (Coordinates.Z, PhysicalCoordinateTypes.Z_MIN, PhysicalCoordinateTypes.Z_MAX),
+                (Coordinates.X, PhysicalCoordinateTypes.X_MIN, PhysicalCoordinateTypes.X_MAX),
+                (Coordinates.Y, PhysicalCoordinateTypes.Y_MIN, PhysicalCoordinateTypes.Y_MAX),
+                (Coordinates.Z, PhysicalCoordinateTypes.Z_MIN, PhysicalCoordinateTypes.Z_MAX),
             ):
                 min_selectors = dict(selectors)
                 min_selectors[PHYSICAL_COORDINATE_DIMENSION] = min_selector_value.value
@@ -143,7 +143,8 @@ class NumpyData(TileCollectionData):
 
                 coordinates[coordinate_type] = (
                     self.coordinates.loc[min_selectors].item(),
-                    self.coordinates.loc[max_selectors].item())
+                    self.coordinates.loc[max_selectors].item(),
+                )
         else:
             # fake coordinates!
             coordinates[Coordinates.X] = (0.0, 0.001)
@@ -153,9 +154,5 @@ class NumpyData(TileCollectionData):
         return NumpyImageTile(
             self.data[pos_r, pos_ch, pos_z],
             coordinates,
-            {
-                Axes.ROUND: r,
-                Axes.CH: ch,
-                Axes.ZPLANE: z,
-            },
+            {Axes.ROUND: r, Axes.CH: ch, Axes.ZPLANE: z},
         )

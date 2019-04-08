@@ -11,9 +11,9 @@ from ._validated_table import ValidatedTable
 class SpotAttributes(ValidatedTable):
 
     required_fields = {
-        Axes.X.value,          # spot x-coordinate
-        Axes.Y.value,          # spot y-coordinate
-        Axes.ZPLANE.value,     # spot z-coordinate
+        Axes.X.value,  # spot x-coordinate
+        Axes.Y.value,  # spot y-coordinate
+        Axes.ZPLANE.value,  # spot z-coordinate
         Features.SPOT_RADIUS,  # spot radius
     }
 
@@ -47,10 +47,11 @@ class SpotAttributes(ValidatedTable):
         # TODO ambrosejcarr: write a test for this
         geojson = [
             {
-                'properties': {'id': int(row.spot_id), 'radius': int(row.r)},
-                'geometry': {'type': 'Point', 'coordinates': [int(row.x), int(row.y)]}
-            } for index, row in self.data.iterrows()
+                "properties": {"id": int(row.spot_id), "radius": int(row.r)},
+                "geometry": {"type": "Point", "coordinates": [int(row.x), int(row.y)]},
+            }
+            for index, row in self.data.iterrows()
         ]
 
-        with open(output_file_name, 'w') as f:
+        with open(output_file_name, "w") as f:
             f.write(json.dumps(geojson))

@@ -43,6 +43,7 @@ class DevNull(io.BytesIO):
     See: https://docs.python.org/3/library/io.html
     See also: cpython/Lib/_pyio.py
     """
+
     def __init__(self, filepath: str, *args, **kwargs):
         super(DevNull, self).__init__(*args, **kwargs)
         self.name = filepath
@@ -59,6 +60,7 @@ class DevNull(io.BytesIO):
 
 class InplaceFetchedTile(FetchedTile):
     """Data formatters that operate in-place should return tiles that extend this class."""
+
     @property
     @abc.abstractmethod
     def filepath(self) -> Path:

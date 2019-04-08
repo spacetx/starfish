@@ -3,7 +3,7 @@ from typing import Mapping
 
 from starfish.types import Axes
 
-_DimensionMetadata = collections.namedtuple("_DimensionMetadata", ['order', 'required'])
+_DimensionMetadata = collections.namedtuple("_DimensionMetadata", ["order", "required"])
 
 AXES_DATA: Mapping[Axes, _DimensionMetadata] = {
     Axes.ROUND: _DimensionMetadata(0, True),

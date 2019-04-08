@@ -11,7 +11,6 @@ from ._base import FilterAlgorithmBase
 
 
 class LinearUnmixing(FilterAlgorithmBase):
-
     def __init__(self, coeff_mat: np.ndarray) -> None:
         """Image scaling filter
 
@@ -60,12 +59,12 @@ class LinearUnmixing(FilterAlgorithmBase):
         return unmixed_image
 
     def run(
-            self,
-            stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose: bool = False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -90,19 +89,22 @@ class LinearUnmixing(FilterAlgorithmBase):
         group_by = {Axes.ROUND, Axes.ZPLANE}
         unmix = partial(self._unmix, coeff_mat=self.coeff_mat)
         result = stack.apply(
-            unmix,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            unmix, group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
 
     @staticmethod
     @click.command("LinearUnmixing")
     @click.option(
-        "--coeff_mat", required=True, type=np.ndarray, help="linear unmixing coefficients")
+        "--coeff_mat", required=True, type=np.ndarray, help="linear unmixing coefficients"
+    )
     @click.option(
-        "--clip-method", default=1, type=int,
+        "--clip-method",
+        default=1,
+        type=int,
         help="method to constrain data to [0,1]. 0: clip, 1: scale by max over whole image, "
-             "2: scale by max per chunk")
+        "2: scale by max per chunk",
+    )
     @click.pass_context
     def _cli(ctx, coeff_mat):
         ctx.obj["component"]._cli_run(ctx, LinearUnmixing(coeff_mat))

@@ -40,6 +40,7 @@ class AlgorithmBaseType(ABCMeta):
                     ImageStack -> [IntensityTable, ConnectedComponentDecodingResult]
             TODO segmentation and decoding
         """
+
         def helper(*args, **kwargs):
             result = func(*args, **kwargs)
             # Scenario 1, Filtering, ApplyTransform
@@ -57,6 +58,7 @@ class AlgorithmBaseType(ABCMeta):
                         it = result[0]
                     it.attrs[STARFISH_EXTRAS_KEY] = LogEncoder().encode({LOG: stack.log})
             return result
+
         return helper
 
 
@@ -98,6 +100,7 @@ class AlgorithmBase(metaclass=AlgorithmBaseType):
     --------
     starfish.pipeline.pipelinecomponent.py
     """
+
     @classmethod
     def _get_algorithm_name(cls):
         """

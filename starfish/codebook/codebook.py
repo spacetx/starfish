@@ -131,11 +131,7 @@ class Codebook(xr.DataArray):
 
     @classmethod
     def _create_codebook(
-            cls,
-            code_names: Sequence[str],
-            n_channel: int,
-            n_round: int,
-            data: np.ndarray,
+        cls, code_names: Sequence[str], n_channel: int, n_round: int, data: np.ndarray
     ) -> "Codebook":
         """create a codebook of shape (code_names, n_channel, n_round) with the given data
 
@@ -181,7 +177,7 @@ class Codebook(xr.DataArray):
                 pd.Index(code_names, name=Features.TARGET),
                 pd.Index(np.arange(n_channel), name=Axes.CH.value),
                 pd.Index(np.arange(n_round), name=Axes.ROUND.value),
-            )
+            ),
         )
 
     @classmethod
@@ -191,12 +187,16 @@ class Codebook(xr.DataArray):
             raise ValueError(
                 f"version {version} not supported.  This version of the starfish library only "
                 f"supports codebook formats from {MIN_SUPPORTED_VERSION} to "
-                f"{MAX_SUPPORTED_VERSION}")
+                f"{MAX_SUPPORTED_VERSION}"
+            )
 
     @classmethod
     def from_code_array(
-            cls, code_array: List[Dict[Union[str, Any], Any]],
-            n_round: Optional[int]=None, n_channel: Optional[int]=None) -> "Codebook":
+        cls,
+        code_array: List[Dict[Union[str, Any], Any]],
+        n_round: Optional[int] = None,
+        n_channel: Optional[int] = None,
+    ) -> "Codebook":
         """construct a codebook from a spaceTx-spec array of codewords
 
         Parameters
@@ -270,26 +270,29 @@ class Codebook(xr.DataArray):
         # raise errors if provided n_round or n_channel are out of range
         if max_round + 1 > n_round:
             raise ValueError(
-                f'code detected that requires an imaging round value ({max_round + 1}) that is '
-                f'greater than provided n_round: {max_round}')
+                f"code detected that requires an imaging round value ({max_round + 1}) that is "
+                f"greater than provided n_round: {max_round}"
+            )
         if max_ch + 1 > n_channel:
             raise ValueError(
-                f'code detected that requires a channel value ({max_ch + 1}) that is greater '
-                f'than provided n_channel: {n_channel}')
+                f"code detected that requires a channel value ({max_ch + 1}) that is greater "
+                f"than provided n_channel: {n_channel}"
+            )
 
         # verify codebook structure and fields
         for code in code_array:
 
             if not isinstance(code, dict):
-                raise ValueError(f'codebook must be an array of dictionary codes. Found: {code}.')
+                raise ValueError(f"codebook must be an array of dictionary codes. Found: {code}.")
 
             # verify all necessary fields are present
             required_fields = {Features.CODEWORD, Features.TARGET}
             missing_fields = required_fields.difference(code)
             if missing_fields:
                 raise ValueError(
-                    f'Each entry of codebook must contain {required_fields}. Missing fields: '
-                    f'{missing_fields}')
+                    f"Each entry of codebook must contain {required_fields}. Missing fields: "
+                    f"{missing_fields}"
+                )
 
         target_names = [w[Features.TARGET] for w in code_array]
 
@@ -304,9 +307,7 @@ class Codebook(xr.DataArray):
 
     @classmethod
     def from_json(
-            cls, json_codebook: str,
-            n_round: Optional[int]=None,
-            n_channel: Optional[int]=None,
+        cls, json_codebook: str, n_round: Optional[int] = None, n_channel: Optional[int] = None
     ) -> "Codebook":
         """Load a codebook from a spaceTx spec-compliant json file or a url pointing to such a file
         Loads configuration from StarfishConfig.
@@ -382,14 +383,16 @@ class Codebook(xr.DataArray):
 
             if config.strict:
                 codebook_validator = SpaceTxValidator(
-                    _get_absolute_schema_path('codebook/codebook.json'))
+                    _get_absolute_schema_path("codebook/codebook.json")
+                )
                 if not codebook_validator.validate_object(codebook_doc):
                     raise Exception("validation failed")
 
         if isinstance(codebook_doc, list):
             raise ValueError(
                 f"codebook is a list and not an dictionary.  It is highly likely that you are using"
-                f"a codebook formatted for a previous version of starfish.")
+                f"a codebook formatted for a previous version of starfish."
+            )
 
         version_str = codebook_doc[DocumentKeys.VERSION_KEY]
         cls._verify_version(version_str)
@@ -422,24 +425,21 @@ class Codebook(xr.DataArray):
                             {
                                 Axes.CH.value: int(ch),
                                 Axes.ROUND.value: int(round_),
-                                Features.CODE_VALUE: float(self.loc[target, ch, round_])
-                            })
-            code_array.append({
-                Features.CODEWORD: codeword,
-                Features.TARGET: str(target.values)
-            })
+                                Features.CODE_VALUE: float(self.loc[target, ch, round_]),
+                            }
+                        )
+            code_array.append({Features.CODEWORD: codeword, Features.TARGET: str(target.values)})
         codebook_document = {
             DocumentKeys.VERSION_KEY: str(CURRENT_VERSION),
             DocumentKeys.MAPPINGS_KEY: code_array,
         }
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(codebook_document, f)
 
     @staticmethod
     def _normalize_features(
-            array: Union["Codebook", IntensityTable],
-            norm_order,
+        array: Union["Codebook", IntensityTable], norm_order
     ) -> Tuple[Union["Codebook", IntensityTable], np.ndarray]:
         """unit normalize each feature of array
 
@@ -476,7 +476,7 @@ class Codebook(xr.DataArray):
 
     @staticmethod
     def _approximate_nearest_code(
-            norm_codes: "Codebook", norm_intensities: xr.DataArray, metric: str,
+        norm_codes: "Codebook", norm_intensities: xr.DataArray, metric: str
     ) -> Tuple[np.ndarray, np.ndarray]:
         """find the nearest code for each feature using the ball_tree approximate NN algorithm
 
@@ -502,30 +502,31 @@ class Codebook(xr.DataArray):
 
         """
         linear_codes = norm_codes.stack(traces=(Axes.CH.value, Axes.ROUND.value)).values
-        linear_features = norm_intensities.stack(
-            traces=(Axes.CH.value, Axes.ROUND.value)).values
+        linear_features = norm_intensities.stack(traces=(Axes.CH.value, Axes.ROUND.value)).values
 
         # reshape into traces
-        nn = NearestNeighbors(n_neighbors=1, algorithm='ball_tree', metric=metric).fit(linear_codes)
+        nn = NearestNeighbors(n_neighbors=1, algorithm="ball_tree", metric=metric).fit(linear_codes)
         metric_output, indices = nn.kneighbors(linear_features)
         gene_ids = np.ravel(norm_codes.indexes[Features.TARGET].values[indices])
 
         return np.ravel(metric_output), gene_ids
 
-    def _validate_decode_intensity_input_matches_codebook_shape(
-            self,
-            intensities: IntensityTable,
-    ):
+    def _validate_decode_intensity_input_matches_codebook_shape(self, intensities: IntensityTable):
         # verify that the shapes of the codebook and intensities match
         ch_match = intensities.sizes[Axes.CH] == self.sizes[Axes.CH]
         round_match = intensities.sizes[Axes.ROUND] == self.sizes[Axes.ROUND]
         if not (ch_match and round_match):
             raise ValueError(
-                'Codebook and Intensities must have same number of channels and rounds')
+                "Codebook and Intensities must have same number of channels and rounds"
+            )
 
     def metric_decode(
-            self, intensities: IntensityTable, max_distance: Number, min_intensity: Number,
-            norm_order: int, metric: str='euclidean'
+        self,
+        intensities: IntensityTable,
+        max_distance: Number,
+        min_intensity: Number,
+        norm_order: int,
+        metric: str = "euclidean",
     ) -> IntensityTable:
         """Assign the closest target by euclidean distance to each feature in an intensity table
 
@@ -566,13 +567,12 @@ class Codebook(xr.DataArray):
         norm_codes, _ = self._normalize_features(self, norm_order=norm_order)
 
         metric_outputs, targets = self._approximate_nearest_code(
-            norm_codes, norm_intensities, metric=metric)
+            norm_codes, norm_intensities, metric=metric
+        )
 
         # only targets with low distances and high intensities should be retained
         passes_filters = np.logical_and(
-            norms >= min_intensity,
-            metric_outputs <= max_distance,
-            dtype=np.bool
+            norms >= min_intensity, metric_outputs <= max_distance, dtype=np.bool
         )
 
         # set targets, distances, and filtering results
@@ -626,8 +626,10 @@ class Codebook(xr.DataArray):
 
             """
             nrows, ncols = array.shape
-            dtype = {'names': ['f{}'.format(i) for i in range(ncols)],
-                     'formats': ncols * [array.dtype]}
+            dtype = {
+                "names": ["f{}".format(i) for i in range(ncols)],
+                "formats": ncols * [array.dtype],
+            }
             return array.view(dtype)
 
         self._validate_decode_intensity_input_matches_codebook_shape(intensities)
@@ -654,7 +656,7 @@ class Codebook(xr.DataArray):
         # a code passes filters if it decodes successfully
         passes_filters = ~pd.isnull(targets)
 
-        intensities[Features.TARGET] = (Features.AXIS, targets.astype('U'))
+        intensities[Features.TARGET] = (Features.AXIS, targets.astype("U"))
         intensities[Features.DISTANCE] = (Features.AXIS, distance)
         intensities[Features.PASSES_THRESHOLDS] = (Features.AXIS, passes_filters)
 
@@ -662,7 +664,7 @@ class Codebook(xr.DataArray):
 
     @classmethod
     def synthetic_one_hot_codebook(
-            cls, n_round: int, n_channel: int, n_codes: int, target_names: Optional[Sequence]=None
+        cls, n_round: int, n_channel: int, n_codes: int, target_names: Optional[Sequence] = None
     ) -> "Codebook":
         """Generate codes where one channel is "on" in each imaging round
 
@@ -711,11 +713,8 @@ class Codebook(xr.DataArray):
 
         # construct codewords from code
         codewords = [
-            [
-                {
-                    Axes.ROUND.value: h, Axes.CH.value: c, 'v': 1
-                } for h, c in enumerate(code)
-            ] for code in codes
+            [{Axes.ROUND.value: h, Axes.CH.value: c, "v": 1} for h, c in enumerate(code)]
+            for code in codes
         ]
 
         # make a codebook from codewords
@@ -724,7 +723,8 @@ class Codebook(xr.DataArray):
             target_names = [uuid.uuid4() for _ in range(n_codes)]
         assert n_codes == len(target_names)
 
-        codebook = [{Features.CODEWORD: w, Features.TARGET: g}
-                    for w, g in zip(codewords, target_names)]
+        codebook = [
+            {Features.CODEWORD: w, Features.TARGET: g} for w, g in zip(codewords, target_names)
+        ]
 
         return cls.from_code_array(codebook, n_round=n_round, n_channel=n_channel)

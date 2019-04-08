@@ -7,6 +7,7 @@ class TileKey:
     """
     This class is used to index into the TileData class.
     """
+
     def __init__(self, *, round: int, ch: int, zplane: int) -> None:
         self._round = round
         self._ch = ch
@@ -24,11 +25,7 @@ class TileKey:
     def z(self) -> int:
         return self._zplane
 
-    AXES_TO_PROPERTY_MAP = {
-        Axes.ROUND: round,
-        Axes.CH: ch,
-        Axes.ZPLANE: z,
-    }
+    AXES_TO_PROPERTY_MAP = {Axes.ROUND: round, Axes.CH: ch, Axes.ZPLANE: z}
 
     def __getitem__(self, item) -> int:
         """Given a index, return the corresponding value for that index for this tilekey.  For

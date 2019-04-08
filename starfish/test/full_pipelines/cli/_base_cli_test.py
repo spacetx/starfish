@@ -12,6 +12,7 @@ class CLITest:
     a file called results containing an IntensityTable. Each cli test should define
     it's own verify_results method.
     """
+
     @property
     def subdirs(self):
         raise NotImplementedError()

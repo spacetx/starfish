@@ -5,11 +5,7 @@ from starfish.types import Axes
 
 
 def join_axes_labels(
-        axes_order: Sequence[Axes],
-        *,
-        rounds: Sequence[int],
-        chs: Sequence[int],
-        zplanes: Sequence[int],
+    axes_order: Sequence[Axes], *, rounds: Sequence[int], chs: Sequence[int], zplanes: Sequence[int]
 ) -> Sequence[Tuple[Axes, Sequence[int]]]:
     """
     Given a sequence of axes and their labels, return a sequence of tuples of axes and its
@@ -18,20 +14,13 @@ def join_axes_labels(
     For example, if axes_sequence is (ROUND, CH, Z) and each axes has labels [0, 1], return
     ((ROUND, [0, 1]), (CH, [0, 1]), (Z, [0, 1]).
     """
-    axes_mapping = {
-        Axes.ROUND: rounds,
-        Axes.CH: chs,
-        Axes.ZPLANE: zplanes,
-    }
+    axes_mapping = {Axes.ROUND: rounds, Axes.CH: chs, Axes.ZPLANE: zplanes}
 
-    return [
-        (axes, axes_mapping[axes])
-        for axes in axes_order
-    ]
+    return [(axes, axes_mapping[axes]) for axes in axes_order]
 
 
 def ordered_iterator(
-        axes_labels: Sequence[Tuple[Axes, Sequence[int]]]
+    axes_labels: Sequence[Tuple[Axes, Sequence[int]]]
 ) -> Iterator[Mapping[Axes, int]]:
     """
     Given a sequence of tuples of axes and its respective sequence of labels, return an iterator

@@ -8,11 +8,10 @@ from typing import Any, Dict, IO, Iterator, List, Optional, Union
 from jsonschema import Draft4Validator, RefResolver, ValidationError
 from pkg_resources import resource_filename
 
-package_name = 'starfish'
+package_name = "starfish"
 
 
 class SpaceTxValidator:
-
     def __init__(self, schema: str) -> None:
         """create a validator for a json-schema compliant spaceTx specification file
 
@@ -41,21 +40,22 @@ class SpaceTxValidator:
 
         """
         experiment_schema_path = resource_filename(
-            package_name, "spacetx_format/schema/experiment.json")
+            package_name, "spacetx_format/schema/experiment.json"
+        )
         package_root = os.path.dirname(os.path.dirname(experiment_schema_path))
-        base_uri = 'file://' + package_root + '/'
+        base_uri = "file://" + package_root + "/"
         resolver = RefResolver(base_uri, schema)
         return Draft4Validator(schema, resolver=resolver)
 
     @staticmethod
     def load_json(json_file: str) -> Dict:
-        with open(json_file, 'rb') as f:
+        with open(json_file, "rb") as f:
             return json.load(f)
 
     @staticmethod
-    def _recurse_through_errors(error_iterator: Iterator[ValidationError],
-                                level: int=0,
-                                filename: str=None) -> None:
+    def _recurse_through_errors(
+        error_iterator: Iterator[ValidationError], level: int = 0, filename: str = None
+    ) -> None:
         """Recurse through ValidationErrors, printing message and schema path
 
         Parameters
@@ -76,9 +76,12 @@ class SpaceTxValidator:
             fmt += "\tFilename:       \t{filename}\n"
         for error in error_iterator:
             message = fmt.format(
-                stars="***" * level, level=str(level),
-                path="/".join([str(x)for x in error.absolute_schema_path]),
-                message=error.message, cause=error.cause, schema=error.schema.get("$id", "unknown"),
+                stars="***" * level,
+                level=str(level),
+                path="/".join([str(x) for x in error.absolute_schema_path]),
+                message=error.message,
+                cause=error.cause,
+                schema=error.schema.get("$id", "unknown"),
                 filename=filename,
             )
             warnings.warn(message)
@@ -116,11 +119,7 @@ class SpaceTxValidator:
         target_object = self.load_json(target_file)
         return self.validate_object(target_object, target_file)
 
-    def validate_object(
-            self,
-            target_object: Union[dict, list],
-            target_file: str=None,
-    ) -> bool:
+    def validate_object(self, target_object: Union[dict, list], target_file: str = None) -> bool:
         """validate a loaded json object, returning True if valid, and False otherwise
 
         Parameters
@@ -157,10 +156,7 @@ class SpaceTxValidator:
             return False
 
     def fuzz_object(
-            self,
-            target_object: Union[dict, list],
-            target_file: str=None,
-            out: IO=sys.stdout,
+        self, target_object: Union[dict, list], target_file: str = None, out: IO = sys.stdout
     ) -> None:
         """performs mutations on the given object and tests for validity.
 
@@ -187,8 +183,7 @@ class SpaceTxValidator:
 
 
 class Fuzzer(object):
-
-    def __init__(self, validator: Draft4Validator, obj: Any, out: IO=sys.stdout) -> None:
+    def __init__(self, validator: Draft4Validator, obj: Any, out: IO = sys.stdout) -> None:
         """create a fuzzer which will check different situations against the validator
 
         Parameters
@@ -249,9 +244,9 @@ class Fuzzer(object):
             Change("M", lambda *args: dict()).check(self),
             Change("L", lambda *args: list()).check(self),
         ]
-        return ' '.join(rv) + "\t"
+        return " ".join(rv) + "\t"
 
-    def descend(self, obj: Any, depth: int=0, prefix: str="") -> None:
+    def descend(self, obj: Any, depth: int = 0, prefix: str = "") -> None:
         """walk a JSON-like object tree printing the state of the tree
         at each level. A YAML representation is used for simplicity.
 
@@ -290,8 +285,8 @@ class Fuzzer(object):
         else:
             self.out.write(f"{self.state()}{' ' * depth}{prefix}{obj}\n")
 
-class Checker(object):
 
+class Checker(object):
     @property
     def LETTER(self) -> str:
         return "?"
@@ -328,8 +323,8 @@ class Checker(object):
     def handle(self, fuzz, target):
         raise NotImplementedError()
 
-class Add(Checker):
 
+class Add(Checker):
     @property
     def LETTER(self) -> str:
         return "A"
@@ -342,8 +337,8 @@ class Add(Checker):
         else:
             raise Exception("unknown")
 
-class Del(Checker):
 
+class Del(Checker):
     @property
     def LETTER(self) -> str:
         return "D"
@@ -354,8 +349,8 @@ class Del(Checker):
             key = key[0]
         target.__delitem__(key)
 
-class Change(Checker):
 
+class Change(Checker):
     @property
     def LETTER(self) -> str:
         return self.letter

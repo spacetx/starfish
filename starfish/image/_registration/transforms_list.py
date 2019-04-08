@@ -9,20 +9,17 @@ from starfish.config import StarfishConfig
 from starfish.types import Axes, TransformType
 
 
-transformsTypeMapping = {
-    TransformType.SIMILARITY: SimilarityTransform
-}
+transformsTypeMapping = {TransformType.SIMILARITY: SimilarityTransform}
 
 
 class TransformsList:
     """Simple list wrapper class for storing a list of transformation
     objects to apply to an Imagestack"""
 
-    def __init__(self,
-                 transforms_list: List[Tuple[Mapping[Axes, int],
-                                             TransformType,
-                                             GeometricTransform]] = None
-                 ):
+    def __init__(
+        self,
+        transforms_list: List[Tuple[Mapping[Axes, int], TransformType, GeometricTransform]] = None,
+    ):
         """
         Parameters
         ----------
@@ -34,14 +31,16 @@ class TransformsList:
         if transforms_list:
             self.transforms = transforms_list
         else:
-            self.transforms: List[Tuple[Mapping[Axes, int],
-                                        TransformType, GeometricTransform]] = list()
+            self.transforms: List[
+                Tuple[Mapping[Axes, int], TransformType, GeometricTransform]
+            ] = list()
 
-    def append(self,
-               selectors: Mapping[Axes, int],
-               transform_type: TransformType,
-               transform_object: GeometricTransform
-               ) -> None:
+    def append(
+        self,
+        selectors: Mapping[Axes, int],
+        transform_type: TransformType,
+        transform_object: GeometricTransform,
+    ) -> None:
         """
         Adds a new GoemetricTransform object to the list
 
@@ -71,7 +70,7 @@ class TransformsList:
             transforms_matrix = transforms_object.params.tolist()
             selectors_str = {k.value: v for k, v in selectors.items()}
             transforms_array.append((selectors_str, transform_type.value, transforms_matrix))
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(transforms_array, f)
 
     @classmethod

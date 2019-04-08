@@ -37,6 +37,7 @@ def fill_value(round_: int, ch: int, z: int) -> float:
 
 class UniqueTiles(FetchedTile):
     """Tiles where the pixel values are unique per round/ch/z."""
+
     def __init__(self, fov: int, _round: int, ch: int, zplane: int) -> None:
         super().__init__()
         self._round = _round
@@ -49,12 +50,7 @@ class UniqueTiles(FetchedTile):
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
-        return {
-            Coordinates.X: X_COORDS,
-            Coordinates.Y: Y_COORDS,
-            Coordinates.Z: Z_COORDS,
-
-        }
+        return {Coordinates.X: X_COORDS, Coordinates.Y: Y_COORDS, Coordinates.Z: Z_COORDS}
 
     @property
     def format(self) -> ImageFormat:
@@ -64,7 +60,8 @@ class UniqueTiles(FetchedTile):
         return np.full(
             shape=(HEIGHT, WIDTH),
             fill_value=fill_value(self._round, self._ch, self._zplane),
-            dtype=np.float32)
+            dtype=np.float32,
+        )
 
 
 def setup_imagestack() -> ImageStack:
@@ -72,11 +69,7 @@ def setup_imagestack() -> ImageStack:
     sequential non-negative integers).
     """
     collection = build_image(
-        range(1),
-        ROUND_LABELS,
-        CH_LABELS,
-        ZPLANE_LABELS,
-        tile_fetcher_factory(UniqueTiles, True),
+        range(1), ROUND_LABELS, CH_LABELS, ZPLANE_LABELS, tile_fetcher_factory(UniqueTiles, True)
     )
     tileset = list(collection.all_tilesets())[0][1]
 
@@ -109,17 +102,19 @@ def test_labeled_indices_set_slice():
                 stack = setup_imagestack()
                 zeros = np.zeros((HEIGHT, WIDTH), dtype=np.float32)
 
-                stack.set_slice(
-                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane}, zeros)
+                stack.set_slice({Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane}, zeros)
 
                 for selector in stack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
-                    if (selector[Axes.ROUND] == round_
-                            and selector[Axes.CH] == ch
-                            and selector[Axes.ZPLANE] == zplane):
+                    if (
+                        selector[Axes.ROUND] == round_
+                        and selector[Axes.CH] == ch
+                        and selector[Axes.ZPLANE] == zplane
+                    ):
                         expected_fill_value = 0
                     else:
                         expected_fill_value = fill_value(
-                            selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE])
+                            selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE]
+                        )
 
                     verify_stack_fill(stack, selector, expected_fill_value)
 
@@ -138,15 +133,13 @@ def test_labeled_indices_sel_single_tile():
 
         # verify that the subselected stack has the correct data.
         expected_fill_value = fill_value(
-            selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE])
+            selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE]
+        )
         verify_stack_fill(stack, selector, expected_fill_value)
 
         # assert that the physical coordinate values are what we expect.
     verify_physical_coordinates(
-        stack,
-        X_COORDS,
-        Y_COORDS,
-        get_physical_coordinates_of_z_plane(Z_COORDS),
+        stack, X_COORDS, Y_COORDS, get_physical_coordinates_of_z_plane(Z_COORDS)
     )
 
 
@@ -159,21 +152,20 @@ def test_labeled_indices_sel_slice():
 
     # verify that the subselected stack has the correct index labels.
     for index_type, expected_results in (
-            (Axes.ROUND, [1, 4]),
-            (Axes.CH, [4, 6]),
-            (Axes.ZPLANE, [4],)):
+        (Axes.ROUND, [1, 4]),
+        (Axes.CH, [4, 6]),
+        (Axes.ZPLANE, [4]),
+    ):
         assert subselected.axis_labels(index_type) == expected_results
 
     for selectors in subselected._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
         # verify that the subselected stack has the correct data.
         expected_fill_value = fill_value(
-            selectors[Axes.ROUND], selectors[Axes.CH], selectors[Axes.ZPLANE])
+            selectors[Axes.ROUND], selectors[Axes.CH], selectors[Axes.ZPLANE]
+        )
         verify_stack_fill(subselected, selectors, expected_fill_value)
 
         # verify that each tile in the subselected stack has the correct physical coordinates.
     verify_physical_coordinates(
-        stack,
-        X_COORDS,
-        Y_COORDS,
-        get_physical_coordinates_of_z_plane(Z_COORDS),
+        stack, X_COORDS, Y_COORDS, get_physical_coordinates_of_z_plane(Z_COORDS)
     )

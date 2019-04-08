@@ -19,31 +19,28 @@ from starfish.compat import blob_dog, blob_log
 from starfish.image._filter.util import determine_axes_to_group_by
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.intensity_table.intensity_table_coordinates import \
-    transfer_physical_coords_from_imagestack_to_intensity_table
+from starfish.intensity_table.intensity_table_coordinates import (
+    transfer_physical_coords_from_imagestack_to_intensity_table,
+)
 from starfish.types import Axes, Features, Number
 from starfish.util import click
 from ._base import SpotFinderAlgorithmBase
 
-blob_detectors = {
-    'blob_dog': blob_dog,
-    'blob_log': blob_log
-}
+blob_detectors = {"blob_dog": blob_dog, "blob_log": blob_log}
 
 
 class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
-
     def __init__(
-            self,
-            min_sigma: Union[Number, Tuple[Number, ...]],
-            max_sigma: Union[Number, Tuple[Number, ...]],
-            num_sigma: int,
-            threshold: Number,
-            detector_method: str='blob_log',
-            exclude_border: Optional[int]=None,
-            search_radius: int=3,
-            anchor_round: int=1,
-            **detector_kwargs,
+        self,
+        min_sigma: Union[Number, Tuple[Number, ...]],
+        max_sigma: Union[Number, Tuple[Number, ...]],
+        num_sigma: int,
+        threshold: Number,
+        detector_method: str = "blob_log",
+        exclude_border: Optional[int] = None,
+        search_radius: int = 3,
+        anchor_round: int = 1,
+        **detector_kwargs,
     ) -> None:
         """Multi-dimensional gaussian spot detector.
 
@@ -110,7 +107,7 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
             max_sigma=self.max_sigma,
             threshold=self.threshold,
             exclude_border=self.exclude_border,
-            **self.detector_kwargs
+            **self.detector_kwargs,
         )
 
         # if spots were detected
@@ -135,7 +132,7 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
                     Axes.ZPLANE: z_inds,
                     Axes.Y: y_inds,
                     Axes.X: x_inds,
-                    Features.SPOT_RADIUS: radius
+                    Features.SPOT_RADIUS: radius,
                 }
             )
 
@@ -144,19 +141,19 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
                 data=np.array(
                     [],
                     dtype=[
-                        ('intensity', float), ('z', int), ('y', int), ('x', int),
-                        (Features.SPOT_RADIUS, float)
-                    ]
+                        ("intensity", float),
+                        ("z", int),
+                        ("y", int),
+                        ("x", int),
+                        (Features.SPOT_RADIUS, float),
+                    ],
                 )
             )
 
         return spot_data
 
     def _find_spots(
-        self,
-        data_stack: ImageStack,
-        verbose: bool=False,
-        n_processes: Optional[int]=None
+        self, data_stack: ImageStack, verbose: bool = False, n_processes: Optional[int] = None
     ) -> Dict[Tuple[int, int], np.ndarray]:
         """Find spots in all (z, y, x) volumes of an ImageStack.
 
@@ -218,7 +215,7 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
 
         # create one dataframe per round
         round_dataframes = {
-            k: pd.concat(v, axis=0).reset_index().drop('index', axis=1)
+            k: pd.concat(v, axis=0).reset_index().drop("index", axis=1)
             for k, v in round_data.items()
         }
 
@@ -256,18 +253,18 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
 
         dist = pd.DataFrame(
             data=np.zeros((reference_df.shape[0], len(round_dataframes)), dtype=float),
-            columns=list(round_dataframes.keys())
+            columns=list(round_dataframes.keys()),
         )
         ind = pd.DataFrame(
             data=np.zeros((reference_df.shape[0], len(round_dataframes)), dtype=np.int32),
-            columns=list(round_dataframes.keys())
+            columns=list(round_dataframes.keys()),
         )
 
         # fill data for anchor round; every spot is a perfect match to itself.
         ind[anchor_round] = np.arange(reference_df.shape[0], dtype=np.int32)
 
         # get spots matching across rounds
-        for r in sorted(set(round_dataframes.keys()) - {anchor_round, }):
+        for r in sorted(set(round_dataframes.keys()) - {anchor_round}):
             query_df = round_dataframes[r]
             query_coordinates = query_df[[Axes.ZPLANE, Axes.Y, Axes.X]]
 
@@ -325,7 +322,7 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
             Axes.Y.value: (Features.AXIS, anchor_df[Axes.Y]),
             Axes.X.value: (Features.AXIS, anchor_df[Axes.X]),
             Axes.ROUND.value: (Axes.ROUND.value, rounds),
-            Axes.CH.value: (Axes.CH.value, channels)
+            Axes.CH.value: (Axes.CH.value, channels),
         }
         intensity_table = IntensityTable(data=data, dims=dims, coords=coords)
 
@@ -334,7 +331,7 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
 
             # get intensity data and indices
             spot_indices = ind[r]
-            intensity_data = round_dataframes[r].loc[spot_indices, 'intensity']
+            intensity_data = round_dataframes[r].loc[spot_indices, "intensity"]
             channel_index = round_dataframes[r].loc[spot_indices, Axes.CH]
             round_index = np.full(ind.shape[0], fill_value=r, dtype=int)
             feature_index = np.arange(ind.shape[0], dtype=int)
@@ -352,7 +349,7 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
         return intensity_table
 
     def run(
-        self, data: ImageStack, verbose: bool=False, n_processes: Optional[int]=None
+        self, data: ImageStack, verbose: bool = False, n_processes: Optional[int] = None
     ) -> IntensityTable:
         """Find 1-hot coded spots in data.
 
@@ -377,16 +374,19 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
         per_round_spot_results = self._merge_spots_by_round(per_tile_spot_results)
 
         distances, indices = self._match_spots(
-            per_round_spot_results,
-            search_radius=self.search_radius, anchor_round=self.anchor_round
+            per_round_spot_results, search_radius=self.search_radius, anchor_round=self.anchor_round
         )
 
         # TODO implement consensus seeding (SeqFISH)
 
         intensity_table = self._build_intensity_table(
-            per_round_spot_results, distances, indices,
-            rounds=data.xarray[Axes.ROUND.value].values, channels=data.xarray[Axes.CH.value].values,
-            search_radius=self.search_radius, anchor_round=self.anchor_round
+            per_round_spot_results,
+            distances,
+            indices,
+            rounds=data.xarray[Axes.ROUND.value].values,
+            channels=data.xarray[Axes.CH.value].values,
+            search_radius=self.search_radius,
+            anchor_round=self.anchor_round,
         )
 
         transfer_physical_coords_from_imagestack_to_intensity_table(
@@ -398,26 +398,40 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
     @staticmethod
     @click.command("LocalSearchBlobDetector")
     @click.option(
-        "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation).")
+        "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)."
+    )
     @click.option(
-        "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation).")
+        "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)."
+    )
+    @click.option("--threshold", default=0.01, type=float, help="Dots threshold.")
     @click.option(
-        "--threshold", default=.01, type=float, help="Dots threshold.")
+        "--overlap",
+        default=0.5,
+        type=float,
+        help="Dots with overlap of greater than this fraction are combined.",
+    )
     @click.option(
-        "--overlap", default=0.5, type=float,
-        help="Dots with overlap of greater than this fraction are combined.")
+        "--detector-method",
+        default="blob_log",
+        type=Choice(["blob_log", "blob_dog"]),
+        help="Name of the type of the skimage blob detection method.",
+    )
     @click.option(
-        "--detector-method", default='blob_log', type=Choice(['blob_log', 'blob_dog']),
-        help="Name of the type of the skimage blob detection method.")
-    @click.option(
-        "--search-radius", default=3, type=int,
-        help="Number of pixels over which to search for spots in other image tiles.")
+        "--search-radius",
+        default=3,
+        type=int,
+        help="Number of pixels over which to search for spots in other image tiles.",
+    )
     @click.pass_context
     def _cli(
         ctx, min_sigma, max_sigma, threshold, overlap, show, detector_method, search_radius
     ) -> None:
         instance = LocalSearchBlobDetector(
-            min_sigma, max_sigma, threshold, overlap,
-            detector_method=detector_method, search_radius=search_radius
+            min_sigma,
+            max_sigma,
+            threshold,
+            overlap,
+            detector_method=detector_method,
+            search_radius=search_radius,
         )
         ctx.obj["component"]._cli_run(ctx, instance)

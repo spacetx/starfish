@@ -13,6 +13,7 @@ class FetchedTile:
     """
     This is the contract for providing the data for constructing a :class:`slicedimage.Tile`.
     """
+
     def __init__(self, *args, **kwargs):
         pass
 
@@ -65,6 +66,7 @@ class TileFetcher:
     This is the contract for providing the image data for constructing a
     :class:`slicedimage.Collection`.
     """
+
     def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
         """
         Given fov, r, ch, and z, return an instance of a :class:`.FetchedImage` that can be

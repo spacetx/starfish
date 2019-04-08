@@ -31,10 +31,7 @@ class Filter(PipelineComponent):
         """smooth, sharpen, denoise, etc"""
         print("Filtering images...")
         ctx.obj = dict(
-            component=Filter,
-            input=input,
-            output=output,
-            stack=ImageStack.from_path_or_url(input),
+            component=Filter, input=input, output=output, stack=ImageStack.from_path_or_url(input)
         )
 
 

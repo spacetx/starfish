@@ -20,16 +20,16 @@ def codebook_array_factory() -> List[Dict[str, Any]]:
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 0, Axes.CH.value: 0, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1},
             ],
-            Features.TARGET: "GENE_A"
+            Features.TARGET: "GENE_A",
         },
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 0, Axes.CH.value: 2, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1},
             ],
-            Features.TARGET: "GENE_B"
+            Features.TARGET: "GENE_B",
         },
     ]
 
@@ -114,7 +114,7 @@ def test_from_code_array_throws_exceptions_when_data_does_not_match_channel_or_r
 
 def test_from_code_array_throws_exception_when_data_is_improperly_formatted():
     code_array: List = codebook_array_factory()
-    code_array[0][Features.CODEWORD][0] = ('I should be a dict, oops!',)
+    code_array[0][Features.CODEWORD][0] = ("I should be a dict, oops!",)
     with pytest.raises(TypeError):
         Codebook.from_code_array(code_array, n_channel=3, n_round=1)
 
@@ -126,11 +126,13 @@ def test_from_code_array_throws_exception_when_data_is_improperly_formatted():
 # Underlying methods
 #
 
+
 def test_empty_codebook():
     code_array: List = codebook_array_factory()
     targets = [x[Features.TARGET] for x in code_array]
     codebook = Codebook._empty_codebook(targets, n_channel=3, n_round=2)
     assert_sizes(codebook, False)
+
 
 def test_create_codebook():
     code_array: List = codebook_array_factory()

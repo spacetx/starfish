@@ -30,9 +30,7 @@ class SpotFinder(PipelineComponent):
             mp = blobs_stack.max_proj(Axes.ROUND, Axes.CH)
             mp_numpy = mp._squeezed_numpy(Axes.ROUND, Axes.CH)
             intensities = instance.run(
-                image_stack,
-                blobs_image=mp_numpy,
-                reference_image_from_max_projection=ref_image,
+                image_stack, blobs_image=mp_numpy, reference_image_from_max_projection=ref_image
             )
         else:
             intensities = instance.run(image_stack)
@@ -48,21 +46,27 @@ class SpotFinder(PipelineComponent):
     @click.option("-i", "--input", required=True, type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
     @click.option(
-        '--blobs-stack', default=None, required=False, help=(
-            'ImageStack that contains the blobs. Will be max-projected across imaging round '
-            'and channel to produce the blobs_image'
-        )
+        "--blobs-stack",
+        default=None,
+        required=False,
+        help=(
+            "ImageStack that contains the blobs. Will be max-projected across imaging round "
+            "and channel to produce the blobs_image"
+        ),
     )
     @click.option(
-        '--reference-image-from-max-projection', default=False, is_flag=True, help=(
-            'Construct a reference image by max projecting imaging rounds and channels. Spots '
-            'are found in this image and then measured across all images in the input stack.'
-        )
+        "--reference-image-from-max-projection",
+        default=False,
+        is_flag=True,
+        help=(
+            "Construct a reference image by max projecting imaging rounds and channels. Spots "
+            "are found in this image and then measured across all images in the input stack."
+        ),
     )
     @click.pass_context
     def _cli(ctx, input, output, blobs_stack, reference_image_from_max_projection):
         """detect spots"""
-        print('Detecting Spots ...')
+        print("Detecting Spots ...")
         ctx.obj = dict(
             component=SpotFinder,
             image_stack=ImageStack.from_path_or_url(input),
@@ -79,9 +83,7 @@ class SpotFinderAlgorithmBase(AlgorithmBase):
 
     @abstractmethod
     def run(
-            self,
-            primary_image: ImageStack,
-            *args,
+        self, primary_image: ImageStack, *args
     ) -> Union[IntensityTable, Tuple[IntensityTable, Any]]:
         """Finds spots in an ImageStack"""
         raise NotImplementedError()
@@ -98,5 +100,6 @@ class SpotFinderAlgorithmBase(AlgorithmBase):
         except AttributeError:
             raise ValueError(
                 f'measurement_type must be a numpy reduce function such as "max" or "mean". '
-                f'{measurement_type} not found.')
+                f"{measurement_type} not found."
+            )
         return measurement_function

@@ -15,61 +15,58 @@ from starfish.types import Axes, Features
 from starfish.util import synthesize
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def small_intensity_table():
-    intensities = np.array([
-        [[0, 1],
-         [1, 0]],
-        [[1, 0],
-         [0, 1]],
-        [[0, 0],
-         [1, 1]],
-        [[0.5, 0.5],  # this one should fail decoding
-         [0.5, 0.5]],
-        [[0.1, 0],
-         [0, 0.1]],  # this one is a candidate for intensity filtering
-    ])
+    intensities = np.array(
+        [
+            [[0, 1], [1, 0]],
+            [[1, 0], [0, 1]],
+            [[0, 0], [1, 1]],
+            [[0.5, 0.5], [0.5, 0.5]],  # this one should fail decoding
+            [[0.1, 0], [0, 0.1]],  # this one is a candidate for intensity filtering
+        ]
+    )
 
     spot_attributes = pd.DataFrame(
         data={
             Axes.X.value: [0, 1, 2, 3, 4],
             Axes.Y.value: [3, 4, 5, 6, 7],
             Axes.ZPLANE.value: [0, 0, 0, 0, 0],
-            Features.SPOT_RADIUS: [0.1, 2, 3, 2, 1]
+            Features.SPOT_RADIUS: [0.1, 2, 3, 2, 1],
         }
     )
 
     return IntensityTable.from_spot_data(intensities, spot_attributes)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def simple_codebook_array():
     return [
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 0, Axes.CH.value: 0, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1},
             ],
-            Features.TARGET: "SCUBE2"
+            Features.TARGET: "SCUBE2",
         },
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 0, Axes.CH.value: 1, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1},
             ],
-            Features.TARGET: "BRCA"
+            Features.TARGET: "BRCA",
         },
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 0, Axes.CH.value: 1, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1},
             ],
-            Features.TARGET: "ACTB"
-        }
+            Features.TARGET: "ACTB",
+        },
     ]
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def simple_codebook_json(simple_codebook_array) -> Generator[str, None, None]:
     with tempfile.NamedTemporaryFile() as tf:
         codebook = Codebook.from_code_array(simple_codebook_array)
@@ -77,31 +74,33 @@ def simple_codebook_json(simple_codebook_array) -> Generator[str, None, None]:
 
         yield tf.name
 
-@pytest.fixture(scope='module')
+
+@pytest.fixture(scope="module")
 def loaded_codebook(simple_codebook_json):
     return Codebook.from_json(simple_codebook_json, n_channel=2, n_round=2)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def euclidean_decoded_intensities(small_intensity_table, loaded_codebook):
     decoded_intensities = loaded_codebook.metric_decode(
-        small_intensity_table, max_distance=0, norm_order=2, min_intensity=0)
+        small_intensity_table, max_distance=0, norm_order=2, min_intensity=0
+    )
     assert decoded_intensities.shape == (5, 2, 2)
     return decoded_intensities
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def per_channel_max_decoded_intensities(small_intensity_table, loaded_codebook):
     decoded_intensities = loaded_codebook.decode_per_round_max(small_intensity_table)
     return decoded_intensities
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def synthetic_intensity_table(loaded_codebook) -> IntensityTable:
     return IntensityTable.synthetic_intensities(loaded_codebook, n_spots=2)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def synthetic_dataset_with_truth_values():
     from starfish.util.synthesize import SyntheticData
 
@@ -114,10 +113,8 @@ def synthetic_dataset_with_truth_values():
     return codebook, true_intensities, image
 
 
-@pytest.fixture(scope='function')
-def synthetic_dataset_with_truth_values_and_called_spots(
-        synthetic_dataset_with_truth_values
-):
+@pytest.fixture(scope="function")
+def synthetic_dataset_with_truth_values_and_called_spots(synthetic_dataset_with_truth_values):
 
     codebook, true_intensities, image = synthetic_dataset_with_truth_values
 
@@ -130,11 +127,13 @@ def synthetic_dataset_with_truth_values_and_called_spots(
     max_sigma = 4
     num_sigma = 10
     threshold = 1e-4
-    gsd = BlobDetector(min_sigma=min_sigma,
-                       max_sigma=max_sigma,
-                       num_sigma=num_sigma,
-                       threshold=threshold,
-                       measurement_type='max')
+    gsd = BlobDetector(
+        min_sigma=min_sigma,
+        max_sigma=max_sigma,
+        num_sigma=num_sigma,
+        threshold=threshold,
+        measurement_type="max",
+    )
 
     intensities = gsd.run(data_stack=filtered, blobs_image=filtered_mp_numpy)
     assert intensities.shape[0] == 5
@@ -234,9 +233,16 @@ def synthetic_spot_pass_through_stack(synthetic_dataset_with_truth_values):
     true_intensities = true_intensities[:2]
     # transfer the intensities to the stack but don't do anything to them.
     img_stack = ImageStack.synthetic_spots(
-        true_intensities, num_z=12, height=50, width=45, n_photons_background=0,
-        point_spread_function=(0, 0, 0), camera_detection_efficiency=1.0,
-        background_electrons=0, graylevel=1)
+        true_intensities,
+        num_z=12,
+        height=50,
+        width=45,
+        n_photons_background=0,
+        point_spread_function=(0, 0, 0),
+        camera_detection_efficiency=1.0,
+        background_electrons=0,
+        graylevel=1,
+    )
     return codebook, true_intensities, img_stack
 
 

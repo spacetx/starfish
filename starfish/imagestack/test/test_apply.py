@@ -23,8 +23,7 @@ def test_apply_3d():
     """test that apply correctly applies a simple function across 3d volumes of a Stack"""
     stack = ImageStack.synthetic_stack()
     assert np.all(stack.xarray == 1)
-    stack.apply(divide, in_place=True, value=4,
-                group_by={Axes.ROUND, Axes.CH})
+    stack.apply(divide, in_place=True, value=4, group_by={Axes.ROUND, Axes.CH})
     assert (stack.xarray == 0.25).all()
 
 
@@ -55,6 +54,7 @@ def test_apply_single_process():
     output = stack.apply(divide, value=2, n_processes=1)
     assert (output.xarray == 0.5).all()
 
+
 def test_apply_clipping_methods():
     """test that apply properly clips the imagestack"""
 
@@ -84,7 +84,10 @@ def test_apply_clipping_methods():
 
     # clip_method 2
     res = imagestack.apply(
-        apply_function, clip_method=Clip.SCALE_BY_CHUNK, in_place=False, n_processes=1,
+        apply_function,
+        clip_method=Clip.SCALE_BY_CHUNK,
+        in_place=False,
+        n_processes=1,
         group_by={Axes.CH, Axes.ROUND},
     )
     # any (round, ch) combination that was all 0.5 should now be all 1.
@@ -96,5 +99,5 @@ def test_apply_clipping_methods():
     # construction, look like the original data.
     assert np.allclose(
         res.sel({Axes.ROUND: 1, Axes.CH: 1}).xarray,
-        imagestack.sel({Axes.ROUND: 1, Axes.CH: 1}).xarray
+        imagestack.sel({Axes.ROUND: 1, Axes.CH: 1}).xarray,
     )

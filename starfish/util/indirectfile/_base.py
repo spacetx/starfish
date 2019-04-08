@@ -18,12 +18,14 @@ class ConversionRecipe(Generic[RecipeResultType]):
 
 class NoApplicableConversionRecipeError(Exception):
     """Raised when no conversion recipe declared itself applicable to this input string."""
+
     pass
 
 
 class NoSuccessfulConversionRecipeError(Exception):
     """Raised when all the conversion recipes that declared itself applicable failed to execute
     successfully."""
+
     pass
 
 
@@ -40,6 +42,8 @@ def convert(value: str, conversion_recipes: Iterable[ConversionRecipe]):
 
     if none_applied:
         raise NoApplicableConversionRecipeError(
-            f"Could not find applicable gonversion recipe for {value}")
+            f"Could not find applicable gonversion recipe for {value}"
+        )
     raise NoSuccessfulConversionRecipeError(
-        f"All applicable conversion recipes failed to run successfully for {value}.")
+        f"All applicable conversion recipes failed to run successfully for {value}."
+    )

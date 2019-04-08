@@ -47,8 +47,8 @@ class ExpressionMatrix(xr.DataArray):
         """
         import loompy
 
-        row_attrs = {k: self['cells'][k].values for k in self['cells'].coords}
-        col_attrs = {k: self['genes'][k].values for k in self['genes'].coords}
+        row_attrs = {k: self["cells"][k].values for k in self["cells"].coords}
+        col_attrs = {k: self["genes"][k].values for k in self["genes"].coords}
 
         loompy.create(filename, self.data, row_attrs, col_attrs)
 
@@ -63,8 +63,8 @@ class ExpressionMatrix(xr.DataArray):
         """
         import anndata
 
-        row_attrs = {k: self['cells'][k].values for k in self['cells'].coords}
-        col_attrs = {k: self['genes'][k].values for k in self['genes'].coords}
+        row_attrs = {k: self["cells"][k].values for k in self["cells"].coords}
+        col_attrs = {k: self["genes"][k].values for k in self["genes"].coords}
         anndata = anndata.AnnData(self.data, row_attrs, col_attrs)
         anndata.write(filename)
 
@@ -83,9 +83,5 @@ class ExpressionMatrix(xr.DataArray):
 
         """
         loaded = xr.open_dataarray(filename)
-        expression_matrix = cls(
-            loaded.data,
-            loaded.coords,
-            loaded.dims
-        )
+        expression_matrix = cls(loaded.data, loaded.coords, loaded.dims)
         return expression_matrix

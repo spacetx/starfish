@@ -18,10 +18,7 @@ def test_intensity_table_concatenation():
 
     expected_shape = list(original_shape)
     expected_shape[0] *= 2  # only features is concatenated
-    assert np.array_equal(
-        concatenate([intensities, intensities2]).shape,
-        expected_shape
-    )
+    assert np.array_equal(concatenate([intensities, intensities2]).shape, expected_shape)
 
     # slice out a single channel and round from both experiments, such that the data no longer match
     # across all dimensions but the concatenation dimension. The resulting structure should be

@@ -47,7 +47,7 @@ def bin_open(img: np.ndarray, disk_size: int) -> np.ndarray:
     return res
 
 
-def gaussian_kernel(shape: Tuple[int, int]=(3, 3), sigma: float=0.5):
+def gaussian_kernel(shape: Tuple[int, int] = (3, 3), sigma: float = 0.5):
     """
     Returns a gaussian kernel of specified shape and standard deviation.
     This is a simple python implementation of Matlab's fspecial('gaussian',[shape],[sigma])
@@ -64,9 +64,9 @@ def gaussian_kernel(shape: Tuple[int, int]=(3, 3), sigma: float=0.5):
     np.ndarray :
         Gaussian kernel.
     """
-    m, n = [int((ss - 1.) / 2.) for ss in shape]
-    y, x = np.ogrid[-m:m + 1, -n:n + 1]
-    kernel = np.exp(-(x * x + y * y) / (2. * sigma * sigma))
+    m, n = [int((ss - 1.0) / 2.0) for ss in shape]
+    y, x = np.ogrid[-m : m + 1, -n : n + 1]
+    kernel = np.exp(-(x * x + y * y) / (2.0 * sigma * sigma))
     kernel[kernel < np.finfo(kernel.dtype).eps * kernel.max()] = 0
     sumh = kernel.sum()
     if sumh != 0:
@@ -75,8 +75,7 @@ def gaussian_kernel(shape: Tuple[int, int]=(3, 3), sigma: float=0.5):
 
 
 def validate_and_broadcast_kernel_size(
-        sigma: Union[Number, Tuple[Number, ...]],
-        is_volume: bool
+    sigma: Union[Number, Tuple[Number, ...]], is_volume: bool
 ) -> Tuple[Number, ...]:
     """
     Check that the provided sigma is of the right dimensionality, and if necessary, broadcast it
@@ -94,8 +93,10 @@ def validate_and_broadcast_kernel_size(
 
     """
     if isinstance(sigma, tuple):
-        message = ("if passing an anisotropic kernel, the dimensionality must match the data "
-                   "shape ({shape}), not {passed_shape}")
+        message = (
+            "if passing an anisotropic kernel, the dimensionality must match the data "
+            "shape ({shape}), not {passed_shape}"
+        )
         if is_volume and len(sigma) != 3:
             raise ValueError(message.format(shape=3, passed_shape=len(sigma)))
         if not is_volume and len(sigma) != 2:

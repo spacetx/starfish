@@ -12,25 +12,20 @@ from starfish.util import click
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots, measure_spot_intensity
 
-blob_detectors = {
-    'blob_dog': blob_dog,
-    'blob_doh': blob_doh,
-    'blob_log': blob_log
-}
+blob_detectors = {"blob_dog": blob_dog, "blob_doh": blob_doh, "blob_log": blob_log}
 
 
 class BlobDetector(SpotFinderAlgorithmBase):
-
     def __init__(
-            self,
-            min_sigma: Number,
-            max_sigma: Number,
-            num_sigma: int,
-            threshold: Number,
-            overlap: float = 0.5,
-            measurement_type='max',
-            is_volume: bool = True,
-            detector_method: str = 'blob_log'
+        self,
+        min_sigma: Number,
+        max_sigma: Number,
+        num_sigma: int,
+        threshold: Number,
+        overlap: float = 0.5,
+        measurement_type="max",
+        is_volume: bool = True,
+        detector_method: str = "blob_log",
     ) -> None:
         """Multi-dimensional gaussian spot detector
 
@@ -100,16 +95,11 @@ class BlobDetector(SpotFinderAlgorithmBase):
         """
 
         fitted_blobs_array: np.ndarray = self.detector_method(
-            data_image,
-            self.min_sigma,
-            self.max_sigma,
-            self.num_sigma,
-            self.threshold,
-            self.overlap
+            data_image, self.min_sigma, self.max_sigma, self.num_sigma, self.threshold, self.overlap
         )
 
         if fitted_blobs_array.shape[0] == 0:
-            return SpotAttributes.empty(extra_fields=['intensity', 'spot_id'])
+            return SpotAttributes.empty(extra_fields=["intensity", "spot_id"])
 
         # create the SpotAttributes Table
         columns = [Axes.ZPLANE.value, Axes.Y.value, Axes.X.value, Features.SPOT_RADIUS]
@@ -122,18 +112,19 @@ class BlobDetector(SpotFinderAlgorithmBase):
         # convert the array to int so it can be used to index
         rounded_blobs = SpotAttributes(fitted_blobs.astype(int))
 
-        rounded_blobs.data['intensity'] = measure_spot_intensity(
-            data_image, rounded_blobs, self.measurement_function)
-        rounded_blobs.data['spot_id'] = np.arange(rounded_blobs.data.shape[0])
+        rounded_blobs.data["intensity"] = measure_spot_intensity(
+            data_image, rounded_blobs, self.measurement_function
+        )
+        rounded_blobs.data["spot_id"] = np.arange(rounded_blobs.data.shape[0])
 
         return rounded_blobs
 
     def run(
-            self,
-            data_stack: ImageStack,
-            blobs_image: Optional[Union[np.ndarray, xr.DataArray]]=None,
-            reference_image_from_max_projection: bool=False,
-            *args,
+        self,
+        data_stack: ImageStack,
+        blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
+        reference_image_from_max_projection: bool = False,
+        *args,
     ) -> IntensityTable:
         """find spots in an ImageStack
 
@@ -159,33 +150,38 @@ class BlobDetector(SpotFinderAlgorithmBase):
             reference_image=blobs_image,
             reference_image_from_max_projection=reference_image_from_max_projection,
             measurement_function=self.measurement_function,
-            radius_is_gyration=False)
+            radius_is_gyration=False,
+        )
 
         return intensity_table
 
     @staticmethod
     @click.command("BlobDetector")
     @click.option(
-        "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
+        "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)"
+    )
     @click.option(
-        "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)")
+        "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)"
+    )
+    @click.option("--num-sigma", default=20, type=int, help="Number of sigmas to try")
+    @click.option("--threshold", default=0.01, type=float, help="Dots threshold")
     @click.option(
-        "--num-sigma", default=20, type=int, help="Number of sigmas to try")
+        "--overlap",
+        default=0.5,
+        type=float,
+        help="dots with overlap of greater than this fraction are combined",
+    )
+    @click.option("--show", default=False, is_flag=True, help="display results visually")
     @click.option(
-        "--threshold", default=.01, type=float, help="Dots threshold")
-    @click.option(
-        "--overlap", default=0.5, type=float,
-        help="dots with overlap of greater than this fraction are combined")
-    @click.option(
-        "--show", default=False, is_flag=True, help="display results visually")
-    @click.option(
-        "--detector_method", default='blob_log',
+        "--detector_method",
+        default="blob_log",
         help="str ['blob_dog', 'blob_doh', 'blob_log'] name of the type of "
-             "detection method used from skimage.feature. Default: blob_log"
+        "detection method used from skimage.feature. Default: blob_log",
     )
     @click.pass_context
     def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show, detector_method):
-        instance = BlobDetector(min_sigma, max_sigma, num_sigma, threshold, overlap,
-                                detector_method=detector_method)
+        instance = BlobDetector(
+            min_sigma, max_sigma, num_sigma, threshold, overlap, detector_method=detector_method
+        )
         #  FIXME: measurement_type, is_volume missing as options; show missing as ctor args
         ctx.obj["component"]._cli_run(ctx, instance)

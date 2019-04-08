@@ -13,7 +13,7 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.imagestack.parser.crop import CropParameters
 from starfish.imagestack.physical_coordinate_calculator import (
     get_physical_coordinates_of_z_plane,
-    recalculate_physical_coordinate_range
+    recalculate_physical_coordinate_range,
 )
 from starfish.types import Axes, Coordinates, Number
 from .imagestack_test_utils import verify_physical_coordinates, verify_stack_data
@@ -45,6 +45,7 @@ def data(round_: int, ch: int, z: int) -> np.ndarray:
 
 class UniqueTiles(FetchedTile):
     """Tiles where the pixel values are unique per round/ch/z."""
+
     def __init__(self, fov: int, _round: int, ch: int, zplane: int) -> None:
         super().__init__()
         self._round = _round
@@ -57,11 +58,7 @@ class UniqueTiles(FetchedTile):
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
-        return {
-            Coordinates.X: X_COORDS,
-            Coordinates.Y: Y_COORDS,
-            Coordinates.Z: Z_COORDS,
-        }
+        return {Coordinates.X: X_COORDS, Coordinates.Y: Y_COORDS, Coordinates.Z: Z_COORDS}
 
     @property
     def format(self) -> ImageFormat:
@@ -76,11 +73,7 @@ def setup_imagestack(crop_parameters: Optional[CropParameters]) -> ImageStack:
     sequential non-negative integers).
     """
     collection = build_image(
-        range(1),
-        ROUND_LABELS,
-        CH_LABELS,
-        Z_LABELS,
-        tile_fetcher_factory(UniqueTiles, True),
+        range(1), ROUND_LABELS, CH_LABELS, Z_LABELS, tile_fetcher_factory(UniqueTiles, True)
     )
     tileset = list(collection.all_tilesets())[0][1]
 
@@ -94,10 +87,7 @@ def test_crop_rcz():
     rounds = [1]
     chs = [2, 3]
 
-    crop_parameters = CropParameters(
-        permitted_rounds=rounds,
-        permitted_chs=chs,
-    )
+    crop_parameters = CropParameters(permitted_rounds=rounds, permitted_chs=chs)
     stack = setup_imagestack(crop_parameters)
 
     assert stack.axis_labels(Axes.ROUND) == rounds
@@ -110,17 +100,10 @@ def test_crop_rcz():
                 expected_data = data(round_, ch, zplane)
 
                 verify_stack_data(
-                    stack,
-                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
-                    expected_data,
+                    stack, {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane}, expected_data
                 )
     expected_z_coordinates = get_physical_coordinates_of_z_plane(Z_COORDS)
-    verify_physical_coordinates(
-        stack,
-        X_COORDS,
-        Y_COORDS,
-        expected_z_coordinates,
-    )
+    verify_physical_coordinates(stack, X_COORDS, Y_COORDS, expected_z_coordinates)
 
 
 def test_crop_xy():
@@ -128,10 +111,7 @@ def test_crop_xy():
     """
     X_SLICE = (10, 30)
     Y_SLICE = (15, 40)
-    crop_parameters = CropParameters(
-        x_slice=slice(*X_SLICE),
-        y_slice=slice(*Y_SLICE),
-    )
+    crop_parameters = CropParameters(x_slice=slice(*X_SLICE), y_slice=slice(*Y_SLICE))
     stack = setup_imagestack(crop_parameters)
 
     assert stack.axis_labels(Axes.ROUND) == ROUND_LABELS
@@ -145,35 +125,26 @@ def test_crop_xy():
         for ch in stack.axis_labels(Axes.CH):
             for zplane in stack.axis_labels(Axes.ZPLANE):
                 expected_data = data(round_, ch, zplane)
-                expected_data = expected_data[Y_SLICE[0]:Y_SLICE[1], X_SLICE[0]:X_SLICE[1]]
+                expected_data = expected_data[Y_SLICE[0] : Y_SLICE[1], X_SLICE[0] : X_SLICE[1]]
 
                 verify_stack_data(
-                    stack,
-                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
-                    expected_data,
+                    stack, {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane}, expected_data
                 )
 
     # the coordinates should be rescaled.  verify that the coordinates on the ImageStack
     # are also rescaled.
     original_x_coordinates = X_COORDS
     expected_x_coordinates = recalculate_physical_coordinate_range(
-        original_x_coordinates[0], original_x_coordinates[1],
-        WIDTH,
-        slice(*X_SLICE),
+        original_x_coordinates[0], original_x_coordinates[1], WIDTH, slice(*X_SLICE)
     )
 
     original_y_coordinates = Y_COORDS
     expected_y_coordinates = recalculate_physical_coordinate_range(
-        original_y_coordinates[0], original_y_coordinates[1],
-        HEIGHT,
-        slice(*Y_SLICE),
+        original_y_coordinates[0], original_y_coordinates[1], HEIGHT, slice(*Y_SLICE)
     )
 
     expected_z_coordinates = get_physical_coordinates_of_z_plane(Z_COORDS)
 
     verify_physical_coordinates(
-        stack,
-        expected_x_coordinates,
-        expected_y_coordinates,
-        expected_z_coordinates,
+        stack, expected_x_coordinates, expected_y_coordinates, expected_z_coordinates
     )

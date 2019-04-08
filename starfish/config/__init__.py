@@ -29,6 +29,7 @@ class environ(object):
         >>>     Experiment.from_json(URL)
 
     """
+
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
@@ -125,21 +126,23 @@ class StarfishConfig(object):
         config = os.environ.get("STARFISH_CONFIG", "@~/.starfish/config")
         self._config_obj = Config(config)
         self._env_keys = [
-            x for x in os.environ.keys()
-            if special_prefix(x) and x != "STARFISH_CONFIG"]
+            x for x in os.environ.keys() if special_prefix(x) and x != "STARFISH_CONFIG"
+        ]
 
         # If no directory is set, then force the default
         self._slicedimage = self._config_obj.lookup(("slicedimage",), NestedDict(), remove=True)
         if not self._slicedimage["caching"]["directory"]:
             self._slicedimage["caching"]["directory"] = "~/.starfish/cache"
-        self._slicedimage_update(('caching', 'directory'))
-        self._slicedimage_update(('caching', 'size_limit'), int)
+        self._slicedimage_update(("caching", "directory"))
+        self._slicedimage_update(("caching", "size_limit"), int)
 
         self._strict = self._config_obj.lookup(
-            ("validation", "strict"), self.flag("STARFISH_VALIDATION_STRICT", "false"), remove=True)
+            ("validation", "strict"), self.flag("STARFISH_VALIDATION_STRICT", "false"), remove=True
+        )
 
         self._verbose = self._config_obj.lookup(
-            ("verbose",), self.flag("STARFISH_VERBOSE", "true"), remove=True)
+            ("verbose",), self.flag("STARFISH_VERBOSE", "true"), remove=True
+        )
 
         if self._config_obj.data:
             warnings.warn(f"unknown configuration: {self._config_obj.data}")

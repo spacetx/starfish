@@ -19,23 +19,17 @@ def labeled_intensities_factory() -> Tuple[IntensityTable, np.ndarray, np.ndarra
     decoded_image.
     """
     data = np.array(
-        [[[[0., 0.], [.1, .1]],  # ch 1
-          [[.5, .5], [.2, .3]]],
-         [[[.1, .1], [0, 0]],  # ch 2, x & y are reversed
-          [[.2, .3], [.5, .5]]]],
-        dtype=np.float32
+        [
+            [[[0.0, 0.0], [0.1, 0.1]], [[0.5, 0.5], [0.2, 0.3]]],  # ch 1
+            [[[0.1, 0.1], [0, 0]], [[0.2, 0.3], [0.5, 0.5]]],  # ch 2, x & y are reversed
+        ],
+        dtype=np.float32,
     )
     image_stack = ImageStack.from_numpy_array(data.reshape(1, 2, 2, 2, 2))
     intensity_table = IntensityTable.from_image_stack(image_stack)
     intensity_table[Features.DISTANCE] = (Features.AXIS, np.zeros(intensity_table.shape[0]))
-    label_image = np.array(
-        [[[1, 2], [3, 4]],
-         [[1, 2], [3, 4]]]
-    )
-    decoded_image = np.array(
-        [[[5, 4], [3, 2]],
-         [[5, 4], [3, 2]]]
-    )
+    label_image = np.array([[[1, 2], [3, 4]], [[1, 2], [3, 4]]])
+    decoded_image = np.array([[[5, 4], [3, 2]], [[5, 4], [3, 2]]])
 
     # verify that the listed label image is what would be created by the function we use in the
     # code
@@ -54,8 +48,7 @@ def test_calculate_mean_pixel_traces():
 
     passes_filter = np.ones(4)
     mean_pixel_traces = CombineAdjacentFeatures._calculate_mean_pixel_traces(
-        label_image,
-        intensity_table,
+        label_image, intensity_table
     )
 
     # evaluate the mean pixel traces, we have 4 different spot ids
@@ -66,15 +59,7 @@ def test_calculate_mean_pixel_traces():
 
     # values can be calculated from the simple example, and should match the mean pixel traces
     expected_values = np.array(
-        [[[.25],
-          [.15]],
-         [[.25],
-          [.2]],
-         [[.15],
-          [.25]],
-         [[.2],
-          [.25]]],
-        dtype=np.float32
+        [[[0.25], [0.15]], [[0.25], [0.2]], [[0.15], [0.25]], [[0.2], [0.25]]], dtype=np.float32
     )
     assert np.allclose(expected_values, mean_pixel_traces.values)
 

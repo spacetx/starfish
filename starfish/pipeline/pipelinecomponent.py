@@ -9,19 +9,22 @@ class PipelineComponentType(ABCMeta):
     This is the metaclass for PipelineComponent.  As each subclass that is _not_ PipelineComponent
     is created, it sets up a map between the algorithm name and the class that implements it.
     """
+
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
         if len(bases) != 0:
             # this is _not_ PipelineComponent.  Instead, it's a subclass of PipelineComponent.
             PipelineComponentType._register_pipeline_component_type_name(cls)
 
-    _pipeline_component_type_name_to_class_map: MutableMapping[str, Type["PipelineComponent"]] = \
-        dict()
+    _pipeline_component_type_name_to_class_map: MutableMapping[
+        str, Type["PipelineComponent"]
+    ] = dict()
 
     @classmethod
     def _register_pipeline_component_type_name(mcs, cls: Type["PipelineComponent"]) -> None:
         PipelineComponentType._pipeline_component_type_name_to_class_map[
-            cls.pipeline_component_type_name()] = cls
+            cls.pipeline_component_type_name()
+        ] = cls
 
     @staticmethod
     def get_pipeline_component_type_by_name(name: str) -> Type["PipelineComponent"]:
@@ -78,7 +81,7 @@ class PipelineComponent(metaclass=PipelineComponentType):
         raise NotImplementedError()
 
 
-def import_all_submodules(path_str: str, package: str, excluded: Optional[Set[str]]=None) -> None:
+def import_all_submodules(path_str: str, package: str, excluded: Optional[Set[str]] = None) -> None:
     """
     Given a path of a __init__.py file, find all the .py files in that directory and import them
     relatively to a package.

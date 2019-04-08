@@ -1,24 +1,9 @@
 import json
 import os
 from pathlib import Path
-from typing import (
-    Any,
-    BinaryIO,
-    Callable,
-    Dict,
-    Mapping,
-    Optional,
-    Sequence,
-    Union,
-)
+from typing import Any, BinaryIO, Callable, Dict, Mapping, Optional, Sequence, Union
 
-from slicedimage import (
-    Collection,
-    ImageFormat,
-    Tile,
-    TileSet,
-    Writer,
-)
+from slicedimage import Collection, ImageFormat, Tile, TileSet, Writer
 
 from starfish.codebook.codebook import Codebook
 from starfish.experiment.builder.orderediterator import join_axes_labels, ordered_iterator
@@ -28,10 +13,7 @@ from .defaultproviders import RandomNoiseTile, tile_fetcher_factory
 from .providers import FetchedTile, TileFetcher
 
 
-AUX_IMAGE_NAMES = {
-    'nuclei',
-    'dots',
-}
+AUX_IMAGE_NAMES = {"nuclei", "dots"}
 DEFAULT_DIMENSION_ORDER = (Axes.ZPLANE, Axes.ROUND, Axes.CH)
 
 
@@ -45,7 +27,8 @@ def _tile_opener(toc_path: Path, tile: Tile, file_ext: str) -> BinaryIO:
             tile.indices[Axes.CH],
             ImageFormat.TIFF.file_ext,
         ),
-        "wb")
+        "wb",
+    )
 
 
 def _fov_path_generator(parent_toc_path: Path, toc_name: str) -> Path:
@@ -53,13 +36,13 @@ def _fov_path_generator(parent_toc_path: Path, toc_name: str) -> Path:
 
 
 def build_image(
-        fovs: Sequence[int],
-        rounds: Sequence[int],
-        chs: Sequence[int],
-        zplanes: Sequence[int],
-        image_fetcher: TileFetcher,
-        default_shape: Optional[Mapping[Axes, int]]=None,
-        axes_order: Sequence[Axes]=DEFAULT_DIMENSION_ORDER,
+    fovs: Sequence[int],
+    rounds: Sequence[int],
+    chs: Sequence[int],
+    zplanes: Sequence[int],
+    image_fetcher: TileFetcher,
+    default_shape: Optional[Mapping[Axes, int]] = None,
+    axes_order: Sequence[Axes] = DEFAULT_DIMENSION_ORDER,
 ) -> Collection:
     """
     Build and returns an image set with the following characteristics:
@@ -96,8 +79,7 @@ def build_image(
     -------
     The slicedimage collection representing the image.
     """
-    axes_sizes = join_axes_labels(
-        axes_order, rounds=rounds, chs=chs, zplanes=zplanes)
+    axes_sizes = join_axes_labels(axes_order, rounds=rounds, chs=chs, zplanes=zplanes)
 
     collection = Collection()
     for fov_id in fovs:
@@ -119,10 +101,8 @@ def build_image(
 
         for selector in ordered_iterator(axes_sizes):
             image = image_fetcher.get_tile(
-                fov_id,
-                selector[Axes.ROUND],
-                selector[Axes.CH],
-                selector[Axes.ZPLANE])
+                fov_id, selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE]
+            )
             tile = Tile(
                 image.coordinates,
                 {
@@ -145,19 +125,19 @@ def build_image(
 
 
 def write_experiment_json(
-        path: str,
-        fov_count: int,
-        tile_format: ImageFormat,
-        *,
-        primary_image_dimensions: Mapping[Union[str, Axes], int],
-        aux_name_to_dimensions: Mapping[str, Mapping[Union[str, Axes], int]],
-        primary_tile_fetcher: Optional[TileFetcher]=None,
-        aux_tile_fetcher: Optional[Mapping[str, TileFetcher]]=None,
-        postprocess_func: Optional[Callable[[dict], dict]]=None,
-        default_shape: Optional[Mapping[Axes, int]]=None,
-        dimension_order: Sequence[Axes]=(Axes.ZPLANE, Axes.ROUND, Axes.CH),
-        fov_path_generator: Callable[[Path, str], Path] = _fov_path_generator,
-        tile_opener: Callable[[Path, Tile, str], BinaryIO] = _tile_opener,
+    path: str,
+    fov_count: int,
+    tile_format: ImageFormat,
+    *,
+    primary_image_dimensions: Mapping[Union[str, Axes], int],
+    aux_name_to_dimensions: Mapping[str, Mapping[Union[str, Axes], int]],
+    primary_tile_fetcher: Optional[TileFetcher] = None,
+    aux_tile_fetcher: Optional[Mapping[str, TileFetcher]] = None,
+    postprocess_func: Optional[Callable[[dict], dict]] = None,
+    default_shape: Optional[Mapping[Axes, int]] = None,
+    dimension_order: Sequence[Axes] = (Axes.ZPLANE, Axes.ROUND, Axes.CH),
+    fov_path_generator: Callable[[Path, str], Path] = _fov_path_generator,
+    tile_opener: Callable[[Path, Tile, str], BinaryIO] = _tile_opener,
 ) -> None:
     """
     Build and returns a top-level experiment description with the following characteristics:
@@ -214,11 +194,7 @@ def write_experiment_json(
     if postprocess_func is None:
         postprocess_func = lambda doc: doc
 
-    experiment_doc: Dict[str, Any] = {
-        'version': str(CURRENT_VERSION),
-        'images': {},
-        'extras': {},
-    }
+    experiment_doc: Dict[str, Any] = {"version": str(CURRENT_VERSION), "images": {}, "extras": {}}
     primary_image = build_image(
         range(fov_count),
         range(primary_image_dimensions[Axes.ROUND]),
@@ -236,7 +212,7 @@ def write_experiment_json(
         tile_opener=tile_opener,
         tile_format=tile_format,
     )
-    experiment_doc['images']['primary'] = "primary_images.json"
+    experiment_doc["images"]["primary"] = "primary_images.json"
 
     for aux_name, aux_dimensions in aux_name_to_dimensions.items():
         if aux_dimensions is None:
@@ -258,17 +234,10 @@ def write_experiment_json(
             tile_opener=tile_opener,
             tile_format=tile_format,
         )
-        experiment_doc['images'][aux_name] = "{}.json".format(aux_name)
+        experiment_doc["images"][aux_name] = "{}.json".format(aux_name)
 
     experiment_doc["codebook"] = "codebook.json"
-    codebook_array = [
-        {
-            "codeword": [
-                {"r": 0, "c": 0, "v": 1},
-            ],
-            "target": "PLEASE_REPLACE_ME"
-        },
-    ]
+    codebook_array = [{"codeword": [{"r": 0, "c": 0, "v": 1}], "target": "PLEASE_REPLACE_ME"}]
     codebook = Codebook.from_code_array(codebook_array)
     codebook_json_filename = "codebook.json"
     codebook.to_json(os.path.join(path, codebook_json_filename))

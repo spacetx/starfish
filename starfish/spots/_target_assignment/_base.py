@@ -15,7 +15,6 @@ COMPONENT_NAME = "target_assignment"
 
 
 class TargetAssignment(PipelineComponent):
-
     @classmethod
     def pipeline_component_type_name(cls) -> str:
         return COMPONENT_NAME
@@ -38,12 +37,12 @@ class TargetAssignment(PipelineComponent):
     def _cli(ctx, label_image, intensities, output):
         """assign targets to cells"""
 
-        print('Assigning targets to cells...')
+        print("Assigning targets to cells...")
         ctx.obj = dict(
             component=TargetAssignment,
             output=output,
             intensity_table=IntensityTable.load(intensities),
-            label_image=imread(label_image)
+            label_image=imread(label_image),
         )
 
 
@@ -54,11 +53,11 @@ class TargetAssignmentAlgorithm(AlgorithmBase):
 
     @abstractmethod
     def run(
-            self,
-            label_image: np.ndarray,
-            intensity_table: IntensityTable,
-            verbose: bool=False,
-            in_place: bool=False,
+        self,
+        label_image: np.ndarray,
+        intensity_table: IntensityTable,
+        verbose: bool = False,
+        in_place: bool = False,
     ) -> IntensityTable:
         """Performs target (e.g. gene) assignment given the spots and the regions."""
         raise NotImplementedError()

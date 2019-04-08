@@ -14,21 +14,12 @@ def test_simple_intensities_find_correct_nearest_code():
     GENE_B, but it picks GENE_A because GENE_A comes first in the codebook.
     """
     data = np.array(
-        [[[0, 0.5],
-          [0.5, 0]],
-         [[0, 0.5],
-          [0, 0.5]],
-         [[0.5, 0],
-          [0.5, 0]],
-         [[0, 0],
-          [0.5, 0.5]]]
+        [[[0, 0.5], [0.5, 0]], [[0, 0.5], [0, 0.5]], [[0.5, 0], [0.5, 0]], [[0, 0], [0.5, 0.5]]]
     )
     intensities = intensity_table_factory(data=data)
     codebook = codebook_factory()
     distances, gene_ids = codebook._approximate_nearest_code(
-        codebook,
-        intensities,
-        metric='euclidean'
+        codebook, intensities, metric="euclidean"
     )
 
-    assert np.array_equal(gene_ids, ['GENE_A', 'GENE_B', 'GENE_A', 'GENE_A'])
+    assert np.array_equal(gene_ids, ["GENE_A", "GENE_B", "GENE_A", "GENE_A"])

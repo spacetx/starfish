@@ -23,7 +23,7 @@ def test_intensity_table_serialization():
 
     # dump it to disk
     tempdir = tempfile.mkdtemp()
-    filename = os.path.join(tempdir, 'test.nc')
+    filename = os.path.join(tempdir, "test.nc")
     intensities.save(filename)
 
     # verify the data has not changed

@@ -3,6 +3,7 @@ import numpy as np
 from starfish import ImageStack
 from starfish.image._filter.linear_unmixing import LinearUnmixing
 
+
 def setup_linear_unmixing_test():
     """
         Create the image stack, coeff matrix, and reference result
@@ -22,6 +23,7 @@ def setup_linear_unmixing_test():
     ref_result[:, 1, ...] = 0.5 * np.ones((z, y, x))
 
     return stack, coeff_mat, ref_result
+
 
 def test_linear_unmixing():
     """ Test the linear unmixing filter """

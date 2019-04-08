@@ -10,16 +10,15 @@ from starfish.types import Clip, Number
 from starfish.util import click
 from starfish.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
-from .util import (
-    determine_axes_to_group_by, validate_and_broadcast_kernel_size
-)
+from .util import determine_axes_to_group_by, validate_and_broadcast_kernel_size
 
 
 class MeanHighPass(FilterAlgorithmBase):
-
     def __init__(
-        self, size: Union[Number, Tuple[Number]], is_volume: bool=False,
-        clip_method: Union[str, Clip]=Clip.CLIP
+        self,
+        size: Union[Number, Tuple[Number]],
+        is_volume: bool = False,
+        clip_method: Union[str, Clip] = Clip.CLIP,
     ) -> None:
         """Mean high pass filter.
 
@@ -58,7 +57,7 @@ class MeanHighPass(FilterAlgorithmBase):
 
     @staticmethod
     def _high_pass(
-        image: Union[xr.DataArray, np.ndarray], size: Number, rescale: bool=False
+        image: Union[xr.DataArray, np.ndarray], size: Number, rescale: bool = False
     ) -> np.ndarray:
         """
         Applies a mean high pass filter to an image
@@ -86,12 +85,12 @@ class MeanHighPass(FilterAlgorithmBase):
         return filtered
 
     def run(
-            self,
-            stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose: bool = False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -117,22 +116,27 @@ class MeanHighPass(FilterAlgorithmBase):
         high_pass: Callable = partial(self._high_pass, size=self.size)
         result = stack.apply(
             high_pass,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
-            clip_method=self.clip_method
+            group_by=group_by,
+            verbose=verbose,
+            in_place=in_place,
+            n_processes=n_processes,
+            clip_method=self.clip_method,
         )
         return result
 
     @staticmethod
     @click.command("MeanHighPass")
+    @click.option("--size", type=float, help="width of the kernel")
     @click.option(
-        "--size", type=float, help="width of the kernel")
+        "--is-volume", is_flag=True, help="indicates that the image stack should be filtered in 3d"
+    )
     @click.option(
-        "--is-volume", is_flag=True,
-        help="indicates that the image stack should be filtered in 3d")
-    @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
+        "--clip-method",
+        default=Clip.CLIP,
+        type=Clip,
         help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
+        "'scale_by_chunk'",
+    )
     @click.pass_context
     def _cli(ctx, size, is_volume, clip_method):
         ctx.obj["component"]._cli_run(ctx, MeanHighPass(size, is_volume, clip_method))

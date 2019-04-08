@@ -19,8 +19,15 @@ class Warp(ApplyTransformBase):
     """Class that applies a list of arbitrary skimage GeometricTransforms to an ImageStack
      using skimage.transform.warp"""
 
-    def run(self, stack: ImageStack, transforms_list: TransformsList,
-            in_place: bool=False, verbose: bool=False, *args, **kwargs) -> ImageStack:
+    def run(
+        self,
+        stack: ImageStack,
+        transforms_list: TransformsList,
+        in_place: bool = False,
+        verbose: bool = False,
+        *args,
+        **kwargs
+    ) -> ImageStack:
         """Applies a list of transformations to an ImageStack
 
         Parameters
@@ -54,8 +61,9 @@ class Warp(ApplyTransformBase):
                 # combine all axes data to select one tile
                 selector.update(axes)  # type: ignore
                 selected_image, _ = stack.get_slice(selector)
-                warped_image = warp(selected_image, transformation_object, **kwargs
-                                    ).astype(np.float32)
+                warped_image = warp(selected_image, transformation_object, **kwargs).astype(
+                    np.float32
+                )
                 stack.set_slice(selector, warped_image)
         return stack
 
@@ -66,10 +74,9 @@ class Warp(ApplyTransformBase):
         ctx.obj["component"]._cli_run(ctx, Warp())
 
 
-def warp(image: Union[xr.DataArray, np.ndarray],
-         transformation_object: GeometricTransform,
-         **kwargs
-         ) -> np.ndarray:
+def warp(
+    image: Union[xr.DataArray, np.ndarray], transformation_object: GeometricTransform, **kwargs
+) -> np.ndarray:
     """ Wrapper around skimage.transform.warp. Warps an image according to a
     given coordinate transformation.
 

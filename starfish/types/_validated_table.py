@@ -44,8 +44,8 @@ class ValidatedTable:
         missing_fields = required_fields.difference(table.columns)
         if missing_fields:
             raise ValueError(
-                f'input table with columns {table.columns} is missing {missing_fields} required '
-                f'fields'
+                f"input table with columns {table.columns} is missing {missing_fields} required "
+                f"fields"
             )
 
     def save(self, output_file_name: str) -> None:
@@ -57,7 +57,7 @@ class ValidatedTable:
             Name for output json file
 
         """
-        self.data.to_json(output_file_name, orient='records')
+        self.data.to_json(output_file_name, orient="records")
 
     @classmethod
     def load(cls, json_file: str):

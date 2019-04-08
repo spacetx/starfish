@@ -12,9 +12,8 @@ from ._base import FilterAlgorithmBase
 
 
 class ElementWiseMultiply(FilterAlgorithmBase):
-
     def __init__(
-        self, mult_array: xr.core.dataarray.DataArray, clip_method: Union[str, Clip]=Clip.CLIP
+        self, mult_array: xr.core.dataarray.DataArray, clip_method: Union[str, Clip] = Clip.CLIP
     ) -> None:
         """Perform elementwise multiplication on the image tensor. This is useful for
         performing operations such as image normalization or field flatness correction
@@ -36,19 +35,16 @@ class ElementWiseMultiply(FilterAlgorithmBase):
         self.clip_method = clip_method
 
     _DEFAULT_TESTING_PARAMETERS = {
-        "mult_array": xr.DataArray(
-            np.array([[[[[1]]], [[[0.5]]]]]),
-            dims=('r', 'c', 'z', 'y', 'x')
-        )
+        "mult_array": xr.DataArray(np.array([[[[[1]]], [[[0.5]]]]]), dims=("r", "c", "z", "y", "x"))
     }
 
     def run(
-            self,
-            stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose: bool = False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -86,9 +82,13 @@ class ElementWiseMultiply(FilterAlgorithmBase):
     @staticmethod
     @click.command("ElementWiseMultiply")
     @click.option(
-        "--mult-array", required=True, type=np.ndarray, help="matrix to multiply with the image")
+        "--mult-array", required=True, type=np.ndarray, help="matrix to multiply with the image"
+    )
     @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
-        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image'")
+        "--clip-method",
+        default=Clip.CLIP,
+        type=Clip,
+        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image'",
+    )
     def _cli(ctx, mult_array, clip_method):
         ctx.obj["component"]._cli_run(ctx, ElementWiseMultiply(mult_array), clip_method)

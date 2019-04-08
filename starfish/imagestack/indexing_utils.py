@@ -6,7 +6,8 @@ from starfish.types import Axes
 
 
 def convert_to_selector(
-        indexers: Mapping[Axes, Union[int, slice, tuple]]) -> Mapping[str, Union[int, slice]]:
+    indexers: Mapping[Axes, Union[int, slice, tuple]]
+) -> Mapping[str, Union[int, slice]]:
     """Converts a mapping of Axis to int, slice, or tuple to a mapping of str to int or slice.  The
     latter format is required for standard xarray indexing methods.
 
@@ -17,7 +18,8 @@ def convert_to_selector(
 
     """
     return_dict: MutableMapping[str, Union[int, slice]] = {
-        ind.value: slice(None, None) for ind in Axes}
+        ind.value: slice(None, None) for ind in Axes
+    }
     for key, value in indexers.items():
         if isinstance(value, tuple):
             return_dict[key.value] = slice(value[0], value[1])
@@ -27,7 +29,8 @@ def convert_to_selector(
 
 
 def index_keep_dimensions(
-        data: xr.DataArray, indexers: Mapping[str, Union[int, slice]]) -> xr.DataArray:
+    data: xr.DataArray, indexers: Mapping[str, Union[int, slice]]
+) -> xr.DataArray:
     """Takes an xarray and key to index it. Indexes then adds back in lost dimensions"""
     # store original dims
     original_dims = data.dims

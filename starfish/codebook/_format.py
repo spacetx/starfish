@@ -8,5 +8,5 @@ MAX_SUPPORTED_VERSION = Version("0.0.0")
 
 
 class DocumentKeys:
-    VERSION_KEY = 'version'
-    MAPPINGS_KEY = 'mappings'
+    VERSION_KEY = "version"
+    MAPPINGS_KEY = "mappings"

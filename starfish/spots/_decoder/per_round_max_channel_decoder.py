@@ -5,7 +5,6 @@ from ._base import DecoderAlgorithmBase
 
 
 class PerRoundMaxChannelDecoder(DecoderAlgorithmBase):
-
     def __init__(self):
         pass
 

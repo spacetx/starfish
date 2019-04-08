@@ -15,8 +15,7 @@ class StarfishIndex(click.ParamType):
         try:
             spec = json.loads(spec_json)
         except json.decoder.JSONDecodeError:
-            self.fail(
-                "Could not parse {} into a valid index specification.".format(spec_json))
+            self.fail("Could not parse {} into a valid index specification.".format(spec_json))
 
         return {
             Axes.ROUND: spec.get(Axes.ROUND, 1),
@@ -24,18 +23,19 @@ class StarfishIndex(click.ParamType):
             Axes.ZPLANE: spec.get(Axes.ZPLANE, 1),
         }
 
+
 def dimensions_option(name, required):
     return click.option(
         "--{}-dimensions".format(name),
-        type=StarfishIndex(), required=required,
+        type=StarfishIndex(),
+        required=required,
         help="Dimensions for the {} images.  Should be a json dict, with {}, {}, "
-             "and {} as the possible keys.  The value should be the shape along that "
-             "dimension.  If a key is not present, the value is assumed to be 0."
-             .format(
-             name,
-             Axes.ROUND.value,
-             Axes.CH.value,
-             Axes.ZPLANE.value))
+        "and {} as the possible keys.  The value should be the shape along that "
+        "dimension.  If a key is not present, the value is assumed to be 0.".format(
+            name, Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE.value
+        ),
+    )
+
 
 decorators = [
     click.command(),
@@ -46,13 +46,17 @@ decorators = [
 for image_name in AUX_IMAGE_NAMES:
     decorators.append(dimensions_option(image_name, False))
 
+
 def build(output_dir, fov_count, primary_image_dimensions, **kwargs):
     """generate synthetic experiments"""
     write_experiment_json(
-        output_dir, fov_count, ImageFormat.TIFF,
+        output_dir,
+        fov_count,
+        ImageFormat.TIFF,
         primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions=kwargs,
     )
+
 
 for decorator in reversed(decorators):
     build = decorator(build)

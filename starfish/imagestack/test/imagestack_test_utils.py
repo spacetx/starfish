@@ -8,9 +8,7 @@ from starfish.types import Axes, Coordinates, Number
 
 
 def verify_stack_data(
-        stack: ImageStack,
-        selectors: Mapping[Axes, Union[int, slice]],
-        expected_data: np.ndarray,
+    stack: ImageStack, selectors: Mapping[Axes, Union[int, slice]], expected_data: np.ndarray
 ) -> Tuple[np.ndarray, Sequence[Axes]]:
     """Given an imagestack and a set of selectors, verify that the data referred to by the selectors
     matches the expected data.
@@ -22,9 +20,7 @@ def verify_stack_data(
 
 
 def verify_stack_fill(
-        stack: ImageStack,
-        selectors: Mapping[Axes, Union[int, slice]],
-        expected_fill_value: Number,
+    stack: ImageStack, selectors: Mapping[Axes, Union[int, slice]], expected_fill_value: Number
 ) -> Tuple[np.ndarray, Sequence[Axes]]:
     """Given an imagestack and a set of selectors, verify that the data referred to by the selectors
     matches an expected fill value.
@@ -36,23 +32,37 @@ def verify_stack_fill(
     return tile_data, axes
 
 
-def verify_physical_coordinates(stack: ImageStack,
-                                expected_x_coordinates: Tuple[float, float],
-                                expected_y_coordinates: Tuple[float, float],
-                                expected_z_coordinates: Tuple[float, float],
-                                zplane: Optional[int] = None) -> None:
+def verify_physical_coordinates(
+    stack: ImageStack,
+    expected_x_coordinates: Tuple[float, float],
+    expected_y_coordinates: Tuple[float, float],
+    expected_z_coordinates: Tuple[float, float],
+    zplane: Optional[int] = None,
+) -> None:
     """Given an imagestack and a set of coordinate min/max values
     verify that the physical coordinates on the stack match the expected
     range of values for each coord dimension.
     """
-    assert np.all(np.isclose(stack.xarray[Coordinates.X.value],
-                             np.linspace(expected_x_coordinates[0],
-                                         expected_x_coordinates[1],
-                                         stack.xarray.sizes[Axes.X.value])))
-    assert np.all(np.isclose(stack.xarray[Coordinates.Y.value],
-                             np.linspace(expected_y_coordinates[0],
-                                         expected_y_coordinates[1],
-                                         stack.xarray.sizes[Axes.Y.value])))
+    assert np.all(
+        np.isclose(
+            stack.xarray[Coordinates.X.value],
+            np.linspace(
+                expected_x_coordinates[0],
+                expected_x_coordinates[1],
+                stack.xarray.sizes[Axes.X.value],
+            ),
+        )
+    )
+    assert np.all(
+        np.isclose(
+            stack.xarray[Coordinates.Y.value],
+            np.linspace(
+                expected_y_coordinates[0],
+                expected_y_coordinates[1],
+                stack.xarray.sizes[Axes.Y.value],
+            ),
+        )
+    )
     # If zplane provided, test expected_z_coordinates on specific plane.
     # Else just test expected_z_coordinates on entire array
     if zplane is not None:

@@ -13,10 +13,14 @@ from .util import determine_axes_to_group_by
 
 
 class Bandpass(FilterAlgorithmBase):
-
     def __init__(
-        self, lshort: Number, llong: int, threshold: Number=0, truncate: Number=4,
-        is_volume: bool=False, clip_method: Union[str, Clip]=Clip.CLIP
+        self,
+        lshort: Number,
+        llong: int,
+        threshold: Number = 0,
+        truncate: Number = 4,
+        is_volume: bool = False,
+        clip_method: Union[str, Clip] = Clip.CLIP,
     ) -> None:
         """
 
@@ -58,8 +62,11 @@ class Bandpass(FilterAlgorithmBase):
 
     @staticmethod
     def _bandpass(
-            image: Union[xr.DataArray, np.ndarray],
-            lshort: Number, llong: int, threshold: Number, truncate: Number
+        image: Union[xr.DataArray, np.ndarray],
+        lshort: Number,
+        llong: int,
+        threshold: Number,
+        truncate: Number,
     ) -> np.ndarray:
         """Apply a bandpass filter to remove noise and background variation
 
@@ -83,18 +90,17 @@ class Bandpass(FilterAlgorithmBase):
 
         """
         bandpassed = bandpass(
-            image, lshort=lshort, llong=llong, threshold=threshold,
-            truncate=truncate
+            image, lshort=lshort, llong=llong, threshold=threshold, truncate=truncate
         )
         return bandpassed
 
     def run(
-            self,
-            stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose: bool = False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -118,7 +124,10 @@ class Bandpass(FilterAlgorithmBase):
         """
         bandpass_ = partial(
             self._bandpass,
-            lshort=self.lshort, llong=self.llong, threshold=self.threshold, truncate=self.truncate
+            lshort=self.lshort,
+            llong=self.llong,
+            threshold=self.threshold,
+            truncate=self.truncate,
         )
 
         group_by = determine_axes_to_group_by(self.is_volume)
@@ -134,22 +143,26 @@ class Bandpass(FilterAlgorithmBase):
 
     @staticmethod
     @click.command("Bandpass")
+    @click.option("--lshort", type=float, help="filter signals below this frequency")
+    @click.option("--llong", type=int, help="filter signals above this frequency")
     @click.option(
-        "--lshort", type=float, help="filter signals below this frequency")
+        "--threshold", default=0, type=float, help="zero pixels below this intensity value"
+    )
     @click.option(
-        "--llong", type=int, help="filter signals above this frequency")
+        "--truncate",
+        default=4,
+        type=float,
+        help="truncate the filter at this many standard deviations",
+    )
     @click.option(
-        "--threshold", default=0, type=float, help="zero pixels below this intensity value")
-    @click.option(
-        "--truncate", default=4, type=float,
-        help="truncate the filter at this many standard deviations")
-    @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
+        "--clip-method",
+        default=Clip.CLIP,
+        type=Clip,
         help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
+        "'scale_by_chunk'",
+    )
     @click.pass_context
     def _cli(ctx, lshort, llong, threshold, truncate, clip_method):
         ctx.obj["component"]._cli_run(
-            ctx,
-            Bandpass(lshort, llong, threshold, truncate, clip_method)
+            ctx, Bandpass(lshort, llong, threshold, truncate, clip_method)
         )

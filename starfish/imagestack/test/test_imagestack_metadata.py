@@ -24,17 +24,11 @@ def test_metadata():
     Normal situation where all the tiles have uniform keys for both indices and extras.
     """
     tile_fetcher = tile_fetcher_factory(
-        OnesTilesWithExtras,
-        False,
-        {
-            'random_key': {
-                'hello': "world",
-            }
-        }
+        OnesTilesWithExtras, False, {"random_key": {"hello": "world"}}
     )
 
     stack = ImageStack.synthetic_stack(
-        num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_ZPLANE, tile_fetcher=tile_fetcher,
+        num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_ZPLANE, tile_fetcher=tile_fetcher
     )
     table = stack.tile_metadata
     assert len(table) == NUM_ROUND * NUM_CH * NUM_ZPLANE
@@ -44,6 +38,7 @@ def test_missing_extras():
     """
     If the extras are not present on some of the tiles, it should still work.
     """
+
     class OnesTilesWithExtrasMostly(OnesTile):
         def __init__(self, fov, r, ch, z, extras: dict) -> None:
             super().__init__({Axes.Y: 10, Axes.X: 10})
@@ -57,17 +52,11 @@ def test_missing_extras():
             return self._extras
 
     tile_fetcher = tile_fetcher_factory(
-        OnesTilesWithExtrasMostly,
-        True,
-        {
-            'random_key': {
-                'hello': "world",
-            }
-        }
+        OnesTilesWithExtrasMostly, True, {"random_key": {"hello": "world"}}
     )
 
     stack = ImageStack.synthetic_stack(
-        num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_ZPLANE, tile_fetcher=tile_fetcher,
+        num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_ZPLANE, tile_fetcher=tile_fetcher
     )
     table = stack.tile_metadata
     assert len(table) == NUM_ROUND * NUM_CH * NUM_ZPLANE
@@ -78,17 +67,11 @@ def test_conflict():
     Tiles that have extras that conflict with indices should produce an error.
     """
     tile_fetcher = tile_fetcher_factory(
-        OnesTilesWithExtras,
-        False,
-        {
-            Axes.ROUND: {
-                'hello': "world",
-            }
-        }
+        OnesTilesWithExtras, False, {Axes.ROUND: {"hello": "world"}}
     )
 
     stack = ImageStack.synthetic_stack(
-        num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_ZPLANE, tile_fetcher=tile_fetcher,
+        num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_ZPLANE, tile_fetcher=tile_fetcher
     )
     with pytest.raises(ValueError):
         stack.tile_metadata

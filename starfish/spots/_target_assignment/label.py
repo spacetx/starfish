@@ -7,7 +7,6 @@ from ._base import TargetAssignmentAlgorithm
 
 
 class Label(TargetAssignmentAlgorithm):
-
     def __init__(self, **kwargs) -> None:
         """
         Label accepts no parameters, but all pipeline components must accept arbitrary kwargs
@@ -19,21 +18,18 @@ class Label(TargetAssignmentAlgorithm):
 
     @staticmethod
     def _assign(
-        label_image: np.ndarray,
-        intensities: IntensityTable,
-        in_place: bool,
+        label_image: np.ndarray, intensities: IntensityTable, in_place: bool
     ) -> IntensityTable:
 
         if len(label_image.shape) == 3:
             cell_ids = label_image[
                 intensities[Axes.ZPLANE.value].values,
                 intensities[Axes.Y.value].values,
-                intensities[Axes.X.value].values
+                intensities[Axes.X.value].values,
             ]
         elif len(label_image.shape) == 2:
             cell_ids = label_image[
-                intensities[Axes.Y.value].values,
-                intensities[Axes.X.value].values
+                intensities[Axes.Y.value].values, intensities[Axes.X.value].values
             ]
         else:
             raise ValueError(
@@ -48,11 +44,11 @@ class Label(TargetAssignmentAlgorithm):
         return intensities
 
     def run(
-            self,
-            label_image: np.ndarray,
-            intensity_table: IntensityTable,
-            verbose: bool=False,
-            in_place: bool=False,
+        self,
+        label_image: np.ndarray,
+        intensity_table: IntensityTable,
+        verbose: bool = False,
+        in_place: bool = False,
     ) -> IntensityTable:
         """Extract cell ids for features in IntensityTable from a segmentation label image
 

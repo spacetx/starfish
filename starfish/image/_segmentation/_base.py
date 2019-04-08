@@ -13,7 +13,6 @@ COMPONENT_NAME = "segment"
 
 
 class Segmentation(PipelineComponent):
-
     @classmethod
     def pipeline_component_type_name(cls) -> str:
         return COMPONENT_NAME
@@ -37,7 +36,7 @@ class Segmentation(PipelineComponent):
     @click.pass_context
     def _cli(ctx, primary_images, nuclei, output):
         """define polygons for cell boundaries and assign spots"""
-        print('Segmenting ...')
+        print("Segmenting ...")
         ctx.obj = dict(
             component=Segmentation,
             output=output,

@@ -12,10 +12,8 @@ from .util import determine_axes_to_group_by
 
 
 class ScaleByPercentile(FilterAlgorithmBase):
-
     def __init__(
-        self, p: int=0, is_volume: bool=False,
-        clip_method: Union[str, Clip]=Clip.CLIP
+        self, p: int = 0, is_volume: bool = False, clip_method: Union[str, Clip] = Clip.CLIP
     ) -> None:
         """Image scaling filter
 
@@ -70,12 +68,12 @@ class ScaleByPercentile(FilterAlgorithmBase):
         return image
 
     def run(
-            self,
-            stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose: bool = False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -101,21 +99,27 @@ class ScaleByPercentile(FilterAlgorithmBase):
         clip = partial(self._scale, p=self.p)
         result = stack.apply(
             clip,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
-            clip_method=self.clip_method
+            group_by=group_by,
+            verbose=verbose,
+            in_place=in_place,
+            n_processes=n_processes,
+            clip_method=self.clip_method,
         )
         return result
 
     @staticmethod
     @click.command("ScaleByPercentile")
-    @click.option(
-        "--p", default=100, type=int, help="scale images by this percentile")
+    @click.option("--p", default=100, type=int, help="scale images by this percentile")
     @click.option(  # FIXME: was this intentionally missed?
-        "--is-volume", is_flag=True, help="filter 3D volumes")
+        "--is-volume", is_flag=True, help="filter 3D volumes"
+    )
     @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
+        "--clip-method",
+        default=Clip.CLIP,
+        type=Clip,
         help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
+        "'scale_by_chunk'",
+    )
     @click.pass_context
     def _cli(ctx, p, is_volume, clip_method):
         ctx.obj["component"]._cli_run(ctx, ScaleByPercentile(p, is_volume, clip_method))

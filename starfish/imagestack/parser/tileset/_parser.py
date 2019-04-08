@@ -21,15 +21,15 @@ class _TileSetConsistencyDetector:
     Additionally, if the dtypes are all of the same kind, but not all of the same size, it will
     trigger a :py:class:`starfish.errors.DataFormatWarning`.
     """
+
     def __init__(self) -> None:
         self.tile_shape: Optional[Mapping[Axes, int]] = None
         self.kind = None
         self.dtype_size = None
 
     def report_tile_shape(
-            self,
-            r: int, ch: int, zplane: int,
-            tile_shape: Mapping[Axes, int]) -> None:
+        self, r: int, ch: int, zplane: int, tile_shape: Mapping[Axes, int]
+    ) -> None:
         """As each tile is parsed, the tile shape should be reported via this method.  If an
         inconsistency is detected, a ValueError exception will be raised.
 
@@ -67,7 +67,8 @@ class _TileSetConsistencyDetector:
             warnings.warn(
                 f"Tile (R: {r} C: {ch} Z: {zplane}) has dtype {dtype}, which is different from one "
                 f"or more of the other tiles.",
-                DataFormatWarning)
+                DataFormatWarning,
+            )
 
         self.kind = dtype.kind
         self.dtype_size = dtype.itemsize
@@ -80,13 +81,14 @@ class SlicedImageTile(TileData):
     therefore incumbent on the consumers of these objects to discard them as soon as it is
     reasonable to do so to free up memory.
     """
+
     def __init__(
-            self,
-            wrapped_tile: Tile,
-            expectations: _TileSetConsistencyDetector,
-            r: int,
-            ch: int,
-            zplane: int,
+        self,
+        wrapped_tile: Tile,
+        expectations: _TileSetConsistencyDetector,
+        r: int,
+        ch: int,
+        zplane: int,
     ) -> None:
         self._wrapped_tile = wrapped_tile
         self._expectations = expectations
@@ -124,16 +126,14 @@ class SlicedImageTile(TileData):
 
     @property
     def selector(self) -> Mapping[Axes, int]:
-        return {
-            Axes(axis_str): index
-            for axis_str, index in self._wrapped_tile.indices.items()
-        }
+        return {Axes(axis_str): index for axis_str, index in self._wrapped_tile.indices.items()}
 
 
 class TileSetData(TileCollectionData):
     """
     This class presents a simpler API for accessing a TileSet and its constituent tiles.
     """
+
     def __init__(self, tileset: TileSet) -> None:
         self._tile_shape = tileset.default_tile_shape
 
@@ -142,7 +142,8 @@ class TileSetData(TileCollectionData):
             key = TileKey(
                 round=tile.indices[Axes.ROUND],
                 ch=tile.indices[Axes.CH],
-                zplane=tile.indices.get(Axes.ZPLANE, 0))
+                zplane=tile.indices.get(Axes.ZPLANE, 0),
+            )
             self.tiles[key] = tile
 
             # if we don't have the tile shape, then we peek at the tile and get its shape.
@@ -171,22 +172,16 @@ class TileSetData(TileCollectionData):
 
     def get_tile_by_key(self, tilekey: TileKey) -> TileData:
         return SlicedImageTile(
-            self.tiles[tilekey],
-            self._expectations,
-            tilekey.round, tilekey.ch, tilekey.z,
+            self.tiles[tilekey], self._expectations, tilekey.round, tilekey.ch, tilekey.z
         )
 
     def get_tile(self, r: int, ch: int, z: int) -> TileData:
         return SlicedImageTile(
-            self.tiles[TileKey(round=r, ch=ch, zplane=z)],
-            self._expectations,
-            r, ch, z,
+            self.tiles[TileKey(round=r, ch=ch, zplane=z)], self._expectations, r, ch, z
         )
 
 
-def parse_tileset(
-        tileset: TileSet
-) -> Tuple[Mapping[Axes, int], TileCollectionData]:
+def parse_tileset(tileset: TileSet) -> Tuple[Mapping[Axes, int], TileCollectionData]:
     """
     Parse a :py:class:`slicedimage.TileSet` for formatting into an
     :py:class:`starfish.imagestack.ImageStack`.
@@ -215,10 +210,7 @@ def parse_tileset(
         tile = tile_data.get_tile_by_key(tile_key)
         tile_shape = tile.tile_shape
 
-    return (
-        tile_shape,
-        tile_data,
-    )
+    return (tile_shape, tile_data)
 
 
 def _get_dimension_size(tileset: TileSet, dimension: Axes):

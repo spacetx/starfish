@@ -12,23 +12,30 @@ from starfish.types import Axes, Coordinates, Features, PhysicalCoordinateTypes
 NUMBER_SPOTS = 10
 
 
-def physical_cord_to_pixel_value(physical_coord: float,
-                                 physical_pixel_size: Union[float, int],
-                                 coordinates_at_pixel_offset_0: int):
+def physical_cord_to_pixel_value(
+    physical_coord: float,
+    physical_pixel_size: Union[float, int],
+    coordinates_at_pixel_offset_0: int,
+):
 
     return (physical_coord - coordinates_at_pixel_offset_0) / physical_pixel_size
 
 
 def test_tranfering_physical_coords_to_intensity_table():
-    stack_shape = OrderedDict([(Axes.ROUND, 3), (Axes.CH, 2),
-                               (Axes.ZPLANE, 1), (Axes.Y, 50), (Axes.X, 40)])
+    stack_shape = OrderedDict(
+        [(Axes.ROUND, 3), (Axes.CH, 2), (Axes.ZPLANE, 1), (Axes.Y, 50), (Axes.X, 40)]
+    )
 
-    physical_coords = OrderedDict([(PhysicalCoordinateTypes.X_MIN, 1),
-                                   (PhysicalCoordinateTypes.X_MAX, 2),
-                                   (PhysicalCoordinateTypes.Y_MIN, 4),
-                                   (PhysicalCoordinateTypes.Y_MAX, 6),
-                                   (PhysicalCoordinateTypes.Z_MIN, 1),
-                                   (PhysicalCoordinateTypes.Z_MAX, 3)])
+    physical_coords = OrderedDict(
+        [
+            (PhysicalCoordinateTypes.X_MIN, 1),
+            (PhysicalCoordinateTypes.X_MAX, 2),
+            (PhysicalCoordinateTypes.Y_MIN, 4),
+            (PhysicalCoordinateTypes.Y_MAX, 6),
+            (PhysicalCoordinateTypes.Z_MIN, 1),
+            (PhysicalCoordinateTypes.Z_MAX, 3),
+        ]
+    )
 
     stack = test_utils.imagestack_with_coords_factory(stack_shape, physical_coords)
     codebook = test_utils.codebook_array_factory()
@@ -38,11 +45,12 @@ def test_tranfering_physical_coords_to_intensity_table():
         num_z=stack_shape[Axes.ZPLANE],
         height=stack_shape[Axes.Y],
         width=stack_shape[Axes.X],
-        n_spots=NUMBER_SPOTS
+        n_spots=NUMBER_SPOTS,
     )
 
-    intensities = intensity_table_coordinates.\
-        transfer_physical_coords_from_imagestack_to_intensity_table(stack, intensities)
+    intensities = intensity_table_coordinates.transfer_physical_coords_from_imagestack_to_intensity_table(
+        stack, intensities
+    )
 
     # Assert that new cords were added
     xc = intensities.coords[Coordinates.X]
@@ -71,15 +79,20 @@ def test_tranfering_physical_coords_to_intensity_table():
 
 
 def test_tranfering_physical_coords_to_expression_matrix():
-    stack_shape = OrderedDict([(Axes.ROUND, 3), (Axes.CH, 2),
-                               (Axes.ZPLANE, 1), (Axes.Y, 50), (Axes.X, 40)])
+    stack_shape = OrderedDict(
+        [(Axes.ROUND, 3), (Axes.CH, 2), (Axes.ZPLANE, 1), (Axes.Y, 50), (Axes.X, 40)]
+    )
 
-    physical_coords = OrderedDict([(PhysicalCoordinateTypes.X_MIN, 1),
-                                   (PhysicalCoordinateTypes.X_MAX, 2),
-                                   (PhysicalCoordinateTypes.Y_MIN, 4),
-                                   (PhysicalCoordinateTypes.Y_MAX, 6),
-                                   (PhysicalCoordinateTypes.Z_MIN, 1),
-                                   (PhysicalCoordinateTypes.Z_MAX, 3)])
+    physical_coords = OrderedDict(
+        [
+            (PhysicalCoordinateTypes.X_MIN, 1),
+            (PhysicalCoordinateTypes.X_MAX, 2),
+            (PhysicalCoordinateTypes.Y_MIN, 4),
+            (PhysicalCoordinateTypes.Y_MAX, 6),
+            (PhysicalCoordinateTypes.Z_MIN, 1),
+            (PhysicalCoordinateTypes.Z_MAX, 3),
+        ]
+    )
 
     stack = test_utils.imagestack_with_coords_factory(stack_shape, physical_coords)
     codebook = test_utils.codebook_array_factory()
@@ -89,19 +102,22 @@ def test_tranfering_physical_coords_to_expression_matrix():
         num_z=stack_shape[Axes.ZPLANE],
         height=stack_shape[Axes.Y],
         width=stack_shape[Axes.X],
-        n_spots=NUMBER_SPOTS
+        n_spots=NUMBER_SPOTS,
     )
 
-    intensities = intensity_table_coordinates. \
-        transfer_physical_coords_from_imagestack_to_intensity_table(stack, intensities)
+    intensities = intensity_table_coordinates.transfer_physical_coords_from_imagestack_to_intensity_table(
+        stack, intensities
+    )
 
     # Check that error is thrown before target assignment
     try:
         intensities.to_expression_matrix()
     except KeyError as e:
         # Assert value error is thrown with right message
-        assert e.args[0] == "IntensityTable must have 'cell_id' assignments for each cell before " \
-                            "this function can be called. See starfish.TargetAssignment.Label."
+        assert (
+            e.args[0] == "IntensityTable must have 'cell_id' assignments for each cell before "
+            "this function can be called. See starfish.TargetAssignment.Label."
+        )
 
     # mock out come cell_ids
     cell_ids = random.sample(range(1, 20), NUMBER_SPOTS)

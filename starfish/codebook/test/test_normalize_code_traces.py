@@ -9,14 +9,9 @@ from starfish.types import Axes, Features, SpotAttributes
 def intensity_table_factory() -> IntensityTable:
     """IntensityTable with a single feature that was measured over 2 channels and 2 rounds."""
 
-    intensities = np.array(
-        [[[0, 3],
-          [4, 0]]],
-        dtype=float
-    )
+    intensities = np.array([[[0, 3], [4, 0]]], dtype=float)
     spot_attribute_data = pd.DataFrame(
-        data=[0, 0, 0, 1],
-        index=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
+        data=[0, 0, 0, 1], index=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
     ).T
     spot_attributes = SpotAttributes(spot_attribute_data)
 
@@ -33,25 +28,22 @@ def codebook_factory() -> Codebook:
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 0, Axes.CH.value: 0, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1},
             ],
-            Features.TARGET: "GENE_A"
+            Features.TARGET: "GENE_A",
         },
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 0, Axes.CH.value: 2, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1},
             ],
-            Features.TARGET: "GENE_B"
+            Features.TARGET: "GENE_B",
         },
     ]
     return Codebook.from_code_array(codebook_array)
 
 
-@pytest.mark.parametrize('norm_order, expected_size', [
-    (1, 2),
-    (2, np.sqrt(2))
-])
+@pytest.mark.parametrize("norm_order, expected_size", [(1, 2), (2, np.sqrt(2))])
 def test_normalize_codes(norm_order, expected_size):
     """
     Create a simple codebook with two features, each with two "on" sites. For these simple cases,
@@ -63,21 +55,14 @@ def test_normalize_codes(norm_order, expected_size):
     assert np.all(norms == expected_size)
 
     # each code should still have only two non-zero values
-    assert np.all(
-        normed_codebook.groupby(Features.TARGET).apply(lambda x: np.sum(x != 0)) == 2
-    )
+    assert np.all(normed_codebook.groupby(Features.TARGET).apply(lambda x: np.sum(x != 0)) == 2)
 
     # each non-zero value should be equal to 1 / expected_size of the norm. There are two non-zero
     # values and so the sum of the code should be (1 / expected_size) * 2
-    assert np.all(
-        normed_codebook.sum((Axes.CH.value, Axes.ROUND.value)) == (1 / expected_size) * 2
-    )
+    assert np.all(normed_codebook.sum((Axes.CH.value, Axes.ROUND.value)) == (1 / expected_size) * 2)
 
 
-@pytest.mark.parametrize('norm_order, expected_size', [
-    (1, 7),
-    (2, 5)
-])
+@pytest.mark.parametrize("norm_order, expected_size", [(1, 7), (2, 5)])
 def test_normalize_intensities(norm_order, expected_size):
     """
     Create a slightly less simple IntensityTable with one "on" tile per feature,
@@ -90,9 +75,7 @@ def test_normalize_intensities(norm_order, expected_size):
     assert np.all(norms == expected_size)
 
     # each feature should still have only two non-zero values
-    assert np.all(
-        normed_intensities.groupby(Features.AXIS).apply(lambda x: np.sum(x != 0)) == 2
-    )
+    assert np.all(normed_intensities.groupby(Features.AXIS).apply(lambda x: np.sum(x != 0)) == 2)
 
     # each non-zero value should be equal to 1 / expected_size of the norm.
     assert np.all(normed_intensities == intensity_table / norms)
@@ -100,11 +83,8 @@ def test_normalize_intensities(norm_order, expected_size):
 
 # TODO I think the outcome of this test should be NaNs -- it's too sensitive to boundary conditions
 # 0/0/0/0 vs 0/0/0/1e-30 give VERY different results
-@pytest.mark.skip('Test is wrong, needs to be revisited')
-@pytest.mark.parametrize('norm_order, expected_value', [
-    (1, 1 / 4),
-    (2, 1 / 8)
-])
+@pytest.mark.skip("Test is wrong, needs to be revisited")
+@pytest.mark.parametrize("norm_order, expected_value", [(1, 1 / 4), (2, 1 / 8)])
 def test_all_blank_features_yield_non_zero_but_equal_normalized_values(norm_order, expected_value):
 
     intensity_table = intensity_table_factory()

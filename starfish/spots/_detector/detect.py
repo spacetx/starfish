@@ -8,16 +8,17 @@ import xarray as xr
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.intensity_table.intensity_table_coordinates import \
-    transfer_physical_coords_from_imagestack_to_intensity_table
+from starfish.intensity_table.intensity_table_coordinates import (
+    transfer_physical_coords_from_imagestack_to_intensity_table,
+)
 from starfish.types import Axes, Features, Number, SpotAttributes
 
 
 def measure_spot_intensity(
-        image: Union[np.ndarray, xr.DataArray],
-        spots: SpotAttributes,
-        measurement_function: Callable[[Sequence], Number],
-        radius_is_gyration: bool=False,
+    image: Union[np.ndarray, xr.DataArray],
+    spots: SpotAttributes,
+    measurement_function: Callable[[Sequence], Number],
+    radius_is_gyration: bool = False,
 ) -> pd.Series:
     """measure the intensity of each spot in spots in the corresponding image
 
@@ -44,9 +45,7 @@ def measure_spot_intensity(
 
     def fn(row: pd.Series) -> Number:
         data = image[
-            row['z_min']:row['z_max'],
-            row['y_min']:row['y_max'],
-            row['x_min']:row['x_max']
+            row["z_min"] : row["z_max"], row["y_min"] : row["y_max"], row["x_min"] : row["x_max"]
         ]
         return measurement_function(data)
 
@@ -54,21 +53,22 @@ def measure_spot_intensity(
         radius = np.ceil(spots.data[Features.SPOT_RADIUS]).astype(int) + 1  # round up
     else:
         radius = spots.data[Features.SPOT_RADIUS].astype(int)  # truncate down to nearest integer
-    for v, max_size in zip(['z', 'y', 'x'], image.shape):
+    for v, max_size in zip(["z", "y", "x"], image.shape):
         # numpy does exclusive max indexing, so need to subtract 1 from min to get centered box
-        spots.data[f'{v}_min'] = np.clip(spots.data[v] - (radius - 1), 0, None)
-        spots.data[f'{v}_max'] = np.clip(spots.data[v] + radius, None, max_size)
-    return spots.data[['z_min', 'z_max', 'y_min', 'y_max', 'x_min', 'x_max']].astype(int).apply(
-        fn,
-        axis=1
+        spots.data[f"{v}_min"] = np.clip(spots.data[v] - (radius - 1), 0, None)
+        spots.data[f"{v}_max"] = np.clip(spots.data[v] + radius, None, max_size)
+    return (
+        spots.data[["z_min", "z_max", "y_min", "y_max", "x_min", "x_max"]]
+        .astype(int)
+        .apply(fn, axis=1)
     )
 
 
 def measure_spot_intensities(
-        data_image: ImageStack,
-        spot_attributes: SpotAttributes,
-        measurement_function: Callable[[Sequence], Number],
-        radius_is_gyration: bool=False,
+    data_image: ImageStack,
+    spot_attributes: SpotAttributes,
+    measurement_function: Callable[[Sequence], Number],
+    radius_is_gyration: bool = False,
 ) -> IntensityTable:
     """given spots found from a reference image, find those spots across a data_image
 
@@ -99,9 +99,7 @@ def measure_spot_intensities(
 
     # construct the empty intensity table
     intensity_table = IntensityTable.empty_intensity_table(
-        spot_attributes=spot_attributes,
-        n_ch=n_ch,
-        n_round=n_round,
+        spot_attributes=spot_attributes, n_ch=n_ch, n_round=n_round
     )
 
     # if no spots were detected, return the empty IntensityTable
@@ -113,10 +111,7 @@ def measure_spot_intensities(
     for c, r in indices:
         image, _ = data_image.get_slice({Axes.CH: c, Axes.ROUND: r})
         blob_intensities: pd.Series = measure_spot_intensity(
-            image,
-            spot_attributes,
-            measurement_function,
-            radius_is_gyration=radius_is_gyration
+            image, spot_attributes, measurement_function, radius_is_gyration=radius_is_gyration
         )
         intensity_table[:, c, r] = blob_intensities
 
@@ -124,7 +119,7 @@ def measure_spot_intensities(
 
 
 def concatenate_spot_attributes_to_intensities(
-        spot_attributes: Sequence[Tuple[SpotAttributes, Dict[Axes, int]]]
+    spot_attributes: Sequence[Tuple[SpotAttributes, Dict[Axes, int]]]
 ) -> IntensityTable:
     """
     Merge multiple spot attributes frames into a single IntensityTable without merging across
@@ -147,29 +142,31 @@ def concatenate_spot_attributes_to_intensities(
 
     all_spots = pd.concat([sa.data for sa, inds in spot_attributes], sort=True)
     # this drop call ensures only x, y, z, radius, and quality, are passed to the IntensityTable
-    features_coordinates = all_spots.drop(['spot_id', 'intensity'], axis=1)
+    features_coordinates = all_spots.drop(["spot_id", "intensity"], axis=1)
 
     intensity_table = IntensityTable.empty_intensity_table(
-        SpotAttributes(features_coordinates), n_ch, n_round,
+        SpotAttributes(features_coordinates), n_ch, n_round
     )
 
     i = 0
     for attrs, inds in spot_attributes:
         for _, row in attrs.data.iterrows():
-            intensity_table[i, inds[Axes.CH], inds[Axes.ROUND]] = row['intensity']
+            intensity_table[i, inds[Axes.CH], inds[Axes.ROUND]] = row["intensity"]
             i += 1
 
     return intensity_table
 
 
-def detect_spots(data_stack: ImageStack,
-                 spot_finding_method: Callable[..., SpotAttributes],
-                 spot_finding_kwargs: Dict = None,
-                 reference_image: Union[xr.DataArray, np.ndarray] = None,
-                 reference_image_from_max_projection: bool = False,
-                 measurement_function: Callable[[Sequence], Number] = np.max,
-                 radius_is_gyration: bool = False,
-                 n_processes: Optional[int] = None) -> IntensityTable:
+def detect_spots(
+    data_stack: ImageStack,
+    spot_finding_method: Callable[..., SpotAttributes],
+    spot_finding_kwargs: Dict = None,
+    reference_image: Union[xr.DataArray, np.ndarray] = None,
+    reference_image_from_max_projection: bool = False,
+    measurement_function: Callable[[Sequence], Number] = np.max,
+    radius_is_gyration: bool = False,
+    n_processes: Optional[int] = None,
+) -> IntensityTable:
     """Apply a spot_finding_method to a ImageStack
 
     Parameters
@@ -222,7 +219,7 @@ def detect_spots(data_stack: ImageStack,
 
     if reference_image is not None and reference_image_from_max_projection:
         raise ValueError(
-            'Please pass only one of reference_image and reference_image_from_max_projection'
+            "Please pass only one of reference_image and reference_image_from_max_projection"
         )
 
     if reference_image_from_max_projection:
@@ -241,13 +238,12 @@ def detect_spots(data_stack: ImageStack,
     else:  # don't use a reference image, measure each
         spot_finding_method = partial(spot_finding_method, **spot_finding_kwargs)
         spot_attributes_list = data_stack.transform(
-            func=spot_finding_method,
-            group_by=group_by,
-            n_processes=n_processes
+            func=spot_finding_method, group_by=group_by, n_processes=n_processes
         )
         intensity_table = concatenate_spot_attributes_to_intensities(spot_attributes_list)
 
-    transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=data_stack,
-                                                                intensity_table=intensity_table)
+    transfer_physical_coords_from_imagestack_to_intensity_table(
+        image_stack=data_stack, intensity_table=intensity_table
+    )
 
     return intensity_table

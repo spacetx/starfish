@@ -14,12 +14,21 @@ from .detect import detect_spots
 
 
 class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
-
     def __init__(
-            self, spot_diameter, min_mass, max_size, separation, percentile=0,
-            noise_size: Tuple[int, int, int]=(1, 1, 1), smoothing_size=None, threshold=None,
-            preprocess: bool=False, measurement_type: str='max', is_volume: bool=False,
-            verbose=False) -> None:
+        self,
+        spot_diameter,
+        min_mass,
+        max_size,
+        separation,
+        percentile=0,
+        noise_size: Tuple[int, int, int] = (1, 1, 1),
+        smoothing_size=None,
+        threshold=None,
+        preprocess: bool = False,
+        measurement_type: str = "max",
+        is_volume: bool = False,
+        verbose=False,
+    ) -> None:
         """Find spots using a local max peak finding algorithm
 
         This is a wrapper for `trackpy.locate`
@@ -101,8 +110,8 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
         """
         image = np.asarray(image)
         with warnings.catch_warnings():
-            warnings.simplefilter('ignore', FutureWarning)  # trackpy numpy indexing warning
-            warnings.simplefilter('ignore', UserWarning)  # yielded if black images
+            warnings.simplefilter("ignore", FutureWarning)  # trackpy numpy indexing warning
+            warnings.simplefilter("ignore", UserWarning)  # yielded if black images
             attributes = locate(
                 image,
                 diameter=self.diameter,
@@ -113,25 +122,32 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
                 smoothing_size=self.smoothing_size,
                 threshold=self.threshold,
                 percentile=self.percentile,
-                preprocess=self.preprocess
+                preprocess=self.preprocess,
             )
 
         # when zero spots are detected, 'ep' is missing from the trackpy locate results.
         if attributes.shape[0] == 0:
-            attributes['ep'] = []
+            attributes["ep"] = []
 
         # TODO ambrosejcarr: data should always be at least pseudo-3d, this may not be necessary
         # TODO ambrosejcarr: this is where max vs. sum vs. mean would be parametrized.
         # here, total_intensity = sum, intensity = max
         new_colnames = [
-            'y', 'x', 'total_intensity', 'radius', 'eccentricity', 'intensity', 'raw_mass', 'ep'
+            "y",
+            "x",
+            "total_intensity",
+            "radius",
+            "eccentricity",
+            "intensity",
+            "raw_mass",
+            "ep",
         ]
         if len(image.shape) == 3:
-            attributes.columns = ['z'] + new_colnames
+            attributes.columns = ["z"] + new_colnames
         else:
             attributes.columns = new_colnames
 
-        attributes['spot_id'] = np.arange(attributes.shape[0])
+        attributes["spot_id"] = np.arange(attributes.shape[0])
         # convert these to int so it can be used to index
         attributes.x = attributes.x.astype(int)
         attributes.y = attributes.y.astype(int)
@@ -139,11 +155,11 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
         return SpotAttributes(attributes)
 
     def run(
-            self,
-            data_stack: ImageStack,
-            blobs_image: Optional[Union[np.ndarray, xr.DataArray]]=None,
-            reference_image_from_max_projection: bool=False,
-            *args,
+        self,
+        data_stack: ImageStack,
+        blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
+        reference_image_from_max_projection: bool = False,
+        *args,
     ) -> IntensityTable:
         """
         Find spots.
@@ -167,44 +183,68 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
             reference_image=blobs_image,
             reference_image_from_max_projection=reference_image_from_max_projection,
             measurement_function=self.measurement_function,
-            radius_is_gyration=True)
+            radius_is_gyration=True,
+        )
 
         return intensity_table
 
     @staticmethod
     @click.command("TrackpyLocalMaxPeakFinder")
-    @click.option("--spot-diameter", type=str, help='expected spot size')
+    @click.option("--spot-diameter", type=str, help="expected spot size")
+    @click.option("--min-mass", default=4, type=int, help="minimum integrated spot intensity")
     @click.option(
-        "--min-mass", default=4, type=int, help="minimum integrated spot intensity")
+        "--max-size", default=6, type=int, help="maximum radius of gyration of brightness"
+    )
+    @click.option("--separation", default=5, type=float, help="minimum distance between spots")
     @click.option(
-        "--max-size", default=6, type=int, help="maximum radius of gyration of brightness")
-    @click.option(
-        "--separation", default=5, type=float, help="minimum distance between spots")
-    @click.option(
-        "--noise-size", default=None, type=int,
-        help="width of gaussian blurring kernel, in pixels")
-    @click.option(
-        "--smoothing-size", default=None, type=int,
-        help="odd integer. Size of boxcar (moving average) filter in pixels. Default is the "
-             "Diameter"
+        "--noise-size", default=None, type=int, help="width of gaussian blurring kernel, in pixels"
     )
     @click.option(
-        "--preprocess", is_flag=True,
-        help="if passed, gaussian and boxcar filtering are applied")
+        "--smoothing-size",
+        default=None,
+        type=int,
+        help="odd integer. Size of boxcar (moving average) filter in pixels. Default is the "
+        "Diameter",
+    )
     @click.option(
-        "--show", default=False, is_flag=True, help="display results visually")
+        "--preprocess", is_flag=True, help="if passed, gaussian and boxcar filtering are applied"
+    )
+    @click.option("--show", default=False, is_flag=True, help="display results visually")
     @click.option(
-        "--percentile", default=None, type=float,
+        "--percentile",
+        default=None,
+        type=float,
         help="clip bandpass below this value. Thresholding is done on already background-"
-             "subtracted images. Default 1 for integer images and 1/255 for float")
+        "subtracted images. Default 1 for integer images and 1/255 for float",
+    )
     @click.option(
-        "--is-volume", is_flag=True,
-        help="indicates that the image stack should be filtered in 3d")
+        "--is-volume", is_flag=True, help="indicates that the image stack should be filtered in 3d"
+    )
     @click.pass_context
-    def _cli(ctx, spot_diameter, min_max, max_size, separation, noise_size, smoothing_size,
-             preprocess, show, percentile, is_volume):
+    def _cli(
+        ctx,
+        spot_diameter,
+        min_max,
+        max_size,
+        separation,
+        noise_size,
+        smoothing_size,
+        preprocess,
+        show,
+        percentile,
+        is_volume,
+    ):
 
-        instance = TrackpyLocalMaxPeakFinder(spot_diameter, min_max, max_size,
-                                             separation, noise_size, smoothing_size,
-                                             preprocess, show, percentile, is_volume)
+        instance = TrackpyLocalMaxPeakFinder(
+            spot_diameter,
+            min_max,
+            max_size,
+            separation,
+            noise_size,
+            smoothing_size,
+            preprocess,
+            show,
+            percentile,
+            is_volume,
+        )
         ctx.obj["component"]._cli_run(ctx, instance)

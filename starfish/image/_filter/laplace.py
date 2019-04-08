@@ -17,11 +17,13 @@ from starfish.util import click
 
 
 class Laplace(FilterAlgorithmBase):
-
     def __init__(
         self,
-        sigma: Union[Number, Tuple[Number]], mode: str='reflect',
-        cval: float=0.0, is_volume: bool=False, clip_method: Union[str, Clip]=Clip.CLIP,
+        sigma: Union[Number, Tuple[Number]],
+        mode: str = "reflect",
+        cval: float = 0.0,
+        is_volume: bool = False,
+        clip_method: Union[str, Clip] = Clip.CLIP,
     ) -> None:
         """Multi-dimensional gaussian-laplacian filter used to enhance dots against background
 
@@ -79,23 +81,24 @@ class Laplace(FilterAlgorithmBase):
 
     @staticmethod
     def _gaussian_laplace(
-        image: Union[xr.DataArray, np.ndarray], sigma: Union[Number, Tuple[Number]],
-        mode: str = 'reflect', cval: float = 0.0
+        image: Union[xr.DataArray, np.ndarray],
+        sigma: Union[Number, Tuple[Number]],
+        mode: str = "reflect",
+        cval: float = 0.0,
     ) -> np.ndarray:
-        filtered = gaussian_laplace(
-            image, sigma=sigma, mode=mode, cval=cval)
+        filtered = gaussian_laplace(image, sigma=sigma, mode=mode, cval=cval)
 
         filtered = -filtered  # the peaks are negative so invert the signal
 
         return filtered
 
     def run(
-            self,
-            stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
-            *args,
+        self,
+        stack: ImageStack,
+        in_place: bool = False,
+        verbose: bool = False,
+        n_processes: Optional[int] = None,
+        *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -121,28 +124,36 @@ class Laplace(FilterAlgorithmBase):
         apply_filtering: Callable = partial(self._gaussian_laplace, sigma=self.sigma)
         return stack.apply(
             apply_filtering,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
-            clip_method=self.clip_method
+            group_by=group_by,
+            verbose=verbose,
+            in_place=in_place,
+            n_processes=n_processes,
+            clip_method=self.clip_method,
         )
 
     @staticmethod
     @click.command("Laplace")
     @click.option(
-        "--sigma", type=float,
-        help="Standard deviation of gaussian kernel for spot enhancement")
+        "--sigma", type=float, help="Standard deviation of gaussian kernel for spot enhancement"
+    )
     @click.option(
-        "--mode", default="reflect",
-        help="How the input array is extended when the filter overlaps a border")
+        "--mode",
+        default="reflect",
+        help="How the input array is extended when the filter overlaps a border",
+    )
     @click.option(
-        "--cval", default=0.0,
-        help="Value to fill past edges of input if mode is ‘constant")
+        "--cval", default=0.0, help="Value to fill past edges of input if mode is ‘constant"
+    )
     @click.option(
-        "--is-volume", is_flag=True,
-        help="indicates that the image stack should be filtered in 3d")
+        "--is-volume", is_flag=True, help="indicates that the image stack should be filtered in 3d"
+    )
     @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
+        "--clip-method",
+        default=Clip.CLIP,
+        type=Clip,
         help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
+        "'scale_by_chunk'",
+    )
     @click.pass_context
     def _cli(ctx, sigma, mode, cval, is_volume, clip_method):
         ctx.obj["component"]._cli_run(ctx, Laplace(sigma, mode, cval, is_volume, clip_method))

@@ -1,36 +1,43 @@
 from starfish import Experiment
 
 
-def MERFISH(use_test_data: bool=False):
+def MERFISH(use_test_data: bool = False):
     if use_test_data:
         return Experiment.from_json(
-            "https://d2nhj9g34unfro.cloudfront.net/20181005/MERFISH-TEST/experiment.json")
+            "https://d2nhj9g34unfro.cloudfront.net/20181005/MERFISH-TEST/experiment.json"
+        )
     return Experiment.from_json(
-        "https://d2nhj9g34unfro.cloudfront.net/20181005/MERFISH/experiment.json")
+        "https://d2nhj9g34unfro.cloudfront.net/20181005/MERFISH/experiment.json"
+    )
 
 
-def allen_smFISH(use_test_data: bool=False):
+def allen_smFISH(use_test_data: bool = False):
     return Experiment.from_json(
-        "https://d2nhj9g34unfro.cloudfront.net/20181005/allen_smFISH/experiment.json")
+        "https://d2nhj9g34unfro.cloudfront.net/20181005/allen_smFISH/experiment.json"
+    )
 
 
-def DARTFISH(use_test_data: bool=False):
+def DARTFISH(use_test_data: bool = False):
     if use_test_data:
         return Experiment.from_json(
-            "https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH-TEST/experiment.json")
+            "https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH-TEST/experiment.json"
+        )
     return Experiment.from_json(
-        "https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/experiment.json")
+        "https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/experiment.json"
+    )
 
 
-def ISS(use_test_data: bool=False):
+def ISS(use_test_data: bool = False):
     if use_test_data:
         return Experiment.from_json(
-            "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS-TEST/experiment.json")
+            "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS-TEST/experiment.json"
+        )
     return Experiment.from_json(
-        "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS/experiment.json")
+        "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS/experiment.json"
+    )
 
 
-def osmFISH(use_test_data: bool=False):
+def osmFISH(use_test_data: bool = False):
     """Return osmFISH data from Codeluppi et al. 2018
 
     This function returns a single round of a single field of view from the 16 field of view study
@@ -57,10 +64,11 @@ def osmFISH(use_test_data: bool=False):
             "experiment.json"
         )
     return Experiment.from_json(
-        "https://d2nhj9g34unfro.cloudfront.net/20181031/osmFISH/experiment.json")
+        "https://d2nhj9g34unfro.cloudfront.net/20181031/osmFISH/experiment.json"
+    )
 
 
-def BaristaSeq(use_test_data: bool=False) -> Experiment:
+def BaristaSeq(use_test_data: bool = False) -> Experiment:
     """Loads a BaristaSeq dataset generated from mouse visual cortex. The extracted field of view
     comes from an internal layer of V1 (range: 2-5)
 
@@ -80,14 +88,14 @@ def BaristaSeq(use_test_data: bool=False) -> Experiment:
     )
 
 
-def ImagingMassCytometry(use_test_data: bool=False):
+def ImagingMassCytometry(use_test_data: bool = False):
     return Experiment.from_json(
         "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20181023/"
         "imaging_cytof/BodenmillerBreastCancerSamples/experiment.json"
     )
 
 
-def SeqFISH(use_test_data: bool=False):
+def SeqFISH(use_test_data: bool = False):
     """Loads a SeqFISH field of view generated from cultured mES cells.
 
     Parameters
@@ -114,7 +122,7 @@ def SeqFISH(use_test_data: bool=False):
     return Experiment.from_json(url)
 
 
-def STARmap(use_test_data: bool=False):
+def STARmap(use_test_data: bool = False):
     """Loads a STARmap field of view generated from mouse primary visual cortext.
 
     Parameters
@@ -134,7 +142,6 @@ def STARmap(use_test_data: bool=False):
 
     """
     url = (
-        "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20190309/"
-        "starmap/experiment.json"
+        "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20190309/" "starmap/experiment.json"
     )
     return Experiment.from_json(url)

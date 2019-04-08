@@ -9,7 +9,7 @@ from starfish.image._filter.gaussian_low_pass import GaussianLowPass
 from starfish.spots._detector.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
 
 
-@pytest.mark.skip('issues with checksums prevent this data from working properly')
+@pytest.mark.skip("issues with checksums prevent this data from working properly")
 def test_allen_smFISH_cropped_data():
 
     # set random seed to errors provoked by optimization functions

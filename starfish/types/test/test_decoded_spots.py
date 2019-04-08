@@ -13,11 +13,7 @@ def dummy_intensities() -> IntensityTable:
 
     codebook = test_utils.codebook_array_factory()
     intensities = IntensityTable.synthetic_intensities(
-        codebook,
-        num_z=10,
-        height=10,
-        width=10,
-        n_spots=5,
+        codebook, num_z=10, height=10, width=10, n_spots=5
     )
 
     intensities[Coordinates.Z.value] = (Features.AXIS, [0, 1, 0, 1, 0])
@@ -37,7 +33,7 @@ def test_decoded_spots() -> None:
         data.to_decoded_spots()
 
     # mock decoder run by adding target list
-    data[Features.TARGET] = (Features.AXIS, list('abcde'))
+    data[Features.TARGET] = (Features.AXIS, list("abcde"))
 
     ds = data.to_decoded_spots()
 
@@ -45,7 +41,7 @@ def test_decoded_spots() -> None:
 
     # test serialization
     tempdir = tempfile.mkdtemp()
-    filename = os.path.join(tempdir, 'spots.csv')
+    filename = os.path.join(tempdir, "spots.csv")
     ds.save_csv(filename)
 
     # load back into memory

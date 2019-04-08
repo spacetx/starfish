@@ -15,12 +15,8 @@ from ._base import SegmentationAlgorithmBase
 
 
 class Watershed(SegmentationAlgorithmBase):
-
     def __init__(
-        self,
-        nuclei_threshold: Number,
-        input_threshold: Number,
-        min_distance: int,
+        self, nuclei_threshold: Number, input_threshold: Number, min_distance: int
     ) -> None:
         """Implements watershed segmentation of cells.
 
@@ -84,30 +80,32 @@ class Watershed(SegmentationAlgorithmBase):
         nuclei__mp_numpy = nuclei_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
         self._segmentation_instance = _WatershedSegmenter(nuclei__mp_numpy, stain)
         label_image = self._segmentation_instance.segment(
-            self.nuclei_threshold, self.input_threshold, size_lim, disk_size_markers,
-            disk_size_mask, self.min_distance
+            self.nuclei_threshold,
+            self.input_threshold,
+            size_lim,
+            disk_size_markers,
+            disk_size_mask,
+            self.min_distance,
         )
 
         return label_image
 
-    def show(self, figsize: Tuple[int, int]=(10, 10)) -> None:
+    def show(self, figsize: Tuple[int, int] = (10, 10)) -> None:
         if isinstance(self._segmentation_instance, _WatershedSegmenter):
             self._segmentation_instance.show(figsize=figsize)
         else:
-            raise RuntimeError('Run segmentation before attempting to show results.')
+            raise RuntimeError("Run segmentation before attempting to show results.")
 
     @staticmethod
     @click.command("Watershed")
-    @click.option(
-        "--nuclei-threshold", default=.16, type=float, help="Nuclei threshold")
-    @click.option(
-        "--input-threshold", default=.22, type=float, help="Input threshold")
-    @click.option(
-        "--min-distance", default=57, type=int, help="Minimum distance between cells")
+    @click.option("--nuclei-threshold", default=0.16, type=float, help="Nuclei threshold")
+    @click.option("--input-threshold", default=0.22, type=float, help="Input threshold")
+    @click.option("--min-distance", default=57, type=int, help="Minimum distance between cells")
     @click.pass_context
     def _cli(ctx, nuclei_threshold, input_threshold, min_distance):
         ctx.obj["component"]._cli_run(
-            ctx, Watershed(nuclei_threshold, input_threshold, min_distance))
+            ctx, Watershed(nuclei_threshold, input_threshold, min_distance)
+        )
 
 
 class _WatershedSegmenter:
@@ -134,13 +132,13 @@ class _WatershedSegmenter:
         self.segmented = None
 
     def segment(
-            self,
-            nuclei_thresh: Number,
-            stain_thresh: Number,
-            size_lim: Tuple[int, int],
-            disk_size_markers: Optional[int]=None,  # TODO ambrosejcarr what is this doing?
-            disk_size_mask: Optional[int]=None,  # TODO ambrosejcarr what is this doing?
-            min_dist: Optional[Number]=None
+        self,
+        nuclei_thresh: Number,
+        stain_thresh: Number,
+        size_lim: Tuple[int, int],
+        disk_size_markers: Optional[int] = None,  # TODO ambrosejcarr what is this doing?
+        disk_size_mask: Optional[int] = None,  # TODO ambrosejcarr what is this doing?
+        min_dist: Optional[Number] = None,
     ) -> np.ndarray:
         """Execute watershed cell segmentation.
 
@@ -167,8 +165,7 @@ class _WatershedSegmenter:
         min_allowed_size, max_allowed_size = size_lim
         self.nuclei_thresholded = self.filter_nuclei(nuclei_thresh, disk_size_markers)
         self.markers, self.num_cells = self.label_nuclei(
-            self.nuclei_thresholded,
-            min_allowed_size, max_allowed_size, min_dist
+            self.nuclei_thresholded, min_allowed_size, max_allowed_size, min_dist
         )
         self.mask = self.watershed_mask(stain_thresh, self.markers, disk_size_mask)
         self.segmented = self.watershed(self.markers, self.mask)
@@ -199,7 +196,7 @@ class _WatershedSegmenter:
         nuclei_thresholded: np.ndarray,
         min_allowed_size: int,
         max_allowed_size: int,
-        min_dist: Optional[Number]=None
+        min_dist: Optional[Number] = None,
     ) -> Tuple[np.ndarray, int]:
         """Construct a labeled nuclei image, which will be combined with the point cloud to seed
         the watershed
@@ -234,7 +231,7 @@ class _WatershedSegmenter:
         areas = spm.sum(
             np.ones(nuclei_thresholded.shape),
             markers,
-            np.array(range(0, num_objs + 1), dtype=np.int32)
+            np.array(range(0, num_objs + 1), dtype=np.int32),
         )
 
         # each label value is replaced by its area
@@ -322,11 +319,9 @@ class _WatershedSegmenter:
         """
         img = 1 - self.stain
 
-        res = watershed(image=img,
-                        markers=markers,
-                        connectivity=np.ones((3, 3), bool),
-                        mask=watershed_mask
-                        )
+        res = watershed(
+            image=img, markers=markers, connectivity=np.ones((3, 3), bool), mask=watershed_mask
+        )
 
         return res
 
@@ -354,30 +349,31 @@ class _WatershedSegmenter:
 
     def show(self, figsize=(10, 10)):
         import matplotlib.pyplot as plt
+
         plt.figure(figsize=figsize)
 
         plt.subplot(321)
         image(self.nuclei, ax=plt.gca(), size=20, bar=True)
-        plt.title('Nuclei')
+        plt.title("Nuclei")
 
         plt.subplot(322)
         image(self.stain, ax=plt.gca(), size=20, bar=True)
-        plt.title('Stain')
+        plt.title("Stain")
 
         plt.subplot(323)
         image(self.nuclei_thresholded, bar=False, ax=plt.gca())
-        plt.title('Nuclei Thresholded')
+        plt.title("Nuclei Thresholded")
 
         plt.subplot(324)
         image(self.mask, bar=False, ax=plt.gca())
-        plt.title('Watershed Mask')
+        plt.title("Watershed Mask")
 
         plt.subplot(325)
         image(self.markers, size=20, cmap=plt.cm.nipy_spectral, ax=plt.gca())
-        plt.title('Found: {} cells'.format(self.num_cells))
+        plt.title("Found: {} cells".format(self.num_cells))
 
         plt.subplot(326)
         image(self.segmented, size=20, cmap=plt.cm.nipy_spectral, ax=plt.gca())
-        plt.title('Segmented Cells')
+        plt.title("Segmented Cells")
 
         return plt.gca()

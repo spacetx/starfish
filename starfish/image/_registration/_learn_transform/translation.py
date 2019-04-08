@@ -10,8 +10,7 @@ from ._base import LearnTransformBase
 
 
 class Translation(LearnTransformBase):
-
-    def __init__(self, reference_stack: ImageStack, axes: Axes, upsampling: int=1):
+    def __init__(self, reference_stack: ImageStack, axes: Axes, upsampling: int = 1):
         """
         Parameters
         ----------
@@ -28,7 +27,7 @@ class Translation(LearnTransformBase):
         self.axes = axes
         self.reference_stack = reference_stack
 
-    def run(self, stack: ImageStack, verbose: bool=False, *args) -> TransformsList:
+    def run(self, stack: ImageStack, verbose: bool = False, *args) -> TransformsList:
         """
         Iterate over the given axes of an ImageStack and learn the Similarity transform
         based off the reference_stack passed into :py:class:`Translation`'s constructor.
@@ -59,28 +58,39 @@ class Translation(LearnTransformBase):
                     f"please use the MaxProj filter."
                 )
 
-            shift, error, phasediff = register_translation(src_image=target_image,
-                                                           target_image=reference_image,
-                                                           upsample_factor=self.upsampling)
+            shift, error, phasediff = register_translation(
+                src_image=target_image,
+                target_image=reference_image,
+                upsample_factor=self.upsampling,
+            )
             if verbose:
                 print(f"For {self.axes}: {a}, Shift: {shift}, Error: {error}")
             selectors = {self.axes: a}
             # reverse shift because SimilarityTransform stores in y,x format
             shift = shift[::-1]
-            transforms.append(selectors,
-                              TransformType.SIMILARITY,
-                              SimilarityTransform(translation=shift))
+            transforms.append(
+                selectors, TransformType.SIMILARITY, SimilarityTransform(translation=shift)
+            )
 
         return transforms
 
     @staticmethod
     @click.command("Translation")
-    @click.option("--reference-stack", required=True, type=click.Path(exists=True),
-                  help="The image to align the input ImageStack to.")
+    @click.option(
+        "--reference-stack",
+        required=True,
+        type=click.Path(exists=True),
+        help="The image to align the input ImageStack to.",
+    )
     @click.option("--axes", default="r", type=str, help="The axes to iterate over.")
     @click.option("--upsampling", default=1, type=int, help="Upsampling factor.")
     @click.pass_context
     def _cli(ctx, reference_stack, axes, upsampling):
-        ctx.obj["component"]._cli_run(ctx, Translation(
-            reference_stack=ImageStack.from_path_or_url(reference_stack),
-            axes=Axes(axes), upsampling=upsampling))
+        ctx.obj["component"]._cli_run(
+            ctx,
+            Translation(
+                reference_stack=ImageStack.from_path_or_url(reference_stack),
+                axes=Axes(axes),
+                upsampling=upsampling,
+            ),
+        )

@@ -5,8 +5,9 @@ import numpy as np
 from starfish.codebook.codebook import Codebook
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.intensity_table.intensity_table_coordinates import \
-    transfer_physical_coords_from_imagestack_to_intensity_table
+from starfish.intensity_table.intensity_table_coordinates import (
+    transfer_physical_coords_from_imagestack_to_intensity_table,
+)
 from starfish.util import click
 from ._base import PixelDecoderAlgorithmBase
 from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedComponentDecodingResult
@@ -14,8 +15,14 @@ from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedCompone
 
 class PixelSpotDecoder(PixelDecoderAlgorithmBase):
     def __init__(
-            self, codebook: Codebook, metric: str, distance_threshold: float,
-            magnitude_threshold: int, min_area: int, max_area: int, norm_order: int = 2
+        self,
+        codebook: Codebook,
+        metric: str,
+        distance_threshold: float,
+        magnitude_threshold: int,
+        min_area: int,
+        max_area: int,
+        norm_order: int = 2,
     ) -> None:
         """Decode an image by first coding each pixel, then combining the results into spots
 
@@ -47,10 +54,7 @@ class PixelSpotDecoder(PixelDecoderAlgorithmBase):
         self.norm_order = norm_order
 
     def run(
-            self,
-            primary_image: ImageStack,
-            n_processes: Optional[int] = None,
-            *args,
+        self, primary_image: ImageStack, n_processes: Optional[int] = None, *args
     ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
         """decode pixels and combine them into spots using connected component labeling
 
@@ -76,48 +80,43 @@ class PixelSpotDecoder(PixelDecoderAlgorithmBase):
             max_distance=self.distance_threshold,
             min_intensity=self.magnitude_threshold,
             norm_order=self.norm_order,
-            metric=self.metric
+            metric=self.metric,
         )
         caf = CombineAdjacentFeatures(
-            min_area=self.min_area,
-            max_area=self.max_area,
-            mask_filtered_features=True
+            min_area=self.min_area, max_area=self.max_area, mask_filtered_features=True
         )
-        decoded_spots, image_decoding_results = caf.run(intensities=decoded_intensities,
-                                                        n_processes=n_processes)
+        decoded_spots, image_decoding_results = caf.run(
+            intensities=decoded_intensities, n_processes=n_processes
+        )
 
-        transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=primary_image,
-                                                                    intensity_table=decoded_spots)
+        transfer_physical_coords_from_imagestack_to_intensity_table(
+            image_stack=primary_image, intensity_table=decoded_spots
+        )
         return decoded_spots, image_decoding_results
 
     @staticmethod
     @click.command("PixelSpotDecoder")
-    @click.option("--metric", type=str, default='euclidean')
+    @click.option("--metric", type=str, default="euclidean")
     @click.option(
-        "--distance-threshold", type=float, default=0.5176,
-        help="maximum distance a pixel may be from a codeword before it is filtered"
+        "--distance-threshold",
+        type=float,
+        default=0.5176,
+        help="maximum distance a pixel may be from a codeword before it is filtered",
     )
     @click.option(
-        "--magnitude-threshold", type=float, default=1,
-        help="minimum magnitude of a feature"
+        "--magnitude-threshold", type=float, default=1, help="minimum magnitude of a feature"
     )
+    @click.option("--min-area", type=int, default=2, help="minimum area of a feature")
+    @click.option("--max-area", type=int, default=np.inf, help="maximum area of a feature")
     @click.option(
-        "--min-area", type=int, default=2,
-        help="minimum area of a feature"
-    )
-    @click.option(
-        "--max-area", type=int, default=np.inf,
-        help="maximum area of a feature"
-    )
-    @click.option(
-        "--norm-order", type=int, default=2,
+        "--norm-order",
+        type=int,
+        default=2,
         help="order of L_p norm to apply to intensities "
-        "and codes when using metric_decode to pair each intensities to its closest target"
+        "and codes when using metric_decode to pair each intensities to its closest target",
     )
     @click.pass_context
-    def _cli(
-        ctx, metric, distance_threshold, magnitude_threshold, min_area, max_area, norm_order
-    ):
+    def _cli(ctx, metric, distance_threshold, magnitude_threshold, min_area, max_area, norm_order):
         codebook = ctx.obj["codebook"]
         instance = PixelSpotDecoder(
             codebook=codebook,

@@ -10,7 +10,7 @@ from starfish import Codebook, IntensityTable
 from starfish.types import Axes, Features, SpotAttributes
 
 
-def intensity_table_factory(data: np.ndarray=np.array([[[0, 3], [4, 0]]])) -> IntensityTable:
+def intensity_table_factory(data: np.ndarray = np.array([[[0, 3], [4, 0]]])) -> IntensityTable:
     """
     Produces an IntensityTable with a single feature that was measured over 2 channels and 2 rounds.
     """
@@ -19,7 +19,7 @@ def intensity_table_factory(data: np.ndarray=np.array([[[0, 3], [4, 0]]])) -> In
     # each attribute has coordinates (z, y, x) equal to the feature index, and radius 1.
     spot_attributes_data = pd.DataFrame(
         data=np.array([[i, i, i, 1] for i in np.arange(data.shape[0])]),
-        columns=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
+        columns=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS],
     )
 
     intensity_table = IntensityTable.from_spot_data(data, SpotAttributes(spot_attributes_data))
@@ -35,16 +35,16 @@ def codebook_factory() -> Codebook:
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 0, Axes.CH.value: 1, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1},
             ],
-            Features.TARGET: 'GENE_A'
+            Features.TARGET: "GENE_A",
         },
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1},
             ],
-            Features.TARGET: 'GENE_B'
+            Features.TARGET: "GENE_B",
         },
     ]
     return Codebook.from_code_array(codebook_array)
@@ -60,21 +60,17 @@ def test_metric_decode():
     match
     """
     data = np.array(
-        [[[0, 3],  # this code is decoded "right"
-          [4, 0]],
-         [[0, 0.4],  # this code should be filtered based on magnitude
-          [0, 0.3]],
-         [[30, 0],  # this code should be filtered based on distance
-          [0, 40]]]
+        [
+            [[0, 3], [4, 0]],  # this code is decoded "right"
+            [[0, 0.4], [0, 0.3]],  # this code should be filtered based on magnitude
+            [[30, 0], [0, 40]],  # this code should be filtered based on distance
+        ]
     )
     intensities = intensity_table_factory(data)
     codebook = codebook_factory()
 
     decoded_intensities = codebook.metric_decode(
-        intensities,
-        max_distance=0.5,
-        min_intensity=1,
-        norm_order=1
+        intensities, max_distance=0.5, min_intensity=1, norm_order=1
     )
 
     assert hasattr(decoded_intensities, Features.DISTANCE)
@@ -82,13 +78,11 @@ def test_metric_decode():
     assert decoded_intensities.sizes[Features.AXIS] == 3
 
     assert np.array_equal(
-        decoded_intensities[Features.TARGET].values,
-        ['GENE_A', 'GENE_B', 'GENE_B'],
+        decoded_intensities[Features.TARGET].values, ["GENE_A", "GENE_B", "GENE_B"]
     )
 
     assert np.array_equal(
-        decoded_intensities[Features.PASSES_THRESHOLDS].values,
-        [True, False, False]
+        decoded_intensities[Features.PASSES_THRESHOLDS].values, [True, False, False]
     )
 
     assert not np.all(decoded_intensities == intensities)
@@ -105,10 +99,10 @@ def test_unmatched_intensities_and_codebook_table_sizes_throws_value_error():
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 0, Axes.CH.value: 2, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1},
             ],
-            Features.TARGET: 'GENE_A'
-        },
+            Features.TARGET: "GENE_A",
+        }
     ]
     codebook = Codebook.from_code_array(codebook_array)
     intensities = intensity_table_factory()

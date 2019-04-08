@@ -61,14 +61,13 @@ class SpotFinder(PipelineComponent):
     def _cli(ctx, input, output, blobs_stack, blobs_axis):
         """detect spots"""
         print('Detecting Spots ...')
-        _blobs_stack = None if blobs_stack is None else ImageStack.from_path_or_url(blobs_stack)
         _blobs_axes = tuple(Axes(_blobs_axis) for _blobs_axis in blobs_axis)
 
         ctx.obj = dict(
             component=SpotFinder,
             image_stack=input,
             output=output,
-            blobs_stack=_blobs_stack,
+            blobs_stack=blobs_stack,
             blobs_axes=_blobs_axes,
         )
 

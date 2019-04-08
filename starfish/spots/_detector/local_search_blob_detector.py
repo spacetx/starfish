@@ -371,6 +371,11 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
             Number of processes to devote to spot finding. If None, will use the number of available
             cpus (Default None).
 
+        Notes
+        -----
+        Blobs image is an unused parameter that is included for testing purposes. It should not
+        be passed to this method. If it is passed, the method will trigger a ValueError. 
+
         Returns
         -------
         IntensityTable

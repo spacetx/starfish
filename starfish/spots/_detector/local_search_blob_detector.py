@@ -385,8 +385,8 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
 
         if blobs_image is not None:
             raise ValueError(
-                "blobs_image shouldn't be set for LocalSearchBlobDetector.  This is likely an "
-                "usage error."
+                "blobs_image shouldn't be set for LocalSearchBlobDetector.  This is likely a usage "
+                "error."
             )
 
         per_tile_spot_results = self._find_spots(

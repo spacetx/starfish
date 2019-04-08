@@ -1,13 +1,6 @@
 """
-Introduction
-============
-
-These stages are typically specific to the microscope, camera, filters, chemistry, and any tissue
-handling or microfluidices that are involved in capturing the images. These steps are typically
-independent of the Starfish enables the user to design a pipeline that matches their imaging system
-
 Illumination Correction
------------------------
+=======================
 
 The goal of illumination correction is to remove uneven illumination of the image caused by non
 uniform illumination of the field of view, characteristics of the sensor, (like vignetting), or

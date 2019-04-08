@@ -23,20 +23,6 @@ demonstrates putting together a "pipeline recipe" and running it on an experimen
 
 #TODO ask kevin to tell me if I've got these in the right order
 
-Imaging Corrections
--------------------
-
-These stages are typically specific to the microscope, camera, filters, chemistry, and any tissue
-handling or microfluidices that are involved in capturing the images. These steps are typically
-*independent* of the assay. *Starfish* enables the user to design a pipeline that matches their
-imaging system
-
-.. toctree::
-    :maxdepth: 1
-
-    /usage/tutorials/exec_image_corrections.rst
-
-
 Basic Image Manipulations
 -------------------------
 
@@ -48,6 +34,19 @@ image, as this produces a much faster processing routine.
     :maxdepth: 1
 
     tutorials/exec_image_manipulations.rst
+
+Imaging Corrections
+-------------------
+
+These stages are typically specific to the microscope, camera, filters, chemistry, and any tissue
+handling or microfluidices that are involved in capturing the images. These steps are typically
+*independent* of the assay. *Starfish* enables the user to design a pipeline that matches their
+imaging system
+
+.. toctree::
+    :maxdepth: 1
+
+    tutorials/exec_image_corrections.rst
 
 Tissue/Substrate-specific Corrections
 -------------------------------------

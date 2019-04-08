@@ -1,6 +1,6 @@
 """
-Putting Together a Pipeline and Running it on Data
-==================================================
+Running a Pipeline
+==================
 """
 
 # TODO add vignette.

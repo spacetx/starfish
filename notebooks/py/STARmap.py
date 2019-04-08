@@ -8,10 +8,7 @@
 # EPY: END markdown
 
 # EPY: START code
-import os
-from itertools import product
 from functools import partial
-from typing import Tuple
 
 import numpy as np
 
@@ -22,7 +19,6 @@ from starfish.types import Axes
 
 # EPY: START code
 # EPY: ESCAPE %gui qt
-import starfish.display
 # EPY: END code
 
 # EPY: START code
@@ -36,7 +32,7 @@ ch_r_projection = stack.max_proj(Axes.CH, Axes.ROUND)
 # EPY: END code
 
 # EPY: START code
-starfish.display.stack(ch_r_projection)
+starfish.display(ch_r_projection)
 # EPY: END code
 
 # EPY: START markdown
@@ -50,7 +46,6 @@ starfish.display.stack(ch_r_projection)
 # similarity registration. 
 
 from skimage.feature import register_translation
-from skimage.transform import warp
 from skimage.transform import SimilarityTransform
 
 def _register_imagestack(target_image, reference_image, upsample_factor=5):
@@ -94,11 +89,11 @@ stack = mh.run(stack, in_place=True, verbose=True, n_processes=8)
 # EPY: END markdown
 
 # EPY: START code
-lsbd = starfish.spots._detector.local_search_blob_detector.LocalSearchBlobDetector(
+lsbd = starfish.spots.SpotFinder.LocalSearchBlobDetector(
     min_sigma=1,
     max_sigma=8,
     num_sigma=10,
-    threshold=np.percentile(np.ravel(substack.xarray.values), 95),
+    threshold=np.percentile(np.ravel(stack.xarray.values), 95),
     exclude_border=2,
     anchor_round=0,
     search_radius=10,
@@ -111,7 +106,7 @@ intensities = lsbd.run(stack, n_processes=8)
 # EPY: END markdown
 
 # EPY: START code
-viewer = starfish.display.stack(stack, intensities, radius_multiplier=0.1, mask_intensities=0.01)
+viewer = starfish.display(stack, intensities, radius_multiplier=0.1, mask_intensities=0.01)
 # EPY: END code
 
 # EPY: START markdown
@@ -124,5 +119,5 @@ decode_mask = decoded['target'] != 'nan'
 # EPY: END code
 
 # EPY: START code
-viewer = starfish.display.stack(stack, decoded[decode_mask], radius_multiplier=0.1, mask_intensities=0.1)
+viewer = starfish.display(stack, decoded[decode_mask], radius_multiplier=0.1, mask_intensities=0.1)
 # EPY: END code

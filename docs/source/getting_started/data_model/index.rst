@@ -83,3 +83,6 @@ We suggest the latter, as it will give you a sense of starfish's capabilities be
 into reformatting your data.
 
 #TODO ambrosejcarr add TOC links to other sections.
+
+
+# TODO ambrosejcarr use schematics from poster

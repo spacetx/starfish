@@ -21,7 +21,7 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.intensity_table.intensity_table_coordinates import \
     transfer_physical_coords_from_imagestack_to_intensity_table
-from starfish.types import Axes, Features, Number
+from starfish.types import Axes, Features, Number, SpotAttributes
 from starfish.util import click
 from ._base import SpotFinderAlgorithmBase
 
@@ -32,7 +32,6 @@ blob_detectors = {
 
 
 class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
-
     def __init__(
             self,
             min_sigma: Union[Number, Tuple[Number, ...]],
@@ -352,7 +351,13 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
         return intensity_table
 
     def run(
-        self, data: ImageStack, verbose: bool=False, n_processes: Optional[int]=None
+            self,
+            primary_image: ImageStack,
+            blobs_image: Optional[ImageStack] = None,
+            blobs_axes: Optional[Tuple[Axes, ...]] = None,
+            verbose: bool = False,
+            n_processes: Optional[int] = None,
+            *args,
     ) -> IntensityTable:
         """Find 1-hot coded spots in data.
 
@@ -366,13 +371,26 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
             Number of processes to devote to spot finding. If None, will use the number of available
             cpus (Default None).
 
+        Notes
+        -----
+        blobs_image is an unused parameter that is included for testing purposes. It should not
+        be passed to this method. If it is passed, the method will trigger a ValueError.
+
         Returns
         -------
         IntensityTable
             Contains detected coded spots.
 
         """
-        per_tile_spot_results = self._find_spots(data, verbose=verbose, n_processes=n_processes)
+
+        if blobs_image is not None:
+            raise ValueError(
+                "blobs_image shouldn't be set for LocalSearchBlobDetector.  This is likely a usage "
+                "error."
+            )
+
+        per_tile_spot_results = self._find_spots(
+            primary_image, verbose=verbose, n_processes=n_processes)
 
         per_round_spot_results = self._merge_spots_by_round(per_tile_spot_results)
 
@@ -385,15 +403,22 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
 
         intensity_table = self._build_intensity_table(
             per_round_spot_results, distances, indices,
-            rounds=data.xarray[Axes.ROUND.value].values, channels=data.xarray[Axes.CH.value].values,
-            search_radius=self.search_radius, anchor_round=self.anchor_round
+            rounds=primary_image.xarray[Axes.ROUND.value].values,
+            channels=primary_image.xarray[Axes.CH.value].values,
+            search_radius=self.search_radius,
+            anchor_round=self.anchor_round
         )
 
         transfer_physical_coords_from_imagestack_to_intensity_table(
-            image_stack=data, intensity_table=intensity_table
+            image_stack=primary_image, intensity_table=intensity_table
         )
 
         return intensity_table
+
+    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
+        # LocalSearchBlobDetector does not follow the same contract as the remaining spot detectors.
+        # TODO: (ambrosejcarr) Rationalize the spot detectors by contract and then remove this hack.
+        raise NotImplementedError()
 
     @staticmethod
     @click.command("LocalSearchBlobDetector")

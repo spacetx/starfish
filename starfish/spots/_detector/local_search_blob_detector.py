@@ -374,7 +374,7 @@ class LocalSearchBlobDetector(SpotFinderAlgorithmBase):
         Notes
         -----
         blobs_image is an unused parameter that is included for testing purposes. It should not
-        be passed to this method. If it is passed, the method will trigger a ValueError. 
+        be passed to this method. If it is passed, the method will trigger a ValueError.
 
         Returns
         -------

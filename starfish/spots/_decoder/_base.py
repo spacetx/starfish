@@ -6,7 +6,7 @@ from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util import click
-
+from starfish.util.click.indirectparams import CodebookParamType
 
 COMPONENT_NAME = "decode"
 
@@ -28,7 +28,7 @@ class Decoder(PipelineComponent):
     @click.group(COMPONENT_NAME)
     @click.option("-i", "--input", required=True, type=click.Path(exists=True))
     @click.option("-o", "--output", required=True)
-    @click.option("--codebook", required=True, type=click.Path(exists=True))
+    @click.option("--codebook", required=True, type=CodebookParamType)
     @click.pass_context
     def _cli(ctx, input, output, codebook):
         """assign genes to spots"""
@@ -37,7 +37,7 @@ class Decoder(PipelineComponent):
             input=input,
             output=output,
             intensities=IntensityTable.load(input),
-            codebook=Codebook.from_json(codebook),
+            codebook=codebook,
         )
 
 

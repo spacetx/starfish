@@ -6,7 +6,7 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import PipelineComponent
 from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.util import click
-
+from starfish.util.click.indirectparams import ImageStackParamType
 
 COMPONENT_NAME = "apply_transform"
 
@@ -27,7 +27,7 @@ class ApplyTransform(PipelineComponent):
 
     @staticmethod
     @click.group(COMPONENT_NAME)
-    @click.option("-i", "--input", type=click.Path(exists=True))
+    @click.option("-i", "--input", type=ImageStackParamType)
     @click.option("-o", "--output", required=True)
     @click.option("--transformation-list", required=True, type=click.Path(exists=True),
                   help="The list of transformations to apply to the ImageStack.")
@@ -36,9 +36,8 @@ class ApplyTransform(PipelineComponent):
         print("Applying Transform to images...")
         ctx.obj = dict(
             component=ApplyTransform,
-            input=input,
             output=output,
-            stack=ImageStack.from_path_or_url(input),
+            stack=input,
             transformation_list=TransformsList.from_json(transformation_list)
         )
 

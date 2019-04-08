@@ -5,7 +5,7 @@ from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util import click
-
+from starfish.util.click.indirectparams import ImageStackParamType
 
 COMPONENT_NAME = "filter"
 
@@ -24,7 +24,7 @@ class Filter(PipelineComponent):
 
     @staticmethod
     @click.group(COMPONENT_NAME)
-    @click.option("-i", "--input", type=click.Path(exists=True))
+    @click.option("-i", "--input", type=ImageStackParamType)
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, input, output):
@@ -34,7 +34,7 @@ class Filter(PipelineComponent):
             component=Filter,
             input=input,
             output=output,
-            stack=ImageStack.from_path_or_url(input),
+            stack=input,
         )
 
 

@@ -1,5 +1,4 @@
 import os
-import sys
 import unittest
 
 import numpy as np
@@ -9,6 +8,9 @@ import pytest
 from starfish import IntensityTable
 from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 from starfish.types import Features
+
+
+EXPERIMENT_JSON_URL = "https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH-TEST/experiment.json"
 
 
 @pytest.mark.slow
@@ -26,15 +28,9 @@ class TestWithDartfishData(CLITest, unittest.TestCase):
     def stages(self):
         return (
             [
-                sys.executable,
-                "starfish/test/full_pipelines/cli/get_cli_test_data.py",
-                "https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH-TEST/",
-                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
-            ],
-            [
                 "starfish", "filter",
-                "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered/fov_001", "primary_images.json"),
+                "--input",
+                f"@{EXPERIMENT_JSON_URL}[fov_001][primary]",
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "scale_filtered.json"),
                 "ScaleByPercentile",
@@ -55,8 +51,7 @@ class TestWithDartfishData(CLITest, unittest.TestCase):
                     tempdir, "filtered", "zero_filtered.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "spots.nc"),
-                "--codebook", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered", "codebook.json"),
+                "--codebook", f"@{EXPERIMENT_JSON_URL}",
                 "PixelSpotDecoder",
                 "--distance-threshold", "3",
                 "--magnitude-threshold", ".5",

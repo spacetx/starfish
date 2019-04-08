@@ -1,17 +1,32 @@
-mkdir -p /tmp/starfish/raw
-mkdir -p /tmp/starfish/formatted
+mkdir -p /tmp/starfish/max_projected
+mkdir -p /tmp/starfish/transforms
 mkdir -p /tmp/starfish/registered
 mkdir -p /tmp/starfish/filtered
 mkdir -p /tmp/starfish/results
 
-python data_formatting_examples/format_iss_data.py /tmp/starfish/raw /tmp/starfish/formatted --d 1
+URL=https://d2nhj9g34unfro.cloudfront.net/20181005/ISS-TEST/experiment.json
 
-starfish registration \
-    -i /tmp/starfish/formatted/primary_images-fov_000.json \
+starfish validate experiment $URL
+
+starfish filter \
+    -i @${URL}'[fov_001][primary]' \
+    -o /tmp/starfish/max_projected/primary_images.json \
+    MaxProj \
+    --dims c --dims z
+
+starfish learn_transform \
+    -i /tmp/starfish/max_projected/primary_images.json \
+    -o /tmp/starfish/transforms/transforms.json \
+    Translation \
+    --reference-stack @$URL'[fov_001][dots]' \
+    --upsampling 1000 \
+    --axes r
+
+starfish apply_transform \
+    -i @$URL'[fov_001][primary]' \
     -o /tmp/starfish/registered/primary_images.json \
-    FourierShiftRegistration \
-    --reference-stack /tmp/starfish/formatted/nuclei-fov_000.json \
-    --upsampling 1000
+    --transformation-list /tmp/starfish/transforms/transforms.json \
+    Warp
 
 starfish filter \
     -i /tmp/starfish/registered/primary_images.json \
@@ -20,13 +35,13 @@ starfish filter \
     --masking-radius 15
 
 starfish filter \
-    -i /tmp/starfish/formatted/nuclei-fov_000.json \
+    -i @$URL'[fov_001][nuclei]'  \
     -o /tmp/starfish/filtered/nuclei.json \
     WhiteTophat \
     --masking-radius 15
 
 starfish filter \
-    -i /tmp/starfish/formatted/dots-fov_000.json \
+    -i @$URL'[fov_001][dots]'  \
     -o /tmp/starfish/filtered/dots.json \
     WhiteTophat \
     --masking-radius 15
@@ -58,7 +73,7 @@ starfish target_assignment \
 
 starfish decode \
     -i /tmp/starfish/results/targeted-spots.nc \
-    --codebook /tmp/starfish/formatted/codebook.json \
+    --codebook @$URL \
     -o /tmp/starfish/results/decoded-spots.nc \
     PerRoundMaxChannelDecoder
 

@@ -32,9 +32,10 @@ def iss_pipeline(fov, codebook):
         measurement_type='mean',
     )
 
-    mp = fov.get_image('dots').max_proj(Axes.ROUND, Axes.ZPLANE)
-    mp_numpy = mp._squeezed_numpy(Axes.ROUND, Axes.ZPLANE)
-    intensities = p.run(filtered, blobs_image=mp_numpy)
+    intensities = p.run(
+        filtered,
+        blobs_image=fov.get_image('dots'),
+        blobs_axes=(Axes.ROUND, Axes.ZPLANE))
 
     # decode the pixel traces using the codebook
     decoded = codebook.decode_per_round_max(intensities)

@@ -211,8 +211,8 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
         Parameters
         ----------
-        data_image: Union[np.ndarray, xr.DataArray]
-            image from which spots should be extracted
+        data_image : Union[np.ndarray, xr.DataArray]
+            image containing spots to be detected
 
         Returns
         -------
@@ -270,35 +270,31 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
     def run(
             self,
-            data_stack: ImageStack,
-            blobs_image: Optional[Union[np.ndarray, xr.DataArray]] = None,
-            reference_image_from_max_projection: bool = False,
+            primary_image: ImageStack,
+            blobs_image: Optional[ImageStack] = None,
+            blobs_axes: Optional[Tuple[Axes, ...]] = None,
             *args,
     ) -> IntensityTable:
-        """Find spots.
+        """
+        Find spots.
 
         Parameters
         ----------
-        data_stack : ImageStack
-            Stack where we find the spots in.
-        blobs_image : Union[np.ndarray, xr.DataArray]
+        primary_image : ImageStack
+            ImageStack where we find the spots in.
+        blobs_image : Optional[ImageStack]
             If provided, spots will be found in the blobs image, and intensities will be measured
             across rounds and channels. Otherwise, spots are measured independently for each channel
             and round.
-        reference_image_from_max_projection : bool
-            if True, compute a reference image from the maximum projection of the channels and
-            z-planes
-
-        Returns
-        -------
-        IntensityTable :
-            IntensityTable containing decoded spots
+        blobs_axes : Optional[Tuple[Axes, ...]]
+            If blobs_image is provided, blobs_axes must be provided as well.  blobs_axes represents
+            the axes across which the blobs image is max projected before spot detection is done.
         """
         intensity_table = detect_spots(
-            data_stack=data_stack,
+            data_stack=primary_image,
             spot_finding_method=self.image_to_spots,
             reference_image=blobs_image,
-            reference_image_from_max_projection=reference_image_from_max_projection,
+            reference_image_max_projection_axes=blobs_axes,
             measurement_function=self.measurement_function,
             radius_is_gyration=False)
 

@@ -10,6 +10,7 @@ from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.types import Axes, Number, SpotAttributes
 from starfish.util import click
+from starfish.util.click.indirectparams import ImageStackParamType
 
 COMPONENT_NAME = "detect_spots"
 
@@ -40,12 +41,13 @@ class SpotFinder(PipelineComponent):
 
     @staticmethod
     @click.group(COMPONENT_NAME)
-    @click.option("-i", "--input", required=True, type=click.Path(exists=True))
+    @click.option("-i", "--input", required=True, type=ImageStackParamType)
     @click.option("-o", "--output", required=True)
     @click.option(
         "--blobs-stack",
         default=None,
         required=False,
+        type=ImageStackParamType,
         help="ImageStack that contains the blobs."
     )
     @click.option(
@@ -64,7 +66,7 @@ class SpotFinder(PipelineComponent):
 
         ctx.obj = dict(
             component=SpotFinder,
-            image_stack=ImageStack.from_path_or_url(input),
+            image_stack=input,
             output=output,
             blobs_stack=_blobs_stack,
             blobs_axes=_blobs_axes,

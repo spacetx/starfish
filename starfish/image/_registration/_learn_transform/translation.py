@@ -6,6 +6,7 @@ from starfish.image._registration.transforms_list import TransformsList
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes, TransformType
 from starfish.util import click
+from starfish.util.click.indirectparams import ImageStackParamType
 from ._base import LearnTransformBase
 
 
@@ -75,12 +76,14 @@ class Translation(LearnTransformBase):
 
     @staticmethod
     @click.command("Translation")
-    @click.option("--reference-stack", required=True, type=click.Path(exists=True),
+    @click.option("--reference-stack", required=True, type=ImageStackParamType,
                   help="The image to align the input ImageStack to.")
     @click.option("--axes", default="r", type=str, help="The axes to iterate over.")
     @click.option("--upsampling", default=1, type=int, help="Upsampling factor.")
     @click.pass_context
     def _cli(ctx, reference_stack, axes, upsampling):
-        ctx.obj["component"]._cli_run(ctx, Translation(
-            reference_stack=ImageStack.from_path_or_url(reference_stack),
-            axes=Axes(axes), upsampling=upsampling))
+        ctx.obj["component"]._cli_run(
+            ctx,
+            Translation(
+                reference_stack=reference_stack,
+                axes=Axes(axes), upsampling=upsampling))

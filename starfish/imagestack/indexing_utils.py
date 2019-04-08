@@ -1,9 +1,9 @@
-from typing import Mapping, MutableMapping, Union
+from typing import Dict, Mapping, MutableMapping, Union
 
 import numpy as np
 import xarray as xr
 
-from starfish.types import Axes
+from starfish.types import Axes, Coordinates
 
 
 def convert_to_selector(
@@ -25,6 +25,39 @@ def convert_to_selector(
         else:
             return_dict[key.value] = value
     return return_dict
+
+
+def convert_coords_to_indices(array: xr.DataArray,
+                              indexers: Mapping[Coordinates, Union[float, tuple]]
+                              ) -> Dict[Axes, Union[int, tuple]]:
+    """
+    Convert mapping of physical coordinates to value or range to mapping of corresponding Axes and
+    positional coordinates.
+
+    Parameters
+    ----------
+    array: xr.DataArray
+        The xarray with both physical and positional coordinates.
+    indexers: Mapping[Coordinates, Union[int, tuple]]
+        Mapping of physical coordinates to value or range
+
+    Returns
+    -------
+    Mapping[Axes, Union[int, tuple]]:
+        Mapping of Axes and positional indices that correspond to the given physical indices.
+
+    """
+    axes_indexers: Dict[Axes, Union[int, tuple]] = dict()
+    if Coordinates.X in indexers:
+        idx_x = find_nearest(array[Coordinates.X.value], indexers[Coordinates.X])
+        axes_indexers[Axes.X] = idx_x
+    if Coordinates.Y in indexers:
+        idx_y = find_nearest(array[Coordinates.Y.value], indexers[Coordinates.Y])
+        axes_indexers[Axes.Y] = idx_y
+    if Coordinates.Z in indexers:
+        idx_z = find_nearest(array[Coordinates.Z.value], indexers[Coordinates.Z])
+        axes_indexers[Axes.ZPLANE] = idx_z
+    return axes_indexers
 
 
 def index_keep_dimensions(data: xr.DataArray,

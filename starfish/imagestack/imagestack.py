@@ -404,20 +404,7 @@ class ImageStack:
          ImageStack :
             a new image stack indexed by given value or range.
         """
-        new_indexers = {}
-        for key, value in indexers.items():
-            if key == Coordinates.X:
-                idx_x = indexing_utils.find_nearest(self.xarray[Coordinates.X.value],
-                                                    indexers[Coordinates.X])
-                new_indexers[Axes.X] = idx_x
-            if key == Coordinates.Y:
-                idx_y = indexing_utils.find_nearest(self.xarray[Coordinates.Y.value],
-                                                    indexers[Coordinates.Y])
-                new_indexers[Axes.Y] = idx_y
-            if key == Coordinates.Z:
-                idx_z = indexing_utils.find_nearest(self.xarray[Coordinates.Z.value],
-                                                    indexers[Coordinates.Z])
-                new_indexers[Axes.ZPLANE] = idx_z
+        new_indexers = indexing_utils.convert_coords_to_indices(self.xarray, indexers)
         return self.sel(new_indexers)
 
     def get_slice(

@@ -9,14 +9,14 @@ from starfish.display import (
     _spots_to_markers,
 )
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.test import test_utils
+from starfish.test import factories
 from starfish.types import Axes, Features
 
 
 @lru_cache(maxsize=1)
 def testing_data():
     np.random.seed(1)
-    codebook = test_utils.codebook_array_factory()
+    codebook = factories.codebook_array_factory()
     num_z, height, width = 3, 4, 5
     intensities = IntensityTable.synthetic_intensities(
         codebook,

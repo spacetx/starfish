@@ -10,7 +10,7 @@ from starfish.imagestack.physical_coordinate_calculator import get_physical_coor
 from starfish.intensity_table.intensity_table import IntensityTable
 # don't inspect pytest fixtures in pycharm
 # noinspection PyUnresolvedReferences
-from starfish.test import test_utils
+from starfish.test import factories
 from starfish.types import Axes, PhysicalCoordinateTypes
 from .dataset_fixtures import (  # noqa: F401
     codebook_intensities_image_for_single_synthetic_spot,
@@ -298,7 +298,7 @@ def test_imagestack_export(tmpdir, format, count, recwarn):
                                    (PhysicalCoordinateTypes.Z_MIN, Z_COORDS[0]),
                                    (PhysicalCoordinateTypes.Z_MAX, Z_COORDS[1])])
 
-    stack = test_utils.imagestack_with_coords_factory(stack_shape, physical_coords)
+    stack = factories.imagestack_with_coords_factory(stack_shape, physical_coords)
 
     stack_json = tmpdir / "output.json"
     stack.export(str(stack_json), tile_format=format)

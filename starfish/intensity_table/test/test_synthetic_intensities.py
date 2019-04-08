@@ -5,7 +5,7 @@ Tests for IntensityTable.synthetic_intensities method.
 import numpy as np
 
 from starfish import IntensityTable
-from starfish.test import test_utils
+from starfish.test import factories
 from starfish.types import Axes, Features
 
 
@@ -19,7 +19,7 @@ def test_synthetic_intensity_generation():
     """
     # set seed to check that codebook is matched. This seed generates 2 instances of GENE_B
     np.random.seed(1)
-    codebook = test_utils.codebook_array_factory()
+    codebook = factories.codebook_array_factory()
     num_z, height, width = 3, 4, 5
     intensities = IntensityTable.synthetic_intensities(
         codebook,

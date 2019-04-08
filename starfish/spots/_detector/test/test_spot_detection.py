@@ -7,7 +7,7 @@ from starfish.spots._detector.blob import BlobDetector
 from starfish.spots._detector.detect import detect_spots
 from starfish.spots._detector.local_max_peak_finder import LocalMaxPeakFinder
 from starfish.spots._detector.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
-from starfish.test.test_utils import (
+from starfish.test.factories import (
     two_spot_informative_blank_coded_data_factory,
     two_spot_one_hot_coded_data_factory,
     two_spot_sparse_coded_data_factory,

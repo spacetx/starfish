@@ -38,6 +38,7 @@ from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
 from starfish.config import StarfishConfig
+from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import build_image, TileFetcher
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
 from starfish.imagestack import indexing_utils, physical_coordinate_calculator
@@ -183,11 +184,14 @@ class ImageStack:
             tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
         ]
 
+        tile_dtypes = set()
         for selector in tqdm(all_selectors):
             tile = tile_data.get_tile(
                 r=selector[Axes.ROUND], ch=selector[Axes.CH], z=selector[Axes.ZPLANE])
+            data = tile.numpy_array
+            tile_dtypes.add(data.dtype)
 
-            data = img_as_float32(tile.numpy_array)
+            data = img_as_float32(data)
             self.set_slice(selector=selector, data=data)
 
             coordinates_values = [
@@ -202,6 +206,13 @@ class ImageStack:
                 # Use mid-point of the z range for a tile for the z-coordinate
                 self._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = \
                     physical_coordinate_calculator.get_physical_coordinates_of_z_plane(z_range)
+
+        tile_dtype_kinds = set(tile_dtype.kind for tile_dtype in tile_dtypes)
+        tile_dtype_sizes = set(tile_dtype.itemsize for tile_dtype in tile_dtypes)
+        if len(tile_dtype_kinds) != 1:
+            raise TypeError("All tiles should have the same kind of dtype")
+        if len(tile_dtype_sizes) != 1:
+            warnings.warn("Not all tiles have the same precision data", DataFormatWarning)
 
     @staticmethod
     def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:

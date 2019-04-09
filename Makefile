@@ -107,8 +107,9 @@ help-requirements:
 ### INTEGRATION ##############################################
 #
 include notebooks/subdir.mk
+include docs/source/_static/data_processing_examples/subdir.mk
 
-slow: fast run-notebooks docker
+slow: fast run-notebooks run-examples docker
 
 docker:
 	docker build -t $(DOCKER_IMAGE) .

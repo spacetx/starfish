@@ -5,7 +5,7 @@ EDITOR?=vi
 MPLBACKEND?=Agg
 export MPLBACKEND
 
-MODULES=starfish data_formatting_examples
+MODULES=starfish docs/source/_static/data_formatting_examples
 
 DOCKER_IMAGE?=spacetx/starfish
 DOCKER_BUILD?=1
@@ -110,8 +110,9 @@ help-requirements:
 ### INTEGRATION ##############################################
 #
 include notebooks/subdir.mk
+include docs/source/_static/data_processing_examples/subdir.mk
 
-slow: fast run-notebooks docker
+slow: fast run-notebooks run-examples docker
 
 docker:
 	docker build -t $(DOCKER_IMAGE) .

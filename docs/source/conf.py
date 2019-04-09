@@ -24,7 +24,7 @@ matplotlib.use('agg')
 # -- Project information -----------------------------------------------------
 
 project = 'starfish'
-copyright = '2018, The Chan Zuckerberg Initiative'
+copyright = '2017-2019, The Chan Zuckerberg Initiative'
 author = 'Ambrose J. Carr, Tony Tung, Shannon Axelrod, Brian Long, Jeremy Freeman, Deep Ganguli'
 
 # The short X.Y version
@@ -109,11 +109,11 @@ sphinx_gallery_conf = {
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-# html_theme = 'sphinx_rtd_theme'
-html_theme = 'bootstrap'
+html_theme = 'sphinx_rtd_theme'
+# html_theme = 'bootstrap'
 
-import sphinx_bootstrap_theme
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+# import sphinx_bootstrap_theme
+# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -128,18 +128,18 @@ html_favicon = '_static/favicon.ico'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-html_theme_options = {
-    'source_link_position': "footer",
-    'bootswatch_theme': "flatly", # https://bootswatch.com/
-    'navbar_sidebarrel': False,
-    'bootstrap_version': "3",
-    'navbar_links': [
-                     ("Introduction", "introduction/introduction"),
-                     ("Installation", "installation/installation"),
-                     ("API", "api/index"),
-                     ],
+# html_theme_options = {
+#     'source_link_position': "footer",
+#     'bootswatch_theme': "flatly", # https://bootswatch.com/
+#     'navbar_sidebarrel': False,
+#     'bootstrap_version': "3",
+#     'navbar_links': [
+#                      ("Introduction", "introduction/introduction"),
+#                      ("Installation", "installation/installation"),
+#                      ("API", "api/index"),
+#                      ],
 
-    }
+#     }
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -228,6 +228,15 @@ napoleon_use_rtype = True
 autodoc_mock_imports = ['_tkinter']
 
 sphinx_gallery_conf = {
-    'examples_dirs': '_static/data_processing_examples',   # path to your example scripts
-    'gallery_dirs': 'usage/data_processing_examples',  # path where to save gallery generated examples
+    'examples_dirs': [
+        '_static/data_processing_examples',
+        '_static/data_formatting_examples',
+        '_static/tutorials',
+    ],
+    'gallery_dirs': [
+        'usage/data_processing_examples',
+        'usage/data_formatting_examples',
+        'creating_an_image_processing_pipeline/tutorials',
+    ],
+    'filename_pattern': '/exec_',
 }

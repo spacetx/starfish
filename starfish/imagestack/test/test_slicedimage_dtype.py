@@ -100,8 +100,8 @@ def test_int_type_promotion():
             tile_fetcher=CornerDifferentDtype(np.int32, np.int8),
         )
         assert len(warnings_) == 2
-        assert issubclass(warnings_[0].category, DataFormatWarning)
-        assert issubclass(warnings_[1].category, UserWarning)
+        assert issubclass(warnings_[0].category, UserWarning)
+        assert issubclass(warnings_[1].category, DataFormatWarning)
     expected = img_as_float32(np.ones(
         (NUM_ROUND,
          NUM_CH,
@@ -123,8 +123,8 @@ def test_uint_type_promotion():
             tile_fetcher=CornerDifferentDtype(np.uint32, np.uint8),
         )
         assert len(warnings_) == 2
-        assert issubclass(warnings_[0].category, DataFormatWarning)
-        assert issubclass(warnings_[1].category, UserWarning)
+        assert issubclass(warnings_[0].category, UserWarning)
+        assert issubclass(warnings_[1].category, DataFormatWarning)
     expected = img_as_float32(np.ones(
         (NUM_ROUND,
          NUM_CH,
@@ -146,8 +146,8 @@ def test_float_type_demotion():
             tile_fetcher=CornerDifferentDtype(np.float64, np.float32),
         )
         assert len(warnings_) == 2
-        assert issubclass(warnings_[0].category, DataFormatWarning)
-        assert issubclass(warnings_[1].category, UserWarning)
+        assert issubclass(warnings_[0].category, UserWarning)
+        assert issubclass(warnings_[1].category, DataFormatWarning)
     expected = np.ones(
         (NUM_ROUND,
          NUM_CH,

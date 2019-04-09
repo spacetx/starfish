@@ -2,7 +2,7 @@ import itertools
 import os
 import os.path as osp
 import shutil
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Sequence, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -13,6 +13,33 @@ from starfish.types import Axes, Coordinates
 
 AXES = [a.value for a in Axes if a not in (Axes.ROUND, Axes.CH)]
 COORDS = [c.value for c in Coordinates]
+
+
+def _get_axes_names(ndim: int) -> Tuple[List[str], List[str]]:
+    """Get needed axes names given the number of dimensions.
+
+    Parameters
+    ----------
+    ndim : int
+        Number of dimensions.
+
+    Returns
+    -------
+    axes : List[str]
+        Axes names.
+    coords : List[str]
+        Coordinates names.
+    """
+    if ndim == 2:
+        axes = [axis for axis in AXES if axis != Axes.ZPLANE.value]
+        coords = [coord for coord in COORDS if coord != Coordinates.Z.value]
+    elif ndim == 3:
+        axes = AXES
+        coords = COORDS
+    else:
+        raise TypeError('expected 2- or 3-D image')
+
+    return axes, coords
 
 
 def validate_segmentation_mask(arr: xr.DataArray):
@@ -32,12 +59,7 @@ def validate_segmentation_mask(arr: xr.DataArray):
     if arr.dtype != np.bool:
         raise TypeError(f"expected dtype of bool; got {arr.dtype}")
 
-    if arr.ndim == 2:
-        axes = AXES[1:]
-        coords = COORDS[1:]
-    else:
-        axes = AXES
-        coords = COORDS
+    axes, coords = _get_axes_names(arr.ndim)
 
     for dim in axes:
         if dim not in arr.dims:
@@ -73,7 +95,7 @@ class SegmentationMaskCollection:
     def __len__(self):
         return len(self._masks)
 
-    def add_mask(self, mask: xr.DataArray):
+    def append(self, mask: xr.DataArray):
         """Add an existing segmentation mask.
 
         Parameters
@@ -88,15 +110,15 @@ class SegmentationMaskCollection:
     def from_label_image(
             cls,
             label_image: np.ndarray,
-            physical_ticks: Dict[Coordinates, List[float]]
+            physical_ticks: Dict[Coordinates, Sequence[float]]
     ) -> "SegmentationMaskCollection":
         """Creates segmentation masks from a label image.
 
         Parameters
         ----------
         label_image : int array
-            Integer array where each integer corresponds to a cell.
-        physical_ticks : Dict[Coordinates, List[float]]
+            Integer array where each integer corresponds to a region.
+        physical_ticks : Dict[Coordinates, Sequence[float]]
             Physical coordinates for each axis.
 
         Returns
@@ -106,21 +128,21 @@ class SegmentationMaskCollection:
         """
         props = regionprops(label_image)
 
-        if label_image.ndim == 2:
-            dims = AXES[1:]
-        elif label_image.ndim == 3:
-            dims = AXES
-        else:
-            raise TypeError('expected 2- or 3-D image')
+        dims, _ = _get_axes_names(label_image.ndim)
 
         masks: List[xr.DataArray] = []
 
-        coords: Dict[str, Union[list, Tuple[str, list]]]
+        coords: Dict[str, Union[list, Tuple[str, Sequence]]]
 
+        # for each region (and its properties):
         for label, prop in enumerate(props):
+            # create pixel coordinate labels from the bounding box
+            # to preserve spatial indexing relative to the original image
             coords = {d: list(range(prop.bbox[i], prop.bbox[i + len(dims)]))
                       for i, d in enumerate(dims)}
 
+            # create physical coordinate labels by taking the overlapping
+            # subset from the full span of labels
             for d, c in physical_ticks.items():
                 axis = d.value[0]
                 i = dims.index(axis)
@@ -162,8 +184,8 @@ class SegmentationMaskCollection:
         ----------
         path : str
             Path of the directory to write to.
-        overwrite : bool, optional
-            Whether to overwrite the directory if it exists.
+        overwrite : bool
+            Whether to overwrite the directory if it exists. (default: False)
         """
         try:
             os.mkdir(path)

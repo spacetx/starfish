@@ -94,7 +94,7 @@ class Watershed(SegmentationAlgorithmBase):
         )
 
         # we max-projected and squeezed the Z-plane so label_image.ndim == 2
-        physical_ticks = {coord: nuclei.xarray.coords[coord.value].data.tolist()
+        physical_ticks = {coord: nuclei.xarray.coords[coord.value].data
                           for coord in (Coordinates.Y, Coordinates.X)}
 
         return SegmentationMaskCollection.from_label_image(label_image,

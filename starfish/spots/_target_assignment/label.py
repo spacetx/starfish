@@ -24,6 +24,7 @@ class Label(TargetAssignmentAlgorithm):
     ) -> IntensityTable:
         cell_ids = []
 
+        # for each spot, test whether the spot falls inside the area of each mask
         for spot in intensities:
             for mask in masks:
                 sel = {Axes.X.value: spot[Axes.X.value],

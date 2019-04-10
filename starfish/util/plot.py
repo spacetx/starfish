@@ -1,4 +1,8 @@
 """
+
+Plotting Utilities for Documentation and Examples
+=================================================
+
 This module contains a series of utilities for creating two dimensional plots that are useful for
 generating documentation and vignettes. We suggest that users leverage :py:func:`starfish.display`
 for their plotting needs, as the interactive viewer is better able to handle the array of features
@@ -25,6 +29,21 @@ def imshow_plane(
     Plot a single plane of an ImageStack. If passed a selection function (sel), the stack will be
     subset using :py:meth:`ImageStack.sel`. If ax is passed, the function will be plotted in the
     provided axis. Additional kwargs are passed to :py:func:`plt.imshow`
+
+    Parameters
+    ----------
+    image_stack : ImageStack
+        imagestack from which to extract a 2-d image for plotting
+    sel : Optional[Mapping[Axes, Union[int, tuple]]]
+        Optional, but only if image_stack is already of shape (1, 1, 1, y, x). Selector to pass
+        ImageStack.sel, Selects the (y, x) plane to be plotted.
+    ax :
+        Axes to plot on. If not passed, defaults to the current axes.
+    title : Optional[str]
+        Title to assign the Axes being plotted on.
+    kwargs :
+        additional keyword arguments to pass to plt.imshow
+
     """
     if ax is None:
         ax = plt.gca()
@@ -51,7 +70,22 @@ def intensity_histogram(
     **kwargs
 ) -> None:
     """
-    Plot the intensity histogram of image_stack.
+    Plot the 1-d intensity histogram of linearized image_stack.
+
+    Parameters
+    ----------
+    image_stack : ImageStack
+        imagestack containing intensities
+    sel : Optional[Mapping[Axes, Union[int, tuple]]]
+        Optional, Selector to pass ImageStack.sel that will restrict the histogram construction to
+        the specified subset of image_stack.
+    ax :
+        Axes to plot on. If not passed, defaults to the current axes.
+    title : Optional[str]
+        Title to assign the Axes being plotted on.
+    kwargs :
+        additional keyword arguments to pass to plt.hist
+
     """
     if ax is None:
         ax = plt.gca()
@@ -77,6 +111,25 @@ def overlay_spot_calls(
     """
     Overlays spot calls atop a 2-d image extracted from ImageStack. Manages sub-selection from the
     IntensityTable and ImageStack based on provided `sel` parameter.
+
+    Parameters
+    ----------
+    image_stack : ImageStack
+        imagestack from which to extract a 2-d image for plotting
+    intensities : IntensityTable
+        contains spots to overlay on ImageStack.
+    sel : Optional[Mapping[Axes, Union[int, tuple]]]
+        Optional, but only if image_stack is already of shape (1, 1, 1, y, x). Selector to pass
+        ImageStack.sel, Selects the (y, x) plane to be plotted. Will also be used to reduce the
+        spots from intensities.
+    ax :
+        Axes to plot on. If not passed, defaults to the current axes.
+    title : Optional[str]
+        Title to assign the Axes being plotted on.
+    imshow_kwargs : Optional[Mapping[str, Any]]
+        additional keyword arguments to pass to imshow
+    scatter_kwargs : Optional[Mapping[str, Any]]
+        additional keyword arguments to pass to scatter
     """
     if ax is None:
         ax = plt.gca()
@@ -105,6 +158,6 @@ def overlay_spot_calls(
         **scatter_kwargs,
     )
 
-    # reset the axes limits
+    # reset the axes limits; scatter often extends them.
     ax.set_ylim((0, image_stack.shape[Axes.Y.value]))
     ax.set_xlim((0, image_stack.shape[Axes.X.value]))

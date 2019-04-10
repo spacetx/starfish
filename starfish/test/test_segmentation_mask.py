@@ -1,4 +1,4 @@
-import shutil
+import os
 
 import numpy as np
 import pytest
@@ -115,11 +115,11 @@ def test_save_load():
     masks = SegmentationMaskCollection.from_label_image(label_image,
                                                         physical_ticks)
 
-    path = 'data'
+    path = 'data.tgz'
     try:
         masks.save(path)
         masks2 = SegmentationMaskCollection.from_disk(path)
         for m, m2 in zip(masks, masks2):
             assert np.array_equal(m, m2)
     finally:
-        shutil.rmtree(path, ignore_errors=True)
+        os.remove(path)

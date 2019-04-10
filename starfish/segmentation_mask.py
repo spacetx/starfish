@@ -1,7 +1,6 @@
+import io
 import itertools
-import os
-import os.path as osp
-import shutil
+import tarfile
 from typing import Dict, List, Sequence, Tuple, Union
 
 import numpy as np
@@ -171,29 +170,28 @@ class SegmentationMaskCollection:
             Collection of segmentation masks.
         """
         masks = []
-        for p in os.listdir(path):
-            mask = xr.open_dataarray(osp.join(path, p))
-            masks.append(mask)
+
+        with tarfile.open(path) as t:
+            for info in t.getmembers():
+                f = t.extractfile(info.name)
+                print(f)
+                mask = xr.open_dataarray(f)
+                masks.append(mask)
 
         return cls(masks)
 
-    def save(self, path: str, overwrite: bool = False):
+    def save(self, path: str):
         """Save the segmentation masks to disk.
 
         Parameters
         ----------
         path : str
-            Path of the directory to write to.
-        overwrite : bool
-            Whether to overwrite the directory if it exists. (default: False)
+            Path of the tar file to write to.
         """
-        try:
-            os.mkdir(path)
-        except FileExistsError:
-            if not overwrite:
-                raise
-            shutil.rmtree(path, ignore_errors=True)
-            os.mkdir(path)
-
-        for i, mask in enumerate(self._masks):
-            mask.to_netcdf(osp.join(path, str(i)), 'w')
+        with tarfile.open(path, 'w:gz') as t:
+            for i, mask in enumerate(self._masks):
+                data = mask.to_netcdf()
+                with io.BytesIO(data) as buff:
+                    info = tarfile.TarInfo(name=str(i) + '.nc')
+                    info.size = len(data)
+                    t.addfile(tarinfo=info, fileobj=buff)

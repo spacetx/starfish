@@ -11,9 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-import starfish
 import starfish.data
-from starfish import FieldOfView, Experiment
+from starfish import FieldOfView
 from starfish.types import Axes
 
 # EPY: ESCAPE %matplotlib inline

@@ -76,6 +76,9 @@ class Features:
     CELL_ID = 'cell_id'
     SPOT_ID = 'spot_id'
     INTENSITY = 'intensity'
+    AREA = 'area'
+    CELLS = 'cells'
+    GENES = 'genes'
 
 
 class OverlapStrategy(AugmentedEnum):
@@ -94,3 +97,10 @@ class Clip(AugmentedEnum):
     CLIP = 'clip'
     SCALE_BY_IMAGE = 'scale_by_image'
     SCALE_BY_CHUNK = 'scale_by_chunk'
+
+
+class TransformType(AugmentedEnum):
+    """
+    currently supported transform types
+    """
+    SIMILARITY = 'similarity'

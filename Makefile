@@ -29,7 +29,7 @@ all:	fast
 
 ### UNIT #####################################################
 #
-fast:	lint mypy fast-test docs-html
+fast:	diff-requirements lint mypy fast-test clean-docs docs-html
 
 lint:   lint-non-init lint-init
 
@@ -63,6 +63,9 @@ help-unit:
 docs-%:
 	make -C docs $*
 
+clean-docs:
+	make -C docs clean
+
 help-docs:
 	$(call print_help, docs-TASK, alias for 'make TASK' in the docs subdirectory)
 
@@ -92,6 +95,9 @@ REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
 	.$<-env/bin/pip freeze >> $@
 	cp -f $@ starfish/REQUIREMENTS-STRICT.txt
 	rm -rf .$<-env
+
+diff-requirements :
+	diff -q REQUIREMENTS-STRICT.txt starfish/REQUIREMENTS-STRICT.txt
 
 help-requirements:
 	$(call print_help, refresh_all_requirements, regenerate requirements files)
@@ -151,7 +157,8 @@ help-install:
 # General release steps:
 # --------------------------------------------------------------
 #
-#  (0) Check out the latest version of the branch for releasing.
+#  (0) Pull master and check out the latest version of master for
+#      releasing.
 #
 #  (1) `make release-changelog` to print a suggested update to
 #      CHANGELOG.md. Replace "XXX" with your intended tag and
@@ -161,18 +168,20 @@ help-install:
 #  (2) Commit all files and remove any untracked files.
 #      `git status` should show nothing.
 #
-#  (3) Run `make release-tag TAG=x.y.z` to tag your release.
+#  (3) Push master to origin, i.e., `git push origin master`.
 #
-#  (4) Run `make release-prep` which:
+#  (4) Run `make release-tag TAG=x.y.z` to tag your release.
+#
+#  (5) Run `make release-prep` which:
 #     - checks the tag
 #     - creates a virtualenv
 #     - builds and installs the sdist
 #
-#  (5) Run `make release-verify` which:
+#  (6) Run `make release-verify` which:
 #     - runs tests
 #     - builds docker
 #
-#  (6) Run `make release-upload` and execute the commands.
+#  (7) Run `make release-upload` and execute the commands.
 #
 #  If anything goes wrong, rollback the various steps:
 #     - delete on docker hub

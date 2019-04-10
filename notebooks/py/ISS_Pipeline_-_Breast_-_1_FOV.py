@@ -129,13 +129,12 @@ for img in images:
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image import Registration
+from starfish.image import ApplyTransform, LearnTransform
 
-registration = Registration.FourierShiftRegistration(
-    upsampling=1000,
-    reference_stack=dots,
-    verbose=True)
-registered_image = registration.run(primary_image, in_place=False)
+learn_translation = LearnTransform.Translation(reference_stack=dots, axes=Axes.ROUND, upsampling=1000)
+transforms_list = learn_translation.run(primary_image.max_proj(Axes.CH, Axes.ZPLANE))
+warp = ApplyTransform.Warp()
+registered_image = warp.run(primary_image, transforms_list=transforms_list, in_place=False, verbose=True)
 # EPY: END code
 
 # EPY: START markdown
@@ -169,10 +168,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
 
     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    dots = dots.max_proj(Axes.ROUND, Axes.ZPLANE)
-    dots_numpy = dots._squeezed_numpy(Axes.ROUND, Axes.ZPLANE)
-    blobs_image = dots_numpy
-    intensities = p.run(registered_image, blobs_image=blobs_image)
+    intensities = p.run(registered_image, blobs_image=dots, blobs_axes=(Axes.ROUND, Axes.ZPLANE))
 # EPY: END code
 
 # EPY: START markdown
@@ -243,6 +239,42 @@ seg = Segmentation.Watershed(
 )
 label_image = seg.run(registered_image, nuclei)
 seg.show()
+# EPY: END code
+
+# EPY: START markdown
+#### Assign spots to cells and create cell x gene count matrix
+# EPY: END markdown
+
+# EPY: START code
+from starfish.spots import TargetAssignment
+al = TargetAssignment.Label()
+labeled = al.run(label_image, decoded)
+# EPY: END code
+
+# EPY: START code
+from starfish.expression_matrix.expression_matrix import ExpressionMatrix
+# EPY: END code
+
+# EPY: START code
+cg = labeled.to_expression_matrix()
+cg
+# EPY: END code
+
+# EPY: START markdown
+#Plot the (x, y) centroids of segmented cells in small cyan dots. Plot cells expressing VIM in blue, and cells expressing HER2 in red. Compare with the following plot of the displayed _spots_ below. This demonstrates that (1) the expression matrix is being properly created but (2) many of the spots are occuring outside segmented cells, suggesting that the segmentation may be too restrictive.
+# EPY: END markdown
+
+# EPY: START code
+#Test data is from a region of the tissue slice containing cancer cells, there is no VIM.
+if not use_test_data:
+    vim_mask = cg.loc[:, 'VIM'] > 0
+    her2_mask = cg.loc[:, 'HER2'] > 0
+    plt.scatter(cg['x'], -cg['y'], s=5, c='c')
+    plt.scatter(cg['x'][vim_mask], -cg['y'][vim_mask], s=12, c='b')
+    plt.scatter(cg['x'][her2_mask], -cg['y'][her2_mask], s=12, c='r')
+else:
+    assert np.sum(cg.loc[:, 'HER2'] > 0) > 0
+
 # EPY: END code
 
 # EPY: START markdown

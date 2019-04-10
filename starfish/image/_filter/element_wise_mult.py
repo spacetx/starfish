@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import xarray as xr
@@ -43,7 +43,12 @@ class ElementWiseMultiply(FilterAlgorithmBase):
     }
 
     def run(
-            self, stack: ImageStack, in_place: bool=False, verbose=None, n_processes=None
+            self,
+            stack: ImageStack,
+            in_place: bool=False,
+            verbose: bool=False,
+            n_processes: Optional[int]=None,
+            *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
 
@@ -53,13 +58,10 @@ class ElementWiseMultiply(FilterAlgorithmBase):
             Stack to be filtered.
         in_place : bool
             if True, process ImageStack in-place, otherwise return a new stack
-        verbose : None
-            Not used. Elementwise multiply carries out a single vectorized multiplication that
-            cannot provide a status bar. Included for consistency with Filter API.
-        n_processes : None
-            Not used. Elementwise multiplication scales slowly with additional processes due to the
-            efficiency of vectorization on a single process. Included for consistency with Filter
-            API. All computation happens on the main process.
+        verbose : bool
+            if True, report on filtering progress (default = False)
+        n_processes : Optional[int]
+            Number of parallel processes to devote to calculating the filter
 
         Returns
         -------
@@ -68,7 +70,6 @@ class ElementWiseMultiply(FilterAlgorithmBase):
             original stack.
 
         """
-
         # Align the axes of the multipliers with ImageStack
         mult_array_aligned: np.ndarray = self.mult_array.transpose(*stack.xarray.dims).values
         if not in_place:

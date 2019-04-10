@@ -1,12 +1,10 @@
-import collections
 import importlib
+from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import Mapping, MutableMapping, Optional, Set, Type
 
-from .algorithmbase import AlgorithmBase
 
-
-class PipelineComponentType(type):
+class PipelineComponentType(ABCMeta):
     """
     This is the metaclass for PipelineComponent.  As each subclass that is _not_ PipelineComponent
     is created, it sets up a map between the algorithm name and the class that implements it.
@@ -15,8 +13,6 @@ class PipelineComponentType(type):
         super().__init__(name, bases, namespace)
         if len(bases) != 0:
             # this is _not_ PipelineComponent.  Instead, it's a subclass of PipelineComponent.
-            PipelineComponentType._ensure_algorithms_setup(cls)
-            PipelineComponentType._cli_register(cls)
             PipelineComponentType._register_pipeline_component_type_name(cls)
 
     _pipeline_component_type_name_to_class_map: MutableMapping[str, Type["PipelineComponent"]] = \
@@ -30,25 +26,6 @@ class PipelineComponentType(type):
     @staticmethod
     def get_pipeline_component_type_by_name(name: str) -> Type["PipelineComponent"]:
         return PipelineComponentType._pipeline_component_type_name_to_class_map[name]
-
-    @classmethod
-    def _ensure_algorithms_setup(mcs, cls):
-        if cls._algorithm_to_class_map_int is None:
-            cls._algorithm_to_class_map_int = dict()
-
-            queue = collections.deque(cls._get_algorithm_base_class().__subclasses__())
-            while len(queue) > 0:
-                algorithm_cls = queue.popleft()
-                queue.extend(algorithm_cls.__subclasses__())
-
-                cls._algorithm_to_class_map_int[algorithm_cls.__name__] = algorithm_cls
-
-                setattr(cls, algorithm_cls._get_algorithm_name(), algorithm_cls)
-
-    @classmethod
-    def _cli_register(mcs, cls):
-        for algorithm_cls in cls._algorithm_to_class_map().values():
-            cls._cli.add_command(algorithm_cls._cli)
 
 
 class PipelineComponent(metaclass=PipelineComponentType):
@@ -82,17 +59,10 @@ class PipelineComponent(metaclass=PipelineComponentType):
         return PipelineComponentType.get_pipeline_component_type_by_name(name)
 
     @classmethod
+    @abstractmethod
     def pipeline_component_type_name(cls) -> str:
         """
         Returns the name of the pipeline component type.
-        """
-        raise NotImplementedError()
-
-    @classmethod
-    def _get_algorithm_base_class(cls) -> Type[AlgorithmBase]:
-        """
-        Get the base class that algorithms which implement this pipeline stage must extend.
-        Pipeline components must provide this method.
         """
         raise NotImplementedError()
 
@@ -103,7 +73,8 @@ class PipelineComponent(metaclass=PipelineComponentType):
         return cls._algorithm_to_class_map_int
 
     @classmethod
-    def _cli_run(cls, ctx, instance, *args, **kwargs):
+    @abstractmethod
+    def _cli_run(cls, ctx, instance):
         raise NotImplementedError()
 
 

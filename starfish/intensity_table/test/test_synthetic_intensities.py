@@ -1,0 +1,48 @@
+"""
+Tests for IntensityTable.synthetic_intensities method.
+"""
+
+import numpy as np
+
+from starfish import IntensityTable
+from starfish.test import factories
+from starfish.types import Axes, Features
+
+
+def test_synthetic_intensity_generation():
+    """
+    Create a 2-spot IntensityTable of pixel size (z=3, y=4, x=5) from a codebook with 3 channels
+    and 2 rounds.
+
+    Verify that the constructed Synthetic IntensityTable conforms to those dimensions, and given
+    a known random seed, that the output spots decode to match a target in the input Codebook
+    """
+    # set seed to check that codebook is matched. This seed generates 2 instances of GENE_B
+    np.random.seed(1)
+    codebook = factories.codebook_array_factory()
+    num_z, height, width = 3, 4, 5
+    intensities = IntensityTable.synthetic_intensities(
+        codebook,
+        num_z=num_z,
+        height=height,
+        width=width,
+        n_spots=2
+    )
+
+    # sizes should match codebook
+    assert intensities.sizes[Axes.ROUND] == 2
+    assert intensities.sizes[Axes.CH] == 3
+    assert intensities.sizes[Features.AXIS] == 2
+
+    # attributes should be bounded by the specified size
+    assert np.all(intensities[Axes.ZPLANE.value] <= num_z)
+    assert np.all(intensities[Axes.Y.value] <= height)
+    assert np.all(intensities[Axes.X.value] <= width)
+
+    # both codes should match GENE_B
+    assert np.array_equal(
+        np.where(intensities.values),
+        [[0, 0, 1, 1],  # two each in feature 0 & 1
+         [1, 2, 1, 2],  # one each in channel 1 & 2
+         [1, 0, 1, 0]],  # channel 1 matches round 1, channel 2 matches round zero
+    )

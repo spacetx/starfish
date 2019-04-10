@@ -7,7 +7,7 @@ from trackpy import locate
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.types import SpotAttributes
+from starfish.types import Axes, SpotAttributes
 from starfish.util import click
 from ._base import SpotFinderAlgorithmBase
 from .detect import detect_spots
@@ -58,8 +58,6 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
             name of the function used to calculate the intensity for each identified spot area
         preprocess : boolean
             Set to False to turn off bandpass preprocessing.
-        max_iterations : integer
-            max number of loops to refine the center of mass, default 10
         is_volume : bool
             if True, run the algorithm on 3d volumes of the provided stack
         verbose : bool
@@ -85,13 +83,13 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
         self.is_volume = is_volume
         self.verbose = verbose
 
-    def image_to_spots(self, image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
+    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
         """
 
         Parameters
         ----------
-        image : np.ndarray
-            three-dimensional numpy array containing spots to detect
+        data_image : np.ndarray
+            three-dimensional image containing spots to be detected
 
         Returns
         -------
@@ -99,12 +97,12 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
             spot attributes table for all detected spots
 
         """
-        image = np.asarray(image)
+        data_image = np.asarray(data_image)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', FutureWarning)  # trackpy numpy indexing warning
             warnings.simplefilter('ignore', UserWarning)  # yielded if black images
             attributes = locate(
-                image,
+                data_image,
                 diameter=self.diameter,
                 minmass=self.minmass,
                 maxsize=self.maxsize,
@@ -126,7 +124,7 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
         new_colnames = [
             'y', 'x', 'total_intensity', 'radius', 'eccentricity', 'intensity', 'raw_mass', 'ep'
         ]
-        if len(image.shape) == 3:
+        if len(data_image.shape) == 3:
             attributes.columns = ['z'] + new_colnames
         else:
             attributes.columns = new_colnames
@@ -140,31 +138,31 @@ class TrackpyLocalMaxPeakFinder(SpotFinderAlgorithmBase):
 
     def run(
             self,
-            data_stack: ImageStack,
-            blobs_image: Optional[Union[np.ndarray, xr.DataArray]]=None,
-            reference_image_from_max_projection: bool=False,
+            primary_image: ImageStack,
+            blobs_image: Optional[ImageStack] = None,
+            blobs_axes: Optional[Tuple[Axes, ...]] = None,
+            *args,
     ) -> IntensityTable:
         """
         Find spots.
 
         Parameters
         ----------
-        data_stack : ImageStack
-            Stack where we find the spots in.
-        blobs_image : Union[np.ndarray, xr.DataArray]
+        primary_image : ImageStack
+            ImageStack where we find the spots in.
+        blobs_image : Optional[ImageStack]
             If provided, spots will be found in the blobs image, and intensities will be measured
             across rounds and channels. Otherwise, spots are measured independently for each channel
             and round.
-        reference_image_from_max_projection : bool
-            if True, compute a reference image from the maximum projection of the channels and
-            z-planes
-
+        blobs_axes : Optional[Tuple[Axes, ...]]
+            If blobs_image is provided, blobs_axes must be provided as well.  blobs_axes represents
+            the axes across which the blobs image is max projected before spot detection is done.
         """
         intensity_table = detect_spots(
-            data_stack=data_stack,
+            data_stack=primary_image,
             spot_finding_method=self.image_to_spots,
             reference_image=blobs_image,
-            reference_image_from_max_projection=reference_image_from_max_projection,
+            reference_image_max_projection_axes=blobs_axes,
             measurement_function=self.measurement_function,
             radius_is_gyration=True)
 

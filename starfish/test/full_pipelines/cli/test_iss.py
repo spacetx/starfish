@@ -5,7 +5,6 @@ This test and docs/source/usage/iss/iss_cli.sh test the same code paths and shou
 together
 """
 import os
-import sys
 import unittest
 
 import numpy as np
@@ -14,6 +13,9 @@ import pytest
 
 from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 from starfish.types import Features
+
+
+EXPERIMENT_JSON_URL = "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS-TEST/experiment.json"
 
 
 @pytest.mark.slow
@@ -26,8 +28,8 @@ class TestWithIssData(CLITest, unittest.TestCase):
     @property
     def subdirs(self):
         return (
-            "raw",
-            "formatted",
+            "max_projected",
+            "transforms",
             "registered",
             "filtered",
             "results",
@@ -37,41 +39,54 @@ class TestWithIssData(CLITest, unittest.TestCase):
     def stages(self):
         return (
             [
-                sys.executable,
-                "starfish/test/full_pipelines/cli/get_cli_test_data.py",
-                "--primary-name=hybridization.json",
-                "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS-TEST/",
-                lambda tempdir, *args, **kwargs: os.path.join(tempdir, "formatted")
+                "starfish", "validate", "experiment", EXPERIMENT_JSON_URL,
             ],
             [
-                "starfish", "validate", "experiment",
-                lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted", "experiment.json")
-            ],
-            [
-                "starfish", "registration",
-                "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted/fov_001", "hybridization.json"),
+                "starfish", "filter",
+                "--input",
+                f"@{EXPERIMENT_JSON_URL}[fov_001][primary]",
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered", "hybridization.json"),
-                "FourierShiftRegistration",
-                "--reference-stack", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted/fov_001", "dots.json"),
+                    tempdir, "max_projected", "primary_images.json"),
+                "MaxProj",
+                "--dims", "c",
+                "--dims", "z"
+
+            ],
+            [
+                "starfish", "learn_transform",
+                "--input", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "max_projected", "primary_images.json"),
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "transforms", "transforms.json"),
+                "Translation",
+                "--reference-stack",
+                f"@{EXPERIMENT_JSON_URL}[fov_001][dots]",
                 "--upsampling", "1000",
+                "--axes", "r"
+            ],
+            [
+                "starfish", "apply_transform",
+                "--input",
+                f"@{EXPERIMENT_JSON_URL}[fov_001][primary]",
+                "--output", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "registered", "primary_images.json"),
+                "--transformation-list", lambda tempdir, *args, **kwargs: os.path.join(
+                    tempdir, "transforms", "transforms.json"),
+                "Warp",
             ],
             [
                 "starfish", "filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "registered", "hybridization.json"),
+                    tempdir, "registered", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "hybridization.json"),
+                    tempdir, "filtered", "primary_images.json"),
                 "WhiteTophat",
                 "--masking-radius", "15",
             ],
             [
                 "starfish", "filter",
-                "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted/fov_001", "nuclei.json"),
+                "--input",
+                f"@{EXPERIMENT_JSON_URL}[fov_001][nuclei]",
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "nuclei.json"),
                 "WhiteTophat",
@@ -79,8 +94,8 @@ class TestWithIssData(CLITest, unittest.TestCase):
             ],
             [
                 "starfish", "filter",
-                "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted/fov_001", "dots.json"),
+                "--input",
+                f"@{EXPERIMENT_JSON_URL}[fov_001][dots]",
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "dots.json"),
                 "WhiteTophat",
@@ -89,11 +104,12 @@ class TestWithIssData(CLITest, unittest.TestCase):
             [
                 "starfish", "detect_spots",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "hybridization.json"),
+                    tempdir, "filtered", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "spots.nc"),
                 "--blobs-stack", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "dots.json"),
+                "--blobs-axis", "r", "--blobs-axis", "c",
                 "BlobDetector",
                 "--min-sigma", "4",
                 "--max-sigma", "6",
@@ -103,7 +119,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
             [
                 "starfish", "segment",
                 "--primary-images", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "filtered", "hybridization.json"),
+                    tempdir, "filtered", "primary_images.json"),
                 "--nuclei", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "nuclei.json"),
                 "-o", lambda tempdir, *args, **kwargs: os.path.join(
@@ -128,8 +144,8 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "starfish", "decode",
                 "-i", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "targeted-spots.nc"),
-                "--codebook", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "formatted", "codebook.json"),
+                "--codebook",
+                f"@{EXPERIMENT_JSON_URL}",
                 "-o", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "decoded-spots.nc"),
                 "PerRoundMaxChannelDecoder",

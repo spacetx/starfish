@@ -117,7 +117,7 @@ def format_data(input_dir, output_dir, num_fovs):
             'dots': ISSCroppedBreastAuxTileFetcher(input_dir, 'dots'),
         },
         postprocess_func=add_codebook,
-        default_shape=(1044, 1390)
+        default_shape={Axes.Y: 1044, Axes.X: 1390}
     )
 
 

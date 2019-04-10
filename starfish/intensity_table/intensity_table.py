@@ -9,7 +9,7 @@ import xarray as xr
 
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 from starfish.types import Axes, DecodedSpots, Features, LOG, SpotAttributes, STARFISH_EXTRAS_KEY
-from starfish.types._constants import OverlapStrategy
+from starfish.types import OverlapStrategy
 from starfish.util.dtype import preserve_float_range
 from starfish.util.overlap_utils import (
     find_overlaps_of_xarrays,
@@ -394,26 +394,26 @@ class IntensityTable(xr.DataArray):
         return IntensityTable.from_spot_data(intensity_data, pixel_coordinates)
 
     @staticmethod
-    def process_overlaps(its: List["IntensityTable"],
+    def process_overlaps(intensity_tables: List["IntensityTable"],
                          overlap_strategy: OverlapStrategy
                          ) -> List["IntensityTable"]:
         """Find the overlapping sections between IntensityTables and process them according
         to the given overlap strategy
         """
-        overlap_pairs = find_overlaps_of_xarrays(its)
+        overlap_pairs = find_overlaps_of_xarrays(intensity_tables)
         for indices in overlap_pairs:
             overlap_method = OVERLAP_STRATEGY_MAP[overlap_strategy]
             idx1, idx2 = indices
             # modify IntensityTables based on overlap strategy
-            it1, it2 = overlap_method(its[idx1], its[idx2])
+            it1, it2 = overlap_method(intensity_tables[idx1], intensity_tables[idx2])
             # replace IntensityTables in list
-            its[idx1] = it1
-            its[idx2] = it2
-        return its
+            intensity_tables[idx1] = it1
+            intensity_tables[idx2] = it2
+        return intensity_tables
 
     @staticmethod
     def concatanate_intensity_tables(intensity_tables: List["IntensityTable"],
-                                     overlap_strategy: OverlapStrategy = None):
+                                     overlap_strategy: Optional[OverlapStrategy] = None):
         if overlap_strategy:
             intensity_tables = IntensityTable.process_overlaps(intensity_tables,
                                                                overlap_strategy)

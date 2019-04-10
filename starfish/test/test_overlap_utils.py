@@ -149,5 +149,5 @@ def test_take_max():
 
     # The overlap section hits half of the spots from each intensity table, 5 from it1
     # and 10 from i21. It2 wins and the resulting concatenated table should have all the
-    # spots from it2 (20) and 6 (one on the boarder) from it1 (6) for a total of 26 spots
+    # spots from it2 (20) and 6 (one on the border) from it1 (6) for a total of 26 spots
     assert concatenated.sizes[Features.AXIS] == 26

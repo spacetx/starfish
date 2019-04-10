@@ -1,10 +1,10 @@
 import itertools
-from typing import List, Optional, Tuple
+from typing import List, Optional, Sequence, Tuple
 
 import xarray as xr
 
 from starfish.types import Coordinates, Features, Number
-from starfish.types._constants import OverlapStrategy
+from starfish.types import OverlapStrategy
 
 
 class Area:
@@ -18,7 +18,7 @@ class Area:
         self.min_y = min_y
         self.max_y = max_y
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return (self.min_x == other.min_x
                 and self.min_y == other.min_y
                 and self.max_x == other.max_x
@@ -47,7 +47,7 @@ class Area:
         return None
 
 
-def find_overlaps_of_xarrays(xarrays: List[xr.DataArray]) -> List[Tuple[int, int]]:
+def find_overlaps_of_xarrays(xarrays: Sequence[xr.DataArray]) -> Sequence[Tuple[int, int]]:
     """
     Find all the overlap areas within a list of xarrays.
 
@@ -58,7 +58,7 @@ def find_overlaps_of_xarrays(xarrays: List[xr.DataArray]) -> List[Tuple[int, int
 
     Returns
     -------
-    list[Tuple[int, int]] :
+    List[Tuple[int, int]] :
         A list of tuples containing the indices of two overlapping
         IntensityTables.
 

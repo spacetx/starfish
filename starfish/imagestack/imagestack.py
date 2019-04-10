@@ -388,7 +388,8 @@ class ImageStack:
         stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector)
         return stack
 
-    def sel_by_physical_coords(self, indexers: Mapping[Coordinates, Union[float, tuple]]):
+    def sel_by_physical_coords(
+            self, indexers: Mapping[Coordinates, Union[Number, Tuple[Number, Number]]]):
         """
         Given a dictionary mapping the coordinate name to either a value or a range represented as a
         tuple, return an Imagestack with each the Coordinate dimension indexed accordingly.

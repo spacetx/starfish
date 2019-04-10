@@ -1,9 +1,9 @@
-from typing import Dict, Mapping, MutableMapping, Union
+from typing import Dict, Mapping, MutableMapping, Tuple, Union
 
 import numpy as np
 import xarray as xr
 
-from starfish.types import Axes, Coordinates
+from starfish.types import Axes, Coordinates, Number
 
 
 def convert_to_selector(
@@ -28,7 +28,7 @@ def convert_to_selector(
 
 
 def convert_coords_to_indices(array: xr.DataArray,
-                              indexers: Mapping[Coordinates, Union[float, tuple]]
+                              indexers: Mapping[Coordinates, Union[Number, Tuple[Number, Number]]]
                               ) -> Dict[Axes, Union[int, tuple]]:
     """
     Convert mapping of physical coordinates to value or range to mapping of corresponding Axes and
@@ -76,7 +76,8 @@ def index_keep_dimensions(data: xr.DataArray,
     return data.transpose(*original_dims)
 
 
-def find_nearest(array: xr.DataArray, value: Union[float, tuple]
+def find_nearest(array: xr.DataArray,
+                 value: Union[Number, Tuple[Number, Number]]
                  ) -> Union[int, tuple]:
     """
     Given an xarray and value or tuple range return the indices of the closest corresponding
@@ -85,7 +86,7 @@ def find_nearest(array: xr.DataArray, value: Union[float, tuple]
     Parameters
     ----------
     array: xr.DataArray
-        he array to do lookups in.
+        The array to do lookups in.
 
     value:  Union[float, tuple]
         The value or values to lookup.

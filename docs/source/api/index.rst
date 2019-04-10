@@ -22,6 +22,9 @@ API
    spots/index.rst
 
 .. toctree::
+   recipe/index.rst
+
+.. toctree::
    types/index.rst
 
 .. toctree::

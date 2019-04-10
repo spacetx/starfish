@@ -13,7 +13,7 @@ import pandas as pd
 
 import starfish
 import starfish.data
-from starfish import FieldOfView
+from starfish import FieldOfView, Experiment
 from starfish.types import Axes
 
 # EPY: ESCAPE %matplotlib inline
@@ -200,5 +200,5 @@ plt.title("Starfish x osmFISH Benchmark Comparison");
 # EPY: START code
 spot_difference = benchmark_spot_count - starfish_spot_count
 print(f"Starfish finds {spot_difference} fewer spots")
-# assert spot_difference == 41  # for starfish testing purposes
+assert spot_difference == 41  # for starfish testing purposes
 # EPY: END code

@@ -401,7 +401,7 @@ class ImageStack:
 
         Returns
         -------
-         ImageStack :
+        ImageStack :
             a new image stack indexed by given value or range.
         """
         new_indexers = indexing_utils.convert_coords_to_indices(self.xarray, indexers)

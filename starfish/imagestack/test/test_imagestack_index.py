@@ -172,3 +172,34 @@ def test_sel_by_physical_coords():
 
     # assert that the resulting xarrays are the same
     assert indexed_stack_by_coords.xarray.equals(indexed_stack_by_pos.xarray)
+
+
+def test_sel_by_physical_and_axes():
+    """
+       Set up ImageStack with physical coordinates:
+           x_coords = [1. 1.11111111 1.22222222 1.33333333 1.44444444 1.55555556
+           1.66666667 1.77777778 1.88888889 2.]
+
+           y_coords = [4. 4.22222222 4.44444444 4.66666667 4.88888889 5.11111111
+           5.33333333 5.55555556 5.77777778 6. ]
+
+       Test that sel_by_physical_coords() correctly indexes the imagestack by the
+       corresponding positional indexers
+       """
+    stack_shape = OrderedDict([(Axes.ROUND, 3), (Axes.CH, 2),
+                               (Axes.ZPLANE, 1), (Axes.Y, 10), (Axes.X, 10)])
+
+    physical_coords = OrderedDict([(PhysicalCoordinateTypes.X_MIN, X_COORDS[0]),
+                                   (PhysicalCoordinateTypes.X_MAX, X_COORDS[1]),
+                                   (PhysicalCoordinateTypes.Y_MIN, Y_COORDS[0]),
+                                   (PhysicalCoordinateTypes.Y_MAX, Y_COORDS[1]),
+                                   (PhysicalCoordinateTypes.Z_MIN, Z_COORDS[0]),
+                                   (PhysicalCoordinateTypes.Z_MAX, Z_COORDS[1])])
+
+    stack = test_utils.imagestack_with_coords_factory(stack_shape, physical_coords)
+    indexed_stack_by_coords = stack.sel_by_physical_coords({Coordinates.X: (1.2, 1.5),
+                                                            Coordinates.Y: (4, 5.1)})
+    indexed_stack = indexed_stack_by_coords.sel({Axes.ROUND: 2, Axes.CH: 1, Axes.ZPLANE: 0})
+    expected_shape = OrderedDict([(Axes.ROUND, 1), (Axes.CH, 1),
+                                  (Axes.ZPLANE, 1), (Axes.Y, 5), (Axes.X, 2)])
+    assert indexed_stack.shape == expected_shape

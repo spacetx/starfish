@@ -1,5 +1,17 @@
 .. _Recipe:
 
+Execution
+=========
+
+.. autoclass:: starfish.recipe.Execution
+   :members:
+
+Recipe
+======
+
+.. autoclass:: starfish.recipe.Recipe
+   :members:
+
 Runnable
 ========
 

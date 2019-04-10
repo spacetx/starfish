@@ -1,6 +1,6 @@
 from itertools import product
 from json import loads
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -13,10 +13,15 @@ from starfish.types import (
     DecodedSpots,
     Features,
     LOG,
+    OverlapStrategy,
     SpotAttributes,
     STARFISH_EXTRAS_KEY
 )
 from starfish.util.dtype import preserve_float_range
+from starfish.util.overlap_utils import (
+    find_overlaps_of_xarrays,
+    OVERLAP_STRATEGY_MAP,
+)
 
 
 class IntensityTable(xr.DataArray):
@@ -400,10 +405,29 @@ class IntensityTable(xr.DataArray):
         return IntensityTable.from_spot_data(intensity_data, pixel_coordinates)
 
     @staticmethod
-    def concatanate_intensity_tables(intensity_tables: List["IntensityTable"]):
-        # TODO VARY CONCAT LOGIC IF TILES OVERLAP
-        # This method is a starting point for handling tile overlap, right now
-        # it does a simple concat but people want other overlap logic implmented
+    def process_overlaps(intensity_tables: List["IntensityTable"],
+                         overlap_strategy: OverlapStrategy
+                         ) -> List["IntensityTable"]:
+        """Find the overlapping sections between IntensityTables and process them according
+        to the given overlap strategy
+        """
+        overlap_pairs = find_overlaps_of_xarrays(intensity_tables)
+        for indices in overlap_pairs:
+            overlap_method = OVERLAP_STRATEGY_MAP[overlap_strategy]
+            idx1, idx2 = indices
+            # modify IntensityTables based on overlap strategy
+            it1, it2 = overlap_method(intensity_tables[idx1], intensity_tables[idx2])
+            # replace IntensityTables in list
+            intensity_tables[idx1] = it1
+            intensity_tables[idx2] = it2
+        return intensity_tables
+
+    @staticmethod
+    def concatanate_intensity_tables(intensity_tables: List["IntensityTable"],
+                                     overlap_strategy: Optional[OverlapStrategy] = None):
+        if overlap_strategy:
+            intensity_tables = IntensityTable.process_overlaps(intensity_tables,
+                                                               overlap_strategy)
         return xr.concat(intensity_tables, dim=Features.AXIS)
 
     def to_features_dataframe(self) -> pd.DataFrame:

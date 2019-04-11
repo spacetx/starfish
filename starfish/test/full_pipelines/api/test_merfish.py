@@ -19,7 +19,7 @@ def test_merfish_pipeline_cropped_data():
 
     merfish = __import__('MERFISH')
 
-    primary_image = merfish.primary_image
+    primary_image = merfish.imgs
 
     expected_primary_image = np.array(
         [[0.09593347, 0.09794766, 0.10089265, 0.10231174, 0.10133516,

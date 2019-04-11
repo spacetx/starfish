@@ -131,7 +131,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "--nuclei", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "nuclei.json"),
                 "-o", lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "label_image.png"),
+                    tempdir, "results", "masks.tgz"),
                 "Watershed",
                 "--nuclei-threshold", ".16",
                 "--input-threshold", ".22",
@@ -141,7 +141,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "starfish", "target_assignment",
                 "--label-image",
                 lambda tempdir, *args, **kwargs: os.path.join(
-                    tempdir, "results", "label_image.png"),
+                    tempdir, "results", "masks.tgz"),
                 "--intensities", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "spots.nc"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(

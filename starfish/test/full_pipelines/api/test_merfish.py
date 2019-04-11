@@ -17,7 +17,7 @@ def test_merfish_pipeline_cropped_data():
     # set random seed to errors provoked by optimization functions
     np.random.seed(777)
 
-    merfish = __import__('MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV')
+    merfish = __import__('MERFISH')
 
     primary_image = merfish.primary_image
 

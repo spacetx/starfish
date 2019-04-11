@@ -1,7 +1,7 @@
 import io
 import itertools
 import tarfile
-from typing import Dict, List, Sequence, Tuple, Union
+from typing import Dict, List, Set, Sequence, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -59,14 +59,13 @@ def validate_segmentation_mask(arr: xr.DataArray):
         raise TypeError(f"expected dtype of bool; got {arr.dtype}")
 
     axes, coords = _get_axes_names(arr.ndim)
+    dims = set(axes)
 
-    for dim in axes:
-        if dim not in arr.dims:
-            raise TypeError(f"no dimension '{dim}'")
+    if dims != set(arr.dims):
+        raise TypeError(f"missing dimensions '{dims.difference(arr.dims)}'")
 
-    for coord in itertools.chain(axes, coords):
-        if coord not in arr.coords:
-            raise TypeError(f"no coordinate '{coord}'")
+    if dims.union(coords) != set(arr.coords):
+        raise TypeError(f"missing coordinates '{dims.union(coords).difference(arr.coords)}'")
 
 
 class SegmentationMaskCollection:
@@ -74,7 +73,7 @@ class SegmentationMaskCollection:
 
     Parameters
     ----------
-    masks : list of xr.DataArray
+    masks : List[xr.DataArray]
         Segmentation masks.
     """
     _masks: List[xr.DataArray]

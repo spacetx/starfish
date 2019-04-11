@@ -767,8 +767,13 @@ class ImageStack:
         if verbose and StarfishConfig().verbose:
             selectors_and_slice_lists = tqdm(selectors_and_slice_lists)
 
+        coordinates = {
+            dim: self.xarray.coords[dim]
+            for dim in self.xarray.coords.dims
+        }
+
         mp_applyfunc: Callable = partial(
-            self._processing_workflow, partial(func, **kwargs))
+            self._processing_workflow, partial(func, **kwargs), self.xarray.dims, coordinates)
 
         with Pool(
                 processes=n_processes,
@@ -785,6 +790,8 @@ class ImageStack:
     @staticmethod
     def _processing_workflow(
             worker_callable: Callable[[np.ndarray], Any],
+            xarray_dims: Sequence[str],
+            xarray_coordinates: Mapping[str, np.ndarray],
             selector_and_slice_list: Tuple[Mapping[Axes, int],
                                            Tuple[Union[int, slice], ...]],
     ):
@@ -792,16 +799,11 @@ class ImageStack:
         backing_mp_array, shape, dtype = SharedMemory.get_payload()
         unshaped_numpy_array = np.frombuffer(backing_mp_array.get_obj(), dtype=dtype)
 
-        # get the correct dimension order for the imagestack based on AXES_DATA
-        dims = [
-            name.value for (name, data) in
-            sorted(AXES_DATA.items(), key=lambda kv: kv[1].order)
-        ] + [Axes.Y.value, Axes.X.value]
-
         # build and then slice the xarray to get the piece needed for this worker
         data_array = xr.DataArray(
             data=unshaped_numpy_array.reshape(shape),
-            dims=dims,
+            dims=xarray_dims,
+            coords=xarray_coordinates,
         )
         sliced = data_array.sel(selector_and_slice_list[0])
 

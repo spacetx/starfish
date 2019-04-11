@@ -177,3 +177,34 @@ def test_labeled_indices_sel_slice():
         Y_COORDS,
         get_physical_coordinates_of_z_plane(Z_COORDS),
     )
+
+
+def multiply(array, value):
+    return array * value
+
+
+def test_labeled_indices_apply():
+    """Build an imagestack with labeled indices (i.e., indices that do not start at 0 or are not
+    sequential non-negative integers).  Verify that apply behaves correctly.
+    """
+    stack = setup_imagestack()
+
+    for round_ in stack.axis_labels(Axes.ROUND):
+        for ch in stack.axis_labels(Axes.CH):
+            for zplane in stack.axis_labels(Axes.ZPLANE):
+                verify_stack_fill(
+                    stack,
+                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
+                    fill_value(round_, ch, zplane),
+                )
+
+    output = stack.apply(multiply, value=0.5)
+
+    for round_ in stack.axis_labels(Axes.ROUND):
+        for ch in stack.axis_labels(Axes.CH):
+            for zplane in stack.axis_labels(Axes.ZPLANE):
+                verify_stack_fill(
+                    output,
+                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
+                    fill_value(round_, ch, zplane) * 0.5,
+                )

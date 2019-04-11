@@ -1,0 +1,37 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="24">
+            <item index="0" class="java.lang.String" itemvalue="xarray" />
+            <item index="1" class="java.lang.String" itemvalue="urllib3" />
+            <item index="2" class="java.lang.String" itemvalue="tornado" />
+            <item index="3" class="java.lang.String" itemvalue="pyflakes" />
+            <item index="4" class="java.lang.String" itemvalue="sphinx-rtd-theme" />
+            <item index="5" class="java.lang.String" itemvalue="testpath" />
+            <item index="6" class="java.lang.String" itemvalue="mypy" />
+            <item index="7" class="java.lang.String" itemvalue="pickleshare" />
+            <item index="8" class="java.lang.String" itemvalue="ipython" />
+            <item index="9" class="java.lang.String" itemvalue="pycodestyle" />
+            <item index="10" class="java.lang.String" itemvalue="pytest-xdist" />
+            <item index="11" class="java.lang.String" itemvalue="requests" />
+            <item index="12" class="java.lang.String" itemvalue="m2r" />
+            <item index="13" class="java.lang.String" itemvalue="ipykernel" />
+            <item index="14" class="java.lang.String" itemvalue="prometheus-client" />
+            <item index="15" class="java.lang.String" itemvalue="flake8" />
+            <item index="16" class="java.lang.String" itemvalue="mistune" />
+            <item index="17" class="java.lang.String" itemvalue="jedi" />
+            <item index="18" class="java.lang.String" itemvalue="alabaster" />
+            <item index="19" class="java.lang.String" itemvalue="Sphinx" />
+            <item index="20" class="java.lang.String" itemvalue="pyzmq" />
+            <item index="21" class="java.lang.String" itemvalue="bleach" />
+            <item index="22" class="java.lang.String" itemvalue="prompt-toolkit" />
+            <item index="23" class="java.lang.String" itemvalue="notebook" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

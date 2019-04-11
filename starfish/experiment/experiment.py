@@ -152,28 +152,13 @@ class FieldOfView:
 
 class Experiment:
     """
-    This encapsulates an experiment, with one or more fields of view and a codebook.  An individual
-    FOV can be retrieved using a key, i.e., experiment[fov_name].
-
-    Methods
-    -------
-    from_json()
-        Given a URL or a path to an experiment.json document, return an Experiment object
-        corresponding to the document.
-    fov()
-        Given a callable that accepts a FOV, return the first FOVs that the callable returns True
-        when passed the FOV.  Because there is no guaranteed sorting for the FOVs, use this
-        cautiously.
-    fovs()
-        Given a callable that accepts a FOV, return all the FOVs that the callable returns True when
-        passed the FOV.
-    fovs_by_name()
-        Given one or more FOV names, return the FOVs that match those names.
+    Encapsulates an experiment, with one or more fields of view and a codebook.  An individual
+    FieldOfView can be retrieved using a key, i.e., experiment[fov_name].
 
     Attributes
     ----------
     codebook : Codebook
-        Returns the codebook associated with this experiment.
+        The codebook associated with this experiment.
     extras : Dict
         Returns the extras dictionary associated with this experiment.
     """
@@ -212,7 +197,7 @@ class Experiment:
     @classmethod
     def from_json(cls, json_url: str) -> "Experiment":
         """
-        Construct an `Experiment` from an experiment.json file format specifier.
+        Construct an Experiment from an experiment.json file format specifier.
         Loads configuration from StarfishConfig.
 
         Parameters
@@ -304,11 +289,25 @@ class Experiment:
             key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
     ) -> FieldOfView:
         """
-        Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return the first
-        FOV such that filter_fn(FOV) returns True. The order of the filtered FOVs will be determined
-        by the key_fn callable. By default, this matches the order of fov.name.
+        Given a callable filter_fn, apply it to all the FOVs in this experiment.
 
-        If no FOV matches, raise LookupError.
+        Parameters
+        ----------
+        filter_fn : Callable
+            Filter to apply to the list of FOVs
+        key_fn : Callable
+            The key that determines the order of filtered FOVs, default fov.name
+
+        Returns
+        -------
+        FieldOfView
+            The first FOV that fulfills the filter parameters.
+
+        Raises
+        ------
+        LookupError :
+             If no FOV matches
+
         """
         for fov in sorted(self._fovs, key=key_fn):
             if filter_fn(fov):
@@ -321,9 +320,20 @@ class Experiment:
             key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
     ) -> Sequence[FieldOfView]:
         """
-        Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return a list of
-        FOVs such that filter_fn(FOV) returns True. The returned list is sorted based on the key_fn
-        callable, which by default matches the order of fov.name.
+        Given a callable filter_fn, apply it to all the FOVs in this experiment.
+
+        Parameters
+        ----------
+        filter_fn : Callable
+            Filter to apply to the list of FOVs
+        key_fn : Callable
+            The key that determines the order of filtered FOVs, default fov.name
+
+        Returns
+        -------
+        Sequence[FieldOfView]
+            All fovs that pass the filter function.
+
         """
         results: MutableSequence[FieldOfView] = list()
         for fov in self._fovs:
@@ -337,12 +347,19 @@ class Experiment:
     def fovs_by_name(
         self,
         *names,
-        key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
     ) -> Sequence[FieldOfView]:
         """
-        Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return a list of
-        FOVs such that filter_fn(FOV) returns True.  The returned list is sorted based on the key_fn
-        callable, which by default matches the order of fov.name.
+        Given a name or set of names, return all fovs that match.
+
+        Parameters
+        ----------
+        names : str
+            The fov names to search for.
+
+        Returns
+        -------
+        Sequence[FieldOfView]
+            All fovs that match the given names.
         """
         return self.fovs(filter_fn=lambda fov: fov.name in names)
 

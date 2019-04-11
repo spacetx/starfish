@@ -33,11 +33,28 @@ class FieldOfView:
     This encapsulates a field of view.  It contains the primary image and auxiliary images that are
     associated with the field of view.
 
-    All images can be accessed using a the get_image('primary') method with the name of the image
-    type. The primary image is accessed using the name
-    :py:attr:`starfish.experiment.experiment.FieldOFView.PRIMARY_IMAGES`.
+    All images can be accessed using :py:func:`~starfish.experiment.experiment.FieldOfView.get_image`
+    with the name of the image type. The primary image is accessed using the name
+    :py:attr:`~starfish.experiment.experiment.FieldOFView.PRIMARY_IMAGES`.
 
-    Access a FOV through a experiment. experiement.fov()
+    Notes
+    -----
+    Field of views obtain their primary image from a :py:class:`slicedimage.TileSet`. They can obtain
+    their auxiliary image dictionary from a dictionary of auxiliary image to :py:class:`slicedimage.TileSet`.
+
+    When a FieldOfView is initialized we parse each :py:class:`slicedimage.TileSet` into sub groups according to
+    their physical coordinates. Tiles with the same physical coordinates are grouped together into aligned subgroups.
+    If the FieldOfView is properly registered there should only be one aligned subgroup.
+
+    The decoding of :py:class:`slicedimage.TileSet` to :py:class:`~starfish.imagestack.imagestack.ImageStack` does not
+    happen until the image is accessed. ImageStacks can only be initialized with aligned subgroups, so if there
+    are multiple you may need to iterate through the groups using
+    :py:func:`~starfish.experiment.experiment.FieldOfView.iterate_image_type`
+    and process each one individually.
+
+    Be prepared to handle errors when images are accessed.
+
+    Access a FOV through Experiment. :py:func:`~starfish.experiment.experiment.Experiment.fov`.
 
     Attributes
     ----------
@@ -53,16 +70,6 @@ class FieldOfView:
             self, name: str,
             image_tilesets: MutableMapping[str, TileSet]
     ) -> None:
-        """
-        Fields of views can obtain their primary image from either an ImageStack or a TileSet (but
-        only one).  It can obtain their auxiliary image dictionary from either a dictionary of
-        auxiliary image name to ImageStack or a dictionary of auxiliary image name to TileSet (but
-        only one).
-
-        Note that if the source image is from a TileSet, the decoding of TileSet to ImageStack does
-        not happen until the image is accessed.  Be prepared to handle errors when images are
-        accessed.
-        """
         self._images: MutableMapping[str, TileSet] = dict()
         self._name = name
         self.aligned_coordinate_groups: Dict[str, List[CropParameters]] = dict()
@@ -95,13 +102,15 @@ class FieldOfView:
         """
         Describe the aligned subgroups for each Tileset in this FOV
 
-        ex.
+        Examples
+        --------
+        >>> fov.show_aligned_image_groups()
         {'nuclei': ' Group 0:  <starfish.ImageStack r={0}, ch={0}, z={0}, (y, x)=(190,270)>',
         'primary': ' Group 0:  <starfish.ImageStack r={0, 1, 2, 3, 4, 5}, ch={0, 1, '
         '2}, z={0}, (y, x)=(190, 270)>'}
 
-        Means there are two tilesets in this FOV (primary and nuclei), and because all images have
-        the same (x, y) coordinates, each tileset has a single aligned subgroup.
+        The example describes a FieldOfView with two Tilesets in this FOV (primary and nuclei), because
+        all images have the same (x, y) coordinates, each Tileset has a single aligned subgroup.
         """
         all_groups = dict()
         for name, groups in self.aligned_coordinate_groups.items():
@@ -120,6 +129,20 @@ class FieldOfView:
         pprint.pprint(all_groups)
 
     def iterate_image_type(self, image_type: str) -> Iterator[ImageStack]:
+        """
+        Iterate through the aligned subgroups of the given image type (ex. primary)
+
+        Parameters
+        ----------
+        image_type : str
+            The name of the image type to iterate through.
+
+        Returns
+        --------
+        Iterator
+            An iterator for the aligned subgroups of the image type
+
+        """
         for aligned_group, _ in enumerate(self.aligned_coordinate_groups[image_type]):
             yield self.get_image(item=image_type, aligned_group=aligned_group)
 
@@ -128,9 +151,11 @@ class FieldOfView:
                   y_slice: Optional[Union[int, slice]] = None,
                   ) -> ImageStack:
         """
+        Load into memory the Imagestack representation of an aligned image group. If crop parameters
+        provided, first crop the TileSet.
+
         Parameters
         ----------
-
         item: str
             The name of the tileset ex. 'primary' or 'nuclei'
         aligned_group: int
@@ -142,7 +167,8 @@ class FieldOfView:
 
         Returns
         -------
-        The instantiated ImageStack
+        ImageStack
+            The instantiated image stack
         """
         crop_params = copy.copy((self.aligned_coordinate_groups[item][aligned_group]))
         crop_params._x_slice = x_slice

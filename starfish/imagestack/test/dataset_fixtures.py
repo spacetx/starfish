@@ -123,8 +123,6 @@ def synthetic_dataset_with_truth_values_and_called_spots(
 
     wth = WhiteTophat(masking_radius=15)
     filtered = wth.run(image, in_place=False)
-    filtered_mp = filtered.max_proj(Axes.CH, Axes.ROUND)
-    filtered_mp_numpy = filtered_mp._squeezed_numpy(Axes.CH, Axes.ROUND)
 
     min_sigma = 1.5
     max_sigma = 4
@@ -136,7 +134,7 @@ def synthetic_dataset_with_truth_values_and_called_spots(
                        threshold=threshold,
                        measurement_type='max')
 
-    intensities = gsd.run(data_stack=filtered, blobs_image=filtered_mp_numpy)
+    intensities = gsd.run(data_stack=filtered, blobs_image=filtered)
     assert intensities.shape[0] == 5
 
     codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm_order=2)

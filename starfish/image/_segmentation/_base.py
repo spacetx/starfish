@@ -1,13 +1,13 @@
 from abc import abstractmethod
 from typing import Type
 
-import click
 from skimage.io import imsave
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import PipelineComponent
 from starfish.pipeline.algorithmbase import AlgorithmBase
-
+from starfish.util import click
+from starfish.util.click.indirectparams import ImageStackParamType
 
 COMPONENT_NAME = "segment"
 
@@ -31,8 +31,8 @@ class Segmentation(PipelineComponent):
 
     @staticmethod
     @click.group(COMPONENT_NAME)
-    @click.option("--primary-images", required=True, type=click.Path(exists=True))
-    @click.option("--nuclei", required=True, type=click.Path(exists=True))
+    @click.option("--primary-images", required=True, type=ImageStackParamType)
+    @click.option("--nuclei", required=True, type=ImageStackParamType)
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, primary_images, nuclei, output):
@@ -41,8 +41,8 @@ class Segmentation(PipelineComponent):
         ctx.obj = dict(
             component=Segmentation,
             output=output,
-            primary_images=ImageStack.from_path_or_url(primary_images),
-            nuclei=ImageStack.from_path_or_url(nuclei),
+            primary_images=primary_images,
+            nuclei=nuclei,
         )
 
 

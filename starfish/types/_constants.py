@@ -81,6 +81,14 @@ class Features:
     GENES = 'genes'
 
 
+class OverlapStrategy(AugmentedEnum):
+    """
+    contains options to use when processes physically overlapping IntensityTables
+    or ImageStacks
+    """
+    TAKE_MAX = 'take_max'
+
+
 class Clip(AugmentedEnum):
     """
     contains clipping options that determine how out-of-bounds values produced by filters are

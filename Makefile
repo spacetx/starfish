@@ -5,7 +5,7 @@ EDITOR?=vi
 MPLBACKEND?=Agg
 export MPLBACKEND
 
-MODULES=starfish data_formatting_examples
+MODULES=starfish docs/source/_static/data_formatting_examples
 
 DOCKER_IMAGE?=spacetx/starfish
 DOCKER_BUILD?=1
@@ -29,7 +29,7 @@ all:	fast
 
 ### UNIT #####################################################
 #
-fast:	lint mypy fast-test clean-docs docs-html
+fast:	diff-requirements lint mypy fast-test clean-docs docs-html
 
 lint:   lint-non-init lint-init
 
@@ -96,6 +96,9 @@ REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
 	cp -f $@ starfish/REQUIREMENTS-STRICT.txt
 	rm -rf .$<-env
 
+diff-requirements :
+	diff -q REQUIREMENTS-STRICT.txt starfish/REQUIREMENTS-STRICT.txt
+
 help-requirements:
 	$(call print_help, refresh_all_requirements, regenerate requirements files)
 	$(call print_help, check_requirements, fail if requirements files have been modified)
@@ -107,8 +110,9 @@ help-requirements:
 ### INTEGRATION ##############################################
 #
 include notebooks/subdir.mk
+include docs/source/_static/data_processing_examples/subdir.mk
 
-slow: fast run-notebooks docker
+slow: fast run-notebooks run-examples docker
 
 docker:
 	docker build -t $(DOCKER_IMAGE) .

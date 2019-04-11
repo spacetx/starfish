@@ -165,8 +165,8 @@ def concatenate_spot_attributes_to_intensities(
 def detect_spots(data_stack: ImageStack,
                  spot_finding_method: Callable[..., SpotAttributes],
                  spot_finding_kwargs: Dict = None,
-                 reference_image: Union[xr.DataArray, np.ndarray] = None,
-                 reference_image_from_max_projection: bool = False,
+                 reference_image: Optional[ImageStack] = None,
+                 reference_image_max_projection_axes: Optional[Tuple[Axes, ...]] = None,
                  measurement_function: Callable[[Sequence], Number] = np.max,
                  radius_is_gyration: bool = False,
                  n_processes: Optional[int] = None) -> IntensityTable:
@@ -184,9 +184,8 @@ def detect_spots(data_stack: ImageStack,
         (Optional) a reference image. If provided, spots will be found in this image, and then
         the locations that correspond to these spots will be measured across each channel and round,
         filling in the values in the IntensityTable
-    reference_image_from_max_projection : Tuple[Axes]
-        (Optional) if True, create a reference image by max-projecting the channels and imaging
-        rounds found in data_image.
+    reference_image_max_projection_axes : Tuple[Axes]
+        Generate the reference image by max-projecting reference_image across these axes.
     measurement_function : Callable[[Sequence], Number]
         the function to apply over the spot area to extract the intensity value (default 'np.max')
     radius_is_gyration : bool
@@ -220,18 +219,13 @@ def detect_spots(data_stack: ImageStack,
     if spot_finding_kwargs is None:
         spot_finding_kwargs = {}
 
-    if reference_image is not None and reference_image_from_max_projection:
-        raise ValueError(
-            'Please pass only one of reference_image and reference_image_from_max_projection'
-        )
-
-    if reference_image_from_max_projection:
-        reference_image = data_stack.max_proj(Axes.CH, Axes.ROUND).xarray.squeeze()
-
-    group_by = {Axes.ROUND, Axes.CH}
-
     if reference_image is not None:
-        reference_spot_locations = spot_finding_method(reference_image, **spot_finding_kwargs)
+        if reference_image_max_projection_axes is None:
+            raise ValueError("axes must be provided if reference_image is provided")
+        max_proj_reference_image = reference_image.max_proj(*reference_image_max_projection_axes)
+        reference_spot_locations = spot_finding_method(
+            max_proj_reference_image._squeezed_numpy(*reference_image_max_projection_axes),
+            **spot_finding_kwargs)
         intensity_table = measure_spot_intensities(
             data_image=data_stack,
             spot_attributes=reference_spot_locations,
@@ -242,7 +236,7 @@ def detect_spots(data_stack: ImageStack,
         spot_finding_method = partial(spot_finding_method, **spot_finding_kwargs)
         spot_attributes_list = data_stack.transform(
             func=spot_finding_method,
-            group_by=group_by,
+            group_by={Axes.ROUND, Axes.CH},
             n_processes=n_processes
         )
         intensity_table = concatenate_spot_attributes_to_intensities(spot_attributes_list)

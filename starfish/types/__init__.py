@@ -7,6 +7,7 @@ from ._constants import (
     CORE_DEPENDENCIES,
     Features,
     LOG,
+    OverlapStrategy,
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
     STARFISH_EXTRAS_KEY,

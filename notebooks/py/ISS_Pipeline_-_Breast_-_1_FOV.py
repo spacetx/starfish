@@ -168,10 +168,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
 
     # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    dots = dots.max_proj(Axes.ROUND, Axes.ZPLANE)
-    dots_numpy = dots._squeezed_numpy(Axes.ROUND, Axes.ZPLANE)
-    blobs_image = dots_numpy
-    intensities = p.run(registered_image, blobs_image=blobs_image)
+    intensities = p.run(registered_image, blobs_image=dots, blobs_axes=(Axes.ROUND, Axes.ZPLANE))
 # EPY: END code
 
 # EPY: START markdown

@@ -206,19 +206,29 @@ will print out the subcommands that are available.
 .. toctree::
    configuration/index.rst
 
-Vignettes
-=========
 
-This section provides several end-to-end usage vignettes for applying starfish to image-based
-transcriptomics data. The first vignette provides an example of using starfish to format a small,
-16 field of view experiment leveraging the in-situ sequencing (ISS) approach.
+Data Formatting Examples
+========================
+
+This section provides several examples of how to format data into SpaceTx-Format from a variety of
+types of input data shapes and sizes, demonstrating the flexibility of :py:class:`TileFetcher`.
+
+.. toctree::
+     :maxdepth: 2
+     :caption: Data Formatting Examples
+
+.. toctree::
+     data_formatting_examples/index.rst
+
+Data Processing examples
+========================
+
+This section provides several examples of how to apply starfish to data from a variety of assay
+types assuming your data is already in spaceTx format.
 
 .. toctree::
    :maxdepth: 2
    :caption: Vignettes:
 
 .. toctree::
-   iss/iss_vignette.rst
-
-.. toctree::
-   iss/iss_cli_vignette.rst
+   data_processing_examples/index.rst

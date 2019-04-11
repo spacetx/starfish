@@ -49,7 +49,7 @@ def imshow_plane(
         ax = plt.gca()
 
     if sel is not None:
-        image_stack: ImageStack = image_stack.sel(sel)
+        image_stack = image_stack.sel(sel)
 
     if title is not None:
         ax.set_title(title)
@@ -91,7 +91,7 @@ def intensity_histogram(
         ax = plt.gca()
 
     if sel is not None:
-        image_stack: ImageStack = image_stack.sel(sel)
+        image_stack = image_stack.sel(sel)
 
     if title is not None:
         ax.set_title(title)
@@ -135,7 +135,7 @@ def overlay_spot_calls(
         ax = plt.gca()
 
     if sel is not None:
-        image_stack: ImageStack = image_stack.sel(sel)
+        image_stack = image_stack.sel(sel)
 
         # subset the intensities if needed
         intensity_keys = (Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE)

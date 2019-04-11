@@ -20,7 +20,11 @@ command:
     print(intensity_table)
 
 in R_, the ncdf4 library allows the :code:`.nc` archive, which is based on hdf5, to be opened.
-It will contain a number of variables, each of which can be accessed by name:
+It will contain a number of variables, each of which can be accessed by name. Alternative
+installation instructions can be accessed here. Alternative installation instructions can be
+accessed here_:
+
+.. _here: http://cirrus.ucsd.edu/~pierce/ncdf/
 
 .. code-block:: R
 

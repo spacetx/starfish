@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from starfish.imagestack import indexing_utils as iu
 from starfish.imagestack.imagestack import ImageStack
-from starfish.test import test_utils
+from starfish.test import factories
 from starfish.types import Axes, Coordinates, PhysicalCoordinateTypes
 
 
@@ -96,7 +96,7 @@ def test_find_nearest():
                                    (PhysicalCoordinateTypes.Z_MIN, Z_COORDS[0]),
                                    (PhysicalCoordinateTypes.Z_MAX, Z_COORDS[1])])
 
-    stack = test_utils.imagestack_with_coords_factory(stack_shape, physical_coords)
+    stack = factories.imagestack_with_coords_factory(stack_shape, physical_coords)
     assert iu.find_nearest(stack.xarray[Coordinates.X.value], 1.2) == 2
     assert iu.find_nearest(stack.xarray[Coordinates.X.value], 1.5) == 4
     assert iu.find_nearest(stack.xarray[Coordinates.X.value], (1.2, 1.5)) == (2, 4)
@@ -132,7 +132,7 @@ def test_convert_coords_to_indices():
                                    (PhysicalCoordinateTypes.Z_MIN, Z_COORDS[0]),
                                    (PhysicalCoordinateTypes.Z_MAX, Z_COORDS[1])])
 
-    stack = test_utils.imagestack_with_coords_factory(stack_shape, physical_coords)
+    stack = factories.imagestack_with_coords_factory(stack_shape, physical_coords)
     coordinate_indices = {Coordinates.X: (1.2, 1.5), Coordinates.Y: (4, 5.1)}
     positional_indices = iu.convert_coords_to_indices(stack.xarray, coordinate_indices)
 
@@ -164,7 +164,7 @@ def test_sel_by_physical_coords():
                                    (PhysicalCoordinateTypes.Z_MIN, Z_COORDS[0]),
                                    (PhysicalCoordinateTypes.Z_MAX, Z_COORDS[1])])
 
-    stack = test_utils.imagestack_with_coords_factory(stack_shape, physical_coords)
+    stack = factories.imagestack_with_coords_factory(stack_shape, physical_coords)
 
     indexed_stack_by_coords = stack.sel_by_physical_coords({Coordinates.X: (1.2, 1.5),
                                                             Coordinates.Y: (4, 5.1)})
@@ -196,7 +196,7 @@ def test_sel_by_physical_and_axes():
                                    (PhysicalCoordinateTypes.Z_MIN, Z_COORDS[0]),
                                    (PhysicalCoordinateTypes.Z_MAX, Z_COORDS[1])])
 
-    stack = test_utils.imagestack_with_coords_factory(stack_shape, physical_coords)
+    stack = factories.imagestack_with_coords_factory(stack_shape, physical_coords)
     indexed_stack_by_coords = stack.sel_by_physical_coords({Coordinates.X: (1.2, 1.5),
                                                             Coordinates.Y: (4, 5.1)})
     indexed_stack = indexed_stack_by_coords.sel({Axes.ROUND: 2, Axes.CH: 1, Axes.ZPLANE: 0})

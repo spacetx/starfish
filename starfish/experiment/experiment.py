@@ -178,8 +178,10 @@ class FieldOfView:
 
 class Experiment:
     """
-    Encapsulates an experiment, with one or more fields of view and a codebook.  An individual
-    FieldOfView can be retrieved using a key, i.e., experiment[fov_name].
+    Encapsulates an experiment, with one or more fields of view and a
+    :py:class:`~starfish.codebook.codebook.Codebook`. An individual
+    :py:class:`~starfish.experiment.experiment.FieldOfView` can be retrieved using a
+    key, i.e., experiment[fov_name].
 
     Attributes
     ----------

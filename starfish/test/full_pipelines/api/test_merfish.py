@@ -172,7 +172,7 @@ def test_merfish_pipeline_cropped_data():
         low_passed.xarray[5, 0, 0, 40:50, 45:55]
     )
 
-    scaled_image = merfish.scaled_image
+    scaled_image = merfish.filtered_imgs
 
     # assert that the scaled data is correct
     expected_scaled_low_passed = np.array(

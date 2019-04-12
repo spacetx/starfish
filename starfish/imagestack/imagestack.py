@@ -248,10 +248,11 @@ class ImageStack:
         Constructs an ImageStack object from a URL and a base URL.
 
         The following examples will all load from the same location:
-          1. url: https://www.example.com/images/primary_images.json  baseurl: None
-          2. url: https://www.example.com/images/primary_images.json  baseurl: I_am_ignored
-          3. url: primary_images.json  baseurl: https://www.example.com/images
-          4. url: images/primary_images.json  baseurl: https://www.example.com
+
+        - url: https://www.example.com/images/primary_images.json  baseurl: None
+        - url: https://www.example.com/images/primary_images.json  baseurl: I_am_ignored
+        - url: primary_images.json  baseurl: https://www.example.com/images
+        - url: images/primary_images.json  baseurl: https://www.example.com
 
         Parameters
         ----------
@@ -263,6 +264,11 @@ class ImageStack:
         aligned_group: int
             Which aligned tile group to load into the Imagestack, only applies if the
             tileset is unaligned. Default 0 (the first group)
+
+        Returns
+        -------
+        ImageStack :
+            An ImageStack representing encapsulating the data from the TileSet.
         """
         config = StarfishConfig()
         tileset = Reader.parse_doc(url, baseurl, backend_config=config.slicedimage)
@@ -276,8 +282,9 @@ class ImageStack:
         Constructs an ImageStack object from an absolute URL or a filesystem path.
 
         The following examples will all load from the same location:
-          1. url_or_path: file:///Users/starfish-user/images/primary_images.json
-          2. url_or_path: /Users/starfish-user/images/primary_images.json
+
+        - url_or_path: file:///Users/starfish-user/images/primary_images.json
+        - url_or_path: /Users/starfish-user/images/primary_images.json
 
         Parameters
         ----------
@@ -629,13 +636,14 @@ class ImageStack:
             Function to apply. must expect a first argument which is a 2d or 3d numpy array and
             return an array of the same shape.
         group_by : Set[Axes]
-            Axes to split the data along.  For instance, splitting a 2D array (axes: X, Y; size:
+            Axes to split the data along.
+            `ex. splitting a 2D array (axes: X, Y; size:
             3, 4) by X results in 3 arrays of size 4.  (default {Axes.ROUND, Axes.CH,
-            Axes.ZPLANE})
+            Axes.ZPLANE})`
         in_place : bool
-            (Default False) If True, function is executed in place. If n_proc is not 1, the tile or
+            If True, function is executed in place. If n_proc is not 1, the tile or
             volume will be copied once during execution. If false, a new ImageStack object will be
-            produced.
+            produced. (Default False)
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
         n_processes : Optional[int]
@@ -643,21 +651,29 @@ class ImageStack:
             (default = None).
         kwargs : dict
             Additional arguments to pass to func
-        clip_method : Union[str, Clip]
-            1. Clip.CLIP (default) Controls the way that data are scaled to retain skimage dtype
-            requirements that float data fall in [0, 1].
-            2. Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-            3. Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-            value calculated over the entire ImageStack
-            3. Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-            value calculated over each slice, where slice shapes are determined by the group_by
-            parameters
+        clip_method : Union[str, :py:class:`~starfish.types.Clip`]
+
+            - Clip.CLIP (default): Controls the way that data are scaled to retain skimage dtype
+              requirements that float data fall in [0, 1].
+            - Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            - Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+              value calculated over the entire ImageStack
+            - Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+              value calculated over each slice, where slice shapes are determined by the group_by
+              parameters
+
 
         Returns
         -------
         ImageStack :
             If inplace is False, return a new ImageStack, otherwise return a reference to the
             original stack with data modified by application of func
+
+        Raises
+        ------
+        TypeError :
+             If no Clip method given.
+
         """
         # default grouping is by (x, y) tile
         if group_by is None:
@@ -852,9 +868,11 @@ class ImageStack:
         Returns a list of pipeline components that have been applied to this imagestack
         as well as their corresponding runtime parameters.
 
-         ex.
-            [('GaussianHighPass', {'sigma': (3, 3), 'is_volume': False}),
-            ('GaussianLowPass', {'sigma': (1, 1), 'is_volume': False}])]
+        Examples
+        ---------
+        >>> stack.log
+        [('GaussianHighPass', {'sigma': (3, 3), 'is_volume': False}),
+        ('GaussianLowPass', {'sigma': (1, 1), 'is_volume': False}])]
 
         Means that this imagestack was created by applying a GaussianHighPass Filter then
         a GaussianLowPass Filter to a starting imagestack
@@ -933,8 +951,8 @@ class ImageStack:
         return self.xarray.sizes[Axes.ZPLANE]
 
     def axis_labels(self, axis: Axes) -> Iterable[int]:
-        """Given a axis, return the sorted unique values for that axis in this ImageStack.  For
-        instance, imagestack.unique_index_values(Axes.ROUND) returns all the round ids in this
+        """Given an axis, return the sorted unique values for that axis in this ImageStack.  For
+        instance, ``imagestack.axis_labels(Axes.ROUND)`` returns all the round ids in this
         imagestack."""
 
         return [int(val) for val in self.xarray.coords[axis.value].values]

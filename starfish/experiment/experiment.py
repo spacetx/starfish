@@ -54,7 +54,7 @@ class FieldOfView:
 
     Be prepared to handle errors when images are accessed.
 
-    Access a FieldOfView through Experiment. :py:func:`~zstarfish.experiment.experiment.Experiment.fov`.
+    Access a FieldOfView through Experiment. :py:func:`~starfish.experiment.experiment.Experiment.fov`.
 
     Attributes
     ----------

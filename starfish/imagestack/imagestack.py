@@ -1,5 +1,6 @@
 import collections
 import warnings
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from functools import partial
 from itertools import product
@@ -184,12 +185,12 @@ class ImageStack:
             tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
         ]
 
-        tile_dtypes = set()
-        for selector in tqdm(all_selectors):
+        pbar = tqdm(total=len(all_selectors))
+        def load_by_selector(selector):
             tile = tile_data.get_tile(
                 r=selector[Axes.ROUND], ch=selector[Axes.CH], z=selector[Axes.ZPLANE])
             data = tile.numpy_array
-            tile_dtypes.add(data.dtype)
+            tile_dtype = data.dtype
 
             data = img_as_float32(data)
             self.set_slice(selector=selector, data=data)
@@ -206,6 +207,14 @@ class ImageStack:
                 # Use mid-point of the z range for a tile for the z-coordinate
                 self._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = \
                     physical_coordinate_calculator.get_physical_coordinates_of_z_plane(z_range)
+
+            pbar.update(1)
+
+            return tile_dtype
+
+        with ThreadPoolExecutor() as tpe:
+            tile_dtypes = set(tpe.map(load_by_selector, all_selectors))
+        pbar.close()
 
         tile_dtype_kinds = set(tile_dtype.kind for tile_dtype in tile_dtypes)
         tile_dtype_sizes = set(tile_dtype.itemsize for tile_dtype in tile_dtypes)

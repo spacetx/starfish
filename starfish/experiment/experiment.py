@@ -39,10 +39,10 @@ class FieldOfView:
 
     Notes
     -----
-    Field of views obtain their primary image from a :py:class:`slicedimage.TileSet`. They can obtain
+    Field of views obtain their primary image from a :py:class:`~slicedimage.TileSet`. They can obtain
     their auxiliary image dictionary from a dictionary of auxiliary image to :py:class:`slicedimage.TileSet`.
 
-    When a FieldOfView is initialized we parse each :py:class:`slicedimage.TileSet` into sub groups according to
+    When a FieldOfView is initialized we parse each :py:class:`~slicedimage.TileSet` into sub groups according to
     their physical coordinates. Tiles with the same physical coordinates are grouped together into aligned subgroups.
     If the FieldOfView is properly registered there should only be one aligned subgroup.
 
@@ -54,7 +54,7 @@ class FieldOfView:
 
     Be prepared to handle errors when images are accessed.
 
-    Access a FOV through Experiment. :py:func:`~starfish.experiment.experiment.Experiment.fov`.
+    Access a FOV through Experiment. :py:func:`~zstarfish.experiment.experiment.Experiment.fov`.
 
     Attributes
     ----------

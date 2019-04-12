@@ -65,7 +65,10 @@ from .dataorder import AXES_DATA, N_AXES
 
 class ImageStack:
     """
-    Container for a TileSet (field of view)
+    NEED WAY MORE DESCRIPTION HERE
+
+    Container for an aligned image group within a
+    :py:class:`~starfish.experiment.experiment.FieldOfView`
     Loads configuration from StarfishConfig.
 
     Attributes
@@ -76,35 +79,12 @@ class ImageStack:
         the number of imaging rounds stored in the image tensor
     num_zplanes : int
         the number of z-layers stored in the image tensor
-    xarray : xarray.core.dataarray.DataArray
+    xarray : :py:class:`xarray.DataArray`
         the 5-d image tensor is stored in this array
     raw_shape : Tuple[int]
         the shape of the image tensor (in integers)
     shape : Dict[str, int]
            the shape of the image tensor by categorical index (channels, imaging rounds, z-layers)
-
-    Methods
-    -------
-    get_slice(selector)
-        retrieve a slice of the image tensor
-    set_slice(selector, data, axes=[])
-        set a slice of the image tensor
-    apply(func, group_by={Axes.ROUND, Axes.CH, Axes.ZPLANE},
-        in_place=False, verbose=False, n_processes=None)
-        split the image tensor along one or more axes and apply a function across each of the
-        components to yield an image tensor
-    transform(func, group_by={Axes.ROUND, Axes.CH, Axes.ZPLANE}, verbose=False,
-        n_processes=None)
-        split the image tensor along one or more axes and apply a function across each of the
-        components. Results are returned as a List with length equal to the number of times
-        the image tensor is split.
-    max_proj(*dims)
-        return a max projection over one or more axis of the image tensor
-    sel(indexers)
-        return an ImageStack (coordinates preserved) that is the subset described
-        by the indexers. The indexers can slice all 5 dimensions of the image tensor.
-    export(filepath, tile_opener=None)
-        save the (potentially modified) image tensor to disk
     """
 
     def __init__(
@@ -360,7 +340,7 @@ class ImageStack:
 
     @property
     def xarray(self) -> xr.DataArray:
-        """Retrieves the image data as an xarray.DataArray"""
+        """Retrieves the image data as an :py:class:`xarray.DataArray`"""
         return self._data.data
 
     def sel(self, indexers: Mapping[Axes, Union[int, tuple]]):

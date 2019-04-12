@@ -12,7 +12,7 @@ Every method run on an ImageStack is recorded on the stacks log attribute. Each 
 - release tag
 
 
-example
+Example
 --------
 
 .. code-block:: python

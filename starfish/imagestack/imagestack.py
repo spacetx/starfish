@@ -877,6 +877,8 @@ class ImageStack:
         Means that this imagestack was created by applying a GaussianHighPass Filter then
         a GaussianLowPass Filter to a starting imagestack
 
+        For more information about provenance logging see #provenance-logging
+
         Returns
         -------
         List[dict]

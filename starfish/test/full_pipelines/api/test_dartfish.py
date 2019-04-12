@@ -19,9 +19,9 @@ def test_dartfish_pipeline_cropped_data():
     # set random seed to errors provoked by optimization functions
     np.random.seed(777)
 
-    dartfish = __import__('DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV')
+    dartfish = __import__('DARTFISH')
 
-    primary_image = dartfish.stack
+    primary_image = dartfish.imgs
 
     expected_primary_image = np.array(
         [[1.52590219e-05, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
@@ -64,7 +64,7 @@ def test_dartfish_pipeline_cropped_data():
         expected_primary_image
     )
 
-    normalized_image = dartfish.norm_stack
+    normalized_image = dartfish.norm_imgs
 
     expected_normalized_image = np.array(
         [[0.01960784, 0., 0., 0., 0.,
@@ -96,7 +96,7 @@ def test_dartfish_pipeline_cropped_data():
         expected_normalized_image
     )
 
-    zero_norm_stack = dartfish.zero_norm_stack
+    zero_norm_stack = dartfish.filtered_imgs
 
     expected_zero_normalized_image = np.array(
         [[0.01960784, 0., 0., 0., 0.,

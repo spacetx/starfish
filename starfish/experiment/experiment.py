@@ -40,21 +40,21 @@ class FieldOfView:
     Notes
     -----
     Field of views obtain their primary image from a :py:class:`~slicedimage.TileSet`. They can obtain
-    their auxiliary image dictionary from a dictionary of auxiliary image to :py:class:`slicedimage.TileSet`.
+    their auxiliary image dictionary from a dictionary of auxiliary image to :py:class:`~slicedimage.TileSet`.
 
     When a FieldOfView is initialized we parse each :py:class:`~slicedimage.TileSet` into sub groups according to
-    their physical coordinates. Tiles with the same physical coordinates are grouped together into aligned subgroups.
+    their physical coordinates. Tiles with the same physical coordinates are grouped together into aligned tilesets.
     If the FieldOfView is properly registered there should only be one aligned subgroup.
 
-    The decoding of :py:class:`slicedimage.TileSet` to :py:class:`~starfish.imagestack.imagestack.ImageStack` does not
-    happen until the image is accessed. ImageStacks can only be initialized with aligned subgroups, so if there
+    The decoding of :py:class:`~slicedimage.TileSet` to :py:class:`~starfish.imagestack.imagestack.ImageStack` does not
+    happen until the image is accessed. ImageStacks can only be initialized with aligned tilesets, so if there
     are multiple you may need to iterate through the groups using
     :py:func:`~starfish.experiment.experiment.FieldOfView.iterate_image_type`
     and process each one individually.
 
     Be prepared to handle errors when images are accessed.
 
-    Access a FOV through Experiment. :py:func:`~zstarfish.experiment.experiment.Experiment.fov`.
+    Access a FieldOfView through Experiment. :py:func:`~zstarfish.experiment.experiment.Experiment.fov`.
 
     Attributes
     ----------
@@ -109,8 +109,8 @@ class FieldOfView:
         'primary': ' Group 0:  <starfish.ImageStack r={0, 1, 2, 3, 4, 5}, ch={0, 1, '
         '2}, z={0}, (y, x)=(190, 270)>'}
 
-        The example describes a FieldOfView with two Tilesets in this FOV (primary and nuclei), because
-        all images have the same (x, y) coordinates, each Tileset has a single aligned subgroup.
+        The example describes a FieldOfView with two Tilesets (primary and nuclei), because
+        all images have the same (x, y) coordinates, each Tileset has a single aligned subgroup: Group 0.
         """
         all_groups = dict()
         for name, groups in self.aligned_coordinate_groups.items():
@@ -130,7 +130,8 @@ class FieldOfView:
 
     def iterate_image_type(self, image_type: str) -> Iterator[ImageStack]:
         """
-        Iterate through the aligned subgroups of the given image type (ex. primary)
+        Iterate through the aligned subgroups of the given image type.
+        (ex. primary)
 
         Parameters
         ----------
@@ -303,6 +304,8 @@ class Experiment:
 
     @classmethod
     def verify_version(cls, semantic_version_str: str) -> Version:
+        """Verifies the compatibility of the current starfish version with
+        the experiment version"""
         version = Version(semantic_version_str)
         if not (MIN_SUPPORTED_VERSION <= version <= MAX_SUPPORTED_VERSION):
             raise ValueError(
@@ -398,12 +401,15 @@ class Experiment:
         return fovs[0]
 
     def keys(self):
+        """Return all fov names in the experiment"""
         return (fov.name for fov in self.fovs())
 
     def values(self):
+        """Return all FieldOfViews in the experiment"""
         return (fov for fov in self.fovs())
 
     def items(self):
+        """Return all names and fovs in the experiment"""
         return ((fov.name, fov) for fov in self.fovs())
 
     @property

@@ -65,10 +65,14 @@ from .dataorder import AXES_DATA, N_AXES
 
 class ImageStack:
     """
-    NEED WAY MORE DESCRIPTION HERE
+    ImageStacks are the main objects for processing images in starfish. It is a
+    5-dimensional Image Tensor that labels each (z, y, x) tile with the round and channel
+    and zplane it corresponds to. The class is a wrapper around :py:class:`xarray.DataArray`.
+    The names of each imaging r/ch/zplane as well as the physical coordinates of each tile
+    are stored as coordinates on the :py:class:`xarray.DataArray`. ImageStacks can only be
+    initialized with aligned Tilesets.
 
-    Container for an aligned image group within a
-    :py:class:`~starfish.experiment.experiment.FieldOfView`
+
     Loads configuration from StarfishConfig.
 
     Attributes
@@ -640,12 +644,12 @@ class ImageStack:
         kwargs : dict
             Additional arguments to pass to func
         clip_method : Union[str, Clip]
-            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+            1. Clip.CLIP (default) Controls the way that data are scaled to retain skimage dtype
             requirements that float data fall in [0, 1].
-            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+            2. Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            3. Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
             value calculated over the entire ImageStack
-            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+            3. Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
             value calculated over each slice, where slice shapes are determined by the group_by
             parameters
 
@@ -913,14 +917,17 @@ class ImageStack:
 
     @property
     def num_rounds(self):
+        """Return the number of rounds in the ImageStack"""
         return self.xarray.sizes[Axes.ROUND]
 
     @property
     def num_chs(self):
+        """Return the number of channels in the ImageStack"""
         return self.xarray.sizes[Axes.CH]
 
     @property
     def num_zplanes(self):
+        """Return the number of z_planes in the ImageStack"""
         return self.xarray.sizes[Axes.ZPLANE]
 
     def axis_labels(self, axis: Axes) -> Iterable[int]:
@@ -932,6 +939,8 @@ class ImageStack:
 
     @property
     def tile_shape(self):
+        """Return the shape of each tile in the ImageStack. All
+        Tiles have the same shape."""
         return self.xarray.sizes[Axes.Y], self.xarray.sizes[Axes.X]
 
     def to_multipage_tiff(self, filepath: str) -> None:

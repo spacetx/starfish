@@ -198,7 +198,7 @@ spot_intensities = initial_spot_intensities.loc[initial_spot_intensities[Feature
 
 # EPY: START code
 bench = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/MERFISH/benchmark_results.csv',
-                    dtype = {'barcode':object})
+                    dtype={'barcode': object})
 
 benchmark_counts = bench.groupby('gene')['gene'].count()
 genes, counts = np.unique(spot_intensities[Features.AXIS][Features.TARGET], return_counts=True)

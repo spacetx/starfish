@@ -14,6 +14,7 @@ Every method run on an ImageStack is recorded on the stacks log attribute. Each 
 
 Example
 --------
+This is an example of the formatted provenance log after processing an ImageStack through the ISS pipeline.
 
 .. code-block:: python
 

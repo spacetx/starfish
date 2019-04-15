@@ -366,7 +366,7 @@ class ImageStack:
         Examples
         --------
 
-        Create an Imagestack using the ``synthetic_stack`` method
+        Create an Imagestack using :py:func:`~starfish.imagestack.imagestack.ImageStack.synthetic_stack`.
             >>> from starfish import ImageStack
             >>> from starfish.types import Axes
             >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
@@ -868,16 +868,9 @@ class ImageStack:
         Returns a list of pipeline components that have been applied to this imagestack
         as well as their corresponding runtime parameters.
 
-        Examples
-        ---------
-        >>> stack.log
-        [('GaussianHighPass', {'sigma': (3, 3), 'is_volume': False}),
-        ('GaussianLowPass', {'sigma': (1, 1), 'is_volume': False}])]
-
-        Means that this imagestack was created by applying a GaussianHighPass Filter then
-        a GaussianLowPass Filter to a starting imagestack
-
-        For more information about provenance logging see #provenance-logging
+        For more information about provenance logging see
+        `Provenance Logging
+        <https://spacetx-starfish.readthedocs.io/en/latest/help_and_reference/api/utils/ilogging.html>`_
 
         Returns
         -------

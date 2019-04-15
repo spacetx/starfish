@@ -76,7 +76,7 @@ plt.axis('off');
 # EPY: START markdown
 ### Filter and scale raw data before decoding into spatially resolved gene expression
 #
-#First, we normalize the intensity of each image by the maximum intensity of that image, which is equivalent to scaling by the 100th percentile value of the pixel values in each image.
+#First, we equalize the intensity of the images by scaling each image by its maximum intensity, which is equivalent to scaling by the 100th percentile value of the pixel values in each image.
 # EPY: END markdown
 
 # EPY: START code

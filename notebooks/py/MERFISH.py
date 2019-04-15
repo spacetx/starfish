@@ -193,7 +193,7 @@ spot_intensities = initial_spot_intensities.loc[initial_spot_intensities[Feature
 # EPY: START markdown
 ### Compare to results from paper
 #
-#The below plot aggregates gene copy number across single cells in the field of view and compares the results to the published intensities in the MERFISH paper. Note that Starfish detects a lower number of transcripts than the authors' results. This can probably be improved by tweaking any of the above parameters.
+#The below plot aggregates gene copy number across single cells in the field of view and compares the results to the published counts in the MERFISH paper. Note that Starfish detects a lower number of transcripts than the authors' results. This can likely be improved by tweaking the parameters of the algorithms above.
 # EPY: END markdown
 
 # EPY: START code

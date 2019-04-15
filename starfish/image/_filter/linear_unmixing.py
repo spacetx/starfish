@@ -5,22 +5,49 @@ import numpy as np
 import xarray as xr
 
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Axes
+from starfish.types import Axes, Clip
 from starfish.util import click
 from ._base import FilterAlgorithmBase
 
 
 class LinearUnmixing(FilterAlgorithmBase):
 
-    def __init__(self, coeff_mat: np.ndarray) -> None:
+    def __init__(
+        self, coeff_mat: np.ndarray, clip_method: Optional[Clip]=Clip.SCALE_BY_IMAGE,
+) -> None:
+
         """Image scaling filter
 
         Parameters
         ----------
         coeff_mat : np.ndarray
-            matrix of the linear unmixing coefficients. Should take the form:
-            B = AX, where B are the unmixed values, A is coeff_mat and X are
-            the observed values.
+            matrix of the linear unmixing coefficients. Should take the form: B = AX, where B are
+            the unmixed values, A is coeff_mat and X are the observed values. coeff_mat has shape
+            (n_ch, n_ch), and poses each channel (column) as a combination of other columns (rows).
+        clip_method : Union[str, Clip]
+            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].
+            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over the entire ImageStack
+            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+                value calculated over each slice, where slice shapes are determined by the group_by
+                parameters
+
+        Examples
+        --------
+        The following example provides a coeff mat that corrects for spectral
+        mixing in a 3-channel experiment.
+        Channel 0 contains a mixture of itself plus 50% of the intensity of
+        channel 2. Channel 1 has no mixing with other channels. Channel 3
+        consists of itself plus 10% of the intensity of both channels 0 and 1.
+
+        >>> import numpy as np
+        >>> coeff_mat = np.ndarray([
+        ...     [1,    0,  -0.1]
+        ...     [0,    1,  -0.1]
+        ...     [-0.5, 0,  1   ]
+        ... ])
         """
         self.coeff_mat = coeff_mat
 
@@ -38,7 +65,8 @@ class LinearUnmixing(FilterAlgorithmBase):
         coeff_mat : np.ndarray
             matrix of the linear unmixing coefficients. Should take the form:
             B = AX, where B are the unmixed values, A is coeff_mat and X are
-            the observed values. coeff_mat has shape (n_ch, n_ch).
+            the observed values. coeff_mat has shape (n_ch, n_ch), and poses
+            each channel (column) as a combination of other columns (rows).
 
         Returns
         -------
@@ -55,7 +83,10 @@ class LinearUnmixing(FilterAlgorithmBase):
         broadcast_coeff = np.tile(coeff_mat, reps=x * y).reshape(c, y, x, c)
 
         # multiply the image by each coefficient
-        unmixed_image = np.sum(image.values[..., None] * broadcast_coeff, axis=-1)
+        broadcast_image = image.values[..., None] * broadcast_coeff
+
+        # collapse the unmixed result
+        unmixed_image = np.sum(broadcast_image, axis=0).transpose([2, 0, 1])
 
         return unmixed_image
 
@@ -91,7 +122,7 @@ class LinearUnmixing(FilterAlgorithmBase):
         unmix = partial(self._unmix, coeff_mat=self.coeff_mat)
         result = stack.apply(
             unmix,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
         )
         return result
 
@@ -100,9 +131,9 @@ class LinearUnmixing(FilterAlgorithmBase):
     @click.option(
         "--coeff_mat", required=True, type=np.ndarray, help="linear unmixing coefficients")
     @click.option(
-        "--clip-method", default=1, type=int,
-        help="method to constrain data to [0,1]. 0: clip, 1: scale by max over whole image, "
-             "2: scale by max per chunk")
+        "--clip-method", default='scale_by_image',
+        type=click.Choice(['clip', 'scale_by_image', 'scale_by_chunk']),
+        help="method to constrain data to [0,1]")
     @click.pass_context
     def _cli(ctx, coeff_mat):
         ctx.obj["component"]._cli_run(ctx, LinearUnmixing(coeff_mat))

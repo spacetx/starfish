@@ -8,7 +8,8 @@ amplified spots using a one-hot codebook. The publication for this assay can be
 found `here <baristaseq>`_
 
 This example processes a single field of view extracted from a tissue slide that
-measures gene expression in mouse primary visual cortex.
+measures gene expression in mouse primary visual cortex, created as part of the
+SpaceTx project.
 
 .. _baristaseq: https://www.ncbi.nlm.nih.gov/pubmed/29190363
 """
@@ -18,7 +19,7 @@ import pandas as pd
 
 import starfish
 import starfish.data
-from starfish.types import Axes
+from starfish.types import Axes, Clip
 from starfish.util.plot import (
     imshow_plane, intensity_histogram, overlay_spot_calls
 )
@@ -26,7 +27,9 @@ from starfish.util.plot import (
 ###############################################################################
 # Load Data
 # ---------
-# Import starfish and extract a single field of view.
+# Import starfish and extract a single field of view. The data from one field
+# of view correspond to 476 images from 7 imaging rounds `(r)`, 4 channels,
+# `(c)`, and 17 z-planes `(z)`. Each image is `1193 x 913` (y, x).
 
 experiment_json = (
     "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20190319/baristaseq"
@@ -42,9 +45,15 @@ img = exp['fov_000'].get_image('primary')
 # non-interactive fashion, it's best to visualize the data in 2-d. There are
 # better ways to look at these data using the :py:func:`starfish.display`
 # method, which allows the user to page through each axis of the tensor
-
+#
 # for this vignette, we'll pick one plane and track it through the processing
 # steps
+
+# # Uncomment this block to use starfish.display
+# %gui qt5
+# starfish.display(img)
+# starfish.display(nissl)
+
 plane_selector = {Axes.CH: 0, Axes.ROUND: 0, Axes.ZPLANE: 8}
 
 f, (ax1, ax2) = plt.subplots(ncols=2)
@@ -52,18 +61,25 @@ imshow_plane(img, sel=plane_selector, ax=ax1, title="primary image")
 imshow_plane(nissl, sel=plane_selector, ax=ax2, title="nissl image")
 
 ###############################################################################
+# Visualize codebook
+# ------------------
+# The BaristaSeq codebook maps pixel intensities across the rounds and channels
+# to corresponding barcodes and genes that each pixel codes for. For this
+# example dataset, the codebook specifies 79 possible gene targets.
+
+###############################################################################
 # Register the data
 # -----------------
 # The first step in BaristaSeq is to do some rough registration. For this data,
 # the rough registration has been done for us by the authors, so it is omitted
-# from this notebook.
+# from this example.
 
 ###############################################################################
 # Project into 2D
 # ---------------
 # BaristaSeq is typically processed in 2d. Starfish exposes
 # :py:meth:`ImageStack.max_proj` to enable a user to max-project any axes. Here
-# we max project Z for both the nissl images and the primary images.
+# Z is max projected for both the nissl images and the primary images.
 
 z_projected_image = img.max_proj(Axes.ZPLANE)
 z_projected_nissl = nissl.max_proj(Axes.ZPLANE)
@@ -120,19 +136,27 @@ registration_corrected: starfish.ImageStack = z_projected_image.sel(
 # ----------------------------------------------------
 # The following matrix contains bleed correction factors for Illumina
 # sequencing-by-synthesis reagents. Starfish provides a LinearUnmixing method
-# that will unmix the fluorescence intensities
+# that will unmix the fluorescence intensities. This matrix is read as a
+# *correction* factor for each channel, where each column defines an implied
+# mixing of the channels.
+#
+# For example, this should be read as implying that channel zero is mixed with
+# 35% of the intensity of channel 1, which should be substracted. Similarly,
+# channel 1 is mixed with 5% of channel 0 and 2% of channel 2.
 
 data = np.array(
-    [[0.  , 0.05, 0.  , 0.  ],
-     [0.35, 0.  , 0.  , 0.  ],
-     [0.  , 0.02, 0.  , 0.84],
-     [0.  , 0.  , 0.05, 0.  ]]
+    [[1.   , -0.05,  0.  ,  0.  ],
+     [-0.35,  1.  ,  0.  ,  0.  ],
+     [0.   , -0.02,  1.  , -0.84],
+     [0.   ,  0.  , -0.05,  1.  ]]
 )
 rows = pd.Index(np.arange(4), name='bleed_from')
 cols = pd.Index(np.arange(4), name='bleed_to')
 unmixing_coeff = pd.DataFrame(data, rows, cols)
 
-lum = starfish.image._filter.linear_unmixing.LinearUnmixing(unmixing_coeff)
+lum = starfish.image.Filter.LinearUnmixing(
+    unmixing_coeff, clip_method=Clip.CLIP
+)
 bleed_corrected = lum.run(registration_corrected, in_place=False)
 
 ###############################################################################
@@ -144,7 +168,6 @@ bleed_corrected = lum.run(registration_corrected, in_place=False)
 # of 5% of channel 3. However, Channel 3 should look dramatically sparser after
 # spots from Channel 2 have been subtracted
 
-# TODO ambrosejcarr fix this.
 ch2_r0 = {Axes.CH: 2, Axes.ROUND: 0, Axes.X: (500, 700), Axes.Y: (500, 700)}
 ch3_r0 = {Axes.CH: 3, Axes.ROUND: 0, Axes.X: (500, 700), Axes.Y: (500, 700)}
 f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
@@ -242,78 +265,22 @@ f = plot_scaling_result(background_corrected, scaled)
 # We repeat this scaling by the 99.8th percentile value, which does a better job
 # of equalizing the intensity distributions.
 #
-# It should also be visible that exactly 0.2% of values take on the max value
-# of 1. This is a result of setting any value above the 99.5th percentile to 1,
+# It should also be visible that exactly 0.1% of values take on the max value
+# of 1. This is a result of setting any value above the 99.9th percentile to 1,
 # and is a trade-off made to eliminate large-value outliers.
 
-sbp = starfish.image.Filter.ScaleByPercentile(p=99.8)
-scaled = sbp.run(background_corrected, n_processes=1, in_place=False)
+sbp = starfish.image.Filter.ScaleByPercentile(p=99.9)
+scaled = sbp.run(background_corrected, in_place=False)
 
 f = plot_scaling_result(background_corrected, scaled)
 
 ###############################################################################
-# Remove residual background
-# --------------------------
-# The background is fairly uniformly present below intensity=0.5. However,
-# starfish's clip method currently only supports percentiles. To solve this
-# problem, the intensities can be directly edited in the underlying numpy array.
-
-from copy import deepcopy
-
-clipped = deepcopy(scaled)
-clipped.xarray.values[clipped.xarray.values < 0.5] = 0
-
-f, (before, after) = plt.subplots(ncols=4, nrows=2)
-for channel, ax in enumerate(before):
-    title = f'Before clipping\nChannel {channel}'
-    imshow_plane(
-        scaled, sel={Axes.CH: channel, Axes.ROUND: 0}, ax=ax, title=title,
-    )
-for channel, ax in enumerate(after):
-    title = f'After clipping\nChannel {channel}'
-    imshow_plane(
-        clipped, sel={Axes.CH: channel, Axes.ROUND: 0}, ax=ax, title=title,
-    )
-f.tight_layout()
-
-###############################################################################
-# Detect Spots
-# ------------
-# Detect spots with a local search blob detector that identifies spots in all
-# rounds and channels and matches them using a local search method. The local
-# search starts in an anchor channel (default ch=1) and identifies the nearest
-# spot in all subsequent imaging rounds.
-
-threshold = 0.5
-
-lsbd = starfish.spots.SpotFinder.LocalSearchBlobDetector(
-    min_sigma=(0.5, 0.5, 0.5),
-    max_sigma=(8, 8, 8),
-    num_sigma=10,
-    threshold=threshold,
-    search_radius=7
-)
-intensities = lsbd.run(clipped)
-decoded = exp.codebook.decode_per_round_max(intensities.fillna(0))
-
-f, ax = plt.subplots()
-overlay_spot_calls(
-    clipped,
-    decoded,
-    sel={Axes.ROUND: 0, Axes.CH: 0},
-    ax=ax,
-    title="Blob Detection Results"
-)
-
-
-###############################################################################
-# Based on visual inspection, it looks like some spots are not being matched
-# across rounds. Try the PixelSpotDetector as an alternative
+# We use a pixel spot decoder to identify the gene target for each spot.
 psd = starfish.spots.PixelSpotDecoder.PixelSpotDecoder(
     codebook=exp.codebook, metric='euclidean', distance_threshold=0.5,
     magnitude_threshold=0.1, min_area=7, max_area=50
 )
-pixel_decoded, ccdr = psd.run(clipped)
+pixel_decoded, ccdr = psd.run(scaled)
 
 ###############################################################################
 # plot a mask that shows where pixels have decoded to genes. Note the lack of
@@ -321,48 +288,17 @@ pixel_decoded, ccdr = psd.run(clipped)
 # fixable with calibration. Perhaps the results could be improved if the
 # illumination were flattened.
 f, ax = plt.subplots()
-ax.imshow(np.squeeze(ccdr.label_image > 0), cmap=plt.cm.gray)
+# ax.imshow(np.squeeze(ccdr.label_image > 0), cmap=plt.cm.gray)
+ax.imshow(np.squeeze(ccdr.decoded_image), cmap=plt.cm.nipy_spectral)
 ax.set_title("Pixel Decoding Results")
 
-###############################################################################
-# Compare the number of spots being detected by the two spot finders
-
-print(
-    "pixel_decoder spots detected",
-    int(np.sum(pixel_decoded['target'] != 'nan'))
-)
-print(
-    "local search spot detector spots detected",
-    int(np.sum(decoded['target'] != 'nan'))
-)
 
 ###############################################################################
-# Report the correlation between the two methods
+# Get the total counts for each gene from each spot detector.
+# Do the below values make sense for this tissue and this probeset?
 
-from scipy.stats import pearsonr
-
-# get the total counts for each gene from each spot detector
 pixel_decoded_gene_counts = pd.Series(
     *np.unique(pixel_decoded['target'], return_counts=True)[::-1]
 )
-decoded_gene_counts = pd.Series(
-    *np.unique(decoded['target'], return_counts=True)[::-1]
-)
-
-# get the genes that are detected by both spot finders
-codetected = pixel_decoded_gene_counts.index.intersection(
-    decoded_gene_counts.index
-)
-
-# report the correlation
-r, p = pearsonr(
-    pixel_decoded_gene_counts[codetected],
-    decoded_gene_counts[codetected]
-)
-print(f"Pearson correlation r^2: {r}, p-value: {p}")
-
-###############################################################################
-# The pixel based spot detector looks better upon visual inspection. Do the
-# below values make sense for this tissue and this probeset??
 
 print(pixel_decoded_gene_counts.sort_values().drop("nan"))

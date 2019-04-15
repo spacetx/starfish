@@ -33,28 +33,33 @@ class FieldOfView:
     This encapsulates a field of view.  It contains the primary image and auxiliary images that are
     associated with the field of view.
 
-    All images can be accessed using :py:func:`~starfish.experiment.experiment.FieldOfView.get_image`
+    All images can be accessed using
+    :py:func:`~starfish.experiment.experiment.FieldOfView.get_image`
     with the name of the image type. The primary image is accessed using the name
     :py:attr:`~starfish.experiment.experiment.FieldOFView.PRIMARY_IMAGES`.
 
     Notes
     -----
-    Field of views obtain their primary image from a :py:class:`~slicedimage.TileSet`. They can obtain
-    their auxiliary image dictionary from a dictionary of auxiliary image to :py:class:`~slicedimage.TileSet`.
+    Field of views obtain their primary image from a :py:class:`~slicedimage.TileSet`.
+    They can obtain their auxiliary image dictionary from a dictionary of auxiliary image to
+    :py:class:`~slicedimage.TileSet`.
 
-    When a FieldOfView is initialized we parse each :py:class:`~slicedimage.TileSet` into sub groups according to
-    their physical coordinates. Tiles with the same physical coordinates are grouped together into aligned tilesets.
-    If the FieldOfView is properly registered there should only be one aligned subgroup.
+    When a FieldOfView is initialized we parse each :py:class:`~slicedimage.TileSet`
+    into sub groups according to their physical coordinates. Tiles with the same physical
+    coordinates are grouped together into aligned tilesets. If the FieldOfView is properly
+    registered there should only be one aligned subgroup.
 
-    The decoding of :py:class:`~slicedimage.TileSet` to :py:class:`~starfish.imagestack.imagestack.ImageStack` does not
-    happen until the image is accessed. ImageStacks can only be initialized with aligned tilesets, so if there
-    are multiple you may need to iterate through the groups using
-    :py:func:`~starfish.experiment.experiment.FieldOfView.iterate_image_type`
+    The decoding of :py:class:`~slicedimage.TileSet` to
+    :py:class:`~starfish.imagestack.imagestack.ImageStack`
+    does not happen until the image is accessed. ImageStacks can only be initialized with
+    aligned tilesets, so if thereare multiple you may need to iterate through the groups
+    using :py:func:`~starfish.experiment.experiment.FieldOfView.iterate_image_type`
     and process each one individually.
 
     Be prepared to handle errors when images are accessed.
 
-    Access a FieldOfView through Experiment. :py:func:`~starfish.experiment.experiment.Experiment.fov`.
+    Access a FieldOfView through Experiment.
+    :py:func:`~starfish.experiment.experiment.Experiment.fov`.
 
     Attributes
     ----------
@@ -110,7 +115,8 @@ class FieldOfView:
         '2}, z={0}, (y, x)=(190, 270)>'}
 
         The example describes a FieldOfView with two Tilesets (primary and nuclei), because
-        all images have the same (x, y) coordinates, each Tileset has a single aligned subgroup: Group 0.
+        all images have the same (x, y) coordinates, each Tileset has a single aligned subgroup:
+        Group 0.
         """
         all_groups = dict()
         for name, groups in self.aligned_coordinate_groups.items():

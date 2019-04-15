@@ -200,8 +200,8 @@ else:
 
         Notes
         -----
-        The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
-        a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
+        The radius of each blob is approximately :math:`sqrt{2}sigma` for
+        a 2-D image and :math:`sqrt{3}sigma` for a 3-D image.
         """
 
         image = img_as_float(image)
@@ -344,8 +344,8 @@ else:
 
         Notes
         -----
-        The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
-        a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
+        The radius of each blob is approximately :math:`sqrt{2}sigma` for
+        a 2-D image and :math:`sqrt{3}sigma` for a 3-D image.
         """
         image = img_as_float(image)
 

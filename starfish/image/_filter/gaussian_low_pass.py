@@ -80,7 +80,6 @@ class GaussianLowPass(FilterAlgorithmBase):
 
         filtered = preserve_float_range(filtered, rescale)
 
-        assert isinstance(filtered, np.ndarray)
         return filtered
 
     def run(

@@ -290,7 +290,7 @@ class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
         blobs_axes : Optional[Tuple[Axes, ...]]
             If blobs_image is provided, blobs_axes must be provided as well.  blobs_axes represents
             the axes across which the blobs image is max projected before spot detection is done.
-        n_processes : Optional[int] = 0,
+        n_processes : Optional[int] = None,
             Number of processes to devote to spot finding.
         """
         intensity_table = detect_spots(

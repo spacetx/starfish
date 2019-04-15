@@ -20,16 +20,15 @@ import pandas as pd
 import starfish
 import starfish.data
 from starfish.types import Axes, Clip
-from starfish.util.plot import (
-    imshow_plane, intensity_histogram, overlay_spot_calls
-)
+from starfish.util.plot import imshow_plane, intensity_histogram
 
 ###############################################################################
 # Load Data
 # ---------
 # Import starfish and extract a single field of view. The data from one field
-# of view correspond to 476 images from 7 imaging rounds `(r)`, 4 channels,
-# `(c)`, and 17 z-planes `(z)`. Each image is `1193 x 913` (y, x).
+# of view correspond to 476 images from 7 imaging rounds :code:`(r)`, 4
+# channels, :code:`(c)`, and 17 z-planes :code:`(z)`. Each image is
+# :code:`1193 x 913 (y, x)`.
 
 experiment_json = (
     "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20190319/baristaseq"
@@ -41,6 +40,8 @@ nissl = exp['fov_000'].get_image('dots')
 img = exp['fov_000'].get_image('primary')
 
 ###############################################################################
+# Visualize raw data
+# ------------------
 # starfish data are 5-dimensional, but to demonstrate what they look like in a
 # non-interactive fashion, it's best to visualize the data in 2-d. There are
 # better ways to look at these data using the :py:func:`starfish.display`
@@ -196,8 +197,9 @@ f.tight_layout()
 # measures the background with a rolling disk morphological element and
 # subtracts it from the image.
 
-from skimage.morphology import opening, dilation, disk
 from functools import partial
+
+from skimage.morphology import dilation, disk, opening
 
 # calculate the background
 opening = partial(opening, selem=disk(5))
@@ -232,7 +234,7 @@ scaled = sbp.run(background_corrected, n_processes=1, in_place=False)
 
 
 ###############################################################################
-# The easiest way to visualize this is to calculate the intensity histograms
+# The easiest way to visualize scaling is to calculate the intensity histograms
 # before and after this scaling and plot their log-transformed values. This
 # should see that the histograms are better aligned in terms of intensities.
 # It gets most of what we want, but the histograms are still slightly shifted;
@@ -283,15 +285,11 @@ psd = starfish.spots.PixelSpotDecoder.PixelSpotDecoder(
 pixel_decoded, ccdr = psd.run(scaled)
 
 ###############################################################################
-# plot a mask that shows where pixels have decoded to genes. Note the lack of
-# spots in the top left. this matches an illumination gradient which might be
-# fixable with calibration. Perhaps the results could be improved if the
-# illumination were flattened.
+# plot a mask that shows where pixels have decoded to genes.
+
 f, ax = plt.subplots()
-# ax.imshow(np.squeeze(ccdr.label_image > 0), cmap=plt.cm.gray)
 ax.imshow(np.squeeze(ccdr.decoded_image), cmap=plt.cm.nipy_spectral)
 ax.set_title("Pixel Decoding Results")
-
 
 ###############################################################################
 # Get the total counts for each gene from each spot detector.

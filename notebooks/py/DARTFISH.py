@@ -33,7 +33,7 @@ from starfish.spots import PixelSpotDecoder
 # EPY: START markdown
 ### Load data into Starfish from the Cloud
 #
-#The example data here corresopond to DARTFISHv1 2017. The group is actively working on improving the protocol. The data represent human brain tissue from the human occipital cortex from 1 field of view (FOV) of larger experiment. The data from one field of view correspond to 9 images from 6 imaging rounds (r) 3 color channels (c) and 1 z-plane (z). Each image is 988x988 (y,x)
+#The example data here corresopond to DARTFISHv1 2017. The group is actively working on improving the protocol. The data represent human brain tissue from the human occipital cortex from 1 field of view (FOV) of larger experiment. The data from one field of view correspond to 18 images from 6 imaging rounds (r) 3 color channels (c) and 1 z-plane (z). Each image is 988x988 (y,x)
 # EPY: END markdown
 
 # EPY: START code

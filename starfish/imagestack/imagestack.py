@@ -399,6 +399,42 @@ class ImageStack:
         stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector)
         return stack
 
+    def isel(self, indexers: Mapping[Axes, Union[int, tuple]]):
+        """Given a dictionary mapping the index name to either a value or a range represented as a
+        tuple, return an Imagestack with each dimension indexed by position accordingly
+
+        Parameters
+        ----------
+        indexers : Dict[Axes, (int/tuple)]
+            A dictionary of dim:index where index is the value or range to index the dimension
+
+        Examples
+        --------
+
+        Create an Imagestack using the ``synthetic_stack`` method
+            >>> from starfish import ImageStack
+            >>> from starfish.types import Axes
+            >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
+            >>> stack
+            <starfish.ImageStack (r: 5, c: 5, z: 15, y: 200, x: 200)>
+            >>> stack.sel({Axes.ROUND: (1, None), Axes.CH: 0, Axes.ZPLANE: 0})
+            <starfish.ImageStack (r: 4, c: 1, z: 1, y: 200, x: 200)>
+            >>> stack.sel({Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 1,
+            ...Axes.Y: 100, Axes.X: (None, 100)})
+            <starfish.ImageStack (r: 1, c: 1, z: 1, y: 1, x: 100)>
+            and the imagestack's physical coordinates
+            xarray also indexed and recalculated according to the x,y slicing.
+
+        Returns
+        -------
+        ImageStack :
+            a new image stack indexed by given value or range.
+        """
+        stack = deepcopy(self)
+        selector = indexing_utils.convert_to_selector(indexers)
+        stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector, by_pos=True)
+        return stack
+
     def sel_by_physical_coords(
             self, indexers: Mapping[Coordinates, Union[Number, Tuple[Number, Number]]]):
         """
@@ -407,7 +443,7 @@ class ImageStack:
 
         Parameters
         ----------
-        indexers : Dict[Axes, (float/tuple)]:
+        indexers : Mapping[Coordinates, Union[Number, Tuple[Number, Number]]]:
             A dictionary of coord:index where index is the value or range to index the coordinate
             dimension.
 
@@ -417,7 +453,7 @@ class ImageStack:
             a new image stack indexed by given value or range.
         """
         new_indexers = indexing_utils.convert_coords_to_indices(self.xarray, indexers)
-        return self.sel(new_indexers)
+        return self.isel(new_indexers)
 
     def get_slice(
             self,

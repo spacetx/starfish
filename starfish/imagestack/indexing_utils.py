@@ -29,25 +29,25 @@ def convert_to_selector(
 
 def convert_coords_to_indices(array: xr.DataArray,
                               indexers: Mapping[Coordinates, Union[Number, Tuple[Number, Number]]]
-                              ) -> Dict[Axes, Union[int, tuple]]:
+                              ) -> Dict[Axes, Union[int, Tuple[Number, Number]]]:
     """
     Convert mapping of physical coordinates to value or range to mapping of corresponding Axes and
     positional coordinates.
 
     Parameters
     ----------
-    array: xr.DataArray
+    array : xr.DataArray
         The xarray with both physical and positional coordinates.
-    indexers: Mapping[Coordinates, Union[int, tuple]]
+    indexers: Mapping[Coordinates, Union[Number, Tuple[Number, Number]]]
         Mapping of physical coordinates to value or range
 
     Returns
     -------
-    Mapping[Axes, Union[int, tuple]]:
+    Mapping[Axes, Union[int, Tuple[Number, Number]]]:
         Mapping of Axes and positional indices that correspond to the given physical indices.
 
     """
-    axes_indexers: Dict[Axes, Union[int, tuple]] = dict()
+    axes_indexers: Dict[Axes, Union[int, Tuple[Number, Number]]] = dict()
     if Coordinates.X in indexers:
         idx_x = find_nearest(array[Coordinates.X.value], indexers[Coordinates.X])
         axes_indexers[Axes.X] = idx_x
@@ -62,12 +62,16 @@ def convert_coords_to_indices(array: xr.DataArray,
 
 def index_keep_dimensions(data: xr.DataArray,
                           indexers: Mapping[str, Union[int, slice]],
+                          by_pos: bool=False
                           ) -> xr.DataArray:
     """Takes an xarray and key to index it. Indexes then adds back in lost dimensions"""
     # store original dims
     original_dims = data.dims
     # index
-    data = data.sel(indexers)
+    if by_pos:
+        data = data.isel(indexers)
+    else:
+        data = data.sel(indexers)
     # find missing dims
     missing_dims = set(original_dims) - set(data.dims)
     # Add back in missing dims
@@ -78,7 +82,7 @@ def index_keep_dimensions(data: xr.DataArray,
 
 def find_nearest(array: xr.DataArray,
                  value: Union[Number, Tuple[Number, Number]]
-                 ) -> Union[int, tuple]:
+                 ) -> Union[int, Tuple[Number, Number]]:
     """
     Given an xarray and value or tuple range return the indices of the closest corresponding
     value/values in the array.

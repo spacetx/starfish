@@ -12,6 +12,7 @@ recommonmark
 requests
 seaborn
 sphinx
+sphinx_autodoc_typehints
 sphinx_bootstrap_theme
 sphinxcontrib-programoutput
 sphinx-gallery

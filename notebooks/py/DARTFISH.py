@@ -85,7 +85,7 @@ norm_imgs = sc_filt.run(imgs)
 # EPY: END code
 
 # EPY: START markdown
-#Next, for each imaging round, and each pixel location, we zero out the values across all three color channels if the magnitude of this 3 vector is below a threshold. As such, the code letters in these rounds for these pixels will be 0
+#Next, for each imaging round, and each pixel location, we zero the intensity values across all three color channels if the magnitude of this 3 vector is below a threshold. As such, the code value associated with these pixels will be the blank. This is necessary to support euclidean decoding for codebooks that include blank values. 
 # EPY: END markdown
 
 # EPY: START code

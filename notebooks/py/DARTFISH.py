@@ -96,7 +96,7 @@ filtered_imgs = z_filt.run(norm_imgs)
 # EPY: START markdown
 ### Decode the processed data into spatially resolved gene expression profiles
 #
-#Here, we decode each pixel value, across all rounds and channels into the corresponding target (gene) it corresponds too. Contiguous pixels that map to the same target gene are called as one RNA molecule. Intuitively, pixel vectors are matched to the codebook by computing the euclidean distance between the pixel vector and all codewords. The minimal distance gene target is then selected. 
+#Here, starfish decodes each pixel value, across all rounds and channels, into the corresponding target (gene) it corresponds too. Contiguous pixels that map to the same target gene are called as one RNA molecule. Intuitively, pixel vectors are matched to the codebook by computing the euclidean distance between the pixel vector and all codewords. The minimal distance gene target is then selected, if it is within `distance_threshold` of any code. 
 #
 #This decoding operation requires some parameter tuning, which is described below. First, we look at a distribution of pixel vector barcode magnitudes to determine the minimum magnitude threshold at which we will attempt to decode the pixel vector.
 # EPY: END markdown

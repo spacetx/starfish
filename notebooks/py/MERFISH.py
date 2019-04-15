@@ -83,7 +83,7 @@ single_plane = imgs.sel({Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0})
 single_plane = single_plane.xarray.squeeze()
 plt.figure(figsize=(7,7))
 plt.imshow(single_plane, cmap='gray')
-plt.title('Round: 0, Chanel:0')
+plt.title('Round: 0, Channel: 0')
 plt.axis('off');
 # EPY: END code
 

@@ -160,7 +160,7 @@ spots_df.head()
 # EPY: END markdown
 
 # EPY: START code
-# load results from Matlab based pipeline
+# load results from authors' pipeline
 cnts_benchmark = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 

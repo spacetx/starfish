@@ -102,7 +102,7 @@ high_passed = ghp.run(imgs, verbose=True, in_place=False)
 # EPY: END code
 
 # EPY: START markdown
-#The below algorithm deconvolves out the point spread function (PSF) introduced by the microcope. The goal of deconvolution is to enable the resolution of more spots, especially in high transcript density regions of the data. For this assay, the PSF is well approximated by a 2D isotropic gaussian with standard deviation (sigma) of 2. This The number of iterations (here 15) is an important parameter that needs careful optimization.
+#The below algorithm deconvolves the point spread function (PSF) introduced by the microcope. The goal of deconvolution is to enable the resolution of more spots, especially in high transcript density regions of the data. For this assay, the PSF is well approximated by a 2D isotropic gaussian with standard deviation (sigma) of 2. This The number of iterations (here 15) is an important parameter that needs careful optimization.
 # EPY: END markdown
 
 # EPY: START code

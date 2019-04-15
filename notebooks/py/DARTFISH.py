@@ -156,7 +156,7 @@ spots_df.head()
 # EPY: START markdown
 ### Compare to benchmark results
 #
-#The below plot aggregates gene copy number across single cells in the field of view and compares the results to the same copy numbers from the Matlab based pipeline. This can probably be improved by tweaking any of the above parameters.
+#The below plot aggregates gene copy number across cells in the field of view and compares the results to the same copy numbers from the authors' pipeline. This can likely be improved by tweaking parameters in the above algorithms.
 # EPY: END markdown
 
 # EPY: START code

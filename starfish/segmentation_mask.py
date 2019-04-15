@@ -1,7 +1,6 @@
 import io
-import itertools
 import tarfile
-from typing import Dict, List, Set, Sequence, Tuple, Union
+from typing import Dict, List, Sequence, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -76,8 +75,6 @@ class SegmentationMaskCollection:
     masks : List[xr.DataArray]
         Segmentation masks.
     """
-    _masks: List[xr.DataArray]
-
     def __init__(self, masks: List[xr.DataArray]):
         for mask in masks:
             validate_segmentation_mask(mask)
@@ -146,10 +143,13 @@ class SegmentationMaskCollection:
                 i = dims.index(axis)
                 coords[d.value] = (axis, c[prop.bbox[i]:prop.bbox[i + len(dims)]])
 
+            name = str(label + 1)
+            name = name.zfill(len(str(len(props))))  # pad with zeros
+
             mask = xr.DataArray(prop.image,
                                 dims=dims,
                                 coords=coords,
-                                name=str(label + 1))
+                                name=name)
             masks.append(mask)
 
         return cls(masks)
@@ -161,7 +161,7 @@ class SegmentationMaskCollection:
         Parameters
         ----------
         path : str
-            Path of the directory to instantiate from.
+            Path of the tar file to instantiate from.
 
         Returns
         -------
@@ -173,7 +173,6 @@ class SegmentationMaskCollection:
         with tarfile.open(path) as t:
             for info in t.getmembers():
                 f = t.extractfile(info.name)
-                print(f)
                 mask = xr.open_dataarray(f)
                 masks.append(mask)
 

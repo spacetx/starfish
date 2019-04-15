@@ -162,7 +162,7 @@ plt.axis('off')
 plt.title('Original data, Round:0, Channel: 0')
 plt.subplot(122)
 plt.imshow(single_plane_filtered, cmap='gray', clim = list(np.percentile(single_plane_filtered.data, [5, 99])))
-plt.title('Filtered data, Round:0, Channel: 0')
+plt.title('Filtered data, Round: 0, Channel: 0')
 plt.axis('off');
 # EPY: END code
 

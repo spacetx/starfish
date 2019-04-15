@@ -48,7 +48,7 @@ print(imgs)
 # EPY: START markdown
 ### Visualize codebook
 #
-#The DARTFISH codebook maps pixel intensities across the rounds and channels to the corresponding barcodes and genes that those pixels code for. For this example dataset, the codebook specifies 96 possible barcodes.
+#The DARTFISH codebook maps pixel intensities across the rounds and channels to the corresponding barcodes and genes that those pixels code for. For this example dataset, the codebook specifies 96 possible barcodes. The codebook used in this experiment has 3 color channels and one blank channel, each of which contribute to codes. The presence of the blank channel will be important later when the filtering is described.
 # EPY: END markdown
 
 # EPY: START code

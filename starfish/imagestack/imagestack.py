@@ -366,8 +366,7 @@ class ImageStack:
         Examples
         --------
 
-        Create an Imagestack using
-        :py:func:`~starfish.imagestack.imagestack.ImageStack.synthetic_stack`.
+        Create an Imagestack :py:func:`~starfish.imagestack.imagestack.ImageStack.synthetic_stack`
             >>> from starfish import ImageStack
             >>> from starfish.types import Axes
             >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)

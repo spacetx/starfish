@@ -13,11 +13,11 @@ The output should look similar to this:
    % python --version
    Python 3.6.5
 
-Installation for users
-----------------------
-
+Using virtual environments
+--------------------------
+   
 Starfish names its dependencies and lists explicit versions, due to sensitivity to subtle algorithm
-changes.  For that reason, it is strongly encouraged that you set up a
+changes.  For that reason, it is strongly encouraged, but not required, that you set up a
 virtualenv_. Create a work folder and set up the virtual environment like:
 
 .. _virtualenv: https://packaging.python.org/tutorials/installing-packages/#creating-virtual-environments
@@ -29,7 +29,19 @@ virtualenv_. Create a work folder and set up the virtual environment like:
     % python -m venv .venv
     % source .venv/bin/activate
 
-Finally, then install starfish:
+Conda_ users can set one up like so:
+
+.. _Conda: https://www.anaconda.com/distribution/
+
+.. code-block:: bash
+
+    % conda create -n starfish "python>=3.6"
+    % conda activate starfish
+
+Installation for users
+----------------------
+
+Starfish can easily be installed using pip:
 
 .. code-block:: bash
 
@@ -39,17 +51,15 @@ Installation for developers
 ---------------------------
 
 If you are on a mac, make sure you have the `XCode CommandLine Tools`_
-installed.  Check out the code for starfish and set up a virtualenv_.
+installed.  Check out the code for starfish and set up a `virtual environment`_.
 
 .. _`XCode CommandLine Tools`: https://developer.apple.com/library/archive/technotes/tn2339/_index.html
-.. _virtualenv: https://packaging.python.org/tutorials/installing-packages/#creating-virtual-environments
+.. _`virtual environment`: #using-virtual-environments
 
 .. code-block:: bash
 
     % git clone git://github.com/spacetx/starfish.git
     % cd starfish
-    % python -m venv .venv
-    % source .venv/bin/activate
 
 Finally, then install starfish:
 

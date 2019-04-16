@@ -105,7 +105,7 @@ diagnose_registration(
     projection, sel_0, sel_1, ax=ax1, title='pre-registered'
 )
 diagnose_registration(
-    post_projection, sel_0, sel_1, ax=ax2, title='pre-registered'
+    post_projection, sel_0, sel_1, ax=ax2, title='registered'
 )
 
 ###############################################################################
@@ -181,7 +181,7 @@ intensities = lsbd.run(scaled, n_processes=8)
 # ------------
 # Next, spots are decoded. There is really no good way to display 3-d spot
 # detection in 2-d planes, so we encourage you to grab this notebook and
-# uncomment the below lines.
+# uncomment the below lines to visualize the results with starfish.display.
 
 decoded = experiment.codebook.decode_per_round_max(intensities.fillna(0))
 decode_mask = decoded['target'] != 'nan'

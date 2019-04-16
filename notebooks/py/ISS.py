@@ -24,7 +24,9 @@ import pprint
 from starfish import data, FieldOfView
 from starfish.types import Features, Axes
 from starfish.util.plot import imshow_plane
+# EPY: END code
 
+# EPY: START code
 matplotlib.rcParams["figure.dpi"] = 150
 # EPY: END code
 
@@ -73,10 +75,9 @@ experiment.codebook
 # display(imgs)
 
 # Display a single plane of data
-imshow_plane(
-    imgs, sel={Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0}, 
-    title="Round: 0, Channel: 0"
-)
+sel={Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0}
+single_plane = imgs.sel(sel)
+imshow_plane(single_plane, title="Round: 0, Channel: 0")
 # EPY: END code
 
 # EPY: START markdown
@@ -118,13 +119,19 @@ filt.run(nuclei, verbose=True, in_place=True)
 # EPY: END code
 
 # EPY: START code
-sel = {Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0}
+single_plane_filtered = filtered_imgs.sel(sel)
 
 f, (ax1, ax2) = plt.subplots(ncols=2)
-vmin, vmax = np.percentile(np.ravel(single_plane), [5, 99])
-imshow_plane(imgs, sel=sel, ax=ax1, vmin=vmin, vmax=vmax, title="Original data\nRound: 0, Channel: 0")
-vmin, vmax = np.percentile(np.ravel(single_plane_filtered), [5, 99])
-imshow_plane(filtered_imgs, sel=sel, vmin=vmin, vmax=vmax, title="Filtered data\nRound: 0, Channel: 0")
+vmin, vmax = np.percentile(single_plane.xarray.values.data, [5, 99])
+imshow_plane(
+    single_plane, ax=ax1, vmin=vmin, vmax=vmax, 
+    title="Original data\nRound: 0, Channel: 0"
+)
+vmin, vmax = np.percentile(single_plane_filtered.xarray.values.data, [5, 99])
+imshow_plane(
+    single_plane_filtered, ax=ax2, vmin=vmin, vmax=vmax, 
+    title="Filtered data\nRound: 0, Channel: 0"
+)
 # EPY: END code
 
 # EPY: START markdown

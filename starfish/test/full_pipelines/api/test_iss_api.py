@@ -19,9 +19,9 @@ def test_iss_pipeline_cropped_data():
     # set random seed to errors provoked by optimization functions
     np.random.seed(777)
 
-    iss = __import__('ISS_Pipeline_-_Breast_-_1_FOV')
+    iss = __import__('ISS')
 
-    white_top_hat_filtered_image = iss.primary_image
+    white_top_hat_filtered_image = iss.filtered_imgs
 
     # # pick a random part of the registered image and assert on it
     expected_filtered_values = np.array(
@@ -55,7 +55,7 @@ def test_iss_pipeline_cropped_data():
         white_top_hat_filtered_image.xarray[2, 2, 0, 40:50, 40:50]
     )
 
-    registered_image = iss.registered_image
+    registered_image = iss.registered_imgs
 
     expected_registered_values = np.array(
         [[9.712600e-03, 4.279962e-03, 3.146056e-03, 1.600749e-03, 2.020520e-04,

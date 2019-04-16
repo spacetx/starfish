@@ -29,26 +29,9 @@ class IntensityTable(xr.DataArray):
 
     An IntensityTable is comprised of each feature's intensity across channels and imaging
     rounds, where features are typically spots or pixels. This forms an
-    ``(n_feature, n_channel, n_round)`` tensor implemented as an xarray.DataArray object.
-    In addition to the basic xarray methods, IntensityTable implements:
-
-    Methods
-    -------
-    empty_intensity_table(spot_attributes, n_ch, n_round)
-        creates an IntensityTable with all intensities equal to zero
-
-    from_spot_data(intensities, spot_attributes)
-        creates an IntensityTable from a 3d array and a spot attributes dataframe
-
-    synthetic_intensities(codebook, num_z=12, height=50, width=40, n_spots=10, \
-            mean_fluor_per_spot=200, mean_photons_per_fluor=50)
-        creates an IntensityTable with synthetic spots, given a codebook
-
-    save(filename)
-        save the IntensityTable to netCDF
-
-    load(filename)
-        load an IntensityTable from netCDF
+    ``(n_feature, n_channel, n_round)`` tensor implemented as an :py:class:`xarray.DataArray`
+    object. In addition to the basic :py:class:`xarray.DataArray` methods,
+    IntensityTable implements:
 
     Examples
     --------
@@ -187,6 +170,7 @@ class IntensityTable(xr.DataArray):
 
     @property
     def has_physical_coords(self):
+        """Return True if this IntensityTable stores physical coordinate information"""
         return Coordinates.X in self.coords and Coordinates.Y in self.coords
 
     def save(self, filename: str) -> None:
@@ -211,7 +195,7 @@ class IntensityTable(xr.DataArray):
         Parameters
         ----------
         filename : str
-            name for compressed-gzipped MERMAID data file. Should end in '.csv.gz'
+            name for compressed-gzipped MERMAID data file. Should end in .csv.gz
 
         See Also
         --------
@@ -241,7 +225,8 @@ class IntensityTable(xr.DataArray):
 
     @classmethod
     def load(cls, filename: str) -> "IntensityTable":
-        """load an IntensityTable from Netcdf
+        """
+        load an IntensityTable from Netcdf
 
         Parameters
         ----------
@@ -271,7 +256,8 @@ class IntensityTable(xr.DataArray):
             cls, codebook, num_z: int=12, height: int=50, width: int=40, n_spots=10,
             mean_fluor_per_spot=200, mean_photons_per_fluor=50
     ) -> "IntensityTable":
-        """Create an IntensityTable containing synthetic spots with random locations
+        """
+        Create an IntensityTable containing synthetic spots with random locations
 
         Parameters
         ----------
@@ -340,7 +326,8 @@ class IntensityTable(xr.DataArray):
             image_stack,
             crop_x: int=0, crop_y: int=0, crop_z: int=0
     ) -> "IntensityTable":
-        """Generate an IntensityTable from all the pixels in the ImageStack
+        """
+        Generate an IntensityTable from all the pixels in the ImageStack
 
         Parameters
         ----------
@@ -408,7 +395,8 @@ class IntensityTable(xr.DataArray):
     def process_overlaps(intensity_tables: List["IntensityTable"],
                          overlap_strategy: OverlapStrategy
                          ) -> List["IntensityTable"]:
-        """Find the overlapping sections between IntensityTables and process them according
+        """
+        Find the overlapping sections between IntensityTables and process them according
         to the given overlap strategy
         """
         overlap_pairs = find_overlaps_of_xarrays(intensity_tables)
@@ -425,13 +413,30 @@ class IntensityTable(xr.DataArray):
     @staticmethod
     def concatanate_intensity_tables(intensity_tables: List["IntensityTable"],
                                      overlap_strategy: Optional[OverlapStrategy] = None):
+        """
+        Takes a list of IntenistyTables and concatanates them according to the goven overlap
+        strategy. If none is give just use :py:func:`xarray.concat`
+
+        Parameters
+        ----------
+        intensity_tables : List["IntensityTable"]
+            The list of IntensityTables to concat
+        overlap_strategy : OverlapStrategy
+            The strategy for handling physical overlaps between the tables
+
+        Returns
+        -------
+        xr.DataArray :
+            One combined DataArray
+        """
         if overlap_strategy:
             intensity_tables = IntensityTable.process_overlaps(intensity_tables,
                                                                overlap_strategy)
         return xr.concat(intensity_tables, dim=Features.AXIS)
 
     def to_features_dataframe(self) -> pd.DataFrame:
-        """Generates a dataframe of the underlying features multi-index.
+        """
+        Generates a dataframe of the underlying features multi-index.
         This is guaranteed to contain the features x, y, z, and radius.
 
         Returns
@@ -455,7 +460,8 @@ class IntensityTable(xr.DataArray):
         return DecodedSpots(df)
 
     def to_expression_matrix(self) -> ExpressionMatrix:
-        """Generates a cell x gene count matrix where each cell is annotated with spatial metadata
+        """
+        Generates a cell x gene count matrix where each cell is annotated with spatial metadata
 
         Requires that spots in the IntensityTable have been assigned to cells.
 
@@ -493,7 +499,8 @@ class IntensityTable(xr.DataArray):
         return mat
 
     def feature_trace_magnitudes(self) -> np.ndarray:
-        """Return the magnitudes of each feature across rounds and channels
+        """
+        Return the magnitudes of each feature across rounds and channels
 
         Returns
         -------

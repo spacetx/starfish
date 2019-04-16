@@ -10,10 +10,7 @@ API
 .. toctree::
    :hidden:
 
-   self
-
-.. toctree::
-   core_objects/index.rst
+   data_structures/index
 
 .. toctree::
    image/index.rst

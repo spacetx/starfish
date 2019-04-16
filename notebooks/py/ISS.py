@@ -119,7 +119,10 @@ from starfish.image import Filter
 # filter raw data
 masking_radius = 15
 filt = Filter.WhiteTophat(masking_radius, is_volume=False)
+
 filtered_imgs = filt.run(imgs, verbose=True, in_place=False)
+filt.run(dots, verbose=True, in_place=True)
+filt.run(nuclei, verbose=True, in_place=True)
 # EPY: END code
 
 # EPY: START code
@@ -187,7 +190,7 @@ with warnings.catch_warnings():
 # EPY: END code
 
 # EPY: START markdown
-#The resulting "Intensity Table" table is the hypothesized standardized file format for the output of a spot detector, and is the first output file format in the pipeline that is not an image or set of images
+#The resulting "Intensity Table" table is the standardized file format for the output of a spot detector, and is the first output file format in the pipeline that is not an image or set of images
 # EPY: END markdown
 
 # EPY: START code
@@ -219,7 +222,7 @@ table
 # EPY: START code
 from starfish.image import Segmentation
 
-dapi_thresh = .16  # binary mask for cell (nuclear) locations
+dapi_thresh = .18  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
 min_dist = 57
 
@@ -288,4 +291,8 @@ with warnings.catch_warnings():
 plt.plot(is_gene1.x, is_gene1.y, 'or')
 plt.plot(is_gene2.x, is_gene2.y, 'ob')
 plt.title(f'Red: {GENE1}, Blue: {GENE2}');
+# EPY: END code
+
+# EPY: START code
+
 # EPY: END code

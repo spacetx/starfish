@@ -266,7 +266,7 @@ from skimage.color import rgb2gray
 GENE1 = 'HER2'
 GENE2 = 'VIM'
 
-rgb = np.zeros(registered_image.tile_shape + (3,))
+rgb = np.zeros(registered_imgs.tile_shape + (3,))
 nuclei_mp = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 nuclei_numpy = nuclei_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 rgb[:,:,0] = nuclei_numpy
@@ -276,7 +276,10 @@ rgb[:,:,1] = dots_mp_numpy
 do = rgb2gray(rgb)
 do = do/(do.max())
 
-image(do,size=10)
+plt.figure(figsize=(10,10))
+plt.imshow(do,cmap='gray')
+plt.axis('off');
+
 with warnings.catch_warnings():
     warnings.simplefilter('ignore', FutureWarning)
     is_gene1 = decoded.where(decoded[Features.AXIS][Features.TARGET] == GENE1, drop=True)

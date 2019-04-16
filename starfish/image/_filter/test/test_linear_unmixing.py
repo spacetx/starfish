@@ -20,9 +20,9 @@ def setup_linear_unmixing_test():
 
     # Create coefficients matrix
     coeff_mat = np.array(
-        [[1,     -0.25, 0    ],
-         [-0.25, 1,     -0.25],
-         [-0.1,  0,     1    ]]
+        [[ 1.00, -0.25,  0.00],  # noqa
+         [-0.25,  1.00, -0.25],  # noqa
+         [-0.10,  0.00,  1.00]]  # noqa
     )
 
     # Create reference result

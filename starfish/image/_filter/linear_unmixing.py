@@ -13,8 +13,8 @@ from ._base import FilterAlgorithmBase
 class LinearUnmixing(FilterAlgorithmBase):
 
     def __init__(
-        self, coeff_mat: np.ndarray, clip_method: Optional[Clip]=Clip.SCALE_BY_IMAGE,
-) -> None:
+        self, coeff_mat: np.ndarray, clip_method: Optional[Clip] = Clip.SCALE_BY_IMAGE,
+    ) -> None:
 
         """Image scaling filter
 

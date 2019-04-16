@@ -42,9 +42,7 @@ def test_linear_unmixing():
 
     stack, coeff_mat, ref_result = setup_linear_unmixing_test()
 
-    filter_unmix = LinearUnmixing(coeff_mat=coeff_mat)
-    stack2 = filter_unmix.run(
-        stack, in_place=False, verbose=False, n_processes=1, clip_method=Clip.CLIP
-    )
+    filter_unmix = LinearUnmixing(coeff_mat=coeff_mat, clip_method=Clip.CLIP)
+    stack2 = filter_unmix.run(stack, in_place=False, verbose=False)
 
     assert np.allclose(ref_result, np.asarray(stack2.xarray))

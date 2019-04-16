@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 #
-# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
+# EPY: stripped_notebook: {"metadata": {"hide_input": false, "kernelspec": {"display_name": "starfish-venv", "language": "python", "name": "starfish-venv"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}, "toc": {"nav_menu": {}, "number_sections": true, "sideBar": true, "skip_h1_title": false, "toc_cell": false, "toc_position": {}, "toc_section_display": "block", "toc_window_display": false}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
 ### Reproduce In-situ Sequencing results with Starfish
@@ -13,23 +13,25 @@
 
 # EPY: START code
 # EPY: ESCAPE %matplotlib inline
-# EPY: ESCAPE %load_ext autoreload
-# EPY: ESCAPE %autoreload 2
 
 import numpy as np
 import os
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
 import pprint
 
 from starfish import data, FieldOfView
 from starfish.types import Features, Axes
+from starfish.util.plot import imshow_plane
+
+matplotlib.rcParams["figure.dpi"] = 150
 # EPY: END code
 
 # EPY: START markdown
 ### Load Data into Starfish from the Cloud
 #
-#The primary data from one field of view correspond to 16 images from 4 hybridzation rounds (r) 4 color channels (c) one z plane (z). Each image is 1044 x 1390 (y,x). These data arise from human breast tissue. O(10) transcripts are barcoded for subsequent spatial resolution. Average pixel intensity values for one 'spot' in the image, across all rounds and channels, can be decoded into the nearest barcode, thus resolving each pixel into a particular gene.
+#The primary data from one field of view correspond to 16 images from 4 hybridzation rounds (r) 4 color channels (c) one z plane (z). Each image is 1044 x 1390 (y, x). These data arise from human breast tissue. O(10) transcripts are barcoded for subsequent spatial resolution. Average pixel intensity values for one 'spot' in the image, across all rounds and channels, can be decoded into the nearest barcode, thus resolving each pixel into a particular gene.
 # EPY: END markdown
 
 # EPY: START code
@@ -37,10 +39,12 @@ use_test_data = os.getenv("USE_TEST_DATA") is not None
 
 # An experiment contains a codebook, primary images, and auxiliary images
 experiment = data.ISS(use_test_data=use_test_data)
-fov = experiment.fov()
-
 pp = pprint.PrettyPrinter(indent=2)
 pp.pprint(experiment._src_doc)
+# EPY: END code
+
+# EPY: START code
+fov = experiment.fov()
 
 # note the structure of the 5D tensor containing the raw imaging data
 imgs = fov.get_image(FieldOfView.PRIMARY_IMAGES)
@@ -64,18 +68,15 @@ experiment.codebook
 # EPY: END markdown
 
 # EPY: START code
-# Display all the data in an interactive pop-up window. Uncomment to have this version work.
-
+# # Display all the data in an interactive pop-up window. Uncomment to have this version work.
 # %gui qt5
 # display(imgs)
 
 # Display a single plane of data
-single_plane = imgs.sel({Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0})
-single_plane = single_plane.xarray.squeeze()
-plt.figure(figsize=(7,7))
-plt.imshow(single_plane, cmap='gray')
-plt.title('Round: 0, Channel: 0')
-plt.axis('off');
+imshow_plane(
+    imgs, sel={Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0}, 
+    title="Round: 0, Channel: 0"
+)
 # EPY: END code
 
 # EPY: START markdown
@@ -83,13 +84,9 @@ plt.axis('off');
 # EPY: END markdown
 
 # EPY: START code
-dots = fov.get_image('dots')
-dots_single_plane = dots.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE).xarray.squeeze()
-
-plt.figure(figsize=(7,7))
-plt.imshow(dots_single_plane, cmap='gray')
-plt.title('Anchor channel, all RNA molecules')
-plt.axis('off');
+dots = fov.get_image("dots")
+dots_single_plane = dots.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+imshow_plane(dots_single_plane, title="Anchor channel, all RNA molecules")
 # EPY: END code
 
 # EPY: START markdown
@@ -97,14 +94,9 @@ plt.axis('off');
 # EPY: END markdown
 
 # EPY: START code
-nuclei = fov.get_image('nuclei')
-
-nuclei_single_plane = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE).xarray.squeeze()
-
-plt.figure(figsize=(7,7))
-plt.imshow(nuclei_single_plane, cmap='gray')
-plt.title('Nuclei (DAPI) channel')
-plt.axis('off');
+nuclei = fov.get_image("nuclei")
+nuclei_single_plane = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+imshow_plane(nuclei_single_plane, title="Nuclei (DAPI) channel")
 # EPY: END code
 
 # EPY: START markdown
@@ -126,18 +118,13 @@ filt.run(nuclei, verbose=True, in_place=True)
 # EPY: END code
 
 # EPY: START code
-single_plane_filtered = filtered_imgs.sel({Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0})
-single_plane_filtered = single_plane_filtered.xarray.squeeze()
+sel = {Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0}
 
-plt.figure(figsize=(10,10))
-plt.subplot(121)
-plt.imshow(single_plane, cmap='gray', clim = list(np.percentile(single_plane.data, [5, 99])))
-plt.axis('off')
-plt.title('Original data, Round: 0, Channel: 0')
-plt.subplot(122)
-plt.imshow(single_plane_filtered, cmap='gray', clim = list(np.percentile(single_plane_filtered.data, [5, 99])))
-plt.title('Filtered data, Round: 0, Channel: 0')
-plt.axis('off');
+f, (ax1, ax2) = plt.subplots(ncols=2)
+vmin, vmax = np.percentile(np.ravel(single_plane), [5, 99])
+imshow_plane(imgs, sel=sel, ax=ax1, vmin=vmin, vmax=vmax, title="Original data\nRound: 0, Channel: 0")
+vmin, vmax = np.percentile(np.ravel(single_plane_filtered), [5, 99])
+imshow_plane(filtered_imgs, sel=sel, vmin=vmin, vmax=vmax, title="Filtered data\nRound: 0, Channel: 0")
 # EPY: END code
 
 # EPY: START markdown
@@ -168,25 +155,16 @@ from starfish.spots import SpotFinder
 import warnings
 
 # parameters to define the allowable gaussian sizes (parameter space)
-min_sigma = 1
-max_sigma = 10
-num_sigma = 30
-threshold = 0.01
-
 p = SpotFinder.BlobDetector(
-    min_sigma=min_sigma,
-    max_sigma=max_sigma,
-    num_sigma=num_sigma,
-    threshold=threshold,
+    min_sigma=1,
+    max_sigma=10,
+    num_sigma=30,
+    threshold=0.1,
     measurement_type='mean',
 )
 
-# detect triggers some numpy warnings
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-
-    # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    intensities = p.run(registered_imgs, blobs_image=dots, blobs_axes=(Axes.ROUND, Axes.ZPLANE))
+# blobs = dots; define the spots in the dots image, but then find them again in the stack.
+intensities = p.run(registered_imgs, blobs_image=dots, blobs_axes=(Axes.ROUND, Axes.ZPLANE))
 # EPY: END code
 
 # EPY: START markdown
@@ -279,7 +257,6 @@ rgb[:,:,1] = dots_mp_numpy
 do = rgb2gray(rgb)
 do = do/(do.max())
 
-plt.figure(figsize=(10,10))
 plt.imshow(do,cmap='gray')
 plt.axis('off');
 
@@ -288,11 +265,7 @@ with warnings.catch_warnings():
     is_gene1 = decoded.where(decoded[Features.AXIS][Features.TARGET] == GENE1, drop=True)
     is_gene2 = decoded.where(decoded[Features.AXIS][Features.TARGET] == GENE2, drop=True)
 
-plt.plot(is_gene1.x, is_gene1.y, 'or')
-plt.plot(is_gene2.x, is_gene2.y, 'ob')
+plt.plot(is_gene1.x, is_gene1.y, 'or', markersize=3)
+plt.plot(is_gene2.x, is_gene2.y, 'ob', markersize=3)
 plt.title(f'Red: {GENE1}, Blue: {GENE2}');
-# EPY: END code
-
-# EPY: START code
-
 # EPY: END code

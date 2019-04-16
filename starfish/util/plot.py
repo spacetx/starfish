@@ -8,11 +8,13 @@ generating documentation and vignettes. We suggest that users leverage :py:func:
 for their plotting needs, as the interactive viewer is better able to handle the array of features
 that starfish needs.
 """
+import itertools
 from typing import Any, Mapping, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
+from matplotlib.colors import ListedColormap
 
 from starfish import ImageStack, IntensityTable
 from starfish.types import Axes, Features
@@ -59,7 +61,12 @@ def imshow_plane(
     if set(data.sizes.keys()).intersection({Axes.CH, Axes.ROUND, Axes.ZPLANE}):
         raise ValueError(f"image_stack must be a 2d (x, y) array, not {data.sizes}")
 
+    # set imshow default kwargs
+    if "cmap" not in kwargs:
+        kwargs["cmap"] = plt.cm.gray
+
     ax.imshow(data, **kwargs)
+    ax.axis("off")
 
 
 def intensity_histogram(
@@ -161,3 +168,44 @@ def overlay_spot_calls(
     # reset the axes limits; scatter often extends them.
     ax.set_ylim((0, image_stack.shape[Axes.Y.value]))
     ax.set_xlim((0, image_stack.shape[Axes.X.value]))
+
+
+def _linear_alpha_cmap(cmap):
+    """add linear alpha to an existing colormap"""
+    alpha_cmap = cmap(np.arange(cmap.N))
+    alpha_cmap[:, -1] = np.linspace(0, 1, cmap.N)
+    return ListedColormap(alpha_cmap)
+
+
+def diagnose_registration(
+    imagestack,
+    *sels,
+    ax=None,
+    title: Optional[str] = None,
+    **kwargs,
+):
+    """
+    # TODO docme
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    if title is not None:
+        ax.set_title(title)
+
+    # add linear alpha to existing colormaps to avoid the "white" color of the
+    # map at 0 from clobbering previously plotted images. Functionally this
+    # enables high intensity spots to be co-visualized in the same frame.
+    cmaps = [
+        plt.cm.Blues,
+        plt.cm.Reds,
+        plt.cm.Greens,
+        plt.cm.Purples,
+        plt.cm.Greys,
+        plt.cm.Oranges
+    ]
+
+    alpha_cmap_cycle = itertools.cycle([_linear_alpha_cmap(cm) for cm in cmaps])
+
+    for sel, cmap in zip(sels, alpha_cmap_cycle):
+        imshow_plane(imagestack, sel, ax=ax, cmap=cmap)

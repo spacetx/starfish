@@ -7,20 +7,12 @@ from slicedimage import ImageFormat
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.imagestack.physical_coordinate_calculator import get_physical_coordinates_of_z_plane
-from starfish.intensity_table.intensity_table import IntensityTable
-# don't inspect pytest fixtures in pycharm
-# noinspection PyUnresolvedReferences
-from starfish.test import factories
-from starfish.types import Axes, PhysicalCoordinateTypes
-from .dataset_fixtures import (  # noqa: F401
-    codebook_intensities_image_for_single_synthetic_spot,
-    loaded_codebook,
-    simple_codebook_array,
-    simple_codebook_json,
-    synthetic_dataset_with_truth_values,
-    synthetic_intensity_table,
+from starfish.intensity_table.test.factories import synthetic_intensity_table
+from starfish.test.factories import (
     synthetic_spot_pass_through_stack,
-)
+    SyntheticData)
+from starfish.types import Axes, PhysicalCoordinateTypes
+from .factories import imagestack_with_coords_factory, synthetic_stack
 from .imagestack_test_utils import verify_physical_coordinates
 
 X_COORDS = 1, 2
@@ -34,7 +26,7 @@ def test_get_slice_simple_index():
     (P, Q0,..., Qn-1, R), slice across either P or R.  This test has expectations regarding the
     ordering of the axes in the ImageStack.
     """
-    stack = ImageStack.synthetic_stack()
+    stack = synthetic_stack()
     round_ = 1
     imageslice, axes = stack.get_slice(
         {Axes.ROUND: round_}
@@ -57,7 +49,7 @@ def test_get_slice_middle_index():
     (P, Q0,..., Qn-1, R), slice across one of the Q axes.  This test has expectations regarding the
     ordering of the axes in the ImageStack.
     """
-    stack = ImageStack.synthetic_stack()
+    stack = synthetic_stack()
     ch = 1
     imageslice, axes = stack.get_slice(
         {Axes.CH: ch}
@@ -78,7 +70,7 @@ def test_get_slice_range():
     """
     Retrieve a slice across a range of one of the dimensions.
     """
-    stack = ImageStack.synthetic_stack()
+    stack = synthetic_stack()
     zrange = slice(1, 3)
     imageslice, axes = stack.get_slice(
         {Axes.ZPLANE: zrange}
@@ -102,7 +94,7 @@ def test_set_slice_simple_index():
     (P, Q0,..., Qn-1, R), sets a slice across either P or R.  This test has expectations regarding
     the ordering of the axes in the ImageStack.
     """
-    stack = ImageStack.synthetic_stack()
+    stack = synthetic_stack()
     round_ = 1
     y, x = stack.tile_shape
 
@@ -124,7 +116,7 @@ def test_set_slice_middle_index():
     (P, Q0,..., Qn-1, R), slice across one of the Q axes.  This test has expectations regarding the
     ordering of the axes in the ImageStack.
     """
-    stack = ImageStack.synthetic_stack()
+    stack = synthetic_stack()
     ch = 1
     y, x = stack.tile_shape
 
@@ -145,7 +137,7 @@ def test_set_slice_reorder():
     Sets a slice across one of the axes.  The source data is not in the same order as the axes in
     ImageStack, but set_slice should reorder the axes and write it correctly.
     """
-    stack = ImageStack.synthetic_stack()
+    stack = synthetic_stack()
     round_ = 1
     y, x = stack.tile_shape
     index = {Axes.ROUND: round_}
@@ -169,7 +161,7 @@ def test_set_slice_range():
     """
     Sets a slice across a range of one of the axes.
     """
-    stack = ImageStack.synthetic_stack()
+    stack = synthetic_stack()
     zrange = slice(1, 3)
     y, x = stack.tile_shape
 
@@ -213,26 +205,18 @@ def test_max_projection_preserves_dtype():
     assert max_projection.xarray.dtype == original_dtype
 
 
-def test_synthetic_spot_creation_raises_error_with_coords_too_small(synthetic_intensity_table):
+def test_synthetic_spot_creation_raises_error_with_coords_too_small():
     num_z = 0
     height = 40
     width = 50
+    intensity_table = synthetic_intensity_table()
     with pytest.raises(ValueError):
-        ImageStack.synthetic_spots(synthetic_intensity_table, num_z, height, width)
+        SyntheticData.synthetic_spots(intensity_table, num_z, height, width)
 
 
-def test_synthetic_spot_creation_produces_an_imagestack(synthetic_intensity_table):
-    num_z = 12
-    height = 50
-    width = 40
-    image = ImageStack.synthetic_spots(synthetic_intensity_table, num_z, height, width)
-    assert isinstance(image, ImageStack)
+def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_location():
 
-
-def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_location(
-        synthetic_spot_pass_through_stack):
-
-    codebook, true_intensities, image = synthetic_spot_pass_through_stack
+    codebook, true_intensities, image = synthetic_spot_pass_through_stack()
 
     g, c, r = np.where(true_intensities.values)
 
@@ -263,23 +247,6 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
         true_intensities.values[np.where(true_intensities)])
 
 
-# TODO ambrosejcarr: improve the tests here.
-def test_imagestack_to_intensity_table():
-    codebook, intensity_table, image = codebook_intensities_image_for_single_synthetic_spot()
-    pixel_intensities = IntensityTable.from_image_stack(image)
-    pixel_intensities = codebook.metric_decode(
-        pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2)
-    assert isinstance(pixel_intensities, IntensityTable)
-
-
-def test_imagestack_to_intensity_table_no_noise(synthetic_spot_pass_through_stack):
-    codebook, intensity_table, image = synthetic_spot_pass_through_stack
-    pixel_intensities = IntensityTable.from_image_stack(image)
-    pixel_intensities = codebook.metric_decode(
-        pixel_intensities, max_distance=0, min_intensity=1000, norm_order=2)
-    assert isinstance(pixel_intensities, IntensityTable)
-
-
 @pytest.mark.parametrize("format,count", (
     (ImageFormat.TIFF, 6),
     (ImageFormat.NUMPY, 6),
@@ -298,7 +265,7 @@ def test_imagestack_export(tmpdir, format, count, recwarn):
                                    (PhysicalCoordinateTypes.Z_MIN, Z_COORDS[0]),
                                    (PhysicalCoordinateTypes.Z_MAX, Z_COORDS[1])])
 
-    stack = factories.imagestack_with_coords_factory(stack_shape, physical_coords)
+    stack = imagestack_with_coords_factory(stack_shape, physical_coords)
 
     stack_json = tmpdir / "output.json"
     stack.export(str(stack_json), tile_format=format)

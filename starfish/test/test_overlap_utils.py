@@ -2,7 +2,7 @@ import numpy as np
 import xarray as xr
 
 from starfish import IntensityTable
-from starfish.test import factories
+from starfish.codebook.test.factories import codebook_array_factory
 from starfish.types import Coordinates, Features
 from starfish.types._constants import OverlapStrategy
 from starfish.util.overlap_utils import (
@@ -25,7 +25,7 @@ def create_intensity_table_with_coords(area: Area, n_spots: int=10) -> Intensity
     n_spots:
         Number of spots to add to the IntensityTable
     """
-    codebook = factories.codebook_array_factory()
+    codebook = codebook_array_factory()
     it = IntensityTable.synthetic_intensities(
         codebook,
         num_z=1,

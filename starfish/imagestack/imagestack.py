@@ -25,8 +25,7 @@ import numpy as np
 import pandas as pd
 import skimage.io
 import xarray as xr
-from scipy.ndimage.filters import gaussian_filter
-from skimage import img_as_float32, img_as_uint
+from skimage import img_as_float32
 from slicedimage import (
     ImageFormat,
     Reader,
@@ -39,14 +38,11 @@ from tqdm import tqdm
 
 from starfish.config import StarfishConfig
 from starfish.errors import DataFormatWarning
-from starfish.experiment.builder import build_image, TileFetcher
-from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
 from starfish.imagestack import indexing_utils, physical_coordinate_calculator
 from starfish.imagestack.parser import TileCollectionData, TileKey
 from starfish.imagestack.parser.crop import CropParameters, CroppedTileCollectionData
 from starfish.imagestack.parser.numpy import NumpyData
 from starfish.imagestack.parser.tileset import TileSetData
-from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.multiprocessing.pool import Pool
 from starfish.multiprocessing.shmem import SharedMemory
 from starfish.types import (
@@ -368,8 +364,9 @@ class ImageStack:
 
         Create an Imagestack :py:func:`~starfish.imagestack.imagestack.ImageStack.synthetic_stack`
             >>> from starfish import ImageStack
+            >>> from starfish.imagestack.test.factories import synthetic_stack
             >>> from starfish.types import Axes
-            >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
+            >>> stack = synthetic_stack(5, 5, 15, 200, 200)
             >>> stack
             <starfish.ImageStack (r: 5, c: 5, z: 15, y: 200, x: 200)>
             >>> stack.sel({Axes.ROUND: (1, None), Axes.CH: 0, Axes.ZPLANE: 0})
@@ -407,8 +404,9 @@ class ImageStack:
 
         Slicing with a scalar
             >>> from starfish import ImageStack
+            >>> from starfish.imagestack.test.factories import synthetic_stack
             >>> from starfish.types import Axes
-            >>> stack = ImageStack.synthetic_stack(3, 4, 5, 20, 10)
+            >>> stack = synthetic_stack(3, 4, 5, 20, 10)
             >>> stack.shape
             OrderedDict([(<Axes.ROUND: 'r'>, 3),
              (<Axes.CH: 'c'>, 4),
@@ -429,8 +427,9 @@ class ImageStack:
 
         Slicing with a range
             >>> from starfish import ImageStack
+            >>> from starfish.imagestack.test.factories import synthetic_stack
             >>> from starfish.types import Axes
-            >>> stack = ImageStack.synthetic_stack(3, 4, 5, 20, 10)
+            >>> stack = synthetic_stack(3, 4, 5, 20, 10)
             >>> stack.shape
             OrderedDict([(<Axes.ROUND: 'r'>, 3),
              (<Axes.CH: 'c'>, 4),
@@ -497,8 +496,9 @@ class ImageStack:
 
             >>> import numpy as np
             >>> from starfish import ImageStack
+            >>> from starfish.imagestack.test.factories import synthetic_stack
             >>> from starfish.types import Axes
-            >>> stack = ImageStack.synthetic_stack(3, 4, 5, 20, 10)
+            >>> stack = synthetic_stack(3, 4, 5, 20, 10)
             >>> stack.shape
             OrderedDict([(<Axes.ROUND: 'r'>, 3),
              (<Axes.CH: 'c'>, 4),
@@ -513,8 +513,9 @@ class ImageStack:
 
             >>> import numpy as np
             >>> from starfish import ImageStack
+            >>> from starfish.imagestack.test.factories import synthetic_stack
             >>> from starfish.types import Axes
-            >>> stack = ImageStack.synthetic_stack(3, 4, 5, 20, 10)
+            >>> stack = synthetic_stack(3, 4, 5, 20, 10)
             >>> stack.shape
             OrderedDict([(<Axes.ROUND: 'r'>, 3),
              (<Axes.CH: 'c'>, 4),
@@ -527,8 +528,9 @@ class ImageStack:
         Setting a slice indicated by a range.
 
             >>> from starfish import ImageStack
+            >>> from starfish.imagestack.test.factories import synthetic_stack
             >>> from starfish.types import Axes
-            >>> stack = ImageStack.synthetic_stack(3, 4, 5, 20, 10)
+            >>> stack = synthetic_stack(3, 4, 5, 20, 10)
             >>> stack.shape
             OrderedDict([(<Axes.ROUND: 'r'>, 3),
              (<Axes.CH: 'c'>, 4),
@@ -1100,163 +1102,3 @@ class ImageStack:
     def _squeezed_numpy(self, *dims: Axes):
         """return this ImageStack's data as a squeezed numpy array"""
         return self.xarray.squeeze(tuple(dim.value for dim in dims)).values
-
-    @classmethod
-    def synthetic_stack(
-            cls,
-            num_round: int=4,
-            num_ch: int=4,
-            num_z: int=12,
-            tile_height: int=50,
-            tile_width: int=40,
-            tile_fetcher: TileFetcher=None,
-    ) -> "ImageStack":
-        """generate a synthetic ImageStack
-
-        Returns
-        -------
-        ImageStack :
-            imagestack containing a tensor whose default shape is (2, 3, 4, 30, 20)
-            and whose default values are all 1.
-
-        """
-        if tile_fetcher is None:
-            tile_fetcher = tile_fetcher_factory(
-                OnesTile,
-                False,
-                {Axes.Y: tile_height, Axes.X: tile_width},
-            )
-
-        collection = build_image(
-            range(1),
-            range(num_round),
-            range(num_ch),
-            range(num_z),
-            tile_fetcher,
-        )
-        tileset = list(collection.all_tilesets())[0][1]
-
-        return cls.from_tileset(tileset)
-
-    @classmethod
-    def synthetic_spots(
-            cls, intensities: IntensityTable, num_z: int, height: int, width: int,
-            n_photons_background=1000, point_spread_function=(4, 2, 2),
-            camera_detection_efficiency=0.25, background_electrons=1,
-            graylevel: float=37000.0 / 2 ** 16, ad_conversion_bits=16,
-    ) -> "ImageStack":
-        """Generate a synthetic ImageStack from a set of Features stored in an IntensityTable
-
-        Parameters
-        ----------
-        intensities : IntensityTable
-            IntensityTable containing coordinates of fluorophores. Used to position and generate
-            spots in the output ImageStack
-        num_z : int
-            Number of z-planes in the ImageStack
-        height : int
-            Height in pixels of the ImageStack
-        width : int
-            Width in pixels of the ImageStack
-        n_photons_background : int
-            Poisson rate for the number of background photons to add to each pixel of the image.
-            Set this parameter to 0 to eliminate background.
-            (default 1000)
-        point_spread_function : Tuple[int]
-            The width of the gaussian density wherein photons spread around their light source.
-            Set to zero to eliminate this (default (4, 2, 2))
-        camera_detection_efficiency : float
-            The efficiency of the camera to detect light. Set to 1 to remove this filter (default
-            0.25)
-        background_electrons : int
-            Poisson rate for the number of spurious electrons detected per pixel during image
-            capture by the camera (default 1)
-        graylevel : float
-            The number of shades of gray displayable by the synthetic camera. Larger numbers will
-            produce higher resolution images (default 37000 / 2 ** 16)
-        ad_conversion_bits : int
-            The number of bits used during analog to visual conversion (default 16)
-
-        Returns
-        -------
-        ImageStack :
-            synthetic spots
-
-        """
-        # check some params
-        if not 0 < camera_detection_efficiency <= 1:
-            raise ValueError(
-                f'invalid camera_detection_efficiency value: {camera_detection_efficiency}. '
-                f'Must be in the interval (0, 1].')
-
-        def select_uint_dtype(array):
-            """choose appropriate dtype based on values of an array"""
-            max_val = np.max(array)
-            for dtype in (np.uint8, np.uint16, np.uint32):
-                if max_val <= np.iinfo(dtype).max:
-                    return array.astype(dtype)
-            raise ValueError('value exceeds dynamic range of largest skimage-supported type')
-
-        # make sure requested dimensions are large enough to support intensity values
-        axis_to_size = zip((Axes.ZPLANE.value, Axes.Y.value, Axes.X.value), (num_z, height, width))
-        for axis, requested_size in axis_to_size:
-            required_size = intensities.coords[axis].values.max() + 1
-            if required_size > requested_size:
-                raise ValueError(
-                    f'locations of intensities contained in table exceed the size of requested '
-                    f'axis {axis}. Required size {required_size} > {requested_size}.')
-
-        # create an empty array of the correct size
-        image = np.zeros(
-            (
-                intensities.sizes[Axes.ROUND.value],
-                intensities.sizes[Axes.CH.value],
-                num_z,
-                height,
-                width
-            ), dtype=np.uint32
-        )
-
-        # starfish uses float images, but the logic here requires uint. We cast, and will cast back
-        # at the end of the function
-        intensities.values = img_as_uint(intensities)
-
-        for ch, round_ in product(*(range(s) for s in intensities.shape[1:])):
-            spots = intensities[:, ch, round_]
-
-            # numpy deprecated casting a specific way of casting floats that is triggered in xarray
-            with warnings.catch_warnings():
-                warnings.simplefilter('ignore', FutureWarning)
-                values = spots.where(spots, drop=True)
-
-            image[round_, ch, values.z, values.y, values.x] = values
-
-        intensities.values = img_as_float32(intensities)
-
-        # add imaging noise
-        image += np.random.poisson(n_photons_background, size=image.shape).astype(np.uint32)
-
-        # blur image over coordinates, but not over round_/channels (dim 0, 1)
-        sigma = (0, 0) + point_spread_function
-        image = gaussian_filter(image, sigma=sigma, mode='nearest')
-
-        image = image * camera_detection_efficiency
-
-        image += np.random.normal(scale=background_electrons, size=image.shape)
-
-        # mimic analog to digital conversion
-        image = (image / graylevel).astype(int).clip(0, 2 ** ad_conversion_bits)
-
-        # clip in case we've picked up some negative values
-        image = np.clip(image, 0, a_max=None)
-
-        # set the smallest int datatype that supports the data's intensity range
-        image = select_uint_dtype(image)
-
-        # convert to float for ImageStack
-        with warnings.catch_warnings():
-            # possible precision loss when casting from uint to float is acceptable
-            warnings.simplefilter('ignore', UserWarning)
-            image = img_as_float32(image)
-
-        return cls.from_numpy_array(image)

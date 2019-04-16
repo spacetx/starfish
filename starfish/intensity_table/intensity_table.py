@@ -54,7 +54,7 @@ class IntensityTable(xr.DataArray):
     --------
     Create an IntensityTable using the ``synthetic_intensities`` method::
 
-        >>> from starfish.util.synthesize import SyntheticData
+        >>> from starfish.test.factories import SyntheticData
         >>> sd = SyntheticData(n_ch=3, n_round=4, n_codes=2)
         >>> codes = sd.codebook()
         >>> sd.intensities(codebook=codes)

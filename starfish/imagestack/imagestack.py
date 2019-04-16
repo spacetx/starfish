@@ -655,7 +655,6 @@ class ImageStack:
 
             - Clip.CLIP (default): Controls the way that data are scaled to retain skimage dtype
               requirements that float data fall in [0, 1].
-            - Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
             - Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
               value calculated over the entire ImageStack
             - Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum

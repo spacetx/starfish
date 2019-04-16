@@ -546,10 +546,10 @@ class Codebook(xr.DataArray):
         metric : str
             the sklearn metric string to pass to NearestNeighbors
 
-        See Also
-        --------
-        The available norms for this function can be found at the following link:
-        https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.linalg.norm.html
+        Notes
+        ------
+        The available norms for this function can be found `here
+        <https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.linalg.norm.html>`_
 
         Returns
         -------

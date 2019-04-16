@@ -8,6 +8,7 @@ generating documentation and vignettes. We suggest that users leverage :py:func:
 for their plotting needs, as the interactive viewer is better able to handle the array of features
 that starfish needs.
 """
+import itertools
 from typing import Any, Mapping, Optional, Union
 
 import matplotlib.pyplot as plt
@@ -150,7 +151,7 @@ def overlay_spot_calls(
     imshow_plane(image_stack, sel=sel, ax=ax, title=title, **imshow_kwargs)
 
     # plot spots
-    plt.scatter(
+    ax.scatter(
         x=np.asarray(intensities[Axes.X.value]),
         y=np.asarray(intensities[Axes.Y.value]),
         s=np.asarray(intensities[Features.SPOT_RADIUS]),
@@ -161,3 +162,32 @@ def overlay_spot_calls(
     # reset the axes limits; scatter often extends them.
     ax.set_ylim((0, image_stack.shape[Axes.Y.value]))
     ax.set_xlim((0, image_stack.shape[Axes.X.value]))
+
+
+def diagnose_registration(
+    imagestack,
+    *sels,
+    ax=None,
+    title: Optional[str] = None,
+    **kwargs,
+):
+    """
+    # TODO docme
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    if title is not None:
+        ax.set_title(title)
+
+    cmap_cycle = itertools.cycle([
+        plt.cm.Blues,
+        plt.cm.Reds,
+        plt.cm.Greens,
+        plt.cm.Purples,
+        plt.cm.Greys,
+        plt.cm.Oranges
+    ])
+
+    for sel, cmap in zip(sels, cmap_cycle):
+        imshow_plane(imagestack, sel, ax=ax, cmap=cmap, alpha=0.6)

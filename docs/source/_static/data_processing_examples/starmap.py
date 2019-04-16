@@ -11,83 +11,148 @@ data we present here is a subset of the data used in this
 Load example data
 -----------------
 """
-from functools import partial
-
 import matplotlib.pyplot as plt
 import numpy as np
 
 import starfish
 import starfish.data
 from starfish.types import Axes
-from starfish.util.plot import imshow_plane
+from starfish.util.plot import (
+    diagnose_registration, imshow_plane, intensity_histogram
+)
 
 experiment = starfish.data.STARmap(use_test_data=True)
 stack = experiment['fov_000'].get_image('primary')
 
 ###############################################################################
-# Look at the max projection of channels and rounds. Ideally, these should form
-# fairly coherent spots, indicating that the data are well registered. By
-# contrast, if there are patterns whereby pairs of spots are consistently
-# present at small shifts, that can indicate systematic registration offsets
-# which should be corrected prior to analysis.
+# Visualize raw data
+# ------------------
+# In this starmap experiment, starfish exposes a test dataset containing a
+# single field of view. This dataset contains 672 images spanning 6 rounds
+# :code:`(r)`, 4 channels :code:`(ch)`, and 28 z-planes :code:`(z)`. Each image
+# is :code:`1024x1024 (y, x)`
+#
+# To examine this data, the vignette displays the max projection of channels and
+# rounds. Ideally, these should form fairly coherent spots, indicating that the
+# data are well registered. By contrast, if there are patterns whereby pairs of
+# spots are consistently present at small shifts, that can indicate systematic
+# registration offsets which should be corrected prior to analysis.
 
 ch_r_projection = stack.max_proj(Axes.CH, Axes.ROUND)
 
 f, ax = plt.subplots()
-imshow_plane(ch_r_projection, sel={Axes.Z: 15}, ax=ax)
+imshow_plane(ch_r_projection, sel={Axes.ZPLANE: 15}, ax=ax)
 
 ###############################################################################
-# It actually looks like there is a small shift approximately the size of a spot
-# in the `x = -y` direction for at least one (round, channel) pair (see top left
-# corner for most obvious manifestation).
+# Visualize the codebook
+# ----------------------
+# The STARmap codebook maps pixel intensities across the rounds and channels to
+# the corresponding barcodes and genes that those pixels code for. For this
+# dataset, the codebook specifies 160 gene targets.
+
+print(experiment.codebook)
+
+###############################################################################
+# Registration
+# ------------
+# Starfish exposes some simple tooling to identify registration shifts.
+# :code:`starfish.util.plot.diagnose_registration` takes an ImageStack and a
+# set of selectors, each of which maps :py:class:`~starfish.types.Axes` objects
+# to indices that specify a particular 2d image.
 #
-# Attempt a translation registration to fix.
-
-from skimage.feature import register_translation
-from skimage.transform import SimilarityTransform
-
-
-def _register_imagestack(target_image, reference_image, upsample_factor):
-    target_image = np.squeeze(target_image)
-    reference_image = np.squeeze(reference_image)
-    shift, error, phasediff = register_translation(
-        target_image, reference_image, upsample_factor=upsample_factor)
-    return SimilarityTransform(translation=shift)
-
-
-# identify the locations of all the spots by max projecting over z
+# Below the vignette projects the channels and z-planes and examines the
+# registration of those max projections across channels 0 and 1. To make the
+# difference more obvious, we zoom in by selecting a subset of the image, and
+# display the data before and after registration.
+#
+# It looks like there is a small shift approximately the size of a spot
+# in the `x = -y` direction for at least the plotted rounds
+#
+# The starfish package can attempt a translation registration to fix this
+# registration error.
+#
+# Register the data:
 projection = stack.max_proj(Axes.CH, Axes.ZPLANE)
-reference_image = projection.sel({Axes.ROUND: 1}).xarray
+reference_image = projection.sel({Axes.ROUND: 1})
 
-# learn the transformations for each stack
-register_imagestack = partial(
-    _register_imagestack, reference_image=reference_image, upsample_factor=100
+ltt = starfish.image.LearnTransform.Translation(
+    reference_stack=reference_image,
+    axes=Axes.ROUND,
+    upsampling=1000,
 )
-transforms = projection.transform(
-    register_imagestack, group_by={Axes.ROUND}, n_processes=1)
+transforms = ltt.run(projection)
 
 ###############################################################################
-# Print the translations.
+# Apply and print out the size and direction of the transforms.
 
-[t.translation for (t, ind) in transforms]
+print([t[2].translation for t in transforms.transforms])
+
+warp = starfish.image.ApplyTransform.Warp()
+stack = warp.run(
+    stack=stack,
+    transforms_list=transforms,
+)
 
 ###############################################################################
-# Unfortunately, simple translation registration can't further improve upon this
-# problem. To account for this, a small local search will be allowed in
-# the spot finding step to match spots across (round, channel) volumes.
+# Show the effect of registration.
+
+post_projection = stack.max_proj(Axes.CH, Axes.ZPLANE)
+
+f, (ax1, ax2) = plt.subplots(ncols=2)
+sel_0 = {Axes.ROUND: 0, Axes.X: (500, 600), Axes.Y: (500, 600)}
+sel_1 = {Axes.ROUND: 1, Axes.X: (500, 600), Axes.Y: (500, 600)}
+diagnose_registration(
+    projection, sel_0, sel_1, ax=ax1, title='pre-registered'
+)
+diagnose_registration(
+    post_projection, sel_0, sel_1, ax=ax2, title='pre-registered'
+)
 
 ###############################################################################
-# The first stage of the STARmap pipeline is to align the intensity
+# The plot shows that the slight offset has been corrected.
+#
+# Equalize channel intensities
+# ----------------------------
+# The second stage of the STARmap pipeline is to align the intensity
 # distributions across channels and rounds. Here we calculate a reference
 # distribution by sorting each image's intensities in increasing order and
 # averaging the ordered intensities across rounds and channels. All (z, y, x)
 # volumes from each round and channel are quantile normalized against this
 # reference.
+#
+# Note that this type of histogram matching has an implied assumption that each
+# channel has relatively similar numbers of spots. In the case of this data
+# this assumption is reasonably accurate, but for other datasets it can be
+# problematic to apply filters that match this stringently.
 
 mh = starfish.image.Filter.MatchHistograms({Axes.CH, Axes.ROUND})
-stack = mh.run(stack, in_place=True, verbose=True, n_processes=8)
+scaled = mh.run(stack, in_place=True, verbose=True, n_processes=8)
+
+def plot_scaling_result(
+    template: starfish.ImageStack, scaled: starfish.ImageStack
+):
+    f, (before, after) = plt.subplots(ncols=4, nrows=2)
+    for channel, ax in enumerate(before):
+        title = f'Before scaling\nChannel {channel}'
+        intensity_histogram(
+            template, sel={Axes.CH: channel, Axes.ROUND: 0}, ax=ax, title=title,
+            log=True, bins=50,
+        )
+        ax.set_xlim(0, 0.007)
+    for channel, ax in enumerate(after):
+        title = f'After scaling\nChannel {channel}'
+        intensity_histogram(
+            scaled, sel={Axes.CH: channel, Axes.ROUND: 0}, ax=ax, title=title,
+            log=True, bins=50,
+        )
+    f.tight_layout()
+    return f
+
+f = plot_scaling_result(stack, scaled)
 
 ###############################################################################
+# Find spots
+# ----------
 # Finally, a local blob detector that finds spots in each (z, y, x) volume
 # separately is applied. The user selects an "anchor round" and spots found in
 # all channels of that round are used to seed a local search across other rounds
@@ -109,21 +174,19 @@ lsbd = starfish.spots.SpotFinder.LocalSearchBlobDetector(
     anchor_round=0,
     search_radius=10,
 )
-intensities = lsbd.run(stack, n_processes=8)
-
-# This viewer call displays all detected spots, regardless of whether or not
-# they decode.
-# viewer = starfish.display(
-#     stack, intensities, radius_multiplier=0.1, mask_intensities=0.01
-# )
+intensities = lsbd.run(scaled, n_processes=8)
 
 ###############################################################################
-# Next, spots are decoded, and only spots that pass the decoding stage are
-# displayed.
+# Decode spots
+# ------------
+# Next, spots are decoded. There is really no good way to display 3-d spot
+# detection in 2-d planes, so we encourage you to grab this notebook and
+# uncomment the below lines.
 
 decoded = experiment.codebook.decode_per_round_max(intensities.fillna(0))
 decode_mask = decoded['target'] != 'nan'
 
-viewer = starfish.display(
-    stack, decoded[decode_mask], radius_multiplier=0.1, mask_intensities=0.1
-)
+# %gui qt
+# viewer = starfish.display(
+#     stack, decoded[decode_mask], radius_multiplier=2, mask_intensities=0.1
+# )

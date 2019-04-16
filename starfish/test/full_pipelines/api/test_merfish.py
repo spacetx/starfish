@@ -17,9 +17,9 @@ def test_merfish_pipeline_cropped_data():
     # set random seed to errors provoked by optimization functions
     np.random.seed(777)
 
-    merfish = __import__('MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV')
+    merfish = __import__('MERFISH')
 
-    primary_image = merfish.primary_image
+    primary_image = merfish.imgs
 
     expected_primary_image = np.array(
         [[0.09593347, 0.09794766, 0.10089265, 0.10231174, 0.10133516,
@@ -172,7 +172,7 @@ def test_merfish_pipeline_cropped_data():
         low_passed.xarray[5, 0, 0, 40:50, 45:55]
     )
 
-    scaled_image = merfish.scaled_image
+    scaled_image = merfish.filtered_imgs
 
     # assert that the scaled data is correct
     expected_scaled_low_passed = np.array(

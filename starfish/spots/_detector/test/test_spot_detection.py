@@ -158,13 +158,5 @@ def test_spot_finding_no_reference_image(
     assert np.allclose(intensity_table.sum((Axes.ROUND, Axes.CH)).values, expected), \
         "wrong spot intensities detected"
 
-    # verify this execution strategy produces an empty intensitytable when called with a blank image
-    empty_intensity_table = detect_spots(
-        data_stack=EMPTY_IMAGESTACK,
-        spot_finding_method=spot_detector.image_to_spots,
-        measurement_function=np.max,
-        radius_is_gyration=radius_is_gyration
-    )
-
     empty_intensity_table = call_detect_spots(EMPTY_IMAGESTACK)
     assert empty_intensity_table.sizes[Features.AXIS] == 0

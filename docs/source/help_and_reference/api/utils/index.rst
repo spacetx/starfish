@@ -14,3 +14,6 @@ to be temporarily modified, use the :ref:`environ` context manager to set indivi
 
 .. toctree::
    config.rst
+
+.. toctree::
+    logging.rst

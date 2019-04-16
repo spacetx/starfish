@@ -65,7 +65,14 @@ from .dataorder import AXES_DATA, N_AXES
 
 class ImageStack:
     """
-    Container for a TileSet (field of view)
+    ImageStacks are the main objects for processing images in starfish. It is a
+    5-dimensional Image Tensor that labels each (z, y, x) tile with the round and channel
+    and zplane it corresponds to. The class is a wrapper around :py:class:`xarray.DataArray`.
+    The names of each imaging r/ch/zplane as well as the physical coordinates of each tile
+    are stored as coordinates on the :py:class:`xarray.DataArray`. ImageStacks can only be
+    initialized with aligned Tilesets.
+
+
     Loads configuration from StarfishConfig.
 
     Attributes
@@ -76,35 +83,12 @@ class ImageStack:
         the number of imaging rounds stored in the image tensor
     num_zplanes : int
         the number of z-layers stored in the image tensor
-    xarray : xarray.core.dataarray.DataArray
+    xarray : :py:class:`xarray.DataArray`
         the 5-d image tensor is stored in this array
     raw_shape : Tuple[int]
         the shape of the image tensor (in integers)
     shape : Dict[str, int]
            the shape of the image tensor by categorical index (channels, imaging rounds, z-layers)
-
-    Methods
-    -------
-    get_slice(selector)
-        retrieve a slice of the image tensor
-    set_slice(selector, data, axes=[])
-        set a slice of the image tensor
-    apply(func, group_by={Axes.ROUND, Axes.CH, Axes.ZPLANE},
-        in_place=False, verbose=False, n_processes=None)
-        split the image tensor along one or more axes and apply a function across each of the
-        components to yield an image tensor
-    transform(func, group_by={Axes.ROUND, Axes.CH, Axes.ZPLANE}, verbose=False,
-        n_processes=None)
-        split the image tensor along one or more axes and apply a function across each of the
-        components. Results are returned as a List with length equal to the number of times
-        the image tensor is split.
-    max_proj(*dims)
-        return a max projection over one or more axis of the image tensor
-    sel(indexers)
-        return an ImageStack (coordinates preserved) that is the subset described
-        by the indexers. The indexers can slice all 5 dimensions of the image tensor.
-    export(filepath, tile_opener=None)
-        save the (potentially modified) image tensor to disk
     """
 
     def __init__(
@@ -264,10 +248,11 @@ class ImageStack:
         Constructs an ImageStack object from a URL and a base URL.
 
         The following examples will all load from the same location:
-          1. url: https://www.example.com/images/primary_images.json  baseurl: None
-          2. url: https://www.example.com/images/primary_images.json  baseurl: I_am_ignored
-          3. url: primary_images.json  baseurl: https://www.example.com/images
-          4. url: images/primary_images.json  baseurl: https://www.example.com
+
+        - url: https://www.example.com/images/primary_images.json  baseurl: None
+        - url: https://www.example.com/images/primary_images.json  baseurl: I_am_ignored
+        - url: primary_images.json  baseurl: https://www.example.com/images
+        - url: images/primary_images.json  baseurl: https://www.example.com
 
         Parameters
         ----------
@@ -279,6 +264,11 @@ class ImageStack:
         aligned_group: int
             Which aligned tile group to load into the Imagestack, only applies if the
             tileset is unaligned. Default 0 (the first group)
+
+        Returns
+        -------
+        ImageStack :
+            An ImageStack representing encapsulating the data from the TileSet.
         """
         config = StarfishConfig()
         tileset = Reader.parse_doc(url, baseurl, backend_config=config.slicedimage)
@@ -292,8 +282,9 @@ class ImageStack:
         Constructs an ImageStack object from an absolute URL or a filesystem path.
 
         The following examples will all load from the same location:
-          1. url_or_path: file:///Users/starfish-user/images/primary_images.json
-          2. url_or_path: /Users/starfish-user/images/primary_images.json
+
+        - url_or_path: file:///Users/starfish-user/images/primary_images.json
+        - url_or_path: /Users/starfish-user/images/primary_images.json
 
         Parameters
         ----------
@@ -360,7 +351,7 @@ class ImageStack:
 
     @property
     def xarray(self) -> xr.DataArray:
-        """Retrieves the image data as an xarray.DataArray"""
+        """Retrieves the image data as an :py:class:`xarray.DataArray`"""
         return self._data.data
 
     def sel(self, indexers: Mapping[Axes, Union[int, tuple]]):
@@ -375,7 +366,7 @@ class ImageStack:
         Examples
         --------
 
-        Create an Imagestack using the ``synthetic_stack`` method
+        Create an Imagestack :py:func:`~starfish.imagestack.imagestack.ImageStack.synthetic_stack`
             >>> from starfish import ImageStack
             >>> from starfish.types import Axes
             >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
@@ -645,13 +636,14 @@ class ImageStack:
             Function to apply. must expect a first argument which is a 2d or 3d numpy array and
             return an array of the same shape.
         group_by : Set[Axes]
-            Axes to split the data along.  For instance, splitting a 2D array (axes: X, Y; size:
+            Axes to split the data along.
+            `ex. splitting a 2D array (axes: X, Y; size:
             3, 4) by X results in 3 arrays of size 4.  (default {Axes.ROUND, Axes.CH,
-            Axes.ZPLANE})
+            Axes.ZPLANE})`
         in_place : bool
-            (Default False) If True, function is executed in place. If n_proc is not 1, the tile or
+            If True, function is executed in place. If n_proc is not 1, the tile or
             volume will be copied once during execution. If false, a new ImageStack object will be
-            produced.
+            produced. (Default False)
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
         n_processes : Optional[int]
@@ -659,21 +651,29 @@ class ImageStack:
             (default = None).
         kwargs : dict
             Additional arguments to pass to func
-        clip_method : Union[str, Clip]
-            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-            requirements that float data fall in [0, 1].
-            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-            value calculated over the entire ImageStack
-            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-            value calculated over each slice, where slice shapes are determined by the group_by
-            parameters
+        clip_method : Union[str, :py:class:`~starfish.types.Clip`]
+
+            - Clip.CLIP (default): Controls the way that data are scaled to retain skimage dtype
+              requirements that float data fall in [0, 1].
+            - Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+            - Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+              value calculated over the entire ImageStack
+            - Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+              value calculated over each slice, where slice shapes are determined by the group_by
+              parameters
+
 
         Returns
         -------
         ImageStack :
             If inplace is False, return a new ImageStack, otherwise return a reference to the
             original stack with data modified by application of func
+
+        Raises
+        ------
+        TypeError :
+             If no Clip method given.
+
         """
         # default grouping is by (x, y) tile
         if group_by is None:
@@ -868,12 +868,9 @@ class ImageStack:
         Returns a list of pipeline components that have been applied to this imagestack
         as well as their corresponding runtime parameters.
 
-         ex.
-            [('GaussianHighPass', {'sigma': (3, 3), 'is_volume': False}),
-            ('GaussianLowPass', {'sigma': (1, 1), 'is_volume': False}])]
-
-        Means that this imagestack was created by applying a GaussianHighPass Filter then
-        a GaussianLowPass Filter to a starting imagestack
+        For more information about provenance logging see
+        `Provenance Logging
+        <https://spacetx-starfish.readthedocs.io/en/latest/help_and_reference/api/utils/ilogging.html>`_
 
         Returns
         -------
@@ -935,25 +932,30 @@ class ImageStack:
 
     @property
     def num_rounds(self):
+        """Return the number of rounds in the ImageStack"""
         return self.xarray.sizes[Axes.ROUND]
 
     @property
     def num_chs(self):
+        """Return the number of channels in the ImageStack"""
         return self.xarray.sizes[Axes.CH]
 
     @property
     def num_zplanes(self):
+        """Return the number of z_planes in the ImageStack"""
         return self.xarray.sizes[Axes.ZPLANE]
 
     def axis_labels(self, axis: Axes) -> Iterable[int]:
-        """Given a axis, return the sorted unique values for that axis in this ImageStack.  For
-        instance, imagestack.unique_index_values(Axes.ROUND) returns all the round ids in this
+        """Given an axis, return the sorted unique values for that axis in this ImageStack.  For
+        instance, ``imagestack.axis_labels(Axes.ROUND)`` returns all the round ids in this
         imagestack."""
 
         return [int(val) for val in self.xarray.coords[axis.value].values]
 
     @property
     def tile_shape(self):
+        """Return the shape of each tile in the ImageStack. All
+        Tiles have the same shape."""
         return self.xarray.sizes[Axes.Y], self.xarray.sizes[Axes.X]
 
     def to_multipage_tiff(self, filepath: str) -> None:

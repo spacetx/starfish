@@ -33,11 +33,33 @@ class FieldOfView:
     This encapsulates a field of view.  It contains the primary image and auxiliary images that are
     associated with the field of view.
 
-    All images can be accessed using a the get_image('primary') method with the name of the image
-    type. The primary image is accessed using the name
-    :py:attr:`starfish.experiment.experiment.FieldOFView.PRIMARY_IMAGES`.
+    All images can be accessed using
+    :py:func:`~starfish.experiment.experiment.FieldOfView.get_image`
+    with the name of the image type. The primary image is accessed using the name
+    :py:attr:`~starfish.experiment.experiment.FieldOFView.PRIMARY_IMAGES`.
 
-    Access a FOV through a experiment. experiement.fov()
+    Notes
+    -----
+    Field of views obtain their primary image from a :py:class:`~slicedimage.TileSet`.
+    They can obtain their auxiliary image dictionary from a dictionary of auxiliary image to
+    :py:class:`~slicedimage.TileSet`.
+
+    When a FieldOfView is initialized we parse each :py:class:`~slicedimage.TileSet`
+    into sub groups according to their physical coordinates. Tiles with the same physical
+    coordinates are grouped together into aligned tilesets. If the FieldOfView is properly
+    registered there should only be one aligned subgroup.
+
+    The decoding of :py:class:`~slicedimage.TileSet` to
+    :py:class:`~starfish.imagestack.imagestack.ImageStack`
+    does not happen until the image is accessed. ImageStacks can only be initialized with
+    aligned tilesets, so if thereare multiple you may need to iterate through the groups
+    using :py:func:`~starfish.experiment.experiment.FieldOfView.iterate_image_type`
+    and process each one individually.
+
+    Be prepared to handle errors when images are accessed.
+
+    Access a FieldOfView through Experiment.
+    :py:func:`~starfish.experiment.experiment.Experiment.fov`.
 
     Attributes
     ----------
@@ -53,16 +75,6 @@ class FieldOfView:
             self, name: str,
             image_tilesets: MutableMapping[str, TileSet]
     ) -> None:
-        """
-        Fields of views can obtain their primary image from either an ImageStack or a TileSet (but
-        only one).  It can obtain their auxiliary image dictionary from either a dictionary of
-        auxiliary image name to ImageStack or a dictionary of auxiliary image name to TileSet (but
-        only one).
-
-        Note that if the source image is from a TileSet, the decoding of TileSet to ImageStack does
-        not happen until the image is accessed.  Be prepared to handle errors when images are
-        accessed.
-        """
         self._images: MutableMapping[str, TileSet] = dict()
         self._name = name
         self.aligned_coordinate_groups: Dict[str, List[CropParameters]] = dict()
@@ -95,13 +107,16 @@ class FieldOfView:
         """
         Describe the aligned subgroups for each Tileset in this FOV
 
-        ex.
+        Examples
+        --------
+        >>> fov.show_aligned_image_groups()
         {'nuclei': ' Group 0:  <starfish.ImageStack r={0}, ch={0}, z={0}, (y, x)=(190,270)>',
         'primary': ' Group 0:  <starfish.ImageStack r={0, 1, 2, 3, 4, 5}, ch={0, 1, '
         '2}, z={0}, (y, x)=(190, 270)>'}
 
-        Means there are two tilesets in this FOV (primary and nuclei), and because all images have
-        the same (x, y) coordinates, each tileset has a single aligned subgroup.
+        The example describes a FieldOfView with two Tilesets (primary and nuclei), because
+        all images have the same (x, y) coordinates, each Tileset has a single aligned subgroup:
+        Group 0.
         """
         all_groups = dict()
         for name, groups in self.aligned_coordinate_groups.items():
@@ -120,6 +135,21 @@ class FieldOfView:
         pprint.pprint(all_groups)
 
     def iterate_image_type(self, image_type: str) -> Iterator[ImageStack]:
+        """
+        Iterate through the aligned subgroups of the given image type.
+        (ex. primary)
+
+        Parameters
+        ----------
+        image_type : str
+            The name of the image type to iterate through.
+
+        Returns
+        --------
+        Iterator
+            An iterator for the aligned subgroups of the image type
+
+        """
         for aligned_group, _ in enumerate(self.aligned_coordinate_groups[image_type]):
             yield self.get_image(item=image_type, aligned_group=aligned_group)
 
@@ -128,9 +158,11 @@ class FieldOfView:
                   y_slice: Optional[Union[int, slice]] = None,
                   ) -> ImageStack:
         """
+        Load into memory the Imagestack representation of an aligned image group. If crop parameters
+        provided, first crop the TileSet.
+
         Parameters
         ----------
-
         item: str
             The name of the tileset ex. 'primary' or 'nuclei'
         aligned_group: int
@@ -142,7 +174,8 @@ class FieldOfView:
 
         Returns
         -------
-        The instantiated ImageStack
+        ImageStack
+            The instantiated image stack
         """
         crop_params = copy.copy((self.aligned_coordinate_groups[item][aligned_group]))
         crop_params._x_slice = x_slice
@@ -152,28 +185,15 @@ class FieldOfView:
 
 class Experiment:
     """
-    This encapsulates an experiment, with one or more fields of view and a codebook.  An individual
-    FOV can be retrieved using a key, i.e., experiment[fov_name].
-
-    Methods
-    -------
-    from_json()
-        Given a URL or a path to an experiment.json document, return an Experiment object
-        corresponding to the document.
-    fov()
-        Given a callable that accepts a FOV, return the first FOVs that the callable returns True
-        when passed the FOV.  Because there is no guaranteed sorting for the FOVs, use this
-        cautiously.
-    fovs()
-        Given a callable that accepts a FOV, return all the FOVs that the callable returns True when
-        passed the FOV.
-    fovs_by_name()
-        Given one or more FOV names, return the FOVs that match those names.
+    Encapsulates an experiment, with one or more fields of view and a
+    :py:class:`~starfish.codebook.codebook.Codebook`. An individual
+    :py:class:`~starfish.experiment.experiment.FieldOfView` can be retrieved using a
+    key, i.e., experiment[fov_name].
 
     Attributes
     ----------
     codebook : Codebook
-        Returns the codebook associated with this experiment.
+        The codebook associated with this experiment.
     extras : Dict
         Returns the extras dictionary associated with this experiment.
     """
@@ -212,7 +232,7 @@ class Experiment:
     @classmethod
     def from_json(cls, json_url: str) -> "Experiment":
         """
-        Construct an `Experiment` from an experiment.json file format specifier.
+        Construct an Experiment from an experiment.json file format specifier.
         Loads configuration from StarfishConfig.
 
         Parameters
@@ -290,6 +310,8 @@ class Experiment:
 
     @classmethod
     def verify_version(cls, semantic_version_str: str) -> Version:
+        """Verifies the compatibility of the current starfish version with
+        the experiment version"""
         version = Version(semantic_version_str)
         if not (MIN_SUPPORTED_VERSION <= version <= MAX_SUPPORTED_VERSION):
             raise ValueError(
@@ -304,11 +326,25 @@ class Experiment:
             key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
     ) -> FieldOfView:
         """
-        Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return the first
-        FOV such that filter_fn(FOV) returns True. The order of the filtered FOVs will be determined
-        by the key_fn callable. By default, this matches the order of fov.name.
+        Given a callable filter_fn, apply it to all the FOVs in this experiment.
 
-        If no FOV matches, raise LookupError.
+        Parameters
+        ----------
+        filter_fn : Callable
+            Filter to apply to the list of FOVs
+        key_fn : Callable
+            The key that determines the order of filtered FOVs, default fov.name
+
+        Returns
+        -------
+        FieldOfView
+            The first FOV that fulfills the filter parameters.
+
+        Raises
+        ------
+        LookupError :
+             If no FOV matches
+
         """
         for fov in sorted(self._fovs, key=key_fn):
             if filter_fn(fov):
@@ -321,9 +357,20 @@ class Experiment:
             key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
     ) -> Sequence[FieldOfView]:
         """
-        Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return a list of
-        FOVs such that filter_fn(FOV) returns True. The returned list is sorted based on the key_fn
-        callable, which by default matches the order of fov.name.
+        Given a callable filter_fn, apply it to all the FOVs in this experiment.
+
+        Parameters
+        ----------
+        filter_fn : Callable
+            Filter to apply to the list of FOVs
+        key_fn : Callable
+            The key that determines the order of filtered FOVs, default fov.name
+
+        Returns
+        -------
+        Sequence[FieldOfView]
+            All fovs that pass the filter function.
+
         """
         results: MutableSequence[FieldOfView] = list()
         for fov in self._fovs:
@@ -337,12 +384,19 @@ class Experiment:
     def fovs_by_name(
         self,
         *names,
-        key_fn: Callable[[FieldOfView], str]=lambda fov: fov.name,
     ) -> Sequence[FieldOfView]:
         """
-        Given a callable filter_fn, apply it to all the FOVs in this experiment.  Return a list of
-        FOVs such that filter_fn(FOV) returns True.  The returned list is sorted based on the key_fn
-        callable, which by default matches the order of fov.name.
+        Given a name or set of names, return all fovs that match.
+
+        Parameters
+        ----------
+        names : str
+            The fov names to search for.
+
+        Returns
+        -------
+        Sequence[FieldOfView]
+            All fovs that match the given names.
         """
         return self.fovs(filter_fn=lambda fov: fov.name in names)
 
@@ -353,12 +407,15 @@ class Experiment:
         return fovs[0]
 
     def keys(self):
+        """Return all fov names in the experiment"""
         return (fov.name for fov in self.fovs())
 
     def values(self):
+        """Return all FieldOfViews in the experiment"""
         return (fov for fov in self.fovs())
 
     def items(self):
+        """Return all names and fovs in the experiment"""
         return ((fov.name, fov) for fov in self.fovs())
 
     @property

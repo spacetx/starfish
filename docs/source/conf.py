@@ -47,16 +47,24 @@ release = ''
 
 extensions = [
     'sphinx.ext.autodoc',
+    'numpydoc',
+    'sphinx.ext.napoleon',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.napoleon',
+    'sphinx_autodoc_typehints',
     'sphinxcontrib.programoutput',
     'sphinx_gallery.gen_gallery',
+    'sphinx.ext.intersphinx',
     'm2r',
-    # 'sphinx_gallery.gen_gallery',
 ]
+
+# intersphinx mapping for outside starfish linking
+intersphinx_mapping = {'xarray': ('http://xarray.pydata.org/en/stable', None)}
+
+# numpydoc settings
+numpydoc_class_members_toctree = False
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

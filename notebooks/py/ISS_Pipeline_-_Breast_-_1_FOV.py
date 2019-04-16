@@ -237,7 +237,7 @@ seg = Segmentation.Watershed(
     input_threshold=stain_thresh,
     min_distance=min_dist
 )
-label_image = seg.run(registered_image, nuclei)
+masks = seg.run(registered_image, nuclei)
 seg.show()
 # EPY: END code
 
@@ -248,7 +248,7 @@ seg.show()
 # EPY: START code
 from starfish.spots import TargetAssignment
 al = TargetAssignment.Label()
-labeled = al.run(label_image, decoded)
+labeled = al.run(masks, decoded)
 # EPY: END code
 
 # EPY: START code

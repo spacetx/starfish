@@ -9,7 +9,8 @@ from skimage.morphology import watershed
 
 from starfish.image._filter.util import bin_open, bin_thresh
 from starfish.imagestack.imagestack import ImageStack
-from starfish.types import Axes, Number
+from starfish.segmentation_mask import SegmentationMaskCollection
+from starfish.types import Axes, Coordinates, Number
 from starfish.util import click
 from ._base import SegmentationAlgorithmBase
 
@@ -49,7 +50,12 @@ class Watershed(SegmentationAlgorithmBase):
         self.min_distance = min_distance
         self._segmentation_instance: Optional[_WatershedSegmenter] = None
 
-    def run(self, primary_images: ImageStack, nuclei: ImageStack, *args) -> np.ndarray:
+    def run(
+            self,
+            primary_images: ImageStack,
+            nuclei: ImageStack,
+            *args
+    ) -> SegmentationMaskCollection:
         """Segments nuclei in 2-d using a nuclei ImageStack
 
         Primary images are used to expand the nuclear mask, but only in cases where there are
@@ -64,9 +70,8 @@ class Watershed(SegmentationAlgorithmBase):
 
         Returns
         -------
-        np.ndarray :
-            label image where each cell is labeled by a different positive integer value. 0
-            implies that a pixel is not part of a cell.
+        masks : SegmentationMaskCollection
+           binary masks segmenting each cell
         """
 
         # create a 'stain' for segmentation
@@ -88,7 +93,12 @@ class Watershed(SegmentationAlgorithmBase):
             disk_size_mask, self.min_distance
         )
 
-        return label_image
+        # we max-projected and squeezed the Z-plane so label_image.ndim == 2
+        physical_ticks = {coord: nuclei.xarray.coords[coord.value].data
+                          for coord in (Coordinates.Y, Coordinates.X)}
+
+        return SegmentationMaskCollection.from_label_image(label_image,
+                                                           physical_ticks)
 
     def show(self, figsize: Tuple[int, int]=(10, 10)) -> None:
         if isinstance(self._segmentation_instance, _WatershedSegmenter):

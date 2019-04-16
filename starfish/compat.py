@@ -27,7 +27,7 @@ else:
         used to endorse or promote products derived from this software without
         specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+    THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS`` AND ANY EXPRESS OR
     IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
     DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
@@ -58,8 +58,10 @@ else:
         return interp_a_values[src_unique_indices].reshape(source.shape)
 
     def match_histograms(image, reference, multichannel=False):
-        """Adjust an image so that its cumulative histogram matches that of another.
+        """
+        Adjust an image so that its cumulative histogram matches that of another.
         The adjustment is applied separately for each channel.
+
         Parameters
         ----------
         image : ndarray
@@ -69,15 +71,18 @@ else:
             image.
         multichannel : bool, optional
             Apply the matching separately for each channel.
+
         Returns
         -------
         matched : ndarray
             Transformed input image.
+
         Raises
         ------
         ValueError
             Thrown when the number of channels in the input image and the reference
             differ.
+
         References
         ----------
         .. [1] http://paulbourke.net/miscellaneous/equalisation/
@@ -113,10 +118,12 @@ else:
 
     def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
                  overlap=.5, *, exclude_border=False):
-        r"""Finds blobs in the given grayscale image.
+        """
+        Finds blobs in the given grayscale image.
         Blobs are found using the Difference of Gaussian (DoG) method [1]_.
         For each blob found, the method returns its coordinates and the standard
         deviation of the Gaussian kernel that detected the blob.
+
         Parameters
         ----------
         image : 2D or 3D ndarray
@@ -145,6 +152,7 @@ else:
         exclude_border : int or bool, optional
             If nonzero int, `exclude_border` excludes blobs from
             within `exclude_border`-pixels of the border of the image.
+
         Returns
         -------
         A : (n, image.ndim + sigma) ndarray
@@ -156,9 +164,11 @@ else:
             deviation of the Gaussian kernel which detected the blob. When an
             anisotropic gaussian is used (sigmas per dimension), the detected sigma
             is returned for each dimension.
+
         References
         ----------
-        .. [1] https://en.wikipedia.org/wiki/Blob_detection#The_difference_of_Gaussians_approach
+        [1] https://en.wikipedia.org/wiki/Blob_detection#The_difference_of_Gaussians_approach
+
         Examples
         --------
         >>> from skimage import data, feature
@@ -187,10 +197,11 @@ else:
             [  52.      ,  216.      ,   16.777216],
             [  52.      ,  155.      ,   16.777216],
             [  45.      ,  336.      ,   16.777216]])
+
         Notes
         -----
-        The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
-        a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
+        The radius of each blob is approximately :math:`sqrt{2}sigma` for
+        a 2-D image and :math:`sqrt{3}sigma` for a 3-D image.
         """
 
         image = img_as_float(image)
@@ -252,10 +263,12 @@ else:
 
     def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
                  overlap=.5, log_scale=False, *, exclude_border=False):
-        r"""Finds blobs in the given grayscale image.
+        """
+        Finds blobs in the given grayscale image.
         Blobs are found using the Laplacian of Gaussian (LoG) method [1]_.
         For each blob found, the method returns its coordinates and the standard
         deviation of the Gaussian kernel that detected the blob.
+
         Parameters
         ----------
         image : 2D or 3D ndarray
@@ -288,6 +301,7 @@ else:
         exclude_border : int or bool, optional
             If nonzero int, `exclude_border` excludes blobs from
             within `exclude_border`-pixels of the border of the image.
+
         Returns
         -------
         A : (n, image.ndim + sigma) ndarray
@@ -299,9 +313,11 @@ else:
             deviation of the Gaussian kernel which detected the blob. When an
             anisotropic gaussian is used (sigmas per dimension), the detected sigma
             is returned for each dimension.
+
         References
         ----------
         .. [1] https://en.wikipedia.org/wiki/Blob_detection#The_Laplacian_of_Gaussian
+
         Examples
         --------
         >>> from skimage import data, feature, exposure
@@ -325,10 +341,11 @@ else:
             [ 124.        ,  336.        ,   11.88888889],
             [ 121.        ,  272.        ,   17.33333333],
             [ 113.        ,  323.        ,    1.        ]])
+
         Notes
         -----
-        The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
-        a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
+        The radius of each blob is approximately :math:`sqrt{2}sigma` for
+        a 2-D image and :math:`sqrt{3}sigma` for a 3-D image.
         """
         image = img_as_float(image)
 

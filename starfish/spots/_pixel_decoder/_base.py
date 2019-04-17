@@ -27,7 +27,7 @@ class PixelSpotDecoder(PipelineComponent):
         image_stack = ctx.obj["image_stack"]
         # TODO ambrosejcarr serialize and save ConnectedComponentDecodingResult somehow
         intensities, ccdr = instance.run(image_stack)
-        intensities.save(output)
+        intensities.to_netcdf(output)
 
     @staticmethod
     @click.group(COMPONENT_NAME)

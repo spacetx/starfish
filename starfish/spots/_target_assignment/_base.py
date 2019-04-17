@@ -27,7 +27,7 @@ class TargetAssignment(PipelineComponent):
         label_image = ctx.obj["label_image"]
         assigned = instance.run(label_image, intensity_table)
         print(f"Writing intensities, including cell ids to {output}")
-        assigned.save(os.path.join(output))
+        assigned.to_netcdf(os.path.join(output))
 
     @staticmethod
     @click.group(COMPONENT_NAME)

@@ -37,7 +37,7 @@ class SpotFinder(PipelineComponent):
         # TODO ambrosejcarr find a way to save arbitrary detector results
         if isinstance(intensities, tuple):
             intensities = intensities[0]
-        intensities.save(output)
+        intensities.to_netcdf(output)
 
     @staticmethod
     @click.group(COMPONENT_NAME)

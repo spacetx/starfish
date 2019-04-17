@@ -40,37 +40,36 @@ the intensities across the codebook to unit length using any L_p norm. It then a
 available in `scipy.spatial.distance`_.
 
 .. _scipy.spatial.distance: https://docs.scipy.org/doc/scipy/reference/spatial.distance.html
+
+Per Channel Max Decoder
+-----------------------
+
+The :ref:`Codebook.per_channel_max_decode <Codebook>` is a specialized decoder that takes advantage of
+codebooks that are designed to fluoresce in exactly one channel per round. Many image-based
+transcriptomics approaches use four rounds to read out the four DNA nucleotides, and as such
+this decoding method is a common one.
+
+Segmenting Cells
+================
+
+Cell segmentation is a very challenging task for image-based transcriptomics experiments. There
+are many approaches that do a very good job of segmenting *nuclei*, but few if any automated
+approaches to segment *cells*. Starfish exposes the watershed segmentation method from classical
+image processing, which inverts the intensities of the nuclei and spots and treats them like a
+literal watershed basin. The method then sets a threshold (water line), and each basin is treated
+as its own separate segment (cell).
+
+This approach works fairly well for cultured cells and relatively sparse tissues, but often cannot
+segment denser epithelia. As such, starfish *also* defines a simple segmentation format to enable it
+to read and utilize segmentation results derived from hand-drawing or semi-supervised drawing
+applications.
+
+TODO cell segmentation demo
+
+Assigning Spots to Cells
+========================
+
+TODO cell assignment demo and creating Cell x Gene matrix
 """
 
-###################################################################################################
-# Per Channel Max Decoder
-# -----------------------
-#
-# The :ref:`Codebook.per_channel_max_decode <Codebook>` is a specialized decoder that takes advantage of
-# codebooks that are designed to fluoresce in exactly one channel per round. Many image-based
-# transcriptomics approaches use four rounds to read out the four DNA nucleotides, and as such
-# this decoding method is a common one.
-
-###################################################################################################
-# Segmenting Cells
-# ================
-#
-# Cell segmentation is a very challenging task for image-based transcriptomics experiments. There
-# are many approaches that do a very good job of segmenting *nuclei*, but few if any automated
-# approaches to segment *cells*. Starfish exposes the watershed segmentation method from classical
-# image processing, which inverts the intensities of the nuclei and spots and treats them like a
-# literal watershed basin. The method then sets a threshold (water line), and each basin is treated
-# as its own separate segment (cell).
-#
-# This approach works fairly well for cultured cells and relatively sparse tissues, but often cannot
-# segment denser epithelia. As such, starfish *also* defines a simple segmentation format to enable it
-# to read and utilize segmentation results derived from hand-drawing or semi-supervised drawing
-# applications.
-
-# TODO cell segmentation demo
-
-###################################################################################################
-# Assigning Spots to Cells
-# ========================
-
-# TODO cell assignment demo and creating Cell x Gene matrix
+pass

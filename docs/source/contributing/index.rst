@@ -75,7 +75,7 @@ Notebook contributions
   which is an important to keep the notebooks working as starfish evolves.
 
 Debugging Errors
-================
+----------------
 
 First, thank you for using Starfish and SpaceTx-Format! Feedback you provide on features and the
 user experience is critical to making Starfish a successful tool. Because we iterate quickly on this

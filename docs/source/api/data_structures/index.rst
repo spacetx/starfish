@@ -1,5 +1,7 @@
-Core Objects
-============
+.. _data structures:
+
+Data Structures
+===============
 
 The top-level object in a starfish workflow is the :ref:`Experiment`. It is composed of one or more
 :ref:`FieldOfView` objects, and a :ref:`Codebook`, which maps detected spots to the entities they

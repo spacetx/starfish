@@ -263,7 +263,7 @@ class Experiment:
         _, codebook_name, codebook_baseurl = resolve_url(experiment_document['codebook'],
                                                          baseurl, config.slicedimage)
         codebook_absolute_url = pathjoin(codebook_baseurl, codebook_name)
-        codebook = Codebook.from_json(codebook_absolute_url)
+        codebook = Codebook.open_json(codebook_absolute_url)
 
         extras = experiment_document['extras']
 

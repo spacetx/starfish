@@ -70,7 +70,7 @@ def test_metric_decode():
     intensities = intensity_table_factory(data)
     codebook = codebook_factory()
 
-    decoded_intensities = codebook.metric_decode(
+    decoded_intensities = codebook.decode_metric(
         intensities,
         max_distance=0.5,
         min_intensity=1,
@@ -113,4 +113,4 @@ def test_unmatched_intensities_and_codebook_table_sizes_throws_value_error():
     codebook = Codebook.from_code_array(codebook_array)
     intensities = intensity_table_factory()
     with pytest.raises(ValueError):
-        codebook.metric_decode(intensities, max_distance=0.5, min_intensity=1, norm_order=1)
+        codebook.decode_metric(intensities, max_distance=0.5, min_intensity=1, norm_order=1)

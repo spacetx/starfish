@@ -27,7 +27,7 @@ def test_round_trip_synthetic_data():
     spots = sd.spots(intensities=intensities)
     gsd = BlobDetector(min_sigma=1, max_sigma=4, num_sigma=5, threshold=0)
     calculated_intensities = gsd.run(spots, blobs_image=spots, blobs_axes=(Axes.ROUND, Axes.CH))
-    decoded_intensities = codebook.metric_decode(
+    decoded_intensities = codebook.decode_metric(
         calculated_intensities,
         max_distance=1,
         min_intensity=0,
@@ -88,7 +88,7 @@ def test_medium_synthetic_stack():
     spots = sd.spots(intensities=intensities)
     gsd = BlobDetector(min_sigma=1, max_sigma=4, num_sigma=5, threshold=1e-4)
     calculated_intensities = gsd.run(spots, blobs_image=spots, blobs_axes=(Axes.ROUND, Axes.CH))
-    calculated_intensities = codebook.metric_decode(
+    calculated_intensities = codebook.decode_metric(
         calculated_intensities, max_distance=1, min_intensity=0, norm_order=2
     )
 

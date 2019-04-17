@@ -129,7 +129,7 @@ def test_from_code_array_throws_exception_when_data_is_improperly_formatted():
 def test_empty_codebook():
     code_array: List = codebook_array_factory()
     targets = [x[Features.TARGET] for x in code_array]
-    codebook = Codebook._empty_codebook(targets, n_channel=3, n_round=2)
+    codebook = Codebook.empty(targets, n_channel=3, n_round=2)
     assert_sizes(codebook, False)
 
 def test_create_codebook():
@@ -144,5 +144,5 @@ def test_create_codebook():
             r = int(bit[Axes.ROUND])
             data[i, ch, r] = int(bit[Features.CODE_VALUE])
 
-    codebook = Codebook._create_codebook(targets, n_channel=3, n_round=2, data=data)
+    codebook = Codebook.from_numpy(targets, n_channel=3, n_round=2, data=data)
     assert_sizes(codebook)

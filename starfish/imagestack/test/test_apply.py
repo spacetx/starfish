@@ -84,7 +84,6 @@ def test_apply_clipping_methods():
     assert np.allclose(imagestack.xarray, res.xarray)
     assert isinstance(imagestack.xarray, xr.DataArray)
 
-
     # clip_method 2
     res = imagestack.apply(
         apply_function, clip_method=Clip.SCALE_BY_CHUNK, in_place=False, n_processes=1,

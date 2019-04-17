@@ -83,7 +83,7 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        Build an empty 3-round 2-channel codebook::
+        Build an empty 2-round 3-channel codebook::
 
             >>> from starfish import Codebook
             >>> Codebook.empty(['ACTA', 'ACTB'], n_channel=3, n_round=2)
@@ -132,7 +132,7 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        build a 3-round 2-channel codebook where :code:`ACTA` is specified by intensity in round 0,
+        build a 2-round 3-channel codebook where :code:`ACTA` is specified by intensity in round 0,
         channel 1, and :code:`ACTB` is coded by fluorescence in rounds 0 and 1, channel 2
         ::
 

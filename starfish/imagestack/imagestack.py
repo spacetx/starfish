@@ -369,7 +369,7 @@ class ImageStack:
 
         Parameters
         ----------
-        indexers : Dict[Axes, (int/tuple)]
+        indexers : Mapping[Axes, Union[int, tuple]]
             A dictionary of dim:index where index is the value or range to index the dimension
 
         Examples
@@ -417,9 +417,9 @@ class ImageStack:
             >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
             >>> stack
             <starfish.ImageStack (r: 5, c: 5, z: 15, y: 200, x: 200)>
-            >>> stack.sel({Axes.ROUND: (1, None), Axes.CH: 0, Axes.ZPLANE: 0})
+            >>> stack.isel({Axes.ROUND: (1, None), Axes.CH: 0, Axes.ZPLANE: 0})
             <starfish.ImageStack (r: 4, c: 1, z: 1, y: 200, x: 200)>
-            >>> stack.sel({Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 1,
+            >>> stack.isel({Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 1,
             ...Axes.Y: 100, Axes.X: (None, 100)})
             <starfish.ImageStack (r: 1, c: 1, z: 1, y: 1, x: 100)>
             and the imagestack's physical coordinates

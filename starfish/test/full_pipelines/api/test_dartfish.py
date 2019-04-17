@@ -147,9 +147,9 @@ def test_dartfish_pipeline_cropped_data():
     # Test serialization / deserialization of IntensityTable log
 
     fp = tempfile.NamedTemporaryFile()
-    spot_intensities.save(fp.name)
+    spot_intensities.to_netcdf(fp.name)
 
-    loaded_intensities = IntensityTable.load(fp.name)
+    loaded_intensities = IntensityTable.open_netcdf(fp.name)
     pipeline_log = loaded_intensities.get_log()
 
     assert pipeline_log[0]['method'] == 'ScaleByPercentile'

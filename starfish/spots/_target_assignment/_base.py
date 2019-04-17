@@ -42,7 +42,7 @@ class TargetAssignment(PipelineComponent):
         ctx.obj = dict(
             component=TargetAssignment,
             output=output,
-            intensity_table=IntensityTable.load(intensities),
+            intensity_table=IntensityTable.open_netcdf(intensities),
             label_image=SegmentationMaskCollection.from_disk(label_image)
         )
 

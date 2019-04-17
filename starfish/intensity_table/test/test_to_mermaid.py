@@ -24,10 +24,10 @@ def test_to_mermaid_dataframe():
     # without a target assignment, should raise RuntimeError.
     with pytest.raises(RuntimeError):
         with TemporaryDirectory() as dir_:
-            intensities.save_mermaid(os.path.join(dir_, 'test.csv.gz'))
+            intensities.to_mermaid(os.path.join(dir_, 'test.csv.gz'))
 
     # assign targets
     intensities[Features.TARGET] = (Features.AXIS, np.random.choice(list('ABCD'), size=20))
     intensities[Features.DISTANCE] = (Features.AXIS, np.random.rand(20))
     with TemporaryDirectory() as dir_:
-        intensities.save_mermaid(os.path.join(dir_, 'test.csv.gz'))
+        intensities.to_mermaid(os.path.join(dir_, 'test.csv.gz'))

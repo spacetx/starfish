@@ -115,7 +115,7 @@ def test_take_max():
     it2 = create_intensity_table_with_coords(Area(min_x=1, max_x=2,
                                                   min_y=1, max_y=3), n_spots=20)
 
-    concatenated = IntensityTable.concatanate_intensity_tables(
+    concatenated = IntensityTable.concatenate_intensity_tables(
         [it1, it2], overlap_strategy=OverlapStrategy.TAKE_MAX)
 
     # The overlap section hits half of the spots from each intensity table, 5 from it1

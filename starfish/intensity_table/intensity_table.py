@@ -86,7 +86,7 @@ class IntensityTable(xr.DataArray):
         return coordinates
 
     @classmethod
-    def empty_intensity_table(
+    def empty(
             cls, spot_attributes: SpotAttributes, n_ch: int, n_round: int,
     ) -> "IntensityTable":
         """
@@ -184,7 +184,7 @@ class IntensityTable(xr.DataArray):
         """Returns True if this table's features have physical-space loci."""
         return Coordinates.X in self.coords and Coordinates.Y in self.coords
 
-    def save(self, filename: str) -> None:
+    def to_netcdf(self, filename: str) -> None:
         """
         Save an IntensityTable as a Netcdf File.
 
@@ -194,9 +194,9 @@ class IntensityTable(xr.DataArray):
             Name of Netcdf file.
 
         """
-        self.to_netcdf(filename)
+        super().to_netcdf(filename)
 
-    def save_mermaid(self, filename: str) -> pd.DataFrame:
+    def to_mermaid(self, filename: str) -> pd.DataFrame:
         """
         Writes a .csv.gz file in columnar format that is readable by MERMAID visualization
         software.
@@ -236,7 +236,7 @@ class IntensityTable(xr.DataArray):
         mermaid_data.to_csv(filename, compression='gzip', index=False)
 
     @classmethod
-    def load(cls, filename: str) -> "IntensityTable":
+    def open_netcdf(cls, filename: str) -> "IntensityTable":
         """
         Load an IntensityTable from Netcdf.
 
@@ -400,7 +400,7 @@ class IntensityTable(xr.DataArray):
         return IntensityTable.from_spot_data(intensity_data, pixel_coordinates)
 
     @staticmethod
-    def process_overlaps(
+    def _process_overlaps(
         intensity_tables: List["IntensityTable"],
         overlap_strategy: OverlapStrategy
     ) -> List["IntensityTable"]:
@@ -420,12 +420,26 @@ class IntensityTable(xr.DataArray):
         return intensity_tables
 
     @staticmethod
-    def concatanate_intensity_tables(
+    def concatenate_intensity_tables(
         intensity_tables: List["IntensityTable"],
         overlap_strategy: Optional[OverlapStrategy] = None
     ) -> "IntensityTable":
+        """
+        # TODO shanaxel42 doc me
+
+        Parameters
+        ----------
+        intensity_tables: List[IntensityTable]
+            List of IntensityTables to be combined.
+        overlap_strategy
+
+
+        Returns
+        -------
+
+        """
         if overlap_strategy:
-            intensity_tables = IntensityTable.process_overlaps(
+            intensity_tables = IntensityTable._process_overlaps(
                 intensity_tables, overlap_strategy
             )
         return xr.concat(intensity_tables, dim=Features.AXIS)
@@ -492,21 +506,3 @@ class IntensityTable(xr.DataArray):
             name='expression_matrix'
         )
         return mat
-
-    def feature_trace_magnitudes(self) -> np.ndarray:
-        """
-        Return the magnitudes of each feature across rounds and channels.
-
-        Magnitudes are the L2 norm of the linearized intensities for each
-        feature.
-
-        Returns
-        -------
-        np.ndarray :
-            vector of feature norms
-
-        """
-        feature_traces = self.stack(traces=(Axes.CH.value, Axes.ROUND.value))
-        norm = np.linalg.norm(feature_traces.values, ord=2, axis=1)
-
-        return norm

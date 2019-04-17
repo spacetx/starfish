@@ -36,7 +36,7 @@ class Decoder(PipelineComponent):
             component=Decoder,
             input=input,
             output=output,
-            intensities=IntensityTable.load(input),
+            intensities=IntensityTable.open_netcdf(input),
             codebook=codebook,
         )
 

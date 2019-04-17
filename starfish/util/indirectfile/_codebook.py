@@ -18,4 +18,4 @@ class GetCodebook(ConversionRecipe):
         return not input_parameter.startswith("@")
 
     def load(self, input_parameter: str) -> Codebook:
-        return Codebook.from_json(input_parameter)
+        return Codebook.open_json(input_parameter)

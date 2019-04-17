@@ -418,7 +418,7 @@ def synthetic_dataset_with_truth_values_and_called_spots():
     intensities = gsd.run(data_stack=filtered, blobs_image=filtered)
     assert intensities.shape[0] == 5
 
-    codebook.metric_decode(intensities, max_distance=1, min_intensity=0, norm_order=2)
+    codebook.decode_metric(intensities, max_distance=1, min_intensity=0, norm_order=2)
 
     return codebook, true_intensities, image, intensities
 

@@ -25,43 +25,20 @@ from starfish.types import Axes, Features, Number
 class Codebook(xr.DataArray):
     """Codebook for an image-based transcriptomics experiment
 
-    The codebook is a three dimensional tensor whose values are the expected intensity of a spot
-    for each code in each imaging round and each color channel. This class supports the
-    construction of synthetic codebooks for testing, and exposes decode methods to assign target
-    identifiers to spots. This codebook provides an in-memory representation of the codebook
-    defined in the spaceTx format.
+    The codebook is a three dimensional tensor with shape :code:`(feature, channel, round)` whose
+    values are the expected intensity of features (spots or pixels) that correspond to each target
+    (gene or protein) in each of the image tiles of an experiment.
+
+    This class supports the construction of synthetic codebooks for testing, and exposes decode
+    methods to assign target identifiers to spots. This codebook provides an in-memory
+    representation of the codebook defined in the SpaceTx format.
 
     The codebook is a subclass of xarray, and exposes the complete public API of that package in
     addition to the methods and constructors listed below.
 
-    Methods
-    -------
-    from_code_array(code_array, n_round, n_channel)
-        construct a codebook from a spaceTx-spec array of codewords
-
-    from_json(json_codebook, n_round, n_channel)
-        load a codebook from a spaceTx spec-compliant json file
-
-    to_json(filename)
-        save a codebook to json
-
-    synthetic_one_hot_codebook(n_round, n_channel, n_codes, target_names=None)
-        Construct a codebook of random codes where only one channel is on per imaging round.
-        This is the typical codebook format for in-situ sequencing and non-multiplex smFISH
-        experiments.
-
-    decode_euclidean(intensities)
-        find the closest code for each spot in intensities by euclidean distance
-
-    decode_per_round_maximum(intensities)
-        find codes that match the per-channel max intensity for each spot in intensities
-
-    code_length()
-        return the total length of the codes in the codebook
-
     Examples
     --------
-    Build a codebook using ``Codebook.synthetic_one_hot_codebook``::
+    Build a codebook using :py:meth:`Codebook.synthetic_one_hot_codebook`::
 
         >>> from starfish import Codebook
         >>> sd = Codebook.synthetic_one_hot_codebook(n_channel=3, n_round=4, n_codes=2)
@@ -91,34 +68,37 @@ class Codebook(xr.DataArray):
         return int(np.dot(*self.shape[1:]))
 
     @classmethod
-    def _empty_codebook(cls, code_names: Sequence[str], n_channel: int, n_round: int):
-        """create an empty codebook of shape (code_names, n_channel, n_round)
+    def zeros(cls, code_names: Sequence[str], n_channel: int, n_round: int):
+        """
+        Create an empty codebook of shape (code_names, n_channel, n_round)
 
         Parameters
         ----------
         code_names : Sequence[str]
-            the targets to be coded
+            The targets to be coded.
         n_channel : int
-            number of channels used to build the codes
+            Number of channels used to build the codes.
         n_round : int
-            number of imaging rounds used to build the codes
+            Number of imaging rounds used to build the codes.
 
         Examples
         --------
-        >>> from starfish import Codebook
-        >>> Codebook._empty_codebook(['ACTA', 'ACTB'], n_channel=3, n_round=2)
-        <xarray.Codebook (target: 2, c: 3, r: 2)>
-        array([[[0, 0],
-                [0, 0],
-                [0, 0]],
+        Build an empty 2-round 3-channel codebook::
 
-               [[0, 0],
-                [0, 0],
-                [0, 0]]], dtype=uint8)
-        Coordinates:
-          * target     (target) object 'ACTA' 'ACTB'
-          * c          (c) int64 0 1 2
-          * r          (r) int64 0 1
+            >>> from starfish import Codebook
+            >>> Codebook.zeros(['ACTA', 'ACTB'], n_channel=3, n_round=2)
+            <xarray.Codebook (target: 2, c: 3, r: 2)>
+            array([[[0, 0],
+                    [0, 0],
+                    [0, 0]],
+
+                   [[0, 0],
+                    [0, 0],
+                    [0, 0]]], dtype=uint8)
+            Coordinates:
+              * target     (target) object 'ACTA' 'ACTB'
+              * c          (c) int64 0 1 2
+              * r          (r) int64 0 1
 
         Returns
         -------
@@ -127,17 +107,17 @@ class Codebook(xr.DataArray):
 
         """
         data = np.zeros((len(code_names), n_channel, n_round), dtype=np.uint8)
-        return cls._create_codebook(code_names, n_channel, n_round, data)
+        return cls.from_numpy(code_names, n_channel, n_round, data)
 
     @classmethod
-    def _create_codebook(
+    def from_numpy(
             cls,
             code_names: Sequence[str],
             n_channel: int,
             n_round: int,
             data: np.ndarray,
     ) -> "Codebook":
-        """create a codebook of shape (code_names, n_channel, n_round) with the given data
+        """create a codebook of shape (code_names, n_channel, n_round) from a 3-d numpy array
 
         Parameters
         ----------
@@ -152,22 +132,28 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        >>> import numpy as np
-        >>> from starfish import Codebook
-        >>> data = np.zeros((3, 2, 2), dtype=np.uint8)
-        >>> Codebook._create_codebook(['ACTA', 'ACTB'], n_channel=3, n_round=2, data=data)
-        <xarray.Codebook (target: 2, c: 3, r: 2)>
-        array([[[0, 0],
-                [0, 0],
-                [0, 0]],
+        build a 2-round 3-channel codebook where :code:`ACTA` is specified by intensity in round 0,
+        channel 1, and :code:`ACTB` is coded by fluorescence in rounds 0 and 1, channel 2
+        ::
 
-               [[0, 0],
-                [0, 0],
-                [0, 0]]], dtype=uint8)
-        Coordinates:
-          * target     (target) object 'ACTA' 'ACTB'
-          * c          (c) int64 0 1 2
-          * r          (r) int64 0 1
+            >>> import numpy as np
+            >>> from starfish import Codebook
+            >>> data = np.zeros((2, 3, 2), dtype=np.uint8)
+            >>> data[0, 0, 1] = 1                 # ACTA
+            >>> data[[1, 1], [2, 2], [0, 1]] = 1  # ACTB
+            >>> Codebook.from_numpy(['ACTA', 'ACTB'], n_channel=3, n_round=2, data=data)
+            <xarray.Codebook (target: 2, c: 3, r: 2)>
+            array([[[0, 1],
+                    [0, 0],
+                    [0, 0]],
+
+                   [[0, 0],
+                    [0, 0],
+                    [1, 1]]], dtype=uint8)
+            Coordinates:
+              * target     (target) object 'ACTA' 'ACTB'
+              * c          (c) int64 0 1 2
+              * r          (r) int64 0 1
 
         Returns
         -------
@@ -196,8 +182,12 @@ class Codebook(xr.DataArray):
     @classmethod
     def from_code_array(
             cls, code_array: List[Dict[Union[str, Any], Any]],
-            n_round: Optional[int]=None, n_channel: Optional[int]=None) -> "Codebook":
-        """construct a codebook from a spaceTx-spec array of codewords
+            n_round: Optional[int] = None, n_channel: Optional[int] = None) -> "Codebook":
+        """
+        Construct a codebook from a python list of SpaceTx-Format codewords.
+
+        Note: Loading the SpaceTx-Format codebook with :py:meth:`json.load` will produce a code
+        array that can be passed to this constructor.
 
         Parameters
         ----------
@@ -210,7 +200,8 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        Construct a codebook from some array data in python memory::
+        Construct a codebook from some array data in python memory
+        ::
 
             >>> from starfish.types import Axes
             >>> from starfish import Codebook
@@ -300,29 +291,30 @@ class Codebook(xr.DataArray):
                 ch = int(bit[Axes.CH])
                 r = int(bit[Axes.ROUND])
                 data[i, ch, r] = int(bit[Features.CODE_VALUE])
-        return cls._create_codebook(target_names, n_channel, n_round, data)
+        return cls.from_numpy(target_names, n_channel, n_round, data)
 
     @classmethod
-    def from_json(
+    def open_json(
             cls, json_codebook: str,
-            n_round: Optional[int]=None,
-            n_channel: Optional[int]=None,
+            n_round: Optional[int] = None,
+            n_channel: Optional[int] = None,
     ) -> "Codebook":
-        """Load a codebook from a spaceTx spec-compliant json file or a url pointing to such a file
-        Loads configuration from StarfishConfig.
+        """
+        Load a codebook from a SpaceTx Format json file or a url pointing to such a file.
 
         Parameters
         ----------
         json_codebook : str
-            path or url to json file containing a spaceTx codebook
+            Path or url to json file containing a spaceTx codebook.
         n_round : Optional[int]
-            The number of imaging rounds used in the codes. Will be inferred if not provided
+            The number of imaging rounds used in the codes. Will be inferred if not provided.
         n_channel : Optional[int]
-            The number of channels used in the codes. Will be inferred if not provided
+            The number of channels used in the codes. Will be inferred if not provided.
 
         Examples
         --------
-        Create a codebook from in-memory data::
+        Create a codebook from in-memory data
+        ::
 
             >>> from starfish.types import Axes
             >>> from starfish import Codebook
@@ -351,7 +343,7 @@ class Codebook(xr.DataArray):
             >>> with open(json_codebook, 'w') as f:
             >>>     json.dump(codebook, f)
             >>> # read codebook from file
-            >>> Codebook.from_json(json_codebook)
+            >>> Codebook.open_json(json_codebook)
            <xarray.Codebook (target: 2, c: 4, r: 2)>
             array([[[0, 0],
                     [0, 0],
@@ -397,19 +389,13 @@ class Codebook(xr.DataArray):
         return cls.from_code_array(codebook_doc[DocumentKeys.MAPPINGS_KEY], n_round, n_channel)
 
     def to_json(self, filename: str) -> None:
-        """save a codebook to json
-
-        Notes
-        -----
-        This enforces the following typing of codebooks:
-        ch, round : int
-        value : float
-        target : str
+        """
+        Save a codebook to json using SpaceTx Format.
 
         Parameters
         ----------
         filename : str
-            filename
+            The name of the file in which to save the codebook.
 
         """
         code_array = []
@@ -439,9 +425,9 @@ class Codebook(xr.DataArray):
     @staticmethod
     def _normalize_features(
             array: Union["Codebook", IntensityTable],
-            norm_order,
+            norm_order: int,
     ) -> Tuple[Union["Codebook", IntensityTable], np.ndarray]:
-        """unit normalize each feature of array
+        """Unit normalize each feature of array
 
         Parameters
         ----------
@@ -516,21 +502,28 @@ class Codebook(xr.DataArray):
             self,
             intensities: IntensityTable,
     ):
-        # verify that the shapes of the codebook and intensities match
+        """verify that the shapes of the codebook and intensities match"""
         ch_match = intensities.sizes[Axes.CH] == self.sizes[Axes.CH]
         round_match = intensities.sizes[Axes.ROUND] == self.sizes[Axes.ROUND]
         if not (ch_match and round_match):
             raise ValueError(
                 'Codebook and Intensities must have same number of channels and rounds')
 
-    def metric_decode(
+    def decode_metric(
             self, intensities: IntensityTable, max_distance: Number, min_intensity: Number,
             norm_order: int, metric: str='euclidean'
     ) -> IntensityTable:
-        """Assign the closest target by euclidean distance to each feature in an intensity table
+        """
+        Assigns intensity patterns that have been extracted from an :py:class:`ImageStack` and
+        stored in an :py:class:`IntensityTable` by a :py:class:`SpotFinder` to the gene targets that
+        they encode.
 
-        Normalizes both the codes and the features to be unit vectors and finds the closest code
-        for each feature
+        This method carries out the assignment by first normalizing both the codes and the
+        recovered intensities to be unit magnitude using an L2 norm, and then finds the closest
+        code for each feature according to a distance metric (default=euclidean).
+
+        Features greater than :code:`max_distance` from their nearest code, or that have an average
+        intensity below :code:`min_intensity` are not assigned to any feature.
 
         Parameters
         ----------
@@ -550,6 +543,8 @@ class Codebook(xr.DataArray):
         --------
         The available norms for this function can be found at the following link:
         https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.linalg.norm.html
+        The available metrics for this function can be found at the following link:
+        https://docs.scipy.org/doc/scipy-0.14.0/reference/spatial.distance.html
 
         Returns
         -------
@@ -584,15 +579,26 @@ class Codebook(xr.DataArray):
         return IntensityTable(norm_intensities)
 
     def decode_per_round_max(self, intensities: IntensityTable) -> IntensityTable:
-        """decode each feature by selecting the per-imaging-round max-valued channel
+        """
+        Assigns intensity patterns that have been extracted from an :py:class:`ImageStack` and
+        stored in an :py:class:`IntensityTable` by a :py:class:`SpotFinder` to the gene targets that
+        they encode.
+
+        This method carries out the assignment by identifying the maximum-intensity channel for each
+        round, and assigning each spot to a code if the maximum-intensity pattern exists in the
+        codebook.
+
+        This method is only compatible with one-hot codebooks, where exactly one channel is expected
+        to contain fluorescence in each imaging round. This is a common coding strategy for
+        experiments that read out one DNA base with a distinct fluorophore in each imaging round.
 
         Notes
         -----
         - If no code matches the per-round maximum for a feature, it will be assigned 'nan' instead
           of a target value
-        - Numpy's argmax breaks ties by picking the first channel -- this can lead to
-          unexpected results where some features with "tied" channels will decode, but others will
-          be assigned 'nan'.
+        - Numpy's argmax breaks ties by picking the first of the tied values -- this can lead to
+          unexpected results in low-precision images where some features with "tied" channels will
+          decode, but others will be assigned 'nan'.
 
         Parameters
         ----------
@@ -679,7 +685,8 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        Create a Codebook with 2 rounds, 3 channels, and 2 codes::
+        Create a Codebook with 2 rounds, 3 channels, and 2 codes
+        ::
 
             >>> from starfish import Codebook
             >>> Codebook.synthetic_one_hot_codebook(n_round=2, n_channel=3, n_codes=2)

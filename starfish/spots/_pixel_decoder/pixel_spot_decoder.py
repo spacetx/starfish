@@ -71,7 +71,7 @@ class PixelSpotDecoder(PixelDecoderAlgorithmBase):
 
         """
         pixel_intensities = IntensityTable.from_image_stack(primary_image)
-        decoded_intensities = self.codebook.metric_decode(
+        decoded_intensities = self.codebook.decode_metric(
             pixel_intensities,
             max_distance=self.distance_threshold,
             min_intensity=self.magnitude_threshold,

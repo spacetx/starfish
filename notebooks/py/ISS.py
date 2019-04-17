@@ -166,7 +166,7 @@ p = SpotFinder.BlobDetector(
     min_sigma=1,
     max_sigma=10,
     num_sigma=30,
-    threshold=0.1,
+    threshold=0.01,
     measurement_type='mean',
 )
 

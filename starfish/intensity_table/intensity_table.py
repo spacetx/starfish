@@ -18,7 +18,7 @@ from starfish.types import (
     STARFISH_EXTRAS_KEY
 )
 from starfish.util.dtype import preserve_float_range
-from starfish.util.overlap_utils import (
+from .overlap import (
     find_overlaps_of_xarrays,
     OVERLAP_STRATEGY_MAP,
 )
@@ -54,7 +54,7 @@ class IntensityTable(xr.DataArray):
     --------
     Create an IntensityTable using the ``synthetic_intensities`` method::
 
-        >>> from starfish.util.synthesize import SyntheticData
+        >>> from starfish.test.factories import SyntheticData
         >>> sd = SyntheticData(n_ch=3, n_round=4, n_codes=2)
         >>> codes = sd.codebook()
         >>> sd.intensities(codebook=codes)

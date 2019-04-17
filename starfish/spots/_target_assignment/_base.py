@@ -3,11 +3,11 @@ from abc import abstractmethod
 from typing import Type
 
 import numpy as np
-from skimage.io import imread
 
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish.segmentation_mask import SegmentationMaskCollection
 from starfish.util import click
 
 
@@ -43,7 +43,7 @@ class TargetAssignment(PipelineComponent):
             component=TargetAssignment,
             output=output,
             intensity_table=IntensityTable.load(intensities),
-            label_image=imread(label_image)
+            label_image=SegmentationMaskCollection.from_disk(label_image)
         )
 
 

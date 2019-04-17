@@ -1,11 +1,10 @@
 from abc import abstractmethod
 from typing import Type
 
-from skimage.io import imsave
-
 from starfish.imagestack.imagestack import ImageStack
 from starfish.pipeline import PipelineComponent
 from starfish.pipeline.algorithmbase import AlgorithmBase
+from starfish.segmentation_mask import SegmentationMaskCollection
 from starfish.util import click
 from starfish.util.click.indirectparams import ImageStackParamType
 
@@ -24,10 +23,10 @@ class Segmentation(PipelineComponent):
         pri_stack = ctx.obj["primary_images"]
         nuc_stack = ctx.obj["nuclei"]
 
-        label_image = instance.run(pri_stack, nuc_stack)
+        masks = instance.run(pri_stack, nuc_stack)
 
-        print(f"Writing label image to {output}")
-        imsave(output, label_image)
+        print(f"Writing masks to {output}")
+        masks.save(output)
 
     @staticmethod
     @click.group(COMPONENT_NAME)
@@ -50,8 +49,12 @@ class SegmentationAlgorithmBase(AlgorithmBase):
     @classmethod
     def get_pipeline_component_class(cls) -> Type[PipelineComponent]:
         return Segmentation
-
     @abstractmethod
-    def run(self, primary_image_stack: ImageStack, nuclei_stack: ImageStack, *args):
-        """Performs registration on the stack provided."""
+    def run(
+            self,
+            primary_image_stack: ImageStack,
+            nuclei_stack: ImageStack,
+            *args
+    ) -> SegmentationMaskCollection:
+        """Performs segmentation on the stack provided."""
         raise NotImplementedError()

@@ -32,19 +32,22 @@ jobs:
       script: make install-dev && ipython docs/source/_static/data_processing_examples/3d_smFISH.py
     - name: MERFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: travis_wait make install-dev run__notebooks/py/MERFISH_Pipeline_-_U2O2_Cell_Culture_-_1_FOV.py
+      script: travis_wait make install-dev run__notebooks/py/MERFISH.py
     - name: osmFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: make install-dev run__notebooks/py/osmFISH.py
     - name: DARTFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev run__notebooks/py/DARTFISH_Pipeline_-_Human_Occipital_Cortex_-_1_FOV.py
+      script: make install-dev run__notebooks/py/DARTFISH.py
     - name: Simulation Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: make install-dev run__notebooks/py/Starfish_simulation.py
     - name: ISS Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev run__notebooks/py/ISS_Pipeline_-_Breast_-_1_FOV.py
+      script: make install-dev run__notebooks/py/ISS.py
+    - name: BaristaSeq Notebook
+      if: type = push and branch =~ /^(master|merge)/
+      script: make install-dev run__notebooks/py/BaristaSeq.py
     - name: SeqFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: make install-dev run__notebooks/py/SeqFISH.py
@@ -55,7 +58,7 @@ jobs:
       if: type = cron and branch =~ /^(master|merge)/
       script: make check-notebooks install-released-notebooks-support run-notebooks
     - name: Check Requirements
-      if: type = cron and branch = /^master$/
+      if: type = cron and branch =~ /^master$/
       script: make refresh-all-requirements check-requirements
 cache:
   directories:

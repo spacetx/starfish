@@ -5,13 +5,13 @@ import pandas as pd
 import pytest
 
 from starfish import IntensityTable
-from starfish.test import factories
+from starfish.codebook.test.factories import codebook_array_factory
 from starfish.types import Coordinates, DecodedSpots, Features
 
 
 def dummy_intensities() -> IntensityTable:
 
-    codebook = factories.codebook_array_factory()
+    codebook = codebook_array_factory()
     intensities = IntensityTable.synthetic_intensities(
         codebook,
         num_z=10,

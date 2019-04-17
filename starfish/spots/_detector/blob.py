@@ -133,6 +133,7 @@ class BlobDetector(SpotFinderAlgorithmBase):
             primary_image: ImageStack,
             blobs_image: Optional[ImageStack] = None,
             blobs_axes: Optional[Tuple[Axes, ...]] = None,
+            n_processes: Optional[int] = None,
             *args,
     ) -> IntensityTable:
         """
@@ -149,6 +150,8 @@ class BlobDetector(SpotFinderAlgorithmBase):
         blobs_axes : Optional[Tuple[Axes, ...]]
             If blobs_image is provided, blobs_axes must be provided as well.  blobs_axes represents
             the axes across which the blobs image is max projected before spot detection is done.
+        n_processes : Optional[int] = None,
+            Number of processes to devote to spot finding.
         """
 
         intensity_table = detect_spots(
@@ -157,6 +160,7 @@ class BlobDetector(SpotFinderAlgorithmBase):
             reference_image=blobs_image,
             reference_image_max_projection_axes=blobs_axes,
             measurement_function=self.measurement_function,
+            n_processes=n_processes,
             radius_is_gyration=False)
 
         return intensity_table

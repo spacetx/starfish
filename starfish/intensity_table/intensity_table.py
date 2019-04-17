@@ -25,30 +25,22 @@ from .overlap import (
 
 
 class IntensityTable(xr.DataArray):
-    """Container for spot/pixel features extracted from image data
+    """
+    IntensityTable is a container for spot or pixel features extracted from
+    image data. It is the primary output from starfish :py:class:`SpotFinder`
+    methods.
 
-    An IntensityTable is comprised of each feature's intensity across channels and imaging
-    rounds, where features are typically spots or pixels. This forms an
-    ``(n_feature, n_channel, n_round)`` tensor implemented as an xarray.DataArray object.
-    In addition to the basic xarray methods, IntensityTable implements:
+    An IntensityTable records the numeric intensity of a set of features in each
+    :code:`(round, channel)` tile in which the feature is identified.
+    The :py:class:`IntensityTable` has shape
+    :code:`(n_feature, n_channel, n_round)`.
 
-    Methods
-    -------
-    empty_intensity_table(spot_attributes, n_ch, n_round)
-        creates an IntensityTable with all intensities equal to zero
-
-    from_spot_data(intensities, spot_attributes)
-        creates an IntensityTable from a 3d array and a spot attributes dataframe
-
-    synthetic_intensities(codebook, num_z=12, height=50, width=40, n_spots=10, \
-            mean_fluor_per_spot=200, mean_photons_per_fluor=50)
-        creates an IntensityTable with synthetic spots, given a codebook
-
-    save(filename)
-        save the IntensityTable to netCDF
-
-    load(filename)
-        load an IntensityTable from netCDF
+    Some :py:class:`SpotFinder` methods identify a position and search for
+    Gaussian blobs in a small radius, only recording intensities if they are
+    found in a given tile. Other :py:class:SpotFinder: approaches
+    find blobs in a max-projection and measure them everywhere. As a result,
+    some IntensityTables will be dense, and others will contain :code:`np.nan`
+    entries where no feature was detected.
 
     Examples
     --------
@@ -82,7 +74,7 @@ class IntensityTable(xr.DataArray):
     def _build_xarray_coords(
             spot_attributes: SpotAttributes, channel_index: np.ndarray, round_index: np.ndarray
     ) -> Dict[str, np.ndarray]:
-        """build a non-multi-index set of coordinates for intensity-table"""
+        """build coordinates for intensity-table"""
         coordinates = {
             k: (Features.AXIS, spot_attributes.data[k].values)
             for k in spot_attributes.data}
@@ -97,22 +89,23 @@ class IntensityTable(xr.DataArray):
     def empty_intensity_table(
             cls, spot_attributes: SpotAttributes, n_ch: int, n_round: int,
     ) -> "IntensityTable":
-        """Create an empty intensity table with pre-set axis whose values are zero
+        """
+        Create an empty intensity table with pre-set shape whose values are zero.
 
         Parameters
         ----------
-        spot_attributes : pd.MultiIndex
-            MultiIndex containing spot metadata. Must contain the values specifid in Constants.X,
+        spot_attributes : SpotAttributes
+            Table containing spot metadata. Must contain the values specified in Axes.X,
             Y, Z, and RADIUS.
         n_ch : int
-            number of channels measured in the imaging experiment
+            Number of channels measured in the imaging experiment.
         n_round : int
-            number of imaging rounds measured in the imaging experiment
+            Number of imaging rounds measured in the imaging experiment.
 
         Returns
         -------
         IntensityTable :
-            empty IntensityTable
+            IntensityTable filled with zeros.
 
         """
         if not isinstance(spot_attributes, SpotAttributes):
@@ -134,28 +127,27 @@ class IntensityTable(xr.DataArray):
     def from_spot_data(
             cls, intensities: Union[xr.DataArray, np.ndarray], spot_attributes: SpotAttributes,
             *args, **kwargs) -> "IntensityTable":
-        """Table to store image feature intensities and associated metadata
+        """
+        Creates an IntensityTable from a :code:`(features, channel, round)`
+        array and a :py:class:`~starfish.types._spot_attributes.SpotAttributes`
+        object.
 
         Parameters
         ----------
-        intensities : np.ndarray[Any]
-            intensity data
-        spot_attributes : pd.DataFrame
-            Name(s) of the data dimension(s). Must be either a string (only
-            for 1D data) or a sequence of strings with length equal to the
-            number of dimensions. If this argument is omitted, dimension names
-            are taken from ``coords`` (if possible) and otherwise default to
-            ``['dim_0', ... 'dim_n']``.
+        intensities : Union[xr.DataArray, np.ndarray]
+            Intensity data.
+        spot_attributes : SpotAttributes
+            Table containing spot metadata. Must contain the values specified in Axes.X,
+            Y, Z, and RADIUS.
         args :
-            additional arguments to pass to the xarray constructor
+            Additional arguments to pass to the xarray constructor.
         kwargs :
-            additional keyword arguments to pass to the xarray constructor
+            Additional keyword arguments to pass to the xarray constructor.
 
         Returns
         -------
         IntensityTable :
-            IntensityTable containing data from passed ndarray, annotated by spot_attributes
-
+            IntensityTable containing data from passed intensities, annotated by spot_attributes
         """
 
         if len(intensities.shape) != 3:
@@ -177,8 +169,10 @@ class IntensityTable(xr.DataArray):
         return intensities
 
     def get_log(self):
-        """Deserialize and return a list of pipeline components that have been applied
-         throughout a starfish session to create this Intensity Table"""
+        """
+        Deserialize and return a list of pipeline components that have been applied
+        throughout a starfish session to create this :py:class:IntensityTable:.
+        """
 
         if STARFISH_EXTRAS_KEY in self.attrs and LOG in self.attrs[STARFISH_EXTRAS_KEY]:
             return loads(self.attrs[STARFISH_EXTRAS_KEY])[LOG]
@@ -187,15 +181,17 @@ class IntensityTable(xr.DataArray):
 
     @property
     def has_physical_coords(self):
+        """Returns True if this table's features have physical-space loci."""
         return Coordinates.X in self.coords and Coordinates.Y in self.coords
 
     def save(self, filename: str) -> None:
-        """Save an IntensityTable as a Netcdf File
+        """
+        Save an IntensityTable as a Netcdf File.
 
         Parameters
         ----------
         filename : str
-            Name of Netcdf file
+            Name of Netcdf file.
 
         """
         self.to_netcdf(filename)
@@ -211,7 +207,7 @@ class IntensityTable(xr.DataArray):
         Parameters
         ----------
         filename : str
-            name for compressed-gzipped MERMAID data file. Should end in '.csv.gz'
+            Name for compressed-gzipped MERMAID data file. Should end in '.csv.gz'.
 
         See Also
         --------
@@ -241,12 +237,13 @@ class IntensityTable(xr.DataArray):
 
     @classmethod
     def load(cls, filename: str) -> "IntensityTable":
-        """load an IntensityTable from Netcdf
+        """
+        Load an IntensityTable from Netcdf.
 
         Parameters
         ----------
         filename : str
-            File to load
+            File to load.
 
         Returns
         -------
@@ -262,33 +259,31 @@ class IntensityTable(xr.DataArray):
         )
         return intensity_table
 
-    def show(self, background_image: np.ndarray) -> None:
-        """show spots on a background image"""
-        raise NotImplementedError
-
     @classmethod
     def synthetic_intensities(
             cls, codebook, num_z: int=12, height: int=50, width: int=40, n_spots=10,
             mean_fluor_per_spot=200, mean_photons_per_fluor=50
     ) -> "IntensityTable":
-        """Create an IntensityTable containing synthetic spots with random locations
+        """
+        Creates an IntensityTable with synthetic spots, that correspond to valid
+        codes in a provided codebook.
 
         Parameters
         ----------
         codebook : Codebook
-            starfish codebook object
-        num_z :
-            number of z-planes to use when localizing spots
-        height :
-            y dimension of each synthetic plane
-        width :
-            x dimension of each synthetic plane
-        n_spots :
-            number of spots to generate
-        mean_fluor_per_spot :
-            mean number of fluorophores per spot
-        mean_photons_per_fluor :
-            mean number of photons per fluorophore.
+            Starfish codebook object.
+        num_z : int
+            Number of z-planes to use when localizing spots.
+        height : int
+            y dimension of each synthetic plane.
+        width : int
+            x dimension of each synthetic plane.
+        n_spots : int
+            Number of spots to generate.
+        mean_fluor_per_spot : int
+            Mean number of fluorophores per spot.
+        mean_photons_per_fluor : int
+            Mean number of photons per fluorophore.
 
         Returns
         -------
@@ -345,18 +340,18 @@ class IntensityTable(xr.DataArray):
         Parameters
         ----------
         crop_x : int
-            number of pixels to crop from both top and bottom of x
+            Number of pixels to crop from both top and bottom of x.
         crop_y : int
-            number of pixels to crop from both top and bottom of y
+            Number of pixels to crop from both top and bottom of y.
         crop_z : int
-            number of pixels to crop from both top and bottom of z
+            Number of pixels to crop from both top and bottom of z.
         image_stack : ImageStack
-            ImageStack containing pixels to be treated as intensities
+            ImageStack containing pixels to be treated as intensities.
 
         Returns
         -------
         IntensityTable :
-            IntensityTable containing one intensity per pixel (across channels and rounds)
+            IntensityTable containing one intensity per pixel (across channels and rounds).
 
         """
 
@@ -405,10 +400,12 @@ class IntensityTable(xr.DataArray):
         return IntensityTable.from_spot_data(intensity_data, pixel_coordinates)
 
     @staticmethod
-    def process_overlaps(intensity_tables: List["IntensityTable"],
-                         overlap_strategy: OverlapStrategy
-                         ) -> List["IntensityTable"]:
-        """Find the overlapping sections between IntensityTables and process them according
+    def process_overlaps(
+        intensity_tables: List["IntensityTable"],
+        overlap_strategy: OverlapStrategy
+    ) -> List["IntensityTable"]:
+        """
+        Find the overlapping sections between IntensityTables and process them according
         to the given overlap strategy
         """
         overlap_pairs = find_overlaps_of_xarrays(intensity_tables)
@@ -423,21 +420,24 @@ class IntensityTable(xr.DataArray):
         return intensity_tables
 
     @staticmethod
-    def concatanate_intensity_tables(intensity_tables: List["IntensityTable"],
-                                     overlap_strategy: Optional[OverlapStrategy] = None):
+    def concatanate_intensity_tables(
+        intensity_tables: List["IntensityTable"],
+        overlap_strategy: Optional[OverlapStrategy] = None
+    ) -> "IntensityTable":
         if overlap_strategy:
-            intensity_tables = IntensityTable.process_overlaps(intensity_tables,
-                                                               overlap_strategy)
+            intensity_tables = IntensityTable.process_overlaps(
+                intensity_tables, overlap_strategy
+            )
         return xr.concat(intensity_tables, dim=Features.AXIS)
 
     def to_features_dataframe(self) -> pd.DataFrame:
-        """Generates a dataframe of the underlying features multi-index.
+        """
+        Generates a dataframe of the underlying features metadata.
         This is guaranteed to contain the features x, y, z, and radius.
 
         Returns
         -------
         pd.DataFrame
-
         """
         return pd.DataFrame(dict(self[Features.AXIS].coords))
 
@@ -455,7 +455,8 @@ class IntensityTable(xr.DataArray):
         return DecodedSpots(df)
 
     def to_expression_matrix(self) -> ExpressionMatrix:
-        """Generates a cell x gene count matrix where each cell is annotated with spatial metadata
+        """
+        Generates a cell x gene count matrix where each cell is annotated with spatial metadata.
 
         Requires that spots in the IntensityTable have been assigned to cells.
 
@@ -493,7 +494,11 @@ class IntensityTable(xr.DataArray):
         return mat
 
     def feature_trace_magnitudes(self) -> np.ndarray:
-        """Return the magnitudes of each feature across rounds and channels
+        """
+        Return the magnitudes of each feature across rounds and channels.
+
+        Magnitudes are the L2 norm of the linearized intensities for each
+        feature.
 
         Returns
         -------
@@ -502,6 +507,6 @@ class IntensityTable(xr.DataArray):
 
         """
         feature_traces = self.stack(traces=(Axes.CH.value, Axes.ROUND.value))
-        norm = np.linalg.norm(feature_traces.values, ord=2, axis=1)  # 2 = feature magnitudes
+        norm = np.linalg.norm(feature_traces.values, ord=2, axis=1)
 
         return norm

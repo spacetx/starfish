@@ -3,8 +3,9 @@ import copy
 import numpy as np
 
 from starfish.imagestack.imagestack import ImageStack
+from starfish.test.factories import SyntheticData
 from starfish.types import Axes, Clip
-from starfish.util.synthesize import SyntheticData
+from .factories import synthetic_stack
 
 
 def divide(array, value):
@@ -13,7 +14,7 @@ def divide(array, value):
 
 def test_apply():
     """test that apply correctly applies a simple function across 2d tiles of a Stack"""
-    stack = ImageStack.synthetic_stack()
+    stack = synthetic_stack()
     assert (stack.xarray == 1).all()
     output = stack.apply(divide, value=2)
     assert (output.xarray == 0.5).all()
@@ -21,7 +22,7 @@ def test_apply():
 
 def test_apply_3d():
     """test that apply correctly applies a simple function across 3d volumes of a Stack"""
-    stack = ImageStack.synthetic_stack()
+    stack = synthetic_stack()
     assert np.all(stack.xarray == 1)
     stack.apply(divide, in_place=True, value=4,
                 group_by={Axes.ROUND, Axes.CH})
@@ -50,7 +51,7 @@ def test_apply_in_place():
 
 def test_apply_single_process():
     """test that apply correctly applies a simple function across 2d tiles of a Stack"""
-    stack = ImageStack.synthetic_stack()
+    stack = synthetic_stack()
     assert (stack.xarray == 1).all()
     output = stack.apply(divide, value=2, n_processes=1)
     assert (output.xarray == 0.5).all()

@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
-from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
+from .factories import synthetic_stack
 
 
 def test_imagestack_indexing():
@@ -12,8 +12,7 @@ def test_imagestack_indexing():
 
     """
 
-    stack = ImageStack.synthetic_stack(num_round=5, num_ch=5, num_z=15,
-                                       tile_height=200, tile_width=200)
+    stack = synthetic_stack(num_round=5, num_ch=5, num_z=15, tile_height=200, tile_width=200)
 
     # index on range of rounds and single ch and Z
     indexed = stack.sel({Axes.ROUND: (1, None), Axes.CH: 0, Axes.ZPLANE: 0})

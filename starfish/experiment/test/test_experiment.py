@@ -5,8 +5,8 @@ from slicedimage import Tile, TileSet
 
 import starfish.data
 from starfish.experiment.experiment import Experiment, FieldOfView
+from starfish.test.factories import SyntheticData
 from starfish.types import Axes, Coordinates
-from starfish.util.synthesize import SyntheticData
 
 
 def round_to_x(r: int) -> Tuple[float, float]:

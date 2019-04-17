@@ -8,8 +8,8 @@ from slicedimage import ImageFormat
 
 from starfish.errors import DataFormatWarning
 from starfish.experiment.builder import FetchedTile, TileFetcher
-from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes, Coordinates, Number
+from .factories import synthetic_stack
 
 NUM_ROUND = 2
 NUM_CH = 2
@@ -70,7 +70,7 @@ class CornerDifferentDtype(TileFetcher):
 
 def test_multiple_tiles_of_different_kind():
     with pytest.raises(TypeError):
-        ImageStack.synthetic_stack(
+        synthetic_stack(
             NUM_ROUND, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_fetcher=CornerDifferentDtype(np.uint32, np.float32),
@@ -78,7 +78,7 @@ def test_multiple_tiles_of_different_kind():
 
 
 def test_multiple_tiles_of_same_dtype():
-    stack = ImageStack.synthetic_stack(
+    stack = synthetic_stack(
         NUM_ROUND, NUM_CH, NUM_Z,
         HEIGHT, WIDTH,
         tile_fetcher=CornerDifferentDtype(np.uint32, np.uint32),
@@ -94,7 +94,7 @@ def test_multiple_tiles_of_same_dtype():
 
 def test_int_type_promotion():
     with warnings.catch_warnings(record=True) as warnings_:
-        stack = ImageStack.synthetic_stack(
+        stack = synthetic_stack(
             NUM_ROUND, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_fetcher=CornerDifferentDtype(np.int32, np.int8),
@@ -117,7 +117,7 @@ def test_int_type_promotion():
 
 def test_uint_type_promotion():
     with warnings.catch_warnings(record=True) as warnings_:
-        stack = ImageStack.synthetic_stack(
+        stack = synthetic_stack(
             NUM_ROUND, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_fetcher=CornerDifferentDtype(np.uint32, np.uint8),
@@ -140,7 +140,7 @@ def test_uint_type_promotion():
 
 def test_float_type_demotion():
     with warnings.catch_warnings(record=True) as warnings_:
-        stack = ImageStack.synthetic_stack(
+        stack = synthetic_stack(
             NUM_ROUND, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_fetcher=CornerDifferentDtype(np.float64, np.float32),

@@ -184,7 +184,7 @@ pre-processing should be applied, please open an issue.
 
 
 Getting started with the CLI
-============================
+----------------------------
 
 The simplest way to get started with starfish for most users will be to try out the
 command-line interface (CLI). After following the :ref:`installation <installation>`
@@ -208,7 +208,7 @@ will print out the subcommands that are available.
 
 
 Data Formatting Examples
-========================
+------------------------
 
 This section provides several examples of how to format data into SpaceTx-Format from a variety of
 types of input data shapes and sizes, demonstrating the flexibility of :py:class:`TileFetcher`.
@@ -221,7 +221,7 @@ types of input data shapes and sizes, demonstrating the flexibility of :py:class
      data_formatting_examples/index.rst
 
 Data Processing examples
-========================
+------------------------
 
 This section provides several examples of how to apply starfish to data from a variety of assay
 types assuming your data is already in spaceTx format.

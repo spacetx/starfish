@@ -25,7 +25,7 @@ class TargetAssignment(PipelineComponent):
         output = ctx.obj["output"]
         intensity_table = ctx.obj["intensity_table"]
         label_image = ctx.obj["label_image"]
-        assigned = instance.run(label_image, intensity_table)
+        assigned: IntensityTable = instance.run(label_image, intensity_table)
         print(f"Writing intensities, including cell ids to {output}")
         assigned.to_netcdf(os.path.join(output))
 

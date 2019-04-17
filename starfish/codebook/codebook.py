@@ -68,7 +68,7 @@ class Codebook(xr.DataArray):
         return int(np.dot(*self.shape[1:]))
 
     @classmethod
-    def empty(cls, code_names: Sequence[str], n_channel: int, n_round: int):
+    def zeros(cls, code_names: Sequence[str], n_channel: int, n_round: int):
         """
         Create an empty codebook of shape (code_names, n_channel, n_round)
 
@@ -86,7 +86,7 @@ class Codebook(xr.DataArray):
         Build an empty 2-round 3-channel codebook::
 
             >>> from starfish import Codebook
-            >>> Codebook.empty(['ACTA', 'ACTB'], n_channel=3, n_round=2)
+            >>> Codebook.zeros(['ACTA', 'ACTB'], n_channel=3, n_round=2)
             <xarray.Codebook (target: 2, c: 3, r: 2)>
             array([[[0, 0],
                     [0, 0],

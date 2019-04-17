@@ -32,3 +32,5 @@ del get_versions
 
 if __name__ == "__main__":
     starfish()
+
+del warnings, pkg_resources

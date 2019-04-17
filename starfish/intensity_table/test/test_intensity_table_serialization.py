@@ -24,8 +24,8 @@ def test_intensity_table_serialization():
     # dump it to disk
     tempdir = tempfile.mkdtemp()
     filename = os.path.join(tempdir, 'test.nc')
-    intensities.save(filename)
+    intensities.to_netcdf(filename)
 
     # verify the data has not changed
-    loaded = intensities.load(filename)
+    loaded = intensities.open_netcdf(filename)
     assert intensities.equals(loaded)

@@ -29,7 +29,7 @@ class CLITest:
 
     def test_run_pipline(self):
         tempdir = exec.stages(self.stages, self.subdirs, keep_data=True)
-        intensities = IntensityTable.load(os.path.join(tempdir, "results", self.spots_file))
+        intensities = IntensityTable.open_netcdf(os.path.join(tempdir, "results", self.spots_file))
         self.verify_results(intensities)
 
         if os.getenv("TEST_KEEP_DATA") is None:

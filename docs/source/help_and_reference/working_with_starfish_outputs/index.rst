@@ -9,14 +9,14 @@ easy to work with in both Python_ and R_.
 .. _Python: https://www.python.org/
 .. _R: https://www.r-project.org/about.html
 
-To work with the :py:class:`IntensityTable` in python, it's as simple as using that object's load
+To work with the :py:class:`IntensityTable` in python, it's as simple as using that object's open_netcdf
 command:
 
 .. code-block:: python
 
     import starfish
     example_netcdf_file: str = "docs/source/_static/example_data_files/decoded.nc"
-    intensity_table: starfish.IntensityTable = starfish.IntensityTable.load(example_netcdf_file)
+    intensity_table: starfish.IntensityTable = starfish.IntensityTable.open_netcdf(example_netcdf_file)
     print(intensity_table)
 
 in R_, the ncdf4 library allows the :code:`.nc` archive, which is based on hdf5, to be opened.

@@ -107,7 +107,7 @@ def processing_pipeline(
         spot_attributes = tlmpf.run(primary_image)
         all_intensities.append(spot_attributes)
 
-    spot_attributes = IntensityTable.concatanate_intensity_tables(all_intensities)
+    spot_attributes = IntensityTable.concatenate_intensity_tables(all_intensities)
 
     print("Decoding spots...")
     decoded = codebook.decode_per_round_max(spot_attributes)

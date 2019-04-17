@@ -27,17 +27,14 @@ class SpotFinder(PipelineComponent):
         blobs_stack = ctx.obj["blobs_stack"]
         blobs_axes = ctx.obj["blobs_axes"]
 
-        intensities = instance.run(
+        intensities: IntensityTable = instance.run(
             image_stack,
             blobs_stack,
             blobs_axes,
         )
 
-        # When run() returns a tuple, we only save the intensities for now
         # TODO ambrosejcarr find a way to save arbitrary detector results
-        if isinstance(intensities, tuple):
-            intensities = intensities[0]
-        intensities.save(output)
+        intensities.to_netcdf(output)
 
     @staticmethod
     @click.group(COMPONENT_NAME)

@@ -86,7 +86,7 @@ class IntensityTable(xr.DataArray):
         return coordinates
 
     @classmethod
-    def empty(
+    def zeros(
             cls, spot_attributes: SpotAttributes, n_ch: int, n_round: int,
     ) -> "IntensityTable":
         """

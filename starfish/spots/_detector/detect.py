@@ -98,7 +98,7 @@ def measure_spot_intensities(
     n_round = data_image.shape[Axes.ROUND]
 
     # construct the empty intensity table
-    intensity_table = IntensityTable.empty(
+    intensity_table = IntensityTable.zeros(
         spot_attributes=spot_attributes,
         n_ch=n_ch,
         n_round=n_round,
@@ -149,7 +149,7 @@ def concatenate_spot_attributes_to_intensities(
     # this drop call ensures only x, y, z, radius, and quality, are passed to the IntensityTable
     features_coordinates = all_spots.drop(['spot_id', 'intensity'], axis=1)
 
-    intensity_table = IntensityTable.empty(
+    intensity_table = IntensityTable.zeros(
         SpotAttributes(features_coordinates), n_ch, n_round,
     )
 

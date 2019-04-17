@@ -27,7 +27,7 @@ def test_intensity_table_can_be_created_from_spot_attributes():
         )
     )
 
-    intensities = IntensityTable.empty(
+    intensities = IntensityTable.zeros(
         spot_attributes,
         n_ch=1,
         n_round=3
@@ -51,4 +51,4 @@ def test_from_spot_attributes_throws_type_error_when_passed_a_dataframe():
     )
 
     with pytest.raises(TypeError):
-        IntensityTable.empty(not_spot_attributes, n_ch=1, n_round=3)
+        IntensityTable.zeros(not_spot_attributes, n_ch=1, n_round=3)

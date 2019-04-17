@@ -3,8 +3,7 @@ from typing import List, Optional, Sequence, Tuple
 
 import xarray as xr
 
-from starfish.types import Coordinates, Features, Number
-from starfish.types import OverlapStrategy
+from starfish.types import Coordinates, Features, Number, OverlapStrategy
 
 
 class Area:

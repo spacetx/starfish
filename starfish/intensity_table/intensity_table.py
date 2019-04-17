@@ -18,7 +18,7 @@ from starfish.types import (
     STARFISH_EXTRAS_KEY
 )
 from starfish.util.dtype import preserve_float_range
-from starfish.util.overlap_utils import (
+from .overlap import (
     find_overlaps_of_xarrays,
     OVERLAP_STRATEGY_MAP,
 )

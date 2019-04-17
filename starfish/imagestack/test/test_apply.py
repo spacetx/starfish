@@ -1,6 +1,7 @@
 import copy
 
 import numpy as np
+import xarray as xr
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.test.factories import SyntheticData
@@ -82,6 +83,7 @@ def test_apply_clipping_methods():
         apply_function, clip_method=Clip.SCALE_BY_IMAGE, in_place=False, n_processes=1
     )
     assert np.allclose(imagestack.xarray, res.xarray)
+    assert isinstance(imagestack.xarray, xr.DataArray)
 
     # clip_method 2
     res = imagestack.apply(

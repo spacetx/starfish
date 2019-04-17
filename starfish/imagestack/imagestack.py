@@ -708,7 +708,7 @@ class ImageStack:
 
         # scale based on values of whole image
         if clip_method == Clip.SCALE_BY_IMAGE:
-            self._data = preserve_float_range(self._data, rescale=True)
+            self._data.data.values = preserve_float_range(self._data.data.values, rescale=True)
 
         return self
 

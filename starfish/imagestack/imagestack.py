@@ -1072,7 +1072,11 @@ class ImageStack:
             default_tile_shape={Axes.Y: self.tile_shape[0], Axes.X: self.tile_shape[1]},
             extras=self._tile_data.extras,
         )
-        for tilekey in self._tile_data.keys():
+        for axis_val_map in self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
+            tilekey = TileKey(
+                round=axis_val_map[Axes.ROUND],
+                ch=axis_val_map[Axes.CH],
+                zplane=axis_val_map[Axes.ZPLANE])
             round_, ch, zplane = tilekey.round, tilekey.ch, tilekey.z
             extras: dict = self._tile_data[tilekey]
 

@@ -29,3 +29,9 @@ Pixel Spot Decoder
 
 .. autoclass:: starfish.spots._pixel_decoder.pixel_spot_decoder.PixelSpotDecoder
     :members:
+
+Trackpy Local Max Peak Finder
+------------------------------
+
+.. autoclass:: starfish.spots._detector.trackpy_local_max_peak_finder.TrackpyLocalMaxPeakFinder
+    :members:

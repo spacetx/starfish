@@ -24,38 +24,39 @@ from .detect import detect_spots
 # however, they are lost due to the memory-space forking induced by multi-processing.
 
 class LocalMaxPeakFinder(SpotFinderAlgorithmBase):
+    """2-dimensional local-max peak finder that wraps skimage.feature.peak_local_max
+
+       Parameters
+       -----------
+       min_distance : int
+           Minimum number of pixels separating peaks in a region of 2 * min_distance + 1
+           (i.e. peaks are separated by at least min_distance). To find the maximum number of
+           peaks, use min_distance=1.
+       stringency : int
+       min_obj_area : int
+       max_obj_area : int
+       threshold : Optional[Number]
+       measurement_type : str, {'max', 'mean'}
+           default 'max' calculates the maximum intensity inside the object
+       min_num_spots_detected : int
+           When fewer than this number of spots are detected, spot searching for higher threshold
+           values. (default = 3)
+       is_volume : bool
+           Not supported. For 3d peak detection please use TrackpyLocalMaxPeakFinder.
+           (default=False)
+       verbose : bool
+           If True, report the percentage completed (default = False) during processing
+
+       Notes
+       ------
+       See Also: :py:func:`~skimage.feature.peak_local_max`
+
+           """
     def __init__(
         self, min_distance: int, stringency: int, min_obj_area: int, max_obj_area: int,
         threshold: Optional[Number]=None, measurement_type: str='max',
         min_num_spots_detected: int=3, is_volume: bool=False, verbose: bool=True
     ) -> None:
-        """2-dimensional local-max peak finder that wraps skimage.feature.peak_local_max
-
-        Parameters:
-        min_distance : int
-            Minimum number of pixels separating peaks in a region of 2 * min_distance + 1
-            (i.e. peaks are separated by at least min_distance). To find the maximum number of
-            peaks, use min_distance=1.
-        stringency : int
-        min_obj_area : int
-        max_obj_area : int
-        threshold : Optional[Number]
-        measurement_type : str, {'max', 'mean'}
-            default 'max' calculates the maximum intensity inside the object
-        min_num_spots_detected : int
-            When fewer than this number of spots are detected, spot searching for higher threshold
-            values. (default = 3)
-        is_volume : bool
-            Not supported. For 3d peak detection please use TrackpyLocalMaxPeakFinder.
-            (default=False)
-        verbose : bool
-            If True, report the percentage completed (default = False) during processing
-
-        See Also
-        --------
-        http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.peak_local_max
-        """
-
         self.min_distance = min_distance
         self.stringency = stringency
         self.min_obj_area = min_obj_area

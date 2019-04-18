@@ -16,6 +16,28 @@ from ._base import SegmentationAlgorithmBase
 
 
 class Watershed(SegmentationAlgorithmBase):
+    """Implements watershed segmentation of cells.
+
+          Algorithm is seeded by nuclei image. Binary segmentation mask is computed from a maximum
+          projection of spots across C and R, which is subsequently thresholded.
+
+          This function wraps skimage watershed.
+
+          Parameters
+          ----------
+          nuclei_threshold : Number
+              threshold to apply to nuclei image
+          input_threshold : Number
+              threshold to apply to stain image
+          min_distance : int
+              minimum distance before object centers in a provided nuclei image are considered single
+              nuclei
+
+          Notes
+          ------
+          See Also `Watershed <https://scikit-image.org/docs/dev/auto_examples/segmentation/plot_watershed.html>`_
+
+          """
 
     def __init__(
         self,
@@ -23,28 +45,6 @@ class Watershed(SegmentationAlgorithmBase):
         input_threshold: Number,
         min_distance: int,
     ) -> None:
-        """Implements watershed segmentation of cells.
-
-        Algorithm is seeded by nuclei image. Binary segmentation mask is computed from a maximum
-        projection of spots across C and R, which is subsequently thresholded.
-
-        This function wraps skimage watershed.
-
-        Parameters
-        ----------
-        nuclei_threshold : Number
-            threshold to apply to nuclei image
-        input_threshold : Number
-            threshold to apply to stain image
-        min_distance : int
-            minimum distance before object centers in a provided nuclei image are considered single
-            nuclei
-
-        See Also
-        --------
-        Watershed: http://scikit-image.org/docs/dev/auto_examples/segmentation/plot_watershed.html
-
-        """
         self.nuclei_threshold = nuclei_threshold
         self.input_threshold = input_threshold
         self.min_distance = min_distance

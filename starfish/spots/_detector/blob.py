@@ -66,9 +66,9 @@ class BlobDetector(SpotFinderAlgorithmBase):
         is defined as an absolute value -- therefore it must be adjusted depending on the datatype
         of the passed image.
 
-        See Also
-        --------
-        http://scikit-image.org/docs/dev/auto_examples/features_detection/plot_blob.html
+        Notes
+        -----
+        See Also `<http://scikit-image.org/docs/dev/auto_examples/features_detection/plot_blob.html>`_
 
         """
         self.min_sigma = min_sigma

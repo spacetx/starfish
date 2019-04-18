@@ -11,20 +11,19 @@ from ._base import LearnTransformBase
 
 
 class Translation(LearnTransformBase):
-
+    """
+            Parameters
+            ----------
+            axes:
+                The axes {r, ch, zplane} to iterate over
+            reference_stack: ImageStack
+                The target image used in skimage.feature.register_translation
+            upsampling: int
+                upsampling factor (default=1). See
+                :py:func:`~skimage.feature.register_translation`
+                for an explanation of this parameter.
+            """
     def __init__(self, reference_stack: ImageStack, axes: Axes, upsampling: int=1):
-        """
-        Parameters
-        ----------
-        axes:
-            The axes {r, ch, zplane} to iterate over
-        reference_stack: ImageStack
-            The target image used in skimage.feature.register_translation
-        upsampling: int
-            upsampling factor (default=1). See
-            http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.register_translation
-            for an explanation of this parameter.
-        """
         self.upsampling = upsampling
         self.axes = axes
         self.reference_stack = reference_stack

@@ -25,7 +25,7 @@ def labeled_intensities_factory() -> Tuple[IntensityTable, np.ndarray, np.ndarra
           [[.2, .3], [.5, .5]]]],
         dtype=np.float32
     )
-    image_stack = ImageStack.from_numpy_array(data.reshape(1, 2, 2, 2, 2))
+    image_stack = ImageStack.from_numpy(data.reshape(1, 2, 2, 2, 2))
     intensity_table = IntensityTable.from_image_stack(image_stack)
     intensity_table[Features.DISTANCE] = (Features.AXIS, np.zeros(intensity_table.shape[0]))
     label_image = np.array(

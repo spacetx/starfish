@@ -126,7 +126,7 @@ def test_imagestack_deepcopy(nitems: int=10) -> None:
     shape = (nitems, 3, 4, 5, 6)
     dtype = np.float32
     source = np.zeros(shape, dtype=np.float32)
-    imagestack = ImageStack.from_numpy_array(source)
+    imagestack = ImageStack.from_numpy(source)
     imagestack_copy = copy.deepcopy(imagestack)
     _start_process_to_test_shmem(
         array_holder=imagestack_copy._data._backing_mp_array,
@@ -151,7 +151,7 @@ def test_imagestack_xarray_deepcopy(nitems: int=10) -> None:
     shape = (nitems, 3, 4, 5, 6)
     dtype = np.float32
     source = np.zeros(shape, dtype=dtype)
-    imagestack = ImageStack.from_numpy_array(source)
+    imagestack = ImageStack.from_numpy(source)
     with warnings.catch_warnings(record=True) as warnings_:
         copy.deepcopy(imagestack.xarray)
         assert len(warnings_) == 1  # type: ignore

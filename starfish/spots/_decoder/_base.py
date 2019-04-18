@@ -21,8 +21,8 @@ class Decoder(PipelineComponent):
         table = ctx.obj["intensities"]
         codes = ctx.obj["codebook"]
         output = ctx.obj["output"]
-        intensities = instance.run(table, codes)
-        intensities.save(output)
+        intensities: IntensityTable = instance.run(table, codes)
+        intensities.to_netcdf(output)
 
     @staticmethod
     @click.group(COMPONENT_NAME)
@@ -36,7 +36,7 @@ class Decoder(PipelineComponent):
             component=Decoder,
             input=input,
             output=output,
-            intensities=IntensityTable.load(input),
+            intensities=IntensityTable.open_netcdf(input),
             codebook=codebook,
         )
 

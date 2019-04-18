@@ -94,14 +94,14 @@ def measure_spot_intensities(
     """
 
     # determine the shape of the intensity table
-    n_ch = data_image.shape[Axes.CH]
-    n_round = data_image.shape[Axes.ROUND]
+    ch_values = data_image.axis_labels(Axes.CH)
+    round_values = data_image.axis_labels(Axes.ROUND)
 
     # construct the empty intensity table
-    intensity_table = IntensityTable.empty_intensity_table(
+    intensity_table = IntensityTable.zeros(
         spot_attributes=spot_attributes,
-        n_ch=n_ch,
-        n_round=n_round,
+        ch_values=ch_values,
+        round_values=round_values,
     )
 
     # if no spots were detected, return the empty IntensityTable
@@ -109,7 +109,7 @@ def measure_spot_intensities(
         return intensity_table
 
     # fill the intensity table
-    indices = product(range(n_ch), range(n_round))
+    indices = product(ch_values, round_values)
     for c, r in indices:
         image, _ = data_image.get_slice({Axes.CH: c, Axes.ROUND: r})
         blob_intensities: pd.Series = measure_spot_intensity(
@@ -142,15 +142,15 @@ def concatenate_spot_attributes_to_intensities(
         concatenated input SpotAttributes, converted to an IntensityTable object
 
     """
-    n_ch: int = max(inds[Axes.CH] for _, inds in spot_attributes) + 1
-    n_round: int = max(inds[Axes.ROUND] for _, inds in spot_attributes) + 1
+    ch_values: Sequence[int] = sorted(set(inds[Axes.CH] for _, inds in spot_attributes))
+    round_values: Sequence[int] = sorted(set(inds[Axes.ROUND] for _, inds in spot_attributes))
 
     all_spots = pd.concat([sa.data for sa, inds in spot_attributes], sort=True)
     # this drop call ensures only x, y, z, radius, and quality, are passed to the IntensityTable
     features_coordinates = all_spots.drop(['spot_id', 'intensity'], axis=1)
 
-    intensity_table = IntensityTable.empty_intensity_table(
-        SpotAttributes(features_coordinates), n_ch, n_round,
+    intensity_table = IntensityTable.zeros(
+        SpotAttributes(features_coordinates), ch_values, round_values,
     )
 
     i = 0

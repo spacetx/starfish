@@ -18,14 +18,14 @@ def test_intensity_table_serialization():
 
     # create an IntensityTable
     data = np.zeros(100, dtype=np.float32).reshape(1, 5, 2, 2, 5)
-    image_stack = ImageStack.from_numpy_array(data)
+    image_stack = ImageStack.from_numpy(data)
     intensities = IntensityTable.from_image_stack(image_stack)
 
     # dump it to disk
     tempdir = tempfile.mkdtemp()
     filename = os.path.join(tempdir, 'test.nc')
-    intensities.save(filename)
+    intensities.to_netcdf(filename)
 
     # verify the data has not changed
-    loaded = intensities.load(filename)
+    loaded = intensities.open_netcdf(filename)
     assert intensities.equals(loaded)

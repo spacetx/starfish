@@ -47,7 +47,7 @@ gradient = xr.DataArray(
 
 # introduce the gradient, overwriting the ImageStack
 data = image_2d.xarray.values / gradient.values
-image_2d = starfish.ImageStack.from_numpy_array(data)
+image_2d = starfish.ImageStack.from_numpy(data)
 
 # display the resulting image
 plt.imshow(np.squeeze(image_2d.xarray.values))

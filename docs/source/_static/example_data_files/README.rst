@@ -9,4 +9,4 @@ as follows:
 pipeline run on testing data and serialized using :py:meth:`DecodedSpots.save`.
 
 2. decoded.nc: A :code:`netcdf` file containing the :py:class:`IntensityTable` output from the ISS
-pipeline run on testing data and serialized using :py:meth:`IntensityTable.save`.
+pipeline run on testing data and serialized using :py:meth:`IntensityTable.to_netcdf`.

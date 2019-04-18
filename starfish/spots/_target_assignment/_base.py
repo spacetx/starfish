@@ -25,9 +25,9 @@ class TargetAssignment(PipelineComponent):
         output = ctx.obj["output"]
         intensity_table = ctx.obj["intensity_table"]
         label_image = ctx.obj["label_image"]
-        assigned = instance.run(label_image, intensity_table)
+        assigned: IntensityTable = instance.run(label_image, intensity_table)
         print(f"Writing intensities, including cell ids to {output}")
-        assigned.save(os.path.join(output))
+        assigned.to_netcdf(os.path.join(output))
 
     @staticmethod
     @click.group(COMPONENT_NAME)
@@ -42,7 +42,7 @@ class TargetAssignment(PipelineComponent):
         ctx.obj = dict(
             component=TargetAssignment,
             output=output,
-            intensity_table=IntensityTable.load(intensities),
+            intensity_table=IntensityTable.open_netcdf(intensities),
             label_image=SegmentationMaskCollection.from_disk(label_image)
         )
 

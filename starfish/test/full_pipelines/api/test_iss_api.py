@@ -131,8 +131,8 @@ def test_iss_pipeline_cropped_data():
 
     # Test serialization / deserialization of IntensityTable log
     fp = tempfile.NamedTemporaryFile()
-    assigned.save(fp.name)
-    loaded_intensities = IntensityTable.load(fp.name)
+    assigned.to_netcdf(fp.name)
+    loaded_intensities = IntensityTable.open_netcdf(fp.name)
     pipeline_log = loaded_intensities.get_log()
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'

@@ -15,7 +15,7 @@ def test_match_histograms():
 
     # because of how the image was structured, every volume should be the same after
     # quantile normalization
-    stack = ImageStack.from_numpy_array(image)
+    stack = ImageStack.from_numpy(image)
     mh = MatchHistograms({Axes.CH, Axes.ROUND})
     results = mh.run(stack)
     assert len(np.unique(results.xarray.sum(("x", "y", "z")))) == 1

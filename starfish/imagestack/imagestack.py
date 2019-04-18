@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import (
     Any,
     Callable,
-    Iterable,
     Iterator,
     List,
     Mapping,
@@ -296,7 +295,7 @@ class ImageStack:
         return cls.from_url(relativeurl, baseurl, aligned_group)
 
     @classmethod
-    def from_numpy_array(
+    def from_numpy(
             cls,
             array: np.ndarray,
             index_labels: Optional[Mapping[Axes, Sequence[int]]]=None,
@@ -356,7 +355,7 @@ class ImageStack:
 
         Parameters
         ----------
-        indexers : Dict[Axes, (int/tuple)]
+        indexers : Mapping[Axes, Union[int, tuple]]
             A dictionary of dim:index where index is the value or range to index the dimension
 
         Examples
@@ -382,13 +381,66 @@ class ImageStack:
         ImageStack :
             a new image stack indexed by given value or range.
         """
-
-        # convert indexers to Dict[str, (int/slice)] format
-        # TODO shanaxel42 check if this can be changed to xarray.copy(deep=false)
         stack = deepcopy(self)
         selector = indexing_utils.convert_to_selector(indexers)
         stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector)
         return stack
+
+    def isel(self, indexers: Mapping[Axes, Union[int, tuple]]):
+        """Given a dictionary mapping the index name to either a value or a range represented as a
+        tuple, return an Imagestack with each dimension indexed by position accordingly
+
+        Parameters
+        ----------
+        indexers : Dict[Axes, (int/tuple)]
+            A dictionary of dim:index where index is the value or range to index the dimension
+
+        Examples
+        --------
+
+        Create an Imagestack using the ``synthetic_stack`` method
+            >>> from starfish import ImageStack
+            >>> from starfish.types import Axes
+            >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
+            >>> stack
+            <starfish.ImageStack (r: 5, c: 5, z: 15, y: 200, x: 200)>
+            >>> stack.isel({Axes.ROUND: (1, None), Axes.CH: 0, Axes.ZPLANE: 0})
+            <starfish.ImageStack (r: 4, c: 1, z: 1, y: 200, x: 200)>
+            >>> stack.isel({Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 1,
+            ...Axes.Y: 100, Axes.X: (None, 100)})
+            <starfish.ImageStack (r: 1, c: 1, z: 1, y: 1, x: 100)>
+            and the imagestack's physical coordinates
+            xarray also indexed and recalculated according to the x,y slicing.
+
+        Returns
+        -------
+        ImageStack :
+            a new image stack indexed by given value or range.
+        """
+        stack = deepcopy(self)
+        selector = indexing_utils.convert_to_selector(indexers)
+        stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector, by_pos=True)
+        return stack
+
+    def sel_by_physical_coords(
+            self, indexers: Mapping[Coordinates, Union[Number, Tuple[Number, Number]]]):
+        """
+        Given a dictionary mapping the coordinate name to either a value or a range represented as a
+        tuple, return an Imagestack with each the Coordinate dimension indexed accordingly.
+
+        Parameters
+        ----------
+        indexers : Mapping[Coordinates, Union[Number, Tuple[Number, Number]]]:
+            A dictionary of coord:index where index is the value or range to index the coordinate
+            dimension.
+
+        Returns
+        -------
+        ImageStack :
+            a new image stack indexed by given value or range.
+        """
+        new_indexers = indexing_utils.convert_coords_to_indices(self.xarray, indexers)
+        return self.isel(new_indexers)
 
     def get_slice(
             self,
@@ -946,7 +998,7 @@ class ImageStack:
         """Return the number of z_planes in the ImageStack"""
         return self.xarray.sizes[Axes.ZPLANE]
 
-    def axis_labels(self, axis: Axes) -> Iterable[int]:
+    def axis_labels(self, axis: Axes) -> Sequence[int]:
         """Given an axis, return the sorted unique values for that axis in this ImageStack.  For
         instance, ``imagestack.axis_labels(Axes.ROUND)`` returns all the round ids in this
         imagestack."""
@@ -1095,7 +1147,7 @@ class ImageStack:
         max_projection = self._data.max([dim.value for dim in dims])
         max_projection = max_projection.expand_dims(tuple(dim.value for dim in dims))
         max_projection = max_projection.transpose(*self.xarray.dims)
-        max_proj_stack = self.from_numpy_array(max_projection.values)
+        max_proj_stack = self.from_numpy(max_projection.values)
         return max_proj_stack
 
     def _squeezed_numpy(self, *dims: Axes):

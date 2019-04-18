@@ -22,7 +22,12 @@ def intensity_table_factory(data: np.ndarray=np.array([[[0, 3], [4, 0]]])) -> In
         columns=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
     )
 
-    intensity_table = IntensityTable.from_spot_data(data, SpotAttributes(spot_attributes_data))
+    intensity_table = IntensityTable.from_spot_data(
+        data,
+        SpotAttributes(spot_attributes_data),
+        ch_values=np.arange(data.shape[1]),
+        round_values=np.arange(data.shape[2]),
+    )
     return intensity_table
 
 
@@ -70,7 +75,7 @@ def test_metric_decode():
     intensities = intensity_table_factory(data)
     codebook = codebook_factory()
 
-    decoded_intensities = codebook.metric_decode(
+    decoded_intensities = codebook.decode_metric(
         intensities,
         max_distance=0.5,
         min_intensity=1,
@@ -113,4 +118,4 @@ def test_unmatched_intensities_and_codebook_table_sizes_throws_value_error():
     codebook = Codebook.from_code_array(codebook_array)
     intensities = intensity_table_factory()
     with pytest.raises(ValueError):
-        codebook.metric_decode(intensities, max_distance=0.5, min_intensity=1, norm_order=1)
+        codebook.decode_metric(intensities, max_distance=0.5, min_intensity=1, norm_order=1)

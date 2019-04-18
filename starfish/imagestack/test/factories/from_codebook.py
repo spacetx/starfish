@@ -31,4 +31,4 @@ def create_imagestack_from_codebook(
 
     # blur with a small non-isotropic kernel TODO make kernel smaller.
     imagestack_data = gaussian_filter(imagestack_data, sigma=(0, 0, 0.7, 1.5, 1.5))
-    return ImageStack.from_numpy_array(imagestack_data)
+    return ImageStack.from_numpy(imagestack_data)

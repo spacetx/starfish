@@ -65,7 +65,7 @@ def test_apply_clipping_methods():
     # set one value to max
     data[1, 1, 1, 1, 1] = 1
 
-    imagestack = ImageStack.from_numpy_array(data)
+    imagestack = ImageStack.from_numpy(data)
 
     # max value after multiplication == 2, all other values == 1
     def apply_function(x):

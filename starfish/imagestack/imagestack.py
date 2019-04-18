@@ -296,7 +296,7 @@ class ImageStack:
         return cls.from_url(relativeurl, baseurl, aligned_group)
 
     @classmethod
-    def from_numpy_array(
+    def from_numpy(
             cls,
             array: np.ndarray,
             index_labels: Optional[Mapping[Axes, Sequence[int]]]=None,
@@ -1149,7 +1149,7 @@ class ImageStack:
         max_projection = self._data.max([dim.value for dim in dims])
         max_projection = max_projection.expand_dims(tuple(dim.value for dim in dims))
         max_projection = max_projection.transpose(*self.xarray.dims)
-        max_proj_stack = self.from_numpy_array(max_projection.values)
+        max_proj_stack = self.from_numpy(max_projection.values)
         return max_proj_stack
 
     def _squeezed_numpy(self, *dims: Axes):

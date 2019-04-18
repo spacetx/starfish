@@ -10,7 +10,7 @@ from starfish.types import Clip, Number
 
 def random_data_image_stack_factory():
     data = np.random.uniform(0, 1, 100).reshape(1, 1, 1, 10, 10).astype(np.float32)
-    return ImageStack.from_numpy_array(data)
+    return ImageStack.from_numpy(data)
 
 
 @pytest.mark.parametrize('sigma, is_volume', [

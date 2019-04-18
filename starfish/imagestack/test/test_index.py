@@ -201,3 +201,27 @@ def test_sel_by_physical_and_axes():
     expected_shape = OrderedDict([(Axes.ROUND, 1), (Axes.CH, 1),
                                   (Axes.ZPLANE, 1), (Axes.Y, 5), (Axes.X, 2)])
     assert indexed_stack.shape == expected_shape
+
+
+def test_nonindexed_dimensions_restored():
+    """When the selection removes a dimension, xarray.expand_dims does not expand the non-indexed
+    dimensions that were removed.  For example, if one selects only a single zplane, it reduce the z
+    physical coordinate to a coordinate scalar, and not an array of size 1.  This verifies that the
+    workaround we introduced to restore the dependent axes's labels is in place.
+    """
+    stack = synthetic_stack(num_round=5, num_ch=5, num_z=15, tile_height=200, tile_width=200)
+
+    for selector in (
+            {Axes.ROUND: 0, Axes.CH: 2, Axes.ZPLANE: 5},
+            {Axes.ROUND: (0, 3), Axes.CH: 2, Axes.ZPLANE: 5},
+            {Axes.CH: (None, 3), Axes.ZPLANE: 5},
+    ):
+        sel_xarray = stack.sel(selector).xarray
+
+        # when the selection removes a dimension (e.g., only select a single z plane)
+        for primary_axis, dependent_axis in (
+                (Axes.X, Coordinates.X),
+                (Axes.Y, Coordinates.Y),
+                (Axes.ZPLANE, Coordinates.Z),
+        ):
+            assert len(sel_xarray[primary_axis.value]) == len(sel_xarray[dependent_axis.value])

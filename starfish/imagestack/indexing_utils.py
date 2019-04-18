@@ -2,6 +2,7 @@ from typing import Dict, Mapping, MutableMapping, Tuple, Union
 
 import numpy as np
 import xarray as xr
+from xarray.core.utils import is_scalar
 
 from starfish.types import Axes, Coordinates, Number
 
@@ -76,6 +77,21 @@ def index_keep_dimensions(data: xr.DataArray,
     missing_dims = set(original_dims) - set(data.dims)
     # Add back in missing dims
     data = data.expand_dims(tuple(missing_dims))
+
+    # When the selection removes a dimension, xarray.expand_dims does not expand the non-indexed
+    # dimensions that were removed.  For example, if one selects only a single zplane, it reduces
+    # the z physical coordinate to a coordinate scalar, and not an array of size 1.  This hack
+    # restores the dependent axes to arrays so they can be indexed.
+    for primary_axis, dependent_axis in (
+            (Axes.X, Coordinates.X),
+            (Axes.Y, Coordinates.Y),
+            (Axes.ZPLANE, Coordinates.Z),
+    ):
+        if primary_axis.value in missing_dims and is_scalar(data[dependent_axis.value]):
+            data[dependent_axis.value] = xr.DataArray(
+                np.array([data[dependent_axis.value]]),
+                dims=primary_axis.value)
+
     # Reorder to correct format
     return data.transpose(*original_dims)
 

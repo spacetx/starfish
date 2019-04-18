@@ -510,9 +510,11 @@ class Codebook(xr.DataArray):
             norm_order: int, metric: str='euclidean'
     ) -> IntensityTable:
         """
-        Assigns intensity patterns that have been extracted from an :py:class:`ImageStack` and
-        stored in an :py:class:`IntensityTable` by a :py:class:`SpotFinder` to the gene targets that
-        they encode.
+        Assigns intensity patterns that have been extracted from an
+        :py:class:`~starfish.imagestack.imagestack.ImageStack` and
+        stored in an :py:class:`~starfish.intensity_table.intensity_table.IntensityTable` by a `SpotFinder
+        <https://spacetx-starfish.readthedocs.io/en/latest/api/spots/detection/detection.html>`_
+        to the  gene targets that they encode.
 
         This method carries out the assignment by first normalizing both the codes and the
         recovered intensities to be unit magnitude using an L2 norm, and then finds the closest
@@ -576,9 +578,11 @@ class Codebook(xr.DataArray):
 
     def decode_per_round_max(self, intensities: IntensityTable) -> IntensityTable:
         """
-        Assigns intensity patterns that have been extracted from an :py:class:`ImageStack` and
-        stored in an :py:class:`IntensityTable` by a :py:class:`SpotFinder` to the gene targets that
-        they encode.
+        Assigns intensity patterns that have been extracted from an
+        :py:class:`~starfish.imagestack.imagestack.ImageStack` and
+        stored in an :py:class:`~starfish.intensity_table.intensity_table.IntensityTable` by a `SpotFinder
+        <https://spacetx-starfish.readthedocs.io/en/latest/api/spots/detection/detection.html>`_
+        to the  gene targets that they encode.
 
         This method carries out the assignment by identifying the maximum-intensity channel for each
         round, and assigning each spot to a code if the maximum-intensity pattern exists in the

@@ -32,7 +32,7 @@ def decoded_intensity_table_factory() -> Tuple[IntensityTable, np.ndarray]:
     labels_with_nan[labels == '0'] = 'nan'
 
     # create an intensity table and add the labels
-    image_stack = ImageStack.from_numpy_array(data)
+    image_stack = ImageStack.from_numpy(data)
     intensities = IntensityTable.from_image_stack(image_stack)
     intensities[Features.TARGET] = (Features.AXIS, np.ravel(labels_with_nan))
 

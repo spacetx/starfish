@@ -18,7 +18,7 @@ def test_to_mermaid_dataframe():
     """
     r, c, z, y, x = 1, 5, 2, 2, 5
     data = np.zeros(100, dtype=np.float32).reshape(r, c, z, y, x)
-    image_stack = ImageStack.from_numpy_array(data)
+    image_stack = ImageStack.from_numpy(data)
     intensities = IntensityTable.from_image_stack(image_stack)
 
     # without a target assignment, should raise RuntimeError.

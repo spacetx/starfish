@@ -20,7 +20,7 @@ _, SPARSE_IMAGESTACK, SPARSE_MAX_INTENSITY = two_spot_sparse_coded_data_factory(
 _, BLANK_IMAGESTACK, BLANK_MAX_INTENSITY = two_spot_informative_blank_coded_data_factory()
 
 # make sure that all spot finders handle empty arrays
-EMPTY_IMAGESTACK = ImageStack.from_numpy_array(np.zeros((4, 2, 10, 100, 100), dtype=np.float32))
+EMPTY_IMAGESTACK = ImageStack.from_numpy(np.zeros((4, 2, 10, 100, 100), dtype=np.float32))
 
 
 def simple_gaussian_spot_detector() -> BlobDetector:

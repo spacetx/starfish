@@ -244,7 +244,7 @@ class SyntheticData:
             warnings.simplefilter('ignore', UserWarning)
             image = img_as_float32(image)
 
-        return ImageStack.from_numpy_array(image)
+        return ImageStack.from_numpy(image)
 
 
 def two_spot_one_hot_coded_data_factory() -> Tuple[Codebook, ImageStack, float]:

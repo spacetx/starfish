@@ -46,7 +46,7 @@ installed.  Check out the code for starfish and set up a virtualenv_.
 
 .. code-block:: bash
 
-    % git checkout git@github.com:spacetx/starfish.git
+    % git clone git://github.com/spacetx/starfish.git
     % cd starfish
     % python -m venv .venv
     % source .venv/bin/activate

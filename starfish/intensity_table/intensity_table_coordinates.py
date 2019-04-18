@@ -1,3 +1,4 @@
+import numpy as np
 import xarray as xr
 
 from starfish.imagestack.imagestack import ImageStack
@@ -27,11 +28,13 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(
         (Axes.Y.value, Coordinates.Y.value),
         (Axes.ZPLANE.value, Coordinates.Z.value)
     )
-    for px, coord in pairs:
-        pixels = image_stack.xarray[px].values
-        feature_inds = intensity_table[px].values.astype(int)
-        pixel_inds = pixels[feature_inds]
-        coordinates = image_stack.xarray[coord][pixel_inds]
+    for axis, coord in pairs:
+
+        imagestack_pixels: np.ndarray = image_stack.xarray[axis].values
+        intensity_table_pixels: np.ndarray = intensity_table[axis].values.astype(int)
+        pixel_inds: np.ndarray = imagestack_pixels[intensity_table_pixels]
+        coordinates: xr.DataArray = image_stack.xarray[coord][pixel_inds]
+
         intensity_table[coord] = xr.DataArray(coordinates.values, dims='features')
 
     return intensity_table

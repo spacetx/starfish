@@ -29,8 +29,8 @@ def test_intensity_table_can_be_created_from_spot_attributes():
 
     intensities = IntensityTable.zeros(
         spot_attributes,
-        n_ch=1,
-        n_round=3
+        ch_values=np.arange(1),
+        round_values=np.arange(3)
     )
 
     assert intensities.sizes[Axes.CH] == 1

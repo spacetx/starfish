@@ -22,7 +22,12 @@ def intensity_table_factory(data: np.ndarray=np.array([[[0, 3], [4, 0]]])) -> In
         columns=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
     )
 
-    intensity_table = IntensityTable.from_spot_data(data, SpotAttributes(spot_attributes_data))
+    intensity_table = IntensityTable.from_spot_data(
+        data,
+        SpotAttributes(spot_attributes_data),
+        ch_values=np.arange(data.shape[1]),
+        round_values=np.arange(data.shape[2]),
+    )
     return intensity_table
 
 

@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import (
     Any,
     Callable,
-    Iterable,
     Iterator,
     List,
     Mapping,
@@ -1000,7 +999,7 @@ class ImageStack:
         """Return the number of z_planes in the ImageStack"""
         return self.xarray.sizes[Axes.ZPLANE]
 
-    def axis_labels(self, axis: Axes) -> Iterable[int]:
+    def axis_labels(self, axis: Axes) -> Sequence[int]:
         """Given an axis, return the sorted unique values for that axis in this ImageStack.  For
         instance, ``imagestack.axis_labels(Axes.ROUND)`` returns all the round ids in this
         imagestack."""

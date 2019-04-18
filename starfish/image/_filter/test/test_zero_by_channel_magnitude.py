@@ -9,7 +9,7 @@ def create_imagestack_with_magnitude_scale():
     data = np.repeat(data[None, :], 2, axis=0)
     # reshape data into a 2-channel, (1, 11, 1) image in (x, y, z)
     data = data.reshape(1, 2, 1, 11, 1)
-    imagestack = ImageStack.from_numpy_array(data)
+    imagestack = ImageStack.from_numpy(data)
     return imagestack
 
 

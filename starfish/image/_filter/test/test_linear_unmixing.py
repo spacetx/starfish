@@ -16,7 +16,7 @@ def setup_linear_unmixing_test():
 
     # Create a single pixel with zero intensity
     im[0, 0, 0, 0, 0] = 0
-    stack = ImageStack.from_numpy_array(im)
+    stack = ImageStack.from_numpy(im)
 
     # Create coefficients matrix
     coeff_mat = np.array(

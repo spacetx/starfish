@@ -31,7 +31,7 @@ methods: Mapping[str, Type] = Filter._algorithm_to_class_map()
 
 def generate_default_data():
     data = np.random.rand(2, 2, 2, 40, 50).astype(np.float32)
-    return ImageStack.from_numpy_array(data)
+    return ImageStack.from_numpy(data)
 
 
 @pytest.mark.parametrize('filter_class', methods.values())

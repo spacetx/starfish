@@ -9,7 +9,7 @@ def test_intensity_table_concatenation():
 
     r, c, z, y, x = 3, 3, 2, 2, 5
     data = np.zeros(180, dtype=np.float32).reshape(r, c, z, y, x)
-    image_stack = ImageStack.from_numpy_array(data)
+    image_stack = ImageStack.from_numpy(data)
     intensities = IntensityTable.from_image_stack(image_stack)
 
     intensities2 = intensities.copy()

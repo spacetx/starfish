@@ -18,7 +18,7 @@ def traversing_code() -> ImageStack:
     # blur points
     gaussian_filter(img, (0, 0, 0.5, 1.5, 1.5), output=img)
 
-    return ImageStack.from_numpy_array(img)
+    return ImageStack.from_numpy(img)
 
 
 def multiple_possible_neighbors() -> ImageStack:
@@ -41,7 +41,7 @@ def multiple_possible_neighbors() -> ImageStack:
     # blur points
     gaussian_filter(img, (0, 0, 0.5, 1.5, 1.5), output=img)
 
-    return ImageStack.from_numpy_array(img)
+    return ImageStack.from_numpy(img)
 
 
 def jitter_code() -> ImageStack:
@@ -56,7 +56,7 @@ def jitter_code() -> ImageStack:
     # blur points
     gaussian_filter(img, (0, 0, 0.5, 1.5, 1.5), output=img)
 
-    return ImageStack.from_numpy_array(img)
+    return ImageStack.from_numpy(img)
 
 
 def two_perfect_codes() -> ImageStack:
@@ -76,7 +76,7 @@ def two_perfect_codes() -> ImageStack:
     # blur points
     gaussian_filter(img, (0, 0, 0.5, 1.5, 1.5), output=img)
 
-    return ImageStack.from_numpy_array(img)
+    return ImageStack.from_numpy(img)
 
 
 def local_search_blob_detector(search_radius: int, anchor_channel=0) -> LocalSearchBlobDetector:

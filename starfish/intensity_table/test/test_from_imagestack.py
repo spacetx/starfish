@@ -5,6 +5,7 @@ Tests for IntensityTable.from_image_stack method
 import numpy as np
 
 from starfish import ImageStack, IntensityTable
+from starfish.imagestack.test import test_labeled_indices
 from starfish.test.factories import (
     codebook_intensities_image_for_single_synthetic_spot,
     synthetic_spot_pass_through_stack,
@@ -54,3 +55,13 @@ def test_intensity_table_can_be_constructed_from_an_imagestack():
     # the number of channels and rounds should match the ImageStack
     assert intensities.sizes[Axes.CH.value] == c
     assert intensities.sizes[Axes.ROUND.value] == r
+
+
+def test_from_imagestack_labeled_indices():
+    # use the ImageStack with labeled indices from the test.
+    imagestack = test_labeled_indices.setup_imagestack()
+    intensity_table = IntensityTable.from_image_stack(imagestack)
+    assert np.array_equal(
+        intensity_table[Axes.CH.value], np.array(test_labeled_indices.CH_LABELS))
+    assert np.array_equal(
+        intensity_table[Axes.ROUND.value], np.array(test_labeled_indices.ROUND_LABELS))

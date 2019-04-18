@@ -20,7 +20,11 @@ def intensity_table_factory() -> IntensityTable:
     ).T
     spot_attributes = SpotAttributes(spot_attribute_data)
 
-    intensity_table = IntensityTable.from_spot_data(intensities, spot_attributes)
+    intensity_table = IntensityTable.from_spot_data(
+        intensities, spot_attributes,
+        ch_values=np.arange(intensities.shape[1]),
+        round_values=np.arange(intensities.shape[2]),
+    )
     return intensity_table
 
 

@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 
 from starfish.spots._detector.blob import BlobDetector
+from starfish.test.factories import SyntheticData
 from starfish.types import Axes, Features
-from starfish.util.synthesize import SyntheticData
 
 
 def test_round_trip_synthetic_data():

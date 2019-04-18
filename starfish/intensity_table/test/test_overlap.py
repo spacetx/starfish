@@ -1,44 +1,15 @@
 import numpy as np
-import xarray as xr
 
 from starfish import IntensityTable
-from starfish.test import factories
-from starfish.types import Coordinates, Features
-from starfish.types._constants import OverlapStrategy
-from starfish.util.overlap_utils import (
+from starfish.intensity_table.overlap import (
     Area,
     find_overlaps_of_xarrays,
     remove_area_of_xarray,
     sel_area_of_xarray
 )
-
-
-def create_intensity_table_with_coords(area: Area, n_spots: int=10) -> IntensityTable:
-    """
-    Creates a 50X50 intensity table with physical coordinates within
-    the given Area.
-
-    Parameters
-    ----------
-    area: Area
-        The area of physical space the IntensityTable should be defined over
-    n_spots:
-        Number of spots to add to the IntensityTable
-    """
-    codebook = factories.codebook_array_factory()
-    it = IntensityTable.synthetic_intensities(
-        codebook,
-        num_z=1,
-        height=50,
-        width=50,
-        n_spots=n_spots
-    )
-    # intensity table 1 has 10 spots, xmin = 0, ymin = 0, xmax = 2, ymax = 1
-    it[Coordinates.X.value] = xr.DataArray(np.linspace(area.min_x, area.max_x, n_spots),
-                                           dims=Features.AXIS)
-    it[Coordinates.Y.value] = xr.DataArray(np.linspace(area.min_y, area.max_y, n_spots),
-                                           dims=Features.AXIS)
-    return it
+from starfish.types import Coordinates, Features
+from starfish.types._constants import OverlapStrategy
+from .factories import create_intensity_table_with_coords
 
 
 def test_find_area_intersection():

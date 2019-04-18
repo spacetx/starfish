@@ -66,7 +66,6 @@ intersphinx_mapping = {'xarray': ('http://xarray.pydata.org/en/stable', None)}
 numpydoc_class_members_toctree = False
 numpydoc_show_inherited_class_members = False
 
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

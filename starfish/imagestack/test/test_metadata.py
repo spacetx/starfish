@@ -1,8 +1,8 @@
 import pytest
 
 from starfish.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
-from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
+from .factories import synthetic_stack
 
 NUM_ROUND = 4
 NUM_CH = 2
@@ -33,7 +33,7 @@ def test_metadata():
         }
     )
 
-    stack = ImageStack.synthetic_stack(
+    stack = synthetic_stack(
         num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_ZPLANE, tile_fetcher=tile_fetcher,
     )
     table = stack.tile_metadata
@@ -66,7 +66,7 @@ def test_missing_extras():
         }
     )
 
-    stack = ImageStack.synthetic_stack(
+    stack = synthetic_stack(
         num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_ZPLANE, tile_fetcher=tile_fetcher,
     )
     table = stack.tile_metadata
@@ -87,7 +87,7 @@ def test_conflict():
         }
     )
 
-    stack = ImageStack.synthetic_stack(
+    stack = synthetic_stack(
         num_round=NUM_ROUND, num_ch=NUM_CH, num_z=NUM_ZPLANE, tile_fetcher=tile_fetcher,
     )
     with pytest.raises(ValueError):

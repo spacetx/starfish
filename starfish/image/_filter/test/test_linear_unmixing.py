@@ -2,6 +2,7 @@ import numpy as np
 
 from starfish import ImageStack
 from starfish.image._filter.linear_unmixing import LinearUnmixing
+from starfish.types import Clip
 
 def setup_linear_unmixing_test():
     """
@@ -10,16 +11,29 @@ def setup_linear_unmixing_test():
 
     """
     # Create image
-    r, c, z, y, x = 2, 3, 6, 5, 4
+    r, c, z, y, x = 1, 3, 6, 5, 4
     im = np.ones((r, c, z, y, x), dtype=np.float32)
+
+    # Create a single pixel with zero intensity
+    im[0, 0, 0, 0, 0] = 0
     stack = ImageStack.from_numpy_array(im)
 
     # Create coefficients matrix
-    coeff_mat = np.array([[1, 0, 0], [-0.25, 1, -0.25], [0, 0, 1]])
+    coeff_mat = np.array(
+        [[ 1.00, -0.25,  0.00],  # noqa
+         [-0.25,  1.00, -0.25],  # noqa
+         [-0.10,  0.00,  1.00]]  # noqa
+    )
 
     # Create reference result
-    ref_result = np.ones((r, c, z, y, x))
-    ref_result[:, 1, ...] = 0.5 * np.ones((z, y, x))
+    ref_result = im.copy()
+    ref_result[:, 0, ...] = 0.65 * np.ones((z, y, x))
+    ref_result[:, 1, ...] = 0.75 * np.ones((z, y, x))
+    ref_result[:, 2, ...] = 0.75 * np.ones((z, y, x))
+
+    # Account for the zero-value pixel
+    ref_result[0, 0, 0, 0, 0] = 0
+    ref_result[0, 1, 0, 0, 0] = 1
 
     return stack, coeff_mat, ref_result
 
@@ -28,7 +42,7 @@ def test_linear_unmixing():
 
     stack, coeff_mat, ref_result = setup_linear_unmixing_test()
 
-    filter_unmix = LinearUnmixing(coeff_mat=coeff_mat)
-    stack2 = filter_unmix.run(stack, in_place=False, verbose=False, n_processes=1)
+    filter_unmix = LinearUnmixing(coeff_mat=coeff_mat, clip_method=Clip.CLIP)
+    stack2 = filter_unmix.run(stack, in_place=False, verbose=False)
 
-    assert np.all(ref_result == stack2.xarray.values)
+    assert np.allclose(ref_result, np.asarray(stack2.xarray))

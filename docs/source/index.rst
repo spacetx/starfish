@@ -50,7 +50,7 @@ To see the code or report a bug, please visit the `github repository
    introduction/index
    getting_started/index
    creating_an_image_processing_pipeline/index
-   data_structures/index
+   api/index
    help_and_reference/index
    community/index
    contributing/index

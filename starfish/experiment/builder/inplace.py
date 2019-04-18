@@ -4,6 +4,8 @@
 2. Call write_experiment_json with tile_opener=inplace_tile_opener.
 3. The TileFetcher should return an instance of a InplaceTileFetcher.
 
+Please note that enabling in-place experiment construction should be only done in an isolated script
+dedicated to constructing an experiment, as it modifies some existing code paths.
 """
 
 

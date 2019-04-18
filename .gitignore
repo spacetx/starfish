@@ -12,3 +12,4 @@ dist/
 docs/source/usage/data_formatting_examples/
 docs/source/usage/data_processing_examples/
 docs/source/creating_an_image_processing_pipeline/tutorials/
+.idea/

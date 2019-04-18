@@ -5,8 +5,9 @@ from typing import Union
 import numpy as np
 
 from starfish import IntensityTable
+from starfish.codebook.test.factories import codebook_array_factory
+from starfish.imagestack.test.factories import imagestack_with_coords_factory
 from starfish.intensity_table import intensity_table_coordinates
-from starfish.test import factories
 from starfish.types import Axes, Coordinates, Features, PhysicalCoordinateTypes
 
 NUMBER_SPOTS = 10
@@ -30,8 +31,8 @@ def test_tranfering_physical_coords_to_intensity_table():
                                    (PhysicalCoordinateTypes.Z_MIN, 1),
                                    (PhysicalCoordinateTypes.Z_MAX, 3)])
 
-    stack = factories.imagestack_with_coords_factory(stack_shape, physical_coords)
-    codebook = factories.codebook_array_factory()
+    stack = imagestack_with_coords_factory(stack_shape, physical_coords)
+    codebook = codebook_array_factory()
 
     intensities = IntensityTable.synthetic_intensities(
         codebook,
@@ -81,8 +82,8 @@ def test_tranfering_physical_coords_to_expression_matrix():
                                    (PhysicalCoordinateTypes.Z_MIN, 1),
                                    (PhysicalCoordinateTypes.Z_MAX, 3)])
 
-    stack = factories.imagestack_with_coords_factory(stack_shape, physical_coords)
-    codebook = factories.codebook_array_factory()
+    stack = imagestack_with_coords_factory(stack_shape, physical_coords)
+    codebook = codebook_array_factory()
 
     intensities = IntensityTable.synthetic_intensities(
         codebook,

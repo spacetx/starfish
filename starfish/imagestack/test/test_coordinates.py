@@ -4,9 +4,9 @@ import numpy as np
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, tile_fetcher_factory
-from starfish.imagestack.imagestack import ImageStack
 from starfish.imagestack.physical_coordinate_calculator import get_physical_coordinates_of_z_plane
 from starfish.types import Axes, Coordinates, Number
+from .factories import synthetic_stack
 from .imagestack_test_utils import verify_physical_coordinates
 
 NUM_ROUND = 8
@@ -64,7 +64,7 @@ def test_coordinates():
     """Set up an ImageStack with tiles that are aligned.  Verify that the coordinates
     retrieved match.
     """
-    stack = ImageStack.synthetic_stack(
+    stack = synthetic_stack(
         NUM_ROUND, NUM_CH, NUM_Z,
         HEIGHT, WIDTH,
         tile_fetcher=tile_fetcher_factory(
@@ -136,7 +136,7 @@ def test_unaligned_tiles():
     """Test that imagestack error is thrown when constructed with unaligned tiles"""
 
     try:
-        ImageStack.synthetic_stack(
+        synthetic_stack(
             NUM_ROUND, NUM_CH, NUM_Z,
             HEIGHT, WIDTH,
             tile_fetcher=tile_fetcher_factory(
@@ -154,7 +154,7 @@ def test_scalar_coordinates():
     Internally, this should be converted to a range where the two endpoints are identical to the
     physical coordinate provided.
     """
-    stack = ImageStack.synthetic_stack(
+    stack = synthetic_stack(
         NUM_ROUND, NUM_CH, NUM_Z,
         HEIGHT, WIDTH,
         tile_fetcher=tile_fetcher_factory(

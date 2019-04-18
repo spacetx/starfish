@@ -1,5 +1,10 @@
+import os
+import tempfile
 from collections import OrderedDict
 
+import numpy as np
+
+from starfish import ImageStack
 from starfish.imagestack import indexing_utils as iu
 from starfish.types import Axes, Coordinates, PhysicalCoordinateTypes
 from .factories import imagestack_with_coords_factory, synthetic_stack
@@ -225,3 +230,26 @@ def test_nonindexed_dimensions_restored():
                 (Axes.ZPLANE, Coordinates.Z),
         ):
             assert len(sel_xarray[primary_axis.value]) == len(sel_xarray[dependent_axis.value])
+
+
+def test_select_and_export():
+    """Tests selecting on an Imagestack with a shape (5, 5, 15, 200, 200)
+        1.) stack.sel(indexers)
+        2.) export stack
+    """
+    stack = synthetic_stack(
+        num_round=5, num_ch=5, num_z=15, tile_height=200, tile_width=200)
+
+    # select on range of rounds and single ch and Z
+    selected = stack.sel({Axes.ROUND: (1, None), Axes.CH: (2, 3), Axes.ZPLANE: 0})
+
+    with tempfile.TemporaryDirectory() as tfd:
+        path = os.path.join(tfd, "stack.json")
+        selected.export(path)
+
+        loaded = ImageStack.from_path_or_url(path)
+
+        assert np.array_equal(selected.xarray, loaded.xarray)
+        for coords in (
+                Axes.ROUND, Axes.CH, Axes.ZPLANE, Coordinates.X, Coordinates.Y, Coordinates.Z):
+            assert np.allclose(selected.xarray[coords.value], loaded.xarray[coords.value])

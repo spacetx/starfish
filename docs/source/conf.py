@@ -60,7 +60,9 @@ extensions = [
 ]
 
 # intersphinx mapping for outside starfish linking
-intersphinx_mapping = {'xarray': ('http://xarray.pydata.org/en/stable', None)}
+intersphinx_mapping = {'xarray': ('http://xarray.pydata.org/en/stable', None),
+                       'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+                       'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None)}
 
 # numpydoc settings
 numpydoc_class_members_toctree = False

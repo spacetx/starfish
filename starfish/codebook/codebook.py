@@ -33,8 +33,8 @@ class Codebook(xr.DataArray):
     methods to assign target identifiers to spots. This codebook provides an in-memory
     representation of the codebook defined in the SpaceTx format.
 
-    The codebook is a subclass of xarray, and exposes the complete public API of that package in
-    addition to the methods and constructors listed below.
+    The codebook is a subclass of :py:class:`xarray.DataArray` and exposes the complete public API of that
+    package in addition to the methods and constructors listed below.
 
     Examples
     --------
@@ -55,10 +55,6 @@ class Codebook(xr.DataArray):
           * target     (target) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
           * c          (c) int64 0 1 2
           * r          (r) int64 0 1 2 3
-
-    See Also
-    --------
-    TODO <link to spaceTx format>
 
     """
 
@@ -542,9 +538,9 @@ class Codebook(xr.DataArray):
         Notes
         --------
         The available norms for this function can be found at the following link:
-        https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.linalg.norm.html
+        :py:func:`numpy.linalg.norm`
         The available metrics for this function can be found at the following link:
-        https://docs.scipy.org/doc/scipy-0.14.0/reference/spatial.distance.html
+        :py:mod:`scipy.spatial.distance`
 
         Returns
         -------

@@ -452,8 +452,10 @@ class IntensityTable(xr.DataArray):
         return intensity_tables
 
     @staticmethod
-    def concatanate_intensity_tables(intensity_tables: List["IntensityTable"],
-                                     overlap_strategy: Optional[OverlapStrategy] = None):
+    def concatenate_intensity_tables(
+            intensity_tables: List["IntensityTable"],
+            overlap_strategy: Optional[OverlapStrategy] = None
+    ) -> "IntensityTable":
         """
         Takes a list of IntenistyTables and concatanates them according to the goven overlap
         strategy. If none is give just use :py:func:`xarray.concat`

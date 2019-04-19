@@ -33,8 +33,9 @@ class TestWithDartfishData(CLITest, unittest.TestCase):
                 f"@{EXPERIMENT_JSON_URL}[fov_001][primary]",
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "scale_filtered.json"),
-                "ScaleByPercentile",
-                "--p", "100",
+                "Clip",
+                "--p-max", "100",
+                "--expand-dynamic-range"
             ],
             [
                 "starfish", "Filter",

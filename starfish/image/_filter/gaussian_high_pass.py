@@ -17,30 +17,36 @@ from .util import (
 
 
 class GaussianHighPass(FilterAlgorithmBase):
+    """
+    Applies a Gaussian high pass filter to the ImageStack. This is useful to remove cellular
+    autofluorescence, which is typically low frequency.
+
+    This filter works by subtracting a Gaussian low pass filter defined in :ref:`scipy.ndimage`
+    and used by :ref:`skimage.filters.Gaussian`.
+
+    Parameters
+    ----------
+    sigma : Union[Number, Tuple[Number]]
+        standard deviation of gaussian kernel
+    is_volume : bool
+        If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
+        independently.
+    clip_method : Union[str, Clip]
+        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].
+        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over the entire ImageStack
+        Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over each slice, where slice shapes are determined by the group_by
+        parameters
+    """
 
     def __init__(
-        self, sigma: Union[Number, Tuple[Number]], is_volume: bool=False,
-        clip_method: Union[str, Clip]=Clip.CLIP
+        self, sigma: Union[Number, Tuple[Number]], is_volume: bool = False,
+        clip_method: Union[str, Clip] = Clip.CLIP
     ) -> None:
-        """Gaussian high pass filter
 
-        Parameters
-        ----------
-        sigma : Union[Number, Tuple[Number]]
-            standard deviation of gaussian kernel
-        is_volume : bool
-            If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
-            independently.
-        clip_method : Union[str, Clip]
-            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-            requirements that float data fall in [0, 1].
-            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-                value calculated over the entire ImageStack
-            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-                value calculated over each slice, where slice shapes are determined by the group_by
-                parameters
-        """
         self.sigma = validate_and_broadcast_kernel_size(sigma, is_volume)
         self.is_volume = is_volume
         self.clip_method = clip_method
@@ -51,7 +57,7 @@ class GaussianHighPass(FilterAlgorithmBase):
     def _high_pass(
             image: Union[xr.DataArray, np.ndarray],
             sigma: Union[Number, Tuple[Number]],
-            rescale: bool=False
+            rescale: bool = False
     ) -> Union[xr.DataArray, np.ndarray]:
         """
         Applies a gaussian high pass filter to an image
@@ -80,9 +86,9 @@ class GaussianHighPass(FilterAlgorithmBase):
     def run(
             self,
             stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
+            in_place: bool = False,
+            verbose: bool = False,
+            n_processes: Optional[int] = None,
             *args,
     ) -> ImageStack:
         """Perform filtering of an image stack

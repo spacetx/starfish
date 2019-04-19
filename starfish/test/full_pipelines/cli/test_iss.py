@@ -47,7 +47,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 f"@{EXPERIMENT_JSON_URL}[fov_001][primary]",
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "max_projected", "primary_images.json"),
-                "MaxProj",
+                "MaxProject",
                 "--dims", "c",
                 "--dims", "z"
 

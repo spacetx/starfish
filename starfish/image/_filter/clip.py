@@ -11,59 +11,60 @@ from .util import determine_axes_to_group_by
 
 
 class Clip(FilterAlgorithmBase):
+    """
+    Image clipping filter that clips values below a minimum percentile and above a maximum
+    percentile.
 
-    def __init__(self, p_min: int=0, p_max: int=100, is_volume: bool=False) -> None:
-        """Image clipping filter
+    By default, these min and max percentiles are set to 0 and 100 respectively, which will
+    result in the filter doing nothing.
 
-        Parameters
-        ----------
-        p_min : int
-            values below this percentile are set to p_min (default 0)
-        p_max : int
-            values above this percentile are set to p_max (default 100)
-        is_volume : bool
-            If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) tiles
-        """
+    This is a wrapper for :ref:`numpy.clip` that can optionally linearly expand the dynamic
+    range of the data to extend from [0, 1]
+
+    Parameters
+    ----------
+    p_min : int
+        values below this percentile are set to p_min (default 0)
+    p_max : int
+        values above this percentile are set to p_max (default 100)
+    is_volume : bool
+        If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) tiles
+    expand_dynamic_range : bool
+        If True, linearly expand intensity values to fill [0, 1] after clipping. (default False)
+    """
+
+    def __init__(
+        self, p_min: int = 0, p_max: int = 100, is_volume: bool = False,
+        expand_dynamic_range: bool = False
+    ) -> None:
+
         self.p_min = p_min
         self.p_max = p_max
         self.is_volume = is_volume
+        self.expand_dynamic_range = expand_dynamic_range
 
     _DEFAULT_TESTING_PARAMETERS = {"p_min": 0, "p_max": 100}
 
     @staticmethod
-    def _clip(image: Union[xr.DataArray, np.ndarray], p_min: int, p_max: int) -> np.ndarray:
-        """Clip values of img below and above percentiles p_min and p_max
-
-        Parameters
-        ----------
-        image : Union[xr.DataArray, np.ndarray]
-            image to be clipped
-        p_min : int
-          values below this percentile are set to the value of this percentile
-        p_max : int
-          values above this percentile are set to the value of this percentile
-
-        Notes
-        -----
-        - Wrapper for np.clip
-        - No shifting or transformation to adjust dynamic range is done after clipping
-
-        Returns
-        -------
-        np.ndarray :
-          Numpy array of same shape as img
-
-        """
+    def _clip(
+        image: Union[xr.DataArray, np.ndarray], p_min: int, p_max: int,
+        expand_dynamic_range: bool
+    ) -> np.ndarray:
+        """Clip values of image"""
         v_min, v_max = np.percentile(image, [p_min, p_max])
 
-        return image.clip(min=v_min, max=v_max)
+        image = image.clip(min=v_min, max=v_max)
+        if expand_dynamic_range:
+            image /= np.max(image)
+
+        return image
 
     def run(
             self,
             stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
+            in_place: bool = False,
+            verbose: bool = False,
+            n_processes: Optional[int] = None,
             *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
@@ -82,12 +83,15 @@ class Clip(FilterAlgorithmBase):
         Returns
         -------
         ImageStack :
-            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            If in-place is False, return the results of filter as a new stack. Otherwise return the
             original stack.
 
         """
         group_by = determine_axes_to_group_by(self.is_volume)
-        clip = partial(self._clip, p_min=self.p_min, p_max=self.p_max)
+        clip = partial(
+            self._clip,
+            p_min=self.p_min, p_max=self.p_max, expand_dynamic_range=self.expand_dynamic_range
+        )
         result = stack.apply(
             clip,
             group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
@@ -100,6 +104,12 @@ class Clip(FilterAlgorithmBase):
         "--p-min", default=0, type=int, help="clip intensities below this percentile")
     @click.option(
         "--p-max", default=100, type=int, help="clip intensities above this percentile")
+    @click.option(
+        "--is-volume", is_flag=True, help="filter 3D volumes")
+    @click.option(
+        "--expand-dynamic-range", is_flag=True,
+        help="linearly scale data to fill [0, 1] after clipping."
+    )
     @click.pass_context
-    def _cli(ctx, p_min, p_max):
-        ctx.obj["component"]._cli_run(ctx, Clip(p_min, p_max))
+    def _cli(ctx, p_min, p_max, is_volume, expand_dynamic_range):
+        ctx.obj["component"]._cli_run(ctx, Clip(p_min, p_max, is_volume, expand_dynamic_range))

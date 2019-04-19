@@ -12,20 +12,22 @@ from ._base import FilterAlgorithmBase
 
 
 class ZeroByChannelMagnitude(FilterAlgorithmBase):
+    """
+    For assays in which we expect codewords to have explicit zero values,
+    e.g., DARTFISH, this filter allows for the explicit zeroing
+    out of pixels, for each round, where there is insufficient signal magnitude across channels.
+
+    Parameters
+    ----------
+    thresh : int
+        pixels in each round that have a L2 norm across channels below this threshold
+        are set to 0
+    normalize : bool
+        if True, this scales all rounds to have unit L2 norm across channels
+    """
+
     def __init__(self, thresh: int, normalize: bool) -> None:
-        """For assays in which we expect codewords to have explicit zero values,
-        e.g., DARTFISH, SEQFISH, etc., this filter allows for the explicit zeroing
-        out of pixels, for each round, where there is insufficient signal magnitude across channels.
 
-
-        Parameters
-        ----------
-        thresh : int
-            pixels in each round that have a L2 norm across channels below this threshold
-            are set to 0
-        normalize : bool
-            if True, this scales all rounds to have unit L2 norm across channels
-        """
         self.thresh = thresh
         self.normalize = normalize
 
@@ -33,9 +35,9 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
 
     def run(
             self, stack: ImageStack,
-            in_place: bool=False,
+            in_place: bool = False,
             verbose=False,
-            n_processes: Optional[int]=None,
+            n_processes: Optional[int] = None,
             *args,
     ) -> ImageStack:
         """Perform filtering of an image stack

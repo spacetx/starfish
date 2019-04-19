@@ -12,24 +12,26 @@ from ._base import FilterAlgorithmBase
 
 
 class ElementWiseMultiply(FilterAlgorithmBase):
+    """
+    Perform element-wise multiplication on the image tensor. This is useful for
+    performing operations such as image normalization or field flatness correction
+
+    Parameters
+    ----------
+    mult_mat : xr.DataArray
+        the image is element-wise multiplied with this array
+    clip_method : Union[str, Clip]
+        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].
+        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over the entire ImageStack
+    """
 
     def __init__(
-        self, mult_array: xr.core.dataarray.DataArray, clip_method: Union[str, Clip]=Clip.CLIP
+        self, mult_array: xr.core.dataarray.DataArray, clip_method: Union[str, Clip] = Clip.CLIP
     ) -> None:
-        """Perform elementwise multiplication on the image tensor. This is useful for
-        performing operations such as image normalization or field flatness correction
 
-        Parameters
-        ----------
-        mult_mat : xr.DataArray
-            the image is element-wise multiplied with this array
-        clip_method : Union[str, Clip]
-            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-            requirements that float data fall in [0, 1].
-            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-                value calculated over the entire ImageStack
-        """
         self.mult_array = mult_array
         if clip_method == Clip.SCALE_BY_CHUNK:
             raise ValueError("`scale_by_chunk` is not a valid clip_method for ElementWiseMultiply")
@@ -45,9 +47,9 @@ class ElementWiseMultiply(FilterAlgorithmBase):
     def run(
             self,
             stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
+            in_place: bool = False,
+            verbose: bool = False,
+            n_processes: Optional[int] = None,
             *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
@@ -61,7 +63,8 @@ class ElementWiseMultiply(FilterAlgorithmBase):
         verbose : bool
             if True, report on filtering progress (default = False)
         n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter
+            Number of parallel processes to devote to calculating the filter. If None, defaults to
+            the result of os.cpu_count().
 
         Returns
         -------

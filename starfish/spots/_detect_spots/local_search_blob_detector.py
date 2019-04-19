@@ -32,6 +32,39 @@ blob_detectors = {
 
 
 class LocalSearchBlobDetector(DetectSpotsAlgorithmBase):
+    """
+    Multi-dimensional gaussian spot detector.
+
+    This method is a wrapper for skimage.feature.blob_log that engages in a local radius search
+    to match spots up across rounds. In sparse conditions, the search can be seeded in one round
+    with a relatively large radius. In crowded images, the spots can be seeded in all rounds and
+    consensus filtering can be used to extract codes that are consistently extracted across
+    rounds.
+
+    Parameters
+    ----------
+    min_sigma : float
+        The minimum standard deviation for Gaussian Kernel. Keep this low to
+        detect smaller blobs.
+    max_sigma : float
+        The maximum standard deviation for Gaussian Kernel. Keep this high to
+        detect larger blobs.
+    threshold : float
+        The absolute lower bound for scale space maxima. Local maxima smaller
+        than thresh are ignored. Reduce this to detect blobs with less
+        intensities.
+    detector_method : str ['blob_dog', 'blob_log']
+        Name of the type of detection method used from skimage.feature, default: blob_log.
+    search_radius : int
+        Number of pixels over which to search for spots in other rounds and channels.
+    anchor_round : int
+        The imaging round against which other rounds will be checked for spots in the same
+        approximate pixel location.
+    detector_kwargs : Dict[str, Any]
+        Additional keyword arguments to pass to the detector_method.
+
+    """
+
     def __init__(
             self,
             min_sigma: Union[Number, Tuple[Number, ...]],
@@ -44,36 +77,7 @@ class LocalSearchBlobDetector(DetectSpotsAlgorithmBase):
             anchor_round: int=1,
             **detector_kwargs,
     ) -> None:
-        """Multi-dimensional gaussian spot detector.
 
-        This method is a wrapper for skimage.feature.blob_log that engages in a local radius search
-        to match spots up across rounds. In sparse conditions, the search can be seeded in one round
-        with a relatively large radius. In crowded images, the spots can be seeded in all rounds and
-        consensus filtering can be used to extract codes that are consistently extracted across
-        rounds.
-
-        Parameters
-        ----------
-        min_sigma : float
-            The minimum standard deviation for Gaussian Kernel. Keep this low to
-            detect smaller blobs.
-        max_sigma : float
-            The maximum standard deviation for Gaussian Kernel. Keep this high to
-            detect larger blobs.
-        threshold : float
-            The absolute lower bound for scale space maxima. Local maxima smaller
-            than thresh are ignored. Reduce this to detect blobs with less
-            intensities.
-        detector_method : str ['blob_dog', 'blob_log']
-            Name of the type of detection method used from skimage.feature, default: blob_log.
-        search_radius : int
-            Number of pixels over which to search for spots in other rounds and channels.
-        anchor_round : int
-            The imaging round against which other rounds will be checked for spots in the same
-            approximate pixel location.
-        detector_kwargs : Dict[str, Any]
-            Additional keyword arguments to pass to the detector_method.
-        """
         self.min_sigma = min_sigma
         self.max_sigma = max_sigma
         self.threshold = threshold

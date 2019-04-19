@@ -14,61 +14,64 @@ from .detect import detect_spots
 
 
 class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithmBase):
+    """
+    Find spots using a local max peak finding algorithm
+
+    This is a wrapper for :code:`trackpy.locate`, which implements a version of the
+    `Crocker-Grier <crocker_grier>`_ algorithm.
+
+    .. _crocker_grier: https://physics.nyu.edu/grierlab/methods3c/
+
+    Parameters
+    ----------
+
+    spot_diameter : odd integer or tuple of odd integers.
+        This may be a single number or a tuple giving the feature’s extent in each dimension,
+        useful when the dimensions do not have equal resolution (e.g. confocal microscopy).
+        The tuple order is the same as the image shape, conventionally (z, y, x) or (y, x).
+        The number(s) must be odd integers. When in doubt, round up.
+    min_mass : float, optional
+        The minimum integrated brightness. This is a crucial parameter for eliminating spurious
+        features. Recommended minimum values are 100 for integer images and 1 for float images.
+        Defaults to 0 (no filtering).
+    max_size : float
+        maximum radius-of-gyration of brightness, default None
+    separation : float or tuple
+        Minimum separtion between features. Default is diameter + 1. May be a tuple, see
+        diameter for details.
+    percentile : float
+        Features must have a peak brighter than pixels in this percentile. This helps eliminate
+        spurious peaks.
+    noise_size : float or tuple
+        Width of Gaussian blurring kernel, in pixels Default is 1. May be a tuple, see diameter
+        for details.
+    smoothing_size : float or tuple
+        The size of the sides of the square kernel used in boxcar (rolling average) smoothing,
+        in pixels Default is diameter. May be a tuple, making the kernel rectangular.
+    threshold : float
+        Clip bandpass result below this value. Thresholding is done on the already
+        background-subtracted image. By default, 1 for integer images and 1/255 for float
+        images.
+    measurement_type : str ['max', 'mean']
+        name of the function used to calculate the intensity for each identified spot area
+    preprocess : boolean
+        Set to False to turn off bandpass preprocessing.
+    is_volume : bool
+        if True, run the algorithm on 3d volumes of the provided stack
+    verbose : bool
+        If True, report the percentage completed (default = False) during processing
+
+    See Also
+    --------
+    trackpy locate: http://soft-matter.github.io/trackpy/dev/generated/trackpy.locate.html
+
+    """
 
     def __init__(
             self, spot_diameter, min_mass, max_size, separation, percentile=0,
-            noise_size: Tuple[int, int, int]=(1, 1, 1), smoothing_size=None, threshold=None,
-            preprocess: bool=False, measurement_type: str='max', is_volume: bool=False,
+            noise_size: Tuple[int, int, int] = (1, 1, 1), smoothing_size=None, threshold=None,
+            preprocess: bool = False, measurement_type: str = 'max', is_volume: bool = False,
             verbose=False) -> None:
-        """Find spots using a local max peak finding algorithm
-
-        This is a wrapper for `trackpy.locate`
-
-        Parameters
-        ----------
-
-        spot_diameter : odd integer or tuple of odd integers.
-            This may be a single number or a tuple giving the feature’s extent in each dimension,
-            useful when the dimensions do not have equal resolution (e.g. confocal microscopy).
-            The tuple order is the same as the image shape, conventionally (z, y, x) or (y, x).
-            The number(s) must be odd integers. When in doubt, round up.
-        min_mass : float, optional
-            The minimum integrated brightness. This is a crucial parameter for eliminating spurious
-            features. Recommended minimum values are 100 for integer images and 1 for float images.
-            Defaults to 0 (no filtering).
-        max_size : float
-            maximum radius-of-gyration of brightness, default None
-        separation : float or tuple
-            Minimum separtion between features. Default is diameter + 1. May be a tuple, see
-            diameter for details.
-        percentile : float
-            Features must have a peak brighter than pixels in this percentile. This helps eliminate
-            spurious peaks.
-        noise_size : float or tuple
-            Width of Gaussian blurring kernel, in pixels Default is 1. May be a tuple, see diameter
-            for details.
-        smoothing_size : float or tuple
-            The size of the sides of the square kernel used in boxcar (rolling average) smoothing,
-            in pixels Default is diameter. May be a tuple, making the kernel rectangular.
-        threshold : float
-            Clip bandpass result below this value. Thresholding is done on the already
-            background-subtracted image. By default, 1 for integer images and 1/255 for float
-            images.
-        measurement_type : str ['max', 'mean']
-            name of the function used to calculate the intensity for each identified spot area
-        preprocess : boolean
-            Set to False to turn off bandpass preprocessing.
-        is_volume : bool
-            if True, run the algorithm on 3d volumes of the provided stack
-        verbose : bool
-            If True, report the percentage completed (default = False) during processing
-
-
-        See Also
-        --------
-        trackpy locate: http://soft-matter.github.io/trackpy/dev/generated/trackpy.locate.html
-
-        """
 
         self.diameter = spot_diameter
         self.minmass = min_mass

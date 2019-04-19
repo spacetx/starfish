@@ -78,7 +78,8 @@ class Clip(FilterAlgorithmBase):
         verbose : bool
             if True, report on filtering progress (default = False)
         n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter
+            Number of parallel processes to devote to applying the filter. If None, defaults to
+            the result of os.cpu_count(). (default None)
 
         Returns
         -------

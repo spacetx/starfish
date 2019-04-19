@@ -16,7 +16,12 @@ from .util import (
 
 
 class DeconvolvePSF(FilterAlgorithmBase):
-    """Deconvolve a user-provided isotropic point spread function of size sigma
+    """
+    Deconvolve a point spread function from the image. The point spread function is assumed to be
+    an isotropic Gaussian, with a user specified standard deviation, sigma.
+
+    There are currently several issues with this function.
+    See https://github.com/spacetx/starfish/issues/731
 
     Parameters
     ----------
@@ -157,7 +162,8 @@ class DeconvolvePSF(FilterAlgorithmBase):
         verbose : bool
             if True, report on the percentage completed during processing (default = False)
         n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter
+            Number of parallel processes to devote to applying the filter. If None, defaults to
+            the result of os.cpu_count(). (default None)
 
         Returns
         -------

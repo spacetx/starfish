@@ -17,7 +17,7 @@ class LinearUnmixing(FilterAlgorithmBase):
 
     Examples
     --------
-    The following example provides a coeff mat that corrects for spectral
+    The following example provides a coefficient matrix that corrects for spectral
     mixing in a 3-channel experiment.
     Channel 0 contains a mixture of itself plus 50% of the intensity of
     channel 2. Channel 1 has no mixing with other channels. Channel 3
@@ -117,7 +117,8 @@ class LinearUnmixing(FilterAlgorithmBase):
         verbose : bool
             if True, report on filtering progress (default = False)
         n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter
+            Number of parallel processes to devote to applying the filter. If None, defaults to
+            the result of os.cpu_count(). (default None)
 
         Returns
         -------

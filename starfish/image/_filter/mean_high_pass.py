@@ -21,7 +21,8 @@ class MeanHighPass(FilterAlgorithmBase):
     mean filtered image from the original image. The mean filter smooths an image by replacing
     each pixel's value with an average of the pixel values of the surrounding neighborhood.
 
-    The mean filter is also known as a uniform or box filter.
+    The mean filter is also known as a uniform or box filter. It can also be considered as a fast
+    approximation to a GaussianHighPass filter.
 
     This is a pass through for the scipy.ndimage.filters.uniform_filter:
     https://docs.scipy.org/doc/scipy-0.19.0/reference/generated/scipy.ndimage.uniform_filter.html
@@ -103,7 +104,8 @@ class MeanHighPass(FilterAlgorithmBase):
         verbose : bool
             if True, report on filtering progress (default = False)
         n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter
+            Number of parallel processes to devote to applying the filter. If None, defaults to
+            the result of os.cpu_count(). (default None)
 
         Returns
         -------

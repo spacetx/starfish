@@ -78,7 +78,8 @@ class WhiteTophat(FilterAlgorithmBase):
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
         n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter
+            Number of parallel processes to devote to applying the filter. If None, defaults to
+            the result of os.cpu_count(). (default None)
 
         Returns
         -------

@@ -63,8 +63,8 @@ class ElementWiseMultiply(FilterAlgorithmBase):
         verbose : bool
             if True, report on filtering progress (default = False)
         n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter. If None, defaults to
-            the result of os.cpu_count().
+            Number of parallel processes to devote to applying the filter. If None, defaults to
+            the result of os.cpu_count(). (default None)
 
         Returns
         -------

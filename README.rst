@@ -22,7 +22,7 @@ Introduction
 
 Starfish is a Python library that lets you build scalable and modular pipelines for processing image-based transcriptomics data. Starfish is developed in the open in collaboration with SpaceTx. SpaceTx is a consortium effort to benchmark image based transcriptomic methods by applying 10 different methods on a common tissue source, standardizing the raw data formats and using standardized analysis pipelines.
 
-For detailed information on installation and usage, see the documentation_
+For detailed information on installation and usage, see the documentation_.
 
 .. _documentation: https://spacetx-starfish.readthedocs.io/en/latest/
 
@@ -35,9 +35,9 @@ contributors that leverage starfish's shared object model. Follow the links to s
 ====================  ==========  ===================  ==================
  Assay                Loads Data  Single-FoV Pipeline  Multi-FoV Pipeline
 --------------------  ----------  -------------------  ------------------
- MERFISH              [x]         [x]                  in process
- ISS                  [x]         [x]                  in process
- osmFISH              [x]         in process           [ ]
+ MERFISH              [x]         [x] mer_             in process
+ ISS                  [x]         [x] iss_             in process
+ osmFISH              [x]         [x] osm_             [ ]
  allen_smFISH         [x]         in review            [ ]
  BaristaSeq           [x]         in process           [ ]
  DARTFISH             [x]         in review            [ ]
@@ -47,6 +47,11 @@ contributors that leverage starfish's shared object model. Follow the links to s
  seq-FISH             [ ]         [ ]                  [ ]
  Imaging Mass. Cyto.  [x]         [ ]                  [ ]
 ====================  ==========  ===================  ==================
+
+.. _mer: https://github.com/spacetx/starfish/blob/master/notebooks/MERFISH.ipynb
+.. _iss: https://github.com/spacetx/starfish/blob/master/notebooks/ISS.ipynb
+.. _osm: https://github.com/spacetx/starfish/blob/master/notebooks/osmFISH.ipynb
+
 
 Concept
 -------

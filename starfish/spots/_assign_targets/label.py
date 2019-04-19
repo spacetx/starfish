@@ -1,6 +1,8 @@
+import numpy as np
+
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.segmentation_mask import SegmentationMaskCollection
-from starfish.types import Axes, Features
+from starfish.types import Features
 from starfish.util import click
 from ._base import AssignTargetsAlgorithm
 
@@ -22,31 +24,27 @@ class Label(AssignTargetsAlgorithm):
         intensities: IntensityTable,
         in_place: bool,
     ) -> IntensityTable:
-        cell_ids = []
 
-        # for each spot, test whether the spot falls inside the area of each mask
-        for spot in intensities:
-            for mask in masks:
-                sel = {Axes.X.value: spot[Axes.X.value],
-                       Axes.Y.value: spot[Axes.Y.value]}
-                if mask.ndim == 3:
-                    sel[Axes.ZPLANE.value] = spot[Axes.ZPLANE.value]
+        intensities[Features.CELL_ID] = (
+            Features.AXIS,
+            np.full(intensities.sizes[Features.AXIS], fill_value='nan', dtype='<U8')
+        )
 
-                try:
-                    if mask.sel(sel):
-                        cell_id = mask.name
-                        break
-                except KeyError:
-                    pass
-            else:
-                cell_id = ''
+        for mask in masks:
+            y_min, y_max = float(mask.y.min()), float(mask.y.max())
+            x_min, x_max = float(mask.x.min()), float(mask.x.max())
 
-            cell_ids.append(cell_id)
+            in_bbox = intensities.where(
+                (intensities.y >= y_min)
+                & (intensities.y <= y_max)
+                & (intensities.x >= x_min)
+                & (intensities.x <= x_max),
+                drop=True
+            )
 
-        if not in_place:
-            intensities = intensities.copy()
-
-        intensities[Features.CELL_ID] = (Features.AXIS, cell_ids)
+            in_mask = mask.sel_points(y=in_bbox.y, x=in_bbox.x)
+            spot_ids = in_bbox[Features.SPOT_ID][in_mask.values]
+            intensities[Features.CELL_ID].loc[spot_ids] = mask.name
 
         return intensities
 

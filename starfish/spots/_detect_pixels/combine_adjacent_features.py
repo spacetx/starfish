@@ -168,18 +168,51 @@ class CombineAdjacentFeatures:
             and the intensities of each each feature is its mean trace.
 
         """
+
+        import xarray as xr
         pixel_labels = label_image.reshape(-1)
-        intensities['spot_id'] = (Features.AXIS, pixel_labels)
-        mean_pixel_traces = intensities.groupby('spot_id').mean(Features.AXIS)
-        mean_distances = intensities[Features.DISTANCE].groupby('spot_id').mean(Features.AXIS)
-        mean_pixel_traces[Features.DISTANCE] = (
-            'spot_id',
-            np.ravel(mean_distances)
+
+        # Use a pandas groupby approach-based approach, because it is much faster than xarray
+
+        # If needed, it is possible to be even faster than pandas:
+        # https://stackoverflow.com/questions/51975512/\
+        # faster-alternative-to-perform-pandas-groupby-operation
+
+        # stack intensities
+        stacked = intensities.stack(traces=(Axes.CH.value, Axes.ROUND.value))
+
+        # drop into pandas to use their faster groupby
+        traces: pd.DataFrame = pd.DataFrame(
+            stacked.values,
+            index=pixel_labels,
+            columns=stacked.traces.to_index()
         )
+
+        #
+        distances: pd.Series = pd.Series(
+            stacked[Features.DISTANCE].values, index=pixel_labels
+        )
+
+        grouped = traces.groupby(level=0)
+        pd_mean_pixel_traces = grouped.mean()
+
+        grouped = distances.groupby(level=0)
+        pd_mean_distances = grouped.mean()
+
+        pd_xarray = xr.DataArray(
+            pd_mean_pixel_traces,
+            dims=(Features.AXIS, 'traces'),
+            coords=dict(
+                traces=('traces', pd_mean_pixel_traces.columns),
+                distance=(Features.AXIS, pd_mean_distances),
+                features=(Features.AXIS, pd_mean_pixel_traces.index)
+            )
+        )
+        mean_pixel_traces = pd_xarray.unstack('traces')
 
         # the 0th pixel trace corresponds to background. If present, drop it.
         try:
-            mean_pixel_traces = mean_pixel_traces.drop(0, dim='spot_id')
+            mean_pixel_traces = mean_pixel_traces.drop(0, dim=Features.AXIS)
         except KeyError:
             pass
 

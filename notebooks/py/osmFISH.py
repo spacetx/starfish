@@ -101,9 +101,9 @@ plt.axis('off');
 # EPY: END markdown
 
 # EPY: START code
-from starfish.spots import SpotFinder
+from starfish.spots import DetectSpots
 
-lmp = SpotFinder.LocalMaxPeakFinder(
+lmp = DetectSpots.LocalMaxPeakFinder(
     min_distance=6,
     stringency=0,
     min_obj_area=6,

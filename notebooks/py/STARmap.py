@@ -46,7 +46,6 @@ matplotlib.rcParams["figure.dpi"] = 150
 #data are well registered. By contrast, if there are patterns whereby pairs of
 #spots are consistently present at small shifts, that can indicate systematic
 #registration offsets which should be corrected prior to analysis.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -67,7 +66,6 @@ imshow_plane(ch_r_projection, sel={Axes.ZPLANE: 15})
 #The STARmap codebook maps pixel intensities across the rounds and channels to
 #the corresponding barcodes and genes that those pixels code for. For this
 #dataset, the codebook specifies 160 gene targets.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -128,7 +126,6 @@ stack = warp.run(
 
 # EPY: START markdown
 #Show the effect of registration.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -164,7 +161,6 @@ f.tight_layout()
 #channel has relatively similar numbers of spots. In the case of this data
 #this assumption is reasonably accurate, but for other datasets it can be
 #problematic to apply filters that match this stringently.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -211,11 +207,10 @@ f = plot_scaling_result(stack, scaled)
 #channels and will therefore fail decoding. Because of the stringency built
 #into the STARmap codebook, it is OK to be relatively permissive with the spot
 #finding parameters for this assay.
-#
 # EPY: END markdown
 
 # EPY: START code
-lsbd = starfish.spots.SpotFinder.LocalSearchBlobDetector(
+lsbd = starfish.spots.DetectSpots.LocalSearchBlobDetector(
     min_sigma=1,
     max_sigma=8,
     num_sigma=10,
@@ -233,7 +228,6 @@ intensities = lsbd.run(scaled, n_processes=8)
 #Next, spots are decoded. There is really no good way to display 3-d spot
 #detection in 2-d planes, so we encourage you to grab this notebook and
 #uncomment the below lines.
-#
 # EPY: END markdown
 
 # EPY: START code

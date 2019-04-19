@@ -6,7 +6,7 @@ from starfish import FieldOfView
 from starfish.image._filter.bandpass import Bandpass
 from starfish.image._filter.clip import Clip
 from starfish.image._filter.gaussian_low_pass import GaussianLowPass
-from starfish.spots._detector.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
+from starfish.spots._detect_spots.trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
 
 
 @pytest.mark.skip('issues with checksums prevent this data from working properly')

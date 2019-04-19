@@ -6,7 +6,7 @@ import numpy as np
 
 import starfish
 from starfish import IntensityTable
-from starfish.spots import TargetAssignment
+from starfish.spots import AssignTargets
 from starfish.types import Coordinates, Features
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(starfish.__file__)))
@@ -115,7 +115,7 @@ def test_iss_pipeline_cropped_data():
     assert seg._segmentation_instance.num_cells == 1
 
     # assign targets
-    lab = TargetAssignment.Label()
+    lab = AssignTargets.Label()
     assigned = lab.run(masks, decoded)
 
     pipeline_log = assigned.get_log()

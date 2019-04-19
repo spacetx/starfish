@@ -173,9 +173,9 @@ plt.axis('off');
 # EPY: END markdown
 
 # EPY: START code
-from starfish.spots import PixelSpotDecoder
+from starfish.spots import DetectPixels
 
-psd = PixelSpotDecoder.PixelSpotDecoder(
+psd = DetectPixels.PixelSpotDecoder(
     codebook=experiment.codebook,
     metric='euclidean', # distance metric to use for computing distance between a pixel vector and a codeword
     norm_order=2, # the L_n norm is taken of each pixel vector and codeword before computing the distance. this is n

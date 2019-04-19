@@ -42,7 +42,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "starfish", "validate", "experiment", EXPERIMENT_JSON_URL,
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input",
                 f"@{EXPERIMENT_JSON_URL}[fov_001][primary]",
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -53,7 +53,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
 
             ],
             [
-                "starfish", "learn_transform",
+                "starfish", "LearnTransform",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "max_projected", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -65,7 +65,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "--axes", "r"
             ],
             [
-                "starfish", "apply_transform",
+                "starfish", "ApplyTransform",
                 "--input",
                 f"@{EXPERIMENT_JSON_URL}[fov_001][primary]",
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -75,7 +75,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "Warp",
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "registered", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -84,7 +84,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "--masking-radius", "15",
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input",
                 f"@{EXPERIMENT_JSON_URL}[fov_001][nuclei]",
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -93,7 +93,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "--masking-radius", "15",
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input",
                 f"@{EXPERIMENT_JSON_URL}[fov_001][dots]",
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -102,7 +102,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "--masking-radius", "15",
             ],
             [
-                "starfish", "detect_spots",
+                "starfish", "DetectSpots",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -117,7 +117,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "--threshold", "0.01",
             ],
             [
-                "starfish", "segment",
+                "starfish", "Segment",
                 "--primary-images", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "primary_images.json"),
                 "--nuclei", lambda tempdir, *args, **kwargs: os.path.join(
@@ -130,7 +130,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "--min-distance", "57",
             ],
             [
-                "starfish", "target_assignment",
+                "starfish", "AssignTargets",
                 "--label-image",
                 lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "masks.tgz"),
@@ -141,7 +141,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 "Label",
             ],
             [
-                "starfish", "decode",
+                "starfish", "Decode",
                 "-i", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "targeted-spots.nc"),
                 "--codebook",

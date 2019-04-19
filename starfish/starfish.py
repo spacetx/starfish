@@ -11,14 +11,14 @@ from starfish.image import (
     ApplyTransform,
     Filter,
     LearnTransform,
-    Segmentation,
+    Segment,
 )
 from starfish.spacetx_format.cli import validate as validate_cli
 from starfish.spots import (
-    Decoder,
-    PixelSpotDecoder,
-    SpotFinder,
-    TargetAssignment,
+    AssignTargets,
+    Decode,
+    DetectPixels,
+    DetectSpots,
 )
 from starfish.util import click
 
@@ -96,11 +96,11 @@ def install_strict_dependencies():
 starfish.add_command(LearnTransform._cli)  # type: ignore
 starfish.add_command(ApplyTransform._cli)  # type: ignore
 starfish.add_command(Filter._cli)  # type: ignore
-starfish.add_command(PixelSpotDecoder._cli)
-starfish.add_command(SpotFinder._cli)  # type: ignore
-starfish.add_command(Segmentation._cli)  # type: ignore
-starfish.add_command(TargetAssignment._cli)  # type: ignore
-starfish.add_command(Decoder._cli)  # type: ignore
+starfish.add_command(DetectPixels._cli)
+starfish.add_command(DetectSpots._cli)  # type: ignore
+starfish.add_command(Segment._cli)  # type: ignore
+starfish.add_command(AssignTargets._cli)  # type: ignore
+starfish.add_command(Decode._cli)  # type: ignore
 
 # Other
 starfish.add_command(build_cli)  # type: ignore

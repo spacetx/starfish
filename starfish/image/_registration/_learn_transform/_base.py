@@ -8,14 +8,8 @@ from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util import click
 from starfish.util.click.indirectparams import ImageStackParamType
 
-COMPONENT_NAME = "learn_transform"
-
 
 class LearnTransform(PipelineComponent):
-    @classmethod
-    def pipeline_component_type_name(cls) -> str:
-        return COMPONENT_NAME
-
     @classmethod
     def _cli_run(cls, ctx, instance, *args, **kwargs):
         output = ctx.obj["output"]
@@ -24,7 +18,7 @@ class LearnTransform(PipelineComponent):
         transformation_list.to_json(output)
 
     @staticmethod
-    @click.group(COMPONENT_NAME)
+    @click.group("LearnTransform")
     @click.option("-i", "--input", type=ImageStackParamType)
     @click.option("-o", "--output", required=True)
     @click.pass_context

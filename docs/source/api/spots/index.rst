@@ -14,4 +14,4 @@ Spots
    detection/detection.rst
 
 .. toctree::
-   target_assignment/target_assignment.rst
+   assign_targets/assign_targets.rst

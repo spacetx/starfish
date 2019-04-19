@@ -22,11 +22,11 @@ class TestHelpReturnCode(unittest.TestCase):
             lambda tempdir: tempdir
         ],
         [
-            "starfish", "detect_spots", "--help",
+            "starfish", "DetectSpots", "--help",
             lambda tempdir: tempdir
         ],
         [
-            "starfish", "detect_spots", "BlobDetector", "--help",
+            "starfish", "DetectSpots", "BlobDetector", "--help",
             lambda tempdir: tempdir
         ],
     )
@@ -47,12 +47,12 @@ class TestHelpStandardOut(unittest.TestCase):
         assert_contains(actual, expected)
 
     def test_second(self):
-        actual = subprocess.check_output(["starfish", "detect_spots", "--help"])
-        expected = """Usage: starfish detect_spots [OPTIONS] COMMAND [ARGS]..."""
+        actual = subprocess.check_output(["starfish", "DetectSpots", "--help"])
+        expected = """Usage: starfish DetectSpots [OPTIONS] COMMAND [ARGS]..."""
         actual = actual.decode("utf-8")
         assert_contains(actual, expected)
 
     def test_third(self):
-        actual = subprocess.check_output(["starfish", "detect_spots", "BlobDetector", "--help"])
-        expected = """Usage: starfish detect_spots BlobDetector [OPTIONS]"""
+        actual = subprocess.check_output(["starfish", "DetectSpots", "BlobDetector", "--help"])
+        expected = """Usage: starfish DetectSpots BlobDetector [OPTIONS]"""
         assert_contains(actual, expected)

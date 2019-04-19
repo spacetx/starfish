@@ -48,7 +48,7 @@ clip2 = starfish.image.Filter.Clip(p_min=99, p_max=100, is_volume=True)
 # local intensity maxima, and spots are matched to the gene they represent by looking them up in a
 # codebook that records which (round, channel) matches which gene target.
 
-tlmpf = starfish.spots.SpotFinder.TrackpyLocalMaxPeakFinder(
+tlmpf = starfish.spots.DetectSpots.TrackpyLocalMaxPeakFinder(
     spot_diameter=5,  # must be odd integer
     min_mass=0.02,
     max_size=2,  # this is max radius

@@ -1,34 +1,10 @@
 import importlib
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from pathlib import Path
-from typing import Mapping, MutableMapping, Optional, Set, Type
+from typing import Mapping, Optional, Set, Type
 
 
-class PipelineComponentType(ABCMeta):
-    """
-    This is the metaclass for PipelineComponent.  As each subclass that is _not_ PipelineComponent
-    is created, it sets up a map between the algorithm name and the class that implements it.
-    """
-    def __init__(cls, name, bases, namespace):
-        super().__init__(name, bases, namespace)
-        if len(bases) != 0:
-            # this is _not_ PipelineComponent.  Instead, it's a subclass of PipelineComponent.
-            PipelineComponentType._register_pipeline_component_type_name(cls)
-
-    _pipeline_component_type_name_to_class_map: MutableMapping[str, Type["PipelineComponent"]] = \
-        dict()
-
-    @classmethod
-    def _register_pipeline_component_type_name(mcs, cls: Type["PipelineComponent"]) -> None:
-        PipelineComponentType._pipeline_component_type_name_to_class_map[
-            cls.pipeline_component_type_name()] = cls
-
-    @staticmethod
-    def get_pipeline_component_type_by_name(name: str) -> Type["PipelineComponent"]:
-        return PipelineComponentType._pipeline_component_type_name_to_class_map[name]
-
-
-class PipelineComponent(metaclass=PipelineComponentType):
+class PipelineComponent:
     """
     This is the base class for any method executed by the CLI.
 
@@ -53,18 +29,6 @@ class PipelineComponent(metaclass=PipelineComponentType):
     """
 
     _algorithm_to_class_map_int: Optional[Mapping[str, Type]] = None
-
-    @staticmethod
-    def get_pipeline_component_class_by_name(name: str) -> Type["PipelineComponent"]:
-        return PipelineComponentType.get_pipeline_component_type_by_name(name)
-
-    @classmethod
-    @abstractmethod
-    def pipeline_component_type_name(cls) -> str:
-        """
-        Returns the name of the pipeline component type.
-        """
-        raise NotImplementedError()
 
     @classmethod
     def _algorithm_to_class_map(cls) -> Mapping[str, Type]:

@@ -38,7 +38,6 @@ matplotlib.rcParams["figure.dpi"] = 150
 #Load Data
 #---------
 #Import starfish and extract a single field of view.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -75,7 +74,6 @@ imshow_plane(nissl, sel=plane_selector, ax=ax2, title="nissl image")
 #The first step in BaristaSeq is to do some rough registration. For this data,
 #the rough registration has been done for us by the authors, so it is omitted
 #from this notebook.
-#
 # EPY: END markdown
 
 # EPY: START markdown
@@ -84,7 +82,6 @@ imshow_plane(nissl, sel=plane_selector, ax=ax2, title="nissl image")
 #BaristaSeq is typically processed in 2d. Starfish exposes
 #`ImageStack.max_proj` to enable a user to max-project any axes. Here
 #we max project Z for both the nissl images and the primary images.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -103,7 +100,6 @@ imshow_plane(nissl, sel=plane_selector, ax=ax2, title="nissl image")
 #There is a slight miss-alignment of the C channel in the microscope used to
 #acquire the data. This has been corrected for this data, but here is how it
 #could be transformed using python code for future datasets.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -138,7 +134,6 @@ imshow_plane(nissl, sel=plane_selector, ax=ax2, title="nissl image")
 #-----------------------------
 #There are some minor registration errors along the pixels for which y < 100
 #and x < 50. Those pixels are dropped from this analysis
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -153,7 +148,6 @@ registration_corrected: starfish.ImageStack = z_projected_image.sel(
 #The following matrix contains bleed correction factors for Illumina
 #sequencing-by-synthesis reagents. Starfish provides a LinearUnmixing method
 #that will unmix the fluorescence intensities
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -179,7 +173,6 @@ bleed_corrected = lum.run(registration_corrected, in_place=False)
 #Channel 2 should look relative unchanged, as it only receives a bleed through
 #of 5% of channel 3. However, Channel 3 should look dramatically sparser after
 #spots from Channel 2 have been subtracted
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -212,7 +205,6 @@ f.tight_layout()
 #To remove image background, BaristaSeq uses a White Tophat filter, which
 #measures the background with a rolling disk morphological element and
 #subtracts it from the image.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -248,7 +240,6 @@ f.tight_layout()
 #is identified and set as the maximum across channels, and the dynamic range is
 #extended to equalize the channel intensities. We first demonatrate what
 #scaling by the max value does.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -262,7 +253,6 @@ scaled = sbp.run(background_corrected, n_processes=1, in_place=False)
 #should see that the histograms are better aligned in terms of intensities.
 #It gets most of what we want, but the histograms are still slightly shifted;
 #a result of high-value outliers.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -311,7 +301,7 @@ f = plot_scaling_result(background_corrected, scaled)
 # EPY: END markdown
 
 # EPY: START code
-psd = starfish.spots.PixelSpotDecoder.PixelSpotDecoder(
+psd = starfish.spots.DetectPixels.PixelSpotDecoder(
     codebook=exp.codebook, metric='euclidean', distance_threshold=0.5,
     magnitude_threshold=0.1, min_area=7, max_area=50
 )

@@ -18,8 +18,7 @@ class DetectSpots(PipelineComponent):
     Starfish spot detectors use a variety of means to detect bright spots against
     dark backgrounds. Starfish's spot detectors each have different strengths and weaknesses.
 
-    Fixed-position spot finders
-    ---------------------------
+    **Fixed-position spot finders**
 
     The following spot finders have two modes of operation.
 
@@ -36,15 +35,15 @@ class DetectSpots(PipelineComponent):
     other :code:`(round, channel)` pairs; those positions of the IntensityTable are filled with
     :code:`np.nan`.
 
-    1. BlobDetector
-    BlobDetector allows the user to pre-filter an image using either a Laplacian-of-Gaussians or
+    1. The :py:class:`~starfish.spots._detect_spots.blob.BlobDetector` allows the user to pre-filter
+    an image using either a Laplacian-of-Gaussians or
     Difference-of-Gaussians (fast approximation to Laplacian-of-Gaussians). These filters are
     applied at with a user-specified variety of Gaussian kernel sizes, and the best-fitting size is
     automatically selected. This allows this filter to detect Gaussian shaped blobs of various
     sizes.
 
-    2. LocalMaxPeakFinder
-    This filter identifies local maxima using the same machinery as the BlobDetector, except that
+    2. The :py:class:`~starfish.spots._detect_spots.local_max_peak_finder.LocalMaxPeakFinder`
+    identifies local maxima using the same machinery as the BlobDetector, except that
     it requires that the user to pre-apply any filters to enhance spots. In exchange, it allows a
     user to automatically select the threshold that separates foreground (spots) from background
     (noise).
@@ -52,8 +51,9 @@ class DetectSpots(PipelineComponent):
     In the future, starfish will combine the functionality of LocalMaxPeakFinder into BlobDetector
     so that a user can detect blobs of multiple sizes *and* automatically find a stable threshold.
 
-    3. TrackpyLocalMaxPeakFinder
-    Trackpy provides an implementation of the `Crocker-Grier <crocker_grier>`_ spot finding
+    3. The
+    :py:class:`~starfish.spots._detect_spots.trackpy_local_max_peak_finder.TrackpyLocalMaxPeakFinder`
+    provides an implementation of the `Crocker-Grier <crocker_grier>`_ spot finding
     algorithm. This method optionally preprocesses the image by performing a band pass and a
     threshold. It then locates all peaks of brightness, characterizes the neighborhoods of the peaks
     and takes only those with given total brightness (“mass”). Finally, it refines the positions of
@@ -61,16 +61,16 @@ class DetectSpots(PipelineComponent):
 
     .. _crocker_grier: https://physics.nyu.edu/grierlab/methods3c/
 
-    Fuzzy-position spot finders
-    ---------------------------
+    **Fuzzy-position spot finders**
 
     In addition to the spot finders above, we expose single additional spot finder that, while very
     similar in implementation to the BlobFinder, is able to adjust to small local spatial
     perturbations in the centroid of the spot across rounds and channels, such as those that might
     occur from small shifts to the tissue or stage.
 
-    1. LocalSearchBlobDetector
-    This Gaussian blob detector finds spots in all rounds and channels independently, then, given
+    1. The
+    :py:class:`~starfish.spots._detect_spots.local_search_blob_detector.LocalSearchBlobDetector`
+    is a Gaussian blob detector finds spots in all rounds and channels independently, then, given
     each spot in a user specified "anchor round", selects the closest spot by spatial position in
     all other rounds and aggregates those into codes which can subsequently be decoded. This Spot
     detector is only applicable to experiments with "one-hot" codebooks, such as those generated

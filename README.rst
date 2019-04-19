@@ -54,3 +54,12 @@ to see starfish in action on particular assay types. Or, browse our our notebook
 .. _bar: https://github.com/spacetx/starfish/blob/master/notebooks/BaristaSeq.ipynb
 .. _dar: https://github.com/spacetx/starfish/blob/master/notebooks/DARTFISH.ipynb
 .. _str: https://github.com/spacetx/starfish/blob/master/notebooks/STARmap.ipynb
+
+Contributing
+------------
+
+We are very interested in contributions! See our contributing.rst_ and documentation_ for more information.
+
+.. _documentation: https://spacetx-starfish.readthedocs.io/en/latest/
+.. _contributing.rst: https://github.com/spacetx/starfish/blob/master/CONTRIBUTING.rst
+

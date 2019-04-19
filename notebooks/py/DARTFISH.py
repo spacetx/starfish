@@ -80,12 +80,12 @@ plt.axis('off');
 # EPY: END markdown
 
 # EPY: START code
-sc_filt = Filter.ScaleByPercentile(p=100)
+sc_filt = Filter.Clip(p_max=100, expand_dynamic_range=True)
 norm_imgs = sc_filt.run(imgs)
 # EPY: END code
 
 # EPY: START markdown
-#Next, for each imaging round, and each pixel location, we zero the intensity values across all three color channels if the magnitude of this 3 vector is below a threshold. As such, the code value associated with these pixels will be the blank. This is necessary to support euclidean decoding for codebooks that include blank values. 
+#Next, for each imaging round, and each pixel location, we zero the intensity values across all three color channels if the magnitude of this 3 vector is below a threshold. As such, the code value associated with these pixels will be the blank. This is necessary to support euclidean decoding for codebooks that include blank values.
 # EPY: END markdown
 
 # EPY: START code
@@ -96,7 +96,7 @@ filtered_imgs = z_filt.run(norm_imgs)
 # EPY: START markdown
 ### Decode the processed data into spatially resolved gene expression profiles
 #
-#Here, starfish decodes each pixel value, across all rounds and channels, into the corresponding target (gene) it corresponds too. Contiguous pixels that map to the same target gene are called as one RNA molecule. Intuitively, pixel vectors are matched to the codebook by computing the euclidean distance between the pixel vector and all codewords. The minimal distance gene target is then selected, if it is within `distance_threshold` of any code. 
+#Here, starfish decodes each pixel value, across all rounds and channels, into the corresponding target (gene) it corresponds too. Contiguous pixels that map to the same target gene are called as one RNA molecule. Intuitively, pixel vectors are matched to the codebook by computing the euclidean distance between the pixel vector and all codewords. The minimal distance gene target is then selected, if it is within `distance_threshold` of any code.
 #
 #This decoding operation requires some parameter tuning, which is described below. First, we look at a distribution of pixel vector barcode magnitudes to determine the minimum magnitude threshold at which we will attempt to decode the pixel vector.
 # EPY: END markdown
@@ -269,10 +269,10 @@ spot_intensities = IntensityTable(spot_intensities.where(spot_intensities[Featur
 # EPY: END code
 
 # EPY: START markdown
-#Here, we: 
+#Here, we:
 #
-#1. Pick a rolony that was succesfully decoded to a gene. 
-#2. Pull out the average pixel trace for that rolony  
+#1. Pick a rolony that was succesfully decoded to a gene.
+#2. Pull out the average pixel trace for that rolony
 #3. Plot that pixel trace against the barcode of that gene
 #
 #In order to assess, visually, how close decoded barcodes match their targets

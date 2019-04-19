@@ -13,36 +13,43 @@ from .util import determine_axes_to_group_by
 
 
 class Bandpass(FilterAlgorithmBase):
+    """
+    Convolve with a Gaussian to remove short-wavelength noise and subtract out long-wavelength
+    variations, retaining features of intermediate scale. This implementation relies on
+    scipy.ndimage.filters.gaussian_filter.
+
+    This method is a thin wrapper around :code:`trackpy.Bandpass`:
+
+    http://soft-matter.github.io/trackpy/v0.3.0/generated/trackpy.bandpass.html
+
+    Parameters
+    ----------
+    lshort : float
+        filter frequencies below this value
+    llong : int
+        filter frequencies above this odd integer value
+    threshold : float
+        zero any spots below this intensity value after background subtraction (default 0)
+    truncate : float
+        truncate the gaussian kernel, used by the gaussian filter, at this many standard
+        deviations (default 4)
+    is_volume : bool
+        If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
+    clip_method : Union[str, Clip]
+        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].
+        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over the entire ImageStack
+        Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over each slice, where slice shapes are determined by the group_by
+        parameters
+    """
 
     def __init__(
-        self, lshort: Number, llong: int, threshold: Number=0, truncate: Number=4,
-        is_volume: bool=False, clip_method: Union[str, Clip]=Clip.CLIP
+        self, lshort: Number, llong: int, threshold: Number = 0, truncate: Number = 4,
+        is_volume: bool = False, clip_method: Union[str, Clip] = Clip.CLIP
     ) -> None:
-        """
-
-        Parameters
-        ----------
-        lshort : float
-            filter frequencies below this value
-        llong : int
-            filter frequencies above this odd integer value
-        threshold : float
-            zero any spots below this intensity value after background subtraction (default 0)
-        truncate : float
-            truncate the gaussian kernel, used by the gaussian filter, at this many standard
-            deviations (default 4)
-        is_volume : bool
-            If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
-        clip_method : Union[str, Clip]
-            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-            requirements that float data fall in [0, 1].
-            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-                value calculated over the entire ImageStack
-            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-                value calculated over each slice, where slice shapes are determined by the group_by
-                parameters
-        """
         self.lshort = lshort
         self.llong = llong
 
@@ -107,7 +114,8 @@ class Bandpass(FilterAlgorithmBase):
         verbose : bool
             if True, report on filtering progress (default = False)
         n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter
+            Number of parallel processes to devote to applying the filter. If None, defaults to
+            the result of os.cpu_count(). (default None)
 
         Returns
         -------

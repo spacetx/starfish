@@ -60,7 +60,9 @@ extensions = [
 ]
 
 # intersphinx mapping for outside starfish linking
+# TODO add scipy and skimage
 intersphinx_mapping = {'xarray': ('http://xarray.pydata.org/en/stable', None)}
+
 
 # numpydoc settings
 numpydoc_class_members_toctree = False

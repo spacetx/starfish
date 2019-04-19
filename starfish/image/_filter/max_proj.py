@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Iterable, Optional, Union
 
 from starfish.imagestack.imagestack import ImageStack
 from starfish.types import Axes
@@ -6,9 +6,23 @@ from starfish.util import click
 from ._base import FilterAlgorithmBase
 
 
-class MaxProj(FilterAlgorithmBase):
+class MaxProject(FilterAlgorithmBase):
+    """
+    Creates a maximum projection over one or more axis of the image tensor
 
-    def __init__(self, dims) -> None:
+    Parameters
+    ----------
+    dims : Axes
+        one or more Axes to project over
+
+    See Also
+    --------
+    :py:class:`Starfish.types.Axes`
+
+    """
+
+    def __init__(self, dims: Iterable[Union[Axes, str]]) -> None:
+
         self.dims = dims
 
     _DEFAULT_TESTING_PARAMETERS = {"dims": 'r'}
@@ -16,9 +30,9 @@ class MaxProj(FilterAlgorithmBase):
     def run(
             self,
             stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
+            in_place: bool = False,
+            verbose: bool = False,
+            n_processes: Optional[int] = None,
             *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
@@ -37,18 +51,23 @@ class MaxProj(FilterAlgorithmBase):
         Returns
         -------
         ImageStack :
-            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            If in-place is False, return the results of filter as a new stack. Otherwise return the
             original stack.
 
         """
         return stack.max_proj(*tuple(Axes(dim) for dim in self.dims))
 
     @staticmethod
-    @click.command("MaxProj")
-    @click.option("--dims", type=str, multiple=True,
-                  help="The dimensions the Imagestack should max project over. Options:"
-                       "(r, c, z, y, or x) For multiple dimensions add multiple --dims. Ex."
-                       "--dims r --dims c")
+    @click.command("MaxProject")
+    @click.option(
+        "--dims",
+        type=click.Choice(
+            [Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE.value, Axes.X.value, Axes.Y.value]
+        ),
+        multiple=True,
+        help="The dimensions the Imagestack should max project over."
+             "For multiple dimensions add multiple --dims. Ex."
+             "--dims r --dims c")
     @click.pass_context
     def _cli(ctx, dims):
-        ctx.obj["component"]._cli_run(ctx, MaxProj(dims))
+        ctx.obj["component"]._cli_run(ctx, MaxProject(dims))

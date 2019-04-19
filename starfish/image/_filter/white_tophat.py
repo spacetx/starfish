@@ -13,38 +13,39 @@ from .util import determine_axes_to_group_by
 
 class WhiteTophat(FilterAlgorithmBase):
     """
-    Performs "white top hat" filtering of an image to enhance spots. "White top hat filtering"
-    finds spots that are both smaller and brighter than their surroundings.
+    Performs "white top hat" filtering of an image to enhance spots. White top hat filtering
+    finds spots that are both smaller and brighter than their surroundings by subtracting an
+    estimate of the background produced by a binary opening of the image using a disk-shaped
+    structuring element.
 
-    See Also
-    --------
-    https://en.wikipedia.org/wiki/Top-hat_transform
+    Parameters
+    ----------
+    masking_radius : int
+        radius of the morphological masking structure in pixels
+    is_volume : int
+        If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
+        independently.
+    clip_method : Union[str, Clip]
+        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].
+        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over the entire ImageStack
+        Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over each slice, where slice shapes are determined by the group_by
+        parameters
+
+    Notes
+    -----
+    See https://en.wikipedia.org/wiki/Top-hat_transform for more information
+
     """
 
     def __init__(
-        self, masking_radius: int, is_volume: bool=False, clip_method: Union[str, Clip]=Clip.CLIP
+        self, masking_radius: int, is_volume: bool = False,
+        clip_method: Union[str, Clip] = Clip.CLIP
     ) -> None:
-        """
-        Instance of a white top hat morphological masking filter which masks objects larger
-        than `masking_radius`
 
-        Parameters
-        ----------
-        masking_radius : int
-            radius of the morphological masking structure in pixels
-        is_volume : int
-            If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
-            independently.
-        clip_method : Union[str, Clip]
-            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-            requirements that float data fall in [0, 1].
-            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-                value calculated over the entire ImageStack
-            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-                value calculated over each slice, where slice shapes are determined by the group_by
-                parameters
-        """
         self.masking_radius = masking_radius
         self.is_volume = is_volume
         self.clip_method = clip_method
@@ -61,9 +62,9 @@ class WhiteTophat(FilterAlgorithmBase):
     def run(
             self,
             stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
+            in_place: bool = False,
+            verbose: bool = False,
+            n_processes: Optional[int] = None,
             *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
@@ -77,7 +78,8 @@ class WhiteTophat(FilterAlgorithmBase):
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
         n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter
+            Number of parallel processes to devote to applying the filter. If None, defaults to
+            the result of os.cpu_count(). (default None)
 
         Returns
         -------

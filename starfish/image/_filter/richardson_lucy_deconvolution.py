@@ -16,33 +16,62 @@ from .util import (
 
 
 class DeconvolvePSF(FilterAlgorithmBase):
+    """
+    Deconvolve a point spread function from the image. The point spread function is assumed to be
+    an isotropic Gaussian, with a user specified standard deviation, sigma.
+
+    There are currently several issues with this function.
+    See https://github.com/spacetx/starfish/issues/731
+
+    Parameters
+    ----------
+    num_iter : int
+        number of iterations to run. Note that this is a very important parameter that requires
+        careful optimization
+    sigma : Number
+        standard deviation of the gaussian kernel used to construct the point spread function
+    is_volume: bool
+        If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
+        independently.
+    clip_method : Union[str, Clip]
+        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].
+        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over the entire ImageStack
+        Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over each slice, where slice shapes are determined by the group_by
+        parameters
+
+    Examples
+    --------
+    >>> from skimage import color, data, restoration
+    >>> camera = color.rgb2gray(data.camera())
+    >>> from scipy.signal import convolve2d
+    >>> psf = np.ones((5, 5)) / 25
+    >>> camera = convolve2d(camera, psf, 'same')
+    >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
+    >>> deconvolved = restoration.richardson_lucy(camera, psf, 5)
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+
+    Notes
+    -----
+    This code is based on code from skimage.restoration. We modified it to implement a bugfix
+    wherein zeros in the input image or zeros produced during an intermediate would induce
+    divide by zero -> Nan. These Nans would then propagate throughout the image, invalidating
+    the results. Longer term, we will make a PR to skimage to introduce the fix. There is some
+    existing work linked here: https://github.com/scikit-image/scikit-image/issues/2551
+
+    """
 
     def __init__(
         self, num_iter: int, sigma: Number, is_volume: bool = False,
-        clip_method: Union[str, Clip]=Clip.CLIP
+        clip_method: Union[str, Clip] = Clip.CLIP
     ) -> None:
-        """Deconvolve a point spread function
 
-        Parameters
-        ----------
-        num_iter : int
-            number of iterations to run. Note that this is a very important parameter that requires
-            careful optimization
-        sigma : Number
-            standard deviation of the gaussian kernel used to construct the point spread function
-        is_volume: bool
-            If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
-            independently.
-        clip_method : Union[str, Clip]
-            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-            requirements that float data fall in [0, 1].
-            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-                value calculated over the entire ImageStack
-            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-                value calculated over each slice, where slice shapes are determined by the group_by
-                parameters
-        """
         self.num_iter = num_iter
         self.sigma = sigma
         self.kernel_size: int = int(2 * np.ceil(2 * sigma) + 1)
@@ -78,28 +107,6 @@ class DeconvolvePSF(FilterAlgorithmBase):
         -------
         im_deconv : ndarray
            The deconvolved image.
-
-        Examples
-        --------
-        >>> from skimage import color, data, restoration
-        >>> camera = color.rgb2gray(data.camera())
-        >>> from scipy.signal import convolve2d
-        >>> psf = np.ones((5, 5)) / 25
-        >>> camera = convolve2d(camera, psf, 'same')
-        >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
-        >>> deconvolved = restoration.richardson_lucy(camera, psf, 5)
-
-        References
-        ----------
-        .. [1] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
-
-        Notes
-        -----
-        This code is copied from skimage.restoration. We copied it to implement a bugfix wherein
-        zeros in the input image or zeros produced during an intermediate would induce divide by
-        zero -> Nan. These Nans would then propagate throughout the image, invalidating the results.
-        Longer term, we will make a PR to skimage to introduce the fix. There is some existing work
-        linked here: https://github.com/scikit-image/scikit-image/issues/2551
 
         """
         # compute the times for direct convolution and the fft method. The fft is of
@@ -139,9 +146,9 @@ class DeconvolvePSF(FilterAlgorithmBase):
     def run(
             self,
             stack: ImageStack,
-            in_place: bool=False,
+            in_place: bool = False,
             verbose=False,
-            n_processes: Optional[int]=None,
+            n_processes: Optional[int] = None,
             *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
@@ -155,7 +162,8 @@ class DeconvolvePSF(FilterAlgorithmBase):
         verbose : bool
             if True, report on the percentage completed during processing (default = False)
         n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter
+            Number of parallel processes to devote to applying the filter. If None, defaults to
+            the result of os.cpu_count(). (default None)
 
         Returns
         -------

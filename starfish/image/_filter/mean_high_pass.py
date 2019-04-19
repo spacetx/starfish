@@ -16,39 +16,39 @@ from .util import (
 
 
 class MeanHighPass(FilterAlgorithmBase):
+    """
+    The mean high pass filter reduces low spatial frequency features by subtracting a
+    mean filtered image from the original image. The mean filter smooths an image by replacing
+    each pixel's value with an average of the pixel values of the surrounding neighborhood.
+
+    The mean filter is also known as a uniform or box filter. It can also be considered as a fast
+    approximation to a GaussianHighPass filter.
+
+    This is a pass through for the scipy.ndimage.filters.uniform_filter:
+    https://docs.scipy.org/doc/scipy-0.19.0/reference/generated/scipy.ndimage.uniform_filter.html
+
+    Parameters
+    ----------
+    size : Union[Number, Tuple[Number]]
+        width of the kernel
+    is_volume : bool
+        If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
+        independently.
+    clip_method : Union[str, Clip]
+        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].
+        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over the entire ImageStack
+        Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over each slice, where slice shapes are determined by the group_by
+        parameters
+    """
 
     def __init__(
-        self, size: Union[Number, Tuple[Number]], is_volume: bool=False,
-        clip_method: Union[str, Clip]=Clip.CLIP
+        self, size: Union[Number, Tuple[Number]], is_volume: bool = False,
+        clip_method: Union[str, Clip] = Clip.CLIP
     ) -> None:
-        """Mean high pass filter.
-
-        The mean high pass filter reduces low spatial frequency features by subtracting a
-        mean filtered image from the original image. The mean filter smooths an image by replacing
-        each pixel's value with an average of the pixel values of the surrounding neighborhood.
-
-        The mean filter is also known as a uniform or box filter.
-
-        This is a pass through for the scipy.ndimage.filters.uniform_filter:
-        https://docs.scipy.org/doc/scipy-0.19.0/reference/generated/scipy.ndimage.uniform_filter.html
-
-        Parameters
-        ----------
-        size : Union[Number, Tuple[Number]]
-            width of the kernel
-        is_volume : bool
-            If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
-            independently.
-        clip_method : Union[str, Clip]
-            (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-            requirements that float data fall in [0, 1].
-            Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-            Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-                value calculated over the entire ImageStack
-            Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-                value calculated over each slice, where slice shapes are determined by the group_by
-                parameters
-        """
 
         self.size = validate_and_broadcast_kernel_size(size, is_volume)
         self.is_volume = is_volume
@@ -58,7 +58,7 @@ class MeanHighPass(FilterAlgorithmBase):
 
     @staticmethod
     def _high_pass(
-        image: Union[xr.DataArray, np.ndarray], size: Number, rescale: bool=False
+        image: Union[xr.DataArray, np.ndarray], size: Number, rescale: bool = False
     ) -> np.ndarray:
         """
         Applies a mean high pass filter to an image
@@ -88,9 +88,9 @@ class MeanHighPass(FilterAlgorithmBase):
     def run(
             self,
             stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
+            in_place: bool = False,
+            verbose: bool = False,
+            n_processes: Optional[int] = None,
             *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
@@ -104,12 +104,13 @@ class MeanHighPass(FilterAlgorithmBase):
         verbose : bool
             if True, report on filtering progress (default = False)
         n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter
+            Number of parallel processes to devote to applying the filter. If None, defaults to
+            the result of os.cpu_count(). (default None)
 
         Returns
         -------
         ImageStack :
-            If in-place is False, return the results of filter as a new stack.  Otherwise return the
+            If in-place is False, return the results of filter as a new stack. Otherwise return the
             original stack.
 
         """

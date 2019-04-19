@@ -129,7 +129,7 @@ def test_dartfish_pipeline_cropped_data():
 
     pipeline_log = zero_norm_stack.log
 
-    assert pipeline_log[0]['method'] == 'ScaleByPercentile'
+    assert pipeline_log[0]['method'] == 'Clip'
     assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
 
     spot_intensities = dartfish.initial_spot_intensities
@@ -141,7 +141,7 @@ def test_dartfish_pipeline_cropped_data():
 
     pipeline_log = spot_intensities.get_log()
 
-    assert pipeline_log[0]['method'] == 'ScaleByPercentile'
+    assert pipeline_log[0]['method'] == 'Clip'
     assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
 
     # Test serialization / deserialization of IntensityTable log
@@ -152,7 +152,7 @@ def test_dartfish_pipeline_cropped_data():
     loaded_intensities = IntensityTable.open_netcdf(fp.name)
     pipeline_log = loaded_intensities.get_log()
 
-    assert pipeline_log[0]['method'] == 'ScaleByPercentile'
+    assert pipeline_log[0]['method'] == 'Clip'
     assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
 
     spots_df = IntensityTable(

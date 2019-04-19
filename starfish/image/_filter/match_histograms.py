@@ -12,28 +12,31 @@ from ._base import FilterAlgorithmBase
 
 
 class MatchHistograms(FilterAlgorithmBase):
+    """
+    Normalize data by matching distributions of each tile or volume to a reference volume
+
+    Chunks sharing the same values for axes specified by group_by will be quantile
+    normalized such that their intensity values are identically distributed. The reference
+    distribution is calculated by sorting the intensities in each chunk and averaging across
+    chunks.
+
+    For example, if group_by={Axes.CH, Axes.ROUND} each (z, y, x) volume will be linearized,
+    the intensities will be sorted, and averaged across {Axes.CH, Axes.ROUND}, equalizing
+    the intensity distribution of each (round, channel) volume.
+
+    Setting group_by={Axes.CH} would carry out the same approach, but the result would _retain_
+    variation across channel.
+
+    Parameters
+    ----------
+    group_by : Set[Axes]
+        The Axes to group by.
+    """
 
     def __init__(
             self, group_by: Set[Axes]
     ) -> None:
-        """Normalize data by matching distributions of each tile or volume to a reference volume
 
-        Chunks sharing the same values for axes specified by group_by will be quantile
-        normalized such that their intensity values are identically distributed. The reference
-        distribution is calculated by sorting the intensities in each chunk and averaging across
-        chunks.
-
-        For example, if group_by={Axes.CH, Axes.ROUND} each (z, y, x) volume will be linearized,
-        the intensities will be sorted, and averaged across {Axes.CH, Axes.ROUND}, equalizing
-        the intensity distribution of each (round, channel) volume.
-
-        Setting group_by={Axes.CH} would carry out the same approach, but the result would _retain_
-        variation across channel.
-
-        Parameters
-        ----------
-        group_by : Set[Axes]
-        """
         self.group_by = group_by
 
     _DEFAULT_TESTING_PARAMETERS = {"group_by": {Axes.CH, Axes.ROUND}}
@@ -76,9 +79,9 @@ class MatchHistograms(FilterAlgorithmBase):
     def run(
             self,
             stack: ImageStack,
-            in_place: bool=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
+            in_place: bool = False,
+            verbose: bool = False,
+            n_processes: Optional[int] = None,
             *args,
     ) -> ImageStack:
         """Perform filtering of an image stack
@@ -92,7 +95,8 @@ class MatchHistograms(FilterAlgorithmBase):
         verbose : bool
             if True, report on filtering progress (default = False)
         n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter
+            Number of parallel processes to devote to applying the filter. If None, defaults to
+            the result of os.cpu_count(). (default None)
 
         Returns
         -------

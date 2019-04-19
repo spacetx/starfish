@@ -3,17 +3,17 @@
 Decoding
 ========
 
-Decoders can be imported using ``starfish.spots.Decoder``, which registers all classes that subclass
-``DecoderAlgorithmBase``:
+Decoders can be imported using ``starfish.spots.Decode``, which registers all classes that subclass
+``DecodeAlgorithmBase``:
 
 .. code-block:: python
 
-    from starfish.spots import Decoder
+    from starfish.spots import Decode
 
 .. contents::
 
 Per Round Max Channel Decoder
 -----------------------------
 
-.. autoclass:: starfish.spots._decoder.per_round_max_channel_decoder.PerRoundMaxChannelDecoder
+.. autoclass:: starfish.spots._decode.per_round_max_channel_decoder.PerRoundMaxChannelDecoder
     :members:

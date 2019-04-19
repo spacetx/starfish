@@ -72,12 +72,12 @@ class AlgorithmBase(metaclass=AlgorithmBaseType):
     Examples
     --------
 
-    PipelineComponent: `starfish.image._segmentation.Segmentation(PipelineComponent)`
+    PipelineComponent: `starfish.image._segment.Segmentation(PipelineComponent)`
 
-    AlgorithmBase: `starfish.image._segmentation._base.SegmentationAlgorithmBase(AlgorithmBase)`
+    AlgorithmBase: `starfish.image._segment._base.SegmentationAlgorithmBase(AlgorithmBase)`
 
     Implementing Algorithms:
-    - `starfish.image._segmentation.watershed.Watershed(SegmentationAlgorithmBase)`
+    - `starfish.image._segment.watershed.Watershed(SegmentationAlgorithmBase)`
 
     This pattern exposes the API as follows:
 

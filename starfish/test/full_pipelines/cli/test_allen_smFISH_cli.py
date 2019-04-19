@@ -27,7 +27,7 @@ class TestAllenData(CLITest, unittest.TestCase):
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "registered/fov_001", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -37,7 +37,7 @@ class TestAllenData(CLITest, unittest.TestCase):
                 "--p-max", "100"
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "clip_filtered.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -48,7 +48,7 @@ class TestAllenData(CLITest, unittest.TestCase):
                 "--truncate", "4"
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "bandpass_filtered.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -58,7 +58,7 @@ class TestAllenData(CLITest, unittest.TestCase):
                 "--p-max", "100"
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "clip2_filtered.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -67,7 +67,7 @@ class TestAllenData(CLITest, unittest.TestCase):
                 "--sigma", "1"
             ],
             [
-                "starfish", "detect_spots",
+                "starfish", "DetectSpots",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "gaussian_filtered.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),

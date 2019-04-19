@@ -102,7 +102,7 @@ def test_tranfering_physical_coords_to_expression_matrix():
     except KeyError as e:
         # Assert value error is thrown with right message
         assert e.args[0] == "IntensityTable must have 'cell_id' assignments for each cell before " \
-                            "this function can be called. See starfish.TargetAssignment.Label."
+                            "this function can be called. See starfish.spots.AssignTargets.Label."
 
     # mock out come cell_ids
     cell_ids = random.sample(range(1, 20), NUMBER_SPOTS)

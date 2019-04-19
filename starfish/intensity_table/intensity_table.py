@@ -510,8 +510,9 @@ class IntensityTable(xr.DataArray):
             cell x gene expression table
         """
         if Features.CELL_ID not in self.coords:
-            raise KeyError("IntensityTable must have 'cell_id' assignments for each cell before "
-                           "this function can be called. See starfish.TargetAssignment.Label.")
+            raise KeyError(
+                "IntensityTable must have 'cell_id' assignments for each cell before this function "
+                "can be called. See starfish.spots.AssignTargets.Label.")
         grouped = self.to_features_dataframe().groupby([Features.CELL_ID, Features.TARGET])
         counts = grouped.count().iloc[:, 0].unstack().fillna(0)
         if self.has_physical_coords:

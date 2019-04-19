@@ -6,8 +6,8 @@ ISS Processing Workflow
 import os
 
 import starfish
-from starfish.image import ApplyTransform, Filter, LearnTransform, Segmentation
-from starfish.spots import SpotFinder, TargetAssignment
+from starfish.image import ApplyTransform, Filter, LearnTransform, Segment
+from starfish.spots import DetectSpots, AssignTargets
 from starfish.types import Axes
 
 test = os.getenv("TESTING") is not None
@@ -29,7 +29,7 @@ def iss_pipeline(fov, codebook):
     filtered = filt.run(registered, verbose=True, in_place=False)
 
     # detect spots using laplacian of gaussians approach
-    p = SpotFinder.BlobDetector(
+    p = DetectSpots.BlobDetector(
         min_sigma=1,
         max_sigma=10,
         num_sigma=30,
@@ -46,7 +46,7 @@ def iss_pipeline(fov, codebook):
     decoded = codebook.decode_per_round_max(intensities)
 
     # segment cells
-    seg = Segmentation.Watershed(
+    seg = Segment.Watershed(
         nuclei_threshold=.16,
         input_threshold=.22,
         min_distance=57,
@@ -54,7 +54,7 @@ def iss_pipeline(fov, codebook):
     label_image = seg.run(primary_image, fov.get_image('dots'))
 
     # assign spots to cells
-    ta = TargetAssignment.Label()
+    ta = AssignTargets.Label()
     assigned = ta.run(label_image, decoded)
 
     return assigned, label_image

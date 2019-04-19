@@ -27,7 +27,7 @@ from starfish.types import Features, Axes
 from starfish import IntensityTable
 
 from starfish.image import Filter
-from starfish.spots import PixelSpotDecoder
+from starfish.spots import DetectPixels
 # EPY: END code
 
 # EPY: START markdown
@@ -134,7 +134,7 @@ area_threshold = (5, 30)
 # here, I set this to be a large number, so I can inspect the distribution of decoded distances below
 distance_threshold = 3
 
-psd = PixelSpotDecoder.PixelSpotDecoder(
+psd = DetectPixels.PixelSpotDecoder(
     codebook=experiment.codebook,
     metric='euclidean',
     distance_threshold=distance_threshold,
@@ -255,7 +255,7 @@ plt.title('Set minimum distance threshold');
 # EPY: START code
 distance_threshold = min_dist
 
-psd = PixelSpotDecoder.PixelSpotDecoder(
+psd = DetectPixels.PixelSpotDecoder(
     codebook=experiment.codebook,
     metric='euclidean',
     distance_threshold=distance_threshold,

@@ -8,15 +8,8 @@ from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.util import click
 from starfish.util.click.indirectparams import ImageStackParamType
 
-COMPONENT_NAME = "apply_transform"
-
 
 class ApplyTransform(PipelineComponent):
-
-    @classmethod
-    def pipeline_component_type_name(cls) -> str:
-        return COMPONENT_NAME
-
     @classmethod
     def _cli_run(cls, ctx, instance):
         output = ctx.obj["output"]
@@ -26,7 +19,7 @@ class ApplyTransform(PipelineComponent):
         transformed.export(output)
 
     @staticmethod
-    @click.group(COMPONENT_NAME)
+    @click.group("ApplyTransform")
     @click.option("-i", "--input", type=ImageStackParamType)
     @click.option("-o", "--output", required=True)
     @click.option("--transformation-list", required=True, type=click.Path(exists=True),

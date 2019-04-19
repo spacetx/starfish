@@ -28,7 +28,7 @@ class TestWithDartfishData(CLITest, unittest.TestCase):
     def stages(self):
         return (
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input",
                 f"@{EXPERIMENT_JSON_URL}[fov_001][primary]",
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -37,7 +37,7 @@ class TestWithDartfishData(CLITest, unittest.TestCase):
                 "--p", "100",
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "scale_filtered.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -46,7 +46,7 @@ class TestWithDartfishData(CLITest, unittest.TestCase):
                 "--thresh", ".05",
             ],
             [
-                "starfish", "detect_pixels",
+                "starfish", "DetectPixels",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "zero_filtered.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(

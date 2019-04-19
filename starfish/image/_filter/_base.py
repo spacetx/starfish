@@ -7,14 +7,8 @@ from starfish.pipeline.pipelinecomponent import PipelineComponent
 from starfish.util import click
 from starfish.util.click.indirectparams import ImageStackParamType
 
-COMPONENT_NAME = "filter"
-
 
 class Filter(PipelineComponent):
-    @classmethod
-    def pipeline_component_type_name(cls) -> str:
-        return COMPONENT_NAME
-
     @classmethod
     def _cli_run(cls, ctx, instance):
         output = ctx.obj["output"]
@@ -23,7 +17,7 @@ class Filter(PipelineComponent):
         filtered.export(output)
 
     @staticmethod
-    @click.group(COMPONENT_NAME)
+    @click.group("Filter")
     @click.option("-i", "--input", type=ImageStackParamType)
     @click.option("-o", "--output", required=True)
     @click.pass_context

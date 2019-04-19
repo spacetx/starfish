@@ -3,12 +3,12 @@
 Segmentation
 ============
 
-Segmentation can be imported using ``starfish.image.Segmentation``, which registers all classes
-that subclass ``SegmentationAlgorithmBase``:
+Segmentation can be imported using ``starfish.image.Segment``, which registers all classes that subclass
+``SegmentAlgorithmBase``:
 
 .. code-block:: python
 
-    from starfish.image import Segmentation
+    from starfish.image import Segment
 
 .. contents::
 
@@ -16,6 +16,6 @@ that subclass ``SegmentationAlgorithmBase``:
 Watershed
 ---------
 
-.. autoclass:: starfish.image._segmentation.watershed.Watershed
+.. autoclass:: starfish.image._segment.watershed.Watershed
    :members:
 

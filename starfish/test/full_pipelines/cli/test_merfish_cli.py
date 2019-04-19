@@ -28,7 +28,7 @@ class TestWithMerfishData(CLITest, unittest.TestCase):
                 lambda tempdir, *args, **kwargs: os.path.join(tempdir, "registered")
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "registered/fov_001", "primary_images.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -37,7 +37,7 @@ class TestWithMerfishData(CLITest, unittest.TestCase):
                 "--sigma", "3",
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "gaussian_filtered.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -47,7 +47,7 @@ class TestWithMerfishData(CLITest, unittest.TestCase):
                 "--num-iter", "9"
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "deconvolve_filtered.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -56,7 +56,7 @@ class TestWithMerfishData(CLITest, unittest.TestCase):
                 "--sigma", "1"
             ],
             [
-                "starfish", "filter",
+                "starfish", "Filter",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "deconvolve_filtered.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(
@@ -65,7 +65,7 @@ class TestWithMerfishData(CLITest, unittest.TestCase):
                 "--p", "90",
             ],
             [
-                "starfish", "detect_spots",
+                "starfish", "DetectSpots",
                 "--input", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "filtered", "scale_filtered.json"),
                 "--output", lambda tempdir, *args, **kwargs: os.path.join(tempdir, "results"),

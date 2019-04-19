@@ -158,11 +158,11 @@ registered_imgs = warp.run(filtered_imgs, transforms_list=transforms_list, in_pl
 # EPY: END markdown
 
 # EPY: START code
-from starfish.spots import SpotFinder
+from starfish.spots import DetectSpots
 import warnings
 
 # parameters to define the allowable gaussian sizes (parameter space)
-p = SpotFinder.BlobDetector(
+p = DetectSpots.BlobDetector(
     min_sigma=1,
     max_sigma=10,
     num_sigma=30,
@@ -205,7 +205,7 @@ table
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image import Segmentation
+from starfish.image import Segment
 
 dapi_thresh = .18  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
@@ -217,7 +217,7 @@ stain = stain/stain.max()
 nuclei = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 
 
-seg = Segmentation.Watershed(
+seg = Segment.Watershed(
     nuclei_threshold=dapi_thresh,
     input_threshold=stain_thresh,
     min_distance=min_dist
@@ -231,10 +231,10 @@ seg.show()
 # EPY: END markdown
 
 # EPY: START code
-from starfish.spots import TargetAssignment
+from starfish.spots import AssignTargets
 from starfish.expression_matrix.expression_matrix import ExpressionMatrix
 
-al = TargetAssignment.Label()
+al = AssignTargets.Label()
 labeled = al.run(masks, decoded)
 cg = labeled.to_expression_matrix()
 cg

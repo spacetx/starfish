@@ -21,8 +21,9 @@ class GaussianHighPass(FilterAlgorithmBase):
     Applies a Gaussian high pass filter to the ImageStack. This is useful to remove cellular
     autofluorescence, which is typically low frequency.
 
-    This filter works by subtracting a Gaussian low pass filter defined in :ref:`scipy.ndimage`
-    and used by :ref:`skimage.filters.Gaussian`.
+    This filter works by subtracting a Gaussian low pass filter defined in
+    :py:func:`scipy.ndimage`
+    and used by :py:func:`skimage.filters.gaussian`.
 
     Parameters
     ----------

@@ -49,12 +49,6 @@ Deconvolve PSF
 .. autoclass:: starfish.image._filter.richardson_lucy_deconvolution.DeconvolvePSF
     :members:
 
-Scale By Percentile
--------------------
-
-.. autoclass:: starfish.image._filter.scale_by_percentile.ScaleByPercentile
-    :members:
-
 White Top Hat
 -------------
 

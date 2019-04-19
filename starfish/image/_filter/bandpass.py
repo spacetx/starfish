@@ -20,7 +20,7 @@ class Bandpass(FilterAlgorithmBase):
 
     This method is a thin wrapper around :code:`trackpy.Bandpass`:
 
-    `<http://soft-matter.github.io/trackpy/v0.3.0/generated/trackpy.bandpass.html>`
+    http://soft-matter.github.io/trackpy/v0.3.0/generated/trackpy.bandpass.html
 
     Parameters
     ----------

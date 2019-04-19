@@ -22,7 +22,7 @@ class GaussianLowPass(FilterAlgorithmBase):
     useful to apply prior to pixel decoding or watershed segmentation to spread intensity across
     neighboring pixels, accounting for noise that the algorithms are sensitive to.
 
-    This is a thin wrapper around :ref:`skimage.filters.Gaussian`
+    This is a thin wrapper around :py:func:`skimage.filters.Gaussian`
 
     Parameters
     ----------

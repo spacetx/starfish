@@ -18,7 +18,7 @@ class Clip(FilterAlgorithmBase):
     By default, these min and max percentiles are set to 0 and 100 respectively, which will
     result in the filter doing nothing.
 
-    This is a wrapper for :ref:`numpy.clip` that can optionally linearly expand the dynamic
+    This is a wrapper for :py:func:`numpy.clip` that can optionally linearly expand the dynamic
     range of the data to extend from [0, 1]
 
     Parameters

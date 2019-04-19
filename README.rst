@@ -38,19 +38,21 @@ contributors that leverage starfish's shared object model. Follow the links to s
  MERFISH              [x]         [x] mer_             in process
  ISS                  [x]         [x] iss_             in process
  osmFISH              [x]         [x] osm_             [ ]
- allen_smFISH         [x]         in review            [ ]
- BaristaSeq           [x]         in process           [ ]
- DARTFISH             [x]         in review            [ ]
+ smFISH               [x]         [x]                  [ ]
+ BaristaSeq           [x]         [x] bar_             [ ]
+ DARTFISH             [x]         [x] dar_             [ ]
  ex-FISH              [x]         [ ]                  [ ]
- StarMAP              [ ]         [ ]                  [ ]
+ StarMAP              [x]         [x] str_             [ ]
+ seq-FISH             [x]         in process           [ ]
  FISSEQ               no data     no pipeline          [ ]
- seq-FISH             [ ]         [ ]                  [ ]
- Imaging Mass. Cyto.  [x]         [ ]                  [ ]
 ====================  ==========  ===================  ==================
 
 .. _mer: https://github.com/spacetx/starfish/blob/master/notebooks/MERFISH.ipynb
 .. _iss: https://github.com/spacetx/starfish/blob/master/notebooks/ISS.ipynb
 .. _osm: https://github.com/spacetx/starfish/blob/master/notebooks/osmFISH.ipynb
+.. _bar: https://github.com/spacetx/starfish/blob/master/notebooks/BaristaSeq.ipynb
+.. _dar: https://github.com/spacetx/starfish/blob/master/notebooks/DARTFISH.ipynb
+.. _str: https://github.com/spacetx/starfish/blob/master/notebooks/STARmap.ipynb
 
 
 Concept

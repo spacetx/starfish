@@ -20,11 +20,17 @@ Starfish
 Introduction
 ------------
 
-Starfish is a Python library that lets you build scalable pipelines for processing image-based transcriptomics data. This is a work in progress and is being developed in collaboration with SpaceTx. SpaceTx is a consortium effort to explore image based transcriptomic methods by applying 10 different methods on a common tissue source, standardizing the raw data formats and using standardized analysis pipelines.
+Starfish is a Python library that lets you build scalable and modular pipelines for processing image-based transcriptomics data. Starfish is developed in the open in collaboration with SpaceTx. SpaceTx is a consortium effort to benchmark image based transcriptomic methods by applying 10 different methods on a common tissue source, standardizing the raw data formats and using standardized analysis pipelines.
+
+For detailed information on installation and usage, see the documentation_
+
+.. _documentation: https://spacetx-starfish.readthedocs.io/en/latest/
+
+Quickstart
+------------
 
 We are currently in **pre-alpha**, finishing proof of concept pipelines for each of the spaceTx
-contributors that leverage starfish's shared object model. At this time starfish is mature enough to
-support computational developers interested in adapting other assays to starfish's object model.
+contributors that leverage starfish's shared object model. Follow the links to see Jupyter notebooks showing Starfish in action. 
 
 ====================  ==========  ===================  ==================
  Assay                Loads Data  Single-FoV Pipeline  Multi-FoV Pipeline
@@ -53,10 +59,4 @@ associated file manifests that this package plans to standardize and implement.
 .. image:: docs/source/_static/design/pipeline-diagram.png
     :alt: pipeline diagram
 
-Documentation
--------------
 
-For more information on installation, usage, and the starfish API and CLI, please see the
-documentation_
-
-.. _documentation: https://spacetx-starfish.readthedocs.io/en/latest/

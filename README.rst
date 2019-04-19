@@ -31,7 +31,7 @@ Quickstart
 
 We are currently in **pre-alpha**, finishing proof of concept pipelines for each of the spaceTx
 contributors that leverage starfish's shared object model. Follow the links in the table below
-to see showing Starfish in action on particular assay types. Or, browse our our notebooks directory `here <https://github.com/spacetx/starfish/tree/master/notebooks/>`_.
+to see starfish in action on particular assay types. Or, browse our our notebooks directory `here <https://github.com/spacetx/starfish/tree/master/notebooks/>`_.
 
 ====================  ==========  ===================  ==================
  Assay                Loads Data  Single-FoV Pipeline  Multi-FoV Pipeline
@@ -54,17 +54,3 @@ to see showing Starfish in action on particular assay types. Or, browse our our 
 .. _bar: https://github.com/spacetx/starfish/blob/master/notebooks/BaristaSeq.ipynb
 .. _dar: https://github.com/spacetx/starfish/blob/master/notebooks/DARTFISH.ipynb
 .. _str: https://github.com/spacetx/starfish/blob/master/notebooks/STARmap.ipynb
-
-
-Concept
--------
-
-See this document_ for details. The diagram below describes the core pipeline components and
-associated file manifests that this package plans to standardize and implement.
-
-.. _document: https://docs.google.com/document/d/1IHIngoMKr-Tnft2xOI3Q-5rL3GSX2E3PnJrpsOX5ZWs/edit?usp=sharing
-
-.. image:: docs/source/_static/design/pipeline-diagram.png
-    :alt: pipeline diagram
-
-

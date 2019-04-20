@@ -40,6 +40,10 @@ class AssignTargets(PipelineComponent):
 
 
 class AssignTargetsAlgorithm(AlgorithmBase):
+    """
+    AssignTargets assigns cell IDs to detected spots using an IntensityTable and
+    SegmentationMaskCollection
+    """
     @classmethod
     def get_pipeline_component_class(cls) -> Type[PipelineComponent]:
         return AssignTargets

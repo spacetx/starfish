@@ -8,11 +8,12 @@ from ._base import AssignTargetsAlgorithm
 
 
 class Label(AssignTargetsAlgorithm):
+    """
+    Extract cell ids for features in IntensityTable from a segmentation label image.
+    """
 
     def __init__(self, **kwargs) -> None:
-        """
-        Label accepts no parameters, but all pipeline components must accept arbitrary kwargs
-        """
+        pass
 
     @classmethod
     def _add_arguments(cls, parser) -> None:
@@ -59,7 +60,7 @@ class Label(AssignTargetsAlgorithm):
 
         Parameters
         ----------
-        masks : SegmentaionMaskCollection
+        masks : SegmentationMaskCollection
             binary masks segmenting each cell
         intensity_table : IntensityTable
             spot information

@@ -11,30 +11,34 @@ from ._base import LearnTransformBase
 
 
 class Translation(LearnTransformBase):
+    """
+    Iterate over the given axes of an ImageStack and learn the translation transform
+    based off the reference_stack passed into :py:class:`Translation`'s constructor.
+    Only supports 2d data.
+
+    Parameters
+    ----------
+    axes : Axes
+        The axes {r, ch, zplane} to iterate over
+    reference_stack : ImageStack
+        The target image used in skimage.feature.register_translation
+    upsampling : int
+        upsampling factor (default=1). See
+        http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.register_translation
+        for an explanation of this parameter.
+    """
 
     def __init__(self, reference_stack: ImageStack, axes: Axes, upsampling: int=1):
-        """
-        Parameters
-        ----------
-        axes:
-            The axes {r, ch, zplane} to iterate over
-        reference_stack: ImageStack
-            The target image used in skimage.feature.register_translation
-        upsampling: int
-            upsampling factor (default=1). See
-            http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.register_translation
-            for an explanation of this parameter.
-        """
+
         self.upsampling = upsampling
         self.axes = axes
         self.reference_stack = reference_stack
 
     def run(self, stack: ImageStack, verbose: bool=False, *args) -> TransformsList:
         """
-        Iterate over the given axes of an ImageStack and learn the Similarity transform
+        Iterate over the given axes of an ImageStack and learn the translation transform
         based off the reference_stack passed into :py:class:`Translation`'s constructor.
         Only supports 2d data.
-
 
         Parameters
         ----------

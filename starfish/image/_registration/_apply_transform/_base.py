@@ -10,6 +10,10 @@ from starfish.util.click.indirectparams import ImageStackParamType
 
 
 class ApplyTransform(PipelineComponent):
+    """
+    ApplyTransform exposes methods to align image data by transforming and re-sampling input data
+    according to a provided transformation.
+    """
     @classmethod
     def _cli_run(cls, ctx, instance):
         output = ctx.obj["output"]

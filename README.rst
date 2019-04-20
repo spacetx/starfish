@@ -39,12 +39,12 @@ to see starfish in action on particular assay types. Or, browse our our notebook
  MERFISH              [x]         [x] mer_             in process
  ISS                  [x]         [x] iss_             in process
  osmFISH              [x]         [x] osm_             [ ]
- smFISH               [x]         [x] seq_             [ ]
+ smFISH               [x]         [x]                  [ ]
  BaristaSeq           [x]         [x] bar_             [ ]
  DARTFISH             [x]         [x] dar_             [ ]
  ex-FISH              [x]         [ ]                  [ ]
  StarMAP              [x]         [x] str_             [ ]
- seq-FISH             [x]         in process           [ ]
+ seq-FISH             [x]         in process: seq_     [ ]
  FISSEQ               no data     no pipeline          [ ]
 ====================  ==========  ===================  ==================
 

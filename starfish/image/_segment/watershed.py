@@ -22,7 +22,7 @@ class Watershed(SegmentAlgorithmBase):
     Algorithm is seeded by nuclei image. Binary segmentation mask is computed from a maximum
     projection of spots across C and R, which is subsequently thresholded.
 
-    This function wraps skimage watershed.
+    This function wraps :py:func:`skimage.morphology.watershed`
 
     Parameters
     ----------

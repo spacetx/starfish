@@ -4,7 +4,7 @@
 # EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "starfish", "language": "python", "name": "starfish"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START markdown
-## Starfish BaristaSeq Processing Example
+## Starfish SeqFISH Work-in-progress Processing Example
 # EPY: END markdown
 
 # EPY: START code
@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 import starfish
 import starfish.data
-from starfish.spots import SpotFinder
+from starfish.spots import DetectSpots
 from starfish.types import Axes
 # EPY: END code
 
@@ -40,7 +40,7 @@ img = exp['fov_000'].get_image('primary')
 # EPY: END code
 
 # EPY: START markdown
-#The first step in BaristaSeq is to do some rough registration. For this data, the rough registration has been done for us by the authors, so it is omitted from this notebook.
+#The first step in SeqFISH is to do some rough registration. For this data, the rough registration has been done for us by the authors, so it is omitted from this notebook.
 # EPY: END markdown
 
 # EPY: START markdown
@@ -48,7 +48,7 @@ img = exp['fov_000'].get_image('primary')
 # EPY: END markdown
 
 # EPY: START markdown
-#To remove image background, BaristaSeq uses a White Tophat filter, which measures the background with a rolling disk morphological element and subtracts it from the image. 
+#To remove image background, use a White Tophat filter, which measures the background with a rolling disk morphological element and subtracts it from the image. 
 # EPY: END markdown
 
 # EPY: START code
@@ -61,14 +61,14 @@ from functools import partial
 # EPY: END markdown
 
 # EPY: START code
-# opening = partial(opening, selem=disk(3))
+opening = partial(opening, selem=disk(3))
 
-# background = img.apply(
-#     opening,
-#     group_by={Axes.ROUND, Axes.CH, Axes.ZPLANE}, verbose=False, in_place=False
-# )
+background = img.apply(
+    opening,
+    group_by={Axes.ROUND, Axes.CH, Axes.ZPLANE}, verbose=False, in_place=False
+)
 
-# starfish.display(background)
+starfish.display(background)
 # EPY: END code
 
 # EPY: START code
@@ -126,7 +126,7 @@ starfish.display(clipped)
 # EPY: START code
 threshold = 0.5
 
-lsbd = starfish.spots._detector.local_search_blob_detector.LocalSearchBlobDetector(
+lsbd = starfish.spots.DetectSpots.LocalSearchBlobDetector(
     min_sigma=(1.5, 1.5, 1.5),
     max_sigma=(8, 8, 8),
     num_sigma=10,
@@ -146,30 +146,27 @@ starfish.display(clipped, intensities)
 # EPY: END markdown
 
 # EPY: START code
-psd = starfish.spots.PixelSpotDecoder.PixelSpotDecoder(
-    codebook=exp.codebook, metric='euclidean', distance_threshold=0.5, 
-    magnitude_threshold=0.1, min_area=7, max_area=50
-)
-pixel_decoded, ccdr = psd.run(clipped)
+glp = starfish.image.Filter.GaussianLowPass(sigma=(0.3, 1, 1), is_volume=True)
+blurred = glp.run(clipped)
 # EPY: END code
 
 # EPY: START code
-ccdr.label_image.shape
+psd = starfish.spots.DetectPixels.PixelSpotDecoder(
+    codebook=exp.codebook, metric='euclidean', distance_threshold=0.5, 
+    magnitude_threshold=0.1, min_area=7, max_area=50,
+)
+pixel_decoded, ccdr = psd.run(blurred)
+# EPY: END code
+
+# EPY: START code
+import matplotlib.pyplot as plt
 # EPY: END code
 
 # EPY: START code
 # look at the label image in napari
-label_image = starfish.ImageStack.from_numpy_array(np.reshape(ccdr.label_image, (1, 1, 29, 280, 280)))
+label_image = starfish.ImageStack.from_numpy(np.reshape(ccdr.decoded_image, (1, 1, 29, 280, 280)))
 starfish.display(label_image)
 # EPY: END code
-
-# EPY: START code
-np.unique(ccdr.label_image[19])
-# EPY: END code
-
-# EPY: START markdown
-#Well, this definitely does not work. It's decoding pixels in subsequent rounds as new unique gene types...
-# EPY: END markdown
 
 # EPY: START markdown
 #Compare the number of spots being detected by the two spot finders

@@ -34,8 +34,8 @@ class Watershed(SegmentAlgorithmBase):
         minimum distance before object centers in a provided nuclei image are considered single
         nuclei
 
-    See Also
-    --------
+    Notes
+    -----
     Watershed: http://scikit-image.org/docs/dev/auto_examples/segmentation/plot_watershed.html
 
     """

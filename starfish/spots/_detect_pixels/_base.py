@@ -14,15 +14,15 @@ from .combine_adjacent_features import ConnectedComponentDecodingResult
 
 
 class DetectPixels(PipelineComponent):
+    """
+    Decode an image by first coding each pixel, then combining the results into spots.
+    """
     @classmethod
     def _cli_run(cls, ctx, instance):
         output = ctx.obj["output"]
         image_stack: ImageStack = ctx.obj["image_stack"]
-        # TODO ambrosejcarr serialize and save ConnectedComponentDecodingResult somehow
-
         intensities: IntensityTable
-        ccdr: ConnectedComponentDecodingResult
-        intensities, ccdr = instance.run(image_stack)
+        intensities, _ = instance.run(image_stack)
         intensities.to_netcdf(output)
 
     @staticmethod

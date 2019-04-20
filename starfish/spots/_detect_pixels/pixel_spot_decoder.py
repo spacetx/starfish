@@ -13,31 +13,32 @@ from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedCompone
 
 
 class PixelSpotDecoder(DetectPixelsAlgorithmBase):
+    """Decode an image by first coding each pixel, then combining the results into spots
+
+    Parameters
+    ----------
+    codebook : Codebook
+        Codebook object mapping codewords to the targets they are designed to detect
+    metric : str
+        the sklearn metric string to pass to NearestNeighbors
+    distance_threshold : float
+        spots whose codewords are more than this metric distance from an expected code are
+        filtered
+    magnitude_threshold : int
+        spots with intensity less than this value are filtered
+    min_area : int
+        spots with total area less than this value are filtered
+    max_area : int
+        spots with total area greater than this value are filtered
+    norm_order : int
+        order of L_p norm to apply to intensities and codes when using metric_decode to pair
+        each intensities to its closest target (default = 2)
+    """
     def __init__(
             self, codebook: Codebook, metric: str, distance_threshold: float,
             magnitude_threshold: int, min_area: int, max_area: int, norm_order: int = 2
     ) -> None:
-        """Decode an image by first coding each pixel, then combining the results into spots
 
-        Parameters
-        ----------
-        codebook : Codebook
-            Codebook object mapping codewords to the targets they are designed to detect
-        metric : str
-            the sklearn metric string to pass to NearestNeighbors
-        distance_threshold : float
-            spots whose codewords are more than this metric distance from an expected code are
-            filtered
-        magnitude_threshold : int
-            spots with intensity less than this value are filtered
-        min_area : int
-            spots with total area less than this value are filtered
-        max_area : int
-            spots with total area greater than this value are filtered
-        norm_order : int
-            order of L_p norm to apply to intensities and codes when using metric_decode to pair
-            each intensities to its closest target (default = 2)
-        """
         self.codebook = codebook
         self.metric = metric
         self.distance_threshold = distance_threshold

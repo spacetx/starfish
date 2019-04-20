@@ -137,6 +137,7 @@ class Bandpass(FilterAlgorithmBase):
             in_place=in_place,
             n_processes=n_processes,
             clip_method=self.clip_method,
+            verbose=verbose,
         )
         return result
 

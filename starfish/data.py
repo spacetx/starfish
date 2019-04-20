@@ -34,7 +34,7 @@ def allen_smFISH(use_test_data: bool = False) -> Experiment:
     contributed by the Allen Institute for Brain Science as a part of the SpaceTx consortium
     project.
 
-    The data consist of 102 images from 1 round, 3 channels, and a single z-plane. Each image is
+    The data consist of 102 images from 1 round, 3 channels, and 33 z-planes. Each image is
     (2048, 2048) (y, x). There are no test data.
 
     Parameters

@@ -29,7 +29,7 @@ jobs:
       script: make docker
     - name: 3d smFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev && ipython docs/source/_static/data_processing_examples/3d_smFISH.py
+      script: travis_wait make install-dev run__notebooks/py/3d_smFISH.py
     - name: MERFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
       script: travis_wait make install-dev run__notebooks/py/MERFISH.py

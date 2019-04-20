@@ -1,7 +1,6 @@
 from abc import abstractmethod
 from typing import Type
 
-from starfish.codebook.codebook import Codebook
 from starfish.intensity_table.intensity_table import IntensityTable
 from starfish.pipeline.algorithmbase import AlgorithmBase
 from starfish.pipeline.pipelinecomponent import PipelineComponent

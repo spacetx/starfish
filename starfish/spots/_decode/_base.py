@@ -17,7 +17,7 @@ class Decode(PipelineComponent):
     For single molecule FISH or RNAscope experiments, these codebooks are often simple mappings of
     (round, channel) pairs to targets. For coded assays, these codebooks can be much more complex.
 
-    Example codebooks are associated with each experiment in :py:module:`starfish.data` and can
+    Example codebooks are associated with each experiment in :py:mod:`starfish.data` and can
     be accessed with :py:meth`Experiment.codebook`.
     """
     @classmethod

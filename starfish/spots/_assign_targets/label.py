@@ -9,7 +9,7 @@ from ._base import AssignTargetsAlgorithm
 
 class Label(AssignTargetsAlgorithm):
     """
-    Extract cell ids for features in IntensityTable from a segmentation label image.
+    Extract cell ids for features in IntensityTable from a set of segmentation masks.
     """
 
     def __init__(self, **kwargs) -> None:

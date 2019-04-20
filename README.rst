@@ -3,7 +3,7 @@ Starfish
 
 .. image:: https://travis-ci.org/spacetx/starfish.svg?branch=master
     :target: https://travis-ci.org/spacetx/starfish
-    :width: 30%
+    :width: 20%
 .. image:: https://codecov.io/gh/spacetx/starfish/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/spacetx/starfish
 .. image:: https://readthedocs.org/projects/spacetx-starfish/badge/?version=latest
@@ -13,51 +13,53 @@ Starfish
 .. ideally we could use the ..include directive here instead of copy and pasting the following
    information
 
+
+.. image:: docs/source/_static/design/logo.png
+    :scale: 50 %
+
 Introduction
 ------------
 
-.. image:: docs/source/_static/design/logo.png
-    :width: 250px
+Starfish is a Python library that lets you build scalable and modular pipelines for processing image-based transcriptomics data. Starfish is developed in the open in collaboration with SpaceTx. SpaceTx is a consortium effort to benchmark image based transcriptomic methods by applying 10 different methods on a common tissue source, standardizing the raw data formats and using standardized analysis pipelines.
 
-The goal of *starfish* is to **prototype** a reference pipeline for the analysis of image-based
-transcriptomics data that works for each image-based transcriptomic assay. This is a **work in
-progress** and will be developed in the open.
+For detailed information on installation and usage, see the documentation_.
+
+.. _documentation: https://spacetx-starfish.readthedocs.io/en/latest/
+
+Quickstart
+------------
 
 We are currently in **pre-alpha**, finishing proof of concept pipelines for each of the spaceTx
-contributors that leverage starfish's shared object model. At this time starfish is mature enough to
-support computational developers interested in adapting other assays to starfish's object model.
+contributors that leverage starfish's shared object model. Follow the links in the table below
+to see starfish in action on particular assay types. Or, browse our our notebooks directory `here <https://github.com/spacetx/starfish/tree/master/notebooks/>`_.
 
 ====================  ==========  ===================  ==================
  Assay                Loads Data  Single-FoV Pipeline  Multi-FoV Pipeline
 --------------------  ----------  -------------------  ------------------
- MERFISH              [x]         [x]                  in process
- ISS                  [x]         [x]                  in process
- osmFISH              [x]         in process           [ ]
- allen_smFISH         [x]         in review            [ ]
- BaristaSeq           [x]         in process           [ ]
- DARTFISH             [x]         in review            [ ]
+ MERFISH              [x]         [x] mer_             in process
+ ISS                  [x]         [x] iss_             in process
+ osmFISH              [x]         [x] osm_             [ ]
+ smFISH               [x]         [x]                  [ ]
+ BaristaSeq           [x]         [x] bar_             [ ]
+ DARTFISH             [x]         [x] dar_             [ ]
  ex-FISH              [x]         [ ]                  [ ]
- StarMAP              [ ]         [ ]                  [ ]
+ StarMAP              [x]         [x] str_             [ ]
+ seq-FISH             [x]         in process           [ ]
  FISSEQ               no data     no pipeline          [ ]
- seq-FISH             [ ]         [ ]                  [ ]
- Imaging Mass. Cyto.  [x]         [ ]                  [ ]
 ====================  ==========  ===================  ==================
 
-Concept
--------
+.. _mer: https://github.com/spacetx/starfish/blob/master/notebooks/MERFISH.ipynb
+.. _iss: https://github.com/spacetx/starfish/blob/master/notebooks/ISS.ipynb
+.. _osm: https://github.com/spacetx/starfish/blob/master/notebooks/osmFISH.ipynb
+.. _bar: https://github.com/spacetx/starfish/blob/master/notebooks/BaristaSeq.ipynb
+.. _dar: https://github.com/spacetx/starfish/blob/master/notebooks/DARTFISH.ipynb
+.. _str: https://github.com/spacetx/starfish/blob/master/notebooks/STARmap.ipynb
 
-See this document_ for details. The diagram below describes the core pipeline components and
-associated file manifests that this package plans to standardize and implement.
+Contributing
+------------
 
-.. _document: https://docs.google.com/document/d/1IHIngoMKr-Tnft2xOI3Q-5rL3GSX2E3PnJrpsOX5ZWs/edit?usp=sharing
-
-.. image:: docs/source/_static/design/pipeline-diagram.png
-    :alt: pipeline diagram
-
-Documentation
--------------
-
-For more information on installation, usage, and the starfish API and CLI, please see the
-documentation_
+We are very interested in contributions! See our contributing.rst_ and documentation_ for more information.
 
 .. _documentation: https://spacetx-starfish.readthedocs.io/en/latest/
+.. _contributing.rst: https://github.com/spacetx/starfish/blob/master/CONTRIBUTING.rst
+

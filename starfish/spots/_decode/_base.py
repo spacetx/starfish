@@ -10,12 +10,22 @@ from starfish.util.click.indirectparams import CodebookParamType
 
 
 class Decode(PipelineComponent):
+    """
+    The Decode class exposes methods to compare detected spots to expected patterns of
+    fluorescence across the rounds and channels of an experiment and map them to target genes or
+    proteins.
+
+    For single molecule FISH or RNAscope experiments, these codebooks are often simple mappings of
+    (round, channel) pairs to targets. For coded assays, these codebooks can be much more complex.
+
+    Example codebooks are associated with each experiment in :py:module:`starfish.data` and can
+    be accessed with :py:meth`Experiment.codebook`.
+    """
     @classmethod
     def _cli_run(cls, ctx, instance):
         table = ctx.obj["intensities"]
-        codes = ctx.obj["codebook"]
         output = ctx.obj["output"]
-        intensities: IntensityTable = instance.run(table, codes)
+        intensities: IntensityTable = instance.run(table)
         intensities.to_netcdf(output)
 
     @staticmethod
@@ -41,6 +51,6 @@ class DecodeAlgorithmBase(AlgorithmBase):
         return Decode
 
     @abstractmethod
-    def run(self, intensities: IntensityTable, codebook: Codebook, *args):
+    def run(self, intensities: IntensityTable, *args):
         """Performs decoding on the spots found, using the codebook specified."""
         raise NotImplementedError()

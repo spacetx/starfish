@@ -17,18 +17,21 @@ from starfish.util import click
 
 class Warp(ApplyTransformBase):
     """
-    Applies a list of geometric transformations to an ImageStack using skimage.transform.warp
+    Applies a list of geometric transformations to an ImageStack using
+    :py:func:skimage.transform.warp
 
     Parameters
     ----------
     stack : ImageStack
         Stack to be transformed.
     transforms_list : TransformsList
-        The list of transform objects to apply to the ImageStack.
+        The list of skimage transform objects to apply to the ImageStack. See a list of valid
+        transform objects at https://scikit-image.org/docs/dev/api/skimage.transform.html
     in_place : bool
         if True, process ImageStack in-place, otherwise return a new stack
     verbose : bool
         if True, report on transformation progress (default = False)
+
 
     Returns
     -------
@@ -70,14 +73,14 @@ def warp(image: Union[xr.DataArray, np.ndarray],
          **kwargs
          ) -> np.ndarray:
     """
-    Wrapper around skimage.transform.warp. Warps an image according to a
+    Wrapper around :py:func:`skimage.transform.warp`. Warps an image according to a
     given coordinate transformation.
 
     Parameters
     ----------
     image : np.ndarray
         The image to be transformed
-    transformation_object : skimage.transform.GeometricTransform
+    transformation_object : :py:class:`~skimage.transform._geometric.GeometricTransform`
         The transformation object to apply.
 
     Returns

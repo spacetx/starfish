@@ -734,7 +734,7 @@ class ImageStack:
             group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
 
         if not isinstance(clip_method, (str, Clip)):
-            raise TypeError("must pass a Clip method. See Starfish.types.Clip for valid options")
+            raise TypeError("must pass a Clip method. See starfish.types.Clip for valid options")
 
         if not in_place:
             # create a copy of the ImageStack, call apply on that stack with in_place=True

@@ -20,7 +20,7 @@ class Laplace(FilterAlgorithmBase):
     """
     Multi-dimensional Gaussian-Laplacian filter used to enhance dots against background
 
-    This filter wraps :ref:`scipy.ndimage.gaussian_laplace`
+    This filter wraps :py:func:`scipy.ndimage.gaussian_laplace`
 
     Parameters
     ----------

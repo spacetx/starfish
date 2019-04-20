@@ -36,7 +36,7 @@ to see starfish in action on particular assay types. Or, browse our our notebook
 ====================  ==========  ===================  ==================
  Assay                Loads Data  Single-FoV Pipeline  Multi-FoV Pipeline
 --------------------  ----------  -------------------  ------------------
- MERFISH              [x]         [x] mer_notebook_    in process
+ MERFISH              [x]         [x] mer_             in process
  ISS                  [x]         [x] iss_             in process
  osmFISH              [x]         [x] osm_             [ ]
  smFISH               [x]         [x]                  [ ]

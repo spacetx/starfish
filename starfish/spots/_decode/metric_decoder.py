@@ -25,7 +25,7 @@ class MetricDistance(DecodeAlgorithmBase):
         the norm to use to normalize the magnitudes of spots and codes (default 2, L2 norm)
     metric : str
         the metric to use to measure distance. Can be any metric that satisfies the triangle
-        inequality that is implemented by scipy.spatial.distance (default "euclidean")
+        inequality that is implemented by :py:mod:`scipy.spatial.distance` (default "euclidean")
     """
 
     def __init__(

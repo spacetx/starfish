@@ -17,7 +17,7 @@ class MaxProject(FilterAlgorithmBase):
 
     See Also
     --------
-    :py:class:`Starfish.types.Axes`
+    starfish.types.Axes
 
     """
 

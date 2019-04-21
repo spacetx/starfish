@@ -36,7 +36,7 @@ class Warp(ApplyTransformBase):
     Returns
     -------
     ImageStack :
-        If in-place is False, return the results of the transforms as a new stack.
+        If `in_place` is False, return the results of the transforms as a new stack.
         Otherwise return the original stack.
     """
 

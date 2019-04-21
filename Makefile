@@ -31,13 +31,16 @@ all:	fast
 #
 fast:	diff-requirements lint mypy fast-test clean-docs docs-html
 
-lint:   lint-non-init lint-init
+lint:   lint-non-init lint-init	lint-top-init
 
 lint-non-init:
 	flake8 --ignore 'E252, E301, E302, E305, E401, W503, E731, F811' --exclude='*__init__.py' $(MODULES)
 
 lint-init:
-	flake8 --ignore 'E252, E301, E302, E305, E401, F401, W503, E731, F811' --filename='*__init__.py' $(MODULES)
+	flake8 --ignore 'E252, E301, E302, E305, E401, F401, W503, E731, F811' --filename='*__init__.py' $(MODULES) --exclude="starfish/__init__.py"
+
+lint-top-init:
+	flake8 --ignore 'I100, E252, E301, E302, E305, E401, F401, W503, E731, F811' --filename='starfish/__init__.py' $(MODULES)
 
 test:
 	pytest -v -n 8 --cov starfish

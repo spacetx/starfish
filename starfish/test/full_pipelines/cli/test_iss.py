@@ -148,7 +148,7 @@ class TestWithIssData(CLITest, unittest.TestCase):
                 f"@{EXPERIMENT_JSON_URL}",
                 "-o", lambda tempdir, *args, **kwargs: os.path.join(
                     tempdir, "results", "decoded-spots.nc"),
-                "PerRoundMaxChannelDecoder",
+                "PerRoundMaxChannel",
             ],
 
             # Validate results/{spots,targeted-spots,decoded-spots}.nc

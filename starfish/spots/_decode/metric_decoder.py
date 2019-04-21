@@ -5,6 +5,7 @@ from starfish.util import click
 from ._base import DecodeAlgorithmBase
 
 
+# TODO ambrosejcarr add tests
 class MetricDistance(DecodeAlgorithmBase):
     """
     Normalizes both the magnitudes of the codes and the spot intensities, then decodes spots by

@@ -56,9 +56,9 @@ class Codebook(xr.DataArray):
           * c          (c) int64 0 1 2
           * r          (r) int64 0 1 2 3
 
-    See Also
-    --------
-    TODO <link to spaceTx format>
+    Notes
+    -----
+    See :ref:`sptx_format` for more information.
 
     """
 

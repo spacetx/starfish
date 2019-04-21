@@ -1,7 +1,7 @@
 import pytest
 from pkg_resources import resource_filename
 
-from starfish.codebook._format import DocumentKeys
+from starfish._codebook._format import DocumentKeys
 from .util import SpaceTxValidator
 from .validate_sptx import validate_file
 

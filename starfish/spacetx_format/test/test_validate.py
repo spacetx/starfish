@@ -1,6 +1,6 @@
 import unittest
 
-from starfish.util import exec
+from starfish._util import exec
 
 
 class TestValidateCommand(unittest.TestCase):

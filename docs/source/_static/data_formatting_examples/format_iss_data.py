@@ -17,10 +17,10 @@ from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish import Codebook
-from starfish.experiment.builder import FetchedTile, TileFetcher
-from starfish.experiment.builder import write_experiment_json
+from starfish._experiment.builder import FetchedTile, TileFetcher
+from starfish._experiment.builder import write_experiment_json
 from starfish.types import Axes, Coordinates, Features, Number
-from starfish.util.argparse import FsExistsType
+from starfish._util.argparse import FsExistsType
 
 SHAPE = {Axes.Y: 980, Axes.X: 1330}
 

@@ -4,10 +4,10 @@ from typing import Optional, Union
 import numpy as np
 import xarray as xr
 
-from starfish.imagestack.imagestack import ImageStack
+from starfish._imagestack.imagestack import ImageStack
 from starfish.types import Clip
-from starfish.util import click
-from starfish.util.dtype import preserve_float_range
+from starfish._util import click
+from starfish._util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
 
 

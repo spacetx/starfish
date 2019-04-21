@@ -1,7 +1,7 @@
 import numpy as np
 
 from starfish.image._filter.match_histograms import MatchHistograms
-from starfish.imagestack.imagestack import ImageStack
+from starfish._imagestack.imagestack import ImageStack
 from starfish.types import Axes
 
 

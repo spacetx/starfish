@@ -14,10 +14,10 @@ from typing import Mapping, Tuple, Union
 import numpy as np
 from slicedimage import ImageFormat
 
-import starfish.util.try_import
-from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
+import starfish._util.try_import
+from starfish._experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.types import Axes, Coordinates, Features, Number
-from starfish.util import click
+from starfish._util import click
 
 
 # We use this to cache images across tiles.  In the case of the osmFISH data set, volumes are saved
@@ -73,7 +73,7 @@ class osmFISHTile(FetchedTile):
 
 class osmFISHTileFetcher(TileFetcher):
 
-    @starfish.util.try_import.try_import({"yaml"})
+    @starfish._util.try_import.try_import({"yaml"})
     def __init__(self, input_dir: str, metadata_yaml) -> None:
         """Implement a TileFetcher for an osmFISH experiment.
 

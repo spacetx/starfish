@@ -11,9 +11,9 @@ from starfish.image._filter.util import (
     determine_axes_to_group_by,
     validate_and_broadcast_kernel_size,
 )
-from starfish.imagestack.imagestack import ImageStack
+from starfish._imagestack.imagestack import ImageStack
 from starfish.types import Clip, Number
-from starfish.util import click
+from starfish._util import click
 
 
 class Laplace(FilterAlgorithmBase):

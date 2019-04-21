@@ -3,10 +3,10 @@ from typing import Type
 
 
 from starfish.image._registration.transforms_list import TransformsList
-from starfish.pipeline.algorithmbase import AlgorithmBase
-from starfish.pipeline.pipelinecomponent import PipelineComponent
-from starfish.util import click
-from starfish.util.click.indirectparams import ImageStackParamType
+from starfish._pipeline.algorithmbase import AlgorithmBase
+from starfish._pipeline.pipelinecomponent import PipelineComponent
+from starfish._util import click
+from starfish._util.click.indirectparams import ImageStackParamType
 
 
 class LearnTransform(PipelineComponent):

@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from starfish import IntensityTable
-from starfish.codebook.test.factories import codebook_array_factory
+from starfish._codebook.test.factories import codebook_array_factory
 from starfish.types import Coordinates, DecodedSpots, Features
 
 

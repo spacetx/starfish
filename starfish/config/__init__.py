@@ -1,7 +1,7 @@
 import os
 import warnings
 
-from starfish.util.config import Config, NestedDict
+from starfish._util.config import Config, NestedDict
 
 
 def special_prefix(key):

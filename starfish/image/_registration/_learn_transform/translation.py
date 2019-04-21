@@ -3,10 +3,10 @@ from skimage.feature import register_translation
 from skimage.transform._geometric import SimilarityTransform
 
 from starfish.image._registration.transforms_list import TransformsList
-from starfish.imagestack.imagestack import ImageStack
+from starfish._imagestack.imagestack import ImageStack
 from starfish.types import Axes, TransformType
-from starfish.util import click
-from starfish.util.click.indirectparams import ImageStackParamType
+from starfish._util import click
+from starfish._util.click.indirectparams import ImageStackParamType
 from ._base import LearnTransformBase
 
 

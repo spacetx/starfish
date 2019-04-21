@@ -16,11 +16,11 @@ from ._display import display
 # generated version number and commit hash
 from ._version import get_versions
 # top-level objects
-from .codebook.codebook import Codebook
-from .experiment.experiment import Experiment, FieldOfView
-from .imagestack.imagestack import ImageStack
-from .intensity_table.intensity_table import IntensityTable
-from .starfish import starfish
+from ._codebook.codebook import Codebook
+from ._experiment.experiment import Experiment, FieldOfView
+from ._imagestack.imagestack import ImageStack
+from ._intensity_table.intensity_table import IntensityTable
+from ._starfish import starfish
 
 
 # NOTE: if we move to python 3.7, we can produce this value at call time via __getattr__

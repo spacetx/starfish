@@ -27,7 +27,7 @@ import pandas as pd
 import starfish
 import starfish.data
 from starfish.types import Axes
-from starfish.util.plot import (
+from starfish._util.plot import (
     imshow_plane, intensity_histogram, overlay_spot_calls
 )
 

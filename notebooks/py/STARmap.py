@@ -26,7 +26,7 @@ import numpy as np
 import starfish
 import starfish.data
 from starfish.types import Axes
-from starfish.util.plot import (
+from starfish._util.plot import (
     diagnose_registration, imshow_plane, intensity_histogram
 )
 

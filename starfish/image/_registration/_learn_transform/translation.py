@@ -21,7 +21,7 @@ class Translation(LearnTransformBase):
     axes : Axes
         The axes {r, ch, zplane} to iterate over
     reference_stack : ImageStack
-        The target image used in skimage.feature.register_translation
+        The target image used in :py:func:`skimage.feature.register_translation`
     upsampling : int
         upsampling factor (default=1). See
         http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.register_translation

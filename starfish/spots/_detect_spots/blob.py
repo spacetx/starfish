@@ -20,6 +20,39 @@ blob_detectors = {
 
 
 class BlobDetector(DetectSpotsAlgorithmBase):
+    """
+    Multi-dimensional gaussian spot detector
+
+    This method is a wrapper for skimage.feature.blob_log
+
+    Parameters
+    ----------
+    min_sigma : float
+        The minimum standard deviation for Gaussian Kernel. Keep this low to
+        detect smaller blobs.
+    max_sigma : float
+        The maximum standard deviation for Gaussian Kernel. Keep this high to
+        detect larger blobs.
+    num_sigma : int
+        The number of intermediate values of standard deviations to consider
+        between `min_sigma` and `max_sigma`.
+    threshold : float
+        The absolute lower bound for scale space maxima. Local maxima smaller
+        than thresh are ignored. Reduce this to detect blobs with less
+        intensities.
+    overlap : float [0, 1]
+        If two spots have more than this fraction of overlap, the spots are combined
+        (default = 0.5)
+    measurement_type : str ['max', 'mean']
+        name of the function used to calculate the intensity for each identified spot area
+    detector_method: str ['blob_dog', 'blob_doh', 'blob_log']
+        name of the type of detection method used from skimage.feature, default: blob_log
+
+    See Also
+    --------
+    http://scikit-image.org/docs/dev/auto_examples/features_detection/plot_blob.html
+
+    """
 
     def __init__(
             self,
@@ -32,45 +65,7 @@ class BlobDetector(DetectSpotsAlgorithmBase):
             is_volume: bool = True,
             detector_method: str = 'blob_log'
     ) -> None:
-        """Multi-dimensional gaussian spot detector
 
-        This method is a wrapper for skimage.feature.blob_log
-
-        Parameters
-        ----------
-        min_sigma : float
-            The minimum standard deviation for Gaussian Kernel. Keep this low to
-            detect smaller blobs.
-        max_sigma : float
-            The maximum standard deviation for Gaussian Kernel. Keep this high to
-            detect larger blobs.
-        num_sigma : int
-            The number of intermediate values of standard deviations to consider
-            between `min_sigma` and `max_sigma`.
-        threshold : float
-            The absolute lower bound for scale space maxima. Local maxima smaller
-            than thresh are ignored. Reduce this to detect blobs with less
-            intensities.
-        overlap : float [0, 1]
-            If two spots have more than this fraction of overlap, the spots are combined
-            (default = 0.5)
-        measurement_type : str ['max', 'mean']
-            name of the function used to calculate the intensity for each identified spot area
-        detector_method: str ['blob_dog', 'blob_doh', 'blob_log']
-            name of the type of detection method used from skimage.feature, default: blob_log
-
-        Notes
-        -----
-        # TODO ambrosejcarr: revisit after changing dtype assumptions of library to float in [0, 1]
-        This spot detector is very sensitive to the threshold that is selected, and the threshold
-        is defined as an absolute value -- therefore it must be adjusted depending on the datatype
-        of the passed image.
-
-        See Also
-        --------
-        http://scikit-image.org/docs/dev/auto_examples/features_detection/plot_blob.html
-
-        """
         self.min_sigma = min_sigma
         self.max_sigma = max_sigma
         self.num_sigma = num_sigma

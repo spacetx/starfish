@@ -10,6 +10,9 @@ from starfish.util.click.indirectparams import ImageStackParamType
 
 
 class LearnTransform(PipelineComponent):
+    """
+    LearnTransform exposes methods to learn transformations that align ImageStacks.
+    """
     @classmethod
     def _cli_run(cls, ctx, instance, *args, **kwargs):
         output = ctx.obj["output"]

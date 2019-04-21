@@ -8,7 +8,6 @@ from skimage.measure import regionprops
 
 from starfish.types import Axes, Coordinates
 
-
 AXES = [a.value for a in Axes if a not in (Axes.ROUND, Axes.CH)]
 COORDS = [c.value for c in Coordinates]
 

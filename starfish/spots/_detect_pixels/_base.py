@@ -7,9 +7,9 @@ from starfish._imagestack.imagestack import ImageStack
 from starfish._intensity_table.intensity_table import IntensityTable
 from starfish._pipeline.algorithmbase import AlgorithmBase
 from starfish._pipeline.pipelinecomponent import PipelineComponent
-from starfish.types import Number
 from starfish._util import click
 from starfish._util.click.indirectparams import CodebookParamType, ImageStackParamType
+from starfish.types import Number
 from .combine_adjacent_features import ConnectedComponentDecodingResult
 
 

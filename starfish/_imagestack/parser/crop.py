@@ -5,7 +5,9 @@ import numpy as np
 from slicedimage import TileSet
 
 from starfish._imagestack.parser import TileCollectionData, TileData, TileKey
-from starfish._imagestack.physical_coordinate_calculator import recalculate_physical_coordinate_range
+from starfish._imagestack.physical_coordinate_calculator import (
+    recalculate_physical_coordinate_range
+)
 from starfish.types import Axes, Coordinates, Number
 
 

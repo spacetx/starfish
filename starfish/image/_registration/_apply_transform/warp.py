@@ -7,12 +7,12 @@ from skimage import transform
 from skimage.transform._geometric import GeometricTransform
 from tqdm import tqdm
 
+from starfish._imagestack.imagestack import ImageStack
+from starfish._util import click
 from starfish.config import StarfishConfig
 from starfish.image._registration._apply_transform._base import ApplyTransformBase
 from starfish.image._registration.transforms_list import TransformsList
-from starfish._imagestack.imagestack import ImageStack
 from starfish.types import Axes
-from starfish._util import click
 
 
 class Warp(ApplyTransformBase):

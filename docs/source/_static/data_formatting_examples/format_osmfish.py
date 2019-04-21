@@ -16,8 +16,8 @@ from slicedimage import ImageFormat
 
 import starfish._util.try_import
 from starfish._experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Axes, Coordinates, Features, Number
 from starfish._util import click
+from starfish.types import Axes, Coordinates, Features, Number
 
 
 # We use this to cache images across tiles.  In the case of the osmFISH data set, volumes are saved

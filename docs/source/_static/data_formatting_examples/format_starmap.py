@@ -17,8 +17,8 @@ from slicedimage import ImageFormat
 
 from starfish import Codebook
 from starfish._experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Axes, Coordinates, Features
 from starfish._util import click
+from starfish.types import Axes, Coordinates, Features
 
 
 # We use this to cache images. This allows us to write a separate function to extract the data's

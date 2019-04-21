@@ -6,14 +6,14 @@ import numpy as np
 import xarray as xr
 from scipy.ndimage import gaussian_laplace
 
+from starfish._imagestack.imagestack import ImageStack
+from starfish._util import click
 from starfish.image._filter._base import FilterAlgorithmBase
 from starfish.image._filter.util import (
     determine_axes_to_group_by,
     validate_and_broadcast_kernel_size,
 )
-from starfish._imagestack.imagestack import ImageStack
 from starfish.types import Clip, Number
-from starfish._util import click
 
 
 class Laplace(FilterAlgorithmBase):

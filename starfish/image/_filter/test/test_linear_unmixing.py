@@ -4,6 +4,7 @@ from starfish import ImageStack
 from starfish.image._filter.linear_unmixing import LinearUnmixing
 from starfish.types import Clip
 
+
 def setup_linear_unmixing_test():
     """
         Create the image stack, coeff matrix, and reference result

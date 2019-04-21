@@ -6,8 +6,8 @@ from diskcache import Cache
 from pytest import mark, raises
 
 from starfish import data
-from starfish.config import environ, StarfishConfig
 from starfish._util.config import Config, NestedDict
+from starfish.config import environ, StarfishConfig
 
 
 def test_nested_dict():

@@ -16,13 +16,13 @@ from click import Choice
 from sklearn.neighbors import NearestNeighbors
 
 from starfish._compat import blob_dog, blob_log
-from starfish.image._filter.util import determine_axes_to_group_by
 from starfish._imagestack.imagestack import ImageStack
 from starfish._intensity_table.intensity_table import IntensityTable
 from starfish._intensity_table.intensity_table_coordinates import \
     transfer_physical_coords_from_imagestack_to_intensity_table
-from starfish.types import Axes, Features, Number, SpotAttributes
 from starfish._util import click
+from starfish.image._filter.util import determine_axes_to_group_by
+from starfish.types import Axes, Features, Number, SpotAttributes
 from ._base import DetectSpotsAlgorithmBase
 
 blob_detectors = {

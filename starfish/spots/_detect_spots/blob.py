@@ -7,8 +7,8 @@ from skimage.feature import blob_dog, blob_doh, blob_log
 
 from starfish._imagestack.imagestack import ImageStack
 from starfish._intensity_table.intensity_table import IntensityTable
-from starfish.types import Axes, Features, Number, SpotAttributes
 from starfish._util import click
+from starfish.types import Axes, Features, Number, SpotAttributes
 from ._base import DetectSpotsAlgorithmBase
 from .detect import detect_spots, measure_spot_intensity
 

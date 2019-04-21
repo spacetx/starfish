@@ -7,11 +7,11 @@ from showit import image
 from skimage.feature import peak_local_max
 from skimage.morphology import watershed
 
-from starfish.image._filter.util import bin_open, bin_thresh
 from starfish._imagestack.imagestack import ImageStack
 from starfish._segmentation_mask import SegmentationMaskCollection
-from starfish.types import Axes, Coordinates, Number
 from starfish._util import click
+from starfish.image._filter.util import bin_open, bin_thresh
+from starfish.types import Axes, Coordinates, Number
 from ._base import SegmentAlgorithmBase
 
 

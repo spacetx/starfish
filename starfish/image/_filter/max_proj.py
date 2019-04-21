@@ -1,8 +1,8 @@
 from typing import Iterable, Optional, Union
 
 from starfish._imagestack.imagestack import ImageStack
-from starfish.types import Axes
 from starfish._util import click
+from starfish.types import Axes
 from ._base import FilterAlgorithmBase
 
 

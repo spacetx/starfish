@@ -3,5 +3,5 @@
 Codebook
 ========
 
-.. automodule:: starfish.codebook.codebook
+.. automodule:: starfish._codebook.codebook
    :members:

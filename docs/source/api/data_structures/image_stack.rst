@@ -3,5 +3,5 @@
 ImageStack
 ==========
 
-.. automodule:: starfish.imagestack.imagestack
+.. automodule:: starfish._imagestack.imagestack
    :members:

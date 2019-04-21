@@ -27,7 +27,6 @@ from starfish.types import Axes, Coordinates
 from .defaultproviders import RandomNoiseTile, tile_fetcher_factory
 from .providers import FetchedTile, TileFetcher
 
-
 AUX_IMAGE_NAMES = {
     'nuclei',
     'dots',

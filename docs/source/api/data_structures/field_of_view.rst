@@ -3,5 +3,5 @@
 Field of View
 =============
 
-.. autoclass:: starfish.experiment.experiment.FieldOfView
+.. autoclass:: starfish._experiment.experiment.FieldOfView
     :members:

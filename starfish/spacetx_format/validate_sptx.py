@@ -8,7 +8,7 @@ from slicedimage.backends._base import Backend
 from slicedimage.io import resolve_path_or_url
 
 from starfish.config import StarfishConfig
-from starfish.util import click
+from starfish._util import click
 from .util import SpaceTxValidator
 
 

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from starfish.intensity_table.test.factories import synthetic_intensity_table
+from starfish._intensity_table.test.factories import synthetic_intensity_table
 from starfish.test.factories import synthetic_spot_pass_through_stack, SyntheticData
 from starfish.types import Axes
 

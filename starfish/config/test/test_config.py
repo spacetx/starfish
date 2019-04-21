@@ -7,7 +7,7 @@ from pytest import mark, raises
 
 from starfish import data
 from starfish.config import environ, StarfishConfig
-from starfish.util.config import Config, NestedDict
+from starfish._util.config import Config, NestedDict
 
 
 def test_nested_dict():

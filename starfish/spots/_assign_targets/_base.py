@@ -4,11 +4,11 @@ from typing import Type
 
 import numpy as np
 
-from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.pipeline.algorithmbase import AlgorithmBase
-from starfish.pipeline.pipelinecomponent import PipelineComponent
-from starfish.segmentation_mask import SegmentationMaskCollection
-from starfish.util import click
+from starfish._intensity_table.intensity_table import IntensityTable
+from starfish._pipeline.algorithmbase import AlgorithmBase
+from starfish._pipeline.pipelinecomponent import PipelineComponent
+from starfish._segmentation_mask import SegmentationMaskCollection
+from starfish._util import click
 
 
 class AssignTargets(PipelineComponent):

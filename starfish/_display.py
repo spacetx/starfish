@@ -5,8 +5,8 @@ from typing import Iterable, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
-from starfish.imagestack.imagestack import ImageStack
-from starfish.intensity_table.intensity_table import IntensityTable
+from starfish._imagestack.imagestack import ImageStack
+from starfish._intensity_table.intensity_table import IntensityTable
 from starfish.types import Axes, Features
 
 try:

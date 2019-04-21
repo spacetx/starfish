@@ -1,9 +1,9 @@
 import numpy as np
 
-from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.segmentation_mask import SegmentationMaskCollection
+from starfish._intensity_table.intensity_table import IntensityTable
+from starfish._segmentation_mask import SegmentationMaskCollection
 from starfish.types import Features
-from starfish.util import click
+from starfish._util import click
 from ._base import AssignTargetsAlgorithm
 
 

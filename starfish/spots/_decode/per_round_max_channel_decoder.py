@@ -1,6 +1,6 @@
-from starfish.codebook.codebook import Codebook
-from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.util import click
+from starfish._codebook.codebook import Codebook
+from starfish._intensity_table.intensity_table import IntensityTable
+from starfish._util import click
 from ._base import DecodeAlgorithmBase
 
 

@@ -10,9 +10,9 @@ from tqdm import tqdm
 from starfish.config import StarfishConfig
 from starfish.image._registration._apply_transform._base import ApplyTransformBase
 from starfish.image._registration.transforms_list import TransformsList
-from starfish.imagestack.imagestack import ImageStack
+from starfish._imagestack.imagestack import ImageStack
 from starfish.types import Axes
-from starfish.util import click
+from starfish._util import click
 
 
 class Warp(ApplyTransformBase):

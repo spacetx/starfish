@@ -16,8 +16,8 @@ import numpy as np
 from skimage.io import imread
 from slicedimage import ImageFormat
 
-from starfish.experiment.builder import (FetchedTile, TileFetcher,
-                                         write_experiment_json)
+from starfish._experiment.builder import (FetchedTile, TileFetcher,
+                                          write_experiment_json)
 from starfish.types import Axes, Coordinates, Number
 
 DEFAULT_TILE_SHAPE = {Axes.Y: 1000, Axes.X: 800}

@@ -4,13 +4,13 @@ from typing import Any, Callable, Optional, Sequence, Tuple, Type, Union
 import numpy as np
 import xarray as xr
 
-from starfish.imagestack.imagestack import ImageStack
-from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.pipeline.algorithmbase import AlgorithmBase
-from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish._imagestack.imagestack import ImageStack
+from starfish._intensity_table.intensity_table import IntensityTable
+from starfish._pipeline.algorithmbase import AlgorithmBase
+from starfish._pipeline.pipelinecomponent import PipelineComponent
 from starfish.types import Axes, Number, SpotAttributes
-from starfish.util import click
-from starfish.util.click.indirectparams import ImageStackParamType
+from starfish._util import click
+from starfish._util.click.indirectparams import ImageStackParamType
 
 
 class DetectSpots(PipelineComponent):

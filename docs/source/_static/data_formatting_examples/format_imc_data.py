@@ -12,9 +12,9 @@ import numpy as np
 from skimage.io import imread
 from slicedimage import ImageFormat
 
-from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
+from starfish._experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.types import Axes, Coordinates, Features, Number
-from starfish.util import click
+from starfish._util import click
 
 
 class ImagingMassCytometryTile(FetchedTile):

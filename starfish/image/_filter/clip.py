@@ -4,8 +4,8 @@ from typing import Optional, Union
 import numpy as np
 import xarray as xr
 
-from starfish.imagestack.imagestack import ImageStack
-from starfish.util import click
+from starfish._imagestack.imagestack import ImageStack
+from starfish._util import click
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by
 

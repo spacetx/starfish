@@ -8,10 +8,10 @@ from skimage.feature import peak_local_max
 from skimage.morphology import watershed
 
 from starfish.image._filter.util import bin_open, bin_thresh
-from starfish.imagestack.imagestack import ImageStack
-from starfish.segmentation_mask import SegmentationMaskCollection
+from starfish._imagestack.imagestack import ImageStack
+from starfish._segmentation_mask import SegmentationMaskCollection
 from starfish.types import Axes, Coordinates, Number
-from starfish.util import click
+from starfish._util import click
 from ._base import SegmentAlgorithmBase
 
 

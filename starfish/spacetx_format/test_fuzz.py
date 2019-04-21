@@ -2,7 +2,7 @@ import io
 
 from pkg_resources import resource_filename
 
-from starfish.codebook._format import CURRENT_VERSION, DocumentKeys
+from starfish._codebook._format import CURRENT_VERSION, DocumentKeys
 from .util import Fuzzer, SpaceTxValidator
 
 package_name = "starfish"

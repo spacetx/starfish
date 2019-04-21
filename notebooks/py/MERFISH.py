@@ -31,7 +31,7 @@ from starfish import display
 from starfish import data, FieldOfView
 from starfish.types import Features, Axes
 
-from starfish.util.plot import (
+from starfish._util.plot import (
     imshow_plane, intensity_histogram, overlay_spot_calls
 )
 # EPY: END code

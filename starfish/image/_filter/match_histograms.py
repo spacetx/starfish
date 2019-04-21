@@ -4,10 +4,10 @@ from typing import Optional, Set
 import numpy as np
 import xarray as xr
 
-from starfish.compat import match_histograms
-from starfish.imagestack.imagestack import ImageStack
+from starfish._compat import match_histograms
+from starfish._imagestack.imagestack import ImageStack
 from starfish.types import Axes
-from starfish.util import click, enum
+from starfish._util import click, enum
 from ._base import FilterAlgorithmBase
 
 

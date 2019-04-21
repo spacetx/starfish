@@ -3,13 +3,13 @@ from typing import Callable, Sequence, Tuple, Type
 
 import numpy as np
 
-from starfish.imagestack.imagestack import ImageStack
-from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.pipeline.algorithmbase import AlgorithmBase
-from starfish.pipeline.pipelinecomponent import PipelineComponent
+from starfish._imagestack.imagestack import ImageStack
+from starfish._intensity_table.intensity_table import IntensityTable
+from starfish._pipeline.algorithmbase import AlgorithmBase
+from starfish._pipeline.pipelinecomponent import PipelineComponent
 from starfish.types import Number
-from starfish.util import click
-from starfish.util.click.indirectparams import CodebookParamType, ImageStackParamType
+from starfish._util import click
+from starfish._util.click.indirectparams import CodebookParamType, ImageStackParamType
 from .combine_adjacent_features import ConnectedComponentDecodingResult
 
 

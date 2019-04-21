@@ -1,3 +1,3 @@
-from .starfish import starfish
+from ._starfish import starfish
 
 starfish()

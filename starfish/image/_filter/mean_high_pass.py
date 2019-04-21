@@ -5,10 +5,10 @@ import numpy as np
 import xarray as xr
 from scipy.ndimage.filters import uniform_filter
 
-from starfish.imagestack.imagestack import ImageStack
+from starfish._imagestack.imagestack import ImageStack
 from starfish.types import Clip, Number
-from starfish.util import click
-from starfish.util.dtype import preserve_float_range
+from starfish._util import click
+from starfish._util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by, validate_and_broadcast_kernel_size

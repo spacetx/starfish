@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from starfish.imagestack.imagestack import ImageStack
+from starfish._imagestack.imagestack import ImageStack
 from starfish.spots._detect_spots._base import DetectSpotsAlgorithmBase
 from starfish.spots._detect_spots.blob import BlobDetector
 from starfish.spots._detect_spots.detect import detect_spots

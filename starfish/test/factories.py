@@ -8,7 +8,7 @@ from skimage import img_as_float32, img_as_uint
 
 from starfish import Codebook, ImageStack, IntensityTable
 from starfish.image._filter.white_tophat import WhiteTophat
-from starfish.imagestack.test.factories import create_imagestack_from_codebook
+from starfish._imagestack.test.factories import create_imagestack_from_codebook
 from starfish.spots._detect_spots.blob import BlobDetector
 from starfish.types import Axes, Features
 

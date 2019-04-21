@@ -23,7 +23,7 @@ import pprint
 
 from starfish import data, FieldOfView
 from starfish.types import Features, Axes
-from starfish.util.plot import imshow_plane
+from starfish._util.plot import imshow_plane
 # EPY: END code
 
 # EPY: START code
@@ -232,7 +232,7 @@ seg.show()
 
 # EPY: START code
 from starfish.spots import AssignTargets
-from starfish.expression_matrix.expression_matrix import ExpressionMatrix
+from starfish._expression_matrix.expression_matrix import ExpressionMatrix
 
 al = AssignTargets.Label()
 labeled = al.run(masks, decoded)

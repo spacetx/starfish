@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from starfish.segmentation_mask import (SegmentationMaskCollection,
-                                        validate_segmentation_mask)
+from starfish._segmentation_mask import (SegmentationMaskCollection,
+                                         validate_segmentation_mask)
 from starfish.types import Axes, Coordinates
 
 

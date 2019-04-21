@@ -1,8 +1,8 @@
 import os
 import shutil
 
-from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.util import exec
+from starfish._intensity_table.intensity_table import IntensityTable
+from starfish._util import exec
 
 
 class CLITest:

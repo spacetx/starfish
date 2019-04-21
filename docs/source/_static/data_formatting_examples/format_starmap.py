@@ -16,9 +16,9 @@ from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish import Codebook
-from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
+from starfish._experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.types import Axes, Coordinates, Features
-from starfish.util import click
+from starfish._util import click
 
 
 # We use this to cache images. This allows us to write a separate function to extract the data's

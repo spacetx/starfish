@@ -1,12 +1,12 @@
 from abc import abstractmethod
 from typing import Type
 
-from starfish.imagestack.imagestack import ImageStack
-from starfish.pipeline import PipelineComponent
-from starfish.pipeline.algorithmbase import AlgorithmBase
-from starfish.segmentation_mask import SegmentationMaskCollection
-from starfish.util import click
-from starfish.util.click.indirectparams import ImageStackParamType
+from starfish._imagestack.imagestack import ImageStack
+from starfish._pipeline import PipelineComponent
+from starfish._pipeline.algorithmbase import AlgorithmBase
+from starfish._segmentation_mask import SegmentationMaskCollection
+from starfish._util import click
+from starfish._util.click.indirectparams import ImageStackParamType
 
 
 class Segment(PipelineComponent):

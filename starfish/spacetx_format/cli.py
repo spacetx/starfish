@@ -2,7 +2,7 @@ from time import time
 
 import xarray as xr
 
-from starfish.util import click
+from starfish._util import click
 from . import validate_sptx
 
 

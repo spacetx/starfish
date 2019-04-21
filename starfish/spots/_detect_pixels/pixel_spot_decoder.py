@@ -2,12 +2,12 @@ from typing import Optional, Tuple
 
 import numpy as np
 
-from starfish.codebook.codebook import Codebook
-from starfish.imagestack.imagestack import ImageStack
-from starfish.intensity_table.intensity_table import IntensityTable
-from starfish.intensity_table.intensity_table_coordinates import \
+from starfish._codebook.codebook import Codebook
+from starfish._imagestack.imagestack import ImageStack
+from starfish._intensity_table.intensity_table import IntensityTable
+from starfish._intensity_table.intensity_table_coordinates import \
     transfer_physical_coords_from_imagestack_to_intensity_table
-from starfish.util import click
+from starfish._util import click
 from ._base import DetectPixelsAlgorithmBase
 from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedComponentDecodingResult
 

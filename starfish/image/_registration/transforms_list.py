@@ -8,7 +8,6 @@ from slicedimage.io import resolve_path_or_url
 from starfish.config import StarfishConfig
 from starfish.types import Axes, TransformType
 
-
 transformsTypeMapping = {
     TransformType.SIMILARITY: SimilarityTransform
 }

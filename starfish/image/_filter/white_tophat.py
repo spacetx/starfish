@@ -5,8 +5,8 @@ import xarray as xr
 from skimage.morphology import ball, disk, white_tophat
 
 from starfish._imagestack.imagestack import ImageStack
-from starfish.types import Clip
 from starfish._util import click
+from starfish.types import Clip
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by
 

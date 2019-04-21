@@ -7,6 +7,7 @@ import pandas as pd
 import xarray as xr
 
 from starfish._expression_matrix.expression_matrix import ExpressionMatrix
+from starfish._util.dtype import preserve_float_range
 from starfish.types import (
     Axes,
     Coordinates,
@@ -17,7 +18,6 @@ from starfish.types import (
     SpotAttributes,
     STARFISH_EXTRAS_KEY
 )
-from starfish._util.dtype import preserve_float_range
 from .overlap import (
     find_overlaps_of_xarrays,
     OVERLAP_STRATEGY_MAP,

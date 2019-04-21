@@ -2,11 +2,11 @@ import numpy as np
 from skimage.feature import register_translation
 from skimage.transform._geometric import SimilarityTransform
 
-from starfish.image._registration.transforms_list import TransformsList
 from starfish._imagestack.imagestack import ImageStack
-from starfish.types import Axes, TransformType
 from starfish._util import click
 from starfish._util.click.indirectparams import ImageStackParamType
+from starfish.image._registration.transforms_list import TransformsList
+from starfish.types import Axes, TransformType
 from ._base import LearnTransformBase
 
 

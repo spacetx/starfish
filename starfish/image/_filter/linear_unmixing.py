@@ -5,8 +5,8 @@ import numpy as np
 import xarray as xr
 
 from starfish._imagestack.imagestack import ImageStack
-from starfish.types import Axes, Clip
 from starfish._util import click
+from starfish.types import Axes, Clip
 from ._base import FilterAlgorithmBase
 
 

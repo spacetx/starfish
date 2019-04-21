@@ -6,8 +6,8 @@ import xarray as xr
 
 from starfish._compat import match_histograms
 from starfish._imagestack.imagestack import ImageStack
-from starfish.types import Axes
 from starfish._util import click, enum
+from starfish.types import Axes
 from ._base import FilterAlgorithmBase
 
 

@@ -4,9 +4,9 @@ from typing import Type
 
 from starfish._imagestack.imagestack import ImageStack
 from starfish._intensity_table.intensity_table import IntensityTable
+from starfish._util.logging import LogEncoder
 from starfish.types import LOG
 from starfish.types._constants import STARFISH_EXTRAS_KEY
-from starfish._util.logging import LogEncoder
 from .pipelinecomponent import PipelineComponent
 
 

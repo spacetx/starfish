@@ -7,6 +7,7 @@ from pstats import Stats
 import pkg_resources
 
 from starfish._experiment.builder.cli import build as build_cli
+from starfish._util import click
 from starfish.image import (
     ApplyTransform,
     Filter,
@@ -20,8 +21,6 @@ from starfish.spots import (
     DetectPixels,
     DetectSpots,
 )
-from starfish._util import click
-
 
 PROFILER_KEY = "profiler"
 """This is the dictionary key we use to attach the profiler to pass to the resultcallback."""

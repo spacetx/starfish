@@ -14,8 +14,8 @@ from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish._experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Axes, Coordinates, Number
 from starfish._util.argparse import FsExistsType
+from starfish.types import Axes, Coordinates, Number
 
 SHAPE = {Axes.Y: 2048, Axes.X: 2048}
 

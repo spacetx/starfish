@@ -6,8 +6,8 @@ import xarray as xr
 from trackpy import bandpass
 
 from starfish._imagestack.imagestack import ImageStack
-from starfish.types import Clip, Number
 from starfish._util import click
+from starfish.types import Clip, Number
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by
 

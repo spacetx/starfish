@@ -2,8 +2,8 @@ import json
 
 from slicedimage import ImageFormat
 
-from starfish.types import Axes
 from starfish._util import click
+from starfish.types import Axes
 from . import AUX_IMAGE_NAMES, write_experiment_json
 
 

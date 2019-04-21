@@ -1,12 +1,12 @@
 from abc import abstractmethod
 from typing import Type
 
-from starfish.image._registration.transforms_list import TransformsList
 from starfish._imagestack.imagestack import ImageStack
 from starfish._pipeline import PipelineComponent
 from starfish._pipeline.algorithmbase import AlgorithmBase
 from starfish._util import click
 from starfish._util.click.indirectparams import ImageStackParamType
+from starfish.image._registration.transforms_list import TransformsList
 
 
 class ApplyTransform(PipelineComponent):

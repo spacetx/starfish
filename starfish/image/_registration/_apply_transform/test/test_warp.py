@@ -5,7 +5,6 @@ from starfish.image._registration._apply_transform.warp import Warp
 from starfish.image._registration._learn_transform.translation import Translation
 from starfish.types import Axes
 
-
 expected_registered_values = np.array(
     [[0.090654, 0.090593, 0.091554, 0.091661, 0.089967, 0.094072, 0.097398,
       0.099046, 0.100969, 0.112108],

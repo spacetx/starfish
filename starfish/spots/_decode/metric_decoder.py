@@ -1,7 +1,7 @@
 from starfish._codebook.codebook import Codebook
 from starfish._intensity_table.intensity_table import IntensityTable
-from starfish.types import Number
 from starfish._util import click
+from starfish.types import Number
 from ._base import DecodeAlgorithmBase
 
 

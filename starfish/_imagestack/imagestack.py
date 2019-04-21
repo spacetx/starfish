@@ -35,7 +35,6 @@ from slicedimage import (
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
 
-from starfish.config import StarfishConfig
 from starfish._errors import DataFormatWarning
 from starfish._imagestack import indexing_utils, physical_coordinate_calculator
 from starfish._imagestack.parser import TileCollectionData, TileKey
@@ -44,6 +43,9 @@ from starfish._imagestack.parser.numpy import NumpyData
 from starfish._imagestack.parser.tileset import TileSetData
 from starfish._multiprocessing.pool import Pool
 from starfish._multiprocessing.shmem import SharedMemory
+from starfish._util import logging
+from starfish._util.dtype import preserve_float_range
+from starfish.config import StarfishConfig
 from starfish.types import (
     Axes,
     Clip,
@@ -52,8 +54,6 @@ from starfish.types import (
     Number,
     STARFISH_EXTRAS_KEY
 )
-from starfish._util import logging
-from starfish._util.dtype import preserve_float_range
 from ._mp_dataarray import MPDataArray
 from .dataorder import AXES_DATA, N_AXES
 

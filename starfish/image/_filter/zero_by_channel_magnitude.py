@@ -4,10 +4,10 @@ from typing import Optional
 import numpy as np
 from tqdm import tqdm
 
-from starfish.config import StarfishConfig
 from starfish._imagestack.imagestack import ImageStack
-from starfish.types import Axes
 from starfish._util import click
+from starfish.config import StarfishConfig
+from starfish.types import Axes
 from ._base import FilterAlgorithmBase
 
 

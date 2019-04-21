@@ -15,8 +15,8 @@ from starfish._codebook._format import (
     MAX_SUPPORTED_VERSION,
     MIN_SUPPORTED_VERSION,
 )
-from starfish.config import StarfishConfig
 from starfish._intensity_table.intensity_table import IntensityTable
+from starfish.config import StarfishConfig
 from starfish.spacetx_format.util import SpaceTxValidator
 from starfish.spacetx_format.validate_sptx import _get_absolute_schema_path
 from starfish.types import Axes, Features, Number

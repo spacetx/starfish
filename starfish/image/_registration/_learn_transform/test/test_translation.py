@@ -4,7 +4,6 @@ from starfish import data
 from starfish.image._registration._learn_transform.translation import Translation
 from starfish.types import Axes
 
-
 ISS_SHIFTS = [[-23, 6], [-22, 2], [-22, -3], [-15, -4]]
 
 

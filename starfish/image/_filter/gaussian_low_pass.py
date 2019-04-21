@@ -6,9 +6,9 @@ import xarray as xr
 from skimage.filters import gaussian
 
 from starfish._imagestack.imagestack import ImageStack
-from starfish.types import Clip, Number
 from starfish._util import click
 from starfish._util.dtype import preserve_float_range
+from starfish.types import Clip, Number
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by,

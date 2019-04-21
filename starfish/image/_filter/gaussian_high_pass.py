@@ -4,11 +4,11 @@ from typing import Callable, Optional, Tuple, Union
 import numpy as np
 import xarray as xr
 
-from starfish.image._filter.gaussian_low_pass import GaussianLowPass
 from starfish._imagestack.imagestack import ImageStack
-from starfish.types import Clip, Number
 from starfish._util import click
 from starfish._util.dtype import preserve_float_range
+from starfish.image._filter.gaussian_low_pass import GaussianLowPass
+from starfish.types import Clip, Number
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by,

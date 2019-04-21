@@ -10,6 +10,9 @@ from starfish.util.click.indirectparams import ImageStackParamType
 
 
 class Segment(PipelineComponent):
+    """
+    Starfish class implementing segmentation approaches.
+    """
     @classmethod
     def _cli_run(cls, ctx, instance):
         output = ctx.obj["output"]
@@ -28,7 +31,7 @@ class Segment(PipelineComponent):
     @click.option("-o", "--output", required=True)
     @click.pass_context
     def _cli(ctx, primary_images, nuclei, output):
-        """define polygons for cell boundaries and assign spots"""
+        """define masks for cell boundaries and assign spots"""
         print('Segmenting ...')
         ctx.obj = dict(
             component=Segment,

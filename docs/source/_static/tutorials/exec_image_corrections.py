@@ -108,7 +108,7 @@ plt.show()
 # The point spread function can be determined in several ways. Ideally, it is approximated during
 # calibration of the microscope, in which case it can be removed by the
 # `Richardson-Lucy algorithm <richardson-lucy-web>`_ (API:
-# :ref:`Richardson-Lucy <richardson-lucy>`)
+# :py:class:`~starfish.image.Filter.DeconvolvePSF`)
 #
 # .. _richardson-lucy-web: https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
 #

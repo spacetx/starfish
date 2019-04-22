@@ -3,22 +3,18 @@
 Spots
 =====
 
-Starfish provides a number of methods for which spots (or other regions of interest) are the main 
-substrate. These include 
-``starfish.spots.DetectPixels``, which exposes methods that identify which target code best 
-corresponds to each pixel, and merges adjacent pixels into ROIs,
-``starfish.spots.DetectSpots``, which exposes methods that find bright spots against dark backgrounds,
-``starfish.spots.Decode``, which exposes methods that match patterns of spots detected across rounds and 
-channels in the same spatial positions with target codes, and 
-``starfish.spots.AssignTargets``, which exposes methods to assign spots to cells. 
+Starfish provides a number of methods for which spots (or other regions of interest) are the main substrate.
+These include :py:class:`starfish.spots.DetectPixels`, which exposes methods that identify which target code best corresponds to each pixel, and merges adjacent pixels into ROIs,
+:py:class:`starfish.spots.DetectSpots`, which exposes methods that find bright spots against dark backgrounds,
+:py:class:`starfish.spots.Decode`, which exposes methods that match patterns of spots detected across rounds and channels in the same spatial positions with target codes, and
+:py:class:`starfish.spots.AssignTargets`, which exposes methods to assign spots to cells.
 
 .. _detect_pixels:
 
 Detecting Pixels
 ----------------
 
-Pixel Detectors can be imported using ``starfish.spots.DetectPixels``, which registers all classes that
-subclass ``DetectPixelsAlgorithmBase``:
+Pixel Detectors can be imported using ``starfish.spots.DetectPixels``, which registers all classes that subclass ``DetectPixelsAlgorithmBase``:
 
 .. code-block:: python
 
@@ -33,8 +29,7 @@ subclass ``DetectPixelsAlgorithmBase``:
 Detecting Spots
 ---------------
 
-Spot Detectors can be imported using ``starfish.spots.DetectSpots``, which registers all classes that
-subclass ``DetectSpotsAlgorithmBase``:
+Spot Detectors can be imported using ``starfish.spots.DetectSpots``, which registers all classes that subclass ``DetectSpotsAlgorithmBase``:
 
 .. code-block:: python
 
@@ -49,8 +44,7 @@ subclass ``DetectSpotsAlgorithmBase``:
 Decoding
 --------
 
-Decoders can be imported using ``starfish.spots.Decode``, which registers all classes that subclass
-``DecodeAlgorithmBase``:
+Decoders can be imported using ``starfish.spots.Decode``, which registers all classes that subclass ``DecodeAlgorithmBase``:
 
 .. code-block:: python
 
@@ -65,8 +59,7 @@ Decoders can be imported using ``starfish.spots.Decode``, which registers all cl
 Target Assignment
 -----------------
 
-Target Assignment can be imported using ``starfish.spots.AssignTargets``, which registers all classes that subclass
-``AssignTargetsAlgorithmBase``:
+Target Assignment can be imported using ``starfish.spots.AssignTargets``, which registers all classes that subclass ``AssignTargetsAlgorithmBase``:
 
 .. code-block:: python
 

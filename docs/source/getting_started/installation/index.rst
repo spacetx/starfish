@@ -80,11 +80,12 @@ Clone the starfish repo
     % git checkout git@github.com:spacetx/starfish.git
     % cd starfish
 
-Install and activate a virtualenv
+Install create and activate a virtualenv
 
 .. code-block:: bash
 
     % python3 -m pip install --user virtualenv
+    % python3 -m virtualenv venv
     % source venv/bin/activate
 
 Finally, then install starfish:

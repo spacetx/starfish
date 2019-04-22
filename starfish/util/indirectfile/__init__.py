@@ -1,8 +1,8 @@
 from ._base import (
-    ConversionRecipe,
+    ConversionFormula,
     convert,
-    NoApplicableConversionRecipeError,
-    NoSuccessfulConversionRecipeError,
+    NoApplicableConversionFormulaError,
+    NoSuccessfulConversionFormulaError,
 )
 from ._codebook import GetCodebook, GetCodebookFromExperiment
 from ._imagestack import GetImageStack, GetImageStackFromExperiment

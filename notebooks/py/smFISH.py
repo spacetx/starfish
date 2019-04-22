@@ -23,7 +23,6 @@
 #The data consist of 45 images from 1 round, 1 channels, and 33 z-planes. Each image is
 #(2048, 2048) (y, x). There are no test data.
 #
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -46,7 +45,6 @@ ipython.magic("gui qt5")
 #signal and blurs over z with a 1-pixel gaussian to smooth the signal over the z-axis.
 #
 #low-intensity signal is (stringently) clipped from the images before and after these filters.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -72,7 +70,6 @@ clip2 = starfish.image.Filter.Clip(p_min=99, p_max=100, is_volume=True)
 #Spots are detected using a spot finder based on trackpy's locate method, which identifies
 #local intensity maxima, and spots are matched to the gene they represent by looking them up in a
 #codebook that records which (round, channel) matches which gene target.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -92,7 +89,6 @@ tlmpf = starfish.spots.DetectSpots.TrackpyLocalMaxPeakFinder(
 # EPY: START markdown
 #Construct the pipeline
 #----------------------
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -164,7 +160,6 @@ def processing_pipeline(
 # EPY: START markdown
 #Load data, run pipeline, display results
 #----------------------------------------
-#
 # EPY: END markdown
 
 # EPY: START code

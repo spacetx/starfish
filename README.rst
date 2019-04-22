@@ -39,7 +39,7 @@ to see starfish in action on particular assay types. Or, browse our our notebook
  MERFISH              [x]         [x] mer_             in process
  ISS                  [x]         [x] iss_             in process
  osmFISH              [x]         [x] osm_             [ ]
- smFISH               [x]         [x] 3ds_             [ ]
+ smFISH               [x]         [x] 3ds_             [x]
  BaristaSeq           [x]         [x] bar_             [ ]
  DARTFISH             [x]         [x] dar_             [ ]
  ex-FISH              [x]         [ ]                  [ ]

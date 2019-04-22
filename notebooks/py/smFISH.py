@@ -13,7 +13,7 @@
 #========================================================================
 #
 #This notebook walks through a work flow that analyzes one field of view of a mouse gene panel from
-#the Allen Institute for Cell Science, using the starfish package.
+#the Allen Institute for Brain Science, using the starfish package.
 #
 #This example processes an experiment with a single round from a single field of view of sequential
 #smFISH data taken from mouse primary visual cortex. These data are unpublished, and were kindly

@@ -56,10 +56,6 @@ class Codebook(xr.DataArray):
           * c          (c) int64 0 1 2
           * r          (r) int64 0 1 2 3
 
-    See Also
-    --------
-    TODO <link to spaceTx format>
-
     """
 
     @property
@@ -436,8 +432,8 @@ class Codebook(xr.DataArray):
         norm_order : int
             the norm to apply to each feature
 
-        See Also
-        --------
+        Notes
+        -----
         The available norms for this function can be found at the following link:
         https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.linalg.norm.html
 
@@ -539,8 +535,8 @@ class Codebook(xr.DataArray):
         metric : str
             the sklearn metric string to pass to NearestNeighbors
 
-        See Also
-        --------
+        Notes
+        -----
         The available norms for this function can be found at the following link:
         https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.linalg.norm.html
         The available metrics for this function can be found at the following link:

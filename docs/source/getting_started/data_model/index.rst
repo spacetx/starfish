@@ -21,8 +21,6 @@ Note that at the current time, this means there is some up-front cost to users, 
 determine, using our documentation, how to reformat their microscopy data. We are working with
 `Bio-Formats <bio_formats>`_ to automate this conversion and reduce this up-front cost.
 
-#TODO ambrosejcarr add an image of an experiment
-
 Field of View
 -------------
 
@@ -34,13 +32,15 @@ user captures them. It is important to note that all images regardless of the fl
 time point/round, or z-plane that are taken of the specific :code:`(y, x)` coordinate area should
 be included in a field of view:
 
+.. image:: /_static/design/imagestack.png
+
 This data structure is general across the types of data that we've observed in image-based
 transcriptomics and proteomics studies, which have variables numbers of fluorescence channels
 and imaging rounds. Starfish simply builds up a set of 5D tensor for each field of view, one for
 each image type (primary, dots, nuclei, ...). The dimensions are :code:`round (time), channel,
 z, y, x`.
 
-#TODO ambrosejcarr add an image of a field of view
+.. image:: /_static/design/field_of_view.png
 
 Processing Model
 ----------------
@@ -58,7 +58,7 @@ is completed. By working with small 2-dimensional planes, starfish is able to ex
 control over data upload, producing an efficient processing system for large imaging experiments
 that works both on local HPC clusters and on the cloud.
 
-#TODO ambrosejcarr add an image of our computing structure (e.g. from slides)
+.. image:: /_static/design/processing_model.png
 
 Dual Coordinate Systems
 -----------------------
@@ -72,7 +72,6 @@ Internally, starfish treats images as tensors, and will primarily operate on pix
 bringing the physical coordinates along for the ride. This duality will pervade the remainder of
 the documentation.
 
-#TODO ambrosejcarr add an image of a field of view's coordinates
 
 Next Steps
 ----------
@@ -81,8 +80,3 @@ At this point, the tutorial forks. You can either dive into formatting your data
 or play skip forward and play with starfish using our pre-constructed example datasets.
 We suggest the latter, as it will give you a sense of starfish's capabilities before you put work
 into reformatting your data.
-
-#TODO ambrosejcarr add TOC links to other sections.
-
-
-# TODO ambrosejcarr use schematics from poster

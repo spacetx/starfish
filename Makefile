@@ -115,7 +115,7 @@ include docs/source/_static/data_processing_examples/subdir.mk
 slow: fast run-notebooks run-examples docker
 
 docker:
-	docker build -t $(DOCKER_IMAGE) .
+	docker build -f docker/Dockerfile -t $(DOCKER_IMAGE) .
 	docker run -ti --rm $(DOCKER_IMAGE) build --fov-count 1 --primary-image-dimensions '{"z": 1}' /tmp/
 
 help-integration:

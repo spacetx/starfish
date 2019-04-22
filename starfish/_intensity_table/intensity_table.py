@@ -233,8 +233,8 @@ class IntensityTable(xr.DataArray):
         filename : str
             Name for compressed-gzipped MERMAID data file. Should end in '.csv.gz'.
 
-        See Also
-        --------
+        Notes
+        -----
         https://github.com/JEFworks/MERmaid
 
         """

@@ -48,8 +48,8 @@ class BlobDetector(DetectSpotsAlgorithmBase):
     detector_method: str ['blob_dog', 'blob_doh', 'blob_log']
         name of the type of detection method used from skimage.feature, default: blob_log
 
-    See Also
-    --------
+    Notes
+    -----
     http://scikit-image.org/docs/dev/auto_examples/features_detection/plot_blob.html
 
     """

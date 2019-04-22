@@ -18,7 +18,7 @@ class Decode(PipelineComponent):
     (round, channel) pairs to targets. For coded assays, these codebooks can be much more complex.
 
     Example codebooks are associated with each experiment in :py:mod:`starfish.data` and can
-    be accessed with :py:meth`Experiment.codebook`.
+    be accessed with :py:meth`starfish.Experiment.codebook`.
     """
     @classmethod
     def _cli_run(cls, ctx, instance):

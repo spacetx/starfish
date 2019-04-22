@@ -2,13 +2,13 @@ import re
 
 from starfish.experiment.experiment import Experiment
 from starfish.imagestack.imagestack import ImageStack
-from starfish.util.indirectfile._base import ConversionRecipe
+from starfish.util.indirectfile._base import ConversionFormula
 
 
 CRE = re.compile("@(?P<path>.+)\[(?P<fov>[^\[\]]+)\]\[(?P<image_type>[^\[\]]+)\]")  # noqa: W605
 
 
-class GetImageStackFromExperiment(ConversionRecipe[ImageStack]):
+class GetImageStackFromExperiment(ConversionFormula[ImageStack]):
     def applicable(self, input_parameter: str) -> bool:
         return CRE.match(input_parameter) is not None
 
@@ -20,7 +20,7 @@ class GetImageStackFromExperiment(ConversionRecipe[ImageStack]):
         return fov.get_image(mo.group("image_type"))
 
 
-class GetImageStack(ConversionRecipe[ImageStack]):
+class GetImageStack(ConversionFormula[ImageStack]):
     def applicable(self, input_parameter: str) -> bool:
         return not CRE.match(input_parameter)
 

@@ -1,9 +1,9 @@
 from starfish.codebook.codebook import Codebook
 from starfish.experiment.experiment import Experiment
-from starfish.util.indirectfile._base import ConversionRecipe
+from starfish.util.indirectfile._base import ConversionFormula
 
 
-class GetCodebookFromExperiment(ConversionRecipe):
+class GetCodebookFromExperiment(ConversionFormula):
     def applicable(self, input_parameter: str) -> bool:
         return input_parameter.startswith("@")
 
@@ -13,7 +13,7 @@ class GetCodebookFromExperiment(ConversionRecipe):
         return experiment.codebook
 
 
-class GetCodebook(ConversionRecipe):
+class GetCodebook(ConversionFormula):
     def applicable(self, input_parameter: str) -> bool:
         return not input_parameter.startswith("@")
 

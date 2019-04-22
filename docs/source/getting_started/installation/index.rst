@@ -56,3 +56,40 @@ Finally, then install starfish:
 .. code-block:: bash
 
    % make install-dev
+
+Step by Step Installation on Windows
+--------------------------------------
+
+We recommend using starfish with a Windows Linux Subsystem (WSL)
+
+Instructions on how to download and install a new WSL can be found here: `WSL install manual`_
+
+.. _`WSL install manual`: https://docs.microsoft.com/en-us/windows/wsl/install-manual
+
+Once your WSL is running, run an apt-get update and install pip
+
+.. code-block:: bash
+
+    % sudo apt-get update
+    % sudo apt-get install python3-pip
+
+Clone the starfish repo
+
+.. code-block:: bash
+
+    % git checkout git@github.com:spacetx/starfish.git
+    % cd starfish
+
+Install create and activate a virtualenv
+
+.. code-block:: bash
+
+    % python3 -m pip install --user virtualenv
+    % python3 -m virtualenv venv
+    % source venv/bin/activate
+
+Finally, then install starfish:
+
+.. code-block:: bash
+
+   % make install-dev

@@ -44,7 +44,7 @@ to see starfish in action on particular assay types. Or, browse our our notebook
  DARTFISH             [x]         [x] dar_             [ ]
  ex-FISH              [x]         [ ]                  [ ]
  StarMAP              [x]         [x] str_             [ ]
- seq-FISH             [x]         in process           [ ]
+ seq-FISH             [x]         in process: seq_     [ ]
  FISSEQ               no data     no pipeline          [ ]
 ====================  ==========  ===================  ==================
 
@@ -54,6 +54,7 @@ to see starfish in action on particular assay types. Or, browse our our notebook
 .. _bar: https://github.com/spacetx/starfish/blob/master/notebooks/BaristaSeq.ipynb
 .. _dar: https://github.com/spacetx/starfish/blob/master/notebooks/DARTFISH.ipynb
 .. _str: https://github.com/spacetx/starfish/blob/master/notebooks/STARmap.ipynb
+.. _seq: https://github.com/spacetx/starfish/blob/master/notebooks/SeqFISH.ipynb
 
 Contributing
 ------------

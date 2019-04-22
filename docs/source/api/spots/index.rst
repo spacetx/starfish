@@ -3,15 +3,68 @@
 Spots
 =====
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+TODO: blurb from @ambrosejcarr about the various spot detection thingies
 
-.. toctree::
-   decoding/decoding.rst
 
-.. toctree::
-   detection/detection.rst
+.. _detect_pixels:
 
-.. toctree::
-   assign_targets/assign_targets.rst
+Detecting Pixels
+----------------
+
+Pixel Detectors can be imported using ``starfish.spots.DetectPixels``, which registers all classes that
+subclass ``DetectPixelsAlgorithmBase``:
+
+.. code-block:: python
+
+    from starfish.spots import DetectPixels
+
+.. autoclass:: starfish.spots.DetectPixels
+    :members:
+
+
+.. _detection:
+
+Detecting Spots
+---------------
+
+Spot Detectors can be imported using ``starfish.spots.DetectSpots``, which registers all classes that
+subclass ``DetectSpotsAlgorithmBase``:
+
+.. code-block:: python
+
+    from starfish.spots import DetectSpots
+
+.. autoclass:: starfish.spots.DetectSpots
+    :members:
+
+
+.. _decoding:
+
+Decoding
+--------
+
+Decoders can be imported using ``starfish.spots.Decode``, which registers all classes that subclass
+``DecodeAlgorithmBase``:
+
+.. code-block:: python
+
+    from starfish.spots import Decode
+
+.. autoclass:: starfish.spots.Decode
+   :members:
+
+
+.. _target_assignment:
+
+Target Assignment
+-----------------
+
+Target Assignment can be imported using ``starfish.spots.AssignTargets``, which registers all classes that subclass
+``AssignTargetsAlgorithmBase``:
+
+.. code-block:: python
+
+    from starfish.spots import AssignTargets
+
+.. autoclass:: starfish.spots.AssignTargets
+   :members:

@@ -61,9 +61,9 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithmBase):
     verbose : bool
         If True, report the percentage completed (default = False) during processing
 
-    See Also
-    --------
-    trackpy locate: http://soft-matter.github.io/trackpy/dev/generated/trackpy.locate.html
+    Notes
+    -----
+    See also trackpy locate: http://soft-matter.github.io/trackpy/dev/generated/trackpy.locate.html
 
     """
 

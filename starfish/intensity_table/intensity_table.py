@@ -233,9 +233,9 @@ class IntensityTable(xr.DataArray):
         filename : str
             Name for compressed-gzipped MERMAID data file. Should end in '.csv.gz'.
 
-        See Also
-        --------
-        https://github.com/JEFworks/MERmaid
+        Notes
+        ------
+        See also https://github.com/JEFworks/MERmaid
 
         """
 
@@ -455,8 +455,6 @@ class IntensityTable(xr.DataArray):
         overlap_strategy: Optional[OverlapStrategy] = None
     ) -> "IntensityTable":
         """
-        # TODO shanaxel42 doc me
-
         Parameters
         ----------
         intensity_tables: List[IntensityTable]

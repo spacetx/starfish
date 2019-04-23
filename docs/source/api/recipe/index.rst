@@ -1,13 +1,7 @@
 .. _Recipe:
 
-Runnable
-========
+Recipe
+======
 
-.. autoclass:: starfish.recipe.Runnable
-   :members:
-
-FileProvider
-============
-
-.. autoclass:: starfish.recipe.filesystem.FileProvider
+.. autoclass:: starfish.recipe.Recipe
    :members:

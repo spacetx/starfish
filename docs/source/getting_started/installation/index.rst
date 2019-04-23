@@ -16,9 +16,10 @@ The output should look similar to this:
 Using virtual environments
 --------------------------
    
-Starfish names its dependencies and lists explicit versions, due to sensitivity to subtle algorithm
-changes.  For that reason, it is strongly encouraged, but not required, that you set up a
-virtualenv_. Create a work folder and set up the virtual environment like:
+Starfish lists minimum versions for its dependencies for access to new features and algorithms.
+These more up-to-date packages may create conflicts in your existing scripts or other packages,
+so you may want to set up a virtualenv_.
+You can create a work folder and set up the virtual environment like:
 
 .. _virtualenv: https://packaging.python.org/tutorials/installing-packages/#creating-virtual-environments
 

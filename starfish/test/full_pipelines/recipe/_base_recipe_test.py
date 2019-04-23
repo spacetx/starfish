@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 from typing import Iterable, Optional
 
-from starfish.util import exec
+from starfish.core.util import exec
 
 
 class RecipeTest:

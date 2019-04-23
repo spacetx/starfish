@@ -2,7 +2,8 @@ import os
 import sys
 import unittest
 
-from starfish.test.full_pipelines.cli._base_cli_test import CLITest
+from ._base_cli_test import CLITest
+
 
 @unittest.skip("skipping for now")
 class TestWithMerfishData(CLITest, unittest.TestCase):

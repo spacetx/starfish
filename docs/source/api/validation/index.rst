@@ -8,7 +8,7 @@ Validators are provided for validating a SpaceTx fileset against the :ref:`schem
 Validators
 ----------
 
-.. autoclass:: starfish.spacetx_format.util.SpaceTxValidator
+.. autoclass:: starfish.core.spacetx_format.util.SpaceTxValidator
    :members:
    :exclude-members: fuzz_object
 
@@ -19,7 +19,7 @@ In addition, the starfish.spacetx_format.validate_sptx module contains helpers t
 iterating over the tree of json files and their respective schemas.
 
 
-.. automodule:: starfish.spacetx_format.validate_sptx
+.. automodule:: starfish.core.spacetx_format.validate_sptx
    :members:
 
 
@@ -31,7 +31,7 @@ For example:
 
 ::
 
-    starfish/starfish/spacetx_format/util.py:82: UserWarning:
+    starfish/starfish/core/spacetx_format/util.py:82: UserWarning:
      'contents' is a required property
             Schema:                 https://github.com/spacetx/starfish/starfish/file-format/schema/fov-manifest.json
             Subschema level:        0

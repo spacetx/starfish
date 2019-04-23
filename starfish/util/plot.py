@@ -16,8 +16,9 @@ import numpy as np
 import xarray as xr
 from matplotlib.colors import ListedColormap
 
-from starfish import ImageStack, IntensityTable
-from starfish.types import Axes, Features
+from starfish.core.imagestack.imagestack import ImageStack
+from starfish.core.intensity_table.intensity_table import IntensityTable
+from starfish.core.types import Axes, Features
 
 
 def imshow_plane(

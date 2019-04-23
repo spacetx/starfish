@@ -3,5 +3,5 @@
 ImageStack
 ==========
 
-.. automodule:: starfish.imagestack.imagestack
+.. autoclass:: starfish.core.imagestack.imagestack.ImageStack
    :members:

@@ -3,5 +3,5 @@
 Recipe
 ======
 
-.. autoclass:: starfish.recipe.Recipe
+.. autoclass:: starfish.core.recipe.Recipe
    :members:

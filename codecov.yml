@@ -1,3 +1,3 @@
 ignore:
   - "**/test/*.py"
-  - "starfish/_version.py"
+  - "starfish/core/_version.py"

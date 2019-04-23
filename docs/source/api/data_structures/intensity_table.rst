@@ -3,8 +3,8 @@
 IntensityTable
 ==============
 
-.. automodule:: starfish.intensity_table.intensity_table
+.. autoclass:: starfish.core.intensity_table.intensity_table.IntensityTable
    :members:
 
-.. automodule:: starfish.intensity_table.intensity_table_coordinates
+.. automodule:: starfish.core.intensity_table.intensity_table_coordinates
    :members:

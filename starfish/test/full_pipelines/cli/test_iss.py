@@ -11,8 +11,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from starfish.test.full_pipelines.cli._base_cli_test import CLITest
 from starfish.types import Features
+from ._base_cli_test import CLITest
 
 
 EXPERIMENT_JSON_URL = "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS-TEST/experiment.json"

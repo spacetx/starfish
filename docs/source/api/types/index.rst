@@ -16,13 +16,13 @@ Coordinates holds constants that store with the physical coordinates of a field 
 a field of view's relative location to some global scale parameter, and identify how to stitch or
 combine multiple fields of view.
 
-.. autoclass:: starfish.types.Coordinates
+.. autoclass:: starfish.core.types.Coordinates
     :members:
     :undoc-members:
 
 Physical Coordinates
 ---------------------
-.. autoclass:: starfish.types.PhysicalCoordinateTypes
+.. autoclass:: starfish.core.types.PhysicalCoordinateTypes
     :members:
     :undoc-members:
 
@@ -36,7 +36,7 @@ Axes holds constants that represent indexers into the dimensions of the :py:clas
 2. :py:class:`Codebook`, which stores expected image intensities across imaging rounds and
    channels
 
-.. autoclass:: starfish.types.Axes
+.. autoclass:: starfish.core.types.Axes
     :members:
     :undoc-members:
 
@@ -46,7 +46,7 @@ Features
 Features holds constants that represent characteristics of detected image features (most often
 spots, but sometimes also individual pixels).
 
-.. autoclass:: starfish.types.Features
+.. autoclass:: starfish.core.types.Features
     :members:
     :undoc-members:
 
@@ -58,13 +58,13 @@ SpotAttributes defines the minimum amount of information required by starfish to
 a spot. It also contains methods to save these attributes to files that can be used to visualize
 detected spots.
 
-.. autoclass:: starfish.types.SpotAttributes
+.. autoclass:: starfish.core.types.SpotAttributes
     :members:
 
 Clip
 _____
 
-.. autoclass:: starfish.types.Clip
+.. autoclass:: starfish.core.types.Clip
     :members:
     :undoc-members:
 

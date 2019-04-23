@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from starfish.intensity_table.intensity_table import IntensityTable
+from starfish import IntensityTable
 from starfish.types import Features
 from ._base_recipe_test import RecipeTest
 

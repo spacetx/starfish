@@ -1,3 +1,21 @@
+## [0.1.0] - 2019-04-23
+- public/private separation (#1244)
+- Recipe and recipe execution (#1192)
+- 3d smFISH notebook (#1238)
+- SeqFISH notebook (#1239)
+- Adding windows install instructions (#1227)
+- vectorize labeling spot lookups (#1215)
+- vectorize imagestack -> intensity_table coordinate transfer (#1212)
+- Fix the restoration of non-indexed axes. (#1189)
+- Allow for intensity tables with labeled axes (#1181)
+- ImageStack select on Physical Coordinates (#1147)
+- fixing Clip.SCALE_BY_IMAGE (#1193)
+- Update BaristaSeq text, fix LinearUnmixing (#1188)
+- Update STARmap notebook for SpaceJam (#1199)
+- replace label images with segmentation masks (#1135)
+- BaristaSeq + Plot tools update (#1171)
+- Intensity Table Concat Processing (#1118)
+
 ## [0.0.36] - 2019-04-10
 - Update strict requirements (#1142)
 - High level goal: detect spots should accept imagestacks and not numpy arrays. (#1143)
@@ -28,6 +46,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.1.0]: https://github.com/spacetx/starfish/releases/tag/0.1.0
 [0.0.36]: https://github.com/spacetx/starfish/releases/tag/0.0.36
 [0.0.35]: https://github.com/spacetx/starfish/releases/tag/0.0.35
 [0.0.34]: https://github.com/spacetx/starfish/releases/tag/0.0.34

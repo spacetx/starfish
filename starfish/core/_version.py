@@ -43,8 +43,8 @@ def get_config():
     cfg.style = "pep440"
     cfg.tag_prefix = ""
     cfg.parentdir_prefix = "starfish-"
-    cfg.versionfile_source = "starfish/_version.py"
-    cfg.versionfile_build = "starfish/_version.py"
+    cfg.versionfile_source = "starfish/core/_version.py"
+    cfg.versionfile_build = "starfish/core/_version.py"
     cfg.verbose = False
     return cfg
 

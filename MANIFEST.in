@@ -3,4 +3,3 @@ include starfish/REQUIREMENTS-STRICT.txt
 recursive-include starfish/spacetx_format/schema/ *.json
 recursive-include starfish/spacetx_format/examples/ *.json
 include versioneer.py
-include starfish/_version.py

@@ -20,6 +20,7 @@ from .codebook.codebook import Codebook
 from .experiment.experiment import Experiment, FieldOfView
 from .imagestack.imagestack import ImageStack
 from .intensity_table.intensity_table import IntensityTable
+from .recipe import cli
 from .starfish import starfish
 
 

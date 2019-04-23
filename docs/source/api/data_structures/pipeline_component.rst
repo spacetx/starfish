@@ -3,5 +3,5 @@
 Pipeline Component
 ==================
 
-.. automodule:: starfish.pipeline.pipelinecomponent
+.. automodule:: starfish.core.pipeline.pipelinecomponent
    :members:

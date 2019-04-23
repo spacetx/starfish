@@ -110,10 +110,10 @@ SpaceTx-Format :py:class:`Experiment`.
 
 These are the abstract classes that must be subclassed for each set of naming conventions:
 
-.. literalinclude:: /../../starfish/experiment/builder/providers.py
+.. literalinclude:: /../../starfish/core/experiment/builder/providers.py
     :pyobject: FetchedTile
 
-.. literalinclude:: /../../starfish/experiment/builder/providers.py
+.. literalinclude:: /../../starfish/core/experiment/builder/providers.py
     :pyobject: TileFetcher
 
 To create a formatter object for in-situ sequencing, we subclass the ``TileFetcher`` and

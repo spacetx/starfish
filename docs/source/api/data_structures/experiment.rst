@@ -3,5 +3,5 @@
 Experiment
 ==========
 
-.. autoclass:: starfish.experiment.experiment.Experiment
+.. autoclass:: starfish.core.experiment.experiment.Experiment
     :members:

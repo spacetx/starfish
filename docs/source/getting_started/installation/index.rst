@@ -15,7 +15,7 @@ The output should look similar to this:
 
 Using virtual environments
 --------------------------
-   
+
 Starfish lists minimum versions for its dependencies for access to new features and algorithms.
 These more up-to-date packages may create conflicts in your existing scripts or other packages,
 so you may want to set up a virtualenv_.
@@ -74,6 +74,7 @@ Step by Step Installation on Windows
 We recommend using starfish with a Windows Linux Subsystem (WSL)
 
 Instructions on how to download and install a new WSL can be found here: `WSL install manual`_
+(Note: when choosing a Ubuntu instance, use 18 or higher)
 
 .. _`WSL install manual`: https://docs.microsoft.com/en-us/windows/wsl/install-manual
 
@@ -84,13 +85,6 @@ Once your WSL is running, run an apt-get update and install pip
     % sudo apt-get update
     % sudo apt-get install python3-pip
 
-Clone the starfish repo
-
-.. code-block:: bash
-
-    % git checkout git@github.com:spacetx/starfish.git
-    % cd starfish
-
 Install create and activate a virtualenv
 
 .. code-block:: bash
@@ -99,8 +93,14 @@ Install create and activate a virtualenv
     % python3 -m virtualenv venv
     % source venv/bin/activate
 
-Finally, then install starfish:
+Install starfish:
 
 .. code-block:: bash
 
-   % make install-dev
+   % pip install starfish
+
+Install Jupyter
+
+.. code-block:: bash
+
+   % pip install jupyter

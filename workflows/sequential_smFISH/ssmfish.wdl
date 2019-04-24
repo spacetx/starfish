@@ -7,14 +7,9 @@ task process_field_of_view {
     command <<<
 
         python3 <<CODE
-
-        # imports
-        from typing import Optional, Tuple
         import sys
 
         import starfish
-        import starfish.data
-        from starfish import FieldOfView, IntensityTable
 
         # bandpass filter to remove cellular background and camera noise
         bandpass = starfish.image.Filter.Bandpass(lshort=.5, llong=7, threshold=0.0)
@@ -44,55 +39,37 @@ task process_field_of_view {
             is_volume=True,
         )
 
-        def processing_pipeline(
-            experiment: starfish.Experiment,
-            fov_name: str,
-        ) -> Tuple[starfish.ImageStack, starfish.IntensityTable]:
-            """Process a single field of view of an experiment
-
-            Parameters
-            ----------
-            experiment : starfish.Experiment
-                starfish experiment containing fields of view to analyze
-            fov_name : str
-                name of the field of view to process
-
-            Returns
-            -------
-            starfish.IntensityTable :
-                decoded IntensityTable containing spots matched to the genes they are hybridized
-                against
-            """
+        def processing_pipeline(experiment, fov_name):
 
             print("Loading images...", file=sys.stderr)
-            primary_image = experiment[fov_name].get_image(FieldOfView.PRIMARY_IMAGES)
+            primary_image = experiment[fov_name].get_image(starfish.FieldOfView.PRIMARY_IMAGES)
+
+            filter_kwargs = dict(in_place=True, verbose=True)
+
             all_intensities = list()
-            codebook = experiment.codebook
+            for primary_image in experiment[fov_name].iterate_image_type(starfish.FieldOfView.PRIMARY_IMAGES):
 
-            for primary_image in experiment[fov_name].iterate_image_type(FieldOfView.PRIMARY_IMAGES):
-
-                print("Filtering images...", file=sys.stderr)
-                filter_kwargs = dict(
-                    in_place=True,
-                    verbose=True,
-                )
                 print("Applying Clip...", file=sys.stderr)
                 clip1.run(primary_image, **filter_kwargs)
+
                 print("Applying Bandpass...", file=sys.stderr)
                 bandpass.run(primary_image, **filter_kwargs)
+
                 print("Applying Gaussian low pass...", file=sys.stderr)
                 glp.run(primary_image, **filter_kwargs)
+
                 print("Applying Clip...", file=sys.stderr)
                 clip2.run(primary_image, **filter_kwargs)
 
                 print("Calling spots...", file=sys.stderr)
                 spot_attributes = tlmpf.run(primary_image)
+
                 all_intensities.append(spot_attributes)
 
-            spot_attributes = IntensityTable.concatenate_intensity_tables(all_intensities)
+            spot_attributes = starfish.IntensityTable.concatenate_intensity_tables(all_intensities)
 
             print("Decoding spots...", file=sys.stderr)
-            decoded = codebook.decode_per_round_max(spot_attributes)
+            decoded = experiment.codebook.decode_per_round_max(spot_attributes)
             decoded = decoded[decoded["total_intensity"] > .025]
 
             return primary_image, decoded

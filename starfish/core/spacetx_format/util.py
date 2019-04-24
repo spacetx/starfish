@@ -1,6 +1,7 @@
 import copy
 import json
 import os
+import posixpath
 import sys
 import warnings
 from typing import Any, Dict, IO, Iterator, List, Optional, Union
@@ -9,6 +10,11 @@ from jsonschema import Draft4Validator, RefResolver, ValidationError
 from pkg_resources import resource_filename
 
 package_name = 'starfish'
+
+
+def _get_absolute_schema_path(schema_name: str) -> str:
+    """turn the name of the schema into an absolute path by joining it to <package_root>/schema."""
+    return resource_filename("starfish", posixpath.join("spacetx_format", "schema", schema_name))
 
 
 class SpaceTxValidator:
@@ -369,3 +375,12 @@ class Change(Checker):
         if isinstance(key, tuple):
             key = key[0]
         target.__setitem__(key, self.call())
+
+
+def create_validator(doc, path):
+    version = doc.get("version", "MISSING")
+    return SpaceTxValidator(_get_absolute_schema_path(path.format(**locals())))
+
+
+def create_codebook_validator(doc):
+    return create_validator(doc, "codebook_{version}/codebook.json")

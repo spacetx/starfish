@@ -1,20 +1,13 @@
 import json
-import posixpath
 import sys
 from typing import Dict
 
-from pkg_resources import resource_filename
 from slicedimage.backends._base import Backend
 from slicedimage.io import resolve_path_or_url
 
 from starfish.core.config import StarfishConfig
 from starfish.core.util import click
-from .util import SpaceTxValidator
-
-
-def _get_absolute_schema_path(schema_name: str) -> str:
-    """turn the name of the schema into an absolute path by joining it to <package_root>/schema."""
-    return resource_filename("starfish", posixpath.join("spacetx_format", "schema", schema_name))
+from .util import (_get_absolute_schema_path, SpaceTxValidator)
 
 
 @click.command()

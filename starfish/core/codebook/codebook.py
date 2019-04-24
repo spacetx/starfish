@@ -17,8 +17,7 @@ from starfish.core.codebook._format import (
 )
 from starfish.core.config import StarfishConfig
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.spacetx_format.util import SpaceTxValidator
-from starfish.core.spacetx_format.validate_sptx import _get_absolute_schema_path
+from starfish.core.spacetx_format.util import create_codebook_validator
 from starfish.core.types import Axes, Features, Number
 
 
@@ -369,8 +368,7 @@ class Codebook(xr.DataArray):
             codebook_doc = json.load(fh)
 
             if config.strict:
-                codebook_validator = SpaceTxValidator(
-                    _get_absolute_schema_path('codebook/codebook.json'))
+                codebook_validator = create_codebook_validator(codebook_doc)
                 if not codebook_validator.validate_object(codebook_doc):
                     raise Exception("validation failed")
 

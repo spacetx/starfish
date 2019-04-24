@@ -23,7 +23,7 @@
         ],
         "properties": {
           "codeword": {
-            "$ref": "schema/codebook/codeword.json"
+            "$ref": "schema/codebook_0.0.0/codeword.json"
           },
           "target": {
             "type": "string",

@@ -21,7 +21,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pprint
 
-from starfish import data, FieldOfView
+from starfish import data, FieldOfView, Experiment
 from starfish.types import Features, Axes
 from starfish.util.plot import imshow_plane
 # EPY: END code
@@ -40,7 +40,9 @@ matplotlib.rcParams["figure.dpi"] = 150
 use_test_data = os.getenv("USE_TEST_DATA") is not None
 
 # An experiment contains a codebook, primary images, and auxiliary images
-experiment = data.ISS(use_test_data=use_test_data)
+#experiment = data.ISS(use_test_data=use_test_data)
+#https://d2nhj9g34unfro.cloudfront.net/xiaoyan_qian/ISS_human_HCA_07_MultiFOV/main_files/experiment.json
+experiment = Experiment.from_json("/Users/shannonaxelrod/dev/ISS_human/experiment.json")
 pp = pprint.PrettyPrinter(indent=2)
 pp.pprint(experiment._src_doc)
 # EPY: END code
@@ -56,7 +58,7 @@ print(imgs)
 # EPY: START markdown
 ### Visualize Codebook
 #
-#The ISS codebook maps each barcode to a gene.This protocol asserts that genes are encoded with a length 4 quatenary barcode that can be read out from the images. Each round encodes a position in the codeword. The maximum signal in each color channel (columns in the above image) corresponds to a letter in the codeword. The channels, in order, correspond to the letters: 'T', 'G', 'C', 'A'. 
+#The ISS codebook maps each barcode to a gene.This protocol asserts that genes are encoded with a length 4 quatenary barcode that can be read out from the images. Each round encodes a position in the codeword. The maximum signal in each color channel (columns in the above image) corresponds to a letter in the codeword. The channels, in order, correspond to the letters: 'T', 'G', 'C', 'A'.
 # EPY: END markdown
 
 # EPY: START code
@@ -124,12 +126,12 @@ single_plane_filtered = filtered_imgs.sel(sel)
 f, (ax1, ax2) = plt.subplots(ncols=2)
 vmin, vmax = np.percentile(single_plane.xarray.values.data, [5, 99])
 imshow_plane(
-    single_plane, ax=ax1, vmin=vmin, vmax=vmax, 
+    single_plane, ax=ax1, vmin=vmin, vmax=vmax,
     title="Original data\nRound: 0, Channel: 0"
 )
 vmin, vmax = np.percentile(single_plane_filtered.xarray.values.data, [5, 99])
 imshow_plane(
-    single_plane_filtered, ax=ax2, vmin=vmin, vmax=vmax, 
+    single_plane_filtered, ax=ax2, vmin=vmin, vmax=vmax,
     title="Filtered data\nRound: 0, Channel: 0"
 )
 # EPY: END code
@@ -139,7 +141,7 @@ imshow_plane(
 # EPY: END markdown
 
 # EPY: START markdown
-#Images may have shifted between imaging rounds. This needs to be corrected for before decoding, since this shift in the images will corrupt the barcodes, thus hindering decoding accuracy. A simple procedure can correct for this shift. For each imaging round, the max projection across color channels should look like the dots stain. Below, we simply shift all images in each round to match the dots stain by learning the shift that maximizes the cross-correlation between the images and the dots stain. 
+#Images may have shifted between imaging rounds. This needs to be corrected for before decoding, since this shift in the images will corrupt the barcodes, thus hindering decoding accuracy. A simple procedure can correct for this shift. For each imaging round, the max projection across color channels should look like the dots stain. Below, we simply shift all images in each round to match the dots stain by learning the shift that maximizes the cross-correlation between the images and the dots stain.
 # EPY: END markdown
 
 # EPY: START code

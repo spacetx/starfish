@@ -58,4 +58,4 @@ ENV PATH /home/starfish/.conda/envs/starfish/bin:$PATH
 RUN pip install -e . --ignore-installed --no-cache-dir
 
 env MPLBACKEND Agg
-ENTRYPOINT ["starfish"]
+#ENTRYPOINT ["starfish"]

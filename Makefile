@@ -112,7 +112,9 @@ help-requirements:
 include notebooks/subdir.mk
 include docs/source/_static/data_processing_examples/subdir.mk
 
-slow: fast run-notebooks run-examples docker
+test-examples: export TESTING=1
+test-examples: run-examples
+slow: fast run-notebooks test-examples docker
 
 docker:
 	docker build -f docker/Dockerfile -t $(DOCKER_IMAGE) .

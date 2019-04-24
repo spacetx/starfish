@@ -5,6 +5,7 @@ task process_field_of_view {
     Int field_of_view
 
     command <<<
+
         python3 <<CODE
 
         # imports
@@ -31,7 +32,7 @@ task process_field_of_view {
         clip2 = starfish.image.Filter.Clip(p_min=99, p_max=100)
 
         # peak finding
-        tlmpf = starfish.spots.SpotFinder.TrackpyLocalMaxPeakFinder(
+        tlmpf = starfish.spots.DetectSpots.TrackpyLocalMaxPeakFinder(
             spot_diameter=5,
             min_mass=0.02,
             max_size=2,
@@ -115,7 +116,7 @@ task process_field_of_view {
     >>>
 
     runtime {
-        docker: "spacetx/starfish:0.0.36-1"
+        docker: "spacetx/starfish:0.1.0"
         memory: "16 GB"
         cpu: "4"
         disk: "local-disk 100 SDD"
@@ -148,7 +149,7 @@ task concatenate_fovs {
     >>>
 
     runtime {
-        docker: "spacetx/starfish:0.0.36-1"
+        docker: "spacetx/starfish:0.1.0"
         memory: "16 GB"
         cpu: "2"
         disk: "local-disk 100 SDD"

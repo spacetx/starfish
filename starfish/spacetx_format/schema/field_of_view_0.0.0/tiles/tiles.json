@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schema/field_of_view/tiles/tiles.json",
+  "description": "Specification of a 2-d image tile.",
+  "type": "object",
+  "required": [
+    "coordinates",
+    "indices",
+    "file",
+    "sha256"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "coordinates": {
+      "$ref": "coordinates.json"
+    },
+    "indices": {
+      "$ref": "indices.json"
+    },
+    "file": {
+      "type": "string",
+      "description": "A relative or absolute location of the image file containing data for this tile.",
+      "example": "img_000000000_Bandpass488_000.tif"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9]{64}$",
+      "description": "The Sha256 hash result for the file corresponding to this tile.",
+      "example": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tile_format": {
+      "type": "string",
+      "description": "The file format of this tile.",
+      "enum": [
+        "TIFF",
+        "NUMPY"
+      ]
+    },
+    "tile_shape": {
+      "oneOf": [
+        {
+          "type": "array",
+          "description": "The default tile shape (y, x) of the tiles in this field of view.",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "integer",
+            "example": 2048,
+            "minimum": 0,
+            "maximum": 3000
+          }
+        },
+        {
+          "type": "object",
+          "description": "The default tile shape of the tiles in this field of view.",
+          "properties": {
+            "x": {
+              "type": "integer",
+              "description": "The width of the tile in pixels.",
+              "minimum": 1
+            },
+            "y": {
+              "type": "integer",
+              "description": "The height of the tile in pixels.",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "x",
+            "y"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "extras": {
+      "description": "Unstructured field used to contain additional data about this data manifest.",
+      "default": null,
+      "examples": [
+        null,
+        "spaceTx is great",
+        {"extra_metadata": "critical_info"}
+      ]
+    }
+  }
+}

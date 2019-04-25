@@ -29,7 +29,7 @@ all:	fast
 
 ### UNIT #####################################################
 #
-fast:	diff-requirements lint mypy fast-test clean-docs docs-html
+fast:	diff-requirements lint mypy fast-test docs-html
 
 lint:   lint-non-init lint-init
 
@@ -62,9 +62,6 @@ help-unit:
 #
 docs-%:
 	make -C docs $*
-
-clean-docs:
-	make -C docs clean
 
 help-docs:
 	$(call print_help, docs-TASK, alias for 'make TASK' in the docs subdirectory)

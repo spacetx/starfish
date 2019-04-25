@@ -70,14 +70,15 @@ task concatenate_fovs {
     command <<<
         python <<CODE
 
-        files = "${sep=', ' decoded_csvs}"
+        files = "${sep=' ' decoded_csvs}".strip().split()
+        print(files)
         import pandas as pd
 
         first = pd.read_csv(files[0], index_col=0)
 
         for f in files[1:]:
             next = pd.read_csv(f, index_col=0)
-            first = pd.concat(first, f, axis=0)
+            first = pd.concat([first, f], axis=0)
 
         first.to_csv("decoded_concatenated.csv")
 

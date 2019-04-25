@@ -1,11 +1,11 @@
 import pytest
 from pkg_resources import resource_filename
 
-from .util import create_manifest_validator
+from .util import ManifestValidator
 
 package_name = "starfish"
 current_version = "0.1.0"
-validator = create_manifest_validator({"version": current_version})
+validator = ManifestValidator(version=current_version)
 
 
 def test_fov_manifest():

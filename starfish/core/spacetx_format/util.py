@@ -381,8 +381,11 @@ class Change(Checker):
         target.__setitem__(key, self.call())
 
 
-def get_schema_path(doc, schema):
-    version = doc.get("version", "MISSING")
+def get_schema_path(doc, schema, version="MISSING"):
+
+    if doc is not None:
+        version = doc.get("version", version)
+
     if "codebook" in schema:
         path = "codebook_{version}/codebook.json"
     elif "experiment" in schema:
@@ -402,21 +405,37 @@ def get_schema_path(doc, schema):
     return _get_absolute_schema_path(path.format(**locals()))
 
 
-def create_validator(doc, path):
-    return SpaceTxValidator(_get_absolute_schema_path(path.format(**locals())))
+class CodebookValidator(SpaceTxValidator):
+
+    def __init__(self, doc=None, version=None):
+        super(CodebookValidator, self).__init__(get_schema_path(doc, "codebook", version))
 
 
-def create_codebook_validator(doc):
-    return SpaceTxValidator(get_schema_path(doc, "codebook"))
+class ExperimentValidator(SpaceTxValidator):
+
+    def __init__(self, doc=None, version=None):
+        super(ExperimentValidator, self).__init__(get_schema_path(doc, "experiment", version))
 
 
-def create_experiment_validator(doc):
-    return SpaceTxValidator(get_schema_path(doc, "experiment"))
+class FOVValidator(SpaceTxValidator):
+
+    def __init__(self, doc=None, version=None):
+        super(FOVValidator, self).__init__(get_schema_path(doc, "field_of_view", version))
 
 
-def create_fov_validator(doc):
-    return SpaceTxValidator(get_schema_path(doc, "field_of_view"))
+class ManifestValidator(SpaceTxValidator):
+
+    def __init__(self, doc=None, version=None):
+        super(ManifestValidator, self).__init__(get_schema_path(doc, "fov_manifest", version))
 
 
-def create_manifest_validator(doc):
-    return SpaceTxValidator(get_schema_path(doc, "fov_manifest"))
+LatestCodebookValidator = lambda: CodebookValidator(version="0.0.0")
+
+
+LatestExperimentValidator = lambda: ExperimentValidator(version="5.0.0")
+
+
+LatestFOVValidator = lambda: FOVValidator(version="0.1.0")
+
+
+LatestManifestValidator = lambda: ManifestValidator(version="0.1.0")

@@ -1,11 +1,11 @@
 import io
 
 from starfish.core.codebook._format import CURRENT_VERSION, DocumentKeys
-from .util import create_codebook_validator, create_experiment_validator, Fuzzer
+from .util import CodebookValidator, ExperimentValidator, Fuzzer
 
 package_name = "starfish"
-codebook_validator = create_codebook_validator({"version": "0.0.0"})
-experiment_validator = create_experiment_validator({"version": "5.0.0"})
+codebook_validator = CodebookValidator(version="0.0.0")
+experiment_validator = ExperimentValidator(version="5.0.0")
 
 
 def test_fuzz_mock():

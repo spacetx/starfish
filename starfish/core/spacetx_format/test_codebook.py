@@ -2,12 +2,12 @@ import pytest
 from pkg_resources import resource_filename
 
 from starfish.core.codebook._format import DocumentKeys
-from .util import create_codebook_validator
+from .util import CodebookValidator
 from .validate_sptx import validate_file
 
 package_name = "starfish"
 current_version = "0.0.0"
-validator = create_codebook_validator({"version": current_version})
+validator = CodebookValidator(version=current_version)
 
 
 def test_codebook():

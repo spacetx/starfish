@@ -12,10 +12,10 @@
   "additionalProperties": false,
   "properties": {
     "coordinates": {
-      "$ref": "schema/field_of_view_0.1.0/tiles/coordinates.json"
+      "$ref": "coordinates.json"
     },
     "indices": {
-      "$ref": "schema/field_of_view_0.1.0/tiles/indices.json"
+      "$ref": "indices.json"
     },
     "file": {
       "type": "string",

@@ -1,17 +1,11 @@
 import io
 
-from pkg_resources import resource_filename
-
 from starfish.core.codebook._format import CURRENT_VERSION, DocumentKeys
-from .util import Fuzzer, SpaceTxValidator
+from .util import create_codebook_validator, create_experiment_validator, Fuzzer
 
 package_name = "starfish"
-codebook_schema_path = resource_filename(
-    package_name, "spacetx_format/schema/codebook/codebook.json")
-experiment_schema_path = resource_filename(
-    package_name, "spacetx_format/schema/experiment.json")
-codebook_validator = SpaceTxValidator(codebook_schema_path)
-experiment_validator = SpaceTxValidator(experiment_schema_path)
+codebook_validator = create_codebook_validator({"version": "0.0.0"})
+experiment_validator = create_experiment_validator({"version": "5.0.0"})
 
 
 def test_fuzz_mock():

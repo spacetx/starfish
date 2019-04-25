@@ -46,8 +46,12 @@ class SpaceTxValidator:
             json-schema validator specific to the supplied schema, with references resolved
 
         """
+
+        # Note: we are using 5.0.0 here as the first known file. It does *not* need to
+        # be upgraded with each version bump since only the dirname is used.
         experiment_schema_path = resource_filename(
-            package_name, "spacetx_format/schema/experiment.json")
+            package_name, "spacetx_format/schema/experiment_5.0.0.json")
+
         package_root = os.path.dirname(os.path.dirname(experiment_schema_path))
         base_uri = 'file://' + package_root + '/'
         resolver = RefResolver(base_uri, schema)
@@ -377,10 +381,42 @@ class Change(Checker):
         target.__setitem__(key, self.call())
 
 
-def create_validator(doc, path):
+def get_schema_path(doc, schema):
     version = doc.get("version", "MISSING")
+    if "codebook" in schema:
+        path = "codebook_{version}/codebook.json"
+    elif "experiment" in schema:
+        path = "experiment_{version}.json"
+    elif "fov_manifest" in schema:
+        path = "fov_manifest_{version}.json"
+    elif "coordinates" in schema:
+        path = "field_of_view_{version}/tiles/coordinates.json"
+    elif "indices" in schema:
+        path = "field_of_view_{version}/tiles/indices.json"
+    elif "tiles" in schema:
+        path = "field_of_view_{version}/tiles/tiles.json"
+    elif "field_of_view" in schema:
+        path = "field_of_view_{version}/field_of_view.json"
+    else:
+        raise Exception(f"Unknown schema: {schema}")
+    return _get_absolute_schema_path(path.format(**locals()))
+
+
+def create_validator(doc, path):
     return SpaceTxValidator(_get_absolute_schema_path(path.format(**locals())))
 
 
 def create_codebook_validator(doc):
-    return create_validator(doc, "codebook_{version}/codebook.json")
+    return SpaceTxValidator(get_schema_path(doc, "codebook"))
+
+
+def create_experiment_validator(doc):
+    return SpaceTxValidator(get_schema_path(doc, "experiment"))
+
+
+def create_fov_validator(doc):
+    return SpaceTxValidator(get_schema_path(doc, "field_of_view"))
+
+
+def create_manifest_validator(doc):
+    return SpaceTxValidator(get_schema_path(doc, "fov_manifest"))

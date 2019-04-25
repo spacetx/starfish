@@ -7,7 +7,7 @@ from slicedimage.io import resolve_path_or_url
 
 from starfish.core.config import StarfishConfig
 from starfish.core.util import click
-from .util import (_get_absolute_schema_path, SpaceTxValidator)
+from .util import (get_schema_path, SpaceTxValidator)
 
 
 @click.command()
@@ -109,8 +109,6 @@ def validate_file(file: str, schema: str, fuzz: bool=False,
         >>> valid = validate_sptx.validate_file(json_url, "codebook/codebook.json")
     """
 
-    validator = SpaceTxValidator(_get_absolute_schema_path(schema))
-
     if backend is None:
         backend, name, baseurl = resolve_path_or_url(file)
     else:
@@ -120,6 +118,8 @@ def validate_file(file: str, schema: str, fuzz: bool=False,
         obj = json.load(fh)
         if output is not None:
             output.update(obj)
+
+    validator = SpaceTxValidator(get_schema_path(obj, schema))
 
     if fuzz:
         validator.fuzz_object(obj, file)

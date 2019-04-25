@@ -1,6 +1,7 @@
 import os
-import pandas as pd
 from tempfile import TemporaryDirectory
+
+import pandas as pd
 
 import starfish
 from starfish.core.test.factories import two_spot_sparse_coded_data_factory

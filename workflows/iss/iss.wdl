@@ -78,7 +78,7 @@ task concatenate_fovs {
 
         for f in files[1:]:
             next = pd.read_csv(f, index_col=0)
-            first = pd.concat([first, f], axis=0)
+            first = pd.concat([first, next], axis=0)
 
         first.to_csv("decoded_concatenated.csv")
 

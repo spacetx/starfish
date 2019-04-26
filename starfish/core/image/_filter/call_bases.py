@@ -26,7 +26,7 @@ class CallBases(FilterAlgorithmBase):
         Minimum intensity a pixel must have to be called a base.
         Set to zero for no thresholding.
     quality_threshold : float
-        Minimum intensity a pixel must have to be called a base.
+        Minimum base quality score a pixel must have to be called a base.
         Set to zero for no thresholding.
     clip_method : Union[str, Clip]
         (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype

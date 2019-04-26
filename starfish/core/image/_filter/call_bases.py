@@ -1,57 +1,128 @@
 from functools import partial
-from typing import Callable, Optional, Union
+from typing import Optional, Union
 
 import numpy as np
 import xarray as xr
 
-from ._base import FilterAlgorithmBase
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip
 from starfish.core.util import click
 from starfish.types import Axes
+from ._base import FilterAlgorithmBase
 
 
 class CallBases(FilterAlgorithmBase):
-    def __init__(self, intensity_threshold: float = 0, quality_threshold: float = 0,
-        is_volume: bool = False, expand_dynamic_range: bool = False,
+    """
+    The CallBases filter determines the nucleotide present in each pixel of each
+    (round, channel). The pixel values in the resulting image are the base quality
+    score. The base quality score is calculated as the intensity of the pixel
+    divided by the L2 norm of the all channels for that pixel. The base
+    call score as a range of (0, 1) with a value of 0  and 1 being no call and a
+    perfect call, respectively.
+
+    Parameters
+    ----------
+    intensity_threshold : float
+        Minimum intensity a pixel must have to be called a base.
+        Set to zero for no thresholding.
+    quality_threshold : float
+        Minimum intensity a pixel must have to be called a base.
+        Set to zero for no thresholding.
+    clip_method : Union[str, Clip]
+        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].
+        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over the entire ImageStack
+        Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over each slice, where slice shapes are determined by the group_by
+        parameters
+    """
+
+    def __init__(
+        self, intensity_threshold: float = 0, quality_threshold: float = 0,
         clip_method: Union[str, Clip] = Clip.CLIP
     ) -> None:
 
         self.intensity_threshold = intensity_threshold
         self.quality_threshold = quality_threshold
-        self.is_volume = is_volume
-        self.expand_dynamic_range = expand_dynamic_range
         self.clip_method = clip_method
 
     _DEFAULT_TESTING_PARAMETERS = {"intensity_threshold": 0, "quality_threshold": 0}
 
-    def _vector_norm(self, x, dim, ord=None):
-        return xr.apply_ufunc(np.linalg.norm, x,
-                              input_core_dims=[[dim]],
-                              kwargs={'ord': ord, 'axis': -1})
+    def _vector_norm(self, x: xr.DataArray, dim: Axes, ord=None):
+        """
+        Calculates the vector norm across a given dimension of an xarray.
+
+        Parameters
+        ----------
+        x : xarray.DataArray
+            xarray to calcuate the norm.
+        dim : Axes
+            The dimension of the xarray to perform the norm across
+        ord : Optional[str]
+            Order of the norm to be applied. Leave none for L2 norm.
+
+            See numpy docs for details:
+            https://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.norm.html
+
+        Returns
+        -------
+        result : xarray.DataArray
+            The resulting xarray of norms
+
+        """
+        result = xr.apply_ufunc(
+            np.linalg.norm, x, input_core_dims=[[dim.value]],
+            kwargs={'ord': ord, 'axis': -1}
+        )
+
+        return result
 
     def _call_bases(
         self, image: xr.DataArray, intensity_threshold: float,
         quality_threshold: float
     ) -> xr.DataArray:
+        """
+        Determines the nucleotide present in each pixel of each
+        (round, channel). The pixel values in the resulting image are the base quality
+        score. The base quality score is calculated as the intensity of the pixel
+        divided by the L2 norm of the all channels for that pixel. The base
+        call score as a range of (0, 1) with a value of 0  and 1 being no call and a
+        perfect call, respectively.
 
+        Parameters
+        ----------
+        image : xr.DataArray
+            Image for base calling.
+            Should have the following dims: Axes.CH, Axes.X, Axes.Y
+        intensity_threshold : float
+            Minimum intensity a pixel must have to be called a base.
+            Set to zero for no thresholding.
+        quality_threshold : float
+            Minimum intensity a pixel must have to be called a base.
+            Set to zero for no thresholding.
+
+        """
         # Get the maximum value for each round/z
         max_chan = image.argmax(dim=Axes.CH.value)
         max_values = image.max(dim=Axes.CH.value)
 
         # Get the norms for each pixel
-        norms = self._vector_norm(x=image, dim=Axes.CH.value)
+        norms = self._vector_norm(x=image, dim=Axes.CH)
 
         # Calculate the base qualities
         base_qualities = max_values / norms
 
         # Filter the base call qualities
-        base_qualities_filtered = xr.where(base_qualities < quality_threshold,
-            0, base_qualities)
+        base_qualities_filtered = xr.where(
+            base_qualities < quality_threshold, 0, base_qualities
+        )
 
         # Threshold the intensity values
-        base_qualities_filtered = xr.where(max_values < intensity_threshold,
-            0, base_qualities_filtered)
+        base_qualities_filtered = xr.where(
+            max_values < intensity_threshold, 0, base_qualities_filtered
+        )
 
         # Put the base calls in place
         base_calls = xr.full_like(other=image, fill_value=0)
@@ -104,15 +175,15 @@ class CallBases(FilterAlgorithmBase):
     @staticmethod
     @click.command("CallBases")
     @click.option(
-        "--int-thresh", default=0, type=float, help="Intensity threshold for a base call")
+        "--intensity-threshold", default=0, type=float, help="Intensity threshold for a base call")
     @click.option(
-        "--qual-thresh", default=0, type=float, help="Quality threshold for a base call")
+        "--quality-threshold", default=0, type=float, help="Quality threshold for a base call")
     @click.option(
-        "--is-volume", is_flag=True, help="filter 3D volumes")
-    @click.option(
-        "--expand-dynamic-range", is_flag=True,
-        help="linearly scale data to fill [0, 1] after clipping."
-    )
+        "--clip-method", default=Clip.CLIP, type=Clip,
+        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
+             "'scale_by_chunk'")
     @click.pass_context
-    def _cli(ctx, p_min, p_max, is_volume, expand_dynamic_range):
-        ctx.obj["component"]._cli_run(ctx, CallBases(int_thresh, qual_thresh, is_volume, expand_dynamic_range))
+    def _cli(ctx, intensity_threshold, quality_threshold, clip_method):
+        ctx.obj["component"]._cli_run(
+            ctx, CallBases(intensity_threshold, quality_threshold, clip_method)
+        )

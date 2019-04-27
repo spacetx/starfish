@@ -87,8 +87,8 @@ task concatenate_fovs {
 
     runtime {
         docker: "spacetx/starfish:0.1.0-simple"
-        memory: "32 GB"
-        cpu: "2"
+        memory: "16 GB"
+        cpu: "1"
         disk: "local-disk 100 SDD"
     }
 

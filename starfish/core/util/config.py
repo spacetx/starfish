@@ -85,7 +85,7 @@ class Config(object):
                 data = None  # Clear value
                 if value is Config.__NO_VALUE_PASSED:
                     raise
-        if data:
+        if data is not None:
             # If we've reached here without exception,
             # then we've found the value.
             if remove:

@@ -142,8 +142,8 @@ class NumpyData(TileCollectionData):
                 max_selectors[PHYSICAL_COORDINATE_DIMENSION] = max_selector_value.value
 
                 coordinates[coordinate_type] = (
-                    self.coordinates.loc[min_selectors].item(),
-                    self.coordinates.loc[max_selectors].item())
+                    float(self.coordinates[coordinate_type][0]),
+                    float(self.coordinates[coordinate_type][-1]))
         else:
             # fake coordinates!
             coordinates[Coordinates.X] = (0.0, 0.001)

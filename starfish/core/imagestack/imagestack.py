@@ -1152,7 +1152,7 @@ class ImageStack:
         max_projection = self._data.max([dim.value for dim in dims])
         max_projection = max_projection.expand_dims(tuple(dim.value for dim in dims))
         max_projection = max_projection.transpose(*self.xarray.dims)
-        max_proj_stack = self.from_numpy(max_projection.values)
+        max_proj_stack = self.from_numpy(max_projection.values, coordinates=self.xarray.coords)
         return max_proj_stack
 
     def _squeezed_numpy(self, *dims: Axes):

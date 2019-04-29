@@ -200,10 +200,12 @@ def test_starfish_warn(tmpdir, monkeypatch):
             assert len(warnings_) == 1  # type: ignore
 
 
-def test_starfish_environ():
-    assert not StarfishConfig().strict
-    with environ(VALIDATION_STRICT="true"):
-        assert StarfishConfig().strict
+def test_starfish_environ(monkeypatch):
+    with monkeypatch.context() as mc:
+        mc.setenv("STARFISH_CONFIG", "{}")
+        assert not StarfishConfig().strict
+        with environ(VALIDATION_STRICT="true"):
+            assert StarfishConfig().strict
 
 
 def test_starfish_environ_warn(tmpdir, monkeypatch):

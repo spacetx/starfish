@@ -199,7 +199,7 @@ class Codebook(xr.DataArray):
         Construct a codebook from some array data in python memory
         ::
 
-            >>> from starfish.core.types import Axes
+            >>> from starfish.types import Axes
             >>> from starfish import Codebook
             >>> codebook = [
             >>>     {
@@ -312,7 +312,7 @@ class Codebook(xr.DataArray):
         Create a codebook from in-memory data
         ::
 
-            >>> from starfish.core.types import Axes
+            >>> from starfish.types import Axes
             >>> from starfish import Codebook
             >>> import tempfile
             >>> import json

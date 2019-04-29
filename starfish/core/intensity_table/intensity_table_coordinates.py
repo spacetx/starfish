@@ -29,7 +29,7 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(
     # make sure the intensity table gets empty metadata if there are no intensities
     if intensity_table.sizes[Features.AXIS] == 0:
         for axis, coord in pairs:
-            intensity_table[coord] = xr.DataArray(np.zeros((0)), dims='features')
+            intensity_table[coord] = xr.DataArray(np.zeros((0)), dims=Features.AXIS)
         return intensity_table
 
     for axis, coord in pairs:

@@ -122,12 +122,6 @@ class NumpyData(TileCollectionData):
         pos_ch = self.index_labels[Axes.CH].index(ch)
         pos_z = self.index_labels[Axes.ZPLANE].index(z)
 
-        selectors: Mapping[str, Any] = {
-            Axes.ROUND.value: r,
-            Axes.CH.value: ch,
-            Axes.ZPLANE.value: z,
-        }
-
         coordinates: MutableMapping[Coordinates, Tuple[Number, Number]] = dict()
 
         if self.coordinates is not None:
@@ -136,11 +130,6 @@ class NumpyData(TileCollectionData):
                     (Coordinates.Y, PhysicalCoordinateTypes.Y_MIN, PhysicalCoordinateTypes.Y_MAX),
                     (Coordinates.Z, PhysicalCoordinateTypes.Z_MIN, PhysicalCoordinateTypes.Z_MAX),
             ):
-                min_selectors = dict(selectors)
-                min_selectors[PHYSICAL_COORDINATE_DIMENSION] = min_selector_value.value
-                max_selectors = dict(selectors)
-                max_selectors[PHYSICAL_COORDINATE_DIMENSION] = max_selector_value.value
-
                 coordinates[coordinate_type] = (
                     float(self.coordinates[coordinate_type][0]),
                     float(self.coordinates[coordinate_type][-1]))

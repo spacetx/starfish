@@ -5,8 +5,8 @@ import numpy as np
 from starfish import data
 from starfish.core.types import Axes, PhysicalCoordinateTypes
 from .factories import imagestack_with_coords_factory
-from ..imagestack import ImageStack
 from .imagestack_test_utils import verify_physical_coordinates
+from ..imagestack import ImageStack
 from ..physical_coordinate_calculator import get_physical_coordinates_of_z_plane
 
 

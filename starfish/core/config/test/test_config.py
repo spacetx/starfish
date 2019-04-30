@@ -37,6 +37,17 @@ def test_simple_config_value_map():
     assert config.data["a"] == 1
 
 
+def test_simple_config_false():
+    # config says the value is False.  Do we return False?
+    config = Config("{\"a\": false}")
+    assert config.lookup(("a",), None) is False
+
+    # config says the value is not known.  Do we return the default valueS?
+    config = Config("{}")
+    assert config.lookup(("a",), None) is None
+    assert config.lookup(("a",), False) is False
+
+
 def test_simple_config_value_file(tmpdir):
     f = tmpdir.join("config.json")
     f.write(simple_str)

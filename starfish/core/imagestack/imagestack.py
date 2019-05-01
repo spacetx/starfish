@@ -1153,6 +1153,8 @@ class ImageStack:
         max_projection = max_projection.expand_dims(tuple(dim.value for dim in dims))
         max_projection = max_projection.transpose(*self.xarray.dims)
         max_proj_stack = self.from_numpy(max_projection.values, coordinates=self.xarray.coords)
+        # todo fix from numpy to accept DataCoordinatesObject
+        # todo if max projecting z calculate the average of the z coords
         return max_proj_stack
 
     def _squeezed_numpy(self, *dims: Axes):

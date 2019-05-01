@@ -48,7 +48,8 @@ def imagestack_with_coords_factory(stack_shape: OrderedDict, coords: OrderedDict
         stack.xarray.sizes[Axes.ZPLANE.value]),
         dims=Axes.ZPLANE.value)
 
-    for z in stack.axis_labels(Axes.ZPLANE):
-        stack.xarray[Coordinates.Z.value].loc[z] = z_coord
+    z_coords = [1, 3, 5]
+    for i,z in enumerate(stack.axis_labels(Axes.ZPLANE)):
+        stack.xarray[Coordinates.Z.value].loc[z] = z_coords[i]
 
     return stack

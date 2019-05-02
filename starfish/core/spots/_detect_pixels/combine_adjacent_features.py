@@ -269,7 +269,10 @@ class CombineAdjacentFeatures:
 
         # we're back to 3d or fake-3d here
         bbox = spot_property.bbox
-        target_index = np.max(decoded_image[0, bbox[0]:bbox[2], bbox[1]:bbox[3]])
+        # flatten and remove zeros
+        bb_non_zero = np.trim_zeros(np.ndarray.flatten(decoded_image[0, bbox[0]:bbox[2], bbox[1]:bbox[3]]))
+        # get the most repeated value
+        target_index = np.argmax(np.bincount(bb_non_zero))
         spot_attrs[Features.TARGET] = target_map.target_as_str(target_index)
         spot_attrs[Features.SPOT_RADIUS] = spot_property.equivalent_diameter / 2
 

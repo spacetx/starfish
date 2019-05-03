@@ -56,6 +56,8 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithmBase):
         name of the function used to calculate the intensity for each identified spot area
     preprocess : boolean
         Set to False to turn off bandpass preprocessing.
+    max_iterations : integer
+        Max number of loops to refine the center of mass, default 10
     is_volume : bool
         if True, run the algorithm on 3d volumes of the provided stack
     verbose : bool
@@ -70,8 +72,8 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithmBase):
     def __init__(
             self, spot_diameter, min_mass, max_size, separation, percentile=0,
             noise_size: Tuple[int, int, int] = (1, 1, 1), smoothing_size=None, threshold=None,
-            preprocess: bool = False, measurement_type: str = 'max', is_volume: bool = False,
-            verbose=False) -> None:
+            preprocess: bool = False, max_iterations: int = 10, measurement_type: str = 'max',
+            is_volume: bool = False, verbose=False) -> None:
 
         self.diameter = spot_diameter
         self.minmass = min_mass
@@ -83,6 +85,7 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithmBase):
         self.threshold = threshold
         self.measurement_function = self._get_measurement_function(measurement_type)
         self.preprocess = preprocess
+        self.max_iterations = max_iterations
         self.is_volume = is_volume
         self.verbose = verbose
 
@@ -114,7 +117,8 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithmBase):
                 smoothing_size=self.smoothing_size,
                 threshold=self.threshold,
                 percentile=self.percentile,
-                preprocess=self.preprocess
+                preprocess=self.preprocess,
+                max_iterations=self.max_iterations,
             )
 
         # when zero spots are detected, 'ep' is missing from the trackpy locate results.
@@ -190,11 +194,13 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithmBase):
     @click.option(
         "--smoothing-size", default=None, type=int,
         help="odd integer. Size of boxcar (moving average) filter in pixels. Default is the "
-             "Diameter"
-    )
+             "Diameter")
     @click.option(
         "--preprocess", is_flag=True,
         help="if passed, gaussian and boxcar filtering are applied")
+    @click.option(
+        "--max-iterations", default=10, type=int,
+        help="Max number of loops to refine the center of mass. Default is 10")
     @click.option(
         "--show", default=False, is_flag=True, help="display results visually")
     @click.option(
@@ -206,9 +212,10 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithmBase):
         help="indicates that the image stack should be filtered in 3d")
     @click.pass_context
     def _cli(ctx, spot_diameter, min_max, max_size, separation, noise_size, smoothing_size,
-             preprocess, show, percentile, is_volume):
+             preprocess, max_iterations, show, percentile, is_volume):
 
         instance = TrackpyLocalMaxPeakFinder(spot_diameter, min_max, max_size,
                                              separation, noise_size, smoothing_size,
-                                             preprocess, show, percentile, is_volume)
+                                             preprocess, max_iterations, show,
+                                             percentile, is_volume)
         ctx.obj["component"]._cli_run(ctx, instance)

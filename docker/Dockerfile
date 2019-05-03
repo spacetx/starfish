@@ -41,12 +41,12 @@ RUN useradd -m starfish
 USER starfish
 
 # Set up the initial conda environment
-COPY --chown=starfish:starfish docker/environment.yml /src/environment.yml
+COPY --chown=starfish:starfish docker/environment.yml /src/docker/environment.yml
 COPY --chown=starfish:starfish docker/pip-config /src/
 COPY --chown=starfish:starfish REQUIREMENTS* /src/
 WORKDIR /src
 ENV PIP_CONFIG_FILE=/src/pip-config
-RUN conda env create -f environment.yml \
+RUN conda env create -f docker/environment.yml \
     && conda clean -tipsy
 
 # Prepare for build

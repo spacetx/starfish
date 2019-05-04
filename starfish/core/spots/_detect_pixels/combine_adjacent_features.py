@@ -269,8 +269,14 @@ class CombineAdjacentFeatures:
 
         # we're back to 3d or fake-3d here
         bbox = spot_property.bbox
-        # flatten and remove zeros
-        bb_non_zero = np.trim_zeros(np.ndarray.flatten(decoded_image[0, bbox[0]:bbox[2], bbox[1]:bbox[3]]))
+        if len(bbox) == 6:
+            # 3d bbox
+            bb_non_zero = np.trim_zeros(np.ndarray.flatten(
+                decoded_image[bbox[0]:bbox[3], bbox[1]:bbox[4], bbox[2]:bbox[5]]))
+        else:
+            # flatten and remove zeros
+            bb_non_zero = np.trim_zeros(np.ndarray.flatten(
+                decoded_image[0, bbox[0]:bbox[2], bbox[1]:bbox[3]]))
         # get the most repeated value
         target_index = np.argmax(np.bincount(bb_non_zero))
         spot_attrs[Features.TARGET] = target_map.target_as_str(target_index)

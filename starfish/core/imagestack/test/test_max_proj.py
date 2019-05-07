@@ -7,7 +7,6 @@ from starfish.core.types import Axes, PhysicalCoordinateTypes
 from .factories import imagestack_with_coords_factory
 from .imagestack_test_utils import verify_physical_coordinates
 from ..imagestack import ImageStack
-from ..physical_coordinate_calculator import get_physical_coordinates_of_z_plane
 
 
 def test_max_projection_preserves_dtype():
@@ -46,6 +45,5 @@ def test_max_projection_preserves_coordinatevs():
     stack = imagestack_with_coords_factory(stack_shape, physical_coords)
 
     stack_proj = stack.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
-
-    verify_physical_coordinates(stack_proj, X_COORDS, Y_COORDS,
-                                get_physical_coordinates_of_z_plane(Z_COORDS))
+    expected_z = np.average(Z_COORDS)
+    verify_physical_coordinates(stack_proj, X_COORDS, Y_COORDS, expected_z)

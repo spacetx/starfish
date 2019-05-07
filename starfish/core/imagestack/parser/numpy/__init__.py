@@ -128,11 +128,13 @@ class NumpyData(TileCollectionData):
             for coordinate_type, min_selector_value, max_selector_value in (
                     (Coordinates.X, PhysicalCoordinateTypes.X_MIN, PhysicalCoordinateTypes.X_MAX),
                     (Coordinates.Y, PhysicalCoordinateTypes.Y_MIN, PhysicalCoordinateTypes.Y_MAX),
-                    (Coordinates.Z, PhysicalCoordinateTypes.Z_MIN, PhysicalCoordinateTypes.Z_MAX),
             ):
                 coordinates[coordinate_type] = (
                     float(self.coordinates[coordinate_type][0]),
                     float(self.coordinates[coordinate_type][-1]))
+            # For the z coordinate, take the average.
+            average_z_coord = np.average(self.coordinates[Coordinates.Z])
+            coordinates[Coordinates.Z] = (average_z_coord, average_z_coord)
         else:
             # fake coordinates!
             coordinates[Coordinates.X] = (0.0, 0.001)

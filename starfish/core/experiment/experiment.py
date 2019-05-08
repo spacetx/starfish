@@ -9,10 +9,8 @@ from typing import (
     MutableMapping,
     MutableSequence,
     MutableSet,
-    Optional,
     Sequence,
-    Set,
-    Union
+    Set
 )
 
 from semantic_version import Version
@@ -153,9 +151,7 @@ class FieldOfView:
         for aligned_group, _ in enumerate(self.aligned_coordinate_groups[image_type]):
             yield self.get_image(item=image_type, aligned_group=aligned_group)
 
-    def get_image(self, item: str, aligned_group: int = 0,
-                  x_slice: Optional[Union[int, slice]] = None,
-                  y_slice: Optional[Union[int, slice]] = None,
+    def get_image(self, item: str, aligned_group: int = 0, crop_params: CropParameters = None,
                   ) -> ImageStack:
         """
         Load into memory the Imagestack representation of an aligned image group. If crop parameters
@@ -167,20 +163,22 @@ class FieldOfView:
             The name of the tileset ex. 'primary' or 'nuclei'
         aligned_group: int
             The aligned subgroup, default 0
-        x_slice: int or slice
-            The cropping parameters for the x axis
-        y_slice:
-            The cropping parameters for the y axis
+        crop_params: CropParameters
+            Any extra crop parameters to further crop the aligned image based on Round/Ch/Zplane
+            or x and y axis
 
         Returns
         -------
         ImageStack
             The instantiated image stack
         """
-        crop_params = copy.copy((self.aligned_coordinate_groups[item][aligned_group]))
-        crop_params._x_slice = x_slice
-        crop_params._y_slice = y_slice
-        return ImageStack.from_tileset(self._images[item], crop_parameters=crop_params)
+        # Get the set of permitted r/ch/z in the aligned group
+        aligned_group_crop_params = copy.copy((self.aligned_coordinate_groups[item][aligned_group]))
+        if crop_params:
+            # Combine with any extra crop parameters given
+            aligned_group_crop_params.further_crop(crop_params)
+        return ImageStack.from_tileset(self._images[item],
+                                       crop_parameters=aligned_group_crop_params)
 
 
 class Experiment:

@@ -4,6 +4,7 @@ import numpy as np
 from slicedimage import Tile, TileSet
 
 import starfish.data
+from starfish.core.imagestack.parser.crop import CropParameters
 from starfish.core.test.factories import SyntheticData
 from starfish.types import Axes, Coordinates
 from ..experiment import Experiment, FieldOfView
@@ -97,11 +98,17 @@ def test_fov_order():
 
 def test_crop_experiment():
     exp = starfish.data.ISS(use_test_data=True)
-    x_slice = slice(10, 30)
-    y_slice = slice(40, 70)
-    image = exp['fov_001'].get_image('primary', x_slice=x_slice, y_slice=y_slice)
+    extra_crop_params = CropParameters(x_slice=slice(10, 30), y_slice=slice(40, 70))
+    image = exp['fov_001'].get_image('primary', crop_params=extra_crop_params)
     assert image.shape['x'] == 20
     assert image.shape['y'] == 30
+
+    extra_crop_params = CropParameters(permitted_rounds=[0, 1], permitted_chs=[2, 3])
+    image = exp['fov_001'].get_image('primary', crop_params=extra_crop_params)
+    assert image.num_rounds == 2
+    assert image.axis_labels(Axes.ROUND) == [0, 1]
+    assert image.num_chs == 2
+    assert image.axis_labels(Axes.CH) == [2, 3]
 
 
 def test_fov_aligned_tileset():

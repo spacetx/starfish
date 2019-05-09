@@ -285,8 +285,14 @@ class IntensityTable(xr.DataArray):
 
     @classmethod
     def synthetic_intensities(
-            cls, codebook, num_z: int=12, height: int=50, width: int=40, n_spots=10,
-            mean_fluor_per_spot=200, mean_photons_per_fluor=50
+            cls,
+            codebook,
+            num_z: int = 12,
+            height: int = 50,
+            width: int = 40,
+            n_spots: int = 10,
+            mean_fluor_per_spot: int = 200,
+            mean_photons_per_fluor: int = 50,
     ) -> "IntensityTable":
         """
         Creates an IntensityTable with synthetic spots, that correspond to valid
@@ -317,8 +323,9 @@ class IntensityTable(xr.DataArray):
 
         # TODO nsofroniew: right now there is no jitter on x-y positions of the spots
         z = np.random.randint(0, num_z, size=n_spots)
-        y = np.random.randint(0, height, size=n_spots)
-        x = np.random.randint(0, width, size=n_spots)
+        y = np.random.uniform(0, height - 1, size=n_spots)
+        x = np.random.uniform(0, width - 1, size=n_spots)
+
         r = np.empty(n_spots)
         r.fill(np.nan)  # radius is a function of the point-spread gaussian size
         spot_attributes = SpotAttributes(

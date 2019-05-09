@@ -33,11 +33,15 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(
         return intensity_table
 
     for axis, coord in pairs:
+        imagestack_pixels: xr.DataArray = image_stack.xarray[axis]
+        intensity_table_pixel_offsets: np.ndarray = intensity_table[axis].values
 
-        imagestack_pixels: np.ndarray = image_stack.xarray[axis].values
-        intensity_table_pixels: np.ndarray = intensity_table[axis].values.astype(int)
-        pixel_inds: np.ndarray = imagestack_pixels[intensity_table_pixels]
-        coordinates: xr.DataArray = image_stack.xarray[coord][pixel_inds]
+        # can't interpolate if the axis size == 1, so just select in that case.
+        if len(imagestack_pixels) == 1:
+            coordinate_fetcher = imagestack_pixels.sel
+        else:
+            coordinate_fetcher = imagestack_pixels.interp
+        coordinates = coordinate_fetcher({axis: intensity_table_pixel_offsets})[coord]
 
         intensity_table[coord] = xr.DataArray(coordinates.values, dims='features')
 

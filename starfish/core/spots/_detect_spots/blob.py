@@ -115,7 +115,7 @@ class BlobDetector(DetectSpotsAlgorithmBase):
         fitted_blobs[Features.SPOT_RADIUS] = converted_radius
 
         # convert the array to int so it can be used to index
-        rounded_blobs = SpotAttributes(fitted_blobs.astype(int))
+        rounded_blobs = SpotAttributes(fitted_blobs)
 
         rounded_blobs.data['intensity'] = measure_spot_intensity(
             data_image, rounded_blobs, self.measurement_function)

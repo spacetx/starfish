@@ -18,6 +18,7 @@ For this example we'll use a very small test image from an in-situ sequencing ex
 
 import starfish
 import starfish.data
+from starfish.core.imagestack.parser.crop import CropParameters
 
 experiment: starfish.Experiment = starfish.data.ISS(use_test_data=True)
 field_of_view: starfish.FieldOfView = experiment["fov_001"]
@@ -30,7 +31,8 @@ print(field_of_view)
 
 y_slice = slice(0, 100)
 x_slice = slice(0, 80)
-image: starfish.ImageStack = field_of_view.get_image("primary", x_slice=x_slice, y_slice=y_slice)
+crop_params = CropParameters(x_slice=x_slice, y_slice=y_slice)
+image: starfish.ImageStack = field_of_view.get_image("primary", crop_params=crop_params)
 
 print(image)
 

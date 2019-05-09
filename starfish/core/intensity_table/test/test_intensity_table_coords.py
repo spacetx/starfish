@@ -1,3 +1,4 @@
+import math
 import random
 from collections import OrderedDict
 from typing import Union
@@ -57,13 +58,17 @@ def test_tranfering_physical_coords_to_intensity_table():
     # Assert that the physical coords align with their corresponding pixel coords
     for spot in xc.features:
         pixel_x = spot[Axes.X.value].data
-        physical_x = stack.xarray[Coordinates.X.value][pixel_x]
-        assert np.isclose(spot[Coordinates.X.value], physical_x)
+        pixel_x_floor, pixel_x_ceiling = math.floor(pixel_x), math.ceil(pixel_x)
+        physical_x_floor = stack.xarray[Coordinates.X.value][pixel_x_floor]
+        physical_x_ceiling = stack.xarray[Coordinates.X.value][pixel_x_ceiling]
+        assert physical_x_floor <= spot[Coordinates.X.value] <= physical_x_ceiling
 
     for spot in yc.features:
         pixel_y = spot[Axes.Y.value].data
-        physical_y = stack.xarray[Coordinates.Y.value][pixel_y]
-        assert np.isclose(spot[Coordinates.Y.value], physical_y)
+        pixel_y_floor, pixel_y_ceiling = math.floor(pixel_y), math.ceil(pixel_y)
+        physical_y_floor = stack.xarray[Coordinates.Y.value][pixel_y_floor]
+        physical_y_ceiling = stack.xarray[Coordinates.Y.value][pixel_y_ceiling]
+        assert physical_y_floor <= spot[Coordinates.Y.value] <= physical_y_ceiling
 
     # Assert that zc value is middle of z range
     for spot in zc.features:

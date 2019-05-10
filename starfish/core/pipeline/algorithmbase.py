@@ -1,3 +1,4 @@
+import functools
 import inspect
 from abc import ABCMeta, abstractmethod
 from typing import Type
@@ -40,6 +41,7 @@ class AlgorithmBaseType(ABCMeta):
                     ImageStack -> [IntensityTable, ConnectedComponentDecodingResult]
             TODO segmentation and decoding
         """
+        @functools.wraps(func)
         def helper(*args, **kwargs):
             result = func(*args, **kwargs)
             # Scenario 1, Filtering, ApplyTransform

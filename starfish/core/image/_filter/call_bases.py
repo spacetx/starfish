@@ -28,25 +28,14 @@ class CallBases(FilterAlgorithmBase):
     quality_threshold : float
         Minimum base quality score a pixel must have to be called a base.
         Set to zero for no thresholding.
-    clip_method : Union[str, Clip]
-        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-        requirements that float data fall in [0, 1].
-        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-        value calculated over the entire ImageStack
-        Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-        value calculated over each slice, where slice shapes are determined by the group_by
-        parameters
     """
 
     def __init__(
-        self, intensity_threshold: float = 0, quality_threshold: float = 0,
-        clip_method: Union[str, Clip] = Clip.CLIP
+        self, intensity_threshold: float = 0, quality_threshold: float = 0
     ) -> None:
 
         self.intensity_threshold = intensity_threshold
         self.quality_threshold = quality_threshold
-        self.clip_method = clip_method
 
     _DEFAULT_TESTING_PARAMETERS = {"intensity_threshold": 0, "quality_threshold": 0}
 
@@ -167,8 +156,7 @@ class CallBases(FilterAlgorithmBase):
         )
         result = stack.apply(
             unmix,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
-            clip_method=self.clip_method,
+            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
 
@@ -178,10 +166,6 @@ class CallBases(FilterAlgorithmBase):
         "--intensity-threshold", default=0, type=float, help="Intensity threshold for a base call")
     @click.option(
         "--quality-threshold", default=0, type=float, help="Quality threshold for a base call")
-    @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
-        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
     @click.pass_context
     def _cli(ctx, intensity_threshold, quality_threshold, clip_method):
         ctx.obj["component"]._cli_run(

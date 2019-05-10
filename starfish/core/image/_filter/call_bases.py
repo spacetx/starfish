@@ -1,11 +1,10 @@
 from functools import partial
-from typing import Optional, Union
+from typing import Optional
 
 import numpy as np
 import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import Clip
 from starfish.core.util import click
 from starfish.types import Axes
 from ._base import FilterAlgorithmBase

@@ -3,12 +3,12 @@ import warnings
 import pytest
 from pkg_resources import resource_filename
 
+from starfish.core.experiment.version import CURRENT_VERSION
 from .util import ExperimentValidator
 from .validate_sptx import validate
 
 package_name = "starfish"
-current_version = "5.0.0"
-validator = ExperimentValidator(version=current_version)
+validator = ExperimentValidator(version=CURRENT_VERSION)
 example = resource_filename(package_name, "spacetx_format/examples/experiment/experiment.json")
 
 

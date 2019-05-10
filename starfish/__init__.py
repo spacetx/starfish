@@ -20,7 +20,3 @@ from .core.imagestack.imagestack import ImageStack
 from .core.intensity_table.intensity_table import IntensityTable
 from .core.recipe import cli
 from .core.starfish import starfish
-
-
-if __name__ == "__main__":
-    starfish()

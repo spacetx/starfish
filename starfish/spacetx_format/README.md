@@ -14,15 +14,15 @@ Combined with imaging metadata and a pipeline recipe, both of which are defined 
 
 ## Format Specification
 
-Here, we tabulate the minimum set of required json files that can describe the imaging data of a spaceTx experiment with brief descriptions of their purpose:
+Here, we tabulate the minimum set of required json files that can describe the
+imaging data of a spaceTx experiment with brief descriptions of their purpose:
 
-| File name            | Description                                                                                              |
-|:---------------------|:---------------------------------------------------------------------------------------------------------|
-| experiment.json      | links the data manifests and codebook together                                                           |
-| data_manifest.json   | file locations of each field of view                                                       |
-| nuclei_manifest.json | file locations for the nuclei images that correspond to each field of view                 |
-| field_of_view.json   | describes how individual 2-d image planes form an image tensor                                           |
-| codebook.json        | maps patterns of intensity in the channels and rounds of a field of view to target molecules |
+| Type            | Description                                                                                              |
+|:----------------|:---------------------------------------------------------------------------------------------------------|
+| Experiment      | links the data manifests and codebook together                                                           |
+| Manifest        | file locations of each field of view                                                                     |
+| Field of View   | describes how individual 2-d image planes form an image tensor                                           |
+| Codebook        | maps patterns of intensity in the channels and rounds of a field of view to target molecules             |
 
 Each of these input types and their file formats are described in detail in the following sections.
 

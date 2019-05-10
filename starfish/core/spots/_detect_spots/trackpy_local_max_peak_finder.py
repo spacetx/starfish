@@ -133,10 +133,6 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithmBase):
             attributes.columns = new_colnames
 
         attributes['spot_id'] = np.arange(attributes.shape[0])
-        # convert these to int so it can be used to index
-        attributes.x = attributes.x.astype(int)
-        attributes.y = attributes.y.astype(int)
-        attributes.z = attributes.z.astype(int)
         return SpotAttributes(attributes)
 
     def run(

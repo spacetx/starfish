@@ -23,8 +23,8 @@ class environ(object):
     --------
     Turn on validation:
 
-        >>> from starfish.core.config import environ
-        >>> from starfish.core.experiment.experiment import Experiment
+        >>> from starfish.config import environ
+        >>> from starfish import Experiment
         >>> with environ(VALIDATION_STRICT="true"):
         >>>     Experiment.from_json(URL)
 
@@ -71,7 +71,7 @@ class StarfishConfig(object):
     --------
     Check strict property
 
-        >>> from starfish.core.config import StarfishConfig
+        >>> from starfish.config import StarfishConfig
         >>> config = StarfishConfig()
         >>> if config.strict:
         >>>     validate(json)

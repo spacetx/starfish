@@ -364,7 +364,7 @@ class ImageStack:
         Create an Imagestack :py:func:`~starfish.imagestack.imagestack.ImageStack.synthetic_stack`
             >>> from starfish import ImageStack
             >>> from starfish.core.imagestack.test.factories import synthetic_stack
-            >>> from starfish.core.types import Axes
+            >>> from starfish.types import Axes
             >>> stack = synthetic_stack(5, 5, 15, 200, 200)
             >>> stack
             <starfish.ImageStack (r: 5, c: 5, z: 15, y: 200, x: 200)>
@@ -400,7 +400,7 @@ class ImageStack:
 
         Create an Imagestack using the ``synthetic_stack`` method
             >>> from starfish import ImageStack
-            >>> from starfish.core.types import Axes
+            >>> from starfish.types import Axes
             >>> stack = ImageStack.synthetic_stack(5, 5, 15, 200, 200)
             >>> stack
             <starfish.ImageStack (r: 5, c: 5, z: 15, y: 200, x: 200)>
@@ -457,7 +457,7 @@ class ImageStack:
         Slicing with a scalar
             >>> from starfish import ImageStack
             >>> from starfish.core.imagestack.test.factories import synthetic_stack
-            >>> from starfish.core.types import Axes
+            >>> from starfish.types import Axes
             >>> stack = synthetic_stack(3, 4, 5, 20, 10)
             >>> stack.shape
             OrderedDict([(<Axes.ROUND: 'r'>, 3),
@@ -480,7 +480,7 @@ class ImageStack:
         Slicing with a range
             >>> from starfish import ImageStack
             >>> from starfish.core.imagestack.test.factories import synthetic_stack
-            >>> from starfish.core.types import Axes
+            >>> from starfish.types import Axes
             >>> stack = synthetic_stack(3, 4, 5, 20, 10)
             >>> stack.shape
             OrderedDict([(<Axes.ROUND: 'r'>, 3),
@@ -549,7 +549,7 @@ class ImageStack:
             >>> import numpy as np
             >>> from starfish import ImageStack
             >>> from starfish.core.imagestack.test.factories import synthetic_stack
-            >>> from starfish.core.types import Axes
+            >>> from starfish.types import Axes
             >>> stack = synthetic_stack(3, 4, 5, 20, 10)
             >>> stack.shape
             OrderedDict([(<Axes.ROUND: 'r'>, 3),
@@ -566,7 +566,7 @@ class ImageStack:
             >>> import numpy as np
             >>> from starfish import ImageStack
             >>> from starfish.core.imagestack.test.factories import synthetic_stack
-            >>> from starfish.core.types import Axes
+            >>> from starfish.types import Axes
             >>> stack = synthetic_stack(3, 4, 5, 20, 10)
             >>> stack.shape
             OrderedDict([(<Axes.ROUND: 'r'>, 3),
@@ -581,7 +581,7 @@ class ImageStack:
 
             >>> from starfish import ImageStack
             >>> from starfish.core.imagestack.test.factories import synthetic_stack
-            >>> from starfish.core.types import Axes
+            >>> from starfish.types import Axes
             >>> stack = synthetic_stack(3, 4, 5, 20, 10)
             >>> stack.shape
             OrderedDict([(<Axes.ROUND: 'r'>, 3),

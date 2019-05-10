@@ -198,7 +198,7 @@ class Codebook(xr.DataArray):
         Construct a codebook from some array data in python memory
         ::
 
-            >>> from starfish.core.types import Axes
+            >>> from starfish.types import Axes
             >>> from starfish import Codebook
             >>> codebook = [
             >>>     {
@@ -311,7 +311,7 @@ class Codebook(xr.DataArray):
         Create a codebook from in-memory data
         ::
 
-            >>> from starfish.core.types import Axes
+            >>> from starfish.types import Axes
             >>> from starfish import Codebook
             >>> import tempfile
             >>> import json
@@ -550,6 +550,13 @@ class Codebook(xr.DataArray):
 
         self._validate_decode_intensity_input_matches_codebook_shape(intensities)
 
+        # add empty metadata fields and return
+        if intensities.sizes[Features.AXIS] == 0:
+            intensities[Features.TARGET] = (Features.AXIS, np.empty(0, dtype='U'))
+            intensities[Features.DISTANCE] = (Features.AXIS, np.empty(0, dtype=float))
+            intensities[Features.PASSES_THRESHOLDS] = (Features.AXIS, np.empty(0, dtype=bool))
+            return intensities
+
         # normalize both the intensities and the codebook
         norm_intensities, norms = self._normalize_features(intensities, norm_order=norm_order)
         norm_codes, _ = self._normalize_features(self, norm_order=norm_order)
@@ -631,6 +638,13 @@ class Codebook(xr.DataArray):
             return array.view(dtype)
 
         self._validate_decode_intensity_input_matches_codebook_shape(intensities)
+
+        # add empty metadata fields and return
+        if intensities.sizes[Features.AXIS] == 0:
+            intensities[Features.TARGET] = (Features.AXIS, np.empty(0, dtype='U'))
+            intensities[Features.DISTANCE] = (Features.AXIS, np.empty(0, dtype=float))
+            intensities[Features.PASSES_THRESHOLDS] = (Features.AXIS, np.empty(0, dtype=bool))
+            return intensities
 
         max_channels = intensities.argmax(Axes.CH.value)
         codes = self.argmax(Axes.CH.value)

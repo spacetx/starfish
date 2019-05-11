@@ -15,9 +15,9 @@ import pandas as pd
 from skimage.io import imread
 from slicedimage import ImageFormat
 
+from starfish.core.util.argparse import FsExistsType
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.types import Axes, Coordinates, Number
-from starfish.core.util.argparse import FsExistsType
 
 SHAPE = {Axes.Y: 2048, Axes.X: 2048}
 
@@ -101,8 +101,14 @@ class MERFISHTileFetcher(TileFetcher):
 
     def make_coordinates(self, fov):
         return {
-            Coordinates.X: (float(self.coordinates.loc[fov, 'x_min']), float(self.coordinates.loc[fov, 'x_max'])),
-            Coordinates.Y: (float(self.coordinates.loc[fov, 'y_min']), float(self.coordinates.loc[fov, 'y_max'])),
+            Coordinates.X: (
+                float(self.coordinates.loc[fov, 'x_min']),
+                float(self.coordinates.loc[fov, 'x_max'])
+            ),
+            Coordinates.Y: (
+                float(self.coordinates.loc[fov, 'y_min']),
+                float(self.coordinates.loc[fov, 'y_max'])
+            ),
             Coordinates.Z: (0.0, 0.001)
         }
 
@@ -117,6 +123,9 @@ class MERFISHTileFetcher(TileFetcher):
 
 def format_data(input_dir, output_dir):
 
+    input_dir = os.path.abspath(input_dir)
+    output_dir = os.path.abspath(output_dir)
+
     def add_scale_factors(experiment_json_doc):
         filename = os.path.join(input_dir, "scale_factors.json")
         with open(filename, 'r') as f:
@@ -124,7 +133,7 @@ def format_data(input_dir, output_dir):
         experiment_json_doc['extras'] = {"scale_factors": data}
         return experiment_json_doc
 
-    num_fovs = 1
+    num_fovs = 496
 
     primary_image_dimensions = {
         Axes.ROUND: 8,

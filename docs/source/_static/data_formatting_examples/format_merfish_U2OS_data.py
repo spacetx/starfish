@@ -6,16 +6,18 @@ The following script formats MERFISH data acquired from cultured U2-OS cells.
 """
 import argparse
 import functools
+import json
 import os
 from typing import IO, Mapping, Tuple, Union
 
 import numpy as np
+import pandas as pd
 from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.types import Axes, Coordinates, Number
-from starfish.util.argparse import FsExistsType
+from starfish.core.util.argparse import FsExistsType
 
 SHAPE = {Axes.Y: 2048, Axes.X: 2048}
 
@@ -29,7 +31,7 @@ def cached_read_fn(file_path):
 
 
 class MERFISHTile(FetchedTile):
-    def __init__(self, file_path, r, ch):
+    def __init__(self, file_path, r, ch, coordinates):
         self.file_path = file_path
         # how to index tiles from indices into multi-page tiff
         # key is a tuple of round, chan. val is the index
@@ -51,6 +53,7 @@ class MERFISHTile(FetchedTile):
                     (7, 1): 14}
         self.r = r
         self.ch = ch
+        self._coordinates = coordinates
 
     @property
     def shape(self) -> Mapping[Axes, int]:
@@ -58,21 +61,17 @@ class MERFISHTile(FetchedTile):
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
-        # FIXME: (dganguli) please provide proper coordinates here.
-        return {
-            Coordinates.X: (0.0, 0.0001),
-            Coordinates.Y: (0.0, 0.0001),
-            Coordinates.Z: (0.0, 0.0001),
-        }
+        return self._coordinates
 
     def tile_data(self) -> IO:
         return cached_read_fn(self.file_path)[self.map[(self.r, self.ch)], :, :]
 
 
 class MERFISHAuxTile(FetchedTile):
-    def __init__(self, file_path):
+    def __init__(self, file_path, coordinates):
         self.file_path = file_path
         self.dapi_index = 17
+        self._coordinates = coordinates
 
     @property
     def shape(self) -> Mapping[Axes, int]:
@@ -80,12 +79,7 @@ class MERFISHAuxTile(FetchedTile):
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
-        # FIXME: (dganguli) please provide proper coordinates here.
-        return {
-            Coordinates.X: (0.0, 0.0001),
-            Coordinates.Y: (0.0, 0.0001),
-            Coordinates.Z: (0.0, 0.0001),
-        }
+        return self._coordinates
 
     def tile_data(self) -> np.ndarray:
         return cached_read_fn(self.file_path)[self.dapi_index, :, :]
@@ -95,22 +89,42 @@ class MERFISHTileFetcher(TileFetcher):
     def __init__(self, input_dir, is_dapi):
         self.input_dir = input_dir
         self.is_dapi = is_dapi
+        self.coordinates = self.parse_coordinates(input_dir)
+
+    @staticmethod
+    def parse_coordinates(input_dir):
+        filename = os.path.join(input_dir, "stagePos.csv")
+        data = pd.read_csv(filename, names=['y_min', 'x_min'])
+        data['x_max'] = data['x_min'] + 200
+        data['y_max'] = data['y_min'] + 200
+        return data
+
+    def make_coordinates(self, fov):
+        return {
+            Coordinates.X: (float(self.coordinates.loc[fov, 'x_min']), float(self.coordinates.loc[fov, 'x_max'])),
+            Coordinates.Y: (float(self.coordinates.loc[fov, 'y_min']), float(self.coordinates.loc[fov, 'y_max'])),
+            Coordinates.Z: (0.0, 0.001)
+        }
 
     def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
         filename = os.path.join(self.input_dir, 'fov_{}.tif'.format(fov))
         file_path = os.path.join(self.input_dir, filename)
         if self.is_dapi:
-            return MERFISHAuxTile(file_path)
+            return MERFISHAuxTile(file_path, self.make_coordinates(fov))
         else:
-            return MERFISHTile(file_path, r, ch)
+            return MERFISHTile(file_path, r, ch, self.make_coordinates(fov))
 
 
 def format_data(input_dir, output_dir):
-    def add_codebook(experiment_json_doc):
-        experiment_json_doc['codebook'] = "codebook.json"
+
+    def add_scale_factors(experiment_json_doc):
+        filename = os.path.join(input_dir, "scale_factors.json")
+        with open(filename, 'r') as f:
+            data = json.load(f)
+        experiment_json_doc['extras'] = {"scale_factors": data}
         return experiment_json_doc
 
-    num_fovs = 496
+    num_fovs = 1
 
     primary_image_dimensions = {
         Axes.ROUND: 8,
@@ -135,7 +149,7 @@ def format_data(input_dir, output_dir):
                           aux_tile_fetcher={
                               'nuclei': MERFISHTileFetcher(input_dir, is_dapi=True),
                           },
-                          postprocess_func=add_codebook,
+                          postprocess_func=add_scale_factors,
                           default_shape=SHAPE
                           )
 

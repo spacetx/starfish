@@ -162,9 +162,10 @@ def cli(input_dir: str, output_dir: str, codebook_csv: str) -> int:
     - The spatial organization of the field of view is not known to the starfish developers,
       so they are filled by dummy coordinates
     - Raw data (input for this tool) for this experiment can be found at:
-      s3://spacetx.starfish.data.public/seqfish/
+      s3://spacetx.starfish.data.public/browse/raw/seqfish/
     - Processed data (output of this tool) can be found at:
-      s3://spacetx.starfish.data.public/20181211/seqfish/ and accessed in `starfish.data.SeqFISH`
+      s3://spacetx.starfish.data.public/browse/formatted/20181211/seqfish/ and accessed in
+      `starfish.data.SeqFISH`
 
     Returns
     -------

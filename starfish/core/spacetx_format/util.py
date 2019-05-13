@@ -381,29 +381,28 @@ class Change(Checker):
         target.__setitem__(key, self.call())
 
 
-def get_schema_path(schema:str, doc:Dict= None, version:str ="MISSING") -> str:
-        """lookup the absolute schema path, including version, based
-        on the given parameters
+def get_schema_path(schema: str, doc: Dict=None, version: str ="MISSING") -> str:
+    """lookup the absolute schema path, including version, based
+    on the given parameters
 
-        Parameters
-        ----------
-        schema : str
-	    A portion of the schema path. The heuristic applied is that if any
-            of the strings "codebook", "experiment", "fov_manifest", "coordinates",
-            "indices", "tiles", or "field_of_view" is found in the string, then the
-            appropriate schema is returned. Otherwise an exception is raised.
-        doc: dict
-            If provided, the "version" key will be read from it.
-        version: str
-            Default version string to use if not found in the doc.
+    Parameters
+    ----------
+    schema : str
+        A portion of the schema path. The heuristic applied is that if any
+        of the strings "codebook", "experiment", "fov_manifest", "coordinates",
+        "indices", "tiles", or "field_of_view" is found in the string, then the
+        appropriate schema is returned. Otherwise an exception is raised.
+    doc: dict
+        If provided, the "version" key will be read from it.
+    version: str
+        Default version string to use if not found in the doc.
 
-        Returns
-        -------
-        str :
-            absolute schema path, never None.
+    Returns
+    -------
+    str :
+        absolute schema path, never None.
 
-        """
-
+    """
 
     if doc is not None:
         version = doc.get("version", version)
@@ -434,7 +433,7 @@ class CodebookValidator(SpaceTxValidator):
     """
 
     def __init__(self, doc=None, version=None):
-        super(CodebookValidator, self).__init__(get_schema_path(doc, "codebook", version))
+        super(CodebookValidator, self).__init__(get_schema_path("codebook", doc, version))
 
 
 class ExperimentValidator(SpaceTxValidator):
@@ -444,7 +443,7 @@ class ExperimentValidator(SpaceTxValidator):
     """
 
     def __init__(self, doc=None, version=None):
-        super(ExperimentValidator, self).__init__(get_schema_path(doc, "experiment", version))
+        super(ExperimentValidator, self).__init__(get_schema_path("experiment", doc, version))
 
 
 class FOVValidator(SpaceTxValidator):
@@ -454,7 +453,7 @@ class FOVValidator(SpaceTxValidator):
     """
 
     def __init__(self, doc=None, version=None):
-        super(FOVValidator, self).__init__(get_schema_path(doc, "field_of_view", version))
+        super(FOVValidator, self).__init__(get_schema_path("field_of_view", doc, version))
 
 
 class ManifestValidator(SpaceTxValidator):
@@ -464,7 +463,7 @@ class ManifestValidator(SpaceTxValidator):
     """
 
     def __init__(self, doc=None, version=None):
-        super(ManifestValidator, self).__init__(get_schema_path(doc, "fov_manifest", version))
+        super(ManifestValidator, self).__init__(get_schema_path("fov_manifest", doc, version))
 
 
 LatestCodebookValidator = lambda: CodebookValidator(version="0.0.0")

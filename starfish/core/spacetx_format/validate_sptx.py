@@ -119,7 +119,7 @@ def validate_file(file: str, schema: str, fuzz: bool=False,
         if output is not None:
             output.update(obj)
 
-    validator = SpaceTxValidator(get_schema_path(obj, schema))
+    validator = SpaceTxValidator(get_schema_path(schema, obj))
 
     if fuzz:
         validator.fuzz_object(obj, file)

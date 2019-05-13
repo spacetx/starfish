@@ -3,8 +3,11 @@ from pkg_resources import resource_filename
 
 from .util import SpaceTxValidator
 
+from slicedimage import VERSIONS
+
 package_name = "starfish"
-current_version = "0.1.0"
+current_version = VERSIONS[-1].VERSION
+
 coordinates_path = resource_filename(
     package_name, f"spacetx_format/schema/field_of_view_{current_version}/tiles/coordinates.json")
 validator = SpaceTxValidator(coordinates_path)

@@ -214,7 +214,7 @@ class SyntheticData:
                 warnings.simplefilter('ignore', FutureWarning)
                 values = spots.where(spots, drop=True)
 
-            image[round_, ch, values.z, values.y, values.x] = values
+            image[round_, ch, values.z, values.y.astype(int), values.x.astype(int)] = values
 
         intensities.values = img_as_float32(intensities)
 

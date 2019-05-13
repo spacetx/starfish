@@ -18,7 +18,7 @@ def test_synthetic_intensity_generation():
     a known random seed, that the output spots decode to match a target in the input Codebook
     """
     # set seed to check that codebook is matched. This seed generates 2 instances of GENE_B
-    np.random.seed(1)
+    np.random.seed(2)
     codebook = codebook_array_factory()
     num_z, height, width = 3, 4, 5
     intensities = IntensityTable.synthetic_intensities(
@@ -26,7 +26,7 @@ def test_synthetic_intensity_generation():
         num_z=num_z,
         height=height,
         width=width,
-        n_spots=2
+        n_spots=2,
     )
 
     # sizes should match codebook

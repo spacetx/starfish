@@ -1,4 +1,3 @@
-import warnings
 from copy import deepcopy
 from typing import Callable, Iterable, Optional, Union
 
@@ -21,13 +20,16 @@ class Reduce(FilterAlgorithmBase):
         one or more Axes to project over
     func : Union[str, Callable]
         function to apply across the dimension(s) specified by dims.
-        If a functino is provided, it follow the form specified by
+        If a function is provided, it should follow the form specified by
         DataArray.reduce():
         http://xarray.pydata.org/en/stable/generated/xarray.DataArray.reduce.html
+
         The following strings are valid:
             max: maximum intensity projection (applies numpy.amax)
             mean: take the mean across the dim(s) (applies numpy.mean)
             sum: sum across the dim(s) (applies numpy.sum)
+
+        Note: user-specified functions are not recorded via starfish logging
 
     See Also
     --------
@@ -44,18 +46,11 @@ class Reduce(FilterAlgorithmBase):
         # If the user provided a string, convert to callable
         if isinstance(func, str):
             if func == 'max':
-                func = np.amax
-            elif func == 'mean':
-                func = np.mean
-            elif func == 'sum':
-                func = np.sum
-            else:
-                raise ValueError('func should be max, mean, or sum')
-        elif callable(func):
-            warnings.warn('User-specific functions are not logged')
+                func = 'amax'
+            func = getattr(np, func)
         self.func = func
 
-    _DEFAULT_TESTING_PARAMETERS = {"dims": 'r', "func": 'max'}
+    _DEFAULT_TESTING_PARAMETERS = {"dims": ['r'], "func": 'max'}
 
     def run(
             self,

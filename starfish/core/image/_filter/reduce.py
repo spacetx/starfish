@@ -95,7 +95,7 @@ class Reduce(FilterAlgorithmBase):
             stack = deepcopy(stack)
 
         # Apply the reducing function
-        reduced = stack._data.reduce(self.func, dim=[dim.value for dim in self.dims])
+        reduced = stack._data.reduce(self.func, dim=[Axes(dim).value for dim in self.dims])
 
         # Add the reduced dims back and align with the original stack
         reduced = reduced.expand_dims(tuple(dim.value for dim in self.dims))

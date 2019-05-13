@@ -1,5 +1,6 @@
+import warnings
 from copy import deepcopy
-from typing import Iterable, Optional, Union
+from typing import Callable, Iterable, Optional, Union
 
 import numpy as np
 
@@ -11,12 +12,22 @@ from ._base import FilterAlgorithmBase
 
 class Reduce(FilterAlgorithmBase):
     """
-    Creates a maximum projection over one or more axis of the image tensor
+    Reduces the dimensions of the ImageStack by applying a function
+    along one or more axes.
 
     Parameters
     ----------
     dims : Axes
         one or more Axes to project over
+    func : Union[str, Callable]
+        function to apply across the dimension(s) specified by dims.
+        If a functino is provided, it follow the form specified by
+        DataArray.reduce():
+        http://xarray.pydata.org/en/stable/generated/xarray.DataArray.reduce.html
+        The following strings are valid:
+            max: maximum intensity projection (applies numpy.amax)
+            mean: take the mean across the dim(s) (applies numpy.mean)
+            sum: sum across the dim(s) (applies numpy.sum)
 
     See Also
     --------
@@ -24,7 +35,9 @@ class Reduce(FilterAlgorithmBase):
 
     """
 
-    def __init__(self, dims: Iterable[Union[Axes, str]], func:str='max') -> None:
+    def __init__(
+        self, dims: Iterable[Union[Axes, str]], func: Union[str, Callable] = 'max'
+    ) -> None:
 
         self.dims = dims
 
@@ -38,9 +51,11 @@ class Reduce(FilterAlgorithmBase):
                 func = np.sum
             else:
                 raise ValueError('func should be max, mean, or sum')
+        elif callable(func):
+            warnings.warn('User-specific functions are not logged')
         self.func = func
 
-    _DEFAULT_TESTING_PARAMETERS = {"dims": 'r'}
+    _DEFAULT_TESTING_PARAMETERS = {"dims": 'r', "func": 'max'}
 
     def run(
             self,
@@ -50,7 +65,7 @@ class Reduce(FilterAlgorithmBase):
             n_processes: Optional[int] = None,
             *args,
     ) -> ImageStack:
-        """Perform filtering of an image stack
+        """Performs the dimension reduction with the specifed function
 
         Parameters
         ----------
@@ -85,7 +100,6 @@ class Reduce(FilterAlgorithmBase):
 
         return stack
 
-
     @staticmethod
     @click.command("Reduce")
     @click.option(
@@ -97,6 +111,13 @@ class Reduce(FilterAlgorithmBase):
         help="The dimensions the Imagestack should max project over."
              "For multiple dimensions add multiple --dims. Ex."
              "--dims r --dims c")
+    @click.option(
+        "--func",
+        type=click.Choice(["max", "mean", "sum"]),
+        multiple=False,
+        help="The function to apply across dims"
+             "Valid function names: max, mean, sum."
+    )
     @click.pass_context
-    def _cli(ctx, dims):
-        ctx.obj["component"]._cli_run(ctx, Reduce(dims))
+    def _cli(ctx, dims, func):
+        ctx.obj["component"]._cli_run(ctx, Reduce(dims, func))

@@ -59,24 +59,24 @@ class CropParameters:
             self._permitted_zplanes.add(permitted_axis)
 
     def further_crop(self, further_crop_params) -> "CropParameters":
-        if further_crop_params._permitted_chs and \
-                not further_crop_params._permitted_chs.issubset(self._permitted_chs):
+        if (further_crop_params._permitted_chs
+                and not further_crop_params._permitted_chs.issubset(self._permitted_chs)):
             raise ValueError("Can only provide further ch crop params within the existing set of"
                              "ch crop params")
         else:
             self._permitted_chs = further_crop_params._permitted_chs
 
-        if further_crop_params._permitted_rounds and \
-                not further_crop_params._permitted_rounds.issubset(self._permitted_rounds):
+        if (further_crop_params._permitted_rounds
+                and not further_crop_params._permitted_rounds.issubset(self._permitted_rounds)):
             raise ValueError("Can only provide further round crop params within the existing set of"
                              "round crop params")
         else:
             self._permitted_rounds = further_crop_params._permitted_rounds
 
-        if further_crop_params._permitted_zplanes and \
-                not further_crop_params._permitted_zplanes.issubset(self._permitted_zplanes):
+        if (further_crop_params._permitted_zplanes
+                and not further_crop_params._permitted_zplanes.issubset(self._permitted_zplanes)):
             raise ValueError("Can only provide further zplane crop params within the existing set "
-                             "of z_plane crop params")
+                             "of zplane crop params")
         else:
             self._permitted_zplanes = further_crop_params._permitted_zplanes
         self._x_slice = further_crop_params._x_slice

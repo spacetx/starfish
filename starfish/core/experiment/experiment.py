@@ -3,18 +3,22 @@ import json
 import pprint
 from typing import (
     Callable,
+    Collection,
     Dict,
     Iterator,
     List,
     MutableMapping,
     MutableSequence,
     MutableSet,
+    Optional,
     Sequence,
-    Set
+    Set,
+    Union
 )
 
 from semantic_version import Version
-from slicedimage import Collection, TileSet
+from slicedimage import Collection as collec
+from slicedimage import TileSet
 from slicedimage.io import Reader, resolve_path_or_url, resolve_url
 from slicedimage.urlpath import pathjoin
 
@@ -151,7 +155,12 @@ class FieldOfView:
         for aligned_group, _ in enumerate(self.aligned_coordinate_groups[image_type]):
             yield self.get_image(item=image_type, aligned_group=aligned_group)
 
-    def get_image(self, item: str, aligned_group: int = 0, crop_params: CropParameters = None,
+    def get_image(self, item: str, aligned_group: int = 0,
+                  rounds: Optional[Collection[int]] = None,
+                  chs: Optional[Collection[int]] = None,
+                  zplanes: Optional[Collection[int]] = None,
+                  x: Optional[Union[int, slice]] = None,
+                  y: Optional[Union[int, slice]] = None,
                   ) -> ImageStack:
         """
         Load into memory the Imagestack representation of an aligned image group. If crop parameters
@@ -163,18 +172,34 @@ class FieldOfView:
             The name of the tileset ex. 'primary' or 'nuclei'
         aligned_group: int
             The aligned subgroup, default 0
-        crop_params: CropParameters
-            Any extra crop parameters to further crop the aligned image based on Round/Ch/Zplane
-            or x and y axis
+        rounds : Optional[Collection[int]]
+            The rounds in the original dataset to load into the ImageStack.  If this is not set,
+            then all rounds are loaded into the ImageStack.
+        chs : Optional[Collection[int]]
+            The channels in the original dataset to load into the ImageStack.  If this is not set,
+            then all channels are loaded into the ImageStack.
+        zplanes : Optional[Collection[int]]
+            The z-layers in the original dataset to load into the ImageStack.  If this is not set,
+            then all z-layers are loaded into the ImageStack.
+        x : Optional[Union[int, slice]]
+            The x-range in the x-y tile that is loaded into the ImageStack.  If this is not set,
+            then the entire x-y tile is loaded into the ImageStack.
+        y : Optional[Union[int, slice]]
+            The y-range in the x-y tile that is loaded into the ImageStack.  If this is not set,
+            then the entire x-y tile is loaded into the ImageStack.
 
         Returns
         -------
         ImageStack
             The instantiated image stack
+
         """
+
         # Get the set of permitted r/ch/z in the aligned group
         aligned_group_crop_params = copy.copy((self.aligned_coordinate_groups[item][aligned_group]))
-        if crop_params:
+        if rounds or chs or zplanes or x or y:
+            crop_params = CropParameters(permitted_rounds=rounds, permitted_chs=chs,
+                                         permitted_zplanes=zplanes, x_slice=x, y_slice=y)
             # Combine with any extra crop parameters given
             aligned_group_crop_params.further_crop(crop_params)
         return ImageStack.from_tileset(self._images[item],
@@ -268,9 +293,9 @@ class Experiment:
         fovs: MutableSequence[FieldOfView] = list()
         fov_tilesets: MutableMapping[str, TileSet]
         if version < Version("5.0.0"):
-            primary_image: Collection = Reader.parse_doc(experiment_document['primary_images'],
-                                                         baseurl, config.slicedimage)
-            auxiliary_images: MutableMapping[str, Collection] = dict()
+            primary_image: collec = Reader.parse_doc(experiment_document['primary_images'],
+                                                     baseurl, config.slicedimage)
+            auxiliary_images: MutableMapping[str, collec] = dict()
             for aux_image_type, aux_image_url in experiment_document['auxiliary_images'].items():
                 auxiliary_images[aux_image_type] = Reader.parse_doc(
                     aux_image_url, baseurl, config.slicedimage)
@@ -286,7 +311,7 @@ class Experiment:
                 fov = FieldOfView(fov_name, image_tilesets=fov_tilesets)
                 fovs.append(fov)
         else:
-            images: MutableMapping[str, Collection] = dict()
+            images: MutableMapping[str, collec] = dict()
             all_fov_names: MutableSet[str] = set()
             for image_type, image_url in experiment_document['images'].items():
                 image = Reader.parse_doc(image_url, baseurl, config.slicedimage)

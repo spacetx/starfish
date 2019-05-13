@@ -1,9 +1,9 @@
 import pytest
 from pkg_resources import resource_filename
+from slicedimage import VERSIONS
 
 from .util import SpaceTxValidator
 
-from slicedimage import VERSIONS
 
 package_name = "starfish"
 current_version = VERSIONS[-1].VERSION

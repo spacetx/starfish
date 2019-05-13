@@ -14,7 +14,7 @@ def make_image_stack():
     '''
 
     # Make the test image
-    test = np.ones((2, 4, 1, 2, 2), dtype='float32') * 0.5
+    test = np.ones((2, 4, 1, 2, 2), dtype='float32') * 0.1
 
     x = [0, 0, 1, 1]
     y = [0, 1, 0, 1]
@@ -36,25 +36,36 @@ def make_expected_image_stack(func):
 
     if func == 'max':
         reduced = np.array(
-            [[[[[0.75, 0.5],
-                [0.5, 0.5]]],
-                [[[0.5, 1],
-                  [0.5, 0.5]]],
-                [[[0.5, 0.5],
-                  [1, 0.5]]],
-                [[[0.5, 0.5],
-                  [0.5, 1]]]]], dtype='float32'
+            [[[[[0.75, 0.1],
+                [0.1, 0.1]]],
+                [[[0.1, 1],
+                  [0.1, 0.1]]],
+                [[[0.1, 0.1],
+                  [1, 0.1]]],
+                [[[0.1, 0.1],
+                  [0.1, 1]]]]], dtype='float32'
         )
     elif func == 'mean':
         reduced = np.array(
-            [[[[[0.625, 0.5],
-              [0.5, 0.5]]],
-              [[[0.5, 0.75],
-                [0.5, 0.5]]],
-              [[[0.5, 0.5],
-                [0.75, 0.5]]],
-              [[[0.5, 0.5],
-                [0.5, 0.75]]]]], dtype='float32'
+            [[[[[0.425, 0.1],
+              [0.1, 0.1]]],
+              [[[0.1, 0.55],
+                [0.1, 0.1]]],
+              [[[0.1, 0.1],
+                [0.55, 0.1]]],
+              [[[0.1, 0.1],
+                [0.1, 0.55]]]]], dtype='float32'
+        )
+    elif func == 'sum':
+        reduced = np.array(
+            [[[[[0.85, 0.2],
+              [0.2, 0.2]]],
+              [[[0.2, 1],
+                [0.2, 0.2]]],
+              [[[0.2, 0.2],
+                [1, 0.2]]],
+              [[[0.2, 0.2],
+                [0.2, 1]]]]], dtype='float32'
         )
 
     expected_stack = ImageStack.from_numpy(reduced)
@@ -62,7 +73,7 @@ def make_expected_image_stack(func):
     return expected_stack
 
 
-@pytest.mark.parametrize("func", ['max', 'mean'])
+@pytest.mark.parametrize("func", ['max', 'mean', 'sum'])
 def test_image_stack_reduce(func):
 
     # Get the test stack and expected result

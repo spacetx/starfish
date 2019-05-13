@@ -4,8 +4,9 @@ from typing import Callable, Iterable, Optional, Union
 import numpy as np
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import Axes
+from starfish.core.types import Axes, Clip
 from starfish.core.util import click
+from starfish.core.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
 
 
@@ -29,7 +30,15 @@ class Reduce(FilterAlgorithmBase):
             mean: take the mean across the dim(s) (applies numpy.mean)
             sum: sum across the dim(s) (applies numpy.sum)
 
-        Note: user-specified functions are not recorded via starfish logging
+    clip_method : Union[str, Clip]
+        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].
+        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
+        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over the entire ImageStack
+        Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
+        value calculated over each slice, where slice shapes are determined by the group_by
+        parameters
 
     See Also
     --------
@@ -38,10 +47,12 @@ class Reduce(FilterAlgorithmBase):
     """
 
     def __init__(
-        self, dims: Iterable[Union[Axes, str]], func: Union[str, Callable] = 'max'
+        self, dims: Iterable[Union[Axes, str]], func: Union[str, Callable] = 'max',
+        clip_method: Union[str, Clip] = Clip.CLIP
     ) -> None:
 
         self.dims = dims
+        self.clip_method = clip_method
 
         # If the user provided a string, convert to callable
         if isinstance(func, str):
@@ -90,6 +101,11 @@ class Reduce(FilterAlgorithmBase):
         reduced = reduced.expand_dims(tuple(dim.value for dim in self.dims))
         reduced = reduced.transpose(*stack.xarray.dims)
 
+        if self.clip_method == Clip.CLIP:
+            reduced = preserve_float_range(reduced, rescale=False)
+        else:
+            reduced = preserve_float_range(reduced, rescale=True)
+
         # Construct the stack
         stack = stack.from_numpy(reduced.values)
 
@@ -113,6 +129,10 @@ class Reduce(FilterAlgorithmBase):
         help="The function to apply across dims"
              "Valid function names: max, mean, sum."
     )
+    @click.option(
+        "--clip-method", default=Clip.CLIP, type=Clip,
+        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
+             "'scale_by_chunk'")
     @click.pass_context
-    def _cli(ctx, dims, func):
-        ctx.obj["component"]._cli_run(ctx, Reduce(dims, func))
+    def _cli(ctx, dims, func, clip_method):
+        ctx.obj["component"]._cli_run(ctx, Reduce(dims, func, clip_method))

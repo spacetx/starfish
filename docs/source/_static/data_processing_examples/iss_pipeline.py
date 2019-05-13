@@ -16,10 +16,8 @@ test = os.getenv("TESTING") is not None
 def iss_pipeline(fov, codebook):
     primary_image = fov.get_image(starfish.FieldOfView.PRIMARY_IMAGES)
 
-    dots = primary_image.max_proj(Axes.CH)
-    max_dots = dots.max_proj(Axes.ROUND)
     # register the raw image
-    learn_translation = LearnTransform.Translation(reference_stack=max_dots,
+    learn_translation = LearnTransform.Translation(reference_stack=fov.get_image('dots'),
                                                    axes=Axes.ROUND, upsampling=100)
     transforms_list = learn_translation.run(primary_image.max_proj(Axes.CH, Axes.ZPLANE))
     warp = ApplyTransform.Warp()
@@ -41,7 +39,7 @@ def iss_pipeline(fov, codebook):
 
     intensities = p.run(
         filtered,
-        blobs_image=dots,
+        blobs_image=fov.get_image('dots'),
         blobs_axes=(Axes.ROUND, Axes.ZPLANE))
 
     # decode the pixel traces using the codebook
@@ -53,7 +51,7 @@ def iss_pipeline(fov, codebook):
         input_threshold=.22,
         min_distance=57,
     )
-    label_image = seg.run(primary_image, fov.get_image('nuclei'))
+    label_image = seg.run(primary_image, fov.get_image('dots'))
 
     # assign spots to cells
     ta = AssignTargets.Label()
@@ -67,13 +65,22 @@ def process_experiment(experiment: starfish.Experiment):
     decoded_intensities = {}
     regions = {}
     for i, (name_, fov) in enumerate(experiment.items()):
-        print("processing fov: " + name_)
         decoded, segmentation_results = iss_pipeline(fov, experiment.codebook)
         decoded_intensities[name_] = decoded
         regions[name_] = segmentation_results
+        if test and i == 1:
+            # only run through 2 fovs for the test
+            break
     return decoded_intensities, regions
 
 
 # run the script
-exp = starfish.Experiment.from_json("https://d2nhj9g34unfro.cloudfront.net/xiaoyan_qian/ISS_human_HCA_07_MultiFOV/main_files/experiment.json")
+if test:
+    # TODO: (ttung) Pending a fix for https://github.com/spacetx/starfish/issues/700, it's not
+    # possible to validate the schema for this experiment.
+    with starfish.config.environ(VALIDATION_STRICT="false"):
+        exp = starfish.Experiment.from_json(
+            "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20180926/iss_breast/experiment.json")
+else:
+    exp = starfish.Experiment.from_json("iss/formatted/experiment.json")
 decoded_intensities, regions = process_experiment(exp)

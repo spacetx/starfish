@@ -155,13 +155,13 @@ class FieldOfView:
         for aligned_group, _ in enumerate(self.aligned_coordinate_groups[image_type]):
             yield self.get_image(item=image_type, aligned_group=aligned_group)
 
-    def get_image(self, item: str, aligned_group: int = 0,
+    def get_image(self, item: str,
                   rounds: Optional[Collection[int]] = None,
                   chs: Optional[Collection[int]] = None,
                   zplanes: Optional[Collection[int]] = None,
                   x: Optional[Union[int, slice]] = None,
                   y: Optional[Union[int, slice]] = None,
-                  ) -> ImageStack:
+                  ) -> Union[ImageStack, List[ImageStack]]:
         """
         Load into memory the Imagestack representation of an aligned image group. If crop parameters
         provided, first crop the TileSet.
@@ -194,17 +194,18 @@ class FieldOfView:
             The instantiated image stack
 
         """
-
         # Get the set of permitted r/ch/z in the aligned group
-        aligned_group_crop_params = copy.copy((self.aligned_coordinate_groups[item][aligned_group]))
-        if rounds or chs or zplanes or x or y:
-            crop_params = CropParameters(permitted_rounds=rounds, permitted_chs=chs,
-                                         permitted_zplanes=zplanes, x_slice=x, y_slice=y)
-            # Combine with any extra crop parameters given
-            aligned_group_crop_params.further_crop(crop_params)
-        return ImageStack.from_tileset(self._images[item],
-                                       crop_parameters=aligned_group_crop_params)
+        # parse tileset
 
+        aligned_groups = CropParameters.parse_coordinate_groups(tileset)
+        aligned_image_stacks: List[ImageStack] = list()
+        for aligned_group in aligned_groups:
+            stack = ImageStack.from_tileset(self._images[item], crop_parameters=aligned_group)
+            aligned_image_stacks.append(stack)
+        # if just one, just return the stack
+        if len(aligned_image_stacks) == 1:
+            return aligned_image_stacks[0]
+        return aligned_image_stacks
 
 class Experiment:
     """

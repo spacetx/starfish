@@ -161,10 +161,7 @@ class AlignedImageStackIterator:
         return self
 
     def __next__(self):
-        try:
-            aligned_group = next(self.aligned_groups)
-        except StopIteration:
-            return StopIteration
+        aligned_group = next(self.aligned_groups)
         stack = ImageStack.from_tileset(self.tileset, aligned_group)
         return stack
 

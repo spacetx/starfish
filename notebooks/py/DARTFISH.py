@@ -40,7 +40,7 @@ from starfish.spots import DetectPixels
 use_test_data = os.getenv("USE_TEST_DATA") is not None
 experiment = data.DARTFISH(use_test_data=use_test_data)
 
-imgs = experiment.fov().get_image(FieldOfView.PRIMARY_IMAGES)
+imgs = experiment.fov().get_images(FieldOfView.PRIMARY_IMAGES)
 
 print(imgs)
 # EPY: END code

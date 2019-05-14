@@ -52,7 +52,7 @@ pp = pprint.PrettyPrinter(indent=2)
 pp.pprint(experiment._src_doc)
 
 # note the structure of the 5D tensor containing the raw imaging data
-imgs = experiment.fov().get_image(FieldOfView.PRIMARY_IMAGES)
+imgs = experiment.fov().get_images(FieldOfView.PRIMARY_IMAGES)
 print(imgs)
 # EPY: END code
 
@@ -169,7 +169,7 @@ plt.axis('off');
 # EPY: START markdown
 ### Decode the processed data into spatially resolved gene expression profiles
 #
-#Here, we decode each pixel value, across all rounds and channels, into the corresponding target (gene) it corresponds too. Contiguous pixels that map to the same target gene are called as one RNA molecule. Intuitively, pixel vectors are matched to the codebook by computing the euclidean distance between the pixel vector and all codewords. The minimal distance gene target is selected if it lies within `distance_threshold` of a code. 
+#Here, we decode each pixel value, across all rounds and channels, into the corresponding target (gene) it corresponds too. Contiguous pixels that map to the same target gene are called as one RNA molecule. Intuitively, pixel vectors are matched to the codebook by computing the euclidean distance between the pixel vector and all codewords. The minimal distance gene target is selected if it lies within `distance_threshold` of a code.
 # EPY: END markdown
 
 # EPY: START code

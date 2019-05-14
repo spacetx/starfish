@@ -35,7 +35,7 @@ from starfish.types import Axes
 
 # EPY: START code
 experiment = data.osmFISH(use_test_data=True)
-imgs = experiment["fov_000"].get_image(FieldOfView.PRIMARY_IMAGES)
+imgs = experiment["fov_000"].get_images(FieldOfView.PRIMARY_IMAGES)
 print(imgs)
 # EPY: END code
 

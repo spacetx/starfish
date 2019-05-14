@@ -267,7 +267,7 @@ class ImageStack:
         """
         config = StarfishConfig()
         tileset = Reader.parse_doc(url, baseurl, backend_config=config.slicedimage)
-        coordinate_groups = CropParameters.parse_coordinate_groups(tileset)
+        coordinate_groups = CropParameters.parse_aligned_groups(tileset)
         crop_params = coordinate_groups[aligned_group]
         return cls.from_tileset(tileset, crop_parameters=crop_params)
 

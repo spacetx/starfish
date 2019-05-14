@@ -1,3 +1,6 @@
+.. NOTE: If you update this, you should probably update README.rst at the
+   top level of the repo as well.
+
 .. _contact:
 
 Contact Starfish
@@ -13,8 +16,8 @@ You can get in touch with the starfish authors a variety of ways.
 
 3. The best place to discuss design issues or bug reports is on `github <starfish_github>`_.
 
-.. _email: starfish-data@chanzuckerberg.com
+.. _email: starfish@chanzuckerberg.com
 
-.. _heroku: https://github.com/spacetx/starfish
+.. _heroku: https://join-cziscience-slack.herokuapp.com/
 
 .. _starfish_github: `https://github.com/spacetx/starfish`

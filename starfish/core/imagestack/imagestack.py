@@ -311,7 +311,7 @@ class ImageStack:
         index_labels : Optional[Mapping[Axes, Sequence[int]]]
             Mapping from axes (r, ch, z) to their labels.  If this is not provided, then the axes
             will be labeled from 0..(n-1), where n=the size of the axes.
-        coordinates : Optional[xr.DataArray]
+        coordinates : Optional[DataArrayCoordinates]
             DataArray indexed by r, ch, z, with xmin, xmax, ymin, ymax, zmin, zmax as columns.  If
             this is not provided, then the ImageStack gets fake coordinates.
 
@@ -1148,12 +1148,17 @@ class ImageStack:
         -------
         np.ndarray :
             max projection
-
         """
         max_projection = self._data.max([dim.value for dim in dims])
         max_projection = max_projection.expand_dims(tuple(dim.value for dim in dims))
         max_projection = max_projection.transpose(*self.xarray.dims)
         physical_coords = self.xarray.coords
+        if Axes.ZPLANE in dims:
+            # if we max proj by z, take average coord
+            physical_coords[Coordinates.Z].values[0] = \
+                np.average(self.xarray.coords[Coordinates.Z])
+            physical_coords[Coordinates.Z].values[-1] = \
+                np.average(self.xarray.coords[Coordinates.Z])
         max_proj_stack = self.from_numpy(max_projection.values, coordinates=physical_coords)
         return max_proj_stack
 

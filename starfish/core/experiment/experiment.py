@@ -102,7 +102,7 @@ class FieldOfView:
                    zplanes: Optional[Collection[int]] = None,
                    x: Optional[Union[int, slice]] = None,
                    y: Optional[Union[int, slice]] = None,
-                   ) -> Union[ImageStack, List[ImageStack]]:
+                   ) -> Union[ImageStack, "AlignedImageStackIterator"]:
         """
         Load into memory the Imagestack or list of Imagestacks for the given tileset and selected
         axes. A list is returned if the selected axes represented an unaligned tileset. In this case
@@ -130,7 +130,7 @@ class FieldOfView:
 
         Returns
         -------
-        Union[ImageStack, List[ImageStack]]
+        Union[ImageStack, AlignedImageStackIterator]
             The instantiated ImageStack or list of Imagestacks if the parameters given include
             multiple aligned groups.
 
@@ -140,14 +140,33 @@ class FieldOfView:
                                                              rounds=rounds, chs=chs,
                                                              zplanes=zplanes,
                                                              x=x, y=y)
-        aligned_image_stacks: List[ImageStack] = list()
-        for aligned_group in aligned_groups:
-            stack = ImageStack.from_tileset(self._images[item], aligned_group)
-            aligned_image_stacks.append(stack)
-        # if just one, just return the stack
-        if len(aligned_image_stacks) == 1:
-            return aligned_image_stacks[0]
-        return aligned_image_stacks
+        aligned_stack_iterator = AlignedImageStackIterator(tileset=self._images[item],
+                                                           aligned_groups=aligned_groups)
+        if len(aligned_stack_iterator) == 1:
+            return next(aligned_stack_iterator)
+        return aligned_stack_iterator
+
+
+class AlignedImageStackIterator:
+    """Iterator class of AlignedImageStacks."""
+    def __init__(self, tileset: TileSet, aligned_groups: List[CropParameters]):
+        self.size = len(aligned_groups)
+        self.aligned_groups = iter(aligned_groups)
+        self.tileset = tileset
+
+    def __len__(self):
+        return self.size
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        try:
+            aligned_group = next(self.aligned_groups)
+        except StopIteration:
+            return StopIteration
+        stack = ImageStack.from_tileset(self.tileset, aligned_group)
+        return stack
 
 
 class Experiment:

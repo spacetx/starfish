@@ -119,13 +119,11 @@ def processing_pipeline(
     """
 
     print("Loading images...")
-    primary_image = experiment[fov_name].get_images(FieldOfView.PRIMARY_IMAGES)
+    primary_images = experiment[fov_name].get_images(FieldOfView.PRIMARY_IMAGES)
     all_intensities = list()
     codebook = experiment.codebook
 
-    images = enumerate(experiment[fov_name].iterate_image_type(FieldOfView.PRIMARY_IMAGES))
-
-    for image_number, primary_image in images:
+    for image_number, primary_image in enumerate(primary_images):
 
         print(f"Filtering image {image_number}...")
         filter_kwargs = dict(
@@ -154,7 +152,7 @@ def processing_pipeline(
 
     print("Processing complete.")
 
-    return primary_image, decoded
+    return primary_images, decoded
 # EPY: END code
 
 # EPY: START markdown

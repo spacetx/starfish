@@ -2,7 +2,6 @@ import json
 from typing import (
     Callable,
     Collection,
-    Dict,
     List,
     MutableMapping,
     MutableSequence,
@@ -22,8 +21,8 @@ from slicedimage.urlpath import pathjoin
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.config import StarfishConfig
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.spacetx_format import validate_sptx
 from starfish.core.imagestack.parser.crop import CropParameters
+from starfish.core.spacetx_format import validate_sptx
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
 
@@ -34,7 +33,10 @@ class FieldOfView:
 
     All images can be accessed using
     :py:func:`~starfish.experiment.experiment.FieldOfView.get_image`
-    with the name of the image type. The primary image is accessed using the name
+    with the name of the image type and any specific rounds/chs/zplanes you want to include
+    (If none are provided all are included) If the resulting tileset has unaligned tiles
+    (their x/y coordinates do not all match) we return a list on ImageStacks where each stack
+    represents an aligned group of tiles. The primary image is accessed using the name
     :py:attr:`~starfish.experiment.experiment.FieldOFView.PRIMARY_IMAGES`.
 
     Notes
@@ -42,11 +44,6 @@ class FieldOfView:
     Field of views obtain their primary image from a :py:class:`~slicedimage.TileSet`.
     They can obtain their auxiliary image dictionary from a dictionary of auxiliary image to
     :py:class:`~slicedimage.TileSet`.
-
-    When a FieldOfView is initialized we parse each :py:class:`~slicedimage.TileSet`
-    into sub groups according to their physical coordinates. Tiles with the same physical
-    coordinates are grouped together into aligned tilesets. If the FieldOfView is properly
-    registered there should only be one aligned subgroup.
 
     The decoding of :py:class:`~slicedimage.TileSet` to
     :py:class:`~starfish.imagestack.imagestack.ImageStack`
@@ -116,31 +113,32 @@ class FieldOfView:
         item: str
             The name of the tileset ex. 'primary' or 'nuclei'
         rounds : Optional[Collection[int]]
-            The rounds in the original dataset to load into the ImageStack.  If this is not set,
+            The rounds in the original dataset to load into the ImageStack/s.  If this is not set,
             then all rounds are loaded into the ImageStack.
         chs : Optional[Collection[int]]
-            The channels in the original dataset to load into the ImageStack.  If this is not set,
+            The channels in the original dataset to load into the ImageStac/s.  If this is not set,
             then all channels are loaded into the ImageStack.
         zplanes : Optional[Collection[int]]
-            The z-layers in the original dataset to load into the ImageStack.  If this is not set,
+            The z-layers in the original dataset to load into the ImageStack/s.  If this is not set,
             then all z-layers are loaded into the ImageStack.
         x : Optional[Union[int, slice]]
-            The x-range in the x-y tile that is loaded into the ImageStack.  If this is not set,
+            The x-range in the x-y tile that is loaded into the ImageStack/s.  If this is not set,
             then the entire x-y tile is loaded into the ImageStack.
         y : Optional[Union[int, slice]]
-            The y-range in the x-y tile that is loaded into the ImageStack.  If this is not set,
+            The y-range in the x-y tile that is loaded into the ImageStack/s.  If this is not set,
             then the entire x-y tile is loaded into the ImageStack.
 
         Returns
         -------
         Union[ImageStack, List[ImageStack]]
-            The instantiated ImageStack or list of Imagestacks if the parameters given include multiple
-            aligned groups.
+            The instantiated ImageStack or list of Imagestacks if the parameters given include
+            multiple aligned groups.
 
         """
         # Parse the tileset into aligned groups, only include tiles from selected axes.
         aligned_groups = CropParameters.parse_aligned_groups(self._images[item],
-                                                             rounds=rounds, chs=chs, zplanes=zplanes,
+                                                             rounds=rounds, chs=chs,
+                                                             zplanes=zplanes,
                                                              x=x, y=y)
         aligned_image_stacks: List[ImageStack] = list()
         for aligned_group in aligned_groups:

@@ -2,7 +2,7 @@ from collections import OrderedDict
 from typing import Collection, List, Mapping, MutableSequence, Optional, Tuple, Union
 
 import numpy as np
-from slicedimage import TileSet
+from slicedimage import Tile, TileSet
 
 from starfish.core.imagestack.parser import TileCollectionData, TileData, TileKey
 from starfish.core.imagestack.physical_coordinate_calculator import (
@@ -116,38 +116,47 @@ class CropParameters:
                              y: Optional[Union[int, slice]] = None
                              ) -> List["CropParameters"]:
 
-        """Takes a tileset and any optional selected axes lists compares the physical coordinates on each tile to
-         create aligned coordinate groups (groups of tiles that have the same physical coordinates)
+        """Takes a tileset and any optional selected axes lists compares the physical coordinates on each
+         tile to create aligned coordinate groups (groups of tiles that have the same physical
+         coordinates)
 
         Parameters
         ----------
         tileset: TileSet
-            The tileset to parse
+            The TileSet to parse
         rounds: Optional[Collection[int]]
-            adsfsdf
+            The rounds in the tileset to include in the final aligned groups. If this is not set,
+            then all rounds are included.
         chs: Optional[Collection[int]]
-            afasf
+            The chs in the tileset to include in the final aligned groups. If this is not set,
+            then all chs are included.
         zplanes: Optional[Collection[int]]
-            asdda
+            The zplanes in the tileset to include in the final aligned groups. If this is not set,
+            then all zplanes are included.
         x: Optional[Union[int, slice]]
-            asfgs
+            The x-range in the x-y tile to include in the final aligned groups.  If this is not set,
+            then the entire x-y tile is included.
         y: Optional[Union[int, slice]]
-            asgas
+            The y-range in the x-y tile to include in the final aligned groups.  If this is not set,
+            then the entire x-y tile is included.
 
          Returns
          -------
-         A list of CropParameters. Each entry describes the r/ch/z values of tiles that are aligned
-        (have matching coordinates) and are within the selected_axes if provided.
+         List["CropParameters"]
+             A list of CropParameters. Each entry describes the r/ch/z values of tiles that are
+             aligned (have matching coordinates) and are within the selected_axes if provided.
          """
         coord_groups: OrderedDict[tuple, CropParameters] = OrderedDict()
         for tile in tileset.tiles():
             if (rounds is None and chs is None and zplanes is None) \
                     or CropParameters.tile_in_selected_axes(tile, rounds, chs, zplanes):
+
                 x_y_coords = (
                     tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
                     tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1]
                 )
-                # A tile with this (x, y) has already been seen, add tile's Indices to CropParameters
+                # A tile with this (x, y) has already been seen, add tile's indices to
+                # CropParameters
                 if x_y_coords in coord_groups:
                     crop_params = coord_groups[x_y_coords]
                     crop_params._add_permitted_axes(Axes.CH, tile.indices[Axes.CH])
@@ -165,7 +174,10 @@ class CropParameters:
         return list(coord_groups.values())
 
     @staticmethod
-    def tile_in_selected_axes(tile, rounds, chs, zplanes) -> bool:
+    def tile_in_selected_axes(tile: Tile,
+                              rounds: Optional[Collection[int]] = None,
+                              chs: Optional[Collection[int]] = None,
+                              zplanes: Optional[Collection[int]] = None) -> bool:
         """
         Return True if a tile belongs in a list of selected axes.
 
@@ -173,8 +185,12 @@ class CropParameters:
         ----------
         tile:
             The tile in question
-        selected_axes: CropParameters
-            The list of selected axes represented as a CropParameters object
+        rounds: Optional[Collection[int]]
+            The allowed rounds.
+        chs: Optional[Collection[int]]
+            The allowed chs.
+        zplanes: Optional[Collection[int]]
+            The allowed zplanes.
 
         Returns
         -------

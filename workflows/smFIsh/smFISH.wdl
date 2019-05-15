@@ -63,10 +63,12 @@ task process_field_of_view {
 
             print("decoding")
             decoded = codebook.decode_per_round_max(intensities)
+            print("found:" + str(len(decoded['features'])) + "spots")
             all_decoded.append(decoded)
 
-        print("concatenating decoded spots for {fov_str}")
+        print(f"concatenating decoded spots for {fov_str}")
         decoded = IntensityTable.concatenate_intensity_tables(all_decoded)
+        print(f"{str(len(decoded['features']))} +  total spots in {fov_str}")
         # save results
         df = decoded.to_decoded_spots()
         print("saving csv")

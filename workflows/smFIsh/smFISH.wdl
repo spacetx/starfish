@@ -142,8 +142,8 @@ workflow ProcessSmFISH{
     Array[Pair[Int, Int]] crossed = cross(fields_of_view, rounds_per_fov)
 
     scatter(fov_round in crossed) {
-        Int fov = fov_round[0]
-        Int round = fov_round[1]
+        Int fov = fov_round.left
+        Int round = fov_round.right
         call process_field_of_view {
             input:
                 experiment = experiment,

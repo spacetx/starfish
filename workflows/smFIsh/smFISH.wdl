@@ -111,7 +111,7 @@ task concatenate_fovs {
                 first = pd.concat([first, next_], axis=0)
 
         # label spots sequentially
-        first = first.reset_index.drop("index", axis=1)
+        first = first.reset_index().drop("index", axis=1)
 
         first.to_csv("decoded_concatenated.csv")
 

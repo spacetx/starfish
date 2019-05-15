@@ -22,7 +22,7 @@ task process_field_of_view {
 
         fov = experiment[fov_str]
         print("loainf fov")
-        imgs = fov.get_images(starfish.FieldOfView.PRIMARY_IMAGES, zplanes=[1, 2, 3])
+        imgs = fov.get_images(starfish.FieldOfView.PRIMARY_IMAGES)
         all_decoded = list()
         for i, img in enumerate(imgs):
             print(f"processin fov {fov_str} round {i}...")

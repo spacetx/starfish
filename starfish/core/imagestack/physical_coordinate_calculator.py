@@ -15,13 +15,11 @@ def _pixel_offset_to_physical_coordinate(
         physical_pixel_size: Number,
         pixel_offset: Optional[int],
         coordinates_at_pixel_offset_0: Number,
-        dimension_size: int,
 ) -> Number:
     """Calculate the physical pixel value at the given index"""
     if pixel_offset:
         # Check for negative index
-        if pixel_offset < 0:
-            pixel_offset = pixel_offset + dimension_size
+        assert pixel_offset >= 0
         return (physical_pixel_size * pixel_offset) + coordinates_at_pixel_offset_0
     return coordinates_at_pixel_offset_0
 
@@ -53,15 +51,19 @@ def recalculate_physical_coordinate_range(
     -------
     The new min and max physical coordinate values of the given dimension
     """
-    physical_pixel_size = _calculate_physical_pixel_size(coord_min, coord_max, dimension_size)
+    physical_pixel_size = _calculate_physical_pixel_size(coord_min, coord_max, dimension_size - 1)
     min_pixel_index = indexer if isinstance(indexer, int) else indexer.start
-    max_pixel_index = indexer if isinstance(indexer, int) else indexer.stop
-    # Add one to max pixel index to get end of pixel
-    max_pixel_index = max_pixel_index + 1 if max_pixel_index else dimension_size
-    new_min = _pixel_offset_to_physical_coordinate(
-        physical_pixel_size, min_pixel_index, coord_min, dimension_size)
-    new_max = _pixel_offset_to_physical_coordinate(
-        physical_pixel_size, max_pixel_index, coord_min, dimension_size)
+    if isinstance(indexer, int):
+        max_pixel_index = indexer
+    elif isinstance(indexer.stop, int):
+        if indexer.stop >= 0:
+            max_pixel_index = indexer.stop - 1
+        else:
+            max_pixel_index = indexer.stop + dimension_size
+    else:
+        max_pixel_index = dimension_size - 1
+    new_min = _pixel_offset_to_physical_coordinate(physical_pixel_size, min_pixel_index, coord_min)
+    new_max = _pixel_offset_to_physical_coordinate(physical_pixel_size, max_pixel_index, coord_min)
     return new_min, new_max
 
 

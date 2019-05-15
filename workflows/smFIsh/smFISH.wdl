@@ -1,3 +1,4 @@
+#version 1.0
 
 task process_field_of_view {
 
@@ -131,7 +132,6 @@ task concatenate_fovs {
 
 
 workflow ProcessSmFISH{
-
     Int num_fovs
     Int num_rounds
     String experiment
@@ -139,17 +139,18 @@ workflow ProcessSmFISH{
     Array[Int] fields_of_view = range(num_fovs)
     Array[Int] rounds_per_fov = range(num_rounds)
     # maybe try this after if things are weird
-#    Array[Pair[Int, Int]] crossed = cross(fields_of_view, rounds_per_fov)
+    Array[Pair[Int, Int]] crossed = cross(fields_of_view, rounds_per_fov)
 
-    scatter(fov in fields_of_view) {
-        scatter(round in rounds_per_fov){
-            call process_field_of_view {
-                input:
-                    experiment = experiment,
-                    field_of_view = fov,
-                    round_num = round
-            }
+    scatter(fov_round in crossed) {
+        Int fov = fov_round[0]
+        Int round = fov_round[1]
+        call process_field_of_view {
+            input:
+                experiment = experiment,
+                field_of_view = fov,
+                round_num = round
         }
+
     }
 
     call concatenate_fovs {

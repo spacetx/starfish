@@ -3,6 +3,7 @@ task process_field_of_view {
 
     String experiment
     Int field_of_view
+    Int round_num
 
     command <<<
         pip install git+https://github.com/spacetx/starfish.git@saxelrod-smFISH-wdl
@@ -14,6 +15,7 @@ task process_field_of_view {
         from starfish.core.imagestack import indexing_utils
 
         fov: int = ${field_of_view}
+        round_num: int = ${round_num}
         fov_str: str = f"fov_{int(fov):03d}"
 
         # load experiment
@@ -22,57 +24,51 @@ task process_field_of_view {
 
         fov = experiment[fov_str]
         print("loainf fov")
-        imgs = fov.get_images(starfish.FieldOfView.PRIMARY_IMAGES)
-        all_decoded = list()
-        for i, img in enumerate(imgs):
-            print(f"processin fov {fov_str} round {i}...")
-            codebook = indexing_utils.index_keep_dimensions(experiment.codebook, {Axes.ROUND: i})
+        img = fov.get_images(starfish.FieldOfView.PRIMARY_IMAGES, rounds=[round_num])
 
-            # filter
-            print("clipping")
-            clip1 = starfish.image.Filter.Clip(p_min=50, p_max=100)
-            clip1.run(img)
+        print(f"processin fov {fov_str} round {i}...")
+        codebook = indexing_utils.index_keep_dimensions(experiment.codebook, {Axes.ROUND: i})
 
-            print("bandpass")
-            bandpass = starfish.image.Filter.Bandpass(lshort=.5, llong=7, threshold=0.0)
-            bandpass.run(img)
+        # filter
+        print("clipping")
+        clip1 = starfish.image.Filter.Clip(p_min=50, p_max=100)
+        clip1.run(img)
 
-            print("gaussian")
-            glp = starfish.image.Filter.GaussianLowPass(sigma=(1, 0, 0), is_volume=True)
-            glp.run(img)
+        print("bandpass")
+        bandpass = starfish.image.Filter.Bandpass(lshort=.5, llong=7, threshold=0.0)
+        bandpass.run(img)
+
+        print("gaussian")
+        glp = starfish.image.Filter.GaussianLowPass(sigma=(1, 0, 0), is_volume=True)
+        glp.run(img)
 
 
-            print("clipping")
-            clip2 = starfish.image.Filter.Clip(p_min=99, p_max=100, is_volume=True)
-            clip2.run(img)
+        print("clipping")
+        clip2 = starfish.image.Filter.Clip(p_min=99, p_max=100, is_volume=True)
+        clip2.run(img)
 
-            print("detecting")
-            tlmpf = starfish.spots.DetectSpots.TrackpyLocalMaxPeakFinder(
-                spot_diameter=5,  # must be odd integer
-                min_mass=0.02,
-                max_size=2,  # this is max radius
-                separation=7,
-                noise_size=0.65,  # this is not used because preprocess is False
-                preprocess=False,
-                percentile=10,  # this is irrelevant when min_mass, spot_diameter, and max_size are set properly
-                verbose=True,
-                is_volume=True,
-            )
+        print("detecting")
+        tlmpf = starfish.spots.DetectSpots.TrackpyLocalMaxPeakFinder(
+            spot_diameter=5,  # must be odd integer
+            min_mass=0.02,
+            max_size=2,  # this is max radius
+            separation=7,
+            noise_size=0.65,  # this is not used because preprocess is False
+            preprocess=False,
+            percentile=10,  # this is irrelevant when min_mass, spot_diameter, and max_size are set properly
+            verbose=True,
+            is_volume=True,
+        )
 
-            intensities = tlmpf.run(img)
+        intensities = tlmpf.run(img)
 
-            print("decoding")
-            decoded = codebook.decode_per_round_max(intensities)
-            print("found:" + str(len(decoded['features'])) + "spots")
-            all_decoded.append(decoded)
-
-        print(f"concatenating decoded spots for {fov_str}")
-        decoded = IntensityTable.concatenate_intensity_tables(all_decoded)
-        print(f"{str(len(decoded['features']))} +  total spots in {fov_str}")
-        # save results
+        print("decoding")
+        decoded = codebook.decode_per_round_max(intensities)
+        print("found:" + str(len(decoded['features'])) + "spots")
         df = decoded.to_decoded_spots()
         print("saving csv")
         df.save_csv("decoded.csv")
+
         CODE
     >>>
 
@@ -137,15 +133,22 @@ task concatenate_fovs {
 workflow ProcessSmFISH{
 
     Int num_fovs
+    Int rounds_per_fov
     String experiment
 
     Array[Int] fields_of_view = range(num_fovs)
+    Array[Int] rounds_per_fov = range(num_fovs)
+    # maybe try this after if things are weird
+#    Array[Pair[Int, Int]] crossed = cross(fields_of_view, rounds_per_fov)
 
     scatter(fov in fields_of_view) {
-        call process_field_of_view {
-            input:
-                experiment = experiment,
-                field_of_view = fov
+        scatter(round in rounds_per_fov){
+            call process_field_of_view {
+                input:
+                    experiment = experiment,
+                    field_of_view = fov,
+                    round_num = round
+            }
         }
     }
 

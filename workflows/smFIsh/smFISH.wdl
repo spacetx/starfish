@@ -5,6 +5,8 @@ task process_field_of_view {
     Int field_of_view
 
     command <<<
+        pip install git+https://github.com/spacetx/starfish.git@saxelrod-smFISH-wdl
+
         python3 <<CODE
         import starfish
         from starfish import IntensityTable
@@ -15,28 +17,36 @@ task process_field_of_view {
         fov_str: str = f"fov_{int(fov):03d}"
 
         # load experiment
+        print("loading experiment")
         experiment = starfish.Experiment.from_json("${experiment}")
 
         fov = experiment[fov_str]
+        print("loainf fov")
         imgs = fov.get_images(starfish.FieldOfView.PRIMARY_IMAGES, zplanes=[1, 2, 3])
         all_decoded = list()
         for i, img in enumerate(imgs):
-            codebook = starfish.core.imagestack.index_keep_dimensions(experiment.codebook, {Axes.ROUND: i})
-            print(f"processing image...")
+            print(f"processin fov {fov_str} round {i}...")
+            codebook = indexing_utils.index_keep_dimensions(experiment.codebook, {Axes.ROUND: i})
+
             # filter
+            print("clipping")
             clip1 = starfish.image.Filter.Clip(p_min=50, p_max=100)
             clip1.run(img)
 
+            print("bandpass")
             bandpass = starfish.image.Filter.Bandpass(lshort=.5, llong=7, threshold=0.0)
             bandpass.run(img)
 
+            print("gaussian")
             glp = starfish.image.Filter.GaussianLowPass(sigma=(1, 0, 0), is_volume=True)
             glp.run(img)
 
 
+            print("clipping")
             clip2 = starfish.image.Filter.Clip(p_min=99, p_max=100, is_volume=True)
             clip2.run(img)
 
+            print("detecting")
             tlmpf = starfish.spots.DetectSpots.TrackpyLocalMaxPeakFinder(
                 spot_diameter=5,  # must be odd integer
                 min_mass=0.02,
@@ -50,12 +60,16 @@ task process_field_of_view {
             )
 
             intensities = tlmpf.run(img)
+
+            print("decoding")
             decoded = codebook.decode_per_round_max(intensities)
             all_decoded.append(decoded)
 
+        print("concatenating decoded spots for {fov_str}")
         decoded = IntensityTable.concatenate_intensity_tables(all_decoded)
         # save results
         df = decoded.to_decoded_spots()
+        print("saving csv")
         df.save_csv("decoded.csv")
         CODE
     >>>
@@ -79,6 +93,7 @@ task concatenate_fovs {
     command <<<
         python <<CODE
 
+        print("concatenating")
         files = "${sep=' ' decoded_csvs}".strip().split()
 
         import pandas as pd

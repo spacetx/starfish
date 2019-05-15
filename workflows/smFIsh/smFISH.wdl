@@ -7,7 +7,9 @@ task process_field_of_view {
     command <<<
         python3 <<CODE
         import starfish
+        from starfish import IntensityTable
         from starfish.types import Axes
+        from starfish.core.imagestack import indexing_utils
 
         fov: int = ${field_of_view}
         fov_str: str = f"fov_{int(fov):03d}"
@@ -16,40 +18,42 @@ task process_field_of_view {
         experiment = starfish.Experiment.from_json("${experiment}")
 
         fov = experiment[fov_str]
-        imgs = fov.get_image(starfish.FieldOfView.PRIMARY_IMAGES)
+        imgs = fov.get_images(starfish.FieldOfView.PRIMARY_IMAGES, zplanes=[1, 2, 3])
+        all_decoded = list()
+        for i, img in enumerate(imgs):
+            codebook = starfish.core.imagestack.index_keep_dimensions(experiment.codebook, {Axes.ROUND: i})
+            print(f"processing image...")
+            # filter
+            clip1 = starfish.image.Filter.Clip(p_min=50, p_max=100)
+            clip1.run(img)
 
-        codebook = experiment.codebook
+            bandpass = starfish.image.Filter.Bandpass(lshort=.5, llong=7, threshold=0.0)
+            bandpass.run(img)
 
-        # filter
-        clip1 = starfish.image.Filter.Clip(p_min=50, p_max=100)
-        clip1.run(imgs)
-
-        bandpass = starfish.image.Filter.Bandpass(lshort=.5, llong=7, threshold=0.0)
-        bandpass.run(imgs)
-
-        glp = starfish.image.Filter.GaussianLowPass(sigma=(1, 0, 0), is_volume=True)
-        glp.run(imgs)
+            glp = starfish.image.Filter.GaussianLowPass(sigma=(1, 0, 0), is_volume=True)
+            glp.run(img)
 
 
-        clip2 = starfish.image.Filter.Clip(p_min=99, p_max=100, is_volume=True)
-        clip2.run(imgs)
+            clip2 = starfish.image.Filter.Clip(p_min=99, p_max=100, is_volume=True)
+            clip2.run(img)
 
-        tlmpf = starfish.spots.DetectSpots.TrackpyLocalMaxPeakFinder(
-            spot_diameter=5,  # must be odd integer
-            min_mass=0.02,
-            max_size=2,  # this is max radius
-            separation=7,
-            noise_size=0.65,  # this is not used because preprocess is False
-            preprocess=False,
-            percentile=10,  # this is irrelevant when min_mass, spot_diameter, and max_size are set properly
-            verbose=True,
-            is_volume=True,
-        )
+            tlmpf = starfish.spots.DetectSpots.TrackpyLocalMaxPeakFinder(
+                spot_diameter=5,  # must be odd integer
+                min_mass=0.02,
+                max_size=2,  # this is max radius
+                separation=7,
+                noise_size=0.65,  # this is not used because preprocess is False
+                preprocess=False,
+                percentile=10,  # this is irrelevant when min_mass, spot_diameter, and max_size are set properly
+                verbose=True,
+                is_volume=True,
+            )
 
-        intensities = tlmpf.run(imgs)
-        # decode
-        decoded = experiment.codebook.decode_per_round_max(intensities)
+            intensities = tlmpf.run(img)
+            decoded = codebook.decode_per_round_max(intensities)
+            all_decoded.append(decoded)
 
+        decoded = IntensityTable.concatenate_intensity_tables(all_decoded)
         # save results
         df = decoded.to_decoded_spots()
         df.save_csv("decoded.csv")

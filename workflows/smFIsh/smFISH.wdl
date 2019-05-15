@@ -76,7 +76,7 @@ task process_field_of_view {
 
     runtime {
         docker: "spacetx/starfish:0.1.0-simple"
-        memory: "256 GB"
+        memory: "100 GB"
         cpu: "4"
         disk: "local-disk 100 SDD"
     }

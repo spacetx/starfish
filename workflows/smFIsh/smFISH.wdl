@@ -27,7 +27,7 @@ task process_field_of_view {
         print("loainf fov")
         img = fov.get_images(starfish.FieldOfView.PRIMARY_IMAGES, rounds=[round_num])
 
-        print(f"processin fov {fov_str} round {i}...")
+        print(f"processin fov {fov_str} round {round_num}...")
         codebook = indexing_utils.index_keep_dimensions(experiment.codebook, {Axes.ROUND: i})
 
         # filter

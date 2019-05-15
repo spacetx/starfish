@@ -133,11 +133,11 @@ task concatenate_fovs {
 workflow ProcessSmFISH{
 
     Int num_fovs
-    Int rounds_per_fov
+    Int num_rounds
     String experiment
 
     Array[Int] fields_of_view = range(num_fovs)
-    Array[Int] rounds_per_fov = range(num_fovs)
+    Array[Int] rounds_per_fov = range(num_rounds)
     # maybe try this after if things are weird
 #    Array[Pair[Int, Int]] crossed = cross(fields_of_view, rounds_per_fov)
 

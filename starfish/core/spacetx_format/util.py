@@ -8,7 +8,14 @@ from typing import Any, Dict, IO, Iterator, List, Optional, Union
 
 from jsonschema import Draft4Validator, RefResolver, ValidationError
 from pkg_resources import resource_filename
+from semantic_version import Version
+from slicedimage import VERSIONS as SLICEDIMAGE_VERSIONS
 
+from starfish.core.codebook._format import CURRENT_VERSION as CODEBOOK_CURRENT_VERSION
+from starfish.core.experiment.version import CURRENT_VERSION as EXPERIMENT_CURRENT_VERSION
+
+
+TILESET_CURRENT_VERSION = Version(SLICEDIMAGE_VERSIONS[-1].VERSION)
 package_name = 'starfish'
 
 
@@ -115,7 +122,7 @@ class SpaceTxValidator:
         Validate a codebook file::
 
             >>> from pkg_resources import resource_filename
-            >>> from starfish.spacetx_format.util import SpaceTxValidator
+            >>> from starfish.core.spacetx_format.util import SpaceTxValidator
             >>> schema_path = resource_filename(
                     "starfish", "spacetx_format/schema/codebook/codebook.json")
             >>> validator = SpaceTxValidator(schema_path)
@@ -151,7 +158,7 @@ class SpaceTxValidator:
         Validate an experiment json string ::
 
             >>> from pkg_resources import resource_filename
-            >>> from starfish.spacetx_format.util import SpaceTxValidator
+            >>> from starfish.core.spacetx_format.util import SpaceTxValidator
             >>> schema_path = resource_filename("starfish", "spacetx_format/schema/experiment.json")
             >>> validator = SpaceTxValidator(schema_path)
             >>> if not validator.validate_object(your_experiment_object):
@@ -381,7 +388,11 @@ class Change(Checker):
         target.__setitem__(key, self.call())
 
 
-def get_schema_path(schema: str, doc: Dict=None, version: str ="MISSING") -> str:
+def get_schema_path(
+        schema: str,
+        doc: Optional[dict] = None,
+        version: Optional[Version] = None,
+) -> str:
     """lookup the absolute schema path, including version, based
     on the given parameters
 
@@ -394,7 +405,7 @@ def get_schema_path(schema: str, doc: Dict=None, version: str ="MISSING") -> str
         appropriate schema is returned. Otherwise an exception is raised.
     doc: dict
         If provided, the "version" key will be read from it.
-    version: str
+    version: Version
         Default version string to use if not found in the doc.
 
     Returns
@@ -405,25 +416,30 @@ def get_schema_path(schema: str, doc: Dict=None, version: str ="MISSING") -> str
     """
 
     if doc is not None:
-        version = doc.get("version", version)
+        version_str = doc.get("version", version)
+        if version_str is not None:
+            version = Version(version_str)
+
+    if version is None:
+        raise ValueError("Could not find the version of the schema to validate against")
 
     if "codebook" in schema:
-        path = "codebook_{version}/codebook.json"
+        path = f"codebook_{version}/codebook.json"
     elif "experiment" in schema:
-        path = "experiment_{version}.json"
+        path = f"experiment_{version}.json"
     elif "fov_manifest" in schema:
-        path = "fov_manifest_{version}.json"
+        path = f"fov_manifest_{version}.json"
     elif "coordinates" in schema:
-        path = "field_of_view_{version}/tiles/coordinates.json"
+        path = f"field_of_view_{version}/tiles/coordinates.json"
     elif "indices" in schema:
-        path = "field_of_view_{version}/tiles/indices.json"
+        path = f"field_of_view_{version}/tiles/indices.json"
     elif "tiles" in schema:
-        path = "field_of_view_{version}/tiles/tiles.json"
+        path = f"field_of_view_{version}/tiles/tiles.json"
     elif "field_of_view" in schema:
-        path = "field_of_view_{version}/field_of_view.json"
+        path = f"field_of_view_{version}/field_of_view.json"
     else:
         raise Exception(f"Unknown schema: {schema}")
-    return _get_absolute_schema_path(path.format(**locals()))
+    return _get_absolute_schema_path(path)
 
 
 class CodebookValidator(SpaceTxValidator):
@@ -432,7 +448,7 @@ class CodebookValidator(SpaceTxValidator):
     as returned by get_schema_path.
     """
 
-    def __init__(self, doc=None, version=None):
+    def __init__(self, doc: Optional[dict] = None, version: Optional[Version] = None):
         super(CodebookValidator, self).__init__(get_schema_path("codebook", doc, version))
 
 
@@ -442,7 +458,7 @@ class ExperimentValidator(SpaceTxValidator):
     as returned by get_schema_path.
     """
 
-    def __init__(self, doc=None, version=None):
+    def __init__(self, doc: Optional[dict] = None, version: Optional[Version] = None):
         super(ExperimentValidator, self).__init__(get_schema_path("experiment", doc, version))
 
 
@@ -452,7 +468,7 @@ class FOVValidator(SpaceTxValidator):
     as returned by get_schema_path.
     """
 
-    def __init__(self, doc=None, version=None):
+    def __init__(self, doc: Optional[dict] = None, version: Optional[Version] = None):
         super(FOVValidator, self).__init__(get_schema_path("field_of_view", doc, version))
 
 
@@ -462,17 +478,17 @@ class ManifestValidator(SpaceTxValidator):
     as returned by get_schema_path.
     """
 
-    def __init__(self, doc=None, version=None):
+    def __init__(self, doc: Optional[dict] = None, version: Optional[Version] = None):
         super(ManifestValidator, self).__init__(get_schema_path("fov_manifest", doc, version))
 
 
-LatestCodebookValidator = lambda: CodebookValidator(version="0.0.0")
+LatestCodebookValidator = lambda: CodebookValidator(version=CODEBOOK_CURRENT_VERSION)
 
 
-LatestExperimentValidator = lambda: ExperimentValidator(version="5.0.0")
+LatestExperimentValidator = lambda: ExperimentValidator(version=EXPERIMENT_CURRENT_VERSION)
 
 
-LatestFOVValidator = lambda: FOVValidator(version="0.1.0")
+LatestFOVValidator = lambda: FOVValidator(version=TILESET_CURRENT_VERSION)
 
 
-LatestManifestValidator = lambda: ManifestValidator(version="0.1.0")
+LatestManifestValidator = lambda: ManifestValidator(version=TILESET_CURRENT_VERSION)

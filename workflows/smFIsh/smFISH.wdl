@@ -18,6 +18,7 @@ task process_field_of_view {
         fov: int = ${field_of_view}
         round_num: int = ${round_num}
         fov_str: str = f"fov_{int(fov):03d}"
+        int i = 0
 
         # load experiment
         print("loading experiment")

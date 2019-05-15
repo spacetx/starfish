@@ -28,7 +28,7 @@ task process_field_of_view {
         img = fov.get_images(starfish.FieldOfView.PRIMARY_IMAGES, rounds=[round_num])
 
         print(f"processin fov {fov_str} round {round_num}...")
-        codebook = indexing_utils.index_keep_dimensions(experiment.codebook, {Axes.ROUND: i})
+        codebook = indexing_utils.index_keep_dimensions(experiment.codebook, {Axes.ROUND: round_num})
 
         # filter
         print("clipping")

@@ -1,3 +1,13 @@
+## [0.1.1] - 2019-05-16
+- [Easy] Fixing spot detection for labeled axes (#1347)
+- Schema versioning (#1278)
+- Add a missing parameter to wrapper for trackpy local max peak finder (#1300)
+- Fix physical coordinate calculator (#1350)
+- Fix spot detection for labeled data. (#1349)
+- Adding back ability to crop on fov.get_image() (#1329)
+- RFC: Base calling filter for in situ sequencing (#1281)
+- Preserve subpixel offsets from spot detection (#1330)
+
 ## [0.1.0] - 2019-04-23
 - public/private separation (#1244)
 - Recipe and recipe execution (#1192)
@@ -46,6 +56,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.1.1]: https://github.com/spacetx/starfish/releases/tag/0.1.1
 [0.1.0]: https://github.com/spacetx/starfish/releases/tag/0.1.0
 [0.0.36]: https://github.com/spacetx/starfish/releases/tag/0.0.36
 [0.0.35]: https://github.com/spacetx/starfish/releases/tag/0.0.35

@@ -1,12 +1,10 @@
 import pytest
 from pkg_resources import resource_filename
 
-from .util import SpaceTxValidator
+from .util import LatestFOVValidator
 
 package_name = "starfish"
-fov_schema_path = resource_filename(
-    package_name, "spacetx_format/schema/field_of_view/field_of_view.json")
-validator = SpaceTxValidator(fov_schema_path)
+validator = LatestFOVValidator()
 example = resource_filename(
     package_name, "spacetx_format/examples/field_of_view/field_of_view.json")
 too_large = resource_filename(

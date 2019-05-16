@@ -1,0 +1,122 @@
+{
+  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/field_of_view/field_of_view.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "version",
+    "dimensions",
+    "shape",
+    "tiles"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "$ref": "schema/version.json"
+    },
+    "extras": {
+      "$ref": "schema/extras.json"
+    },
+    "dimensions": {
+      "type": "array",
+      "description": "Dimensions of the image tensor described by this fov specification.",
+      "minItems": 1,
+      "items": {
+        "$id": "/properties/dimensions/items",
+        "type": "string",
+        "description": "A dimension of the tensor described by this fov specification.",
+        "examples": [
+          "x",
+          "y",
+          "c",
+          "z",
+          "r"
+        ]
+      }
+    },
+    "shape": {
+      "type": "object",
+      "description": "The shape of the categorical dimensions (channel, round, z-plane) of the field of view.",
+      "required": "c",
+      "properties": {
+        "r": {
+          "description": "Number of imaging rounds.",
+          "type": "integer",
+          "default": 1,
+          "minimum": 1,
+          "examples": [
+            1, 2, 10
+          ]
+        },
+        "c": {
+          "type": "integer",
+          "description": "Number of channels.",
+          "minimum": 1,
+          "default": 1,
+          "examples": [
+            3, 5, 10
+          ]
+        },
+        "z": {
+          "type": "integer",
+          "title": "Number of z-sections.",
+          "minimum": 1,
+          "default": 1,
+          "examples": [
+            1, 34, 67
+          ]
+        }
+      }
+    },
+    "tiles": {
+      "minItems": 1,
+      "items": {
+        "$ref": "schema/field_of_view_0.1.0/tiles/tiles.json"
+      }
+    },
+    "default_tile_shape": {
+      "oneOf": [
+        {
+          "type": "array",
+          "description": "The default tile shape (y, x) of the tiles in this field of view.",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "integer",
+            "example": 2048,
+            "minimum": 0,
+            "maximum": 3000
+          }
+        },
+        {
+          "type": "object",
+          "description": "The default tile shape of the tiles in this field of view.",
+          "properties": {
+            "x": {
+              "type": "integer",
+              "description": "The width of the tile in pixels.",
+              "minimum": 1
+            },
+            "y": {
+              "type": "integer",
+              "description": "The height of the tile in pixels.",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "x",
+            "y"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "default_tile_format": {
+      "type": "string",
+      "title": "The default tile format for this field of view.",
+      "enum": [
+        "TIFF",
+        "NUMPY"
+      ]
+    }
+  }
+}

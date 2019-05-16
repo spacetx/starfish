@@ -118,7 +118,7 @@ def measure_spot_intensities(
             measurement_function,
             radius_is_gyration=radius_is_gyration
         )
-        intensity_table[:, c, r] = blob_intensities
+        intensity_table.loc[:, c, r] = blob_intensities
 
     return intensity_table
 
@@ -156,8 +156,8 @@ def concatenate_spot_attributes_to_intensities(
     i = 0
     for attrs, inds in spot_attributes:
         for _, row in attrs.data.iterrows():
-            intensity_table.loc[dict(features=i, c=inds[Axes.CH], r=inds[Axes.ROUND])]\
-                = row['intensity']
+            selector = dict(features=i, c=inds[Axes.CH], r=inds[Axes.ROUND])
+            intensity_table.loc[selector] = row['intensity']
             i += 1
 
     return intensity_table

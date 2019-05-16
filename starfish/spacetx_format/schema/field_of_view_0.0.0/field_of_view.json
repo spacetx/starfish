@@ -70,7 +70,7 @@
     "tiles": {
       "minItems": 1,
       "items": {
-        "$ref": "schema/field_of_view/tiles/tiles.json"
+        "$ref": "schema/field_of_view_0.1.0/tiles/tiles.json"
       }
     },
     "default_tile_shape": {

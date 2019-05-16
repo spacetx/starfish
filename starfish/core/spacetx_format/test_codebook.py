@@ -1,14 +1,12 @@
 import pytest
 from pkg_resources import resource_filename
 
-from starfish.core.codebook._format import DocumentKeys
-from .util import SpaceTxValidator
+from starfish.core.codebook._format import CURRENT_VERSION, DocumentKeys
+from .util import LatestCodebookValidator
 from .validate_sptx import validate_file
 
 package_name = "starfish"
-codebook_schema_path = resource_filename(
-    package_name, "spacetx_format/schema/codebook/codebook.json")
-validator = SpaceTxValidator(codebook_schema_path)
+validator = LatestCodebookValidator()
 
 
 def test_codebook():
@@ -41,4 +39,4 @@ def test_codebook_missing_channel_raises_validation_error():
 def test_codebook_validate():
     example = resource_filename(
         package_name, "spacetx_format/examples/codebook/codebook.json")
-    assert validate_file(example, "codebook/codebook.json")
+    assert validate_file(example, f"codebook_{CURRENT_VERSION}/codebook.json")

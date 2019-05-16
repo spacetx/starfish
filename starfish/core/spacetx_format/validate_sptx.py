@@ -1,20 +1,13 @@
 import json
-import posixpath
 import sys
 from typing import Dict
 
-from pkg_resources import resource_filename
 from slicedimage.backends._base import Backend
 from slicedimage.io import resolve_path_or_url
 
 from starfish.core.config import StarfishConfig
 from starfish.core.util import click
-from .util import SpaceTxValidator
-
-
-def _get_absolute_schema_path(schema_name: str) -> str:
-    """turn the name of the schema into an absolute path by joining it to <package_root>/schema."""
-    return resource_filename("starfish", posixpath.join("spacetx_format", "schema", schema_name))
+from .util import (get_schema_path, SpaceTxValidator)
 
 
 @click.command()
@@ -116,8 +109,6 @@ def validate_file(file: str, schema: str, fuzz: bool=False,
         >>> valid = validate_sptx.validate_file(json_url, "codebook/codebook.json")
     """
 
-    validator = SpaceTxValidator(_get_absolute_schema_path(schema))
-
     if backend is None:
         backend, name, baseurl = resolve_path_or_url(file)
     else:
@@ -127,6 +118,8 @@ def validate_file(file: str, schema: str, fuzz: bool=False,
         obj = json.load(fh)
         if output is not None:
             output.update(obj)
+
+    validator = SpaceTxValidator(get_schema_path(schema, obj))
 
     if fuzz:
         validator.fuzz_object(obj, file)

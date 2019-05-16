@@ -3,12 +3,11 @@ import warnings
 import pytest
 from pkg_resources import resource_filename
 
-from .util import SpaceTxValidator
+from .util import LatestExperimentValidator
 from .validate_sptx import validate
 
 package_name = "starfish"
-experiment_schema_path = resource_filename(package_name, "spacetx_format/schema/experiment.json")
-validator = SpaceTxValidator(experiment_schema_path)
+validator = LatestExperimentValidator()
 example = resource_filename(package_name, "spacetx_format/examples/experiment/experiment.json")
 
 

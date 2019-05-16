@@ -1,11 +1,10 @@
 import pytest
 from pkg_resources import resource_filename
 
-from .util import SpaceTxValidator
+from .util import LatestManifestValidator
 
 package_name = "starfish"
-schema_path = resource_filename(package_name, "spacetx_format/schema/fov_manifest.json")
-validator = SpaceTxValidator(schema_path)
+validator = LatestManifestValidator()
 
 
 def test_fov_manifest():

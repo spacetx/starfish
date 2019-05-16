@@ -1,11 +1,10 @@
 import pytest
 from pkg_resources import resource_filename
 
-from .util import FOVValidator
+from .util import LatestFOVValidator
 
 package_name = "starfish"
-current_version = "0.1.0"
-validator = FOVValidator(version=current_version)
+validator = LatestFOVValidator()
 example = resource_filename(
     package_name, "spacetx_format/examples/field_of_view/field_of_view.json")
 too_large = resource_filename(

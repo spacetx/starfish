@@ -830,12 +830,15 @@ class ImageStack:
             self._processing_workflow, partial(func, **kwargs), self.xarray.dims, coordinates)
 
         with Pool(
-                maxtasksperchild=1000,
                 processes=n_processes,
                 initializer=SharedMemory.initializer,
-                initargs=((self._data._backing_mp_array,
-                           self._data._data.shape,
-                           self._data._data.dtype),)) as pool:
+                initargs=(
+                        (self._data._backing_mp_array,
+                         self._data._data.shape,
+                         self._data._data.dtype),
+                ),
+                maxtasksperchild=8,
+        ) as pool:
             results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
             # Note: results is [None, ...] if executing an in-place workflow
             # Note: this return must be inside the context manager or the Pool will deadlock

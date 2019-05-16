@@ -7,6 +7,7 @@ task process_field_of_view {
     command <<<
         python3 <<CODE
 
+        import starfish
         from starfish import Experiment, FieldOfView
         from starfish.image import Filter
         from starfish.image import ApplyTransform, LearnTransform

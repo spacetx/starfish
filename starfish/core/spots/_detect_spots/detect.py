@@ -118,7 +118,7 @@ def measure_spot_intensities(
             measurement_function,
             radius_is_gyration=radius_is_gyration
         )
-        intensity_table.loc[:, c, r] = blob_intensities
+        intensity_table.loc[dict(c=c, r=r)] = blob_intensities
 
     return intensity_table
 

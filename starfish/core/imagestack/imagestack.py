@@ -839,7 +839,10 @@ class ImageStack:
 
             # Note: results is [None, ...] if executing an in-place workflow
             # Note: this return must be inside the context manager or the Pool will deadlock
+            pool.close()
+            pool.join()
             return list(zip(results, selectors))
+
 
     @staticmethod
     def _processing_workflow(

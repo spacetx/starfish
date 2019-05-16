@@ -221,12 +221,12 @@ def detect_spots(data_stack: ImageStack,
         spot_finding_kwargs = {}
 
     if reference_image is not None:
-        if reference_image_max_projection_axes is None:
-            raise ValueError("axes must be provided if reference_image is provided")
-        max_proj_reference_image = reference_image.max_proj(*reference_image_max_projection_axes)
-        reference_spot_locations = spot_finding_method(
-            max_proj_reference_image._squeezed_numpy(*reference_image_max_projection_axes),
-            **spot_finding_kwargs)
+        if reference_image_max_projection_axes is not None:
+            reference_image = reference_image.max_proj(*reference_image_max_projection_axes)
+            data_image = reference_image._squeezed_numpy(*reference_image_max_projection_axes)
+        else:
+            data_image = reference_image.xarray
+        reference_spot_locations = spot_finding_method(data_image, **spot_finding_kwargs)
         intensity_table = measure_spot_intensities(
             data_image=data_stack,
             spot_attributes=reference_spot_locations,

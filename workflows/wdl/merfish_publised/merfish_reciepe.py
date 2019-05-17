@@ -56,5 +56,4 @@ def process_fov(field_of_view, experiement_str):
 
     spot_intensities = initial_spot_intensities.loc[initial_spot_intensities[Features.PASSES_THRESHOLDS]]
     df = spot_intensities.to_decoded_spots()
-    print("saving decoded.csv")
-    df.save_csv("decoded.csv")
+    return df

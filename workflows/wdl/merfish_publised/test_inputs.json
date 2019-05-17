@@ -1,5 +1,5 @@
 {
   "ProcessMERFISH.experiment": "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/MERFISH/20190511/experiment.json",
   "ProcessMERFISH.num_fovs": 2,
-  "ProcessMERFISH.recipe_file"
+  "ProcessMERFISH.recipe_file": "https://raw.githubusercontent.com/spacetx/starfish/saxelrod-wdl-merfish-iss/workflows/wdl/merfish_publised/merfish_reciepe.py"
 }

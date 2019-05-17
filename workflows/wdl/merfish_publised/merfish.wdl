@@ -3,17 +3,20 @@ task process_field_of_view {
 
     String experiment
     Int field_of_view
+    String recipe_file
 
     command <<<
         pip install git+https://github.com/spacetx/starfish.git@saxelrod-wdl-merfish-iss
 
+        wget -O recipe.py ${recipe_file}
+
         python3 <<CODE
 
         import starfish
-        from starfish.core.pipelines import merfish_reciepe
+        merfish = __import__('recipe')
 
-        merfish_reciepe.process_fov(${field_of_view}, "${experiment}")
-
+        decoded_spots = merfish.process_fov(${field_of_view}, "${experiment}")
+        decoded_spots.save_csv("decoded.csv")
 
         CODE
     >>>
@@ -36,9 +39,26 @@ task concatenate_fovs {
 
     command <<<
         python <<CODE
-        from starfish.core.pipelines.wdl_utils import concatenate_decoded_csvs
+        files = "${sep=' ' decoded_csvs}".strip().split()
+        import pandas as pd
 
-        concatenate_decoded_csvs()
+        # get a non-zero size seed dataframe
+        for i, f in enumerate(files):
+            first = pd.read_csv(f, dtype={"target": object})
+            if first.shape[0] != 0:
+                break
+
+        for f in files[i + 1:]:
+            next_ = pd.read_csv(f, dtype={"target": object})
+
+            # don't concatenate if the df is empty
+            if next_.shape[0] != 0:
+                first = pd.concat([first, next_], axis=0)
+
+        # label spots sequentially
+        first = first.reset_index.drop("index", axis=1)
+
+        first.to_csv("decoded_concatenated.csv")
         CODE
     >>>
 
@@ -67,7 +87,8 @@ workflow ProcessMERFISH{
         call process_field_of_view {
             input:
                 experiment = experiment,
-                field_of_view = fov
+                field_of_view = fov,
+                recipe_file = recipe_file
         }
     }
 

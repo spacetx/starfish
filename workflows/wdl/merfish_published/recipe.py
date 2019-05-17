@@ -9,8 +9,8 @@ from starfish.types import Clip
 from starfish.spots import DetectPixels
 
 
-def process_fov(field_of_view, experiement_str):
-    fov_str: str = f"fov_{int(field_of_view):03d}"
+def process_fov(field_num: int, experiement_str: str):
+    fov_str: str = f"fov_{int(field_num):03d}"
     # load experiment
     experiment = starfish.Experiment.from_json(experiement_str)
 

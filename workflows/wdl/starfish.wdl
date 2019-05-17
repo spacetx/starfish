@@ -3,51 +3,19 @@ task process_field_of_view {
 
     String experiment
     Int field_of_view
+    String recipe_file
 
     command <<<
+        wget -O recipe.py ${recipe_file}
+
         python3 <<CODE
 
-        import numpy as np
         import starfish
-        from starfish.types import Axes
+        recipe = __import__('recipe')
 
-        fov: int = ${field_of_view}
-        fov_str: str = f"fov_{int(fov):03d}"
+        decoded_spots = recipe.process_fov(${field_of_view}, "${experiment}")
+        decoded_spots.save_csv("decoded.csv")
 
-        # load experiment
-        experiment = starfish.Experiment.from_json("${experiment}")
-
-        fov = experiment[fov_str]
-        imgs = fov.get_image(starfish.FieldOfView.PRIMARY_IMAGES)
-        dots = imgs.max_proj(Axes.CH)
-
-        # filter
-        filt = starfish.image.Filter.WhiteTophat(masking_radius=15, is_volume=False)
-        filtered_imgs = filt.run(imgs, verbose=True, in_place=False)
-        filt.run(dots, verbose=True, in_place=True)
-
-        # find threshold
-        tmp = dots.sel({Axes.ROUND:0, Axes.CH:0, Axes.ZPLANE:0})
-        dots_threshold = np.percentile(np.ravel(tmp.xarray.values), 50)
-
-        # find spots
-        p = starfish.spots.DetectSpots.BlobDetector(
-            min_sigma=1,
-            max_sigma=10,
-            num_sigma=30,
-            threshold=dots_threshold,
-            measurement_type='mean',
-        )
-
-        # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-        intensities = p.run(filtered_imgs, blobs_image=dots, blobs_axes=(Axes.ROUND, Axes.ZPLANE))
-
-        # decode
-        decoded = experiment.codebook.decode_per_round_max(intensities)
-
-        # save results
-        df = decoded.to_decoded_spots()
-        df.save_csv("decoded.csv")
         CODE
     >>>
 
@@ -69,9 +37,7 @@ task concatenate_fovs {
 
     command <<<
         python <<CODE
-
         files = "${sep=' ' decoded_csvs}".strip().split()
-
         import pandas as pd
 
         # get a non-zero size seed dataframe
@@ -91,7 +57,6 @@ task concatenate_fovs {
         first = first.reset_index.drop("index", axis=1)
 
         first.to_csv("decoded_concatenated.csv")
-
         CODE
     >>>
 
@@ -108,10 +73,10 @@ task concatenate_fovs {
 }
 
 
-workflow ProcessISS{
-
+workflow Starfish {
     Int num_fovs
     String experiment
+    String recipe_file
 
     Array[Int] fields_of_view = range(num_fovs)
 
@@ -119,7 +84,8 @@ workflow ProcessISS{
         call process_field_of_view {
             input:
                 experiment = experiment,
-                field_of_view = fov
+                field_of_view = fov,
+                recipe_file = recipe_file
         }
     }
 

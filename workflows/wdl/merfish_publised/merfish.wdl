@@ -5,7 +5,7 @@ task process_field_of_view {
     Int field_of_view
 
     command <<<
-        pip install git+https://github.com/spacetx/starfish.git@saxelrod-smFISH-wdl
+        pip install git+https://github.com/spacetx/starfish.git@saxelrod-wdl-merfish-iss
 
         python3 <<CODE
 
@@ -59,6 +59,7 @@ workflow ProcessMERFISH{
 
     Int num_fovs
     String experiment
+    String recipe_file
 
     Array[Int] fields_of_view = range(num_fovs)
 

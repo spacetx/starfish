@@ -76,7 +76,7 @@ task process_field_of_view {
 
     runtime {
         docker: "spacetx/starfish:0.1.0-simple"
-        memory: "200 GB"
+        memory: "1 T"
         cpu: "2"
         disk: "local-disk 100 SDD"
     }
@@ -121,7 +121,7 @@ task concatenate_fovs {
 
     runtime {
         docker: "spacetx/starfish:0.1.0-simple"
-        memory: "16 GB"
+        memory: "200 GB"
         cpu: "1"
         disk: "local-disk 100 SDD"
     }

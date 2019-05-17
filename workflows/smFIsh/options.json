@@ -1,0 +1,5 @@
+{
+  "write_to_cache": true,
+  "read_from_cache": true,
+  "monitoring_script": "gs://broad-biccn-dev-test-data/monitoring.sh"
+}

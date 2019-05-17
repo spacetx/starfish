@@ -267,7 +267,7 @@ class ImageStack:
         """
         config = StarfishConfig()
         tileset = Reader.parse_doc(url, baseurl, backend_config=config.slicedimage)
-        coordinate_groups = CropParameters.parse_coordinate_groups(tileset)
+        coordinate_groups = CropParameters.parse_aligned_groups(tileset)
         crop_params = coordinate_groups[aligned_group]
         return cls.from_tileset(tileset, crop_parameters=crop_params)
 
@@ -832,14 +832,18 @@ class ImageStack:
         with Pool(
                 processes=n_processes,
                 initializer=SharedMemory.initializer,
-                initargs=((self._data._backing_mp_array,
-                           self._data._data.shape,
-                           self._data._data.dtype),)) as pool:
+                initargs=(
+                        (self._data._backing_mp_array,
+                         self._data._data.shape,
+                         self._data._data.dtype),
+                ),
+                maxtasksperchild=8,
+        ) as pool:
             results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
-
             # Note: results is [None, ...] if executing an in-place workflow
             # Note: this return must be inside the context manager or the Pool will deadlock
             return list(zip(results, selectors))
+
 
     @staticmethod
     def _processing_workflow(

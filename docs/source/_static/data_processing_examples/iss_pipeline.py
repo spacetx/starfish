@@ -14,10 +14,10 @@ test = os.getenv("TESTING") is not None
 
 
 def iss_pipeline(fov, codebook):
-    primary_image = fov.get_image(starfish.FieldOfView.PRIMARY_IMAGES)
+    primary_image = fov.get_images(starfish.FieldOfView.PRIMARY_IMAGES)
 
     # register the raw image
-    learn_translation = LearnTransform.Translation(reference_stack=fov.get_image('dots'),
+    learn_translation = LearnTransform.Translation(reference_stack=fov.get_images('dots'),
                                                    axes=Axes.ROUND, upsampling=100)
     transforms_list = learn_translation.run(primary_image.max_proj(Axes.CH, Axes.ZPLANE))
     warp = ApplyTransform.Warp()
@@ -39,7 +39,7 @@ def iss_pipeline(fov, codebook):
 
     intensities = p.run(
         filtered,
-        blobs_image=fov.get_image('dots'),
+        blobs_image=fov.get_images('dots'),
         blobs_axes=(Axes.ROUND, Axes.ZPLANE))
 
     # decode the pixel traces using the codebook
@@ -51,7 +51,7 @@ def iss_pipeline(fov, codebook):
         input_threshold=.22,
         min_distance=57,
     )
-    label_image = seg.run(primary_image, fov.get_image('dots'))
+    label_image = seg.run(primary_image, fov.get_images('dots'))
 
     # assign spots to cells
     ta = AssignTargets.Label()

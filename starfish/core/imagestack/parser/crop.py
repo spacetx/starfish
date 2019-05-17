@@ -2,7 +2,7 @@ from collections import OrderedDict
 from typing import Collection, List, Mapping, MutableSequence, Optional, Tuple, Union
 
 import numpy as np
-from slicedimage import TileSet
+from slicedimage import Tile, TileSet
 
 from starfish.core.imagestack.parser import TileCollectionData, TileData, TileKey
 from starfish.core.imagestack.physical_coordinate_calculator import (
@@ -58,31 +58,6 @@ class CropParameters:
         if axis_type == Axes.ZPLANE and self._permitted_zplanes:
             self._permitted_zplanes.add(permitted_axis)
 
-    def further_crop(self, further_crop_params) -> "CropParameters":
-        if (further_crop_params._permitted_chs
-                and not further_crop_params._permitted_chs.issubset(self._permitted_chs)):
-            raise ValueError("Can only provide further ch crop params within the existing set of"
-                             "ch crop params")
-        else:
-            self._permitted_chs = further_crop_params._permitted_chs
-
-        if (further_crop_params._permitted_rounds
-                and not further_crop_params._permitted_rounds.issubset(self._permitted_rounds)):
-            raise ValueError("Can only provide further round crop params within the existing set of"
-                             "round crop params")
-        else:
-            self._permitted_rounds = further_crop_params._permitted_rounds
-
-        if (further_crop_params._permitted_zplanes
-                and not further_crop_params._permitted_zplanes.issubset(self._permitted_zplanes)):
-            raise ValueError("Can only provide further zplane crop params within the existing set "
-                             "of zplane crop params")
-        else:
-            self._permitted_zplanes = further_crop_params._permitted_zplanes
-        self._x_slice = further_crop_params._x_slice
-        self._y_slice = further_crop_params._y_slice
-        return self
-
     def filter_tilekeys(self, tilekeys: Collection[TileKey]) -> Collection[TileKey]:
         """
         Filters tilekeys for those that should be included in the resulting ImageStack.
@@ -133,35 +108,103 @@ class CropParameters:
         return start, stop
 
     @staticmethod
-    def parse_coordinate_groups(tileset: TileSet) -> List["CropParameters"]:
-        """Takes a tileset and compares the physical coordinates on each tile to
-         create aligned coordinate groups (groups of tiles that have the same physical coordinates)
+    def parse_aligned_groups(tileset: TileSet,
+                             rounds: Optional[Collection[int]] = None,
+                             chs: Optional[Collection[int]] = None,
+                             zplanes: Optional[Collection[int]] = None,
+                             x: Optional[Union[int, slice]] = None,
+                             y: Optional[Union[int, slice]] = None
+                             ) -> List["CropParameters"]:
+
+        """Takes a tileset and any optional selected axes lists compares the physical coordinates on each
+         tile to create aligned coordinate groups (groups of tiles that have the same physical
+         coordinates)
+
+        Parameters
+        ----------
+        tileset: TileSet
+            The TileSet to parse
+        rounds: Optional[Collection[int]]
+            The rounds in the tileset to include in the final aligned groups. If this is not set,
+            then all rounds are included.
+        chs: Optional[Collection[int]]
+            The chs in the tileset to include in the final aligned groups. If this is not set,
+            then all chs are included.
+        zplanes: Optional[Collection[int]]
+            The zplanes in the tileset to include in the final aligned groups. If this is not set,
+            then all zplanes are included.
+        x: Optional[Union[int, slice]]
+            The x-range in the x-y tile to include in the final aligned groups.  If this is not set,
+            then the entire x-y tile is included.
+        y: Optional[Union[int, slice]]
+            The y-range in the x-y tile to include in the final aligned groups.  If this is not set,
+            then the entire x-y tile is included.
 
          Returns
          -------
-         A list of CropParameters. Each entry describes the r/ch/z values of tiles that are aligned
-         (have matching coordinates)
+         List["CropParameters"]
+             A list of CropParameters. Each entry describes the r/ch/z values of tiles that are
+             aligned (have matching coordinates) and are within the selected_axes if provided.
          """
         coord_groups: OrderedDict[tuple, CropParameters] = OrderedDict()
         for tile in tileset.tiles():
-            x_y_coords = (
-                tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
-                tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1]
-            )
-            # A tile with this (x, y) has already been seen, add tile's Indices to CropParameters
-            if x_y_coords in coord_groups:
-                crop_params = coord_groups[x_y_coords]
-                crop_params._add_permitted_axes(Axes.CH, tile.indices[Axes.CH])
-                crop_params._add_permitted_axes(Axes.ROUND, tile.indices[Axes.ROUND])
-                if Axes.ZPLANE in tile.indices:
-                    crop_params._add_permitted_axes(Axes.ZPLANE, tile.indices[Axes.ZPLANE])
-            else:
-                coord_groups[x_y_coords] = CropParameters(
-                    permitted_chs=[tile.indices[Axes.CH]],
-                    permitted_rounds=[tile.indices[Axes.ROUND]],
-                    permitted_zplanes=[tile.indices[Axes.ZPLANE]] if Axes.ZPLANE in tile.indices
-                    else None)
+            if (rounds is None and chs is None and zplanes is None) \
+                    or CropParameters.tile_in_selected_axes(tile, rounds, chs, zplanes):
+
+                x_y_coords = (
+                    tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
+                    tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1]
+                )
+                # A tile with this (x, y) has already been seen, add tile's indices to
+                # CropParameters
+                if x_y_coords in coord_groups:
+                    crop_params = coord_groups[x_y_coords]
+                    crop_params._add_permitted_axes(Axes.CH, tile.indices[Axes.CH])
+                    crop_params._add_permitted_axes(Axes.ROUND, tile.indices[Axes.ROUND])
+                    if Axes.ZPLANE in tile.indices:
+                        crop_params._add_permitted_axes(Axes.ZPLANE, tile.indices[Axes.ZPLANE])
+                else:
+                    coord_groups[x_y_coords] = CropParameters(
+                        permitted_chs=[tile.indices[Axes.CH]],
+                        permitted_rounds=[tile.indices[Axes.ROUND]],
+                        permitted_zplanes=[tile.indices[Axes.ZPLANE]] if Axes.ZPLANE in tile.indices
+                        else None,
+                        x_slice=x,
+                        y_slice=y)
         return list(coord_groups.values())
+
+    @staticmethod
+    def tile_in_selected_axes(tile: Tile,
+                              rounds: Optional[Collection[int]] = None,
+                              chs: Optional[Collection[int]] = None,
+                              zplanes: Optional[Collection[int]] = None) -> bool:
+        """
+        Return True if a tile belongs in a list of selected axes.
+
+        Parameters
+        ----------
+        tile:
+            The tile in question
+        rounds: Optional[Collection[int]]
+            The allowed rounds.
+        chs: Optional[Collection[int]]
+            The allowed chs.
+        zplanes: Optional[Collection[int]]
+            The allowed zplanes.
+
+        Returns
+        -------
+        Boolean
+            True if tile belongs with selected axes, False if not.
+        """
+
+        if rounds and tile.indices[Axes.ROUND] not in rounds:
+            return False
+        if chs and tile.indices[Axes.CH] not in chs:
+            return False
+        if zplanes and tile.indices[Axes.ZPLANE] not in zplanes:
+            return False
+        return True
 
     def crop_shape(self, shape: Mapping[Axes, int]) -> Mapping[Axes, int]:
         """

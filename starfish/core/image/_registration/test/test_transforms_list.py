@@ -13,8 +13,8 @@ ISS_SHIFTS = [[-23, 6], [-22, 2], [-22, -3], [-15, -4]]
 
 def test_export_import_transforms_object():
     exp = data.ISS(use_test_data=True)
-    stack = exp.fov().get_image('primary')
-    reference_stack = exp.fov().get_image('dots')
+    stack = exp.fov().get_images('primary')
+    reference_stack = exp.fov().get_images('dots')
     translation = Translation(reference_stack=reference_stack, axes=Axes.ROUND)
     # Calculate max_proj accrss CH/Z
     stack = stack.max_proj(Axes.CH, Axes.ZPLANE)

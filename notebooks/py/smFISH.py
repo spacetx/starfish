@@ -31,11 +31,11 @@ from IPython import get_ipython
 
 import starfish
 import starfish.data
-from starfish import FieldOfView, IntensityTable
+from starfish import FieldOfView, IntensityTable, Experiment
 
 # equivalent to %gui qt
-ipython = get_ipython()
-ipython.magic("gui qt5")
+# ipython = get_ipython()
+# ipython.magic("gui qt5")
 # EPY: END code
 
 # EPY: START markdown
@@ -97,11 +97,12 @@ from functools import partial
 import sys
 print = partial(print, file=sys.stderr)
 
+
 def processing_pipeline(
     experiment: starfish.Experiment,
-    fov_name: str,
+    fov_str,
     n_processes: Optional[int]=None
-) -> Tuple[starfish.ImageStack, starfish.IntensityTable]:
+) -> starfish.IntensityTable:
     """Process a single field of view of an experiment
 
     Parameters
@@ -119,15 +120,12 @@ def processing_pipeline(
     """
 
     print("Loading images...")
-    primary_image = experiment[fov_name].get_image(FieldOfView.PRIMARY_IMAGES)
+    fov = experiment[fov_str]
+    primary_images = fov.get_images(FieldOfView.PRIMARY_IMAGES)
     all_intensities = list()
     codebook = experiment.codebook
-    
-    images = enumerate(experiment[fov_name].iterate_image_type(FieldOfView.PRIMARY_IMAGES))
-
-    for image_number, primary_image in images:
-
-        print(f"Filtering image {image_number}...")
+    for r, primary_image in enumerate(primary_images):
+        print(f"Filtering image {r}...")
         filter_kwargs = dict(
             in_place=True,
             verbose=True,
@@ -151,10 +149,10 @@ def processing_pipeline(
     print("Decoding spots...")
     decoded = codebook.decode_per_round_max(spot_attributes)
     decoded = decoded[decoded["total_intensity"] > .025]
-    
+
     print("Processing complete.")
 
-    return primary_image, decoded
+    return decoded
 # EPY: END code
 
 # EPY: START markdown
@@ -163,9 +161,11 @@ def processing_pipeline(
 # EPY: END markdown
 
 # EPY: START code
-experiment = starfish.data.allen_smFISH(use_test_data=True)
+experiment = Experiment.from_json("https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20190214/allen_mouse_panel_1/experiment.json")
 
-image, intensities = processing_pipeline(experiment, fov_name='fov_001')
+for fov_num in range(2):
+    fov_str: str = f"fov_{int(fov_num):03d}"
+    intensities = processing_pipeline(experiment, fov_str)
 
 # uncomment the below line to visualize the output with the spot calls.
 # viewer = starfish.display(image, intensities)

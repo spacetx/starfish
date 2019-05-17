@@ -156,7 +156,7 @@ def concatenate_spot_attributes_to_intensities(
     i = 0
     for attrs, inds in spot_attributes:
         for _, row in attrs.data.iterrows():
-            intensity_table.loc[i, inds[Axes.CH], inds[Axes.ROUND]] = row['intensity']
+            intensity_table.loc[dict(features=i, c=inds[Axes.CH], r=inds[Axes.ROUND])] = row['intensity']
             i += 1
 
     return intensity_table

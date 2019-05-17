@@ -17,7 +17,7 @@ class GetImageStackFromExperiment(ConversionFormula[ImageStack]):
         assert mo is not None
         experiment = Experiment.from_json(mo.group("path"))
         fov = experiment[mo.group("fov")]
-        return fov.get_image(mo.group("image_type"))
+        return fov.get_images(mo.group("image_type"))
 
 
 class GetImageStack(ConversionFormula[ImageStack]):

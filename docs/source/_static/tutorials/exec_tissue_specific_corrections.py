@@ -22,7 +22,7 @@ from starfish.types import Axes
 
 experiment: starfish.Experiment = starfish.data.ISS(use_test_data=True)
 field_of_view: starfish.FieldOfView = experiment["fov_001"]
-image: starfish.ImageStack = field_of_view.get_image("primary")
+image: starfish.ImageStack = field_of_view.get_images("primary")
 
 ###################################################################################################
 # Next, create the clip filter. Here we clip at the 50th percentile, optimally separates the spots
@@ -48,4 +48,4 @@ ax2.imshow(clip_plot)
 ax2.set_title("clipped")
 
 ###################################################################################################
-# 
+#

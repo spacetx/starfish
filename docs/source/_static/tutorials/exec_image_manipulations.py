@@ -31,7 +31,7 @@ print(field_of_view)
 
 y_slice = slice(0, 100)
 x_slice = slice(0, 80)
-image: starfish.ImageStack = field_of_view.get_image("primary", x=x_slice, y=y_slice)
+image: starfish.ImageStack = field_of_view.get_images("primary", x=x_slice, y=y_slice)
 
 print(image)
 

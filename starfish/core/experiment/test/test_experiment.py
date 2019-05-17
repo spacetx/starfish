@@ -4,6 +4,7 @@ import numpy as np
 from slicedimage import Tile, TileSet
 
 import starfish.data
+from starfish import ImageStack
 from starfish.core.test.factories import SyntheticData
 from starfish.types import Axes, Coordinates
 from ..experiment import Experiment, FieldOfView
@@ -24,8 +25,8 @@ def round_to_z(r: int) -> Tuple[float, float]:
 NUM_ROUND = 5
 NUM_CH = 2
 NUM_Z = 1
-HEIGHT = 10
-WIDTH = 10
+HEIGHT = 100
+WIDTH = 100
 
 
 def get_aligned_tileset():
@@ -97,11 +98,11 @@ def test_fov_order():
 
 def test_crop_experiment():
     exp = starfish.data.ISS(use_test_data=True)
-    image = exp['fov_001'].get_image('primary', x=slice(10, 30), y=slice(40, 70))
+    image = exp['fov_001'].get_images('primary', x=slice(10, 30), y=slice(40, 70))
     assert image.shape['x'] == 20
     assert image.shape['y'] == 30
 
-    image = exp['fov_001'].get_image('primary', rounds=[0, 1], chs=[2, 3])
+    image = exp['fov_001'].get_images('primary', rounds=[0, 1], chs=[2, 3])
     assert image.num_rounds == 2
     assert image.axis_labels(Axes.ROUND) == [0, 1]
     assert image.num_chs == 2
@@ -111,25 +112,18 @@ def test_crop_experiment():
 def test_fov_aligned_tileset():
     tilesets = {'primary': get_aligned_tileset(), 'nuclei': get_aligned_tileset()}
     fov = FieldOfView("aligned", tilesets)
-    # Assert only one coordinate group for each aligned stack
-    assert len(fov.aligned_coordinate_groups['primary']) == 1
-    assert len(fov.aligned_coordinate_groups['nuclei']) == 1
+    primary_images = fov.get_images('primary')
+    nuclei_images = fov.get_images('nuclei')
+    # Assert that only one ImageStack returned, not list
+    assert isinstance(primary_images, ImageStack)
+    assert isinstance(nuclei_images, ImageStack)
 
 
 def test_fov_un_aligned_tileset():
     tilesets = {'primary': get_un_aligned_tileset(), 'nuclei': get_un_aligned_tileset()}
     fov = FieldOfView("unaligned", tilesets)
+    primary_images = fov.get_images('primary')
+    nuclei_images = fov.get_images('nuclei')
     # Assert that the number of coordinate groups == NUM_ROUNDS
-    assert len(fov.aligned_coordinate_groups['primary']) == NUM_ROUND
-    assert len(fov.aligned_coordinate_groups['nuclei']) == NUM_ROUND
-
-
-def test_fov_partially_aligned_tileset():
-    # Create combo of aligned and unaligned tiles
-    partially_aligned_tileset = get_aligned_tileset()
-    for tile in get_un_aligned_tileset().tiles():
-        partially_aligned_tileset.add_tile(tile)
-    tileset_dict = {'primary': partially_aligned_tileset}
-    fov = FieldOfView("paritally aligned", tileset_dict)
-    # Assert the number of tile groups is num rounds + 1 aligned group
-    assert len(fov.aligned_coordinate_groups['primary']) == NUM_ROUND + 1
+    assert len(primary_images) == NUM_ROUND
+    assert len(nuclei_images) == NUM_ROUND

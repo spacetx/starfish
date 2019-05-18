@@ -16,7 +16,7 @@ def process_fov(field_num: int, experiement_str: str):
 
     print(f"loading fov: {fov_str}")
     fov = experiment[fov_str]
-    imgs = fov.get_images(FieldOfView.PRIMARY_IMAGES)
+    imgs = fov.get_image(FieldOfView.PRIMARY_IMAGES)
 
     print("gaussian high pass")
     ghp = Filter.GaussianHighPass(sigma=3)

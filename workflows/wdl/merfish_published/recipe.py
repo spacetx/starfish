@@ -9,24 +9,37 @@ from starfish.types import Clip
 from starfish.spots import DetectPixels
 
 
-def process_fov(field_num: int, experiement_str: str):
+def process_fov(field_num: int, experiment_str: str):
+    """Process a single field of view of MERFISH data
+    Parameters
+    ----------
+    field_num : int
+        the field of view to process
+    experiment_str : int
+        path of experiment json file
+
+    Returns
+    -------
+    DecodedSpots :
+        tabular object containing the locations of detected spots.
+    """
     fov_str: str = f"fov_{int(field_num):03d}"
     # load experiment
-    experiment = starfish.Experiment.from_json(experiement_str)
+    experiment = starfish.Experiment.from_json(experiment_str)
 
-    print(f"loading fov: {fov_str}")
+    print(f"Loading fov: {fov_str}")
     fov = experiment[fov_str]
     imgs = fov.get_image(FieldOfView.PRIMARY_IMAGES)
 
-    print("gaussian high pass")
+    print("Gaussian High Pass")
     ghp = Filter.GaussianHighPass(sigma=3)
     high_passed = ghp.run(imgs, verbose=True, in_place=False)
 
-    print("deconvoling")
+    print("Deconvolve")
     dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2, clip_method=Clip.SCALE_BY_CHUNK)
     deconvolved = dpsf.run(high_passed, verbose=True, in_place=False)
 
-    print("guassian low pass")
+    print("Guassian Low Pass")
     glp = Filter.GaussianLowPass(sigma=1)
     low_passed = glp.run(deconvolved, in_place=False, verbose=True)
 
@@ -41,7 +54,7 @@ def process_fov(field_num: int, experiement_str: str):
         scaled = data / scale_factors[selector[Axes.ROUND.value], selector[Axes.CH.value]]
         filtered_imgs.set_slice(selector, scaled, [Axes.ZPLANE])
 
-    print("decoding")
+    print("Decode")
     psd = DetectPixels.PixelSpotDecoder(
         codebook=experiment.codebook,
         metric='euclidean',  # distance metric to use for computing distance between a pixel vector and a codeword

@@ -6,11 +6,25 @@ from starfish.spots import DetectSpots
 from starfish.types import Axes
 
 
-def process_fov(field_num: int, experiement_str: str):
+def process_fov(field_num: int, experiment_str: str):
+    """Process a single field of view of ISS data
+    Parameters
+    ----------
+    field_num : int
+        the field of view to process
+    experiment_str : int
+        path of experiment json file
+
+    Returns
+    -------
+    DecodedSpots :
+        tabular object containing the locations of detected spots.
+    """
+
     fov_str: str = f"fov_{int(field_num):03d}"
 
     # load experiment
-    experiment = starfish.Experiment.from_json(experiement_str)
+    experiment = starfish.Experiment.from_json(experiment_str)
 
     print(f"loading fov: {fov_str}")
     fov = experiment[fov_str]

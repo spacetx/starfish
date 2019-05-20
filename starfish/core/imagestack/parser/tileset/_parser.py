@@ -1,13 +1,15 @@
 """
 This module parses and retains the extras metadata attached to TileSet extras.
 """
-from typing import Collection, Mapping, MutableMapping, Tuple
+from typing import Collection, Mapping, MutableMapping, Sequence, Tuple
 
 import numpy as np
 from slicedimage import Tile, TileSet
 
 from starfish.core.imagestack.dataorder import AXES_DATA
 from starfish.core.imagestack.parser import TileCollectionData, TileData, TileKey
+from starfish.core.imagestack.physical_coordinate_calculator import \
+    get_physical_coordinates_of_z_plane
 from starfish.core.types import Axes, Coordinates, Number
 
 
@@ -50,11 +52,20 @@ class SlicedImageTile(TileData):
         return self._numpy_array
 
     @property
-    def coordinates(self) -> Mapping[Coordinates, Tuple[Number, Number]]:
-        return {
-            Coordinates(coordinate_name): coordinate_value
-            for coordinate_name, coordinate_value in self._wrapped_tile.coordinates.items()
+    def coordinates(self) -> Mapping[Coordinates, Sequence[Number]]:
+        xrange = self._wrapped_tile.coordinates[Coordinates.X]
+        yrange = self._wrapped_tile.coordinates[Coordinates.Y]
+        return_coords = {
+            Coordinates.X: np.linspace(xrange[0], xrange[1], self.tile_shape[Axes.X]),
+            Coordinates.Y: np.linspace(yrange[0], yrange[1], self.tile_shape[Axes.Y]),
         }
+
+        if Coordinates.Z in self._wrapped_tile.coordinates:
+            zrange = self._wrapped_tile.coordinates[Coordinates.Z]
+            zplane_coord = get_physical_coordinates_of_z_plane(zrange)
+            return_coords[Coordinates.Z] = [zplane_coord]
+
+        return return_coords
 
     @property
     def selector(self) -> Mapping[Axes, int]:

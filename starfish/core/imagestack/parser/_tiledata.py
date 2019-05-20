@@ -1,4 +1,4 @@
-from typing import Collection, Mapping, Tuple
+from typing import Collection, Mapping, Sequence
 
 import numpy as np
 
@@ -26,7 +26,7 @@ class TileData:
         raise NotImplementedError()
 
     @property
-    def coordinates(self) -> Mapping[Coordinates, Tuple[Number, Number]]:
+    def coordinates(self) -> Mapping[Coordinates, Sequence[Number]]:
         raise NotImplementedError()
 
     @property

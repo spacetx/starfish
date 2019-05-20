@@ -1,0 +1,5 @@
+{
+  "Starfish.experiment": "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/MERFISH/20190511/experiment.json",
+  "Starfish.num_fovs": 495,
+  "Starfish.recipe_file": "https://raw.githubusercontent.com/spacetx/starfish/saxelrod-standard-wdl/workflows/wdl/merfish_published/recipe.py"
+}

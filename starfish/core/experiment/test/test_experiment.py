@@ -98,11 +98,11 @@ def test_fov_order():
 
 def test_crop_experiment():
     exp = starfish.data.ISS(use_test_data=True)
-    image = exp['fov_001'].get_images('primary', x=slice(10, 30), y=slice(40, 70))
+    image = exp['fov_001'].get_image('primary', x=slice(10, 30), y=slice(40, 70))
     assert image.shape['x'] == 20
     assert image.shape['y'] == 30
 
-    image = exp['fov_001'].get_images('primary', rounds=[0, 1], chs=[2, 3])
+    image = exp['fov_001'].get_image('primary', rounds=[0, 1], chs=[2, 3])
     assert image.num_rounds == 2
     assert image.axis_labels(Axes.ROUND) == [0, 1]
     assert image.num_chs == 2
@@ -114,9 +114,9 @@ def test_fov_aligned_tileset():
     fov = FieldOfView("aligned", tilesets)
     primary_images = fov.get_images('primary')
     nuclei_images = fov.get_images('nuclei')
-    # Assert that only one ImageStack returned, not list
-    assert isinstance(primary_images, ImageStack)
-    assert isinstance(nuclei_images, ImageStack)
+    # Assert that only one ImageStack in list
+    assert len(primary_images) == 1
+    assert len(nuclei_images) == 1
 
 
 def test_fov_un_aligned_tileset():

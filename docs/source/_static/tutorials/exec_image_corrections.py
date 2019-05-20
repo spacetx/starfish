@@ -27,7 +27,7 @@ import starfish.data
 from starfish.types import Axes
 
 experiment = starfish.data.ISS(use_test_data=True)
-image: starfish.ImageStack = experiment['fov_001'].get_images('primary')
+image: starfish.ImageStack = experiment['fov_001'].get_image('primary')
 
 image_2d = image.sel({Axes.CH: 0, Axes.ROUND: 0, Axes.ZPLANE: 0})
 

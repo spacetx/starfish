@@ -17,7 +17,7 @@
 # EPY: END markdown
 
 # EPY: START code
-from pprint import pprint
+from pprint import pprint 
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -50,7 +50,7 @@ matplotlib.rcParams["figure.dpi"] = 150
 
 # EPY: START code
 experiment = starfish.data.STARmap(use_test_data=True)
-stack = experiment['fov_000'].get_images('primary')
+stack = experiment['fov_000'].get_image('primary')
 # EPY: END code
 
 # EPY: START code
@@ -105,7 +105,7 @@ transforms = ltt.run(projection)
 # EPY: END code
 
 # EPY: START markdown
-#How big are the identified translations?
+#How big are the identified translations? 
 # EPY: END markdown
 
 # EPY: START code

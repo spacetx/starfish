@@ -28,7 +28,7 @@ from starfish.types import Axes
 # EPY: END code
 
 # EPY: START markdown
-#Select data for a single field of view.
+#Select data for a single field of view. 
 # EPY: END markdown
 
 # EPY: START code
@@ -36,7 +36,7 @@ exp = starfish.data.SeqFISH(use_test_data=True)
 # EPY: END code
 
 # EPY: START code
-img = exp['fov_000'].get_images('primary')
+img = exp['fov_000'].get_image('primary')
 # EPY: END code
 
 # EPY: START markdown
@@ -48,7 +48,7 @@ img = exp['fov_000'].get_images('primary')
 # EPY: END markdown
 
 # EPY: START markdown
-#To remove image background, use a White Tophat filter, which measures the background with a rolling disk morphological element and subtracts it from the image.
+#To remove image background, use a White Tophat filter, which measures the background with a rolling disk morphological element and subtracts it from the image. 
 # EPY: END markdown
 
 # EPY: START code
@@ -104,7 +104,7 @@ starfish.display(scaled)
 # EPY: START markdown
 ### Remove residual background
 #
-#The background is fairly uniformly present below intensity=0.5. However, starfish's clip method currently only supports percentiles. To solve this problem, the intensities can be directly edited in the underlying numpy array.
+#The background is fairly uniformly present below intensity=0.5. However, starfish's clip method currently only supports percentiles. To solve this problem, the intensities can be directly edited in the underlying numpy array. 
 # EPY: END markdown
 
 # EPY: START code
@@ -120,7 +120,7 @@ starfish.display(clipped)
 # EPY: START markdown
 ### Detect Spots
 #
-#Detect spots with a local search blob detector that identifies spots in all rounds and channels and matches them using a local search method. The local search starts in an anchor channel (default ch=1) and identifies the nearest spot in all subsequent imaging rounds.
+#Detect spots with a local search blob detector that identifies spots in all rounds and channels and matches them using a local search method. The local search starts in an anchor channel (default ch=1) and identifies the nearest spot in all subsequent imaging rounds. 
 # EPY: END markdown
 
 # EPY: START code
@@ -152,7 +152,7 @@ blurred = glp.run(clipped)
 
 # EPY: START code
 psd = starfish.spots.DetectPixels.PixelSpotDecoder(
-    codebook=exp.codebook, metric='euclidean', distance_threshold=0.5,
+    codebook=exp.codebook, metric='euclidean', distance_threshold=0.5, 
     magnitude_threshold=0.1, min_area=7, max_area=50,
 )
 pixel_decoded, ccdr = psd.run(blurred)

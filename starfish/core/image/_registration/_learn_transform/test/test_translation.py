@@ -10,8 +10,8 @@ ISS_SHIFTS = [[-23, 6], [-22, 2], [-22, -3], [-15, -4]]
 
 def test_learn_transforms_throws_error():
     exp = data.ISS(use_test_data=True)
-    stack = exp.fov().get_images('primary')
-    reference_stack = exp.fov().get_images('dots')
+    stack = exp.fov().get_image('primary')
+    reference_stack = exp.fov().get_image('dots')
     translation = Translation(reference_stack=reference_stack, axes=Axes.ROUND)
     try:
         translation.run(stack)
@@ -22,8 +22,8 @@ def test_learn_transforms_throws_error():
 
 def test_learn_transforms_translation():
     exp = data.ISS(use_test_data=True)
-    stack = exp.fov().get_images('primary')
-    reference_stack = exp.fov().get_images('dots')
+    stack = exp.fov().get_image('primary')
+    reference_stack = exp.fov().get_image('dots')
     translation = Translation(reference_stack=reference_stack, axes=Axes.ROUND)
     # Calculate max_proj accrss CH/Z
     stack = stack.max_proj(Axes.CH, Axes.ZPLANE)

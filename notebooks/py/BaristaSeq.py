@@ -47,8 +47,8 @@ experiment_json = (
 )
 exp = starfish.Experiment.from_json(experiment_json)
 
-nissl = exp['fov_000'].get_images('dots')
-img = exp['fov_000'].get_images('primary')
+nissl = exp['fov_000'].get_image('dots')
+img = exp['fov_000'].get_image('primary')
 # EPY: END code
 
 # EPY: START markdown

@@ -96,17 +96,60 @@ class FieldOfView:
     def image_types(self) -> Set[str]:
         return set(self._images.keys())
 
+    def get_image(self, item: str,
+                  rounds: Optional[Collection[int]] = None,
+                  chs: Optional[Collection[int]] = None,
+                  zplanes: Optional[Collection[int]] = None,
+                  x: Optional[Union[int, slice]] = None,
+                  y: Optional[Union[int, slice]] = None,
+                  ) -> Union[ImageStack, List[ImageStack]]:
+        """
+        Load into memory the first Imagestack representation of an aligned image group. If crop
+        parameters provided, first crop the TileSet.
+
+        Parameters
+        ----------
+        item: str
+            The name of the tileset ex. 'primary' or 'nuclei'
+        aligned_group: int
+            The aligned subgroup, default 0
+        rounds : Optional[Collection[int]]
+            The rounds in the original dataset to load into the ImageStack.  If this is not set,
+            then all rounds are loaded into the ImageStack.
+        chs : Optional[Collection[int]]
+            The channels in the original dataset to load into the ImageStack.  If this is not set,
+            then all channels are loaded into the ImageStack.
+        zplanes : Optional[Collection[int]]
+            The z-layers in the original dataset to load into the ImageStack.  If this is not set,
+            then all z-layers are loaded into the ImageStack.
+        x : Optional[Union[int, slice]]
+            The x-range in the x-y tile that is loaded into the ImageStack.  If this is not set,
+            then the entire x-y tile is loaded into the ImageStack.
+        y : Optional[Union[int, slice]]
+            The y-range in the x-y tile that is loaded into the ImageStack.  If this is not set,
+            then the entire x-y tile is loaded into the ImageStack.
+
+        Returns
+        -------
+        ImageStack
+            The instantiated image stack
+
+        """
+
+        stack_iterator = self.get_images(item=item, rounds=rounds,
+                                         chs=chs, zplanes=zplanes, x=x, y=y)
+        return next(stack_iterator)
+
     def get_images(self, item: str,
                    rounds: Optional[Collection[int]] = None,
                    chs: Optional[Collection[int]] = None,
                    zplanes: Optional[Collection[int]] = None,
                    x: Optional[Union[int, slice]] = None,
                    y: Optional[Union[int, slice]] = None,
-                   ) -> Union[ImageStack, "AlignedImageStackIterator"]:
+                   ) -> "AlignedImageStackIterator":
         """
-        Load into memory the Imagestack or list of Imagestacks for the given tileset and selected
-        axes. A list is returned if the selected axes represented an unaligned tileset. In this case
-        we return a list of Imagestacks where each Imagestack is an aligned group.
+        Load into memory the an iterator of aligned Imagestacks for the given tileset and selected
+        axes.
 
         Parameters
         ----------
@@ -130,7 +173,7 @@ class FieldOfView:
 
         Returns
         -------
-        Union[ImageStack, AlignedImageStackIterator]
+        AlignedImageStackIterator
             The instantiated ImageStack or list of Imagestacks if the parameters given include
             multiple aligned groups.
 
@@ -142,8 +185,6 @@ class FieldOfView:
                                                              x=x, y=y)
         aligned_stack_iterator = AlignedImageStackIterator(tileset=self._images[item],
                                                            aligned_groups=aligned_groups)
-        if len(aligned_stack_iterator) == 1:
-            return next(aligned_stack_iterator)
         return aligned_stack_iterator
 
 

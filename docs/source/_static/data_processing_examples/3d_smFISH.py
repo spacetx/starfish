@@ -95,7 +95,7 @@ def processing_pipeline(
     """
 
     print("Loading images...")
-    primary_image = experiment[fov_name].get_images(FieldOfView.PRIMARY_IMAGES)
+    primary_image = experiment[fov_name].get_image(FieldOfView.PRIMARY_IMAGES)
     all_intensities = list()
     codebook = experiment.codebook
 

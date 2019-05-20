@@ -4,7 +4,6 @@ import numpy as np
 from slicedimage import Tile, TileSet
 
 import starfish.data
-from starfish import ImageStack
 from starfish.core.test.factories import SyntheticData
 from starfish.types import Axes, Coordinates
 from ..experiment import Experiment, FieldOfView

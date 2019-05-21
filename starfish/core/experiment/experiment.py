@@ -98,6 +98,15 @@ class FieldOfView:
     def image_types(self) -> Set[str]:
         return set(self._images.keys())
 
+    def show_aligned_image_groups(self) -> None:
+        raise DeprecationWarning("This method has been deprecated. Aligned groups are now parsed "
+                                 "as a part of, FieldOfView.get_images() and are determined by the "
+                                 "selected axes provided to the method.")
+
+    def iterate_image_type(self, image_type: str) -> Iterator[ImageStack]:
+        raise DeprecationWarning("This method has been deprecated. Instead use "
+                                 "FieldOfView.get_images(image_type)")
+
     def get_image(self, item: str,
                   rounds: Optional[Collection[int]] = None,
                   chs: Optional[Collection[int]] = None,

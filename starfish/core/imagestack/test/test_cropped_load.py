@@ -2,6 +2,8 @@
 These tests center around creating an ImageStack but selectively loading data from the original
 TileSet.
 """
+import numpy as np
+
 from starfish.core.types import Axes
 from .factories.unique_tiles import (
     unique_data, unique_tiles_imagestack, X_COORDS, Y_COORDS, Z_COORDS,
@@ -13,7 +15,6 @@ from .imagestack_test_utils import (
 )
 from ..imagestack import ImageStack
 from ..parser.crop import CropParameters
-from ..physical_coordinates import _get_physical_coordinates_of_z_plane
 
 
 NUM_ROUND = 3
@@ -53,9 +54,11 @@ def test_crop_rcz():
     assert stack.axis_labels(Axes.CH) == chs
     assert stack.axis_labels(Axes.ZPLANE) == ZPLANE_LABELS
 
-    for round_ in stack.axis_labels(Axes.ROUND):
-        for ch in stack.axis_labels(Axes.CH):
-            for zplane in stack.axis_labels(Axes.ZPLANE):
+    expected_zplane_coordinates = np.linspace(Z_COORDS[0], Z_COORDS[1], NUM_ZPLANE)
+
+    for zplane in stack.axis_labels(Axes.ZPLANE):
+        for round_ in stack.axis_labels(Axes.ROUND):
+            for ch in stack.axis_labels(Axes.CH):
                 expected_tile_data = expected_data(round_, ch, zplane)
 
                 verify_stack_data(
@@ -63,13 +66,16 @@ def test_crop_rcz():
                     {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
                     expected_tile_data,
                 )
-    expected_z_coordinates = _get_physical_coordinates_of_z_plane(Z_COORDS)
-    verify_physical_coordinates(
-        stack,
-        X_COORDS,
-        Y_COORDS,
-        expected_z_coordinates,
-    )
+
+        zplane_index = ZPLANE_LABELS.index(zplane)
+        expected_zplane_coordinate = expected_zplane_coordinates[zplane_index]
+        verify_physical_coordinates(
+            stack,
+            X_COORDS,
+            Y_COORDS,
+            expected_zplane_coordinate,
+            zplane,
+        )
 
 
 def test_crop_xy():
@@ -90,9 +96,11 @@ def test_crop_xy():
     assert stack.raw_shape[3] == Y_SLICE[1] - Y_SLICE[0]
     assert stack.raw_shape[4] == X_SLICE[1] - X_SLICE[0]
 
-    for round_ in stack.axis_labels(Axes.ROUND):
-        for ch in stack.axis_labels(Axes.CH):
-            for zplane in stack.axis_labels(Axes.ZPLANE):
+    expected_zplane_coordinates = np.linspace(Z_COORDS[0], Z_COORDS[1], NUM_ZPLANE)
+
+    for zplane in stack.axis_labels(Axes.ZPLANE):
+        for round_ in stack.axis_labels(Axes.ROUND):
+            for ch in stack.axis_labels(Axes.CH):
                 expected_tile_data = expected_data(round_, ch, zplane)
                 expected_tile_data = expected_tile_data[
                     Y_SLICE[0]:Y_SLICE[1], X_SLICE[0]:X_SLICE[1]]
@@ -103,27 +111,29 @@ def test_crop_xy():
                     expected_tile_data,
                 )
 
-    # the coordinates should be rescaled.  verify that the coordinates on the ImageStack
-    # are also rescaled.
-    original_x_coordinates = X_COORDS
-    expected_x_coordinates = recalculate_physical_coordinate_range(
-        original_x_coordinates[0], original_x_coordinates[1],
-        WIDTH,
-        slice(*X_SLICE),
-    )
+        # the coordinates should be rescaled.  verify that the coordinates on the ImageStack
+        # are also rescaled.
+        original_x_coordinates = X_COORDS
+        expected_x_coordinates = recalculate_physical_coordinate_range(
+            original_x_coordinates[0], original_x_coordinates[1],
+            WIDTH,
+            slice(*X_SLICE),
+        )
 
-    original_y_coordinates = Y_COORDS
-    expected_y_coordinates = recalculate_physical_coordinate_range(
-        original_y_coordinates[0], original_y_coordinates[1],
-        HEIGHT,
-        slice(*Y_SLICE),
-    )
+        original_y_coordinates = Y_COORDS
+        expected_y_coordinates = recalculate_physical_coordinate_range(
+            original_y_coordinates[0], original_y_coordinates[1],
+            HEIGHT,
+            slice(*Y_SLICE),
+        )
 
-    expected_z_coordinates = _get_physical_coordinates_of_z_plane(Z_COORDS)
+        zplane_index = ZPLANE_LABELS.index(zplane)
+        expected_zplane_coordinate = expected_zplane_coordinates[zplane_index]
 
-    verify_physical_coordinates(
-        stack,
-        expected_x_coordinates,
-        expected_y_coordinates,
-        expected_z_coordinates,
-    )
+        verify_physical_coordinates(
+            stack,
+            expected_x_coordinates,
+            expected_y_coordinates,
+            expected_zplane_coordinate,
+            zplane,
+        )

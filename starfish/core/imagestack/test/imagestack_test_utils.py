@@ -26,9 +26,8 @@ def verify_physical_coordinates(stack: ImageStack,
                                 expected_y_coordinates: Tuple[float, float],
                                 expected_z_coordinates: Tuple[float, float],
                                 zplane: Optional[int] = None) -> None:
-    """Given an imagestack and a set of coordinate min/max values
-    verify that the physical coordinates on the stack match the expected
-    range of values for each coord dimension.
+    """Given an imagestack and a set of coordinate min/max values verify that the physical
+    coordinates on the stack match the expected range of values for each coord dimension.
     """
     assert np.all(np.isclose(stack.xarray[Coordinates.X.value],
                              np.linspace(expected_x_coordinates[0],
@@ -41,7 +40,9 @@ def verify_physical_coordinates(stack: ImageStack,
     # If zplane provided, test expected_z_coordinates on specific plane.
     # Else just test expected_z_coordinates on entire array
     if zplane is not None:
-        assert np.isclose(stack.xarray[Coordinates.Z.value][zplane], expected_z_coordinates)
+        assert np.isclose(
+            stack.xarray.sel({Axes.ZPLANE.value: zplane})[Coordinates.Z.value],
+            expected_z_coordinates)
     else:
         assert np.all(np.isclose(stack.xarray[Coordinates.Z.value], expected_z_coordinates))
 

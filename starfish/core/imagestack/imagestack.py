@@ -831,9 +831,13 @@ class ImageStack:
         with Pool(
                 processes=n_processes,
                 initializer=SharedMemory.initializer,
-                initargs=((self._data._backing_mp_array,
-                           self._data._data.shape,
-                           self._data._data.dtype),)) as pool:
+                initargs=(
+                    (self._data._backing_mp_array,
+                     self._data._data.shape,
+                     self._data._data.dtype),
+                ),
+                maxtasksperchild=8,
+        ) as pool:
             results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
 
             # Note: results is [None, ...] if executing an in-place workflow

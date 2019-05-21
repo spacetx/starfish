@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from starfish import ImageStack
+from starfish.core.imagestack.test.factories import unique_tiles_imagestack
 from starfish.core.test.factories import (
     two_spot_informative_blank_coded_data_factory,
     two_spot_one_hot_coded_data_factory,
@@ -160,3 +161,50 @@ def test_spot_finding_no_reference_image(
 
     empty_intensity_table = call_detect_spots(EMPTY_IMAGESTACK)
     assert empty_intensity_table.sizes[Features.AXIS] == 0
+
+
+def _make_labeled_image() -> ImageStack:
+    ROUND_LABELS = (1, 4, 6)
+    CH_LABELS = (2, 4, 6, 8)
+    ZPLANE_LABELS = (3, 4)
+    HEIGHT = 2
+    WIDTH = 4
+
+    return unique_tiles_imagestack(
+        ROUND_LABELS, CH_LABELS, ZPLANE_LABELS, HEIGHT, WIDTH)
+
+
+def test_reference_image_spot_detection_with_image_with_labeled_axes(monkeypatch):
+    """This testing method uses a reference image to identify spot locations."""
+
+    def call_detect_spots(stack):
+
+        return detect_spots(
+            data_stack=stack,
+            spot_finding_method=gaussian_spot_detector.image_to_spots,
+            reference_image=stack,
+            reference_image_max_projection_axes=(Axes.ROUND, Axes.CH),
+            measurement_function=np.max,
+            radius_is_gyration=False,
+            n_processes=1,
+        )
+
+    data_stack = _make_labeled_image()
+    call_detect_spots(data_stack)
+
+
+def test_spot_detection_with_image_with_labeled_axes():
+    """This testing method uses no reference image to identify spot locations."""
+
+    def call_detect_spots(stack):
+
+        return detect_spots(
+            data_stack=stack,
+            spot_finding_method=gaussian_spot_detector.image_to_spots,
+            measurement_function=np.max,
+            radius_is_gyration=False,
+            n_processes=1,
+        )
+
+    data_stack = _make_labeled_image()
+    call_detect_spots(data_stack)

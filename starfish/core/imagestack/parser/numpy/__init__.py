@@ -34,7 +34,7 @@ class NumpyImageTile(TileData):
     def __init__(
             self,
             data: np.ndarray,
-            coordinates: Mapping[Coordinates, Tuple[Number, Number]],
+            coordinates: Mapping[Coordinates, Sequence[Number]],
             selector: Mapping[Axes, int],
     ) -> None:
         self._data = data
@@ -53,7 +53,7 @@ class NumpyImageTile(TileData):
         return self._data
 
     @property
-    def coordinates(self) -> Mapping[Coordinates, Tuple[Number, Number]]:
+    def coordinates(self) -> Mapping[Coordinates, Sequence[Number]]:
         return self._coordinates
 
     @property
@@ -70,7 +70,7 @@ class NumpyData(TileCollectionData):
             self,
             data: np.ndarray,
             index_labels: Mapping[Axes, Sequence[int]],
-            coordinates: Optional[xr.DataArray],
+            coordinates: Optional[Mapping[Coordinates, Sequence[Number]]],
     ) -> None:
         self.data = data
         self.index_labels = index_labels
@@ -122,33 +122,18 @@ class NumpyData(TileCollectionData):
         pos_ch = self.index_labels[Axes.CH].index(ch)
         pos_z = self.index_labels[Axes.ZPLANE].index(z)
 
-        selectors: Mapping[str, Any] = {
-            Axes.ROUND.value: r,
-            Axes.CH.value: ch,
-            Axes.ZPLANE.value: z,
-        }
-
-        coordinates: MutableMapping[Coordinates, Tuple[Number, Number]] = dict()
+        coordinates: MutableMapping[Coordinates, Sequence[Number]] = dict()
 
         if self.coordinates is not None:
-            for coordinate_type, min_selector_value, max_selector_value in (
-                    (Coordinates.X, PhysicalCoordinateTypes.X_MIN, PhysicalCoordinateTypes.X_MAX),
-                    (Coordinates.Y, PhysicalCoordinateTypes.Y_MIN, PhysicalCoordinateTypes.Y_MAX),
-                    (Coordinates.Z, PhysicalCoordinateTypes.Z_MIN, PhysicalCoordinateTypes.Z_MAX),
-            ):
-                min_selectors = dict(selectors)
-                min_selectors[PHYSICAL_COORDINATE_DIMENSION] = min_selector_value.value
-                max_selectors = dict(selectors)
-                max_selectors[PHYSICAL_COORDINATE_DIMENSION] = max_selector_value.value
-
-                coordinates[coordinate_type] = (
-                    self.coordinates.loc[min_selectors].item(),
-                    self.coordinates.loc[max_selectors].item())
+            coordinates[Coordinates.X] = self.coordinates[Coordinates.X]
+            coordinates[Coordinates.Y] = self.coordinates[Coordinates.Y]
+            if Coordinates.Z in self.coordinates:
+                coordinates[Coordinates.Z] = [self.coordinates[Coordinates.Z][pos_z]]
         else:
             # fake coordinates!
-            coordinates[Coordinates.X] = (0.0, 0.001)
-            coordinates[Coordinates.Y] = (0.0, 0.001)
-            coordinates[Coordinates.Z] = (0.0, 0.001)
+            coordinates[Coordinates.X] = np.linspace(0.0, 0.001, self.data.shape[-1])
+            coordinates[Coordinates.Y] = np.linspace(0.0, 0.001, self.data.shape[-2])
+            coordinates[Coordinates.Z] = [np.linspace(0.0, 0.001, self.data.shape[-3])[pos_z]]
 
         return NumpyImageTile(
             self.data[pos_r, pos_ch, pos_z],

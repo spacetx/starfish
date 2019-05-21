@@ -271,14 +271,15 @@ class CombineAdjacentFeatures:
         bbox = spot_property.bbox
         if len(bbox) == 6:
             # 3d bbox
-            bb_non_zero = np.trim_zeros(np.ndarray.flatten(
-                decoded_image[bbox[0]:bbox[3], bbox[1]:bbox[4], bbox[2]:bbox[5]]))
+            target_candidates = np.ndarray.flatten(
+                decoded_image[bbox[0]:bbox[3], bbox[1]:bbox[4], bbox[2]:bbox[5]])
         else:
             # flatten and remove zeros
-            bb_non_zero = np.trim_zeros(np.ndarray.flatten(
-                decoded_image[0, bbox[0]:bbox[2], bbox[1]:bbox[3]]))
-        # get the most repeated value
-        target_index = np.argmax(np.bincount(bb_non_zero))
+            target_candidates = np.ndarray.flatten(
+                decoded_image[0, bbox[0]:bbox[2], bbox[1]:bbox[3]])
+        # get the most repeated nonzero value
+        non_zero_target_candidates = target_candidates[target_candidates != 0]
+        target_index = np.argmax(np.bincount(non_zero_target_candidates))
         spot_attrs[Features.TARGET] = target_map.target_as_str(target_index)
         spot_attrs[Features.SPOT_RADIUS] = spot_property.equivalent_diameter / 2
 

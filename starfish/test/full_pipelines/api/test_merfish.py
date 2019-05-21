@@ -232,8 +232,8 @@ def test_merfish_pipeline_cropped_data():
 
     # assert that number of high-expression detected genes are correct
     expected_counts = pd.Series(
-        [104, 63, 55, 45, 32],
-        index=('MALAT1', 'nan', 'SRRM2', 'FASN', 'TLN1')
+        [108, 57, 45, 32, 31],
+        index=('MALAT1', 'SRRM2', 'FASN', 'TLN1', 'IGF2R')
     )
     assert np.array_equal(
         expected_counts.values,
@@ -248,4 +248,4 @@ def test_merfish_pipeline_cropped_data():
 
     corrcoef = np.corrcoef(tmp[:, 1], tmp[:, 0])[0, 1]
 
-    assert np.round(corrcoef, 4) == 0.9963
+    assert np.round(corrcoef, 4) == 0.8411

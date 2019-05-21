@@ -183,7 +183,7 @@ def test_dartfish_pipeline_cropped_data():
     )
     assert np.array_equal(
         high_expression_genes['gene'].values,
-        ['MBP', 'MOBP', 'VIPR2', 'TRIM66', 'SYT6']
+        ['MBP', 'MOBP', 'ADCY8', 'TRIM66', 'SYT6']
     )
 
     # verify correlation is accurate for this subset of the image
@@ -196,4 +196,4 @@ def test_dartfish_pipeline_cropped_data():
     corrcoef = np.corrcoef(x, y)
     corrcoef = corrcoef[0, 1]
 
-    assert np.round(corrcoef, 5) == -0.00483
+    assert np.round(corrcoef, 5) == 0.03028

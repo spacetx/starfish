@@ -1,8 +1,6 @@
 import numpy as np
 
-from starfish.core.imagestack.physical_coordinate_calculator import \
-    recalculate_physical_coordinate_range
-
+from .imagestack_test_utils import recalculate_physical_coordinate_range
 
 COORDS = 0.01, 0.1
 

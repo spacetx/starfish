@@ -10,7 +10,7 @@ from .factories.unique_tiles import (
 )
 from .imagestack_test_utils import verify_physical_coordinates, verify_stack_data
 from ..imagestack import ImageStack
-from ..physical_coordinate_calculator import get_physical_coordinates_of_z_plane
+from ..physical_coordinates import _get_physical_coordinates_of_z_plane
 
 ROUND_LABELS = (1, 4, 6)
 CH_LABELS = (2, 4, 6, 8)
@@ -95,7 +95,7 @@ def test_labeled_indices_sel_single_tile():
         stack,
         X_COORDS,
         Y_COORDS,
-        get_physical_coordinates_of_z_plane(Z_COORDS),
+        _get_physical_coordinates_of_z_plane(Z_COORDS),
     )
 
 
@@ -124,7 +124,7 @@ def test_labeled_indices_sel_slice():
         stack,
         X_COORDS,
         Y_COORDS,
-        get_physical_coordinates_of_z_plane(Z_COORDS),
+        _get_physical_coordinates_of_z_plane(Z_COORDS),
     )
 
 

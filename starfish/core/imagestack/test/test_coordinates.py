@@ -7,7 +7,7 @@ from starfish.core.experiment.builder import FetchedTile, tile_fetcher_factory
 from starfish.types import Axes, Coordinates, Number
 from .factories import synthetic_stack
 from .imagestack_test_utils import verify_physical_coordinates
-from ..physical_coordinate_calculator import get_physical_coordinates_of_z_plane
+from ..physical_coordinates import _get_physical_coordinates_of_z_plane
 
 NUM_ROUND = 8
 NUM_CH = 1
@@ -74,7 +74,7 @@ def test_coordinates():
     )
     for selectors in stack._iter_axes({Axes.ZPLANE}):
         verify_physical_coordinates(stack, X_COORDS, Y_COORDS,
-                                    get_physical_coordinates_of_z_plane(
+                                    _get_physical_coordinates_of_z_plane(
                                         zplane_to_z(selectors[Axes.ZPLANE])),
                                     selectors[Axes.ZPLANE])
 
@@ -171,5 +171,5 @@ def test_scalar_coordinates():
         verify_physical_coordinates(stack,
                                     (expected_x, expected_x),
                                     (expected_y, expected_y),
-                                    get_physical_coordinates_of_z_plane((expected_z, expected_z)),
+                                    _get_physical_coordinates_of_z_plane((expected_z, expected_z)),
                                     selectors[Axes.ZPLANE])

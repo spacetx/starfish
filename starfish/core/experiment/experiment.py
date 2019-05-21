@@ -2,6 +2,8 @@ import json
 from typing import (
     Callable,
     Collection,
+    Iterable,
+    Iterator,
     List,
     MutableMapping,
     MutableSequence,
@@ -33,8 +35,8 @@ class FieldOfView:
 
     All images can be accessed using
     :py:func:`~starfish.experiment.experiment.FieldOfView.get_image`
-    with the name of the image type and any specific rounds/chs/zplanes you want to include
-    (If none are provided all are included) If the resulting tileset has unaligned tiles
+    with the name of the image type and any which rounds/chs/zplanes you want to include
+    (if none are provided all are included) If the resulting tileset has unaligned tiles
     (their x/y coordinates do not all match) we return a list on ImageStacks where each stack
     represents an aligned group of tiles. The primary image is accessed using the name
     :py:attr:`~starfish.experiment.experiment.FieldOFView.PRIMARY_IMAGES`.
@@ -102,7 +104,7 @@ class FieldOfView:
                   zplanes: Optional[Collection[int]] = None,
                   x: Optional[Union[int, slice]] = None,
                   y: Optional[Union[int, slice]] = None,
-                  ) -> Union[ImageStack, List[ImageStack]]:
+                  ) -> ImageStack:
         """
         Load into memory the first Imagestack representation of an aligned image group. If crop
         parameters provided, first crop the TileSet.
@@ -146,7 +148,7 @@ class FieldOfView:
                    zplanes: Optional[Collection[int]] = None,
                    x: Optional[Union[int, slice]] = None,
                    y: Optional[Union[int, slice]] = None,
-                   ) -> "AlignedImageStackIterator":
+                   ) -> Iterator[ImageStack]:
         """
         Load into memory the an iterator of aligned Imagestacks for the given tileset and selected
         axes.
@@ -188,7 +190,7 @@ class FieldOfView:
         return aligned_stack_iterator
 
 
-class AlignedImageStackIterator:
+class AlignedImageStackIterator(Iterable[ImageStack]):
     """Iterator class of AlignedImageStacks."""
     def __init__(self, tileset: TileSet, aligned_groups: List[CropParameters]):
         self.size = len(aligned_groups)

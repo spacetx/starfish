@@ -148,9 +148,7 @@ class CropParameters:
          """
         coord_groups: OrderedDict[tuple, CropParameters] = OrderedDict()
         for tile in tileset.tiles():
-            if (rounds is None and chs is None and zplanes is None) \
-                    or CropParameters.tile_in_selected_axes(tile, rounds, chs, zplanes):
-
+            if CropParameters.tile_in_selected_axes(tile, rounds, chs, zplanes):
                 x_y_coords = (
                     tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
                     tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1]
@@ -167,8 +165,8 @@ class CropParameters:
                     coord_groups[x_y_coords] = CropParameters(
                         permitted_chs=[tile.indices[Axes.CH]],
                         permitted_rounds=[tile.indices[Axes.ROUND]],
-                        permitted_zplanes=[tile.indices[Axes.ZPLANE]] if Axes.ZPLANE in tile.indices
-                        else None,
+                        permitted_zplanes=[tile.indices[Axes.ZPLANE]]
+                        if Axes.ZPLANE in tile.indices else None,
                         x_slice=x,
                         y_slice=y)
         return list(coord_groups.values())
@@ -197,7 +195,9 @@ class CropParameters:
         Boolean
             True if tile belongs with selected axes, False if not.
         """
-
+        # If all none, no selected axes given
+        if rounds is None and chs is None and zplanes is None:
+            return True
         if rounds and tile.indices[Axes.ROUND] not in rounds:
             return False
         if chs and tile.indices[Axes.CH] not in chs:

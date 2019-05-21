@@ -8,8 +8,7 @@ from slicedimage import Tile, TileSet
 
 from starfish.core.imagestack.dataorder import AXES_DATA
 from starfish.core.imagestack.parser import TileCollectionData, TileData, TileKey
-from starfish.core.imagestack.physical_coordinate_calculator import \
-    get_physical_coordinates_of_z_plane
+from starfish.core.imagestack.physical_coordinates import _get_physical_coordinates_of_z_plane
 from starfish.core.types import Axes, Coordinates, Number
 
 
@@ -62,7 +61,7 @@ class SlicedImageTile(TileData):
 
         if Coordinates.Z in self._wrapped_tile.coordinates:
             zrange = self._wrapped_tile.coordinates[Coordinates.Z]
-            zplane_coord = get_physical_coordinates_of_z_plane(zrange)
+            zplane_coord = _get_physical_coordinates_of_z_plane(zrange)
             return_coords[Coordinates.Z] = [zplane_coord]
 
         return return_coords

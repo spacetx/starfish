@@ -6,13 +6,15 @@ from starfish.core.types import Axes
 from .factories.unique_tiles import (
     unique_data, unique_tiles_imagestack, X_COORDS, Y_COORDS, Z_COORDS,
 )
-from .imagestack_test_utils import verify_physical_coordinates, verify_stack_data
+from .imagestack_test_utils import (
+    recalculate_physical_coordinate_range,
+    verify_physical_coordinates,
+    verify_stack_data,
+)
 from ..imagestack import ImageStack
 from ..parser.crop import CropParameters
-from ..physical_coordinate_calculator import (
-    get_physical_coordinates_of_z_plane,
-    recalculate_physical_coordinate_range
-)
+from ..physical_coordinates import _get_physical_coordinates_of_z_plane
+
 
 NUM_ROUND = 3
 NUM_CH = 4
@@ -61,7 +63,7 @@ def test_crop_rcz():
                     {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
                     expected_tile_data,
                 )
-    expected_z_coordinates = get_physical_coordinates_of_z_plane(Z_COORDS)
+    expected_z_coordinates = _get_physical_coordinates_of_z_plane(Z_COORDS)
     verify_physical_coordinates(
         stack,
         X_COORDS,
@@ -117,7 +119,7 @@ def test_crop_xy():
         slice(*Y_SLICE),
     )
 
-    expected_z_coordinates = get_physical_coordinates_of_z_plane(Z_COORDS)
+    expected_z_coordinates = _get_physical_coordinates_of_z_plane(Z_COORDS)
 
     verify_physical_coordinates(
         stack,

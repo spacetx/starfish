@@ -113,8 +113,6 @@ class FieldOfView:
         ----------
         item: str
             The name of the tileset ex. 'primary' or 'nuclei'
-        aligned_group: int
-            The aligned subgroup, default 0
         rounds : Optional[Collection[int]]
             The rounds in the original dataset to load into the ImageStack.  If this is not set,
             then all rounds are loaded into the ImageStack.

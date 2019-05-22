@@ -10,7 +10,6 @@ from .factories.unique_tiles import (
 )
 from .imagestack_test_utils import verify_physical_coordinates, verify_stack_data
 from ..imagestack import ImageStack
-from ..physical_coordinates import _get_physical_coordinates_of_z_plane
 
 ROUND_LABELS = (1, 4, 6)
 CH_LABELS = (2, 4, 6, 8)
@@ -24,7 +23,12 @@ NUM_ZPLANE = len(ZPLANE_LABELS)
 
 
 def expected_data(round_: int, ch: int, zplane: int):
-    return unique_data(round_, ch, zplane, NUM_ROUND, NUM_CH, NUM_ZPLANE, HEIGHT, WIDTH)
+    return unique_data(
+        ROUND_LABELS.index(round_),
+        CH_LABELS.index(ch),
+        ZPLANE_LABELS.index(zplane),
+        NUM_ROUND, NUM_CH, NUM_ZPLANE,
+        HEIGHT, WIDTH)
 
 
 def setup_imagestack() -> ImageStack:
@@ -78,6 +82,8 @@ def test_labeled_indices_sel_single_tile():
     the data is correct and that the physical coordinates are correctly set."""
     stack = setup_imagestack()
 
+    expected_zplane_coordinates = np.linspace(Z_COORDS[0], Z_COORDS[1], NUM_ZPLANE)
+
     for selector in stack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
         subselected = stack.sel(selector)
 
@@ -90,21 +96,25 @@ def test_labeled_indices_sel_single_tile():
             selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE])
         verify_stack_data(stack, selector, expected_tile_data)
 
+        zplane_index = ZPLANE_LABELS.index(selector[Axes.ZPLANE])
+        expected_zplane_coordinate = expected_zplane_coordinates[zplane_index]
+
         # assert that the physical coordinate values are what we expect.
-    verify_physical_coordinates(
-        stack,
-        X_COORDS,
-        Y_COORDS,
-        _get_physical_coordinates_of_z_plane(Z_COORDS),
-    )
+        verify_physical_coordinates(
+            stack,
+            X_COORDS,
+            Y_COORDS,
+            expected_zplane_coordinate,
+            selector[Axes.ZPLANE],
+        )
 
 
 def test_labeled_indices_sel_slice():
     """Select a single tile across each index from an ImageStack with labeled indices.  Verify that
     the data is correct and that the physical coordinates are correctly set."""
     stack = setup_imagestack()
-    selector = {Axes.ROUND: slice(None, 4), Axes.CH: slice(4, 6), Axes.ZPLANE: 4}
-    subselected = stack.sel(selector)
+    set_selector = {Axes.ROUND: slice(None, 4), Axes.CH: slice(4, 6), Axes.ZPLANE: 4}
+    subselected = stack.sel(set_selector)
 
     # verify that the subselected stack has the correct index labels.
     for index_type, expected_results in (
@@ -113,19 +123,25 @@ def test_labeled_indices_sel_slice():
             (Axes.ZPLANE, [4],)):
         assert subselected.axis_labels(index_type) == expected_results
 
-    for selectors in subselected._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
+    expected_zplane_coordinates = np.linspace(Z_COORDS[0], Z_COORDS[1], NUM_ZPLANE)
+
+    for selector in subselected._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
         # verify that the subselected stack has the correct data.
         expected_tile_data = expected_data(
-            selectors[Axes.ROUND], selectors[Axes.CH], selectors[Axes.ZPLANE])
-        verify_stack_data(subselected, selectors, expected_tile_data)
+            selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE])
+        verify_stack_data(subselected, selector, expected_tile_data)
+
+        zplane_index = ZPLANE_LABELS.index(set_selector[Axes.ZPLANE])
+        expected_zplane_coordinate = expected_zplane_coordinates[zplane_index]
 
         # verify that each tile in the subselected stack has the correct physical coordinates.
-    verify_physical_coordinates(
-        stack,
-        X_COORDS,
-        Y_COORDS,
-        _get_physical_coordinates_of_z_plane(Z_COORDS),
-    )
+        verify_physical_coordinates(
+            stack,
+            X_COORDS,
+            Y_COORDS,
+            expected_zplane_coordinate,
+            selector[Axes.ZPLANE]
+        )
 
 
 def multiply(array, value):

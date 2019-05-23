@@ -107,6 +107,7 @@ class FieldOfView:
                                  "FieldOfView.get_images(image_type)")
 
     def get_image(self, item: str,
+                  aligned_group: int = 0,
                   rounds: Optional[Collection[int]] = None,
                   chs: Optional[Collection[int]] = None,
                   zplanes: Optional[Collection[int]] = None,
@@ -205,9 +206,6 @@ class AlignedImageStackIterator(Iterator[ImageStack]):
 
     def __len__(self):
         return self.size
-
-    def __iter__(self):
-        return self
 
     def __next__(self):
         aligned_group = next(self.aligned_groups)

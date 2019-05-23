@@ -26,6 +26,8 @@ from starfish.core.imagestack.parser.crop import CropParameters
 from starfish.core.spacetx_format import validate_sptx
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
+_SINGLETON = -1
+
 
 class FieldOfView:
     """
@@ -107,7 +109,7 @@ class FieldOfView:
                                  "FieldOfView.get_images(image_type)")
 
     def get_image(self, item: str,
-                  aligned_group: int = 0,
+                  aligned_group: int = _SINGLETON,
                   rounds: Optional[Collection[int]] = None,
                   chs: Optional[Collection[int]] = None,
                   zplanes: Optional[Collection[int]] = None,
@@ -144,7 +146,9 @@ class FieldOfView:
             The instantiated image stack
 
         """
-
+        if aligned_group != _SINGLETON:
+            raise RuntimeError("The parameter 'aligned_group` is no longer accepted. Please provide"
+                               "sets of selected axes instead")
         stack_iterator = self.get_images(item=item, rounds=rounds,
                                          chs=chs, zplanes=zplanes, x=x, y=y)
         return next(stack_iterator)

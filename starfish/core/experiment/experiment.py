@@ -2,7 +2,6 @@ import json
 from typing import (
     Callable,
     Collection,
-    Iterable,
     Iterator,
     List,
     MutableMapping,
@@ -197,7 +196,7 @@ class FieldOfView:
         return aligned_stack_iterator
 
 
-class AlignedImageStackIterator(Iterable[ImageStack]):
+class AlignedImageStackIterator(Iterator[ImageStack]):
     """Iterator class of AlignedImageStacks."""
     def __init__(self, tileset: TileSet, aligned_groups: List[CropParameters]):
         self.size = len(aligned_groups)

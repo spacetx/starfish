@@ -195,9 +195,6 @@ class CropParameters:
         Boolean
             True if tile belongs with selected axes, False if not.
         """
-        # If all none, no selected axes given
-        if rounds is None and chs is None and zplanes is None:
-            return True
         if rounds and tile.indices[Axes.ROUND] not in rounds:
             return False
         if chs and tile.indices[Axes.CH] not in chs:

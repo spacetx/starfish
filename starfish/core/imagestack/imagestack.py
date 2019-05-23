@@ -149,11 +149,10 @@ class ImageStack:
             tile.coordinates[Coordinates.X], dims=Axes.X.value)
         self._data[Coordinates.Y.value] = xr.DataArray(
             tile.coordinates[Coordinates.Y], dims=Axes.Y.value)
-        if Coordinates.Z in tile.coordinates:
-            # Fill with zeros for now, then replace with calculated midpoints
-            self._data[Coordinates.Z.value] = xr.DataArray(np.zeros(
-                self.xarray.sizes[Axes.ZPLANE.value]),
-                dims=Axes.ZPLANE.value)
+        # Fill with nan for now, then replace with calculated midpoints
+        self._data[Coordinates.Z.value] = xr.DataArray(
+            np.full(self.xarray.sizes[Axes.ZPLANE.value], np.nan),
+            dims=Axes.ZPLANE.value)
 
         # Get coords on first tile, then verify all subsequent tiles are aligned
         starting_coords = tile.coordinates

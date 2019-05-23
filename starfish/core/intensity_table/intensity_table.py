@@ -153,8 +153,6 @@ class IntensityTable(xr.DataArray):
             5D tensor.
         round_values : Sequence[int]
             The possible values for the round number, in the order that they are in the ImageStack
-        bbox: Optional[Mapping[PhysicalCoordinateTypes, float]]
-            The bounding box of physical space the intensity table exists in.
         args :
             Additional arguments to pass to the xarray constructor.
         kwargs :
@@ -434,7 +432,7 @@ class IntensityTable(xr.DataArray):
             intensity_data,
             pixel_coordinates,
             image_stack.axis_labels(Axes.CH),
-            image_stack.axis_labels(Axes.ROUND)
+            image_stack.axis_labels(Axes.ROUND),
         )
 
     @staticmethod
@@ -454,7 +452,6 @@ class IntensityTable(xr.DataArray):
         Find the overlapping sections between IntensityTables and process them according
         to the given overlap strategy
         """
-
         overlap_pairs = find_overlaps_of_xarrays(intensity_tables)
         for indices in overlap_pairs:
             overlap_method = OVERLAP_STRATEGY_MAP[overlap_strategy]

@@ -34,6 +34,7 @@ from slicedimage import (
 )
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
+from xarray.core.coordinates import DataArrayCoordinates
 
 from starfish.core.config import StarfishConfig
 from starfish.core.errors import DataFormatWarning
@@ -1151,7 +1152,8 @@ class ImageStack:
         max_projection = self._data.max([dim.value for dim in dims])
         max_projection = max_projection.expand_dims(tuple(dim.value for dim in dims))
         max_projection = max_projection.transpose(*self.xarray.dims)
-        max_proj_stack = ImageStack.from_numpy(max_projection.values)
+        physical_coords = self.xarray.coords
+        max_proj_stack = ImageStack.from_numpy(max_projection.values, coordinates=physical_coords)
         return max_proj_stack
 
     def _squeezed_numpy(self, *dims: Axes):

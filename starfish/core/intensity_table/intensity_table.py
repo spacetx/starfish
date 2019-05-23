@@ -1,6 +1,6 @@
 from itertools import product
 from json import loads
-from typing import Dict, List, Optional, Sequence, Union
+from typing import Dict, List, Mapping, Optional, Sequence, Union
 
 import numpy as np
 import pandas as pd
@@ -15,13 +15,11 @@ from starfish.core.types import (
     LOG,
     OverlapStrategy,
     SpotAttributes,
-    STARFISH_EXTRAS_KEY
-)
+    STARFISH_EXTRAS_KEY, PhysicalCoordinateTypes)
 from starfish.core.util.dtype import preserve_float_range
 from .overlap import (
-    find_overlaps_of_xarrays,
     OVERLAP_STRATEGY_MAP,
-)
+    find_overlaps_of_xarrays)
 
 
 class IntensityTable(xr.DataArray):
@@ -136,6 +134,7 @@ class IntensityTable(xr.DataArray):
             spot_attributes: SpotAttributes,
             ch_values: Sequence[int],
             round_values: Sequence[int],
+            bbox: Optional[Mapping[PhysicalCoordinateTypes, float]] = None,
             *args, **kwargs) -> "IntensityTable":
         """
         Creates an IntensityTable from a :code:`(features, channel, round)`
@@ -154,6 +153,8 @@ class IntensityTable(xr.DataArray):
             5D tensor.
         round_values : Sequence[int]
             The possible values for the round number, in the order that they are in the ImageStack
+        bbox: Optional[Mapping[PhysicalCoordinateTypes, float]]
+            The bounding box of physical space the intensity table exists in.
         args :
             Additional arguments to pass to the xarray constructor.
         kwargs :
@@ -190,6 +191,7 @@ class IntensityTable(xr.DataArray):
         dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
 
         intensities = cls(intensities, coords, dims, *args, **kwargs)
+        intensities._set_bbox_attrs(intensities, bbox)
         return intensities
 
     def get_log(self):
@@ -281,7 +283,12 @@ class IntensityTable(xr.DataArray):
             loaded.dims,
             attrs=loaded.attrs,
         )
+        # if there are physical coords, set min/max values on attrs
+        if intensity_table.has_physical_coords and \
+                PhysicalCoordinateTypes.X_MAX.value not in intensity_table.attrs:
+            IntensityTable._set_bbox_attrs(intensity_table)
         return intensity_table
+
 
     @classmethod
     def synthetic_intensities(
@@ -402,6 +409,13 @@ class IntensityTable(xr.DataArray):
                                          Axes.Y: (ymin, ymax),
                                          Axes.X: (xmin, xmax)})
 
+        bbox = {
+            PhysicalCoordinateTypes.X_MIN: float(cropped_stack.xarray[Coordinates.X.value][0]),
+            PhysicalCoordinateTypes.X_MAX: float(cropped_stack.xarray[Coordinates.X.value][-1]),
+            PhysicalCoordinateTypes.Y_MIN: float(cropped_stack.xarray[Coordinates.Y.value][0]),
+            PhysicalCoordinateTypes.Y_MAX: float(cropped_stack.xarray[Coordinates.Y.value][-1]),
+        }
+
         data = cropped_stack.xarray.transpose(
             Axes.ZPLANE.value,
             Axes.Y.value,
@@ -434,7 +448,24 @@ class IntensityTable(xr.DataArray):
             pixel_coordinates,
             image_stack.axis_labels(Axes.CH),
             image_stack.axis_labels(Axes.ROUND),
+            bbox
         )
+
+    @staticmethod
+    def _set_bbox_attrs(it: "IntensityTable",
+                        bbox: Optional[Mapping[PhysicalCoordinateTypes, float]] = None
+                        ) -> None:
+        if bbox:
+            it.attrs[PhysicalCoordinateTypes.X_MAX.value] = bbox[PhysicalCoordinateTypes.X_MAX]
+            it.attrs[PhysicalCoordinateTypes.X_MIN.value] = bbox[PhysicalCoordinateTypes.X_MIN]
+            it.attrs[PhysicalCoordinateTypes.Y_MAX.value] = bbox[PhysicalCoordinateTypes.Y_MIN]
+            it.attrs[PhysicalCoordinateTypes.Y_MIN.value] = bbox[PhysicalCoordinateTypes.Y_MAX]
+            return
+        it.attrs[PhysicalCoordinateTypes.X_MAX.value] = max(it[Coordinates.X.value]).data
+        it.attrs[PhysicalCoordinateTypes.X_MIN.value] = min(it[Coordinates.X.value]).data
+        it.attrs[PhysicalCoordinateTypes.Y_MAX.value] = max(it[Coordinates.Y.value]).data
+        it.attrs[PhysicalCoordinateTypes.Y_MIN.value] = min(it[Coordinates.Y.value]).data
+        return
 
     @staticmethod
     def _process_overlaps(
@@ -455,6 +486,7 @@ class IntensityTable(xr.DataArray):
             intensity_tables[idx1] = it1
             intensity_tables[idx2] = it2
         return intensity_tables
+
 
     @staticmethod
     def concatenate_intensity_tables(

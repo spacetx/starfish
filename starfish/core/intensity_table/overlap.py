@@ -3,7 +3,7 @@ from typing import List, Optional, Sequence, Tuple
 
 import xarray as xr
 
-from starfish.core.types import Coordinates, Features, Number, OverlapStrategy
+from starfish.core.types import Features, Number, OverlapStrategy, PhysicalCoordinateTypes
 
 
 class Area:
@@ -66,15 +66,15 @@ def find_overlaps_of_xarrays(xarrays: Sequence[xr.DataArray]) -> Sequence[Tuple[
     for idx1, idx2 in itertools.combinations(range(len(xarrays)), 2):
         xr1 = xarrays[idx1]
         xr2 = xarrays[idx2]
-        area1 = Area(min(xr1[Coordinates.X.value]).data,
-                     max(xr1[Coordinates.X.value]).data,
-                     min(xr1[Coordinates.Y.value]).data,
-                     max(xr1[Coordinates.Y.value]).data)
+        area1 = Area(xr1.attrs[PhysicalCoordinateTypes.X_MIN],
+                     xr1.attrs[PhysicalCoordinateTypes.X_MAX],
+                     xr1.attrs[PhysicalCoordinateTypes.Y_MIN],
+                     xr1.attrs[PhysicalCoordinateTypes.Y_MAX])
 
-        area2 = Area(min(xr2[Coordinates.X.value]).data,
-                     max(xr2[Coordinates.X.value]).data,
-                     min(xr2[Coordinates.Y.value]).data,
-                     max(xr2[Coordinates.Y.value]).data)
+        area2 = Area(xr2.attrs[PhysicalCoordinateTypes.X_MIN],
+                     xr2.attrs[PhysicalCoordinateTypes.X_MAX],
+                     xr2.attrs[PhysicalCoordinateTypes.Y_MIN],
+                     xr2.attrs[PhysicalCoordinateTypes.Y_MAX])
         if Area._overlap(area1, area2):
             all_overlaps.append((idx1, idx2))
     return all_overlaps
@@ -137,15 +137,15 @@ def take_max(it1: xr.DataArray, it2: xr.DataArray):
     it2 : xr.DataArray
         The second overlapping xarray
     """
-    area1 = Area(min(it1[Coordinates.X.value]).data,
-                 max(it1[Coordinates.X.value]).data,
-                 min(it1[Coordinates.Y.value]).data,
-                 max(it1[Coordinates.Y.value]).data)
+    area1 = Area(it1.attrs[PhysicalCoordinateTypes.X_MIN],
+                 it1.attrs[PhysicalCoordinateTypes.X_MAX],
+                 it1.attrs[PhysicalCoordinateTypes.Y_MIN],
+                 it1.attrs[PhysicalCoordinateTypes.Y_MAX])
 
-    area2 = Area(min(it2[Coordinates.X.value]).data,
-                 max(it2[Coordinates.X.value]).data,
-                 min(it2[Coordinates.Y.value]).data,
-                 max(it2[Coordinates.Y.value]).data)
+    area2 = Area(it2.attrs[PhysicalCoordinateTypes.X_MIN],
+                 it2.attrs[PhysicalCoordinateTypes.X_MAX],
+                 it2.attrs[PhysicalCoordinateTypes.Y_MIN],
+                 it2.attrs[PhysicalCoordinateTypes.Y_MAX])
     intersection_rect = Area.find_intersection(area1, area2)
     if not intersection_rect:
         raise ValueError("The given xarrays do not overlap")

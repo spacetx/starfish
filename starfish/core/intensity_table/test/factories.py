@@ -36,5 +36,4 @@ def create_intensity_table_with_coords(area: Area, n_spots: int=10) -> Intensity
                                            dims=Features.AXIS)
     it[Coordinates.Y.value] = xr.DataArray(np.linspace(area.min_y, area.max_y, n_spots),
                                            dims=Features.AXIS)
-    IntensityTable._set_bbox_attrs(it)
     return it

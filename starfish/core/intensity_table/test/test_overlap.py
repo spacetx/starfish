@@ -57,7 +57,8 @@ def test_find_overlaps_of_xarrays():
                                                   min_y=0, max_y=1))
     it3 = create_intensity_table_with_coords(Area(min_x=0, max_x=1,
                                                   min_y=1, max_y=2))
-    overlaps = find_overlaps_of_xarrays([it0, it1, it2, it3])
+    its = list(map(IntensityTable._set_bbox_attrs, [it0, it1, it2, it3]))
+    overlaps = find_overlaps_of_xarrays(its)
     # should have 4 total overlaps
     assert len(overlaps) == 4
     # overlap 1 between it0 and it1:

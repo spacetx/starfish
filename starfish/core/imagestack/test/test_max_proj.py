@@ -23,7 +23,7 @@ Y_COORDS = 4, 6
 Z_COORDS = 1, 3
 
 
-def test_max_projection_preserves_coordinatevs():
+def test_max_projection_preserves_coordinates():
     e = data.ISS(use_test_data=True)
     nuclei = e.fov().get_image('nuclei')
     nuclei_proj = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)

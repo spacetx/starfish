@@ -34,7 +34,6 @@ from slicedimage import (
 )
 from slicedimage.io import resolve_path_or_url
 from tqdm import tqdm
-from xarray.core.coordinates import DataArrayCoordinates
 
 from starfish.core.config import StarfishConfig
 from starfish.core.errors import DataFormatWarning
@@ -1152,7 +1151,17 @@ class ImageStack:
         max_projection = self._data.max([dim.value for dim in dims])
         max_projection = max_projection.expand_dims(tuple(dim.value for dim in dims))
         max_projection = max_projection.transpose(*self.xarray.dims)
-        physical_coords = self.xarray.coords
+        physical_coords: MutableMapping[Coordinates, Sequence[Number]] = {}
+        for axis, coord in (
+                (Axes.X, Coordinates.X),
+                (Axes.Y, Coordinates.Y),
+                (Axes.ZPLANE, Coordinates.Z)):
+            if axis in dims:
+                # this axis was projected out of existence.
+                assert coord.value not in max_projection.coords
+                physical_coords[coord] = [np.average(self._data.coords[coord.value])]
+            else:
+                physical_coords[coord] = max_projection.coords[coord.value]
         max_proj_stack = ImageStack.from_numpy(max_projection.values, coordinates=physical_coords)
         return max_proj_stack
 

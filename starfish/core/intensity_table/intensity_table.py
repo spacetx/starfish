@@ -14,12 +14,13 @@ from starfish.core.types import (
     Features,
     LOG,
     OverlapStrategy,
+    PhysicalCoordinateTypes,
     SpotAttributes,
-    STARFISH_EXTRAS_KEY, PhysicalCoordinateTypes)
+    STARFISH_EXTRAS_KEY)
 from starfish.core.util.dtype import preserve_float_range
 from .overlap import (
-    OVERLAP_STRATEGY_MAP,
-    find_overlaps_of_xarrays)
+    find_overlaps_of_xarrays,
+    OVERLAP_STRATEGY_MAP)
 
 
 class IntensityTable(xr.DataArray):
@@ -191,7 +192,8 @@ class IntensityTable(xr.DataArray):
         dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
 
         intensities = cls(intensities, coords, dims, *args, **kwargs)
-        intensities._set_bbox_attrs(intensities, bbox)
+        if intensities.has_physical_coords:
+            intensities._set_bbox_attrs(intensities, bbox)
         return intensities
 
     def get_log(self):
@@ -288,7 +290,6 @@ class IntensityTable(xr.DataArray):
                 PhysicalCoordinateTypes.X_MAX.value not in intensity_table.attrs:
             IntensityTable._set_bbox_attrs(intensity_table)
         return intensity_table
-
 
     @classmethod
     def synthetic_intensities(
@@ -486,7 +487,6 @@ class IntensityTable(xr.DataArray):
             intensity_tables[idx1] = it1
             intensity_tables[idx2] = it2
         return intensity_tables
-
 
     @staticmethod
     def concatenate_intensity_tables(

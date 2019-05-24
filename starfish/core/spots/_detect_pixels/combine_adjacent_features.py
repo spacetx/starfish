@@ -267,7 +267,8 @@ class CombineAdjacentFeatures:
                 'x': int(spot_property.centroid[1])
             }
 
-        # we're back to 3d or fake-3d here
+        # define the target index as the most repeated value in the bounding box of the spot.
+        #  it appears there is no simpler way to do this with a regionprops object
         bbox = spot_property.bbox
         if len(bbox) == 6:
             # 3d bbox

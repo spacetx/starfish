@@ -1,10 +1,10 @@
 from copy import deepcopy
-from typing import Callable, Iterable, Optional, Union
+from typing import Callable, Iterable, Optional, Union, Sequence
 
 import numpy as np
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import Axes, Clip
+from starfish.core.types import Axes, Clip, Coordinates
 from starfish.core.util import click
 from starfish.core.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
@@ -106,10 +106,20 @@ class Reduce(FilterAlgorithmBase):
         else:
             reduced = preserve_float_range(reduced, rescale=True)
 
-        # Construct the stack
-        stack = stack.from_numpy(reduced.values)
+        physical_coords: MutableMapping[Coordinates, Sequence[Number]] = {}
+        for axis, coord in (
+                (Axes.X, Coordinates.X),
+                (Axes.Y, Coordinates.Y),
+                (Axes.ZPLANE, Coordinates.Z)):
+            if axis in dims:
+                # this axis was projected out of existence.
+                assert coord.value not in reduced.coords
+                physical_coords[coord] = [np.average(self._data.coords[coord.value])]
+            else:
+                physical_coords[coord] = reduced.coords[coord.value]
+        max_proj_stack = ImageStack.from_numpy(reduced.values, coordinates=physical_coords)
 
-        return stack
+        return reduced_stack
 
     @staticmethod
     @click.command("Reduce")

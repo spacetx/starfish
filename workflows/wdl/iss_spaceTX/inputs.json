@@ -1,0 +1,5 @@
+{
+  "Starfish.experiment": "https://d2nhj9g34unfro.cloudfront.net/xiaoyan_qian/ISS_human_HCA_07_MultiFOV/main_files/experiment.json",
+  "Starfish.num_fovs": 539,
+  "Starfish.recipe_file": "https://raw.githubusercontent.com/spacetx/starfish/master/workflows/wdl/iss_spaceTX/recipe.py"
+}

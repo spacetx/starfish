@@ -24,6 +24,7 @@ class StarfishIndex(click.ParamType):
             Axes.ZPLANE: spec.get(Axes.ZPLANE, 1),
         }
 
+
 def dimensions_option(name, required):
     return click.option(
         "--{}-dimensions".format(name),
@@ -37,6 +38,7 @@ def dimensions_option(name, required):
              Axes.CH.value,
              Axes.ZPLANE.value))
 
+
 decorators = [
     click.command(),
     click.argument("output_dir", type=click.Path(exists=True, file_okay=False, writable=True)),
@@ -46,13 +48,21 @@ decorators = [
 for image_name in AUX_IMAGE_NAMES:
     decorators.append(dimensions_option(image_name, False))
 
+
 def build(output_dir, fov_count, primary_image_dimensions, **kwargs):
     """generate synthetic experiments"""
+
+    aux_names_to_dimension_cardinality = {
+        aux_name: size
+        for aux_name, size in kwargs.items()
+        if size is not None
+    }
     write_experiment_json(
         output_dir, fov_count, ImageFormat.TIFF,
         primary_image_dimensions=primary_image_dimensions,
-        aux_name_to_dimensions=kwargs,
+        aux_name_to_dimensions=aux_names_to_dimension_cardinality,
     )
+
 
 for decorator in reversed(decorators):
     build = decorator(build)

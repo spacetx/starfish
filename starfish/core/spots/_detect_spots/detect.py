@@ -118,7 +118,7 @@ def measure_spot_intensities(
             measurement_function,
             radius_is_gyration=radius_is_gyration
         )
-        intensity_table[:, c, r] = blob_intensities
+        intensity_table.loc[dict(c=c, r=r)] = blob_intensities
 
     return intensity_table
 
@@ -156,7 +156,8 @@ def concatenate_spot_attributes_to_intensities(
     i = 0
     for attrs, inds in spot_attributes:
         for _, row in attrs.data.iterrows():
-            intensity_table[i, inds[Axes.CH], inds[Axes.ROUND]] = row['intensity']
+            selector = dict(features=i, c=inds[Axes.CH], r=inds[Axes.ROUND])
+            intensity_table.loc[selector] = row['intensity']
             i += 1
 
     return intensity_table
@@ -220,12 +221,12 @@ def detect_spots(data_stack: ImageStack,
         spot_finding_kwargs = {}
 
     if reference_image is not None:
-        if reference_image_max_projection_axes is None:
-            raise ValueError("axes must be provided if reference_image is provided")
-        max_proj_reference_image = reference_image.max_proj(*reference_image_max_projection_axes)
-        reference_spot_locations = spot_finding_method(
-            max_proj_reference_image._squeezed_numpy(*reference_image_max_projection_axes),
-            **spot_finding_kwargs)
+        if reference_image_max_projection_axes is not None:
+            reference_image = reference_image.max_proj(*reference_image_max_projection_axes)
+            data_image = reference_image._squeezed_numpy(*reference_image_max_projection_axes)
+        else:
+            data_image = reference_image.xarray
+        reference_spot_locations = spot_finding_method(data_image, **spot_finding_kwargs)
         intensity_table = measure_spot_intensities(
             data_image=data_stack,
             spot_attributes=reference_spot_locations,

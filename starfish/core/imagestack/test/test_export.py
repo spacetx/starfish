@@ -7,7 +7,7 @@ from starfish.core.types import Axes, PhysicalCoordinateTypes
 from .factories import imagestack_with_coords_factory
 from .imagestack_test_utils import verify_physical_coordinates
 from ..imagestack import ImageStack
-from ..physical_coordinate_calculator import get_physical_coordinates_of_z_plane
+from ..physical_coordinates import _get_physical_coordinates_of_z_plane
 
 X_COORDS = 1, 2
 Y_COORDS = 4, 6
@@ -42,7 +42,7 @@ def test_imagestack_export(tmpdir, format, count, recwarn):
         loaded_stack,
         X_COORDS,
         Y_COORDS,
-        get_physical_coordinates_of_z_plane(Z_COORDS),
+        _get_physical_coordinates_of_z_plane(Z_COORDS),
     )
     assert count == len(files)
     with open(files[0], "rb") as fh:

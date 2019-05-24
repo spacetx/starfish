@@ -1,13 +1,10 @@
 from collections import OrderedDict
-from typing import Collection, List, Mapping, MutableSequence, Optional, Tuple, Union
+from typing import Collection, List, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from slicedimage import TileSet
 
 from starfish.core.imagestack.parser import TileCollectionData, TileData, TileKey
-from starfish.core.imagestack.physical_coordinate_calculator import (
-    recalculate_physical_coordinate_range,
-)
 from starfish.core.types import Axes, Coordinates, Number
 
 
@@ -57,6 +54,31 @@ class CropParameters:
             self._permitted_chs.add(permitted_axis)
         if axis_type == Axes.ZPLANE and self._permitted_zplanes:
             self._permitted_zplanes.add(permitted_axis)
+
+    def further_crop(self, further_crop_params) -> "CropParameters":
+        if (further_crop_params._permitted_chs
+                and not further_crop_params._permitted_chs.issubset(self._permitted_chs)):
+            raise ValueError("Can only provide further ch crop params within the existing set of"
+                             "ch crop params")
+        else:
+            self._permitted_chs = further_crop_params._permitted_chs
+
+        if (further_crop_params._permitted_rounds
+                and not further_crop_params._permitted_rounds.issubset(self._permitted_rounds)):
+            raise ValueError("Can only provide further round crop params within the existing set of"
+                             "round crop params")
+        else:
+            self._permitted_rounds = further_crop_params._permitted_rounds
+
+        if (further_crop_params._permitted_zplanes
+                and not further_crop_params._permitted_zplanes.issubset(self._permitted_zplanes)):
+            raise ValueError("Can only provide further zplane crop params within the existing set "
+                             "of zplane crop params")
+        else:
+            self._permitted_zplanes = further_crop_params._permitted_zplanes
+        self._x_slice = further_crop_params._x_slice
+        self._y_slice = further_crop_params._y_slice
+        return self
 
     def filter_tilekeys(self, tilekeys: Collection[TileKey]) -> Collection[TileKey]:
         """
@@ -159,33 +181,23 @@ class CropParameters:
         return image[output_y_shape[0]:output_y_shape[1], output_x_shape[0]:output_x_shape[1]]
 
     def crop_coordinates(
-            self,
-            coordinates: Mapping[Coordinates, Tuple[Number, Number]],
-            shape: Mapping[Axes, int],
-    ) -> Mapping[Coordinates, Tuple[Number, Number]]:
+            self, coordinates: Mapping[Coordinates, Sequence[Number]],
+    ) -> Mapping[Coordinates, Sequence[Number]]:
         """
         Given a mapping of coordinate to coordinate values, return a mapping of the coordinate to
         cropped coordinate values.
         """
-        xmin, xmax = coordinates[Coordinates.X]
-        ymin, ymax = coordinates[Coordinates.Y]
-        if self._x_slice is not None:
-            xmin, xmax = recalculate_physical_coordinate_range(
-                xmin, xmax,
-                shape[Axes.X],
-                self._x_slice)
-        if self._y_slice is not None:
-            ymin, ymax = recalculate_physical_coordinate_range(
-                ymin, ymax,
-                shape[Axes.Y],
-                self._y_slice)
+        output_x_shape = CropParameters._crop_axis(len(coordinates[Coordinates.X]), self._x_slice)
+        output_y_shape = CropParameters._crop_axis(len(coordinates[Coordinates.Y]), self._y_slice)
 
         return_coords = {
-            Coordinates.X: (xmin, xmax),
-            Coordinates.Y: (ymin, ymax)
+            Coordinates.X: coordinates[Coordinates.X][output_x_shape[0]:output_x_shape[1]],
+            Coordinates.Y: coordinates[Coordinates.Y][output_y_shape[0]:output_y_shape[1]],
         }
+
         if Coordinates.Z in coordinates:
             return_coords[Coordinates.Z] = coordinates[Coordinates.Z]
+
         return return_coords
 
 
@@ -204,11 +216,8 @@ class CroppedTileData(TileData):
         return self.cropping_parameters.crop_image(self.backing_tile_data.numpy_array)
 
     @property
-    def coordinates(self) -> Mapping[Coordinates, Tuple[Number, Number]]:
-        return self.cropping_parameters.crop_coordinates(
-            self.backing_tile_data.coordinates,
-            self.backing_tile_data.tile_shape,
-        )
+    def coordinates(self) -> Mapping[Coordinates, Sequence[Number]]:
+        return self.cropping_parameters.crop_coordinates(self.backing_tile_data.coordinates)
 
     @property
     def selector(self) -> Mapping[Axes, int]:

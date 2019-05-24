@@ -1,0 +1,5 @@
+{
+  "Starfish.experiment": "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/iss/20190506/experiment.json",
+  "Starfish.num_fovs": 15,
+  "Starfish.recipe_file": "https://raw.githubusercontent.com/spacetx/starfish/master/workflows/wdl/iss_published/recipe.py"
+}

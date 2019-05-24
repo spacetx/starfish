@@ -37,7 +37,7 @@ from tqdm import tqdm
 
 from starfish.core.config import StarfishConfig
 from starfish.core.errors import DataFormatWarning
-from starfish.core.imagestack import indexing_utils, physical_coordinate_calculator
+from starfish.core.imagestack import indexing_utils
 from starfish.core.imagestack.parser import TileCollectionData, TileKey
 from starfish.core.imagestack.parser.crop import CropParameters, CroppedTileCollectionData
 from starfish.core.imagestack.parser.numpy import NumpyData
@@ -146,22 +146,16 @@ class ImageStack:
 
         # Set up coordinates
         self._data[Coordinates.X.value] = xr.DataArray(
-            np.linspace(tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
-                        self.xarray.sizes[Axes.X.value]), dims=Axes.X.value)
+            tile.coordinates[Coordinates.X], dims=Axes.X.value)
         self._data[Coordinates.Y.value] = xr.DataArray(
-            np.linspace(tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
-                        self.xarray.sizes[Axes.Y.value]), dims=Axes.Y.value)
-        if Coordinates.Z in tile.coordinates:
-            # Fill with zeros for now, then replace with calculated midpoints
-            self._data[Coordinates.Z.value] = xr.DataArray(np.zeros(
-                self.xarray.sizes[Axes.ZPLANE.value]),
-                dims=Axes.ZPLANE.value)
+            tile.coordinates[Coordinates.Y], dims=Axes.Y.value)
+        # Fill with nan for now, then replace with calculated midpoints
+        self._data[Coordinates.Z.value] = xr.DataArray(
+            np.full(self.xarray.sizes[Axes.ZPLANE.value], np.nan),
+            dims=Axes.ZPLANE.value)
 
         # Get coords on first tile, then verify all subsequent tiles are aligned
-        starting_coords = [
-            tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
-            tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
-        ]
+        starting_coords = tile.coordinates
 
         tile_dtypes = set()
         for selector in tqdm(all_selectors):
@@ -173,18 +167,17 @@ class ImageStack:
             data = img_as_float32(data)
             self.set_slice(selector=selector, data=data)
 
-            coordinates_values = [
-                tile.coordinates[Coordinates.X][0], tile.coordinates[Coordinates.X][1],
-                tile.coordinates[Coordinates.Y][0], tile.coordinates[Coordinates.Y][1],
-            ]
-            if starting_coords != coordinates_values:
-                raise ValueError(
-                    f"Tiles must be aligned")
+            if not (
+                    np.array_equal(
+                        starting_coords[Coordinates.X], tile.coordinates[Coordinates.X])
+                    and np.array_equal(
+                        starting_coords[Coordinates.Y], tile.coordinates[Coordinates.Y])
+            ):
+                raise ValueError(f"Tiles must be aligned")
             if Coordinates.Z in tile.coordinates:
-                z_range = (tile.coordinates[Coordinates.Z][0], tile.coordinates[Coordinates.Z][1])
-                # Use mid-point of the z range for a tile for the z-coordinate
+                assert len(tile.coordinates[Coordinates.Z]) == 1
                 self._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = \
-                    physical_coordinate_calculator.get_physical_coordinates_of_z_plane(z_range)
+                    tile.coordinates[Coordinates.Z][0]
 
         tile_dtype_kinds = set(tile_dtype.kind for tile_dtype in tile_dtypes)
         tile_dtype_sizes = set(tile_dtype.itemsize for tile_dtype in tile_dtypes)
@@ -299,7 +292,7 @@ class ImageStack:
             cls,
             array: np.ndarray,
             index_labels: Optional[Mapping[Axes, Sequence[int]]]=None,
-            coordinates: Optional[xr.DataArray]=None,
+            coordinates: Optional[Mapping[Coordinates, Sequence[Number]]]=None,
     ) -> "ImageStack":
         """Create an ImageStack from a 5d numpy array with shape (n_round, n_ch, n_z, y, x)
 
@@ -310,9 +303,9 @@ class ImageStack:
         index_labels : Optional[Mapping[Axes, Sequence[int]]]
             Mapping from axes (r, ch, z) to their labels.  If this is not provided, then the axes
             will be labeled from 0..(n-1), where n=the size of the axes.
-        coordinates : Optional[xr.DataArray]
-            DataArray indexed by r, ch, z, with xmin, xmax, ymin, ymax, zmin, zmax as columns.  If
-            this is not provided, then the ImageStack gets fake coordinates.
+        coordinates : Optional[Mapping[Coordinates, Sequence[Number]]]
+            Map from Coordinates to a sequence of coordinate values.  If this is not provided, then
+            the ImageStack gets fake coordinates.
 
         Returns
         -------
@@ -340,6 +333,11 @@ class ImageStack:
             assert len(index_labels[Axes.ROUND]) == n_round
             assert len(index_labels[Axes.CH]) == n_ch
             assert len(index_labels[Axes.ZPLANE]) == n_z
+
+        if coordinates is not None:
+            assert len(coordinates[Coordinates.X]) == width
+            assert len(coordinates[Coordinates.Y]) == height
+            assert len(coordinates[Coordinates.Z]) == n_z
 
         tile_data = NumpyData(array, index_labels, coordinates)
         return cls(tile_data)
@@ -1152,7 +1150,18 @@ class ImageStack:
         max_projection = self._data.max([dim.value for dim in dims])
         max_projection = max_projection.expand_dims(tuple(dim.value for dim in dims))
         max_projection = max_projection.transpose(*self.xarray.dims)
-        max_proj_stack = self.from_numpy(max_projection.values)
+        physical_coords: MutableMapping[Coordinates, Sequence[Number]] = {}
+        for axis, coord in (
+                (Axes.X, Coordinates.X),
+                (Axes.Y, Coordinates.Y),
+                (Axes.ZPLANE, Coordinates.Z)):
+            if axis in dims:
+                # this axis was projected out of existence.
+                assert coord.value not in max_projection.coords
+                physical_coords[coord] = [np.average(self._data.coords[coord.value])]
+            else:
+                physical_coords[coord] = max_projection.coords[coord.value]
+        max_proj_stack = ImageStack.from_numpy(max_projection.values, coordinates=physical_coords)
         return max_proj_stack
 
     def _squeezed_numpy(self, *dims: Axes):

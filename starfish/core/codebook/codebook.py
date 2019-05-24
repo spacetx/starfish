@@ -450,7 +450,7 @@ class Codebook(xr.DataArray):
         # if a feature is all zero, the information should be spread across the channel
         n = array.sizes[Axes.CH.value] * array.sizes[Axes.ROUND.value]
         partitioned_intensity = np.linalg.norm(np.full(n, fill_value=1 / n), ord=norm_order) / n
-        array = array.fillna(partitioned_intensity)
+        array.values[np.logical_not(np.isfinite(array.values))] = partitioned_intensity
 
         return array, norm
 

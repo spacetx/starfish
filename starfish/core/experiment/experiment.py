@@ -1,5 +1,6 @@
 import json
 from typing import (
+    Any,
     Callable,
     Collection,
     Iterator,
@@ -26,7 +27,7 @@ from starfish.core.imagestack.parser.crop import CropParameters
 from starfish.core.spacetx_format import validate_sptx
 from .version import MAX_SUPPORTED_VERSION, MIN_SUPPORTED_VERSION
 
-_SINGLETON = -1
+_SINGLETON = object()
 
 
 class FieldOfView:
@@ -109,7 +110,7 @@ class FieldOfView:
                                  "FieldOfView.get_images(image_type)")
 
     def get_image(self, item: str,
-                  aligned_group: int = _SINGLETON,
+                  aligned_group: Any = _SINGLETON,
                   rounds: Optional[Collection[int]] = None,
                   chs: Optional[Collection[int]] = None,
                   zplanes: Optional[Collection[int]] = None,
@@ -147,8 +148,9 @@ class FieldOfView:
 
         """
         if aligned_group != _SINGLETON:
-            raise RuntimeError("The parameter 'aligned_group` is no longer accepted. Please provide"
-                               "sets of selected axes instead")
+            raise RuntimeError("The parameter 'aligned_group` is no longer accepted. Please use"
+                               "FieldOfView.get_images() and  provide sets of selected axes "
+                               "instead")
         stack_iterator = self.get_images(item=item, rounds=rounds,
                                          chs=chs, zplanes=zplanes, x=x, y=y)
         return next(stack_iterator)
@@ -208,10 +210,10 @@ class AlignedImageStackIterator(Iterator[ImageStack]):
         self.aligned_groups = iter(aligned_groups)
         self.tileset = tileset
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.size
 
-    def __next__(self):
+    def __next__(self) -> ImageStack:
         aligned_group = next(self.aligned_groups)
         stack = ImageStack.from_tileset(self.tileset, aligned_group)
         return stack

@@ -144,6 +144,139 @@ def build_image(
     return collection
 
 
+def write_labeled_experiment_json(
+        path: str,
+        fov_count: int,
+        tile_format: ImageFormat,
+        *,
+        primary_image_dimension_labels: Mapping[Union[str, Axes], Sequence[int]],
+        aux_name_to_dimension_labels: Mapping[str, Mapping[Union[str, Axes], Sequence[int]]],
+        primary_tile_fetcher: Optional[TileFetcher]=None,
+        aux_tile_fetcher: Optional[Mapping[str, TileFetcher]]=None,
+        postprocess_func: Optional[Callable[[dict], dict]]=None,
+        default_shape: Optional[Mapping[Axes, int]]=None,
+        dimension_order: Sequence[Axes]=(Axes.ZPLANE, Axes.ROUND, Axes.CH),
+        fov_path_generator: Callable[[Path, str], Path] = _fov_path_generator,
+        tile_opener: Callable[[Path, Tile, str], BinaryIO] = _tile_opener,
+) -> None:
+    """
+    Build and returns a top-level experiment description with the following characteristics:
+
+    Parameters
+    ----------
+    path : str
+        Directory to write the files to.
+    fov_count : int
+        Number of fields of view in this experiment.
+    tile_format : ImageFormat
+        File format to write the tiles as.
+    primary_image_dimension_labels : Mapping[Union[str, Axes], Sequence[int]]
+        Dictionary mapping dimension name to dimension labels for the primary image.
+    aux_name_to_dimension_labels : Mapping[str, Mapping[Union[str, Axes], Sequence[int]]]
+        Dictionary mapping the auxiliary image type to dictionaries, which map from dimension name
+        to dimension labels.
+    primary_tile_fetcher : Optional[TileFetcher]
+        TileFetcher for primary images.  Set this if you want specific image data to be set for the
+        primary images.  If not provided, the image data is set to random noise via
+        :class:`RandomNoiseTileFetcher`.
+    aux_tile_fetcher : Optional[Mapping[str, TileFetcher]]
+        TileFetchers for auxiliary images.  Set this if you want specific image data to be set for
+        one or more aux image types.  If not provided for any given aux image, the image data is
+        set to random noise via :class:`RandomNoiseTileFetcher`.
+    postprocess_func : Optional[Callable[[dict], dict]]
+        If provided, this is called with the experiment document for any postprocessing.
+        An example of this would be to add something to one of the top-level extras field.
+        The callable should return what is to be written as the experiment document.
+    default_shape : Optional[Tuple[int, int]] (default = None)
+        Default shape for the tiles in this experiment.
+    dimension_order : Sequence[Axes]
+        Ordering for which dimensions vary, in order of the slowest changing dimension to the
+        fastest.  For instance, if the order is (ROUND, Z, CH) and each dimension has labels (0, 1),
+        then the sequence is:
+          (ROUND=0, CH=0, Z=0)
+          (ROUND=0, CH=1, Z=0)
+          (ROUND=0, CH=0, Z=1)
+          (ROUND=0, CH=1, Z=1)
+          (ROUND=1, CH=0, Z=0)
+          (ROUND=1, CH=1, Z=0)
+          (ROUND=1, CH=0, Z=1)
+          (ROUND=1, CH=1, Z=1)
+        (default = (Axes.Z, Axes.ROUND, Axes.CH))
+    fov_path_generator : Callable[[Path, str], Path]
+        Generates the path for a FOV's json file.  If one is not provided, the default generates
+        the FOV's json file at the same level as the top-level json file for an image.
+    tile_opener : Callable[[Path, Tile, str], BinaryIO]
+    """
+    if primary_tile_fetcher is None:
+        primary_tile_fetcher = tile_fetcher_factory(RandomNoiseTile)
+    if aux_tile_fetcher is None:
+        aux_tile_fetcher = {}
+    if postprocess_func is None:
+        postprocess_func = lambda doc: doc
+
+    experiment_doc: Dict[str, Any] = {
+        'version': str(CURRENT_VERSION),
+        'images': {},
+        'extras': {},
+    }
+    primary_image = build_image(
+        range(fov_count),
+        primary_image_dimension_labels[Axes.ROUND],
+        primary_image_dimension_labels[Axes.CH],
+        primary_image_dimension_labels[Axes.ZPLANE],
+        primary_tile_fetcher,
+        axes_order=dimension_order,
+        default_shape=default_shape,
+    )
+    Writer.write_to_path(
+        primary_image,
+        os.path.join(path, "primary_images.json"),
+        pretty=True,
+        partition_path_generator=fov_path_generator,
+        tile_opener=tile_opener,
+        tile_format=tile_format,
+    )
+    experiment_doc['images']['primary'] = "primary_images.json"
+
+    for aux_name, aux_dimension_labels in aux_name_to_dimension_labels.items():
+        auxiliary_image = build_image(
+            range(fov_count),
+            aux_dimension_labels[Axes.ROUND],
+            aux_dimension_labels[Axes.CH],
+            aux_dimension_labels[Axes.ZPLANE],
+            aux_tile_fetcher.get(aux_name, tile_fetcher_factory(RandomNoiseTile)),
+            axes_order=dimension_order,
+            default_shape=default_shape,
+        )
+        Writer.write_to_path(
+            auxiliary_image,
+            os.path.join(path, "{}.json".format(aux_name)),
+            pretty=True,
+            partition_path_generator=fov_path_generator,
+            tile_opener=tile_opener,
+            tile_format=tile_format,
+        )
+        experiment_doc['images'][aux_name] = "{}.json".format(aux_name)
+
+    experiment_doc["codebook"] = "codebook.json"
+    codebook_array = [
+        {
+            "codeword": [
+                {"r": 0, "c": 0, "v": 1},
+            ],
+            "target": "PLEASE_REPLACE_ME"
+        },
+    ]
+    codebook = Codebook.from_code_array(codebook_array)
+    codebook_json_filename = "codebook.json"
+    codebook.to_json(os.path.join(path, codebook_json_filename))
+
+    experiment_doc = postprocess_func(experiment_doc)
+
+    with open(os.path.join(path, "experiment.json"), "w") as fh:
+        json.dump(experiment_doc, fh, indent=4)
+
+
 def write_experiment_json(
         path: str,
         fov_count: int,
@@ -207,73 +340,29 @@ def write_experiment_json(
         the FOV's json file at the same level as the top-level json file for an image.
     tile_opener : Callable[[Path, Tile, str], BinaryIO]
     """
-    if primary_tile_fetcher is None:
-        primary_tile_fetcher = tile_fetcher_factory(RandomNoiseTile)
-    if aux_tile_fetcher is None:
-        aux_tile_fetcher = {}
-    if postprocess_func is None:
-        postprocess_func = lambda doc: doc
-
-    experiment_doc: Dict[str, Any] = {
-        'version': str(CURRENT_VERSION),
-        'images': {},
-        'extras': {},
+    primary_image_dimension_labels: Mapping[Union[str, Axes], Sequence[int]] = {
+        primary_image_dimension_name: range(primary_image_dimension_cardinality)
+        for primary_image_dimension_name, primary_image_dimension_cardinality in
+        primary_image_dimensions.items()
     }
-    primary_image = build_image(
-        range(fov_count),
-        range(primary_image_dimensions[Axes.ROUND]),
-        range(primary_image_dimensions[Axes.CH]),
-        range(primary_image_dimensions[Axes.ZPLANE]),
-        primary_tile_fetcher,
-        axes_order=dimension_order,
+    aux_name_to_dimension_labels: Mapping[str, Mapping[Union[str, Axes], Sequence[int]]] = {
+        aux_name: {
+            aux_dimension_name: range(aux_dimension_cardinality)
+            for aux_dimension_name, aux_dimension_cardinality in
+            dimension_name_to_cardinality.items()
+        }
+        for aux_name, dimension_name_to_cardinality in aux_name_to_dimensions.items()
+    }
+
+    return write_labeled_experiment_json(
+        path, fov_count, tile_format,
+        primary_image_dimension_labels=primary_image_dimension_labels,
+        aux_name_to_dimension_labels=aux_name_to_dimension_labels,
+        primary_tile_fetcher=primary_tile_fetcher,
+        aux_tile_fetcher=aux_tile_fetcher,
+        postprocess_func=postprocess_func,
         default_shape=default_shape,
-    )
-    Writer.write_to_path(
-        primary_image,
-        os.path.join(path, "primary_images.json"),
-        pretty=True,
-        partition_path_generator=fov_path_generator,
+        dimension_order=dimension_order,
+        fov_path_generator=fov_path_generator,
         tile_opener=tile_opener,
-        tile_format=tile_format,
     )
-    experiment_doc['images']['primary'] = "primary_images.json"
-
-    for aux_name, aux_dimensions in aux_name_to_dimensions.items():
-        if aux_dimensions is None:
-            continue
-        auxiliary_image = build_image(
-            range(fov_count),
-            range(aux_dimensions[Axes.ROUND]),
-            range(aux_dimensions[Axes.CH]),
-            range(aux_dimensions[Axes.ZPLANE]),
-            aux_tile_fetcher.get(aux_name, tile_fetcher_factory(RandomNoiseTile)),
-            axes_order=dimension_order,
-            default_shape=default_shape,
-        )
-        Writer.write_to_path(
-            auxiliary_image,
-            os.path.join(path, "{}.json".format(aux_name)),
-            pretty=True,
-            partition_path_generator=fov_path_generator,
-            tile_opener=tile_opener,
-            tile_format=tile_format,
-        )
-        experiment_doc['images'][aux_name] = "{}.json".format(aux_name)
-
-    experiment_doc["codebook"] = "codebook.json"
-    codebook_array = [
-        {
-            "codeword": [
-                {"r": 0, "c": 0, "v": 1},
-            ],
-            "target": "PLEASE_REPLACE_ME"
-        },
-    ]
-    codebook = Codebook.from_code_array(codebook_array)
-    codebook_json_filename = "codebook.json"
-    codebook.to_json(os.path.join(path, codebook_json_filename))
-
-    experiment_doc = postprocess_func(experiment_doc)
-
-    with open(os.path.join(path, "experiment.json"), "w") as fh:
-        json.dump(experiment_doc, fh, indent=4)

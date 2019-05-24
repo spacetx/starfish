@@ -31,7 +31,10 @@ class Reduce(FilterAlgorithmBase):
         DataArray.reduce():
         http://xarray.pydata.org/en/stable/generated/xarray.DataArray.reduce.html
 
-        The following strings are valid:
+        If a string is provided, it should correspond to a numpy function that
+        matches the form specified above
+        (i.e., function is resolved: func = getattr(np, func)).
+        Some common examples below:
             max: maximum intensity projection (applies numpy.amax)
             mean: take the mean across the dim(s) (applies numpy.mean)
             sum: sum across the dim(s) (applies numpy.sum)

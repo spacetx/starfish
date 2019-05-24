@@ -91,8 +91,6 @@ class Reduce(FilterAlgorithmBase):
             original stack.
 
         """
-        if not in_place:
-            stack = deepcopy(stack)
 
         # Apply the reducing function
         reduced = stack._data.reduce(self.func, dim=[Axes(dim).value for dim in self.dims])
@@ -111,15 +109,20 @@ class Reduce(FilterAlgorithmBase):
                 (Axes.X, Coordinates.X),
                 (Axes.Y, Coordinates.Y),
                 (Axes.ZPLANE, Coordinates.Z)):
-            if axis in dims:
+            if axis in self.dims:
                 # this axis was projected out of existence.
                 assert coord.value not in reduced.coords
                 physical_coords[coord] = [np.average(self._data.coords[coord.value])]
             else:
                 physical_coords[coord] = reduced.coords[coord.value]
-        max_proj_stack = ImageStack.from_numpy(reduced.values, coordinates=physical_coords)
+        reduced_stack = ImageStack.from_numpy(reduced.values, coordinates=physical_coords)
 
-        return reduced_stack
+        if in_place:
+            stack._data = reduced_stack._data
+
+            return stack
+        else:
+            return reduced_stack
 
     @staticmethod
     @click.command("Reduce")

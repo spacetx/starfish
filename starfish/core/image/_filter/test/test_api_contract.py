@@ -25,6 +25,7 @@ import pytest
 from starfish import ImageStack
 from starfish.core.image import Filter
 from starfish.core.image._filter.max_proj import MaxProject
+from starfish.core.image._filter.reduce import Reduce
 
 methods: Mapping[str, Type] = Filter._algorithm_to_class_map()
 
@@ -60,7 +61,7 @@ def test_all_methods_adhere_to_contract(filter_class):
     except TypeError:
         raise AssertionError(f'{filter_class} must accept in_place parameter')
     assert isinstance(filtered, ImageStack)
-    if filter_class is not MaxProject:
+    if filter_class not in [MaxProject, Reduce]:
         # Max Proj does not have an in place option, so we need to skip this assertion
         assert data is filtered, \
             f'{filter_class} should return a reference to the input ImageStack when run in_place'

@@ -1,10 +1,16 @@
-from copy import deepcopy
-from typing import Callable, Iterable, Optional, Union, Sequence
+from typing import (
+    Callable,
+    Iterable,
+    MutableMapping,
+    Optional,
+    Sequence,
+    Union
+)
 
 import numpy as np
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import Axes, Clip, Coordinates
+from starfish.core.types import Axes, Clip, Coordinates, Number
 from starfish.core.util import click
 from starfish.core.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
@@ -104,6 +110,7 @@ class Reduce(FilterAlgorithmBase):
         else:
             reduced = preserve_float_range(reduced, rescale=True)
 
+        # Update the physical coordinates
         physical_coords: MutableMapping[Coordinates, Sequence[Number]] = {}
         for axis, coord in (
                 (Axes.X, Coordinates.X),
@@ -112,17 +119,12 @@ class Reduce(FilterAlgorithmBase):
             if axis in self.dims:
                 # this axis was projected out of existence.
                 assert coord.value not in reduced.coords
-                physical_coords[coord] = [np.average(self._data.coords[coord.value])]
+                physical_coords[coord] = [np.average(stack._data.coords[coord.value])]
             else:
                 physical_coords[coord] = reduced.coords[coord.value]
         reduced_stack = ImageStack.from_numpy(reduced.values, coordinates=physical_coords)
 
-        if in_place:
-            stack._data = reduced_stack._data
-
-            return stack
-        else:
-            return reduced_stack
+        return reduced_stack
 
     @staticmethod
     @click.command("Reduce")

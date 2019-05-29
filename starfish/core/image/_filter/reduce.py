@@ -2,7 +2,6 @@ from typing import (
     Callable,
     Iterable,
     MutableMapping,
-    Optional,
     Sequence,
     Union
 )
@@ -30,15 +29,13 @@ class Reduce(FilterAlgorithmBase):
         If a function is provided, it should follow the form specified by
         DataArray.reduce():
         http://xarray.pydata.org/en/stable/generated/xarray.DataArray.reduce.html
-
         If a string is provided, it should correspond to a numpy function that
         matches the form specified above
         (i.e., function is resolved: func = getattr(np, func)).
         Some common examples below:
-            max: maximum intensity projection (applies numpy.amax)
-            mean: take the mean across the dim(s) (applies numpy.mean)
-            sum: sum across the dim(s) (applies numpy.sum)
-
+        max: maximum intensity projection (applies numpy.amax)
+        mean: take the mean across the dim(s) (applies numpy.mean)
+        sum: sum across the dim(s) (applies numpy.sum)
     clip_method : Union[str, Clip]
         (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
         requirements that float data fall in [0, 1].
@@ -75,9 +72,6 @@ class Reduce(FilterAlgorithmBase):
     def run(
             self,
             stack: ImageStack,
-            in_place: bool = False,
-            verbose: bool = False,
-            n_processes: Optional[int] = None,
             *args,
     ) -> ImageStack:
         """Performs the dimension reduction with the specifed function
@@ -86,12 +80,6 @@ class Reduce(FilterAlgorithmBase):
         ----------
         stack : ImageStack
             Stack to be filtered.
-        in_place : bool
-            if True, process ImageStack in-place, otherwise return a new stack
-        verbose : bool
-            if True, report on filtering progress (default = False)
-        n_processes : Optional[int]
-            Number of parallel processes to devote to calculating the filter
 
         Returns
         -------

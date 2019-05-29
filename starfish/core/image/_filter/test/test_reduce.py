@@ -92,7 +92,7 @@ def test_image_stack_reduce(func):
 
     # Filter
     red = Reduce(dims=[Axes.ROUND], func=func)
-    reduced = red.run(test_stack, in_place=False)
+    reduced = red.run(test_stack)
 
     xr.testing.assert_equal(reduced.xarray, expected_result.xarray)
 
@@ -102,7 +102,7 @@ def test_max_projection_preserves_coordinates():
     nuclei = e.fov().get_image('nuclei')
 
     red = Reduce(dims=[Axes.ROUND, Axes.CH, Axes.ZPLANE], func='max')
-    nuclei_proj = red.run(nuclei, in_place=False)
+    nuclei_proj = red.run(nuclei)
 
     # Since this data already has only 1 round, 1 ch, 1 zplane
     # let's just assert that the max_proj operation didn't change anything
@@ -121,6 +121,6 @@ def test_max_projection_preserves_coordinates():
 
     stack = imagestack_with_coords_factory(stack_shape, physical_coords)
 
-    stack_proj = red.run(stack, in_place=False)
+    stack_proj = red.run(stack)
     expected_z = np.average(Z_COORDS)
     verify_physical_coordinates(stack_proj, X_COORDS, Y_COORDS, expected_z)

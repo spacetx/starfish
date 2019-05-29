@@ -23,7 +23,7 @@ class IssCroppedBreastTile(FetchedTile):
     def __init__(
             self,
             file_path: str,
-            coordinates: Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]
+            coordinates
     ) -> None:
         self.file_path = file_path
         self._coordinates = coordinates

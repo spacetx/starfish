@@ -56,7 +56,7 @@ def test_all_methods_adhere_to_contract(filter_class):
 
     data = generate_default_data()
 
-    # Max Proj and reduce don't have an in place, n_processes, verbose option,
+    # Max Proj and Reduce don't have an in_place, n_processes, verbose option,
     # so we need to skip these tests
     if filter_class not in [MaxProject, Reduce]:
         # always emits an Image, even if in_place=True and the resulting filter operates in-place

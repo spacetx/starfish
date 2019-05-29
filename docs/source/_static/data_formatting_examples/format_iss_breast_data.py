@@ -19,7 +19,12 @@ from starfish.types import Axes, Coordinates, Number
 
 
 class IssCroppedBreastTile(FetchedTile):
-    def __init__(self, file_path: str, coordinates: Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]):
+
+    def __init__(
+            self,
+            file_path: str,
+            coordinates: Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]
+    ) -> None:
         self.file_path = file_path
         self._coordinates = coordinates
 

@@ -37,6 +37,14 @@ class TransformsList:
             self.transforms: List[Tuple[Mapping[Axes, int],
                                         TransformType, GeometricTransform]] = list()
 
+    def __repr__(self) -> str:
+        translation_strings = [
+            f"image_fragment: {t[0]}\ntranslation: y={t[2].translation[0]}, "
+            f"x={t[2].translation[1]}, rotation: {t[2].rotation}, scale: {t[2].scale}"
+            for t in self.transforms
+        ]
+        return "\n".join(translation_strings)
+
     def append(self,
                selectors: Mapping[Axes, int],
                transform_type: TransformType,

@@ -76,7 +76,6 @@ class ISSCroppedBreastPrimaryTileFetcher(TileFetcher):
                 self.coordinates_df.loc[fov, "y_min"],
                 self.coordinates_df.loc[fov, "y_max"]
             ),
-            Coordinates.Z: 0
         }
 
         return IssCroppedBreastTile(file_path, coordinates)
@@ -111,7 +110,6 @@ class ISSCroppedBreastAuxTileFetcher(TileFetcher):
                 self.coordinates_df.loc[fov, "y_min"],
                 self.coordinates_df.loc[fov, "y_max"]
             ),
-            Coordinates.Z: 0
         }
 
         return IssCroppedBreastTile(file_path, coordinates=coordinates)

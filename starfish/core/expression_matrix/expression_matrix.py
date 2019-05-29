@@ -1,6 +1,7 @@
 import xarray as xr
 
 from starfish.core.util.try_import import try_import
+from starfish.types import Features
 
 
 class ExpressionMatrix(xr.DataArray):
@@ -47,8 +48,8 @@ class ExpressionMatrix(xr.DataArray):
         """
         import loompy
 
-        row_attrs = {k: self['cells'][k].values for k in self['cells'].coords}
-        col_attrs = {k: self['genes'][k].values for k in self['genes'].coords}
+        row_attrs = {k: self[Features.CELLS][k].values for k in self[Features.CELLS].coords}
+        col_attrs = {k: self[Features.GENES][k].values for k in self[Features.GENES].coords}
 
         loompy.create(filename, self.data, row_attrs, col_attrs)
 
@@ -63,8 +64,8 @@ class ExpressionMatrix(xr.DataArray):
         """
         import anndata
 
-        row_attrs = {k: self['cells'][k].values for k in self['cells'].coords}
-        col_attrs = {k: self['genes'][k].values for k in self['genes'].coords}
+        row_attrs = {k: self[Features.CELLS][k].values for k in self[Features.CELLS].coords}
+        col_attrs = {k: self[Features.GENES][k].values for k in self[Features.GENES].coords}
         anndata = anndata.AnnData(self.data, row_attrs, col_attrs)
         anndata.write(filename)
 

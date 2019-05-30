@@ -33,18 +33,16 @@ class Reduce(FilterAlgorithmBase):
         matches the form specified above
         (i.e., function is resolved: func = getattr(np, func)).
         Some common examples below:
-        max: maximum intensity projection (applies numpy.amax)
+        amax: maximum intensity projection (applies numpy.amax)
+        max: maximum intensity projection (this is an alias for amax and applies numpy.amax)
         mean: take the mean across the dim(s) (applies numpy.mean)
         sum: sum across the dim(s) (applies numpy.sum)
-    clip_method : Union[str, Clip]
+    clip_method : Clip
         (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
         requirements that float data fall in [0, 1].
         Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
         Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
         value calculated over the entire ImageStack
-        Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-        value calculated over each slice, where slice shapes are determined by the group_by
-        parameters
 
     See Also
     --------
@@ -54,7 +52,7 @@ class Reduce(FilterAlgorithmBase):
 
     def __init__(
         self, dims: Iterable[Union[Axes, str]], func: Union[str, Callable] = 'max',
-        clip_method: Union[str, Clip] = Clip.CLIP
+        clip_method: Clip = Clip.CLIP
     ) -> None:
 
         self.dims = dims

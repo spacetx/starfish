@@ -25,6 +25,7 @@ import pytest
 from starfish import ImageStack
 from starfish.core.image import Filter
 from starfish.core.image._filter.max_proj import MaxProject
+from starfish.core.image._filter.reduce import Reduce
 
 methods: Mapping[str, Type] = Filter._algorithm_to_class_map()
 
@@ -53,38 +54,42 @@ def test_all_methods_adhere_to_contract(filter_class):
     # assert isinstance(volume_param, bool), \
     #     f'{filter_class} is_volume must be a bool, not {type(volume_param)}'
 
-    # always emits an Image, even if in_place=True and the resulting filter operates in-place
     data = generate_default_data()
-    try:
-        filtered = instance.run(data, in_place=True)
-    except TypeError:
-        raise AssertionError(f'{filter_class} must accept in_place parameter')
-    assert isinstance(filtered, ImageStack)
-    if filter_class is not MaxProject:
-        # Max Proj does not have an in place option, so we need to skip this assertion
+
+    # Max Proj and Reduce don't have an in_place, n_processes, verbose option,
+    # so we need to skip these tests
+    if filter_class not in [MaxProject, Reduce]:
+        # always emits an Image, even if in_place=True and the resulting filter operates in-place
+        try:
+            filtered = instance.run(data, in_place=True)
+        except TypeError:
+            raise AssertionError(f'{filter_class} must accept in_place parameter')
+        assert isinstance(filtered, ImageStack)
         assert data is filtered, \
             f'{filter_class} should return a reference to the input ImageStack when run in_place'
 
-    # operates out of place
-    data = generate_default_data()
-    filtered = instance.run(data, in_place=False)
-    assert data is not filtered, \
-        f'{filter_class} should output a new ImageStack when run out-of-place'
+        # operates out of place
+        data = generate_default_data()
+        filtered = instance.run(data, in_place=False)
+        assert data is not filtered, \
+            f'{filter_class} should output a new ImageStack when run out-of-place'
 
-    # accepts n_processes
-    # TODO shanaxel: verify that this causes more than one process to be generated
-    data = generate_default_data()
-    try:
-        instance.run(data, n_processes=1)
-    except TypeError:
-        raise AssertionError(f'{filter_class} must accept n_processes parameter')
+        # accepts n_processes
+        # TODO shanaxel: verify that this causes more than one process to be generated
+        data = generate_default_data()
+        try:
+            instance.run(data, n_processes=1)
+        except TypeError:
+            raise AssertionError(f'{filter_class} must accept n_processes parameter')
 
-    # accepts verbose, and if passed, prints progress
-    data = generate_default_data()
-    try:
-        instance.run(data, verbose=True)
-    except TypeError:
-        raise AssertionError(f'{filter_class} must accept verbose parameter')
+        # accepts verbose, and if passed, prints progress
+        data = generate_default_data()
+        try:
+            instance.run(data, verbose=True)
+        except TypeError:
+            raise AssertionError(f'{filter_class} must accept verbose parameter')
+    else:
+        filtered = instance.run(data)
 
     # output is dtype float and within the expected interval of [0, 1]
     assert filtered.xarray.dtype == np.float32, f'{filter_class} must output float32 data'

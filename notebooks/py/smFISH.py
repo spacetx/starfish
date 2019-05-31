@@ -22,7 +22,6 @@
 #
 #The data consist of 45 images from 1 round, 1 channels, and 33 z-planes. Each image is
 #(2048, 2048) (y, x). There are no test data.
-#
 # EPY: END markdown
 
 # EPY: START code
@@ -118,15 +117,13 @@ def processing_pipeline(
         decoded IntensityTable containing spots matched to the genes they are hybridized against
     """
 
-    print("Loading images...")
-    primary_image = experiment[fov_name].get_image(FieldOfView.PRIMARY_IMAGES)
     all_intensities = list()
     codebook = experiment.codebook
-    
-    images = enumerate(experiment[fov_name].iterate_image_type(FieldOfView.PRIMARY_IMAGES))
+
+    print("Loading images...")
+    images = enumerate(experiment[fov_name].get_images(FieldOfView.PRIMARY_IMAGES))
 
     for image_number, primary_image in images:
-
         print(f"Filtering image {image_number}...")
         filter_kwargs = dict(
             in_place=True,

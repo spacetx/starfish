@@ -98,7 +98,7 @@ def ISS(use_test_data: bool = False) -> Experiment:
         return Experiment.from_json(
             "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS-TEST/experiment.json")
     return Experiment.from_json(
-        "https://d2nhj9g34unfro.cloudfront.net/20181005/ISS/experiment.json")
+        "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/iss/20190506/experiment.json")
 
 
 def osmFISH(use_test_data: bool = False) -> Experiment:

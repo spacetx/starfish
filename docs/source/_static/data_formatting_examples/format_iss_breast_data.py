@@ -9,17 +9,24 @@ import os
 from typing import Mapping, Tuple, Union
 
 import numpy as np
+import pandas as pd
 from skimage.io import imread
 from slicedimage import ImageFormat
 
+from starfish.core.util.argparse import FsExistsType
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.types import Axes, Coordinates, Number
-from starfish.util.argparse import FsExistsType
 
 
 class IssCroppedBreastTile(FetchedTile):
-    def __init__(self, file_path):
+
+    def __init__(
+            self,
+            file_path: str,
+            coordinates
+    ) -> None:
         self.file_path = file_path
+        self._coordinates = coordinates
 
     @property
     def shape(self) -> Mapping[Axes, int]:
@@ -27,12 +34,7 @@ class IssCroppedBreastTile(FetchedTile):
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
-        # FIXME: (dganguli) please provide proper coordinates here.
-        return {
-            Coordinates.X: (0.0, 0.0001),
-            Coordinates.Y: (0.0, 0.0001),
-            Coordinates.Z: (0.0, 0.0001),
-        }
+        return self._coordinates
 
     @staticmethod
     def crop(img):
@@ -46,6 +48,8 @@ class IssCroppedBreastTile(FetchedTile):
 class ISSCroppedBreastPrimaryTileFetcher(TileFetcher):
     def __init__(self, input_dir):
         self.input_dir = input_dir
+        coordinates = os.path.join(input_dir, "coordinates.csv")
+        self.coordinates_df = pd.read_csv(coordinates, index_col=0)
 
     @property
     def ch_dict(self):
@@ -59,18 +63,35 @@ class ISSCroppedBreastPrimaryTileFetcher(TileFetcher):
         return round_dict
 
     def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
-        filename = 'slideA_{}_{}_{}.TIF'.format(str(fov + 1),
-                                                self.round_dict[r],
-                                                self.ch_dict[ch]
-                                                )
+
+        # get filepath
+        fov_ = str(fov + 1)
+        round_ = self.round_dict[r]
+        ch_ = self.ch_dict[ch]
+        filename = f"slideA_{fov_}_{round_}_{ch_}.TIF"
         file_path = os.path.join(self.input_dir, filename)
-        return IssCroppedBreastTile(file_path)
+
+        # get coordinates
+        coordinates = {
+            Coordinates.X: (
+                self.coordinates_df.loc[fov, "x_min"],
+                self.coordinates_df.loc[fov, "x_max"]
+            ),
+            Coordinates.Y: (
+                self.coordinates_df.loc[fov, "y_min"],
+                self.coordinates_df.loc[fov, "y_max"]
+            ),
+        }
+
+        return IssCroppedBreastTile(file_path, coordinates)
 
 
 class ISSCroppedBreastAuxTileFetcher(TileFetcher):
     def __init__(self, input_dir, aux_type):
         self.input_dir = input_dir
         self.aux_type = aux_type
+        coordinates = os.path.join(input_dir, "coordinates.csv")
+        self.coordinates_df = pd.read_csv(coordinates, index_col=0)
 
     def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
         if self.aux_type == 'nuclei':
@@ -84,13 +105,22 @@ class ISSCroppedBreastAuxTileFetcher(TileFetcher):
 
         file_path = os.path.join(self.input_dir, filename)
 
-        return IssCroppedBreastTile(file_path)
+        # get coordinates
+        coordinates = {
+            Coordinates.X: (
+                self.coordinates_df.loc[fov, "x_min"],
+                self.coordinates_df.loc[fov, "x_max"]
+            ),
+            Coordinates.Y: (
+                self.coordinates_df.loc[fov, "y_min"],
+                self.coordinates_df.loc[fov, "y_max"]
+            ),
+        }
+
+        return IssCroppedBreastTile(file_path, coordinates=coordinates)
 
 
-def format_data(input_dir, output_dir, num_fovs):
-    def add_codebook(experiment_json_doc):
-        experiment_json_doc['codebook'] = "codebook.json"
-        return experiment_json_doc
+def format_data(input_dir, output_dir):
 
     primary_image_dimensions = {
         Axes.ROUND: 4,
@@ -113,7 +143,7 @@ def format_data(input_dir, output_dir, num_fovs):
 
     write_experiment_json(
         path=output_dir,
-        fov_count=num_fovs,
+        fov_count=16,
         tile_format=ImageFormat.TIFF,
         primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions=aux_name_to_dimensions,
@@ -122,12 +152,18 @@ def format_data(input_dir, output_dir, num_fovs):
             'nuclei': ISSCroppedBreastAuxTileFetcher(input_dir, 'nuclei'),
             'dots': ISSCroppedBreastAuxTileFetcher(input_dir, 'dots'),
         },
-        postprocess_func=add_codebook,
-        default_shape={Axes.Y: 1044, Axes.X: 1390}
     )
 
 
 if __name__ == "__main__":
+    """
+    This TileFetcher should be run on data found at:
+    s3://spacetx.starfish.data/mignardi_breast_1/raw/
+
+    The data produced by this TileFetcher have been uploaded and can be found at the following
+    prefix:
+    s3://spacetx.starfish.data.public/browse/formatted/iss/20190506
+    """
 
     s3_bucket = "s3://czi.starfish.data.public/browse/raw/20180820/iss_breast/"
     input_help_msg = "Path to raw data. Raw data can be downloaded from: {}".format(s3_bucket)
@@ -136,7 +172,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("input_dir", type=FsExistsType(), help=input_help_msg)
     parser.add_argument("output_dir", type=FsExistsType(), help=output_help_msg)
-    parser.add_argument("num_fovs", type=int, help=fov_help_msg)
 
     args = parser.parse_args()
-    format_data(args.input_dir, args.output_dir, args.num_fovs)
+    format_data(args.input_dir, args.output_dir)

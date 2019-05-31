@@ -94,14 +94,14 @@ def processing_pipeline(
         decoded IntensityTable containing spots matched to the genes they are hybridized against
     """
 
-    print("Loading images...")
-    primary_image = experiment[fov_name].get_image(FieldOfView.PRIMARY_IMAGES)
     all_intensities = list()
     codebook = experiment.codebook
 
-    for primary_image in experiment[fov_name].iterate_image_type(FieldOfView.PRIMARY_IMAGES):
+    print("Loading images...")
+    images = enumerate(experiment[fov_name].get_images(FieldOfView.PRIMARY_IMAGES))
 
-        print("Filtering images...")
+    for image_number, primary_image in images:
+        print(f"Filtering image {image_number}...")
         filter_kwargs = dict(
             in_place=True,
             verbose=True,

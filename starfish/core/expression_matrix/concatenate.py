@@ -21,7 +21,7 @@ def concatenate(expression_matrices: Iterable[ExpressionMatrix]) -> ExpressionMa
     -------
     ExpressionMatrix :
         Concatenated expression matrix containing all input cells. Missing gene values are filled
-        with np.NaN
+        with np.nan
 
     See Also
     --------

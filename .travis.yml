@@ -29,40 +29,40 @@ jobs:
       script: make docker
     - name: smFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: travis_wait make install-dev run__notebooks/py/smFISH.py
+      script: travis_wait make install-dev notebooks/py/smFISH.py
     - name: MERFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: travis_wait make install-dev run__notebooks/py/MERFISH.py
+      script: travis_wait make install-dev notebooks/py/MERFISH.py
     - name: osmFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev run__notebooks/py/osmFISH.py
+      script: make install-dev notebooks/py/osmFISH.py
     - name: DARTFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev run__notebooks/py/DARTFISH.py
+      script: make install-dev notebooks/py/DARTFISH.py
     - name: Simulation Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev run__notebooks/py/Starfish_simulation.py
+      script: make install-dev notebooks/py/Starfish_simulation.py
     - name: ISS Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev run__notebooks/py/ISS.py
+      script: make install-dev notebooks/py/ISS.py
     - name: BaristaSeq Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev run__notebooks/py/BaristaSeq.py
+      script: make install-dev notebooks/py/BaristaSeq.py
     - name: SeqFISH Notebook
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev run__notebooks/py/SeqFISH.py
+      script: make install-dev notebooks/py/SeqFISH.py
 #    - name: STARmap Notebook
 #      if: type = push and branch =~ /^(master|merge)/
-#      script: make install-dev run__notebooks/py/STARmap.py
+#      script: make install-dev notebooks/py/STARmap.py
     - name: 3D smFISH data processing example
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev run__3d_smFISH.py
+      script: make install-dev 3d_smFISH.py
     - name: iss_cli.sh data processing example
       if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev run__iss_cli.sh
+      script: make install-dev iss_cli.sh
     - name: iss_pipeline.py data processing example
       if: type = push and branch =~ /^(master|merge)/
-      script: make TESTING=1 install-dev run__iss_pipeline.py
+      script: make TESTING=1 install-dev iss_pipeline.py
     - name: Released Notebooks
       if: type = cron and branch =~ /^(master|merge)/
       script: make check-notebooks install-released-notebooks-support run-notebooks

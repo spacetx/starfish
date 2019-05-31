@@ -1,11 +1,12 @@
-py_files := $(wildcard notebooks/py/*.py)
+pypath := notebooks/py
+py_files := $(wildcard $(pypath)/*.py)
 ipynb_files := $(wildcard notebooks/*.ipynb)
-py_run_targets := $(addprefix run__, $(py_files))
+py_run_targets := $(patsubst $(pypath)/%,%,$(py_files))
 py_check_targets := $(addprefix check__, $(py_files))
 ipynb_validate_targets := $(addprefix validate__, $(ipynb_files))
 ipynb_regenerate_targets := $(addprefix regenerate__notebooks/, $(addsuffix .ipynb, $(notdir $(basename $(py_files)))))
 py_regenerate_targets := $(addprefix regenerate__notebooks/py/, $(addsuffix .py, $(notdir $(basename $(ipynb_files)))))
-PYTHON := python
+PYTHON := ipython
 
 fast: $(ipynb_validate_targets)
 run-notebooks: $(py_run_targets)
@@ -14,7 +15,10 @@ validate-notebooks: $(ipynb_validate_targets)
 regenerate-ipynb: $(ipynb_regenerate_targets)
 regenerate-py: $(py_regenerate_targets)
 
-$(py_run_targets): run__%.py :
+$(py_run_targets): %.py :
+	[ -e $*.py.skip ] || $(PYTHON) $(pypath)/$*.py
+
+$(py_files): %.py :
 	[ -e $*.py.skip ] || $(PYTHON) $*.py
 
 $(py_check_targets): check__%.py :
@@ -30,3 +34,5 @@ $(ipynb_regenerate_targets): regenerate__notebooks/%.ipynb : notebooks/py/%.py
 
 $(py_regenerate_targets): regenerate__notebooks/py/%.py : notebooks/%.ipynb
 	nbencdec encode notebooks/$*.ipynb notebooks/py/$*.py
+
+.PHONY : $(py_files)

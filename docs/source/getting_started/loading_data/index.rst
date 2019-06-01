@@ -80,7 +80,7 @@ a 1000 pixel square from the :code:`(1044, 1390)` pixel :py:class:`FieldOfView`:
 
 .. code-block:: python
 
-    In [7]: image = fov.get_image("primary", x_slice=slice(0, 1000), y_slice=slice(0, 1000))
+    In [7]: image = fov.get_image("primary", x=slice(0, 1000), y=slice(0, 1000))
 
     In [8]: image
     Out[8]: <starfish.ImageStack (r: 4, c: 4, z: 1, y: 1000, x: 1000)>
@@ -122,13 +122,14 @@ to enable the :code:`qt` environment in IPython:
 
 .. code-block:: python
 
-    In[12]: %gui qt
-    In[13]: starfish.display(image)
-    Out[13]: <napari.components._viewer.model.Viewer at 0x15f7b44e0>
+    In[12]: ipython = get_ipython()
+    In[13]: ipython.magic("gui qt5")
+    In[14]: starfish.display(image)
+    Out[14]: <napari.components._viewer.model.Viewer at 0x15f7b44e0>
 
 Typing the above code should display an image viewer that looks something like this:,
 
-#TODO ambrosejcarr annotate an image of the napari viewer.
+.. image:: /_static/design/napari-viewer.png
 
 This viewer enables the user to scroll through the rounds and channels and change the minimum and
 maximum values on the colormap to visually filter the image by intensity. Later sections that deal

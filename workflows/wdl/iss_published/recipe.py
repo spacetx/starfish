@@ -40,7 +40,7 @@ def process_fov(field_num: int, experiment_str: str):
 
     print("Applying transform")
     warp = ApplyTransform.Warp()
-    registered_imgs = warp.run(imgs, transforms_list=transforms_list, in_place=False, verbose=True)
+    registered_imgs = warp.run(imgs, transforms_list=transforms_list, in_place=True, verbose=True)
 
     print("Filter WhiteTophat")
     filt = Filter.WhiteTophat(masking_radius=15, is_volume=False)
@@ -51,12 +51,12 @@ def process_fov(field_num: int, experiment_str: str):
 
     print("Detecting")
     detector = DetectSpots.BlobDetector(
-                min_sigma=1,
-                max_sigma=10,
-                num_sigma=30,
-                threshold=0.01,
-                measurement_type='mean',
-            )
+        min_sigma=1,
+        max_sigma=10,
+        num_sigma=30,
+        threshold=0.01,
+        measurement_type='mean',
+    )
 
     intensities = detector.run(filtered_imgs, blobs_image=dots, blobs_axes=(Axes.ROUND, Axes.ZPLANE))
 

@@ -1,9 +1,10 @@
 from typing import Tuple, Union
 
 import numpy as np
+import xarray as xr
 import pytest
 
-from starfish.core.image._filter import gaussian_high_pass, mean_high_pass
+from starfish.core.image._filter import element_wise_mult, gaussian_high_pass, mean_high_pass
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip, Number
 
@@ -40,3 +41,16 @@ def test_mean_high_pass(size: Union[Number, Tuple[Number]], is_volume: bool) -> 
     mhp = mean_high_pass.MeanHighPass(size=size, is_volume=is_volume, clip_method=Clip.CLIP)
     result = mhp.run(image_stack)
     assert np.sum(result.xarray) < sum_before
+
+
+def test_element_wise_mult() -> None:
+    image_stack = random_data_image_stack_factory()
+    mult_array = xr.DataArray(
+            np.array([[[[[0.5]]]]]),
+            dims=('r', 'c', 'z', 'y', 'x')
+        )
+    ewm = element_wise_mult.ElementWiseMultiply(mult_array)
+    ewm.run(image_stack, in_place=True)
+    assert isinstance(image_stack.xarray, xr.DataArray)
+
+

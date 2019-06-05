@@ -192,7 +192,6 @@ def test_dartfish_pipeline_cropped_data():
 
     x = benchmark_comparison.dropna().cnt.values
     y = benchmark_comparison.dropna().cnt_starfish.values
-    print(benchmark_comparison)
     corrcoef = np.corrcoef(x, y)
     corrcoef = corrcoef[0, 1]
 

@@ -50,7 +50,8 @@ def test_element_wise_mult() -> None:
             dims=('r', 'c', 'z', 'y', 'x')
         )
     ewm = element_wise_mult.ElementWiseMultiply(mult_array)
-    ewm.run(image_stack, in_place=True)
-    assert isinstance(image_stack.xarray, xr.DataArray)
+    multiplied = ewm.run(image_stack, in_place=False)
+    assert isinstance(multiplied.xarray, xr.DataArray)
+    assert multiplied.xarray.equals(image_stack.xarray*.5)
 
 

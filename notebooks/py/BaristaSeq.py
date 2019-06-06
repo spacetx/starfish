@@ -329,5 +329,5 @@ pixel_decoded_gene_counts = pd.Series(
     *np.unique(pixel_decoded['target'], return_counts=True)[::-1]
 )
 
-print(pixel_decoded_gene_counts.sort_values(ascending=False).drop("nan")[:20])
+print(pixel_decoded_gene_counts.sort_values(ascending=False)[:20])
 # EPY: END code

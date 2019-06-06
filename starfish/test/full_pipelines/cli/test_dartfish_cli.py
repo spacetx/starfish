@@ -104,4 +104,4 @@ class TestWithDartfishData(CLITest, unittest.TestCase):
         corrcoef = np.corrcoef(x, y)
         corrcoef = corrcoef[0, 1]
 
-        assert np.round(corrcoef, 5) == 0.04422
+        assert np.round(corrcoef, 5) == 0.03028

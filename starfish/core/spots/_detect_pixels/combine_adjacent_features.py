@@ -267,8 +267,20 @@ class CombineAdjacentFeatures:
                 'x': int(spot_property.centroid[1])
             }
 
-        # we're back to 3d or fake-3d here
-        target_index = decoded_image[spot_attrs['z'], spot_attrs['y'], spot_attrs['x']]
+        # define the target index as the most repeated value in the bounding box of the spot.
+        #  it appears there is no simpler way to do this with a regionprops object
+        bbox = spot_property.bbox
+        if len(bbox) == 6:
+            # 3d bbox
+            target_candidates = np.ndarray.flatten(
+                decoded_image[bbox[0]:bbox[3], bbox[1]:bbox[4], bbox[2]:bbox[5]])
+        else:
+            # flatten and remove zeros
+            target_candidates = np.ndarray.flatten(
+                decoded_image[0, bbox[0]:bbox[2], bbox[1]:bbox[3]])
+        # get the most repeated nonzero value
+        non_zero_target_candidates = target_candidates[target_candidates != 0]
+        target_index = np.argmax(np.bincount(non_zero_target_candidates))
         spot_attrs[Features.TARGET] = target_map.target_as_str(target_index)
         spot_attrs[Features.SPOT_RADIUS] = spot_property.equivalent_diameter / 2
 

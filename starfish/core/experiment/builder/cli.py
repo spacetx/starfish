@@ -4,7 +4,13 @@ from slicedimage import ImageFormat
 
 from starfish.core.types import Axes
 from starfish.core.util import click
-from . import AUX_IMAGE_NAMES, write_experiment_json
+from . import write_experiment_json
+
+
+AUX_IMAGE_NAMES = {
+    'nuclei',
+    'dots',
+}
 
 
 class StarfishIndex(click.ParamType):

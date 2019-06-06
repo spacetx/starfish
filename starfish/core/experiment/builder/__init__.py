@@ -1,12 +1,18 @@
+import functools
 import json
 import os
+from dataclasses import astuple, dataclass
 from pathlib import Path
 from typing import (
     Any,
     BinaryIO,
     Callable,
     Dict,
+    Iterable,
     Mapping,
+    MutableMapping,
+    MutableSequence,
+    MutableSet,
     Optional,
     Sequence,
     Union,
@@ -20,6 +26,7 @@ from slicedimage import (
     Writer,
 )
 
+from starfish import FieldOfView
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.experiment.builder.orderediterator import join_axes_labels, ordered_iterator
 from starfish.core.experiment.version import CURRENT_VERSION
@@ -28,11 +35,17 @@ from .defaultproviders import RandomNoiseTile, tile_fetcher_factory
 from .providers import FetchedTile, TileFetcher
 
 
-AUX_IMAGE_NAMES = {
-    'nuclei',
-    'dots',
-}
 DEFAULT_DIMENSION_ORDER = (Axes.ZPLANE, Axes.ROUND, Axes.CH)
+
+
+@dataclass
+class TileIdentifier:
+    """Data class for encapsulating the location of a tile in a 6D tensor (fov, round, ch, zplane,
+    y, and x)."""
+    fov_id: int
+    round_id: int
+    ch_id: int
+    zplane_id: int
 
 
 def _tile_opener(toc_path: Path, tile: Tile, file_ext: str) -> BinaryIO:
@@ -52,14 +65,101 @@ def _fov_path_generator(parent_toc_path: Path, toc_name: str) -> Path:
     return parent_toc_path.parent / "{}-{}.json".format(parent_toc_path.stem, toc_name)
 
 
+def build_irregular_image(
+        tile_coordinates: Iterable[TileIdentifier],
+        image_fetcher: TileFetcher,
+        default_shape: Optional[Mapping[Axes, int]] = None,
+) -> Collection:
+    """
+    Build and returns an image set that can potentially be irregular (i.e., the cardinality of the
+    dimensions are not always consistent).  It can also build a regular image.
+
+    Parameters
+    ----------
+    tile_coordinates : Iterable[TileIdentifier]
+        Iterable of all the TileCoordinates that are valid in the image.
+    image_fetcher : TileFetcher
+        Instance of TileFetcher that provides the data for the tile.
+    default_shape : Optional[Tuple[int, int]]
+        Default shape of the individual tiles in this image set.
+
+    Returns
+    -------
+    The slicedimage collection representing the image.
+    """
+    def reducer_to_sets(
+            accumulated: Sequence[MutableSet[int]], update: TileIdentifier,
+    ) -> Sequence[MutableSet[int]]:
+        """Reduces to a list of sets of tile coordinates, in the order of FOV, round, ch, and
+        zplane."""
+        result: MutableSequence[MutableSet[int]] = list()
+        for accumulated_elem, update_elem in zip(accumulated, astuple(update)):
+            accumulated_elem.add(update_elem)
+            result.append(accumulated_elem)
+        return result
+    initial_value: Sequence[MutableSet[int]] = tuple(set() for _ in range(4))
+
+    fovs, rounds, chs, zplanes = functools.reduce(
+        reducer_to_sets, tile_coordinates, initial_value)
+
+    collection = Collection()
+    for expected_fov in fovs:
+        fov_images = TileSet(
+            [
+                Coordinates.X,
+                Coordinates.Y,
+                Coordinates.Z,
+                Axes.ZPLANE,
+                Axes.ROUND,
+                Axes.CH,
+                Axes.X,
+                Axes.Y,
+            ],
+            {Axes.ROUND: len(rounds), Axes.CH: len(chs), Axes.ZPLANE: len(zplanes)},
+            default_shape,
+            ImageFormat.TIFF,
+        )
+
+        for tile_coordinate in tile_coordinates:
+            current_fov, current_round, current_ch, current_zplane = astuple(tile_coordinate)
+            # filter out the fovs that are not the one we are currently processing
+            if expected_fov != current_fov:
+                continue
+            image = image_fetcher.get_tile(
+                current_fov,
+                current_round,
+                current_ch,
+                current_zplane
+            )
+            tile = Tile(
+                image.coordinates,
+                {
+                    Axes.ZPLANE: current_zplane,
+                    Axes.ROUND: current_round,
+                    Axes.CH: current_ch,
+                },
+                image.shape,
+                extras=image.extras,
+            )
+            tile.set_numpy_array_future(image.tile_data)
+            # Astute readers might wonder why we set this variable.  This is to support in-place
+            # experiment construction.  We monkey-patch slicedimage's Tile class such that checksum
+            # computation is done by finding the FetchedTile object, which allows us to calculate
+            # the checksum of the original file.
+            tile.provider = image
+            fov_images.add_tile(tile)
+        collection.add_partition("fov_{:03}".format(expected_fov), fov_images)
+    return collection
+
+
 def build_image(
         fovs: Sequence[int],
         rounds: Sequence[int],
         chs: Sequence[int],
         zplanes: Sequence[int],
         image_fetcher: TileFetcher,
-        default_shape: Optional[Mapping[Axes, int]]=None,
-        axes_order: Sequence[Axes]=DEFAULT_DIMENSION_ORDER,
+        default_shape: Optional[Mapping[Axes, int]] = None,
+        axes_order: Sequence[Axes] = DEFAULT_DIMENSION_ORDER,
 ) -> Collection:
     """
     Build and returns an image set with the following characteristics:
@@ -98,64 +198,23 @@ def build_image(
     """
     axes_sizes = join_axes_labels(
         axes_order, rounds=rounds, chs=chs, zplanes=zplanes)
+    tile_coordinates = [
+        TileIdentifier(fov_id, selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE])
+        for fov_id in fovs
+        for selector in ordered_iterator(axes_sizes)
+    ]
 
-    collection = Collection()
-    for fov_id in fovs:
-        fov_images = TileSet(
-            [
-                Coordinates.X,
-                Coordinates.Y,
-                Coordinates.Z,
-                Axes.ZPLANE,
-                Axes.ROUND,
-                Axes.CH,
-                Axes.X,
-                Axes.Y,
-            ],
-            {Axes.ROUND: len(rounds), Axes.CH: len(chs), Axes.ZPLANE: len(zplanes)},
-            default_shape,
-            ImageFormat.TIFF,
-        )
-
-        for selector in ordered_iterator(axes_sizes):
-            image = image_fetcher.get_tile(
-                fov_id,
-                selector[Axes.ROUND],
-                selector[Axes.CH],
-                selector[Axes.ZPLANE])
-            tile = Tile(
-                image.coordinates,
-                {
-                    Axes.ZPLANE: (selector[Axes.ZPLANE]),
-                    Axes.ROUND: (selector[Axes.ROUND]),
-                    Axes.CH: (selector[Axes.CH]),
-                },
-                image.shape,
-                extras=image.extras,
-            )
-            tile.set_numpy_array_future(image.tile_data)
-            # Astute readers might wonder why we set this variable.  This is to support in-place
-            # experiment construction.  We monkey-patch slicedimage's Tile class such that checksum
-            # computation is done by finding the FetchedTile object, which allows us to calculate
-            # the checksum of the original file.
-            tile.provider = image
-            fov_images.add_tile(tile)
-        collection.add_partition("fov_{:03}".format(fov_id), fov_images)
-    return collection
+    return build_irregular_image(tile_coordinates, image_fetcher, default_shape)
 
 
-def write_labeled_experiment_json(
+def write_irregular_experiment_json(
         path: str,
-        fov_count: int,
         tile_format: ImageFormat,
         *,
-        primary_image_dimension_labels: Mapping[Union[str, Axes], Sequence[int]],
-        aux_name_to_dimension_labels: Mapping[str, Mapping[Union[str, Axes], Sequence[int]]],
-        primary_tile_fetcher: Optional[TileFetcher]=None,
-        aux_tile_fetcher: Optional[Mapping[str, TileFetcher]]=None,
+        image_tile_coordinates: Mapping[str, Iterable[TileIdentifier]],
+        tile_fetchers: Mapping[str, TileFetcher],
         postprocess_func: Optional[Callable[[dict], dict]]=None,
         default_shape: Optional[Mapping[Axes, int]]=None,
-        dimension_order: Sequence[Axes]=(Axes.ZPLANE, Axes.ROUND, Axes.CH),
         fov_path_generator: Callable[[Path, str], Path] = _fov_path_generator,
         tile_opener: Callable[[Path, Tile, str], BinaryIO] = _tile_opener,
 ) -> None:
@@ -166,51 +225,23 @@ def write_labeled_experiment_json(
     ----------
     path : str
         Directory to write the files to.
-    fov_count : int
-        Number of fields of view in this experiment.
     tile_format : ImageFormat
         File format to write the tiles as.
-    primary_image_dimension_labels : Mapping[Union[str, Axes], Sequence[int]]
-        Dictionary mapping dimension name to dimension labels for the primary image.
-    aux_name_to_dimension_labels : Mapping[str, Mapping[Union[str, Axes], Sequence[int]]]
-        Dictionary mapping the auxiliary image type to dictionaries, which map from dimension name
-        to dimension labels.
-    primary_tile_fetcher : Optional[TileFetcher]
-        TileFetcher for primary images.  Set this if you want specific image data to be set for the
-        primary images.  If not provided, the image data is set to random noise via
-        :class:`RandomNoiseTileFetcher`.
-    aux_tile_fetcher : Optional[Mapping[str, TileFetcher]]
-        TileFetchers for auxiliary images.  Set this if you want specific image data to be set for
-        one or more aux image types.  If not provided for any given aux image, the image data is
-        set to random noise via :class:`RandomNoiseTileFetcher`.
+    image_tile_coordinates : Mapping[str, Iterable[TileIdentifier]]
+        Dictionary mapping the image type to an iterable of TileCoordinates.
+    tile_fetchers : Mapping[str, TileFetcher]
+        Dictionary mapping the image type to a TileFetcher.
     postprocess_func : Optional[Callable[[dict], dict]]
         If provided, this is called with the experiment document for any postprocessing.
         An example of this would be to add something to one of the top-level extras field.
         The callable should return what is to be written as the experiment document.
     default_shape : Optional[Tuple[int, int]] (default = None)
         Default shape for the tiles in this experiment.
-    dimension_order : Sequence[Axes]
-        Ordering for which dimensions vary, in order of the slowest changing dimension to the
-        fastest.  For instance, if the order is (ROUND, Z, CH) and each dimension has labels (0, 1),
-        then the sequence is:
-          (ROUND=0, CH=0, Z=0)
-          (ROUND=0, CH=1, Z=0)
-          (ROUND=0, CH=0, Z=1)
-          (ROUND=0, CH=1, Z=1)
-          (ROUND=1, CH=0, Z=0)
-          (ROUND=1, CH=1, Z=0)
-          (ROUND=1, CH=0, Z=1)
-          (ROUND=1, CH=1, Z=1)
-        (default = (Axes.Z, Axes.ROUND, Axes.CH))
     fov_path_generator : Callable[[Path, str], Path]
         Generates the path for a FOV's json file.  If one is not provided, the default generates
         the FOV's json file at the same level as the top-level json file for an image.
     tile_opener : Callable[[Path, Tile, str], BinaryIO]
     """
-    if primary_tile_fetcher is None:
-        primary_tile_fetcher = tile_fetcher_factory(RandomNoiseTile)
-    if aux_tile_fetcher is None:
-        aux_tile_fetcher = {}
     if postprocess_func is None:
         postprocess_func = lambda doc: doc
 
@@ -219,44 +250,20 @@ def write_labeled_experiment_json(
         'images': {},
         'extras': {},
     }
-    primary_image = build_image(
-        range(fov_count),
-        primary_image_dimension_labels[Axes.ROUND],
-        primary_image_dimension_labels[Axes.CH],
-        primary_image_dimension_labels[Axes.ZPLANE],
-        primary_tile_fetcher,
-        axes_order=dimension_order,
-        default_shape=default_shape,
-    )
-    Writer.write_to_path(
-        primary_image,
-        os.path.join(path, "primary_images.json"),
-        pretty=True,
-        partition_path_generator=fov_path_generator,
-        tile_opener=tile_opener,
-        tile_format=tile_format,
-    )
-    experiment_doc['images']['primary'] = "primary_images.json"
+    for image_type, tile_coordinates in image_tile_coordinates.items():
+        tile_fetcher = tile_fetchers[image_type]
 
-    for aux_name, aux_dimension_labels in aux_name_to_dimension_labels.items():
-        auxiliary_image = build_image(
-            range(fov_count),
-            aux_dimension_labels[Axes.ROUND],
-            aux_dimension_labels[Axes.CH],
-            aux_dimension_labels[Axes.ZPLANE],
-            aux_tile_fetcher.get(aux_name, tile_fetcher_factory(RandomNoiseTile)),
-            axes_order=dimension_order,
-            default_shape=default_shape,
-        )
+        image = build_irregular_image(tile_coordinates, tile_fetcher, default_shape)
+
         Writer.write_to_path(
-            auxiliary_image,
-            os.path.join(path, "{}.json".format(aux_name)),
+            image,
+            os.path.join(path, f"{image_type}.json"),
             pretty=True,
             partition_path_generator=fov_path_generator,
             tile_opener=tile_opener,
             tile_format=tile_format,
         )
-        experiment_doc['images'][aux_name] = "{}.json".format(aux_name)
+        experiment_doc['images'][image_type] = f"{image_type}.json"
 
     experiment_doc["codebook"] = "codebook.json"
     codebook_array = [
@@ -340,29 +347,41 @@ def write_experiment_json(
         the FOV's json file at the same level as the top-level json file for an image.
     tile_opener : Callable[[Path, Tile, str], BinaryIO]
     """
-    primary_image_dimension_labels: Mapping[Union[str, Axes], Sequence[int]] = {
-        primary_image_dimension_name: range(primary_image_dimension_cardinality)
-        for primary_image_dimension_name, primary_image_dimension_cardinality in
-        primary_image_dimensions.items()
-    }
-    aux_name_to_dimension_labels: Mapping[str, Mapping[Union[str, Axes], Sequence[int]]] = {
-        aux_name: {
-            aux_dimension_name: range(aux_dimension_cardinality)
-            for aux_dimension_name, aux_dimension_cardinality in
-            dimension_name_to_cardinality.items()
-        }
-        for aux_name, dimension_name_to_cardinality in aux_name_to_dimensions.items()
-    }
+    all_tile_fetcher: MutableMapping[str, TileFetcher] = {}
+    if aux_tile_fetcher is not None:
+        all_tile_fetcher.update(aux_tile_fetcher)
+    if primary_tile_fetcher is not None:
+        all_tile_fetcher[FieldOfView.PRIMARY_IMAGES] = primary_tile_fetcher
 
-    return write_labeled_experiment_json(
-        path, fov_count, tile_format,
-        primary_image_dimension_labels=primary_image_dimension_labels,
-        aux_name_to_dimension_labels=aux_name_to_dimension_labels,
-        primary_tile_fetcher=primary_tile_fetcher,
-        aux_tile_fetcher=aux_tile_fetcher,
+    image_tile_coordinates: MutableMapping[str, Iterable[TileIdentifier]] = dict()
+    image_tile_fetchers: MutableMapping[str, TileFetcher] = dict()
+
+    dimension_cardinality_of_images = {FieldOfView.PRIMARY_IMAGES: primary_image_dimensions}
+    for image_type, image_dimension in aux_name_to_dimensions.items():
+        dimension_cardinality_of_images[image_type] = image_dimension
+
+    for image_type, dimension_cardinality_of_image in dimension_cardinality_of_images.items():
+        axes_sizes = join_axes_labels(
+            dimension_order,
+            rounds=range(dimension_cardinality_of_image[Axes.ROUND]),
+            chs=range(dimension_cardinality_of_image[Axes.CH]),
+            zplanes=range(dimension_cardinality_of_image[Axes.ZPLANE]),
+        )
+        image_tile_coordinates[image_type] = [
+            TileIdentifier(fov_id, selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE])
+            for fov_id in range(fov_count)
+            for selector in ordered_iterator(axes_sizes)
+        ]
+
+        image_tile_fetchers[image_type] = all_tile_fetcher.get(
+            image_type, tile_fetcher_factory(RandomNoiseTile))
+
+    return write_irregular_experiment_json(
+        path, tile_format,
+        image_tile_coordinates=image_tile_coordinates,
+        tile_fetchers=image_tile_fetchers,
         postprocess_func=postprocess_func,
         default_shape=default_shape,
-        dimension_order=dimension_order,
         fov_path_generator=fov_path_generator,
         tile_opener=tile_opener,
     )

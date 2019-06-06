@@ -1,5 +1,11 @@
+from typing import Optional, Sequence
+
 from starfish.core.experiment.builder import build_image, TileFetcher
-from starfish.core.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
+from starfish.core.experiment.builder.defaultproviders import (
+    OnesTile,
+    strip_z_coordinates,
+    tile_fetcher_factory,
+)
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes
 
@@ -11,6 +17,7 @@ def synthetic_stack(
         tile_height: int = 50,
         tile_width: int = 40,
         tile_fetcher: TileFetcher = None,
+        force_z: bool = True
 ) -> ImageStack:
     """generate a synthetic ImageStack
 
@@ -28,11 +35,18 @@ def synthetic_stack(
             {Axes.Y: tile_height, Axes.X: tile_width},
         )
 
+    zplanes: Optional[Sequence[int]]
+    if num_z != 1 or force_z:
+        zplanes = range(num_z)
+    else:
+        zplanes = None
+        tile_fetcher = strip_z_coordinates(tile_fetcher)
+
     collection = build_image(
         range(1),
         range(num_round),
         range(num_ch),
-        range(num_z),
+        zplanes,
         tile_fetcher,
     )
     tileset = list(collection.all_tilesets())[0][1]

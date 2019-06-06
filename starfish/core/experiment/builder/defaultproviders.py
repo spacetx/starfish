@@ -1,8 +1,8 @@
 """
 This module implements default providers of data to the experiment builders.
 """
-
-from typing import Mapping, Tuple, Type, Union
+import copy
+from typing import cast, Mapping, MutableMapping, Tuple, Type, Union
 
 import numpy as np
 from slicedimage import (
@@ -93,3 +93,35 @@ def tile_fetcher_factory(
             return fetched_tile_cls(*args, **fetched_tile_constructor_kwargs)
 
     return ResultingClass()
+
+
+def strip_z_coordinates(tile_fetcher: TileFetcher) -> TileFetcher:
+    class ResultingTile(FetchedTile):
+        def __init__(self, enclosed_tile: FetchedTile) -> None:
+            self.enclosed_tile = enclosed_tile
+
+        @property
+        def shape(self) -> Mapping[Axes, int]:
+            return self.enclosed_tile.shape
+
+        @property
+        def coordinates(
+                self
+        ) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+            original_coordinates_copy = cast(
+                MutableMapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]],
+                copy.copy(self.enclosed_tile.coordinates)
+            )
+            if Coordinates.Z in original_coordinates_copy:
+                del original_coordinates_copy[Coordinates.Z]
+            return original_coordinates_copy
+
+        def tile_data(self) -> np.ndarray:
+            return self.enclosed_tile.tile_data()
+
+    class ResultingTileFetcher(TileFetcher):
+        def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
+            tile = tile_fetcher.get_tile(fov, r, ch, z)
+            return ResultingTile(tile)
+
+    return ResultingTileFetcher()

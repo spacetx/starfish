@@ -65,8 +65,22 @@ def _fov_path_generator(parent_toc_path: Path, toc_name: str) -> Path:
     return parent_toc_path.parent / "{}-{}.json".format(parent_toc_path.stem, toc_name)
 
 
+<<<<<<< variant A
 def build_irregular_image(
         tile_coordinates: Iterable[TileIdentifier],
+>>>>>>> variant B
+def build_image(
+        fovs: Sequence[int],
+        rounds: Sequence[int],
+        chs: Sequence[int],
+        zplanes: Optional[Sequence[int]],
+####### Ancestor
+def build_image(
+        fovs: Sequence[int],
+        rounds: Sequence[int],
+        chs: Sequence[int],
+        zplanes: Sequence[int],
+======= end
         image_fetcher: TileFetcher,
         default_shape: Optional[Mapping[Axes, int]] = None,
 ) -> Collection:
@@ -76,8 +90,29 @@ def build_irregular_image(
 
     Parameters
     ----------
+<<<<<<< variant A
     tile_coordinates : Iterable[TileIdentifier]
         Iterable of all the TileCoordinates that are valid in the image.
+>>>>>>> variant B
+    fovs : Sequence[int]
+        Sequence of field of view ids in this image set.
+    rounds : Sequence[int]
+        Sequence of the round numbers in this image set.
+    chs : Sequence[int]
+        Sequence of the ch numbers in this image set.
+    zplanes : Sequence[int]
+        Sequence of the zplane numbers in this image set.  If this is not set, the resulting image
+        is a 4D tensor.
+####### Ancestor
+    fovs : Sequence[int]
+        Sequence of field of view ids in this image set.
+    rounds : Sequence[int]
+        Sequence of the round numbers in this image set.
+    chs : Sequence[int]
+        Sequence of the ch numbers in this image set.
+    zplanes : Sequence[int]
+        Sequence of the zplane numbers in this image set.
+======= end
     image_fetcher : TileFetcher
         Instance of TileFetcher that provides the data for the tile.
     default_shape : Optional[Tuple[int, int]]
@@ -87,6 +122,7 @@ def build_irregular_image(
     -------
     The slicedimage collection representing the image.
     """
+<<<<<<< variant A
     def reducer_to_sets(
             accumulated: Sequence[MutableSet[int]], update: TileIdentifier,
     ) -> Sequence[MutableSet[int]]:
@@ -101,8 +137,42 @@ def build_irregular_image(
 
     fovs, rounds, chs, zplanes = functools.reduce(
         reducer_to_sets, tile_coordinates, initial_value)
+>>>>>>> variant B
+    if zplanes is not None:
+        write_z = True
+        tileset_dimensions = [
+            Coordinates.X,
+            Coordinates.Y,
+            Coordinates.Z,
+            Axes.ZPLANE,
+            Axes.ROUND,
+            Axes.CH,
+            Axes.X,
+            Axes.Y,
+        ]
+        tileset_shape = {Axes.ROUND: len(rounds), Axes.CH: len(chs), Axes.ZPLANE: len(zplanes)}
+    else:
+        zplanes = [0]
+        write_z = False
+        tileset_dimensions = [
+            Coordinates.X,
+            Coordinates.Y,
+            Axes.ROUND,
+            Axes.CH,
+            Axes.X,
+            Axes.Y,
+        ]
+        tileset_shape = {Axes.ROUND: len(rounds), Axes.CH: len(chs)}
+
+    axes_sizes = join_axes_labels(
+        axes_order, rounds=rounds, chs=chs, zplanes=zplanes)
+####### Ancestor
+    axes_sizes = join_axes_labels(
+        axes_order, rounds=rounds, chs=chs, zplanes=zplanes)
+======= end
 
     collection = Collection()
+<<<<<<< variant A
     for expected_fov in fovs:
         fov_images = TileSet(
             [
@@ -119,6 +189,27 @@ def build_irregular_image(
             default_shape,
             ImageFormat.TIFF,
         )
+>>>>>>> variant B
+    for fov_id in fovs:
+        fov_images = TileSet(tileset_dimensions, tileset_shape, default_shape, ImageFormat.TIFF)
+####### Ancestor
+    for fov_id in fovs:
+        fov_images = TileSet(
+            [
+                Coordinates.X,
+                Coordinates.Y,
+                Coordinates.Z,
+                Axes.ZPLANE,
+                Axes.ROUND,
+                Axes.CH,
+                Axes.X,
+                Axes.Y,
+            ],
+            {Axes.ROUND: len(rounds), Axes.CH: len(chs), Axes.ZPLANE: len(zplanes)},
+            default_shape,
+            ImageFormat.TIFF,
+        )
+======= end
 
         for tile_coordinate in tile_coordinates:
             current_fov, current_round, current_ch, current_zplane = astuple(tile_coordinate)
@@ -126,6 +217,7 @@ def build_irregular_image(
             if expected_fov != current_fov:
                 continue
             image = image_fetcher.get_tile(
+<<<<<<< variant A
                 current_fov,
                 current_round,
                 current_ch,
@@ -141,6 +233,34 @@ def build_irregular_image(
                 image.shape,
                 extras=image.extras,
             )
+>>>>>>> variant B
+                fov_id,
+                selector[Axes.ROUND],
+                selector[Axes.CH],
+                selector[Axes.ZPLANE])
+            indicies = {
+                Axes.ROUND: selector[Axes.ROUND],
+                Axes.CH: selector[Axes.CH],
+            }
+            if write_z:
+                indicies[Axes.ZPLANE] = selector[Axes.ZPLANE]
+            tile = Tile(image.coordinates, indicies, image.shape, extras=image.extras)
+####### Ancestor
+                fov_id,
+                selector[Axes.ROUND],
+                selector[Axes.CH],
+                selector[Axes.ZPLANE])
+            tile = Tile(
+                image.coordinates,
+                {
+                    Axes.ZPLANE: (selector[Axes.ZPLANE]),
+                    Axes.ROUND: (selector[Axes.ROUND]),
+                    Axes.CH: (selector[Axes.CH]),
+                },
+                image.shape,
+                extras=image.extras,
+            )
+======= end
             tile.set_numpy_array_future(image.tile_data)
             # Astute readers might wonder why we set this variable.  This is to support in-place
             # experiment construction.  We monkey-patch slicedimage's Tile class such that checksum

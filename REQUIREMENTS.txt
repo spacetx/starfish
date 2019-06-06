@@ -1,4 +1,5 @@
 click
+dataclasses;python_version<"3.7"
 jsonschema
 matplotlib
 numpy != 1.13.0

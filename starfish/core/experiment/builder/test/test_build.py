@@ -33,11 +33,11 @@ class TestWithBuildData(unittest.TestCase):
         ],
         [
             "starfish", "validate", "manifest",
-            lambda tempdir, *args, **kwargs: os.sep.join([tempdir, "primary_images.json"])
+            lambda tempdir, *args, **kwargs: os.sep.join([tempdir, "primary.json"])
         ],
         [
             "starfish", "validate", "fov",
-            lambda tempdir, *args, **kwargs: os.sep.join([tempdir, "primary_images-fov_000.json"])
+            lambda tempdir, *args, **kwargs: os.sep.join([tempdir, "primary-fov_000.json"])
         ],
     )
 

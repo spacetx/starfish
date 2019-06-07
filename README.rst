@@ -1,8 +1,8 @@
 Starfish
 ========
 
-.. image:: https://travis-ci.org/spacetx/starfish.svg?branch=master
-    :target: https://travis-ci.org/spacetx/starfish
+.. image:: https://travis-ci.com/spacetx/starfish.svg?branch=master
+    :target: https://travis-ci.com/spacetx/starfish
     :width: 20%
 .. image:: https://codecov.io/gh/spacetx/starfish/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/spacetx/starfish
@@ -37,7 +37,7 @@ to see starfish in action on particular assay types. Or, browse our our notebook
  Assay                Loads Data  Single-FoV Pipeline  Multi-FoV Pipeline
 --------------------  ----------  -------------------  ------------------
  MERFISH              [x]         [x] mer_             in process
- ISS                  [x]         [x] iss_             in process
+ ISS                  [x]         [x] iss_             [x]
  osmFISH              [x]         [x] osm_             [ ]
  smFISH               [x]         [x] 3ds_             [x]
  BaristaSeq           [x]         [x] bar_             [ ]
@@ -55,7 +55,7 @@ to see starfish in action on particular assay types. Or, browse our our notebook
 .. _dar: https://github.com/spacetx/starfish/blob/master/notebooks/DARTFISH.ipynb
 .. _str: https://github.com/spacetx/starfish/blob/master/notebooks/STARmap.ipynb
 .. _seq: https://github.com/spacetx/starfish/blob/master/notebooks/SeqFISH.ipynb
-.. _3ds: https://github.com/spacetx/starfish/blob/master/notebooks/3d_smFISH.ipynb
+.. _3ds: https://github.com/spacetx/starfish/blob/master/notebooks/smFISH.ipynb
 
 Contributing
 ------------

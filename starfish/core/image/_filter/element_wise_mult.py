@@ -37,6 +37,13 @@ class ElementWiseMultiply(FilterAlgorithmBase):
             raise ValueError("`scale_by_chunk` is not a valid clip_method for ElementWiseMultiply")
         self.clip_method = clip_method
 
+    _DEFAULT_TESTING_PARAMETERS = {
+        "mult_array": xr.DataArray(
+            np.array([[[[[1]]], [[[0.5]]]]]),
+            dims=('r', 'c', 'z', 'y', 'x')
+        )
+    }
+
     def run(
             self,
             stack: ImageStack,

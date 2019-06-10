@@ -1,8 +1,8 @@
 from typing import Tuple, Union
 
 import numpy as np
-import xarray as xr
 import pytest
+import xarray as xr
 
 from starfish.core.image._filter import element_wise_mult, gaussian_high_pass, mean_high_pass
 from starfish.core.imagestack.imagestack import ImageStack
@@ -46,12 +46,10 @@ def test_mean_high_pass(size: Union[Number, Tuple[Number]], is_volume: bool) -> 
 def test_element_wise_mult() -> None:
     image_stack = random_data_image_stack_factory()
     mult_array = xr.DataArray(
-            np.array([[[[[0.5]]]]]),
-            dims=('r', 'c', 'z', 'y', 'x')
-        )
+        np.array([[[[[0.5]]]]]),
+        dims=('r', 'c', 'z', 'y', 'x')
+    )
     ewm = element_wise_mult.ElementWiseMultiply(mult_array)
     multiplied = ewm.run(image_stack, in_place=False)
     assert isinstance(multiplied.xarray, xr.DataArray)
-    assert multiplied.xarray.equals(image_stack.xarray*.5)
-
-
+    assert multiplied.xarray.equals(image_stack.xarray * .5)

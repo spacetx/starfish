@@ -331,6 +331,10 @@ class CombineAdjacentFeatures:
 
         iterable = tqdm(region_properties, disable=(not StarfishConfig().verbose))
         results = mapfunc(applyfunc, iterable)
+        if len(results) is 0:
+            # no spots found
+            warnings.warn("No spots found, please adjust threshold parameters")
+            return SpotAttributes.empty(extra_fields=['target']), np.array(0, dtype=np.bool)
         spot_attrs, passes_area_filter = zip(*results)
 
         # update passes filter

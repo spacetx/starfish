@@ -29,7 +29,7 @@ class ElementWiseMultiply(FilterAlgorithmBase):
     """
 
     def __init__(
-        self, mult_array: xr.core.dataarray.DataArray, clip_method: Union[str, Clip] = Clip.CLIP
+        self, mult_array: xr.DataArray, clip_method: Union[str, Clip] = Clip.CLIP
     ) -> None:
 
         self.mult_array = mult_array
@@ -78,12 +78,11 @@ class ElementWiseMultiply(FilterAlgorithmBase):
         if not in_place:
             stack = deepcopy(stack)
 
-        # stack._data contains the xarray
-        stack._data *= mult_array_aligned
+        stack._data.data.values *= mult_array_aligned
         if self.clip_method == Clip.CLIP:
-            stack._data = preserve_float_range(stack._data, rescale=False)
+            stack._data.data.values = preserve_float_range(stack._data.data.values, rescale=False)
         else:
-            stack._data = preserve_float_range(stack._data, rescale=True)
+            stack._data.data.values = preserve_float_range(stack._data.data.values, rescale=True)
         return stack
 
     @staticmethod

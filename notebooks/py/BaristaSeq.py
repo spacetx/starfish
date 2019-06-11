@@ -289,7 +289,7 @@ f = plot_scaling_result(background_corrected, scaled)
 # EPY: END markdown
 
 # EPY: START code
-sbp = starfish.image.Filter.Clip(p_max=99.8, expand_dynamic_range=True)
+sbp = starfish.image.Filter.Clip(p_max=99.8, expand_dynamic_range=False)
 scaled = sbp.run(background_corrected, n_processes=1, in_place=False)
 
 f = plot_scaling_result(background_corrected, scaled)

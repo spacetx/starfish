@@ -1,6 +1,6 @@
+import warnings
 from functools import partial
 from typing import Dict, List, NamedTuple, Optional, Tuple
-import warnings
 
 import numpy as np
 import pandas as pd
@@ -332,7 +332,7 @@ class CombineAdjacentFeatures:
 
         iterable = tqdm(region_properties, disable=(not StarfishConfig().verbose))
         results = mapfunc(applyfunc, iterable)
-        if len(results) is 0:
+        if not results:
             # no spots found
             warnings.warn("No spots found, please adjust threshold parameters")
             return SpotAttributes.empty(extra_fields=['target']), np.array(0, dtype=np.bool)

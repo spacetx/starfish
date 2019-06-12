@@ -66,7 +66,7 @@ def _fov_path_generator(parent_toc_path: Path, toc_name: str) -> Path:
 
 
 def build_irregular_image(
-        tile_coordinates: Iterable[TileIdentifier],
+        tile_identifiers: Iterable[TileIdentifier],
         image_fetcher: TileFetcher,
         default_shape: Optional[Mapping[Axes, int]] = None,
 ) -> Collection:
@@ -76,7 +76,7 @@ def build_irregular_image(
 
     Parameters
     ----------
-    tile_coordinates : Iterable[TileIdentifier]
+    tile_identifiers : Iterable[TileIdentifier]
         Iterable of all the TileCoordinates that are valid in the image.
     image_fetcher : TileFetcher
         Instance of TileFetcher that provides the data for the tile.
@@ -100,7 +100,7 @@ def build_irregular_image(
     initial_value: Sequence[MutableSet[int]] = tuple(set() for _ in range(4))
 
     fovs, rounds, chs, zplanes = functools.reduce(
-        reducer_to_sets, tile_coordinates, initial_value)
+        reducer_to_sets, tile_identifiers, initial_value)
 
     collection = Collection()
     for expected_fov in fovs:
@@ -120,7 +120,7 @@ def build_irregular_image(
             ImageFormat.TIFF,
         )
 
-        for tile_coordinate in tile_coordinates:
+        for tile_coordinate in tile_identifiers:
             current_fov, current_round, current_ch, current_zplane = astuple(tile_coordinate)
             # filter out the fovs that are not the one we are currently processing
             if expected_fov != current_fov:
@@ -198,20 +198,20 @@ def build_image(
     """
     axes_sizes = join_axes_labels(
         axes_order, rounds=rounds, chs=chs, zplanes=zplanes)
-    tile_coordinates = [
+    tile_identifiers = [
         TileIdentifier(fov_id, selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE])
         for fov_id in fovs
         for selector in ordered_iterator(axes_sizes)
     ]
 
-    return build_irregular_image(tile_coordinates, image_fetcher, default_shape)
+    return build_irregular_image(tile_identifiers, image_fetcher, default_shape)
 
 
 def write_irregular_experiment_json(
         path: str,
         tile_format: ImageFormat,
         *,
-        image_tile_coordinates: Mapping[str, Iterable[TileIdentifier]],
+        image_tile_identifiers: Mapping[str, Iterable[TileIdentifier]],
         tile_fetchers: Mapping[str, TileFetcher],
         postprocess_func: Optional[Callable[[dict], dict]]=None,
         default_shape: Optional[Mapping[Axes, int]]=None,
@@ -227,7 +227,7 @@ def write_irregular_experiment_json(
         Directory to write the files to.
     tile_format : ImageFormat
         File format to write the tiles as.
-    image_tile_coordinates : Mapping[str, Iterable[TileIdentifier]]
+    image_tile_identifiers : Mapping[str, Iterable[TileIdentifier]]
         Dictionary mapping the image type to an iterable of TileCoordinates.
     tile_fetchers : Mapping[str, TileFetcher]
         Dictionary mapping the image type to a TileFetcher.
@@ -250,10 +250,10 @@ def write_irregular_experiment_json(
         'images': {},
         'extras': {},
     }
-    for image_type, tile_coordinates in image_tile_coordinates.items():
+    for image_type, tile_identifiers in image_tile_identifiers.items():
         tile_fetcher = tile_fetchers[image_type]
 
-        image = build_irregular_image(tile_coordinates, tile_fetcher, default_shape)
+        image = build_irregular_image(tile_identifiers, tile_fetcher, default_shape)
 
         Writer.write_to_path(
             image,
@@ -353,7 +353,7 @@ def write_experiment_json(
     if primary_tile_fetcher is not None:
         all_tile_fetcher[FieldOfView.PRIMARY_IMAGES] = primary_tile_fetcher
 
-    image_tile_coordinates: MutableMapping[str, Iterable[TileIdentifier]] = dict()
+    image_tile_identifiers: MutableMapping[str, Iterable[TileIdentifier]] = dict()
     image_tile_fetchers: MutableMapping[str, TileFetcher] = dict()
 
     dimension_cardinality_of_images = {FieldOfView.PRIMARY_IMAGES: primary_image_dimensions}
@@ -367,7 +367,7 @@ def write_experiment_json(
             chs=range(dimension_cardinality_of_image[Axes.CH]),
             zplanes=range(dimension_cardinality_of_image[Axes.ZPLANE]),
         )
-        image_tile_coordinates[image_type] = [
+        image_tile_identifiers[image_type] = [
             TileIdentifier(fov_id, selector[Axes.ROUND], selector[Axes.CH], selector[Axes.ZPLANE])
             for fov_id in range(fov_count)
             for selector in ordered_iterator(axes_sizes)
@@ -378,7 +378,7 @@ def write_experiment_json(
 
     return write_irregular_experiment_json(
         path, tile_format,
-        image_tile_coordinates=image_tile_coordinates,
+        image_tile_identifiers=image_tile_identifiers,
         tile_fetchers=image_tile_fetchers,
         postprocess_func=postprocess_func,
         default_shape=default_shape,

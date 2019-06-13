@@ -23,8 +23,8 @@ def MERFISH(use_test_data: bool = False) -> Experiment:
     if use_test_data:
         return Experiment.from_json(
             "https://d2nhj9g34unfro.cloudfront.net/20181005/MERFISH-TEST/experiment.json")
-    return Experiment.from_json(
-        "https://d2nhj9g34unfro.cloudfront.net/20181005/MERFISH/experiment.json")
+    return Experiment.from_json("https://d2nhj9g34unfro.cloudfront.net/browse/formatted/"
+                                "MERFISH/20190511/experiment.json")
 
 
 def allen_smFISH(use_test_data: bool = False) -> Experiment:

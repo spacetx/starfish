@@ -125,16 +125,11 @@ low_passed = glp.run(deconvolved, in_place=False, verbose=True)
 # EPY: END markdown
 
 # EPY: START code
-if use_test_data:
-    scale_factors = {
-        (t[Axes.ROUND], t[Axes.CH]): t['scale_factor']
-        for t in experiment.extras['scale_factors']
-    }
-else:
-    scale_factors = {
-        (t[Axes.ROUND], t[Axes.CH]): t['scale_factor']
-        for index, t in imgs.tile_metadata.iterrows()
-    }
+scale_factors = {
+    (t[Axes.ROUND], t[Axes.CH]): t['scale_factor']
+    for t in experiment.extras['scale_factors']
+}
+
 
 # this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to
 # at least we can do it with get_slice and set_slice right now.
@@ -169,7 +164,7 @@ plt.axis('off');
 # EPY: START markdown
 ### Decode the processed data into spatially resolved gene expression profiles
 #
-#Here, we decode each pixel value, across all rounds and channels, into the corresponding target (gene) it corresponds too. Contiguous pixels that map to the same target gene are called as one RNA molecule. Intuitively, pixel vectors are matched to the codebook by computing the euclidean distance between the pixel vector and all codewords. The minimal distance gene target is selected if it lies within `distance_threshold` of a code. 
+#Here, we decode each pixel value, across all rounds and channels, into the corresponding target (gene) it corresponds too. Contiguous pixels that map to the same target gene are called as one RNA molecule. Intuitively, pixel vectors are matched to the codebook by computing the euclidean distance between the pixel vector and all codewords. The minimal distance gene target is selected if it lies within `distance_threshold` of a code.
 # EPY: END markdown
 
 # EPY: START code

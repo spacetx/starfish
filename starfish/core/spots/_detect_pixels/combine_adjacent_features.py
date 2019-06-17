@@ -255,17 +255,18 @@ class CombineAdjacentFeatures:
 
         """
         # because of the above skimage issue, we need to support both 2d and 3d properties
-        if len(spot_property.centroid) == 3:
+        centroid = spot_property.centroid
+        if len(centroid) == 3:
             spot_attrs = {
-                'z': int(spot_property.centroid[0]),
-                'y': int(spot_property.centroid[1]),
-                'x': int(spot_property.centroid[2])
+                'z': int(centroid[0]),
+                'y': int(centroid[1]),
+                'x': int(centroid[2])
             }
         else:  # data is 2d
             spot_attrs = {
                 'z': 0,
-                'y': int(spot_property.centroid[0]),
-                'x': int(spot_property.centroid[1])
+                'y': int(centroid[0]),
+                'x': int(centroid[1])
             }
 
         # define the target index as the most repeated value in the bounding box of the spot.

@@ -130,7 +130,6 @@ scale_factors = {
     for t in experiment.extras['scale_factors']
 }
 
-
 # this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to
 # at least we can do it with get_slice and set_slice right now.
 from copy import deepcopy

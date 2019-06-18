@@ -28,5 +28,3 @@ def test_save_expression_matrix():
     expression_matrix.save_anndata("expression.h5")
     expression_matrix.save_loom("expression")
     expression_matrix.save("expression")
-
-

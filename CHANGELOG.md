@@ -56,6 +56,45 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+## [0.0.34] - 2019-06-19
+- Refactor reduce to take an optional module and only a function name. (#1386)
+- fixing all expression matrix saves (#1413)
+- fix merfish scale factors (#1410)
+- Codify the expectation that in-place experiment construction does not rely on TileFetcher data (#1389)
+- Warn and return empty SpotAttributes when PixelDecoding finds 0 spots (#1400)
+- updating data.merfish link to full dataset (#1406)
+- Rename tile_coordinates to tile_identifier (#1401)
+- fix element wise (#1393)
+- updates to readme (#1395)
+- remove nan code (#1394)
+- Support for irregular images in the builder (#1382)
+- Fix pixel decoding (#1255)
+- post review syntax changes (#1378)
+- Fix how we structure the run notebook rules. (#1384)
+- updated loading data docs and added image of napari viewer (#1387)
+- Format complete ISS experiment and expose in starfish.data (#1316)
+- Add concatenate method for ExpressionMatrix (#1381)
+- Add TransformsList __repr__ (#1380)
+- Fix 3d smFISH notebook as well. (#1385)
+- Add custom clip Filter classes (#1376)
+- Fix smFISH notebook. (#1383)
+- Add Filter.Reduce (general dimension reduction for ImageStack) (#1342)
+- Handle denormalized numbers when normalizing intensities/codebooks (#1371)
+- TileFetcher formats complete 496 fov MERFISH dataset (#1341)
+- Refactor fov.getImage() to fov.getImages() (#1346)
+- Add the ability to write labeled experiments (#1374)
+- Add inplace TileFetcher module back to public builder API (#1375)
+- using numpy min/max functions (#1373)
+- Always create Z coordinates, even on 4D datasets. (#1358)
+- Rework physical coordinate calculation for max_proj (#1353)
+- Create an all-purpose ImageStack factory (#1348)
+- Tests for spot detection on labeled data (#1355)
+- Remove physical_coordinate_calculator.py (#1352)
+- ImageStack parsers should provide coordinates as an array (#1351)
+- bump to slicedimage 3.1.1 (#1343)
+- Creating a standard starfish.wdl that can be run with any recipe file  (#1364)
+- Reference image max projection axes should be optional (#1359)
+
 [0.1.1]: https://github.com/spacetx/starfish/releases/tag/0.1.1
 [0.1.0]: https://github.com/spacetx/starfish/releases/tag/0.1.0
 [0.0.36]: https://github.com/spacetx/starfish/releases/tag/0.0.36

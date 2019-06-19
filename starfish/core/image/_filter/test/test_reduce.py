@@ -2,7 +2,6 @@ from collections import OrderedDict
 
 import numpy as np
 import pytest
-import xarray as xr
 
 from starfish import data
 from starfish import ImageStack
@@ -18,10 +17,7 @@ Z_COORDS = 1, 3
 
 
 def make_image_stack():
-    '''
-        Make a test ImageStack
-
-    '''
+    """Make a test ImageStack."""
 
     # Make the test image
     test = np.ones((2, 4, 1, 2, 2), dtype='float32') * 0.1
@@ -40,9 +36,7 @@ def make_image_stack():
 
 
 def make_expected_image_stack(func):
-    '''
-        Make the expected image stack result
-    '''
+    """Make the expected image stack result"""
 
     if func == 'max':
         reduced = np.array(
@@ -69,7 +63,7 @@ def make_expected_image_stack(func):
     elif func == 'sum':
         reduced = np.array(
             [[[[[0.85, 0.2],
-              [0.2, 0.2]]],
+                [0.2, 0.2]]],
               [[[0.2, 1],
                 [0.2, 0.2]]],
               [[[0.2, 0.2],
@@ -77,24 +71,56 @@ def make_expected_image_stack(func):
               [[[0.2, 0.2],
                 [0.2, 1]]]]], dtype='float32'
         )
+    elif func == 'norm':
+        reduced = np.array(
+            [[[[[0.75663730, 0.14142136],
+                [0.14142136, 0.14142136]]],
+              [[[0.14142136, 1.00000000],
+                [0.14142136, 0.14142136]]],
+              [[[0.14142136, 0.14142136],
+                [1.00000000, 0.14142136]]],
+              [[[0.14142136, 0.14142136],
+                [0.14142136, 1.00000000]]]]],
+            dtype=np.float32
+        )
+    else:
+        raise ValueError("Unsupported func")
 
     expected_stack = ImageStack.from_numpy(reduced)
 
     return expected_stack
 
 
-@pytest.mark.parametrize("func", ['max', 'mean', 'sum'])
-def test_image_stack_reduce(func):
+@pytest.mark.parametrize(
+    "expected_result,func,module,kwargs",
+    [
+        (make_expected_image_stack('max'), 'max', None, None),
+        (make_expected_image_stack('mean'), 'mean', None, None),
+        (make_expected_image_stack('sum'), 'sum', None, None),
+        (
+            make_expected_image_stack('norm'),
+            'linalg.norm',
+            Reduce.FunctionSource.scipy,
+            {'ord': 2},
+        ),
+    ]
+)
+def test_image_stack_reduce(expected_result, func, module, kwargs):
 
     # Get the test stack and expected result
     test_stack = make_image_stack()
-    expected_result = make_expected_image_stack(func=func)
 
     # Filter
-    red = Reduce(dims=[Axes.ROUND], func=func)
+    if kwargs is None:
+        actual_kwargs = {}
+    else:
+        actual_kwargs = kwargs.copy()
+    if module is not None:
+        actual_kwargs['module'] = module
+    red = Reduce(dims=[Axes.ROUND], func=func, **actual_kwargs)
     reduced = red.run(test_stack)
 
-    xr.testing.assert_equal(reduced.xarray, expected_result.xarray)
+    assert np.allclose(reduced.xarray, expected_result.xarray)
 
 
 def test_max_projection_preserves_coordinates():

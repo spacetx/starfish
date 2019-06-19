@@ -1,8 +1,6 @@
-anndata
 click
 dataclasses;python_version<"3.7"
 jsonschema
-loompy
 matplotlib
 numpy != 1.13.0
 pandas >= 0.23.4

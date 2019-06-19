@@ -522,10 +522,11 @@ class IntensityTable(xr.DataArray):
         counts = grouped.count().iloc[:, 0].unstack().fillna(0)
         if self.has_physical_coords:
             grouped = self.to_features_dataframe().groupby([Features.CELL_ID])[[
-                Axes.X, Axes.Y, Axes.ZPLANE, Coordinates.X, Coordinates.Y, Coordinates.Z]]
+                Axes.X.value, Axes.Y.value, Axes.ZPLANE.value, Coordinates.X.value,
+                Coordinates.Y.value, Coordinates.Z.value]]
         else:
             grouped = self.to_features_dataframe().groupby([Features.CELL_ID])[[
-                Axes.X, Axes.Y, Axes.ZPLANE]]
+                Axes.X.value, Axes.Y.value, Axes.ZPLANE.value]]
         min_ = grouped.min()
         max_ = grouped.max()
         coordinate_df = min_ + (max_ - min_) / 2

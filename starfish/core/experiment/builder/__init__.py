@@ -77,7 +77,7 @@ def build_irregular_image(
     Parameters
     ----------
     tile_identifiers : Iterable[TileIdentifier]
-        Iterable of all the TileCoordinates that are valid in the image.
+        Iterable of all the TileIdentifier that are valid in the image.
     image_fetcher : TileFetcher
         Instance of TileFetcher that provides the data for the tile.
     default_shape : Optional[Tuple[int, int]]
@@ -90,7 +90,7 @@ def build_irregular_image(
     def reducer_to_sets(
             accumulated: Sequence[MutableSet[int]], update: TileIdentifier,
     ) -> Sequence[MutableSet[int]]:
-        """Reduces to a list of sets of tile coordinates, in the order of FOV, round, ch, and
+        """Reduces to a list of sets of tile identifiers, in the order of FOV, round, ch, and
         zplane."""
         result: MutableSequence[MutableSet[int]] = list()
         for accumulated_elem, update_elem in zip(accumulated, astuple(update)):
@@ -120,8 +120,8 @@ def build_irregular_image(
             ImageFormat.TIFF,
         )
 
-        for tile_coordinate in tile_identifiers:
-            current_fov, current_round, current_ch, current_zplane = astuple(tile_coordinate)
+        for tile_identifier in tile_identifiers:
+            current_fov, current_round, current_ch, current_zplane = astuple(tile_identifier)
             # filter out the fovs that are not the one we are currently processing
             if expected_fov != current_fov:
                 continue
@@ -228,7 +228,7 @@ def write_irregular_experiment_json(
     tile_format : ImageFormat
         File format to write the tiles as.
     image_tile_identifiers : Mapping[str, Iterable[TileIdentifier]]
-        Dictionary mapping the image type to an iterable of TileCoordinates.
+        Dictionary mapping the image type to an iterable of TileIdentifiers.
     tile_fetchers : Mapping[str, TileFetcher]
         Dictionary mapping the image type to a TileFetcher.
     postprocess_func : Optional[Callable[[dict], dict]]

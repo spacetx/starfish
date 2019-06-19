@@ -6,7 +6,7 @@ The following script formats SeqFISH data in SpaceTx-Format
 """
 import functools
 import os
-from typing import Mapping, Tuple, Union
+from typing import Mapping, Union
 
 import click
 import numpy as np
@@ -16,7 +16,7 @@ from slicedimage import ImageFormat
 
 from starfish import Codebook
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Axes, Coordinates, Features, Number
+from starfish.types import Axes, Coordinates, CoordinateValue, Features
 
 
 # We use this to cache images across tiles.  In the case of the osmFISH data set, volumes are saved
@@ -31,7 +31,7 @@ class SeqFISHTile(FetchedTile):
     def __init__(
             self,
             file_path: str,
-            coordinates: Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]],
+            coordinates: Mapping[Union[str, Coordinates], CoordinateValue],
             zplane: int,
             ch: int,
     ):
@@ -53,7 +53,7 @@ class SeqFISHTile(FetchedTile):
         return {Axes.Y: raw_shape[0], Axes.X: raw_shape[1]}
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         """Stores coordinate information passed from the TileFetcher"""
         return self._coordinates
 
@@ -74,7 +74,7 @@ class SeqFISHTileFetcher(TileFetcher):
         self.input_dir = input_dir
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         """Returns dummy coordinates for this single-FoV TileFetcher"""
         return {
             Coordinates.X: (0., 1.),

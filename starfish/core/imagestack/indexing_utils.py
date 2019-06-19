@@ -4,7 +4,7 @@ import numpy as np
 import xarray as xr
 from xarray.core.utils import is_scalar
 
-from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.types import Axes, Coordinates, CoordinateValue
 
 
 def convert_to_selector(
@@ -28,9 +28,10 @@ def convert_to_selector(
     return return_dict
 
 
-def convert_coords_to_indices(array: xr.DataArray,
-                              indexers: Mapping[Coordinates, Union[Number, Tuple[Number, Number]]]
-                              ) -> Dict[Axes, Union[int, Tuple[Number, Number]]]:
+def convert_coords_to_indices(
+        array: xr.DataArray,
+        indexers: Mapping[Coordinates, CoordinateValue],
+) -> Dict[Axes, Union[int, Tuple[int, int]]]:
     """
     Convert mapping of physical coordinates to value or range to mapping of corresponding Axes and
     positional coordinates.
@@ -39,16 +40,16 @@ def convert_coords_to_indices(array: xr.DataArray,
     ----------
     array : xr.DataArray
         The xarray with both physical and positional coordinates.
-    indexers: Mapping[Coordinates, Union[Number, Tuple[Number, Number]]]
+    indexers: Mapping[Coordinates, CoordinateValue]
         Mapping of physical coordinates to value or range
 
     Returns
     -------
-    Mapping[Axes, Union[int, Tuple[Number, Number]]]:
+    Mapping[Axes, Union[int, Tuple[int, int]]]:
         Mapping of Axes and positional indices that correspond to the given physical indices.
 
     """
-    axes_indexers: Dict[Axes, Union[int, Tuple[Number, Number]]] = dict()
+    axes_indexers: Dict[Axes, Union[int, Tuple[int, int]]] = dict()
     if Coordinates.X in indexers:
         idx_x = find_nearest(array[Coordinates.X.value], indexers[Coordinates.X])
         axes_indexers[Axes.X] = idx_x
@@ -97,7 +98,7 @@ def index_keep_dimensions(data: xr.DataArray,
 
 
 def find_nearest(array: xr.DataArray,
-                 value: Union[Number, Tuple[Number, Number]]
+                 value: CoordinateValue
                  ) -> Union[int, Tuple[int, int]]:
     """
     Given an xarray and value or tuple range return the indices of the closest corresponding
@@ -108,7 +109,7 @@ def find_nearest(array: xr.DataArray,
     array: xr.DataArray
         The array to do lookups in.
 
-    value : Union[Number, Tuple[Number, Number]]
+    value : CoordinateValue
         The value or values to lookup.
 
     Returns

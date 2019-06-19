@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Tuple, Union
 
 from ._constants import (
     Axes,
@@ -17,3 +17,4 @@ from ._decoded_spots import DecodedSpots
 from ._spot_attributes import SpotAttributes
 
 Number = Union[int, float]
+CoordinateValue = Union[Number, Tuple[Number, Number]]

@@ -6,7 +6,7 @@ The following script formats In-Situ Sequencing data in SpaceTx-Format
 """
 import argparse
 import os
-from typing import Mapping, Tuple, Union
+from typing import Mapping, Union
 
 import numpy as np
 import pandas as pd
@@ -15,7 +15,7 @@ from slicedimage import ImageFormat
 
 from starfish.core.util.argparse import FsExistsType
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Axes, Coordinates, Number
+from starfish.types import Axes, Coordinates, CoordinateValue
 
 
 class IssCroppedBreastTile(FetchedTile):
@@ -33,7 +33,7 @@ class IssCroppedBreastTile(FetchedTile):
         return {Axes.Y: 1044, Axes.X: 1390}
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return self._coordinates
 
     @staticmethod

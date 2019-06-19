@@ -1,5 +1,6 @@
 # You should not edit this file directly.  Instead, you should edit one of the following files (REQUIREMENTS.txt) and run make REQUIREMENTS-STRICT.txt
 attrs==19.1.0
+anndata==0.6.21
 backcall==0.1.0
 bleach==3.1.0
 certifi==2019.3.9
@@ -22,6 +23,7 @@ jsonschema==3.0.1
 jupyter-client==5.2.4
 jupyter-core==4.4.0
 kiwisolver==1.1.0
+loompy==2.0.17
 MarkupSafe==1.1.1
 matplotlib==3.0.3
 mistune==0.8.4

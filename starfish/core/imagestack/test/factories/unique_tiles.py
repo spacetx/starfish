@@ -16,8 +16,8 @@ Z_COORDS = 0.0001, 0.001
 
 
 def unique_data(
-        round_: int, ch: int, z: int,
-        num_rounds: int, num_chs: int, num_zplanes: int,
+        fov_id: int, round_id: int, ch_id: int, zplane_id: int,
+        num_fovs: int, num_rounds: int, num_chs: int, num_zplanes: int,
         tile_height: int, tile_width: int,
 ) -> np.ndarray:
     """Return the data for a given tile."""
@@ -25,9 +25,10 @@ def unique_data(
     for row in range(tile_height):
         base_val = tile_width * (
             row + tile_height * (
-                z + num_zplanes * (
-                    ch + num_chs * (
-                        round_))))
+                zplane_id + num_zplanes * (
+                    ch_id + num_chs * (
+                        round_id + num_rounds * (
+                            fov_id)))))
 
         result[row:] = np.linspace(base_val, base_val + tile_width, tile_width, False)
     return img_as_float32(result)
@@ -46,15 +47,16 @@ class UniqueTiles(LocationAwareFetchedTile, metaclass=ABCMeta):
     def tile_data(self) -> np.ndarray:
         """Return the data for a given tile."""
         return unique_data(
-            self.rounds.index(self.round),
-            self.chs.index(self.ch),
-            self.zplanes.index(self.zplane),
+            self.fov_id,
+            self.rounds.index(self.round_id),
+            self.chs.index(self.ch_id),
+            self.zplanes.index(self.zplane_id),
+            len(self.fovs),
             len(self.rounds),
             len(self.chs),
             len(self.zplanes),
             self.tile_height,
-            self.tile_width,
-        )
+            self.tile_width)
 
 
 def unique_tiles_imagestack(

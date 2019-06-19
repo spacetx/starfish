@@ -17,6 +17,7 @@ ZPLANE_LABELS = (3, 4)
 HEIGHT = 2
 WIDTH = 4
 
+NUM_FOV = 1
 NUM_ROUND = len(ROUND_LABELS)
 NUM_CH = len(CH_LABELS)
 NUM_ZPLANE = len(ZPLANE_LABELS)
@@ -24,10 +25,8 @@ NUM_ZPLANE = len(ZPLANE_LABELS)
 
 def expected_data(round_: int, ch: int, zplane: int):
     return unique_data(
-        ROUND_LABELS.index(round_),
-        CH_LABELS.index(ch),
-        ZPLANE_LABELS.index(zplane),
-        NUM_ROUND, NUM_CH, NUM_ZPLANE,
+        0, ROUND_LABELS.index(round_), CH_LABELS.index(ch), ZPLANE_LABELS.index(zplane),
+        NUM_FOV, NUM_ROUND, NUM_CH, NUM_ZPLANE,
         HEIGHT, WIDTH)
 
 

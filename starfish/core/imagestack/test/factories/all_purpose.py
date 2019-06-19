@@ -11,7 +11,7 @@ from starfish.core.experiment.builder import (
 )
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.imagestack.parser.crop import CropParameters
-from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.types import Axes, Coordinates, CoordinateValue, Number
 
 
 class LocationAwareFetchedTile(FetchedTile, metaclass=ABCMeta):
@@ -58,8 +58,7 @@ def _apply_coords_range_fetcher(
             return self.backing_tile.shape
 
         @property
-        def coordinates(self) -> Mapping[Union[str, Coordinates],
-                                         Union[Number, Tuple[Number, Number]]]:
+        def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
             zplane_offset = zplanes.index(self.zplane)
             zplane_coords = np.linspace(zrange[0], zrange[1], len(zplanes))
 

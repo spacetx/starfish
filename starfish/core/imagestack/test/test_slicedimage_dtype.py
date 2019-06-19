@@ -1,5 +1,5 @@
 import warnings
-from typing import Mapping, Tuple, Union
+from typing import Mapping, Union
 
 import numpy as np
 import pytest
@@ -8,7 +8,7 @@ from slicedimage import ImageFormat
 
 from starfish.core.errors import DataFormatWarning
 from starfish.core.experiment.builder import FetchedTile, TileFetcher
-from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.types import Axes, Coordinates, CoordinateValue
 from .factories import synthetic_stack
 
 NUM_ROUND = 2
@@ -28,7 +28,7 @@ class OnesTilesByDtype(FetchedTile):
         return {Axes.Y: HEIGHT, Axes.X: WIDTH}
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return {
             Coordinates.X: (0.0, 0.0001),
             Coordinates.Y: (0.0, 0.0001),

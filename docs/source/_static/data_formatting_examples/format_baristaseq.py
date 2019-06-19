@@ -9,7 +9,7 @@ docstring for `format_data`
 
 import os
 import shutil
-from typing import Mapping, Tuple, Union
+from typing import Mapping, Union
 
 import click
 import numpy as np
@@ -18,7 +18,7 @@ from slicedimage import ImageFormat
 
 from starfish.experiment.builder import (FetchedTile, TileFetcher,
                                          write_experiment_json)
-from starfish.types import Axes, Coordinates, Number
+from starfish.types import Axes, Coordinates, CoordinateValue
 
 DEFAULT_TILE_SHAPE = {Axes.Y: 1000, Axes.X: 800}
 
@@ -32,7 +32,7 @@ class BaristaSeqTile(FetchedTile):
         return DEFAULT_TILE_SHAPE
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         # these are dummy coordinates
         return {
             Coordinates.X: (0.0, 0.0001),

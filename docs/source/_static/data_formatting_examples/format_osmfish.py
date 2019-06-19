@@ -9,7 +9,7 @@ import functools
 import json
 import os
 import re
-from typing import Mapping, Tuple, Union
+from typing import Mapping, Union
 
 import click
 import numpy as np
@@ -17,7 +17,7 @@ from slicedimage import ImageFormat
 
 import starfish.util.try_import
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Axes, Coordinates, Features, Number
+from starfish.types import Axes, Coordinates, CoordinateValue, Features
 
 
 # We use this to cache images across tiles.  In the case of the osmFISH data set, volumes are saved
@@ -33,7 +33,7 @@ class osmFISHTile(FetchedTile):
     def __init__(
             self,
             file_path: str,
-            coordinates: Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]],
+            coordinates: Mapping[Union[str, Coordinates], CoordinateValue],
             z: int
     ) -> None:
         """Parser for an osmFISH tile.
@@ -42,7 +42,7 @@ class osmFISHTile(FetchedTile):
         ----------
         file_path : str
             location of the osmFISH tile
-        coordinates : Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]
+        coordinates : Mapping[Union[str, Coordinates], CoordinateValue]
             the coordinates for the selected osmFISH tile, extracted from the metadata
         z : int
             the z-layer for the selected osmFISH tile
@@ -64,7 +64,7 @@ class osmFISHTile(FetchedTile):
         return {Axes.Y: raw_shape[0], Axes.X: raw_shape[1]}
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return self._coordinates
 
     def tile_data(self) -> np.ndarray:

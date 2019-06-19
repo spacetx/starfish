@@ -1,3 +1,4 @@
+import warnings
 from typing import Iterable, Optional, Union
 
 from starfish.core.imagestack.imagestack import ImageStack
@@ -23,6 +24,10 @@ class MaxProject(FilterAlgorithmBase):
 
     def __init__(self, dims: Iterable[Union[Axes, str]]) -> None:
 
+        warnings.warn(
+            "Filter.MaxProject is being deprecated in favor of Filter.Reduce(func='max')",
+            DeprecationWarning,
+        )
         self.dims = dims
 
     _DEFAULT_TESTING_PARAMETERS = {"dims": 'r'}

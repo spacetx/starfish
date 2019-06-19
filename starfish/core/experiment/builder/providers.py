@@ -2,11 +2,11 @@
 This module describes the contracts to provide data to the experiment builder.
 """
 
-from typing import Mapping, Tuple, Union
+from typing import Mapping, Union
 
 import numpy as np
 
-from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.types import Axes, Coordinates, CoordinateValue
 
 
 class FetchedTile:
@@ -28,12 +28,12 @@ class FetchedTile:
         raise NotImplementedError()
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         """Return the tile's coordinates in the global coordinate space..
 
         Returns
         -------
-        Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]
+        Mapping[Union[str, Coordinates], CoordinateValue]
             Maps from a coordinate type (e.g. 'x', 'y', or 'z') to its value or range.
         """
         raise NotImplementedError()

@@ -6,7 +6,7 @@ The following script converts Imaging Cytof Data in SpaceTx-Format
 """
 import json
 import os
-from typing import List, Mapping, Tuple, Union
+from typing import List, Mapping, Union
 
 import click
 import numpy as np
@@ -14,7 +14,7 @@ from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Axes, Coordinates, Features, Number
+from starfish.types import Axes, Coordinates, CoordinateValue, Features
 
 
 class ImagingMassCytometryTile(FetchedTile):
@@ -29,7 +29,7 @@ class ImagingMassCytometryTile(FetchedTile):
         return {Axes.Y: self._tile_data.shape[0], Axes.X: self._tile_data.shape[1]}
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         # TODO ambrosejcarr: ask about what these coordinates should correspond to.
         return {
             Coordinates.X: (0.0, 0.0001),

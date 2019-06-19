@@ -2,7 +2,7 @@ import hashlib
 import os
 import sys
 from pathlib import Path
-from typing import Mapping, Tuple, Union
+from typing import Mapping, Union
 
 import numpy as np
 from skimage.io import imsave
@@ -13,7 +13,7 @@ from starfish.core.experiment.builder.inplace import (
     enable_inplace_mode, inplace_tile_opener, InplaceFetchedTile
 )
 from starfish.core.experiment.experiment import Experiment, FieldOfView
-from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.types import Axes, Coordinates, CoordinateValue
 
 
 SHAPE = {Axes.Y: 500, Axes.X: 1390}
@@ -36,7 +36,7 @@ class ZeroesInplaceTile(InplaceFetchedTile):
         return SHAPE
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return {
             Coordinates.X: (0.0, 0.0001),
             Coordinates.Y: (0.0, 0.0001),

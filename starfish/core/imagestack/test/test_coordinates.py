@@ -4,7 +4,7 @@ import numpy as np
 from slicedimage import ImageFormat
 
 from starfish.core.experiment.builder import FetchedTile, tile_fetcher_factory
-from starfish.types import Axes, Coordinates, Number
+from starfish.types import Axes, Coordinates, CoordinateValue
 from .factories import synthetic_stack
 from .imagestack_test_utils import verify_physical_coordinates
 from ..physical_coordinates import _get_physical_coordinates_of_z_plane
@@ -45,7 +45,7 @@ class AlignedTiles(FetchedTile):
         return {Axes.Y: HEIGHT, Axes.X: WIDTH}
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return {
             Coordinates.X: X_COORDS,
             Coordinates.Y: Y_COORDS,
@@ -91,7 +91,7 @@ class ScalarTiles(FetchedTile):
         return {Axes.Y: HEIGHT, Axes.X: WIDTH}
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return {
             Coordinates.X: X_COORDS[0],
             Coordinates.Y: Y_COORDS[0],
@@ -117,7 +117,7 @@ class OffsettedTiles(FetchedTile):
         return {Axes.Y: HEIGHT, Axes.X: WIDTH}
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return {
             Coordinates.X: round_to_x(self._round),
             Coordinates.Y: round_to_y(self._round),

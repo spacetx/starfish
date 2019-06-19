@@ -9,7 +9,7 @@ import io
 import json
 import os
 import zipfile
-from typing import Mapping, Tuple, Union
+from typing import Mapping, Union
 
 import numpy as np
 import requests
@@ -19,7 +19,7 @@ from slicedimage import ImageFormat
 from starfish import Codebook
 from starfish.experiment.builder import FetchedTile, TileFetcher
 from starfish.experiment.builder import write_experiment_json
-from starfish.types import Axes, Coordinates, Features, Number
+from starfish.types import Axes, Coordinates, CoordinateValue, Features
 from starfish.util.argparse import FsExistsType
 
 SHAPE = {Axes.Y: 980, Axes.X: 1330}
@@ -34,7 +34,7 @@ class ISSTile(FetchedTile):
         return SHAPE
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         # FIXME: (dganguli) please provide proper coordinates here.
         return {
             Coordinates.X: (0.0, 0.0001),

@@ -48,6 +48,7 @@ from starfish.core.types import (
     Axes,
     Clip,
     Coordinates,
+    CoordinateValue,
     LOG,
     Number,
     STARFISH_EXTRAS_KEY
@@ -421,14 +422,14 @@ class ImageStack:
         return stack
 
     def sel_by_physical_coords(
-            self, indexers: Mapping[Coordinates, Union[Number, Tuple[Number, Number]]]):
+            self, indexers: Mapping[Coordinates, CoordinateValue]):
         """
         Given a dictionary mapping the coordinate name to either a value or a range represented as a
         tuple, return an Imagestack with each the Coordinate dimension indexed accordingly.
 
         Parameters
         ----------
-        indexers : Mapping[Coordinates, Union[Number, Tuple[Number, Number]]]:
+        indexers : Mapping[Coordinates, CoordinateValue]:
             A dictionary of coord:index where index is the value or range to index the coordinate
             dimension.
 

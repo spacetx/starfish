@@ -12,4 +12,4 @@ from starfish.core.types import (  # noqa: F401
     STARFISH_EXTRAS_KEY,
     TransformType,
 )
-from starfish.core.types import Number  # noqa: F401
+from starfish.core.types import CoordinateValue, Number  # noqa: F401

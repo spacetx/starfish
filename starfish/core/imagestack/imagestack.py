@@ -98,12 +98,13 @@ class ImageStack:
         }
 
         self._tile_data = tile_data
+        self._log: List[dict]
 
         # check for existing log info
         if STARFISH_EXTRAS_KEY in tile_data.extras and LOG in tile_data.extras[STARFISH_EXTRAS_KEY]:
             self._log = loads(tile_data.extras[STARFISH_EXTRAS_KEY])[LOG]
         else:
-            self._log: List[dict] = list()
+            self._log = list()
 
         data_shape: MutableSequence[int] = []
         data_dimensions: MutableSequence[str] = []

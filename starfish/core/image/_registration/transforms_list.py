@@ -31,11 +31,11 @@ class TransformsList:
             transform to apply.
         """
 
+        self.transforms: List[Tuple[Mapping[Axes, int], TransformType, GeometricTransform]]
         if transforms_list:
             self.transforms = transforms_list
         else:
-            self.transforms: List[Tuple[Mapping[Axes, int],
-                                        TransformType, GeometricTransform]] = list()
+            self.transforms = list()
 
     def __repr__(self) -> str:
         translation_strings = [

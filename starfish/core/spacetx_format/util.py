@@ -234,7 +234,7 @@ class Fuzzer(object):
         self.out.write(f"{header}\n")
         self.out.write("".join([x in ("\t", "\n") and x or "-" for x in header]))
         self.out.write("\n")
-        self.stack: List[Any] = []
+        self.stack = []
         try:
             self.descend(self.obj)
         finally:

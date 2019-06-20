@@ -107,6 +107,7 @@ def intensity_histogram(
     data: np.ndarray = np.ravel(image_stack.xarray)
     ax.hist(data, **kwargs)
 
+
 def overlay_spot_calls(
     image_stack: ImageStack,
     intensities: IntensityTable,
@@ -146,8 +147,8 @@ def overlay_spot_calls(
         image_stack = image_stack.sel(sel)
 
         # subset the intensities if needed
-        intensity_keys = (Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE)
-        intensity_sel = {x: sel[x] for x in intensity_keys if x in sel}
+        intensity_keys = (Axes.ROUND, Axes.CH, Axes.ZPLANE)
+        intensity_sel = {x.value: sel[x] for x in intensity_keys if x in sel}
         if intensity_sel:
             intensities = intensities.sel(intensity_sel)
 

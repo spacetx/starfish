@@ -127,7 +127,7 @@ def osmFISH(use_test_data: bool = False) -> Experiment:
             "experiment.json"
         )
     return Experiment.from_json(
-        "https://d2nhj9g34unfro.cloudfront.net/20181031/osmFISH/experiment.json")
+        "https://d26bikfyahveg8.cloudfront.net/osmFISH/formatted/20190626/experiment.json")
 
 
 def BaristaSeq(use_test_data: bool = False) -> Experiment:

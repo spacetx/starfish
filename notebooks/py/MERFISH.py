@@ -125,16 +125,10 @@ low_passed = glp.run(deconvolved, in_place=False, verbose=True)
 # EPY: END markdown
 
 # EPY: START code
-# if use_test_data:
 scale_factors = {
     (t[Axes.ROUND], t[Axes.CH]): t['scale_factor']
     for t in experiment.extras['scale_factors']
 }
-# else:
-#     scale_factors = {
-#         (t[Axes.ROUND], t[Axes.CH]): t['scale_factor']
-#         for index, t in imgs.tile_metadata.iterrows()
-#     }
 
 # this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to
 # at least we can do it with get_slice and set_slice right now.

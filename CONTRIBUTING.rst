@@ -78,4 +78,4 @@ Project Tracking
 - The starfish team uses `zenhub <https://app.zenhub.com/workspaces/starfish-dev-5b4e05b4c93e4717b2160fdb/board>`_ to track the team's progress
 and upcoming engineering raodmap.
 - If you would like to see the team's board in github and the correct rendering of epic issues it's recommended that you download the chrome extension
-`here <https://chrome.google.com/webstore/detail/zenhub-for-github/ogcgkffhplmphkaahpmffcafajaocjbd?hl=en-US>`_
+`here <https://www.zenhub.com/extension>`_

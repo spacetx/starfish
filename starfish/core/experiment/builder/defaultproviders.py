@@ -2,14 +2,14 @@
 This module implements default providers of data to the experiment builders.
 """
 
-from typing import Mapping, Tuple, Type, Union
+from typing import Mapping, Type, Union
 
 import numpy as np
 from slicedimage import (
     ImageFormat,
 )
 
-from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.types import Axes, Coordinates, CoordinateValue
 from .providers import FetchedTile, TileFetcher
 
 
@@ -23,7 +23,7 @@ class RandomNoiseTile(FetchedTile):
         return {Axes.Y: 1536, Axes.X: 1024}
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return {
             Coordinates.X: (0.0, 0.0001),
             Coordinates.Y: (0.0, 0.0001),
@@ -53,7 +53,7 @@ class OnesTile(FetchedTile):
         return self._shape
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return {
             Coordinates.X: (0.0, 0.0001),
             Coordinates.Y: (0.0, 0.0001),

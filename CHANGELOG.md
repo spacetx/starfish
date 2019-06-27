@@ -1,3 +1,31 @@
+## [0.1.2] - 2019-06-19
+- Refactor reduce to take an optional module and only a function name. (#1386)
+- Codify the expectation that in-place experiment construction does not rely on TileFetcher data (#1389)
+- Warn and return empty SpotAttributes when PixelDecoding finds 0 spots (#1400)
+- updating data.merfish link to full dataset (#1406)
+- Rename tile_coordinates to tile_identifier (#1401)
+- Support for irregular images in the builder (#1382)
+- Fix how we structure the run notebook rules. (#1384)
+- updated loading data docs and added image of napari viewer (#1387)
+- Format complete ISS experiment and expose in starfish.data (#1316)
+- Add concatenate method for ExpressionMatrix (#1381)
+- Add TransformsList __repr__ (#1380)
+- Fix 3d smFISH notebook as well. (#1385)
+- Add custom clip Filter classes (#1376)
+- Fix smFISH notebook. (#1383)
+- Add Filter.Reduce (general dimension reduction for ImageStack) (#1342)
+- Handle denormalized numbers when normalizing intensities/codebooks (#1371)
+- TileFetcher formats complete 496 fov MERFISH dataset (#1341)
+- Refactor fov.getImage() to fov.getImages() (#1346)
+- Add the ability to write labeled experiments (#1374)
+- Add inplace TileFetcher module back to public builder API (#1375)
+- Always create Z coordinates, even on 4D datasets. (#1358)
+- Create an all-purpose ImageStack factory (#1348)
+- Remove physical_coordinate_calculator.py (#1352)
+- ImageStack parsers should provide coordinates as an array (#1351)
+- bump to slicedimage 3.1.1 (#1343)
+- Creating a standard starfish.wdl that can be run with any recipe file  (#1364)
+
 ## [0.1.1] - 2019-05-16
 - [Easy] Fixing spot detection for labeled axes (#1347)
 - Schema versioning (#1278)
@@ -62,3 +90,4 @@
 [0.0.35]: https://github.com/spacetx/starfish/releases/tag/0.0.35
 [0.0.34]: https://github.com/spacetx/starfish/releases/tag/0.0.34
 [0.0.33]: https://github.com/spacetx/starfish/releases/tag/0.0.33
+

@@ -9,15 +9,15 @@ import functools
 import json
 import os
 import re
-from typing import Mapping, Tuple, Union
+from typing import Mapping, Union
 
 import click
 import numpy as np
 from slicedimage import ImageFormat
 
-import starfish.util.try_import
+import starfish.core.util.try_import
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Axes, Coordinates, Features, Number
+from starfish.types import Axes, Coordinates, CoordinateValue, Features
 
 
 # We use this to cache images across tiles.  In the case of the osmFISH data set, volumes are saved
@@ -33,7 +33,7 @@ class osmFISHTile(FetchedTile):
     def __init__(
             self,
             file_path: str,
-            coordinates: Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]],
+            coordinates: Mapping[Union[str, Coordinates], CoordinateValue],
             z: int
     ) -> None:
         """Parser for an osmFISH tile.
@@ -42,7 +42,7 @@ class osmFISHTile(FetchedTile):
         ----------
         file_path : str
             location of the osmFISH tile
-        coordinates : Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]
+        coordinates : Mapping[Union[str, Coordinates], CoordinateValue]
             the coordinates for the selected osmFISH tile, extracted from the metadata
         z : int
             the z-layer for the selected osmFISH tile
@@ -64,7 +64,7 @@ class osmFISHTile(FetchedTile):
         return {Axes.Y: raw_shape[0], Axes.X: raw_shape[1]}
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return self._coordinates
 
     def tile_data(self) -> np.ndarray:
@@ -73,7 +73,7 @@ class osmFISHTile(FetchedTile):
 
 class osmFISHTileFetcher(TileFetcher):
 
-    @starfish.util.try_import.try_import({"yaml"})
+    @starfish.core.util.try_import.try_import({"yaml"})
     def __init__(self, input_dir: str, metadata_yaml) -> None:
         """Implement a TileFetcher for an osmFISH experiment.
 
@@ -184,11 +184,12 @@ class osmFISHTileFetcher(TileFetcher):
 
 
 @click.command()
-@click.option("--input-dir", type=str, help="input directory containing images")
-@click.option("--output-dir", type=str, help="output directory for formatted data")
-@click.option("--metadata-yaml", type=str, help="experiment metadata")
-def cli(input_dir, output_dir, metadata_yaml):
-    """CLI entrypoint for spaceTx format construction for osmFISH data
+@click.argument("input-dir", type=str)
+@click.argument("metadata-yaml", type=str)
+@click.argument("output-dir", type=str)
+def cli(input_dir, metadata_yaml, output_dir):
+    """Reads osmFISH images from <input-dir> and experiment metadata from <metadata-yaml> and writes
+    spaceTx-formatted data to <output-dir>.
 
     Raw data (input for this tool) for this experiment can be found at:
     s3://spacetx.starfish.data.upload/simone/

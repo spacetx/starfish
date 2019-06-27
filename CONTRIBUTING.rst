@@ -59,7 +59,7 @@ Code contributions
 - Numpy provides an excellent `development workflow <https://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html>`_
   that we encourage you to follow when developing features for starfish!
 - All commits must have informative summaries; try to think about what will still make sense looking back on them next year.
-- All pull requests should describe your testing plan.  
+- All pull requests should describe your testing plan.
 - When merging a pull request, squash commits down to the smallest logical number of commits. In cases where a single commit
   suffices, use the "Squash and Merge" strategy, since it adds the PR number to the commit name. If multiple commits remain,
   use "Rebase and Merge".
@@ -71,3 +71,11 @@ Notebook contributions
   Use `nbencdec <https://github.com/ttung/nbencdec>`_ to generate the corresponding `.py` file.
 - The `.py` files allow refactor commands in the codebase to find code in the `.py` files,
   which is an important to keep the notebooks working as starfish evolves.
+
+
+Project Tracking
+-----------------
+- The starfish team uses `zenhub <https://app.zenhub.com/workspaces/starfish-dev-5b4e05b4c93e4717b2160fdb/board>`_ to track the team's progress
+and upcoming engineering raodmap.
+- If you would like to see the team's board in github and the correct rendering of epic issues it's recommended that you download the chrome extension
+`here <https://www.zenhub.com/extension>`_

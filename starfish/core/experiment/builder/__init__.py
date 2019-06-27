@@ -38,7 +38,7 @@ from .providers import FetchedTile, TileFetcher
 DEFAULT_DIMENSION_ORDER = (Axes.ZPLANE, Axes.ROUND, Axes.CH)
 
 
-@dataclass
+@dataclass(eq=True, order=True, frozen=True)
 class TileIdentifier:
     """Data class for encapsulating the location of a tile in a 6D tensor (fov, round, ch, zplane,
     y, and x)."""
@@ -51,13 +51,8 @@ class TileIdentifier:
 def _tile_opener(toc_path: Path, tile: Tile, file_ext: str) -> BinaryIO:
     base = toc_path.parent / toc_path.stem
     return open(
-        "{}-Z{}-H{}-C{}.{}".format(
-            str(base),
-            tile.indices[Axes.ZPLANE],
-            tile.indices[Axes.ROUND],
-            tile.indices[Axes.CH],
-            ImageFormat.TIFF.file_ext,
-        ),
+        f"{os.fspath(base)}-Z{tile.indices[Axes.ZPLANE]}-"
+        f"R{tile.indices[Axes.ROUND]}-C{tile.indices[Axes.CH]}.{file_ext}",
         "wb")
 
 
@@ -77,7 +72,7 @@ def build_irregular_image(
     Parameters
     ----------
     tile_identifiers : Iterable[TileIdentifier]
-        Iterable of all the TileCoordinates that are valid in the image.
+        Iterable of all the TileIdentifier that are valid in the image.
     image_fetcher : TileFetcher
         Instance of TileFetcher that provides the data for the tile.
     default_shape : Optional[Tuple[int, int]]
@@ -90,7 +85,7 @@ def build_irregular_image(
     def reducer_to_sets(
             accumulated: Sequence[MutableSet[int]], update: TileIdentifier,
     ) -> Sequence[MutableSet[int]]:
-        """Reduces to a list of sets of tile coordinates, in the order of FOV, round, ch, and
+        """Reduces to a list of sets of tile identifiers, in the order of FOV, round, ch, and
         zplane."""
         result: MutableSequence[MutableSet[int]] = list()
         for accumulated_elem, update_elem in zip(accumulated, astuple(update)):
@@ -120,8 +115,8 @@ def build_irregular_image(
             ImageFormat.TIFF,
         )
 
-        for tile_coordinate in tile_identifiers:
-            current_fov, current_round, current_ch, current_zplane = astuple(tile_coordinate)
+        for tile_identifier in tile_identifiers:
+            current_fov, current_round, current_ch, current_zplane = astuple(tile_identifier)
             # filter out the fovs that are not the one we are currently processing
             if expected_fov != current_fov:
                 continue
@@ -215,8 +210,8 @@ def write_irregular_experiment_json(
         tile_fetchers: Mapping[str, TileFetcher],
         postprocess_func: Optional[Callable[[dict], dict]]=None,
         default_shape: Optional[Mapping[Axes, int]]=None,
-        fov_path_generator: Callable[[Path, str], Path] = _fov_path_generator,
-        tile_opener: Callable[[Path, Tile, str], BinaryIO] = _tile_opener,
+        fov_path_generator: Callable[[Path, str], Path] = None,
+        tile_opener: Optional[Callable[[Path, Tile, str], BinaryIO]] = None,
 ) -> None:
     """
     Build and returns a top-level experiment description with the following characteristics:
@@ -228,7 +223,7 @@ def write_irregular_experiment_json(
     tile_format : ImageFormat
         File format to write the tiles as.
     image_tile_identifiers : Mapping[str, Iterable[TileIdentifier]]
-        Dictionary mapping the image type to an iterable of TileCoordinates.
+        Dictionary mapping the image type to an iterable of TileIdentifiers.
     tile_fetchers : Mapping[str, TileFetcher]
         Dictionary mapping the image type to a TileFetcher.
     postprocess_func : Optional[Callable[[dict], dict]]
@@ -237,13 +232,22 @@ def write_irregular_experiment_json(
         The callable should return what is to be written as the experiment document.
     default_shape : Optional[Tuple[int, int]] (default = None)
         Default shape for the tiles in this experiment.
-    fov_path_generator : Callable[[Path, str], Path]
+    fov_path_generator : Optional[Callable[[Path, str], Path]]
         Generates the path for a FOV's json file.  If one is not provided, the default generates
-        the FOV's json file at the same level as the top-level json file for an image.
-    tile_opener : Callable[[Path, Tile, str], BinaryIO]
+        the FOV's json file at the same level as the top-level json file for an image.    If this is
+        not provided, a reasonable default will be provided.
+    tile_opener : Optional[Callable[[Path, Tile, str], BinaryIO]]
+        Callable that gets invoked with the following arguments: 1. the directory of the experiment
+        that is being constructed, 2. the tile that is being written, and 3. the file extension
+        that the tile should be written with.  The callable is expected to return an open file
+        handle.  If this is not provided, a reasonable default will be provided.
     """
     if postprocess_func is None:
         postprocess_func = lambda doc: doc
+    if fov_path_generator is None:
+        fov_path_generator = _fov_path_generator
+    if tile_opener is None:
+        tile_opener = _tile_opener
 
     experiment_doc: Dict[str, Any] = {
         'version': str(CURRENT_VERSION),
@@ -296,8 +300,8 @@ def write_experiment_json(
         postprocess_func: Optional[Callable[[dict], dict]]=None,
         default_shape: Optional[Mapping[Axes, int]]=None,
         dimension_order: Sequence[Axes]=(Axes.ZPLANE, Axes.ROUND, Axes.CH),
-        fov_path_generator: Callable[[Path, str], Path] = _fov_path_generator,
-        tile_opener: Callable[[Path, Tile, str], BinaryIO] = _tile_opener,
+        fov_path_generator: Optional[Callable[[Path, str], Path]] = None,
+        tile_opener: Optional[Callable[[Path, Tile, str], BinaryIO]] = None,
 ) -> None:
     """
     Build and returns a top-level experiment description with the following characteristics:
@@ -344,8 +348,13 @@ def write_experiment_json(
         (default = (Axes.Z, Axes.ROUND, Axes.CH))
     fov_path_generator : Callable[[Path, str], Path]
         Generates the path for a FOV's json file.  If one is not provided, the default generates
-        the FOV's json file at the same level as the top-level json file for an image.
+        the FOV's json file at the same level as the top-level json file for an image.  If this is
+        not provided, a reasonable default will be provided.
     tile_opener : Callable[[Path, Tile, str], BinaryIO]
+        Callable that gets invoked with the following arguments: 1. the directory of the experiment
+        that is being constructed, 2. the tile that is being written, and 3. the file extension
+        that the tile should be written with.  The callable is expected to return an open file
+        handle.  If this is not provided, a reasonable default will be provided.
     """
     all_tile_fetcher: MutableMapping[str, TileFetcher] = {}
     if aux_tile_fetcher is not None:

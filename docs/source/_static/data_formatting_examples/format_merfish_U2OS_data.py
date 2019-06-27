@@ -8,7 +8,7 @@ import argparse
 import functools
 import json
 import os
-from typing import IO, Mapping, Tuple, Union
+from typing import IO, Mapping, Union
 
 import numpy as np
 import pandas as pd
@@ -17,7 +17,7 @@ from slicedimage import ImageFormat
 
 from starfish.core.util.argparse import FsExistsType
 from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.types import Axes, Coordinates, Number
+from starfish.types import Axes, Coordinates, CoordinateValue
 
 SHAPE = {Axes.Y: 2048, Axes.X: 2048}
 
@@ -60,7 +60,7 @@ class MERFISHTile(FetchedTile):
         return SHAPE
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return self._coordinates
 
     def tile_data(self) -> IO:
@@ -78,7 +78,7 @@ class MERFISHAuxTile(FetchedTile):
         return SHAPE
 
     @property
-    def coordinates(self) -> Mapping[Union[str, Coordinates], Union[Number, Tuple[Number, Number]]]:
+    def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return self._coordinates
 
     def tile_data(self) -> np.ndarray:

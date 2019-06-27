@@ -1,18 +1,24 @@
 import os
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
-from starfish.core.experiment.experiment import Experiment
+import numpy as np
+
+from starfish.core.experiment.experiment import Experiment, FieldOfView
 
 
-def test_inplace():
+def test_inplace(tmpdir):
     this = Path(__file__)
     inplace_script = this.parent / "inplace_script.py"
 
-    with tempfile.TemporaryDirectory() as tmpdir_str:
-        tmpdir = Path(tmpdir_str)
+    tmpdir_path = Path(tmpdir)
 
-        subprocess.check_call([sys.executable, os.fspath(inplace_script), os.fspath(tmpdir)])
-        Experiment.from_json(os.fspath(tmpdir / "experiment.json"))
+    subprocess.check_call([sys.executable, os.fspath(inplace_script), os.fspath(tmpdir_path)])
+
+    # load up the experiment, and select an image.  Ensure that it has non-zero data.  This is to
+    # verify that we are sourcing the data from the tiles that were already on-disk, and not the
+    # artificially zero'ed tiles that we feed the experiment builder.
+    experiment = Experiment.from_json(os.fspath(tmpdir_path / "experiment.json"))
+    primary_image = experiment.fov().get_image(FieldOfView.PRIMARY_IMAGES)
+    assert not np.allclose(primary_image.xarray, 0)

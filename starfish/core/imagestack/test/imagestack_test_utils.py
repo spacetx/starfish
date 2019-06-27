@@ -21,11 +21,13 @@ def verify_stack_data(
     return tile_data, axes
 
 
-def verify_physical_coordinates(stack: ImageStack,
-                                expected_x_coordinates: Tuple[float, float],
-                                expected_y_coordinates: Tuple[float, float],
-                                expected_z_coordinates: Tuple[float, float],
-                                zplane: Optional[int] = None) -> None:
+def verify_physical_coordinates(
+        stack: ImageStack,
+        expected_x_coordinates: Tuple[Number, Number],
+        expected_y_coordinates: Tuple[Number, Number],
+        expected_z_coordinates: Union[Number, Tuple[Number, Number]],
+        zplane: Optional[int] = None,
+) -> None:
     """Given an imagestack and a set of coordinate min/max values verify that the physical
     coordinates on the stack match the expected range of values for each coord dimension.
     """

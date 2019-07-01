@@ -17,6 +17,7 @@ from ..imagestack import ImageStack
 from ..parser.crop import CropParameters
 
 
+NUM_FOV = 1
 NUM_ROUND = 3
 NUM_CH = 4
 NUM_ZPLANE = 2
@@ -29,7 +30,7 @@ WIDTH = 60
 
 
 def expected_data(round_: int, ch: int, zplane: int):
-    return unique_data(round_, ch, zplane, NUM_ROUND, NUM_CH, NUM_ZPLANE, HEIGHT, WIDTH)
+    return unique_data(0, round_, ch, zplane, NUM_FOV, NUM_ROUND, NUM_CH, NUM_ZPLANE, HEIGHT, WIDTH)
 
 
 def setup_imagestack(crop_parameters: CropParameters) -> ImageStack:

@@ -21,15 +21,17 @@ class LocationAwareFetchedTile(FetchedTile, metaclass=ABCMeta):
             self,
             # these are the arguments passed in as a result of tile_fetcher_factory's
             # pass_tile_indices parameter.
-            fov: int, _round: int, ch: int, zplane: int,
+            fov_id: int, round_id: int, ch_id: int, zplane_id: int,
             # these are the arguments we are passing through tile_fetcher_factory.
-            rounds: Sequence[int], chs: Sequence[int], zplanes: Sequence[int],
+            fovs: Sequence[int], rounds: Sequence[int], chs: Sequence[int], zplanes: Sequence[int],
             tile_height: int, tile_width: int,
     ) -> None:
         super().__init__()
-        self.round = _round
-        self.ch = ch
-        self.zplane = zplane
+        self.fov_id = fov_id
+        self.round_id = round_id
+        self.ch_id = ch_id
+        self.zplane_id = zplane_id
+        self.fovs = fovs
         self.rounds = rounds
         self.chs = chs
         self.zplanes = zplanes
@@ -40,17 +42,19 @@ class LocationAwareFetchedTile(FetchedTile, metaclass=ABCMeta):
 def _apply_coords_range_fetcher(
         backing_tile_fetcher: TileFetcher,
         zplanes: Sequence[int],
-        xrange: Tuple[Number, Number],
-        yrange: Tuple[Number, Number],
+        fov_to_xrange: Mapping[int, Tuple[Number, Number]],
+        fov_to_yrange: Mapping[int, Tuple[Number, Number]],
         zrange: Tuple[Number, Number],
 ) -> TileFetcher:
     """Given a :py:class:`TileFetcher`, intercept all the returned :py:class:`FetchedTile` instances
-    and replace the coordinates such that the resulting tensor has coordinates that range from
-    `xrange[0]:xrange[1]`, `yrange[0]:yrange[1]`, `zrange[0]:zrange[1]` """
+    and replace the coordinates.  The range for the x and the y coordinates should be fetched from
+    `fov_to_xrange` and `fov_to_yrange`, respectively, using the fov id.  The z coordinates are
+    uniform across all fields of view."""
     class ModifiedTile(FetchedTile):
-        def __init__(self, backing_tile: FetchedTile, zplane: int, *args, **kwargs):
+        def __init__(self, backing_tile: FetchedTile, fov: int, zplane: int, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.backing_tile = backing_tile
+            self.fov = fov
             self.zplane = zplane
 
         @property
@@ -63,8 +67,8 @@ def _apply_coords_range_fetcher(
             zplane_coords = np.linspace(zrange[0], zrange[1], len(zplanes))
 
             return {
-                Coordinates.X: xrange,
-                Coordinates.Y: yrange,
+                Coordinates.X: fov_to_xrange[self.fov],
+                Coordinates.Y: fov_to_yrange[self.fov],
                 Coordinates.Z: zplane_coords[zplane_offset],
             }
 
@@ -74,7 +78,7 @@ def _apply_coords_range_fetcher(
     class ModifiedTileFetcher(TileFetcher):
         def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
             original_fetched_tile = backing_tile_fetcher.get_tile(fov, r, ch, z)
-            return ModifiedTile(original_fetched_tile, z)
+            return ModifiedTile(original_fetched_tile, fov, z)
 
     return ModifiedTileFetcher()
 
@@ -119,11 +123,11 @@ def imagestack_factory(
     """
     original_tile_fetcher = tile_fetcher_factory(
         fetched_tile_cls, True,
-        round_labels, ch_labels, zplane_labels,
+        range(1), round_labels, ch_labels, zplane_labels,
         tile_height, tile_width,
     )
     modified_tile_fetcher = _apply_coords_range_fetcher(
-        original_tile_fetcher, zplane_labels, xrange, yrange, zrange)
+        original_tile_fetcher, zplane_labels, {0: xrange}, {0: yrange}, zrange)
 
     collection = build_image(
         range(1),

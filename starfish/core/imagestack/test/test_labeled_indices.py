@@ -4,9 +4,10 @@ on such an ImageStack work.
 """
 import numpy as np
 
+from starfish.core.experiment.builder.test.factories.unique_tiles import unique_data
 from starfish.types import Axes
 from .factories.unique_tiles import (
-    unique_data, unique_tiles_imagestack, X_COORDS, Y_COORDS, Z_COORDS,
+    unique_tiles_imagestack, X_COORDS, Y_COORDS, Z_COORDS,
 )
 from .imagestack_test_utils import verify_physical_coordinates, verify_stack_data
 from ..imagestack import ImageStack

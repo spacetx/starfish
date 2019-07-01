@@ -17,10 +17,9 @@ from skimage.io import imread
 from slicedimage import ImageFormat
 
 from starfish import Codebook
-from starfish.experiment.builder import FetchedTile, TileFetcher
-from starfish.experiment.builder import write_experiment_json
+from starfish.core.util.argparse import FsExistsType
+from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.types import Axes, Coordinates, CoordinateValue, Features
-from starfish.util.argparse import FsExistsType
 
 SHAPE = {Axes.Y: 980, Axes.X: 1330}
 
@@ -50,15 +49,18 @@ class ISSPrimaryTileFetcher(TileFetcher):
     def __init__(self, input_dir):
         self.input_dir = input_dir
 
-    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
-        return ISSTile(os.path.join(self.input_dir, str(r + 1), "c{}.TIF".format(ch + 2)))
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
+        return ISSTile(os.path.join(
+            self.input_dir, str(round_label + 1), "c{}.TIF".format(ch_label + 2)))
 
 
 class ISSAuxTileFetcher(TileFetcher):
     def __init__(self, path):
         self.path = path
 
-    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
         return ISSTile(self.path)
 
 

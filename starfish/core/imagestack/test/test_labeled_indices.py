@@ -24,9 +24,12 @@ NUM_CH = len(CH_LABELS)
 NUM_ZPLANE = len(ZPLANE_LABELS)
 
 
-def expected_data(round_: int, ch: int, zplane: int):
+def expected_data(round_label: int, ch_label: int, zplane_label: int):
     return unique_data(
-        0, ROUND_LABELS.index(round_), CH_LABELS.index(ch), ZPLANE_LABELS.index(zplane),
+        0,
+        ROUND_LABELS.index(round_label),
+        CH_LABELS.index(ch_label),
+        ZPLANE_LABELS.index(zplane_label),
         NUM_FOV, NUM_ROUND, NUM_CH, NUM_ZPLANE,
         HEIGHT, WIDTH)
 
@@ -42,13 +45,13 @@ def test_labeled_indices_read():
     """
     stack = setup_imagestack()
 
-    for round_ in stack.axis_labels(Axes.ROUND):
-        for ch in stack.axis_labels(Axes.CH):
-            for zplane in stack.axis_labels(Axes.ZPLANE):
+    for round_label in stack.axis_labels(Axes.ROUND):
+        for ch_label in stack.axis_labels(Axes.CH):
+            for zplane_label in stack.axis_labels(Axes.ZPLANE):
                 verify_stack_data(
                     stack,
-                    {Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane},
-                    expected_data(round_, ch, zplane),
+                    {Axes.ROUND: round_label, Axes.CH: ch_label, Axes.ZPLANE: zplane_label},
+                    expected_data(round_label, ch_label, zplane_label),
                 )
 
 

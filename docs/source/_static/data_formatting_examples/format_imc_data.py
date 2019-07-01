@@ -105,9 +105,10 @@ class ImagingMassCytometryTileFetcher(TileFetcher):
     def fov_map(self, fov: int) -> str:
         return self._fov_map[fov]
 
-    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
-        fov_name = self.fov_map(fov)
-        basename = f'{self.ch_dict(ch)}.tiff'
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
+        fov_name = self.fov_map(fov_id)
+        basename = f'{self.ch_dict(ch_label)}.tiff'
         file_path = os.path.join(self.input_dir, fov_name, fov_name, basename)
         return ImagingMassCytometryTile(file_path)
 

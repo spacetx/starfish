@@ -91,8 +91,8 @@ class IntensityTable(xr.DataArray):
     def zeros(
             cls,
             spot_attributes: SpotAttributes,
-            ch_values: Sequence[int],
-            round_values: Sequence[int],
+            ch_labels: Sequence[int],
+            round_labels: Sequence[int],
     ) -> "IntensityTable":
         """
         Create an empty intensity table with pre-set shape whose values are zero.
@@ -102,10 +102,10 @@ class IntensityTable(xr.DataArray):
         spot_attributes : SpotAttributes
             Table containing spot metadata. Must contain the values specified in Axes.X,
             Y, Z, and RADIUS.
-        ch_values : Sequence[int]
+        ch_labels : Sequence[int]
             The possible values for the channel number, in the order that they are in the ImageStack
             5D tensor.
-        round_values : Sequence[int]
+        round_labels : Sequence[int]
             The possible values for the round number, in the order that they are in the ImageStack
             5D tensor.
 
@@ -118,10 +118,10 @@ class IntensityTable(xr.DataArray):
         if not isinstance(spot_attributes, SpotAttributes):
             raise TypeError('parameter spot_attributes must be a starfish SpotAttributes object.')
 
-        data = np.zeros((spot_attributes.data.shape[0], len(ch_values), len(round_values)))
+        data = np.zeros((spot_attributes.data.shape[0], len(ch_labels), len(round_labels)))
         dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
         coords = cls._build_xarray_coords(
-            spot_attributes, np.array(ch_values), round_values)
+            spot_attributes, np.array(ch_labels), round_labels)
 
         intensity_table = cls(
             data=data, coords=coords, dims=dims,

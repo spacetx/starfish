@@ -71,9 +71,12 @@ def _apply_coords_range_fetcher(
             return self.backing_tile.tile_data()
 
     class ModifiedTileFetcher(TileFetcher):
-        def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
-            original_fetched_tile = backing_tile_fetcher.get_tile(fov, r, ch, z)
-            tile_identifier = TileIdentifier(fov, r, ch, z)
+        def get_tile(
+                self, fov_id: int, round_label: int, ch_label: int, zplane_label: int,
+        ) -> FetchedTile:
+            original_fetched_tile = backing_tile_fetcher.get_tile(
+                fov_id, round_label, ch_label, zplane_label)
+            tile_identifier = TileIdentifier(fov_id, round_label, ch_label, zplane_label)
             return ModifiedTile(original_fetched_tile, tile_identifier)
 
     return ModifiedTileFetcher()
@@ -107,11 +110,11 @@ def collection_factory(
     all_fov_ids = sorted(set(
         tile_identifier.fov_id for tile_identifier in tile_identifiers))
     all_round_labels = sorted(set(
-        tile_identifier.round_id for tile_identifier in tile_identifiers))
+        tile_identifier.round_label for tile_identifier in tile_identifiers))
     all_ch_labels = sorted(set(
-        tile_identifier.ch_id for tile_identifier in tile_identifiers))
+        tile_identifier.ch_label for tile_identifier in tile_identifiers))
     all_zplane_labels = sorted(set(
-        tile_identifier.zplane_id for tile_identifier in tile_identifiers))
+        tile_identifier.zplane_label for tile_identifier in tile_identifiers))
 
     original_tile_fetcher = tile_fetcher_factory(
         fetched_tile_cls, True,

@@ -59,8 +59,9 @@ class CornerDifferentDtype(TileFetcher):
         self._dtype = dtype
         self._corner_dtype = corner_dtype
 
-    def get_tile(self, fov: int, round_: int, ch: int, z: int) -> FetchedTile:
-        if round_ == 0 and ch == 0 and z == 0:
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
+        if round_label == 0 and ch_label == 0 and zplane_label == 0:
             dtype = self._corner_dtype
         else:
             dtype = self._dtype

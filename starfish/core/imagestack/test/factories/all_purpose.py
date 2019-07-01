@@ -61,7 +61,7 @@ def imagestack_factory(
         def tile_coordinate_callback(
                 tile_identifier: TileIdentifier
         ) -> Mapping[Coordinates, CoordinateValue]:
-            zplane_offset = all_zplane_labels.index(tile_identifier.zplane_id)
+            zplane_offset = all_zplane_labels.index(tile_identifier.zplane_label)
             return {
                 Coordinates.X: xrange,
                 Coordinates.Y: yrange,
@@ -74,7 +74,7 @@ def imagestack_factory(
         fetched_tile_cls,
         tile_identifiers,
         make_tile_coordinate_callback(
-            sorted(set(tile_identifier.zplane_id for tile_identifier in tile_identifiers))),
+            sorted(set(tile_identifier.zplane_label for tile_identifier in tile_identifiers))),
         tile_height,
         tile_width,
     )

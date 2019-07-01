@@ -160,13 +160,14 @@ class osmFISHTileFetcher(TileFetcher):
             Coordinates.Z: (z_pos, z_pos + z_size),
         }
 
-    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
-        target = self.target_map[r, ch]
-        fov_id = self.fov_map[fov]
-        basename = f"Hybridization{r + 1}_{target}_fov_{fov_id}.npy"
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
+        target = self.target_map[round_label, ch_label]
+        fov = self.fov_map[fov_id]
+        basename = f"Hybridization{round_label + 1}_{target}_fov_{fov}.npy"
         file_path = os.path.join(self.input_dir, basename)
-        coordinates = self.coordinate_map(r, z)
-        return osmFISHTile(file_path, coordinates, z)
+        coordinates = self.coordinate_map(round_label, zplane_label)
+        return osmFISHTile(file_path, coordinates, zplane_label)
 
     def generate_codebook(self):
         mappings = []

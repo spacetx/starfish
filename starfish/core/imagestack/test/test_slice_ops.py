@@ -11,20 +11,22 @@ def test_get_slice_simple_index():
     ordering of the axes in the ImageStack.
     """
     stack = synthetic_stack()
-    round_ = 1
+    round_label = 1
     imageslice, axes = stack.get_slice(
-        {Axes.ROUND: round_}
+        {Axes.ROUND: round_label}
     )
     assert axes == [Axes.CH, Axes.ZPLANE]
 
     y, x = stack.tile_shape
 
-    for ch in range(stack.shape[Axes.CH]):
-        for z in range(stack.shape[Axes.ZPLANE]):
+    for ch_label in range(stack.shape[Axes.CH]):
+        for zplane_label in range(stack.shape[Axes.ZPLANE]):
             data = np.empty((y, x))
-            data.fill((round_ * stack.shape[Axes.CH] + ch) * stack.shape[Axes.ZPLANE] + z)
+            data.fill(
+                (round_label * stack.shape[Axes.CH] + ch_label) * stack.shape[Axes.ZPLANE]
+                + zplane_label)
 
-            assert data.all() == imageslice[ch, z].all()
+            assert data.all() == imageslice[ch_label, zplane_label].all()
 
 
 def test_get_slice_middle_index():

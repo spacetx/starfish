@@ -1077,13 +1077,13 @@ class ImageStack:
                 round=axis_val_map[Axes.ROUND],
                 ch=axis_val_map[Axes.CH],
                 zplane=axis_val_map[Axes.ZPLANE])
-            round_, ch, zplane = tilekey.round, tilekey.ch, tilekey.z
+            round_label, ch_label, zplane_label = tilekey.round, tilekey.ch, tilekey.z
             extras: dict = self._tile_data[tilekey]
 
             selector = {
-                Axes.ROUND: round_,
-                Axes.CH: ch,
-                Axes.ZPLANE: zplane,
+                Axes.ROUND: round_label,
+                Axes.CH: ch_label,
+                Axes.ZPLANE: zplane_label,
             }
 
             coordinates: MutableMapping[Coordinates, Union[Tuple[Number, Number], Number]] = dict()
@@ -1095,7 +1095,7 @@ class ImageStack:
             coordinates[Coordinates.Y] = y_coordinates
             if Coordinates.Z in self.xarray.coords:
                 # set the z coord to the calculated value from the associated z plane
-                z_coordinates = float(self.xarray[Coordinates.Z.value][zplane])
+                z_coordinates = float(self.xarray[Coordinates.Z.value][zplane_label])
                 coordinates[Coordinates.Z] = z_coordinates
 
             tile = Tile(
@@ -1104,7 +1104,7 @@ class ImageStack:
                 extras=extras,
             )
             tile.numpy_array, _ = self.get_slice(
-                selector={Axes.ROUND: round_, Axes.CH: ch, Axes.ZPLANE: zplane}
+                selector={Axes.ROUND: round_label, Axes.CH: ch_label, Axes.ZPLANE: zplane_label}
             )
             tileset.add_tile(tile)
 

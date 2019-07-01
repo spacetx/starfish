@@ -62,24 +62,25 @@ class ISSCroppedBreastPrimaryTileFetcher(TileFetcher):
         round_dict = dict(enumerate(round_str))
         return round_dict
 
-    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
 
         # get filepath
-        fov_ = str(fov + 1)
-        round_ = self.round_dict[r]
-        ch_ = self.ch_dict[ch]
+        fov_ = str(fov_id + 1)
+        round_ = self.round_dict[round_label]
+        ch_ = self.ch_dict[ch_label]
         filename = f"slideA_{fov_}_{round_}_{ch_}.TIF"
         file_path = os.path.join(self.input_dir, filename)
 
         # get coordinates
         coordinates = {
             Coordinates.X: (
-                self.coordinates_df.loc[fov, "x_min"],
-                self.coordinates_df.loc[fov, "x_max"]
+                self.coordinates_df.loc[fov_id, "x_min"],
+                self.coordinates_df.loc[fov_id, "x_max"]
             ),
             Coordinates.Y: (
-                self.coordinates_df.loc[fov, "y_min"],
-                self.coordinates_df.loc[fov, "y_max"]
+                self.coordinates_df.loc[fov_id, "y_min"],
+                self.coordinates_df.loc[fov_id, "y_max"]
             ),
         }
 
@@ -93,11 +94,12 @@ class ISSCroppedBreastAuxTileFetcher(TileFetcher):
         coordinates = os.path.join(input_dir, "coordinates.csv")
         self.coordinates_df = pd.read_csv(coordinates, index_col=0)
 
-    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
         if self.aux_type == 'nuclei':
-            filename = 'slideA_{}_DO_DAPI.TIF'.format(str(fov + 1))
+            filename = 'slideA_{}_DO_DAPI.TIF'.format(str(fov_id + 1))
         elif self.aux_type == 'dots':
-            filename = 'slideA_{}_DO_Cy3.TIF'.format(str(fov + 1))
+            filename = 'slideA_{}_DO_Cy3.TIF'.format(str(fov_id + 1))
         else:
             msg = 'invalid aux type: {}'.format(self.aux_type)
             msg += ' expected either nuclei or dots'
@@ -108,12 +110,12 @@ class ISSCroppedBreastAuxTileFetcher(TileFetcher):
         # get coordinates
         coordinates = {
             Coordinates.X: (
-                self.coordinates_df.loc[fov, "x_min"],
-                self.coordinates_df.loc[fov, "x_max"]
+                self.coordinates_df.loc[fov_id, "x_min"],
+                self.coordinates_df.loc[fov_id, "x_max"]
             ),
             Coordinates.Y: (
-                self.coordinates_df.loc[fov, "y_min"],
-                self.coordinates_df.loc[fov, "y_max"]
+                self.coordinates_df.loc[fov_id, "y_min"],
+                self.coordinates_df.loc[fov_id, "y_max"]
             ),
         }
 

@@ -108,9 +108,9 @@ class ScalarTiles(FetchedTile):
 
 class OffsettedTiles(FetchedTile):
     """Tiles that are physically offset based on round."""
-    def __init__(self, fov: int, _round: int, ch: int, z: int) -> None:
+    def __init__(self, fov: int, round_label: int, ch_label: int, z_label: int) -> None:
         super().__init__()
-        self._round = _round
+        self.round_label = round_label
 
     @property
     def shape(self) -> Mapping[Axes, int]:
@@ -119,9 +119,9 @@ class OffsettedTiles(FetchedTile):
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return {
-            Coordinates.X: round_to_x(self._round),
-            Coordinates.Y: round_to_y(self._round),
-            Coordinates.Z: zplane_to_z(self._round),
+            Coordinates.X: round_to_x(self.round_label),
+            Coordinates.Y: round_to_y(self.round_label),
+            Coordinates.Z: zplane_to_z(self.round_label),
         }
 
     @property

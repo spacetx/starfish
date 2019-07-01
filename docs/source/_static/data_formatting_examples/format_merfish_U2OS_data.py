@@ -112,13 +112,14 @@ class MERFISHTileFetcher(TileFetcher):
             Coordinates.Z: (0.0, 0.001)
         }
 
-    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
-        filename = os.path.join(self.input_dir, 'fov_{}.tif'.format(fov))
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
+        filename = os.path.join(self.input_dir, 'fov_{}.tif'.format(fov_id))
         file_path = os.path.join(self.input_dir, filename)
         if self.is_dapi:
-            return MERFISHAuxTile(file_path, self.make_coordinates(fov))
+            return MERFISHAuxTile(file_path, self.make_coordinates(fov_id))
         else:
-            return MERFISHTile(file_path, r, ch, self.make_coordinates(fov))
+            return MERFISHTile(file_path, round_label, ch_label, self.make_coordinates(fov_id))
 
 
 def format_data(input_dir, output_dir):

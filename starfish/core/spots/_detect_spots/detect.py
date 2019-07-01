@@ -94,14 +94,14 @@ def measure_spot_intensities(
     """
 
     # determine the shape of the intensity table
-    ch_values = data_image.axis_labels(Axes.CH)
-    round_values = data_image.axis_labels(Axes.ROUND)
+    ch_labels = data_image.axis_labels(Axes.CH)
+    round_labels = data_image.axis_labels(Axes.ROUND)
 
     # construct the empty intensity table
     intensity_table = IntensityTable.zeros(
         spot_attributes=spot_attributes,
-        ch_values=ch_values,
-        round_values=round_values,
+        ch_labels=ch_labels,
+        round_labels=round_labels,
     )
 
     # if no spots were detected, return the empty IntensityTable
@@ -109,7 +109,7 @@ def measure_spot_intensities(
         return intensity_table
 
     # fill the intensity table
-    indices = product(ch_values, round_values)
+    indices = product(ch_labels, round_labels)
     for c, r in indices:
         image, _ = data_image.get_slice({Axes.CH: c, Axes.ROUND: r})
         blob_intensities: pd.Series = measure_spot_intensity(

@@ -82,7 +82,8 @@ class SeqFISHTileFetcher(TileFetcher):
             Coordinates.Z: (0., 0.1),
         }
 
-    def get_tile(self, fov: int, r: int, ch: int, zplane: int) -> SeqFISHTile:
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> SeqFISHTile:
         """Extracts 2-d data from a multi-page TIFF containing all Tiles for an imaging round
 
         Parameters
@@ -101,8 +102,8 @@ class SeqFISHTileFetcher(TileFetcher):
         SeqFISHTile :
             SeqFISH subclass of FetchedTile
         """
-        file_path = os.path.join(self.input_dir, f"{r + 1}.tif")
-        return SeqFISHTile(file_path, self.coordinates, zplane, ch)
+        file_path = os.path.join(self.input_dir, f"{round_label + 1}.tif")
+        return SeqFISHTile(file_path, self.coordinates, zplane_label, ch_label)
 
 
 def parse_codebook(codebook_csv: str) -> Codebook:

@@ -395,14 +395,14 @@ class Codebook(xr.DataArray):
         code_array = []
         for target in self[Features.TARGET]:
             codeword = []
-            for ch in self[Axes.CH.value]:
-                for round_ in self[Axes.ROUND.value]:
-                    if self.loc[target, ch, round_]:
+            for ch_label in self[Axes.CH.value]:
+                for round_label in self[Axes.ROUND.value]:
+                    if self.loc[target, ch_label, round_label]:
                         codeword.append(
                             {
-                                Axes.CH.value: int(ch),
-                                Axes.ROUND.value: int(round_),
-                                Features.CODE_VALUE: float(self.loc[target, ch, round_])
+                                Axes.CH.value: int(ch_label),
+                                Axes.ROUND.value: int(round_label),
+                                Features.CODE_VALUE: float(self.loc[target, ch_label, round_label])
                             })
             code_array.append({
                 Features.CODEWORD: codeword,

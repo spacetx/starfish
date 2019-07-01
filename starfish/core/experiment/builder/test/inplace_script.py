@@ -63,8 +63,10 @@ class ZeroesInplaceFetcher(TileFetcher):
         self.input_dir = input_dir
         self.prefix = prefix
 
-    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
-        file_path = tile_fn(self.input_dir, self.prefix, fov, r, ch, z)
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
+        filename = '{}-Z{}-H{}-C{}.tiff'.format(self.prefix, zplane_label, round_label, ch_label)
+        file_path = self.input_dir / f"fov_{fov_id:03}" / filename
         return ZeroesInplaceTile(file_path)
 
 
@@ -110,10 +112,10 @@ def write_image(
     """Writes the constituent tiles of an image to disk.  The tiles are made up with random noise.
     """
     for fov_num in range(num_fovs):
-        for r in range(image_dimensions[Axes.ROUND]):
-            for ch in range(image_dimensions[Axes.CH]):
-                for zplane in range(image_dimensions[Axes.ZPLANE]):
-                    path = tile_fn(base_path, prefix, fov_num, r, ch, zplane)
+        for round_label in range(image_dimensions[Axes.ROUND]):
+            for ch_label in range(image_dimensions[Axes.CH]):
+                for zplane_label in range(image_dimensions[Axes.ZPLANE]):
+                    path = tile_fn(base_path, prefix, fov_num, round_label, ch_label, zplane_label)
                     path.parent.mkdir(parents=True, exist_ok=True)
 
                     data = np.random.random(size=(SHAPE[Axes.Y], SHAPE[Axes.X])).astype(np.float32)

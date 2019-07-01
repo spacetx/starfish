@@ -122,10 +122,11 @@ class StarMapTileFetcher(TileFetcher):
         self.input_dir = input_dir
         self.num_z = 28  # hard coded for this dataset
 
-    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
-        basename = f"reg_round0{r + 1}_ch0{ch + 1}.tif"  # translate to 3d
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
+        basename = f"reg_round0{round_label+ 1}_ch0{ch_label + 1}.tif"  # translate to 3d
         file_path = os.path.join(self.input_dir, "reg3d", basename)
-        return StarMapTile(file_path, z)
+        return StarMapTile(file_path, zplane_label)
 
     def generate_codebook(self, output_dir: str) -> None:
         """Generate and save a codebook from the provided mapping of genes to DNA sequences.
@@ -201,10 +202,11 @@ class StarMapDapiTileFetcher(TileFetcher):
         """
         self.input_dir = input_dir
 
-    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
-        basename = f"reg_round0{r + 1}_ch0{ch + 1}.tif"
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
+        basename = f"reg_round0{round_label + 1}_ch0{ch_label + 1}.tif"
         file_path = os.path.join(self.input_dir, "reg3d", basename)
-        return StarMapTile(file_path, z)
+        return StarMapTile(file_path, zplane_label)
 
 
 class StarMapNisslTileFetcher(TileFetcher):
@@ -234,10 +236,11 @@ class StarMapNisslTileFetcher(TileFetcher):
         """
         self.input_dir = input_dir
 
-    def get_tile(self, fov: int, r: int, ch: int, z: int) -> FetchedTile:
-        basename = f"reg_round0{r + 1}_ch0{ch + 1}.tif"
+    def get_tile(
+            self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
+        basename = f"reg_round0{round_label + 1}_ch0{ch_label + 1}.tif"
         file_path = os.path.join(self.input_dir, "reg3d", basename)
-        return StarMapTile(file_path, z)
+        return StarMapTile(file_path, zplane_label)
 
 
 @click.command()

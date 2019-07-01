@@ -43,9 +43,9 @@ class TileIdentifier:
     """Data class for encapsulating the location of a tile in a 6D tensor (fov, round, ch, zplane,
     y, and x)."""
     fov_id: int
-    round_id: int
-    ch_id: int
-    zplane_id: int
+    round_label: int
+    ch_label: int
+    zplane_label: int
 
 
 def _tile_opener(toc_path: Path, tile: Tile, file_ext: str) -> BinaryIO:

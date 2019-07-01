@@ -50,9 +50,6 @@ class ZeroesInplaceTile(InplaceFetchedTile):
             hasher.update(fh.read())
         return hasher.hexdigest()
 
-    def tile_data(self) -> np.ndarray:
-        return np.zeros(shape=(SHAPE[Axes.Y], SHAPE[Axes.X]), dtype=np.float32)
-
     @property
     def filepath(self) -> Path:
         return self.file_path

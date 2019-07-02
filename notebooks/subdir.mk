@@ -16,7 +16,7 @@ regenerate-ipynb: $(ipynb_regenerate_targets)
 regenerate-py: $(py_regenerate_targets)
 
 $(py_run_targets): %.py :
-	[ -e $*.py.skip ] || $(PYTHON) $(pypath)/$*.py
+	[ -e $(pypath)/$*.py.skip ] || $(PYTHON) $(pypath)/$*.py
 
 $(py_files): %.py :
 	[ -e $*.py.skip ] || $(PYTHON) $*.py

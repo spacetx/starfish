@@ -11,7 +11,6 @@ from starfish.core.image._filter.util import bin_open, bin_thresh
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.segmentation_mask import SegmentationMaskCollection
 from starfish.core.types import Axes, Coordinates, Number
-from starfish.core.util import click
 from ._base import SegmentAlgorithmBase
 
 
@@ -107,19 +106,6 @@ class Watershed(SegmentAlgorithmBase):
             self._segmentation_instance.show(figsize=figsize)
         else:
             raise RuntimeError('Run segmentation before attempting to show results.')
-
-    @staticmethod
-    @click.command("Watershed")
-    @click.option(
-        "--nuclei-threshold", default=.16, type=float, help="Nuclei threshold")
-    @click.option(
-        "--input-threshold", default=.22, type=float, help="Input threshold")
-    @click.option(
-        "--min-distance", default=57, type=int, help="Minimum distance between cells")
-    @click.pass_context
-    def _cli(ctx, nuclei_threshold, input_threshold, min_distance):
-        ctx.obj["component"]._cli_run(
-            ctx, Watershed(nuclei_threshold, input_threshold, min_distance))
 
 
 class _WatershedSegmenter:

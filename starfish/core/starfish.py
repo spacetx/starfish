@@ -7,9 +7,6 @@ from pstats import Stats
 import pkg_resources
 
 from starfish.core.experiment.builder.cli import build as build_cli
-from starfish.core.image import (
-    Segment,
-)
 from starfish.core.spacetx_format.cli import validate as validate_cli
 from starfish.core.util import click
 
@@ -82,9 +79,6 @@ def install_strict_dependencies():
         sys.executable, "-m", "pip", "install", "-r", strict_requirements_file
     ])
 
-
-# Pipelines
-starfish.add_command(Segment._cli)  # type: ignore
 
 # Other
 starfish.add_command(build_cli)  # type: ignore

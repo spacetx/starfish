@@ -13,7 +13,6 @@ from starfish.core.config import StarfishConfig
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Axes, Features, Number, SpotAttributes
-from starfish.core.util import click
 from ._base import DetectSpotsAlgorithmBase
 from .detect import detect_spots
 
@@ -306,41 +305,3 @@ class LocalMaxPeakFinder(DetectSpotsAlgorithmBase):
             radius_is_gyration=False)
 
         return intensity_table
-
-    @staticmethod
-    @click.command("LocalMaxPeakFinder")
-    @click.option(
-        "--min-distance", default=4, type=int,
-        help="Minimum spot size (in number of pixels deviation)")
-    @click.option(
-        "--min-obj-area", default=6, type=int,
-        help="Maximum spot size (in number of pixels")
-    @click.option(
-        "--max_obj_area", default=300, type=int,
-        help="Maximum spot size (in number of pixels)")
-    @click.option(
-        "--stringency", default=0, type=int,
-        help="Number of indices in threshold list to look past "
-             "for the threhsold finding algorithm")
-    @click.option(
-        "--threshold", default=None, type=float,
-        help="Threshold on which to threshold "
-             "image prior to spot detection")
-    @click.option(
-        "--min-num-spots-detected", default=3, type=int,
-        help="Minimum number of spots detected at which to stop a"
-             "utomatic thresholding algorithm")
-    @click.option(
-        "--measurement-type", default='max', type=str,
-        help="How to aggregate pixel intensities in a spot")
-    @click.option(
-        "--is-volume", default=False, help="Find spots in 3D or not")
-    @click.option(
-        "--verbose", default=True, help="Verbosity flag")
-    @click.pass_context
-    def _cli(ctx, min_distance, min_obj_area, max_obj_area, stringency, threshold,
-             min_num_spots_detected, measurement_type, is_volume, verbose):
-        instance = LocalMaxPeakFinder(min_distance, min_obj_area, max_obj_area,
-                                      stringency, threshold,
-                                      min_num_spots_detected, measurement_type, is_volume, verbose)
-        ctx.obj["component"]._cli_run(ctx, instance)

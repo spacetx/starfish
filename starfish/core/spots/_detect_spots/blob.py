@@ -8,7 +8,6 @@ from skimage.feature import blob_dog, blob_doh, blob_log
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Axes, Features, Number, SpotAttributes
-from starfish.core.util import click
 from ._base import DetectSpotsAlgorithmBase
 from .detect import detect_spots, measure_spot_intensity
 
@@ -159,30 +158,3 @@ class BlobDetector(DetectSpotsAlgorithmBase):
             radius_is_gyration=False)
 
         return intensity_table
-
-    @staticmethod
-    @click.command("BlobDetector")
-    @click.option(
-        "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation)")
-    @click.option(
-        "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation)")
-    @click.option(
-        "--num-sigma", default=20, type=int, help="Number of sigmas to try")
-    @click.option(
-        "--threshold", default=.01, type=float, help="Dots threshold")
-    @click.option(
-        "--overlap", default=0.5, type=float,
-        help="dots with overlap of greater than this fraction are combined")
-    @click.option(
-        "--show", default=False, is_flag=True, help="display results visually")
-    @click.option(
-        "--detector_method", default='blob_log',
-        help="str ['blob_dog', 'blob_doh', 'blob_log'] name of the type of "
-             "detection method used from skimage.feature. Default: blob_log"
-    )
-    @click.pass_context
-    def _cli(ctx, min_sigma, max_sigma, num_sigma, threshold, overlap, show, detector_method):
-        instance = BlobDetector(min_sigma, max_sigma, num_sigma, threshold, overlap,
-                                detector_method=detector_method)
-        #  FIXME: measurement_type, is_volume missing as options; show missing as ctor args
-        ctx.obj["component"]._cli_run(ctx, instance)

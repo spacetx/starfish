@@ -1,6 +1,5 @@
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.util import click
 from ._base import DecodeAlgorithmBase
 
 
@@ -38,10 +37,3 @@ class PerRoundMaxChannel(DecodeAlgorithmBase):
 
         """
         return self.codebook.decode_per_round_max(intensities)
-
-    @staticmethod
-    @click.command("PerRoundMaxChannel")
-    @click.pass_context
-    def _cli(ctx):
-        codebook = ctx.obj["codebook"]
-        ctx.obj["component"]._cli_run(ctx, PerRoundMaxChannel(codebook))

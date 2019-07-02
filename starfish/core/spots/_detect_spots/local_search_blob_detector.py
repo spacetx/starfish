@@ -12,7 +12,6 @@ from typing import Dict, List, Mapping, Optional, Sequence, Tuple, Union
 import numpy as np
 import pandas as pd
 import xarray as xr
-from click import Choice
 from sklearn.neighbors import NearestNeighbors
 
 from starfish.core.compat import blob_dog, blob_log
@@ -22,7 +21,6 @@ from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
     transfer_physical_coords_from_imagestack_to_intensity_table
 from starfish.core.types import Axes, Features, Number, SpotAttributes
-from starfish.core.util import click
 from ._base import DetectSpotsAlgorithmBase
 
 blob_detectors = {
@@ -423,30 +421,3 @@ class LocalSearchBlobDetector(DetectSpotsAlgorithmBase):
         # LocalSearchBlobDetector does not follow the same contract as the remaining spot detectors.
         # TODO: (ambrosejcarr) Rationalize the spot detectors by contract and then remove this hack.
         raise NotImplementedError()
-
-    @staticmethod
-    @click.command("LocalSearchBlobDetector")
-    @click.option(
-        "--min-sigma", default=4, type=int, help="Minimum spot size (in standard deviation).")
-    @click.option(
-        "--max-sigma", default=6, type=int, help="Maximum spot size (in standard deviation).")
-    @click.option(
-        "--threshold", default=.01, type=float, help="Dots threshold.")
-    @click.option(
-        "--overlap", default=0.5, type=float,
-        help="Dots with overlap of greater than this fraction are combined.")
-    @click.option(
-        "--detector-method", default='blob_log', type=Choice(['blob_log', 'blob_dog']),
-        help="Name of the type of the skimage blob detection method.")
-    @click.option(
-        "--search-radius", default=3, type=int,
-        help="Number of pixels over which to search for spots in other image tiles.")
-    @click.pass_context
-    def _cli(
-        ctx, min_sigma, max_sigma, threshold, overlap, show, detector_method, search_radius
-    ) -> None:
-        instance = LocalSearchBlobDetector(
-            min_sigma, max_sigma, threshold, overlap,
-            detector_method=detector_method, search_radius=search_radius
-        )
-        ctx.obj["component"]._cli_run(ctx, instance)

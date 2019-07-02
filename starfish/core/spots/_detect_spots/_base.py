@@ -9,8 +9,6 @@ from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.pipeline.algorithmbase import AlgorithmBase
 from starfish.core.pipeline.pipelinecomponent import PipelineComponent
 from starfish.core.types import Axes, Number, SpotAttributes
-from starfish.core.util import click
-from starfish.core.util.click.indirectparams import ImageStackParamType
 
 
 class DetectSpots(PipelineComponent):
@@ -77,53 +75,7 @@ class DetectSpots(PipelineComponent):
     by in-situ sequencing, which guarantee that only one channel will be "on" per round.
 
     """
-    @classmethod
-    def _cli_run(cls, ctx, instance):
-        output = ctx.obj["output"]
-        image_stack = ctx.obj["image_stack"]
-        blobs_stack = ctx.obj["blobs_stack"]
-        blobs_axes = ctx.obj["blobs_axes"]
-
-        intensities: IntensityTable = instance.run(
-            image_stack,
-            blobs_stack,
-            blobs_axes,
-        )
-
-        # TODO ambrosejcarr find a way to save arbitrary detector results
-        intensities.to_netcdf(output)
-
-    @staticmethod
-    @click.group("DetectSpots")
-    @click.option("-i", "--input", required=True, type=ImageStackParamType)
-    @click.option("-o", "--output", required=True)
-    @click.option(
-        "--blobs-stack",
-        default=None,
-        required=False,
-        type=ImageStackParamType,
-        help="ImageStack that contains the blobs."
-    )
-    @click.option(
-        "--blobs-axis",
-        type=click.Choice([Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE.value]),
-        multiple=True,
-        required=False,
-        help="The axes that the blobs image will be maj-projected to produce the blobs_image"
-    )
-    @click.pass_context
-    def _cli(ctx, input, output, blobs_stack, blobs_axis):
-        """detect spots"""
-        print('Detecting Spots ...')
-        _blobs_axes = tuple(Axes(_blobs_axis) for _blobs_axis in blobs_axis)
-
-        ctx.obj = dict(
-            component=DetectSpots,
-            image_stack=input,
-            output=output,
-            blobs_stack=blobs_stack,
-            blobs_axes=_blobs_axes,
-        )
+    pass
 
 
 class DetectSpotsAlgorithmBase(AlgorithmBase):

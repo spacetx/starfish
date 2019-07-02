@@ -1,13 +1,11 @@
 from typing import Optional, Tuple
 
-import numpy as np
 
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
     transfer_physical_coords_from_imagestack_to_intensity_table
-from starfish.core.util import click
 from ._base import DetectPixelsAlgorithmBase
 from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedComponentDecodingResult
 
@@ -90,43 +88,3 @@ class PixelSpotDecoder(DetectPixelsAlgorithmBase):
         transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=primary_image,
                                                                     intensity_table=decoded_spots)
         return decoded_spots, image_decoding_results
-
-    @staticmethod
-    @click.command("PixelSpotDecoder")
-    @click.option("--metric", type=str, default='euclidean')
-    @click.option(
-        "--distance-threshold", type=float, default=0.5176,
-        help="maximum distance a pixel may be from a codeword before it is filtered"
-    )
-    @click.option(
-        "--magnitude-threshold", type=float, default=1,
-        help="minimum magnitude of a feature"
-    )
-    @click.option(
-        "--min-area", type=int, default=2,
-        help="minimum area of a feature"
-    )
-    @click.option(
-        "--max-area", type=int, default=np.inf,
-        help="maximum area of a feature"
-    )
-    @click.option(
-        "--norm-order", type=int, default=2,
-        help="order of L_p norm to apply to intensities "
-        "and codes when using metric_decode to pair each intensities to its closest target"
-    )
-    @click.pass_context
-    def _cli(
-        ctx, metric, distance_threshold, magnitude_threshold, min_area, max_area, norm_order
-    ):
-        codebook = ctx.obj["codebook"]
-        instance = PixelSpotDecoder(
-            codebook=codebook,
-            metric=metric,
-            distance_threshold=distance_threshold,
-            magnitude_threshold=magnitude_threshold,
-            min_area=min_area,
-            max_area=max_area,
-            norm_order=norm_order,
-        )
-        ctx.obj["component"]._cli_run(ctx, instance)

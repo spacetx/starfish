@@ -8,7 +8,6 @@ from trackpy import locate
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Axes, SpotAttributes
-from starfish.core.util import click
 from ._base import DetectSpotsAlgorithmBase
 from .detect import detect_spots
 
@@ -174,44 +173,3 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithmBase):
             radius_is_gyration=True)
 
         return intensity_table
-
-    @staticmethod
-    @click.command("TrackpyLocalMaxPeakFinder")
-    @click.option("--spot-diameter", type=str, help='expected spot size')
-    @click.option(
-        "--min-mass", default=4, type=int, help="minimum integrated spot intensity")
-    @click.option(
-        "--max-size", default=6, type=int, help="maximum radius of gyration of brightness")
-    @click.option(
-        "--separation", default=5, type=float, help="minimum distance between spots")
-    @click.option(
-        "--noise-size", default=None, type=int,
-        help="width of gaussian blurring kernel, in pixels")
-    @click.option(
-        "--smoothing-size", default=None, type=int,
-        help="odd integer. Size of boxcar (moving average) filter in pixels. Default is the "
-             "Diameter")
-    @click.option(
-        "--preprocess", is_flag=True,
-        help="if passed, gaussian and boxcar filtering are applied")
-    @click.option(
-        "--max-iterations", default=10, type=int,
-        help="Max number of loops to refine the center of mass. Default is 10")
-    @click.option(
-        "--show", default=False, is_flag=True, help="display results visually")
-    @click.option(
-        "--percentile", default=None, type=float,
-        help="clip bandpass below this value. Thresholding is done on already background-"
-             "subtracted images. Default 1 for integer images and 1/255 for float")
-    @click.option(
-        "--is-volume", is_flag=True,
-        help="indicates that the image stack should be filtered in 3d")
-    @click.pass_context
-    def _cli(ctx, spot_diameter, min_max, max_size, separation, noise_size, smoothing_size,
-             preprocess, max_iterations, show, percentile, is_volume):
-
-        instance = TrackpyLocalMaxPeakFinder(spot_diameter, min_max, max_size,
-                                             separation, noise_size, smoothing_size,
-                                             preprocess, max_iterations, show,
-                                             percentile, is_volume)
-        ctx.obj["component"]._cli_run(ctx, instance)

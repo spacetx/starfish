@@ -1,7 +1,6 @@
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Number
-from starfish.core.util import click
 from ._base import DecodeAlgorithmBase
 
 
@@ -70,30 +69,3 @@ class MetricDistance(DecodeAlgorithmBase):
             norm_order=self.norm_order,
             metric=self.metric,
         )
-
-    @staticmethod
-    @click.command("MetricDistance")
-    @click.option(
-        "--max-distance", type=float,
-        help="for a detected spot to be assigned a target, it must be within this distance the "
-             "nearest target"
-    )
-    @click.option("--min-intensity", type=float, help="minimum intensity for a spot to be decoded")
-    @click.option(
-        "--norm-order", type=int, default=2,
-        help="norm to equalize the magnitudes of codes and targets"
-    )
-    @click.option(
-        "--metric", type=str, default="euclidean", help="metric used to calculate distance"
-    )
-    @click.pass_context
-    def _cli(ctx, max_distance, min_intensity, norm_order, metric):
-        codebook = ctx.obj["codebook"]
-        instance = MetricDistance(
-            codebook=codebook,
-            max_distance=max_distance,
-            min_intensity=min_intensity,
-            norm_order=norm_order,
-            metric=metric
-        )
-        ctx.obj["component"]._cli_run(ctx, instance)

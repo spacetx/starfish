@@ -12,7 +12,6 @@ from starfish.core.image._registration._apply_transform._base import ApplyTransf
 from starfish.core.image._registration.transforms_list import TransformsList
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes
-from starfish.core.util import click
 
 
 class Warp(ApplyTransformBase):
@@ -60,12 +59,6 @@ class Warp(ApplyTransformBase):
                                     ).astype(np.float32)
                 stack.set_slice(selector, warped_image)
         return stack
-
-    @staticmethod
-    @click.command("Warp")
-    @click.pass_context
-    def _cli(ctx):
-        ctx.obj["component"]._cli_run(ctx, Warp())
 
 
 def warp(image: Union[xr.DataArray, np.ndarray],

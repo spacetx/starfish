@@ -3,7 +3,6 @@ import numpy as np
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.segmentation_mask import SegmentationMaskCollection
 from starfish.core.types import Features
-from starfish.core.util import click
 from ._base import AssignTargetsAlgorithm
 
 
@@ -77,9 +76,3 @@ class Label(AssignTargetsAlgorithm):
 
         """
         return self._assign(masks, intensity_table, in_place=in_place)
-
-    @staticmethod
-    @click.command("Label")
-    @click.pass_context
-    def _cli(ctx):
-        ctx.obj["component"]._cli_run(ctx, Label())

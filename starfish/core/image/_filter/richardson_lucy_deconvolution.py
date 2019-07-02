@@ -7,7 +7,6 @@ from scipy.signal import convolve, fftconvolve
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip, Number
-from starfish.core.util import click
 from ._base import FilterAlgorithmBase
 from .util import (
     determine_axes_to_group_by,
@@ -185,19 +184,3 @@ class DeconvolvePSF(FilterAlgorithmBase):
             in_place=in_place,
         )
         return result
-
-    @staticmethod
-    @click.command("DeconvolvePSF")
-    @click.option(
-        '--num-iter', type=int, help='number of iterations to run')
-    @click.option(
-        '--sigma', type=float, help='standard deviation of gaussian kernel')
-    @click.option("--is-volume", is_flag=True,
-                  help="indicates that the image stack should be filtered in 3d")
-    @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
-        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
-    @click.pass_context
-    def _cli(ctx, num_iter, sigma, is_volume, clip_method):
-        ctx.obj["component"]._cli_run(ctx, DeconvolvePSF(num_iter, sigma, is_volume, clip_method))

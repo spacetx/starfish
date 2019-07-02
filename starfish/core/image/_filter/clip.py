@@ -5,7 +5,6 @@ import numpy as np
 import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.util import click
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by
 
@@ -98,19 +97,3 @@ class Clip(FilterAlgorithmBase):
             group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
-
-    @staticmethod
-    @click.command("Clip")
-    @click.option(
-        "--p-min", default=0, type=int, help="clip intensities below this percentile")
-    @click.option(
-        "--p-max", default=100, type=int, help="clip intensities above this percentile")
-    @click.option(
-        "--is-volume", is_flag=True, help="filter 3D volumes")
-    @click.option(
-        "--expand-dynamic-range", is_flag=True,
-        help="linearly scale data to fill [0, 1] after clipping."
-    )
-    @click.pass_context
-    def _cli(ctx, p_min, p_max, is_volume, expand_dynamic_range):
-        ctx.obj["component"]._cli_run(ctx, Clip(p_min, p_max, is_volume, expand_dynamic_range))

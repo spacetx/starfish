@@ -6,7 +6,6 @@ import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Number
-from starfish.core.util import click
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by
 
@@ -88,19 +87,3 @@ class ClipValueToZero(FilterAlgorithmBase):
             in_place=in_place, n_processes=n_processes
         )
         return result
-
-    @staticmethod
-    @click.command("ClipValueToZero")
-    @click.option(
-        "--v-min", default=0.0, type=float,
-        help=("clip intensities below this value and subtract this value "
-              "from the image"))
-    @click.option(
-        "--v-max", default=None, type=float,
-        help="clip intensities above this value")
-    @click.option(
-        "--is-volume", is_flag=True, help="filter 3D volumes")
-    @click.pass_context
-    def _cli(ctx, v_min, v_max, is_volume):
-        ctx.obj["component"]._cli_run(ctx,
-                                      ClipValueToZero(v_min, v_max, is_volume))

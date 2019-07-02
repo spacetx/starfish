@@ -7,7 +7,6 @@ from tqdm import tqdm
 from starfish.core.config import StarfishConfig
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes
-from starfish.core.util import click
 from ._base import FilterAlgorithmBase
 
 
@@ -92,15 +91,3 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                                                  where=magnitude_mask
                                                  )
         return stack
-
-    @staticmethod
-    @click.command("ZeroByChannelMagnitude")
-    @click.option(
-        '--thresh', type=float,
-        help='minimum magnitude threshold for pixels across channels')
-    @click.option(
-        '--normalize', is_flag=True,
-        help='Scales all rounds to have unit L2 norm across channels')
-    @click.pass_context
-    def _cli(ctx, thresh, normalize):
-        ctx.obj["component"]._cli_run(ctx, ZeroByChannelMagnitude(thresh, normalize))

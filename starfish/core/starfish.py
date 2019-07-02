@@ -9,7 +9,6 @@ import pkg_resources
 from starfish.core.experiment.builder.cli import build as build_cli
 from starfish.core.image import (
     ApplyTransform,
-    Filter,
     LearnTransform,
     Segment,
 )
@@ -95,7 +94,6 @@ def install_strict_dependencies():
 # Pipelines
 starfish.add_command(LearnTransform._cli)  # type: ignore
 starfish.add_command(ApplyTransform._cli)  # type: ignore
-starfish.add_command(Filter._cli)  # type: ignore
 starfish.add_command(DetectPixels._cli)
 starfish.add_command(DetectSpots._cli)  # type: ignore
 starfish.add_command(Segment._cli)  # type: ignore

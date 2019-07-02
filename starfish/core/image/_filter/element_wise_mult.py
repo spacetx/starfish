@@ -6,7 +6,6 @@ import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip
-from starfish.core.util import click
 from starfish.core.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
 
@@ -84,13 +83,3 @@ class ElementWiseMultiply(FilterAlgorithmBase):
         else:
             stack._data.data.values = preserve_float_range(stack._data.data.values, rescale=True)
         return stack
-
-    @staticmethod
-    @click.command("ElementWiseMultiply")
-    @click.option(
-        "--mult-array", required=True, type=np.ndarray, help="matrix to multiply with the image")
-    @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
-        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image'")
-    def _cli(ctx, mult_array, clip_method):
-        ctx.obj["component"]._cli_run(ctx, ElementWiseMultiply(mult_array), clip_method)

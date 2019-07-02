@@ -7,7 +7,7 @@ import xarray as xr
 from starfish.core.compat import match_histograms
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes
-from starfish.core.util import click, enum
+from starfish.core.util import enum
 from ._base import FilterAlgorithmBase
 
 
@@ -114,15 +114,3 @@ class MatchHistograms(FilterAlgorithmBase):
             group_by=self.group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
-
-    @staticmethod
-    @click.command("MatchHistograms")
-    @click.option(
-        "--group-by", type=set, required=True,
-        help=("set that specifies the grouping over which to match the image intensity "
-              "e.g. {'c', 'r'} would equalize each volume, whereas {'c',} would equalize all "
-              "volumes within a channel.")
-    )
-    @click.pass_context
-    def _cli(ctx, group_by):
-        ctx.obj["component"]._cli_run(ctx, MatchHistograms(group_by))

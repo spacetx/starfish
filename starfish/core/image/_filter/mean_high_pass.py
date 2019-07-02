@@ -7,7 +7,6 @@ from scipy.ndimage.filters import uniform_filter
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip, Number
-from starfish.core.util import click
 from starfish.core.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
 from .util import (
@@ -122,18 +121,3 @@ class MeanHighPass(FilterAlgorithmBase):
             clip_method=self.clip_method
         )
         return result
-
-    @staticmethod
-    @click.command("MeanHighPass")
-    @click.option(
-        "--size", type=float, help="width of the kernel")
-    @click.option(
-        "--is-volume", is_flag=True,
-        help="indicates that the image stack should be filtered in 3d")
-    @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
-        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
-    @click.pass_context
-    def _cli(ctx, size, is_volume, clip_method):
-        ctx.obj["component"]._cli_run(ctx, MeanHighPass(size, is_volume, clip_method))

@@ -15,7 +15,6 @@ import numpy as np
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes, Clip, Coordinates, Number
-from starfish.core.util import click
 from starfish.core.util.dtype import preserve_float_range
 from ._base import FilterAlgorithmBase
 
@@ -208,34 +207,3 @@ class Reduce(FilterAlgorithmBase):
         reduced_stack = ImageStack.from_numpy(reduced.values, coordinates=physical_coords)
 
         return reduced_stack
-
-    @staticmethod
-    @click.command("Reduce")
-    @click.option(
-        "--dims",
-        type=click.Choice(
-            [Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE.value, Axes.X.value, Axes.Y.value]
-        ),
-        multiple=True,
-        help="The dimensions the Imagestack should max project over."
-             "For multiple dimensions add multiple --dims. Ex."
-             "--dims r --dims c")
-    @click.option(
-        "--func",
-        type=str,
-        help="The function to apply across dims."
-    )
-    @click.option(
-        "--module",
-        type=click.Choice([member.name for member in list(FunctionSource)]),
-        multiple=False,
-        help="Module to source the function from.",
-        default=FunctionSource.np.name,
-    )
-    @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
-        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image'")
-    @click.pass_context
-    def _cli(ctx, dims, func, module, clip_method):
-        ctx.obj["component"]._cli_run(
-            ctx, Reduce(dims, func, Reduce.FunctionSource[module], clip_method))

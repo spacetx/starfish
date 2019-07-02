@@ -7,7 +7,6 @@ from trackpy import bandpass
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip, Number
-from starfish.core.util import click
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by
 
@@ -140,25 +139,3 @@ class Bandpass(FilterAlgorithmBase):
             verbose=verbose,
         )
         return result
-
-    @staticmethod
-    @click.command("Bandpass")
-    @click.option(
-        "--lshort", type=float, help="filter signals below this frequency")
-    @click.option(
-        "--llong", type=int, help="filter signals above this frequency")
-    @click.option(
-        "--threshold", default=0, type=float, help="zero pixels below this intensity value")
-    @click.option(
-        "--truncate", default=4, type=float,
-        help="truncate the filter at this many standard deviations")
-    @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
-        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
-    @click.pass_context
-    def _cli(ctx, lshort, llong, threshold, truncate, clip_method):
-        ctx.obj["component"]._cli_run(
-            ctx,
-            Bandpass(lshort, llong, threshold, truncate, clip_method)
-        )

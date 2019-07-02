@@ -6,7 +6,6 @@ import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes, Clip
-from starfish.core.util import click
 from ._base import FilterAlgorithmBase
 
 
@@ -135,15 +134,3 @@ class LinearUnmixing(FilterAlgorithmBase):
             clip_method=self.clip_method,
         )
         return result
-
-    @staticmethod
-    @click.command("LinearUnmixing")
-    @click.option(
-        "--coeff_mat", required=True, type=np.ndarray, help="linear unmixing coefficients")
-    @click.option(
-        "--clip-method", default='scale_by_image',
-        type=click.Choice(['clip', 'scale_by_image', 'scale_by_chunk']),
-        help="method to constrain data to [0,1]")
-    @click.pass_context
-    def _cli(ctx, coeff_mat, clip_method):
-        ctx.obj["component"]._cli_run(ctx, LinearUnmixing(coeff_mat, clip_method))

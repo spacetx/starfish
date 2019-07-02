@@ -5,7 +5,6 @@ import numpy as np
 import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.util import click
 from starfish.types import Axes
 from ._base import FilterAlgorithmBase
 
@@ -158,15 +157,3 @@ class CallBases(FilterAlgorithmBase):
             group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
         )
         return result
-
-    @staticmethod
-    @click.command("CallBases")
-    @click.option(
-        "--intensity-threshold", default=0, type=float, help="Intensity threshold for a base call")
-    @click.option(
-        "--quality-threshold", default=0, type=float, help="Quality threshold for a base call")
-    @click.pass_context
-    def _cli(ctx, intensity_threshold, quality_threshold, clip_method):
-        ctx.obj["component"]._cli_run(
-            ctx, CallBases(intensity_threshold, quality_threshold, clip_method)
-        )

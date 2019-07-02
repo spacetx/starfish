@@ -13,7 +13,6 @@ from starfish.core.image._filter.util import (
 )
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip, Number
-from starfish.core.util import click
 
 
 class Laplace(FilterAlgorithmBase):
@@ -126,25 +125,3 @@ class Laplace(FilterAlgorithmBase):
             group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
             clip_method=self.clip_method
         )
-
-    @staticmethod
-    @click.command("Laplace")
-    @click.option(
-        "--sigma", type=float,
-        help="Standard deviation of gaussian kernel for spot enhancement")
-    @click.option(
-        "--mode", default="reflect",
-        help="How the input array is extended when the filter overlaps a border")
-    @click.option(
-        "--cval", default=0.0,
-        help="Value to fill past edges of input if mode is ‘constant")
-    @click.option(
-        "--is-volume", is_flag=True,
-        help="indicates that the image stack should be filtered in 3d")
-    @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
-        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
-    @click.pass_context
-    def _cli(ctx, sigma, mode, cval, is_volume, clip_method):
-        ctx.obj["component"]._cli_run(ctx, Laplace(sigma, mode, cval, is_volume, clip_method))

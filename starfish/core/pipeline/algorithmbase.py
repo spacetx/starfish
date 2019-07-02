@@ -26,8 +26,6 @@ class AlgorithmBaseType(ABCMeta):
         pipeline_component_cls._algorithm_to_class_map_int[algorithm_cls.__name__] = algorithm_cls
         setattr(pipeline_component_cls, algorithm_cls._get_algorithm_name(), algorithm_cls)
 
-        pipeline_component_cls._cli.add_command(algorithm_cls._cli)
-
     @staticmethod
     def run_with_logging(func):
         """

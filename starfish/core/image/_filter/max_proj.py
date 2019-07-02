@@ -3,7 +3,6 @@ from typing import Iterable, Optional, Union
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes
-from starfish.core.util import click
 from ._base import FilterAlgorithmBase
 
 
@@ -61,18 +60,3 @@ class MaxProject(FilterAlgorithmBase):
 
         """
         return stack.max_proj(*tuple(Axes(dim) for dim in self.dims))
-
-    @staticmethod
-    @click.command("MaxProject")
-    @click.option(
-        "--dims",
-        type=click.Choice(
-            [Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE.value, Axes.X.value, Axes.Y.value]
-        ),
-        multiple=True,
-        help="The dimensions the Imagestack should max project over."
-             "For multiple dimensions add multiple --dims. Ex."
-             "--dims r --dims c")
-    @click.pass_context
-    def _cli(ctx, dims):
-        ctx.obj["component"]._cli_run(ctx, MaxProject(dims))

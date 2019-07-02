@@ -6,7 +6,6 @@ from skimage.morphology import ball, disk, white_tophat
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip
-from starfish.core.util import click
 from ._base import FilterAlgorithmBase
 from .util import determine_axes_to_group_by
 
@@ -95,18 +94,3 @@ class WhiteTophat(FilterAlgorithmBase):
             clip_method=self.clip_method
         )
         return result
-
-    @staticmethod
-    @click.command("WhiteTophat")
-    @click.option(
-        "--masking-radius", default=15, type=int,
-        help="diameter of morphological masking disk in pixels")
-    @click.option(  # FIXME: was this intentionally missed?
-        "--is-volume", is_flag=True, help="filter 3D volumes")
-    @click.option(
-        "--clip-method", default=Clip.CLIP, type=Clip,
-        help="method to constrain data to [0,1]. options: 'clip', 'scale_by_image', "
-             "'scale_by_chunk'")
-    @click.pass_context
-    def _cli(ctx, masking_radius, is_volume, clip_method):
-        ctx.obj["component"]._cli_run(ctx, WhiteTophat(masking_radius, is_volume, clip_method))

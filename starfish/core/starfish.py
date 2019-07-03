@@ -10,7 +10,6 @@ from starfish.core.experiment.builder.cli import build as build_cli
 from starfish.core.spacetx_format.cli import validate as validate_cli
 from starfish.core.util import click
 
-
 PROFILER_KEY = "profiler"
 """This is the dictionary key we use to attach the profiler to pass to the resultcallback."""
 PROFILER_LINES = 15

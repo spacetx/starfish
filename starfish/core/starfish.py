@@ -6,7 +6,6 @@ from pstats import Stats
 
 import pkg_resources
 
-from starfish.core.experiment.builder.cli import build as build_cli
 from starfish.core.spacetx_format.cli import validate as validate_cli
 from starfish.core.util import click
 
@@ -80,5 +79,4 @@ def install_strict_dependencies():
 
 
 # Other
-starfish.add_command(build_cli)  # type: ignore
 starfish.add_command(validate_cli)  # type: ignore

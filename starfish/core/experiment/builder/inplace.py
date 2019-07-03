@@ -15,8 +15,10 @@ import sys
 from pathlib import Path
 from typing import BinaryIO
 
+import numpy as np
 from slicedimage import Tile
 
+from starfish.core.types import Axes
 from .providers import FetchedTile
 
 
@@ -72,3 +74,6 @@ class InplaceFetchedTile(FetchedTile):
     def sha256(self):
         """Returns the sha256 checksum of the source tile."""
         raise NotImplementedError()
+
+    def tile_data(self) -> np.ndarray:
+        return np.zeros(shape=(self.shape[Axes.Y], self.shape[Axes.X]), dtype=np.float32)

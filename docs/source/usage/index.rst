@@ -5,7 +5,7 @@ Starfish Usage
 
 The purpose of this short document is to concisely specify how data
 needs to be pre-processed and formatted to be analyzed by *starfish*
-while the package is in pre-alpha development. This document primarily
+while the package is in beta development. This document primarily
 serves to condense and make minor clarifications to the `original
 proposal <https://docs.google.com/document/d/12V-BQF-wh1GDBXwUH2hQrPhw6n0oQqENPK-YHGv59w4/edit#heading=h.r14mr5jpjh7r>`__
 that was circulated earlier this year.

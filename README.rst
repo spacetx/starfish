@@ -29,7 +29,7 @@ For detailed information on installation and usage, see the documentation_.
 Quickstart
 ------------
 
-We are currently in **pre-alpha**, finishing proof of concept pipelines for each of the spaceTx
+We are currently in **beta**, finishing proof of concept pipelines for each of the spaceTx
 contributors that leverage starfish's shared object model. Follow the links in the table below
 to see starfish in action on particular assay types. Or, browse our our notebooks directory `here <https://github.com/spacetx/starfish/tree/master/notebooks/>`_.
 

@@ -1,4 +1,6 @@
-from ._filter import Filter
-from ._registration._apply_transform import ApplyTransform
-from ._registration._learn_transform import LearnTransform
-from ._segment import Segment
+# from Filter import Filter
+from ._registration import ApplyTransform
+from ._registration import LearnTransform
+# from ._registration.ApplyTransform import ApplyTransform
+# from ._registration.LearnTransform import LearnTransform
+# from .Segment import Segment

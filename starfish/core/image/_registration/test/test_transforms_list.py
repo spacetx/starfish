@@ -3,7 +3,7 @@ import tempfile
 import numpy as np
 
 from starfish import data
-from starfish.core.image._registration._learn_transform.translation import Translation
+from starfish.core.image._registration.LearnTransform.translation import Translation
 from starfish.core.image._registration.transforms_list import TransformsList
 from starfish.core.types import Axes, TransformType
 

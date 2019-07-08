@@ -1,30 +1,22 @@
 import functools
+import importlib
 import inspect
 from abc import ABCMeta, abstractmethod
-from typing import Type
+from pathlib import Path
+from typing import Optional, Set
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import LOG
 from starfish.core.types._constants import STARFISH_EXTRAS_KEY
 from starfish.core.util.logging import LogEncoder
-from .pipelinecomponent import PipelineComponent
 
 
 class AlgorithmBaseType(ABCMeta):
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
         if not inspect.isabstract(cls):
-            AlgorithmBaseType.register_with_pipeline_component(cls)
             cls.run = AlgorithmBaseType.run_with_logging(cls.run)
-
-    @staticmethod
-    def register_with_pipeline_component(algorithm_cls):
-        pipeline_component_cls = algorithm_cls.get_pipeline_component_class()
-        if pipeline_component_cls._algorithm_to_class_map_int is None:
-            pipeline_component_cls._algorithm_to_class_map_int = {}
-        pipeline_component_cls._algorithm_to_class_map_int[algorithm_cls.__name__] = algorithm_cls
-        setattr(pipeline_component_cls, algorithm_cls._get_algorithm_name(), algorithm_cls)
 
     @staticmethod
     def run_with_logging(func):
@@ -93,11 +85,8 @@ class AlgorithmBase(metaclass=AlgorithmBaseType):
     To add to an existing group of algorithms like "Segmentation", an algorithm implementation must
     subclass the corresponding subclass of `AlgorithmBase`. In this case,
     `SegmentationAlgorithmBase`.
-
-    See Also
-    --------
-    starfish.pipeline.pipelinecomponent.py
     """
+
     @classmethod
     def _get_algorithm_name(cls):
         """
@@ -108,8 +97,32 @@ class AlgorithmBase(metaclass=AlgorithmBaseType):
 
     @classmethod
     @abstractmethod
-    def get_pipeline_component_class(cls) -> Type[PipelineComponent]:
-        """
-        Returns the class of PipelineComponent this algorithm implements.
-        """
-        raise NotImplementedError()
+    def run(cls):
+        raise NotImplementedError
+
+
+def import_all_submodules(path_str: str, package: str, excluded: Optional[Set[str]]=None) -> None:
+    """
+    Given a path of a __init__.py file, find all the .py files in that directory and import them
+    relatively to a package.
+
+    Parameters
+    ----------
+    path_str : str
+        The path of a __init__.py file.
+    package : str
+        The package name that the modules should be imported relative to.
+    excluded : Optional[Set[str]]
+        A set of files not to include.  If this is not provided, it defaults to set("__init__.py").
+    """
+    if excluded is None:
+        excluded = {"__init__.py"}
+
+    path: Path = Path(path_str).parent
+    for entry in path.iterdir():
+        if not entry.suffix.lower().endswith(".py"):
+            continue
+        if entry.name.lower() in excluded:
+            continue
+
+        importlib.import_module(f".{entry.stem}", package)

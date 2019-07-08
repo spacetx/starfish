@@ -1,2 +1,1 @@
-from .algorithmbase import AlgorithmBase
-from .pipelinecomponent import import_all_submodules, PipelineComponent
+from .algorithmbase import AlgorithmBase, import_all_submodules

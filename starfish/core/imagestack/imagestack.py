@@ -87,24 +87,18 @@ class ImageStack:
            the shape of the image tensor by categorical index (channels, imaging rounds, z-layers)
     """
 
-    def __init__(
-            self,
-            tile_data: TileCollectionData,
-    ) -> None:
+    def __init__(self, data: MPDataArray, tile_data: Optional[TileCollectionData]=None):
+        self._data = data
+        self._tile_data = tile_data
+        self._log: List[dict] = list()
+
+    @classmethod
+    def from_tile_collection_data(cls, tile_data: TileCollectionData) -> "ImageStack":
         axes_sizes = {
             Axes.ROUND: len(set(tilekey.round for tilekey in tile_data.keys())),
             Axes.CH: len(set(tilekey.ch for tilekey in tile_data.keys())),
             Axes.ZPLANE: len(set(tilekey.z for tilekey in tile_data.keys())),
         }
-
-        self._tile_data = tile_data
-        self._log: List[dict]
-
-        # check for existing log info
-        if STARFISH_EXTRAS_KEY in tile_data.extras and LOG in tile_data.extras[STARFISH_EXTRAS_KEY]:
-            self._log = loads(tile_data.extras[STARFISH_EXTRAS_KEY])[LOG]
-        else:
-            self._log = list()
 
         data_shape: MutableSequence[int] = []
         data_dimensions: MutableSequence[str] = []
@@ -126,13 +120,13 @@ class ImageStack:
             data_shape.append(size_for_axis)
             data_dimensions.append(dim_for_axis.value)
             data_tick_marks[dim_for_axis.value] = list(
-                sorted(set(tilekey[dim_for_axis] for tilekey in self._tile_data.keys())))
+                sorted(set(tilekey[dim_for_axis] for tilekey in tile_data.keys())))
 
         data_shape.extend([tile_data.tile_shape[Axes.Y], tile_data.tile_shape[Axes.X]])
         data_dimensions.extend([Axes.Y.value, Axes.X.value])
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
-        self._data = MPDataArray.from_shape_and_dtype(
+        data = MPDataArray.from_shape_and_dtype(
             shape=data_shape,
             dtype=np.float32,
             initial_value=0,
@@ -140,20 +134,24 @@ class ImageStack:
             coords=data_tick_marks,
         )
 
-        all_selectors = list(self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}))
+        imagestack = ImageStack(data, tile_data)
+
+        # TODO: (ttung) move more of the initialization code above the constructor call.
+
+        all_selectors = list(imagestack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}))
         first_selector = all_selectors[0]
         tile = tile_data.get_tile(r=first_selector[Axes.ROUND],
                                   ch=first_selector[Axes.CH],
                                   z=first_selector[Axes.ZPLANE])
 
         # Set up coordinates
-        self._data[Coordinates.X.value] = xr.DataArray(
+        imagestack._data[Coordinates.X.value] = xr.DataArray(
             tile.coordinates[Coordinates.X], dims=Axes.X.value)
-        self._data[Coordinates.Y.value] = xr.DataArray(
+        imagestack._data[Coordinates.Y.value] = xr.DataArray(
             tile.coordinates[Coordinates.Y], dims=Axes.Y.value)
         # Fill with nan for now, then replace with calculated midpoints
-        self._data[Coordinates.Z.value] = xr.DataArray(
-            np.full(self.xarray.sizes[Axes.ZPLANE.value], np.nan),
+        imagestack._data[Coordinates.Z.value] = xr.DataArray(
+            np.full(imagestack.xarray.sizes[Axes.ZPLANE.value], np.nan),
             dims=Axes.ZPLANE.value)
 
         # Get coords on first tile, then verify all subsequent tiles are aligned
@@ -167,7 +165,7 @@ class ImageStack:
             tile_dtypes.add(data.dtype)
 
             data = img_as_float32(data)
-            self.set_slice(selector=selector, data=data)
+            imagestack.set_slice(selector=selector, data=data)
 
             if not (
                     np.array_equal(
@@ -178,7 +176,7 @@ class ImageStack:
                 raise ValueError(f"Tiles must be aligned")
             if Coordinates.Z in tile.coordinates:
                 assert len(tile.coordinates[Coordinates.Z]) == 1
-                self._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = \
+                imagestack._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = \
                     tile.coordinates[Coordinates.Z][0]
 
         tile_dtype_kinds = set(tile_dtype.kind for tile_dtype in tile_dtypes)
@@ -187,6 +185,12 @@ class ImageStack:
             raise TypeError("All tiles should have the same kind of dtype")
         if len(tile_dtype_sizes) != 1:
             warnings.warn("Not all tiles have the same precision data", DataFormatWarning)
+
+        # check for existing log info
+        if STARFISH_EXTRAS_KEY in tile_data.extras and LOG in tile_data.extras[STARFISH_EXTRAS_KEY]:
+            imagestack._log = loads(tile_data.extras[STARFISH_EXTRAS_KEY])[LOG]
+
+        return imagestack
 
     @staticmethod
     def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
@@ -230,7 +234,7 @@ class ImageStack:
         tile_data: TileCollectionData = TileSetData(tileset)
         if crop_parameters is not None:
             tile_data = CroppedTileCollectionData(tile_data, crop_parameters)
-        return cls(tile_data)
+        return ImageStack.from_tile_collection_data(tile_data)
 
     @classmethod
     def from_url(cls, url: str, baseurl: Optional[str], aligned_group: int = 0):
@@ -342,7 +346,7 @@ class ImageStack:
             assert len(coordinates[Coordinates.Z]) == n_z
 
         tile_data = NumpyData(array, index_labels, coordinates)
-        return cls(tile_data)
+        return ImageStack.from_tile_collection_data(tile_data)
 
     @property
     def xarray(self) -> xr.DataArray:
@@ -878,15 +882,17 @@ class ImageStack:
         """
 
         data: collections.defaultdict = collections.defaultdict(list)
-        keys = self._tile_data.keys()
+        extras_keys: Set[str] = set()
+        if self._tile_data is not None:
+            tilekeys = self._tile_data.keys()
+            extras_keys = set(
+                key
+                for tilekey in tilekeys
+                for key in self._tile_data[tilekey].keys())
         index_keys = set(
             key.value
             for key in AXES_DATA.keys()
         )
-        extras_keys = set(
-            key
-            for tilekey in keys
-            for key in self._tile_data[tilekey].keys())
         duplicate_keys = index_keys.intersection(extras_keys)
         if len(duplicate_keys) > 0:
             duplicate_keys_str = ", ".join([str(key) for key in duplicate_keys])
@@ -899,7 +905,7 @@ class ImageStack:
                 round=selector[Axes.ROUND],
                 ch=selector[Axes.CH],
                 zplane=selector[Axes.ZPLANE])
-            extras = self._tile_data[tilekey]
+            extras = self._tile_data[tilekey] if self._tile_data else {}
 
             for index, index_value in selector.items():
                 data[index.value].append(index_value)
@@ -1055,7 +1061,8 @@ class ImageStack:
 
         """
         # Add log data to extras
-        self._tile_data.extras[STARFISH_EXTRAS_KEY] = logging.LogEncoder().encode({LOG: self.log})
+        tileset_extras = self._tile_data.extras if self._tile_data else {}
+        tileset_extras[STARFISH_EXTRAS_KEY] = logging.LogEncoder().encode({LOG: self.log})
         tileset = TileSet(
             dimensions={
                 Axes.ROUND,
@@ -1070,21 +1077,14 @@ class ImageStack:
                 Axes.ZPLANE: self.num_zplanes,
             },
             default_tile_shape={Axes.Y: self.tile_shape[0], Axes.X: self.tile_shape[1]},
-            extras=self._tile_data.extras,
+            extras=tileset_extras,
         )
-        for axis_val_map in self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
+        for selector in self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}):
             tilekey = TileKey(
-                round=axis_val_map[Axes.ROUND],
-                ch=axis_val_map[Axes.CH],
-                zplane=axis_val_map[Axes.ZPLANE])
-            round_label, ch_label, zplane_label = tilekey.round, tilekey.ch, tilekey.z
-            extras: dict = self._tile_data[tilekey]
-
-            selector = {
-                Axes.ROUND: round_label,
-                Axes.CH: ch_label,
-                Axes.ZPLANE: zplane_label,
-            }
+                round=selector[Axes.ROUND],
+                ch=selector[Axes.CH],
+                zplane=selector[Axes.ZPLANE])
+            extras: dict = self._tile_data[tilekey] if self._tile_data else {}
 
             coordinates: MutableMapping[Coordinates, Union[Tuple[Number, Number], Number]] = dict()
             x_coordinates = (float(self.xarray[Coordinates.X.value][0]),
@@ -1095,7 +1095,7 @@ class ImageStack:
             coordinates[Coordinates.Y] = y_coordinates
             if Coordinates.Z in self.xarray.coords:
                 # set the z coord to the calculated value from the associated z plane
-                z_coordinates = float(self.xarray[Coordinates.Z.value][zplane_label])
+                z_coordinates = float(self.xarray[Coordinates.Z.value][selector[Axes.ZPLANE]])
                 coordinates[Coordinates.Z] = z_coordinates
 
             tile = Tile(
@@ -1103,9 +1103,7 @@ class ImageStack:
                 indices=selector,
                 extras=extras,
             )
-            tile.numpy_array, _ = self.get_slice(
-                selector={Axes.ROUND: round_label, Axes.CH: ch_label, Axes.ZPLANE: zplane_label}
-            )
+            tile.numpy_array, _ = self.get_slice(selector)
             tileset.add_tile(tile)
 
         if tile_opener is None:

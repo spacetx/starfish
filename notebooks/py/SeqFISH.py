@@ -28,7 +28,7 @@ from starfish.types import Axes
 # EPY: END code
 
 # EPY: START markdown
-#Select data for a single field of view. 
+#Select data for a single field of view.
 # EPY: END markdown
 
 # EPY: START code
@@ -48,7 +48,7 @@ img = exp['fov_000'].get_image('primary')
 # EPY: END markdown
 
 # EPY: START markdown
-#To remove image background, use a White Tophat filter, which measures the background with a rolling disk morphological element and subtracts it from the image. 
+#To remove image background, use a White Tophat filter, which measures the background with a rolling disk morphological element and subtracts it from the image.
 # EPY: END markdown
 
 # EPY: START code
@@ -84,17 +84,8 @@ starfish.display(background_corrected)
 # EPY: END markdown
 
 # EPY: START code
-def scale_by_percentile(data, p=99.9):
-    data = np.asarray(data)
-    cval = np.percentile(data, p)
-    data = data / cval
-    data[data > 1] = 1
-    return data
-
-scaled = background_corrected.apply(
-    scale_by_percentile,
-    group_by={Axes.ROUND, Axes.CH}, verbose=False, in_place=False
-)
+clip = starfish.image.Filter.Clip(p_max=99.9, expand_dynamic_range=True, is_volume=True)
+scaled = clip.run(background_corrected, in_place=False)
 # EPY: END code
 
 # EPY: START code
@@ -104,7 +95,7 @@ starfish.display(scaled)
 # EPY: START markdown
 ### Remove residual background
 #
-#The background is fairly uniformly present below intensity=0.5. However, starfish's clip method currently only supports percentiles. To solve this problem, the intensities can be directly edited in the underlying numpy array. 
+#The background is fairly uniformly present below intensity=0.5. However, starfish's clip method currently only supports percentiles. To solve this problem, the intensities can be directly edited in the underlying numpy array.
 # EPY: END markdown
 
 # EPY: START code
@@ -120,7 +111,7 @@ starfish.display(clipped)
 # EPY: START markdown
 ### Detect Spots
 #
-#Detect spots with a local search blob detector that identifies spots in all rounds and channels and matches them using a local search method. The local search starts in an anchor channel (default ch=1) and identifies the nearest spot in all subsequent imaging rounds. 
+#Detect spots with a local search blob detector that identifies spots in all rounds and channels and matches them using a local search method. The local search starts in an anchor channel (default ch=1) and identifies the nearest spot in all subsequent imaging rounds.
 # EPY: END markdown
 
 # EPY: START code
@@ -152,7 +143,7 @@ blurred = glp.run(clipped)
 
 # EPY: START code
 psd = starfish.spots.DetectPixels.PixelSpotDecoder(
-    codebook=exp.codebook, metric='euclidean', distance_threshold=0.5, 
+    codebook=exp.codebook, metric='euclidean', distance_threshold=0.5,
     magnitude_threshold=0.1, min_area=7, max_area=50,
 )
 pixel_decoded, ccdr = psd.run(blurred)

@@ -1,3 +1,9 @@
+## [0.1.3] - 2019-07-09
+- Instantiate the multiprocessing pool using `with` (#1436)
+- Slight optimization of pixel decoding  (#1412)
+- [easy] point starfish.data.osmFISH() to new dataset (#1425)
+- [easy] Warn about the deprecation of the MaxProject filter (#1390)
+
 ## [0.1.2] - 2019-06-19
 - Refactor reduce to take an optional module and only a function name. (#1386)
 - Codify the expectation that in-place experiment construction does not rely on TileFetcher data (#1389)
@@ -84,10 +90,11 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.1.3]: https://github.com/spacetx/starfish/releases/tag/0.1.3
+[0.1.2]: https://github.com/spacetx/starfish/releases/tag/0.1.2
 [0.1.1]: https://github.com/spacetx/starfish/releases/tag/0.1.1
 [0.1.0]: https://github.com/spacetx/starfish/releases/tag/0.1.0
 [0.0.36]: https://github.com/spacetx/starfish/releases/tag/0.0.36
 [0.0.35]: https://github.com/spacetx/starfish/releases/tag/0.0.35
 [0.0.34]: https://github.com/spacetx/starfish/releases/tag/0.0.34
 [0.0.33]: https://github.com/spacetx/starfish/releases/tag/0.0.33
-

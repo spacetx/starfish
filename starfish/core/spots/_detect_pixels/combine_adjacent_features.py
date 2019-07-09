@@ -321,29 +321,29 @@ class CombineAdjacentFeatures:
             An array with length equal to the number of features. If zero, indicates that a feature
             has failed area filters.
         """
-        pool = Pool(processes=n_processes)
-        mapfunc = pool.map
-        applyfunc = partial(
-            self._single_spot_attributes,
-            decoded_image=decoded_image,
-            target_map=target_map,
-            min_area=self._min_area,
-            max_area=self._max_area
-        )
+        with Pool(processes=n_processes) as pool:
+            mapfunc = pool.map
+            applyfunc = partial(
+                self._single_spot_attributes,
+                decoded_image=decoded_image,
+                target_map=target_map,
+                min_area=self._min_area,
+                max_area=self._max_area
+            )
 
-        iterable = tqdm(region_properties, disable=(not StarfishConfig().verbose))
-        results = mapfunc(applyfunc, iterable)
-        if not results:
-            # no spots found
-            warnings.warn("No spots found, please adjust threshold parameters")
-            return SpotAttributes.empty(extra_fields=['target']), np.array(0, dtype=np.bool)
-        spot_attrs, passes_area_filter = zip(*results)
+            iterable = tqdm(region_properties, disable=(not StarfishConfig().verbose))
+            results = mapfunc(applyfunc, iterable)
+            if not results:
+                # no spots found
+                warnings.warn("No spots found, please adjust threshold parameters")
+                return SpotAttributes.empty(extra_fields=['target']), np.array(0, dtype=np.bool)
+            spot_attrs, passes_area_filter = zip(*results)
 
-        # update passes filter
-        passes_filter = np.array(passes_area_filter, dtype=np.bool)
+            # update passes filter
+            passes_filter = np.array(passes_area_filter, dtype=np.bool)
 
-        spot_attributes = SpotAttributes(pd.DataFrame.from_records(spot_attrs))
-        return spot_attributes, passes_filter
+            spot_attributes = SpotAttributes(pd.DataFrame.from_records(spot_attrs))
+            return spot_attributes, passes_filter
 
     def run(
             self, intensities: IntensityTable,

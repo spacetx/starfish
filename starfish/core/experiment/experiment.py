@@ -18,7 +18,7 @@ from semantic_version import Version
 from slicedimage import Collection as collec
 from slicedimage import TileSet
 from slicedimage.io import Reader, resolve_path_or_url, resolve_url
-from slicedimage.urlpath import pathjoin
+from slicedimage.url import _pathjoin
 
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.config import StarfishConfig
@@ -298,7 +298,7 @@ class Experiment:
 
         _, codebook_name, codebook_baseurl = resolve_url(experiment_document['codebook'],
                                                          baseurl, config.slicedimage)
-        codebook_absolute_url = pathjoin(codebook_baseurl, codebook_name)
+        codebook_absolute_url = _pathjoin(codebook_baseurl, codebook_name)
         codebook = Codebook.open_json(codebook_absolute_url)
 
         extras = experiment_document['extras']

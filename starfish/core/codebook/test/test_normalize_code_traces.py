@@ -17,7 +17,7 @@ def intensity_table_factory() -> IntensityTable:
     )
     spot_attribute_data = pd.DataFrame(
         data=[0, 0, 0, 1],
-        index=[Axes.ZPLANE, Axes.Y, Axes.X, Features.SPOT_RADIUS]
+        index=[Axes.ZPLANE.value, Axes.Y.value, Axes.X.value, Features.SPOT_RADIUS]
     ).T
     spot_attributes = SpotAttributes(spot_attribute_data)
 

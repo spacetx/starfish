@@ -40,13 +40,3 @@ The above steps can be recapitulated using starfish as follows:
 
 .. literalinclude:: ../../_static/data_processing_examples/iss_pipeline.py
 
-Using the CLI
--------------
-
-Starfish has a fully-featured CLI that mimics the API such that one does not need to write python
-code to use starfish. Running the commands below will re-produce the notebook_ results using
-starfish's CLI:
-
-.. _notebook: ../../_static/data_processing_examples/iss_pipeline.py
-
-.. literalinclude:: ../../_static/data_processing_examples/iss_cli.sh

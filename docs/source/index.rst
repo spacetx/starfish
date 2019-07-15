@@ -30,7 +30,7 @@ see the :ref:`Getting Started <getting started>` section.
 
 Starfish's documentation also contains instructions on :ref:`creating image-based transcriptomics
 processing pipelines <creating_an_image_processing_pipeline>`, tutorials on running
-starfish using the CLI, API, and workflow runner, and a worked example of contributing code to
+starfish using the API, and workflow runner, and a worked example of contributing code to
 starfish. Finally, advanced users can examine the :ref:`Data Structures <data structures>` and
 :ref:`Help & Reference <help and reference>` sections to learn more details about _starfish_ and its
 object models.
@@ -66,7 +66,6 @@ To see the code or report a bug, please visit the `github repository
 * Spot-Finding: :ref:`API <detection>`
 * Decoding: :ref:`API <decoding>`
 * Segmenting: :ref:`API <segmentation>`
-* Pipelining: :ref:`API <pipeline_component>`
 
 .. raw:: html
 

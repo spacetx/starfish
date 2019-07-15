@@ -182,6 +182,16 @@ analysis with *starfish*. Background subtraction, for example, is
 handled by Starfish. If there is confusion about what types of image
 pre-processing should be applied, please open an issue.
 
+Configuration
+--------------
+.. toctree::
+     configuration/index.rst
+
+Validation
+-----------
+.. toctree::
+     validation/index.rst
+
 
 Data Formatting Examples
 ------------------------

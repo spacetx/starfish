@@ -10,7 +10,7 @@ from starfish.core.types import Number
 from .combine_adjacent_features import ConnectedComponentDecodingResult
 
 
-class DetectPixelsAlgorithmBase(AlgorithmBase):
+class DetectPixelsAlgorithmBase(metaclass=AlgorithmBase):
 
     @abstractmethod
     def run(

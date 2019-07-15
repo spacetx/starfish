@@ -5,7 +5,7 @@ from starfish.core.pipeline.algorithmbase import AlgorithmBase
 from starfish.core.segmentation_mask import SegmentationMaskCollection
 
 
-class SegmentAlgorithmBase(AlgorithmBase):
+class SegmentAlgorithmBase(metaclass=AlgorithmBase):
 
     @abstractmethod
     def run(

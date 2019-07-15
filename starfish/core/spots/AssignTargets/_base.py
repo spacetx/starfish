@@ -6,7 +6,7 @@ from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.pipeline.algorithmbase import AlgorithmBase
 
 
-class AssignTargetsAlgorithm(AlgorithmBase):
+class AssignTargetsAlgorithm(metaclass=AlgorithmBase):
     """
     AssignTargets assigns cell IDs to detected spots using an IntensityTable and
     SegmentationMaskCollection.

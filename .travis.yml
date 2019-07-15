@@ -57,9 +57,6 @@ jobs:
     - name: 3D smFISH data processing example
       if: type = push and branch =~ /^(master|merge)/
       script: make install-dev 3d_smFISH.py
-    - name: iss_cli.sh data processing example
-      if: type = push and branch =~ /^(master|merge)/
-      script: make install-dev iss_cli.sh
     - name: iss_pipeline.py data processing example
       if: type = push and branch =~ /^(master|merge)/
       script: make TESTING=1 install-dev iss_pipeline.py

@@ -95,9 +95,8 @@ class AlgorithmBase(metaclass=AlgorithmBaseType):
         """
         return cls.__name__
 
-    @classmethod
     @abstractmethod
-    def run(cls):
+    def run(self):
         raise NotImplementedError
 
 

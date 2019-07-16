@@ -78,7 +78,7 @@ class TransformsList:
         if not (MIN_SUPPORTED_VERSION <= version <= MAX_SUPPORTED_VERSION):
             raise ValueError(
                 f"version {version} not supported.  This version of the starfish library only "
-                f"supports codebook formats from {MIN_SUPPORTED_VERSION} to "
+                f"supports transform list formats from {MIN_SUPPORTED_VERSION} to "
                 f"{MAX_SUPPORTED_VERSION}")
 
     def to_json(self, filename: str) -> None:

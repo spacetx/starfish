@@ -1,3 +1,7 @@
+## [0.1.4] - 2019-07-16
+- Update in-place experiment writing to use the new WriterContract API in slicedimage 4.0.0 (#1447)
+- data set formatter with fixed filenames (#1421)
+
 ## [0.1.3] - 2019-07-09
 - Instantiate the multiprocessing pool using `with` (#1436)
 - Slight optimization of pixel decoding  (#1412)
@@ -90,6 +94,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.1.4]: https://github.com/spacetx/starfish/releases/tag/0.1.4
 [0.1.3]: https://github.com/spacetx/starfish/releases/tag/0.1.3
 [0.1.2]: https://github.com/spacetx/starfish/releases/tag/0.1.2
 [0.1.1]: https://github.com/spacetx/starfish/releases/tag/0.1.1

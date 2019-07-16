@@ -6,8 +6,6 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
-    BinaryIO,
-    Callable,
     cast,
     FrozenSet,
     Mapping,
@@ -20,11 +18,11 @@ from typing import (
 from warnings import warn
 
 import numpy as np
-from slicedimage import ImageFormat, Tile
+from slicedimage import ImageFormat, WriterContract
 
 from starfish.core.types import Axes, Coordinates, CoordinateValue, Number
 from . import TileIdentifier, write_irregular_experiment_json
-from .inplace import enable_inplace_mode, inplace_tile_opener, InplaceFetchedTile
+from .inplace import InplaceFetchedTile, InplaceWriterContract
 from .providers import FetchedTile, TileFetcher
 
 FILENAME_CRE = re.compile(
@@ -130,17 +128,16 @@ def format_structured_dataset(
     }
 
     if in_place:
-        enable_inplace_mode()
-        tile_opener: Optional[Callable[[Path, Tile, str], BinaryIO]] = inplace_tile_opener
+        writer_contract: Optional[WriterContract] = InplaceWriterContract()
     else:
-        tile_opener = None
+        writer_contract = None
 
     write_irregular_experiment_json(
         output_experiment_dir_str,
         tile_format,
         image_tile_identifiers=image_tile_identifiers,
         tile_fetchers=tile_fetchers,
-        tile_opener=tile_opener,
+        writer_contract=writer_contract,
     )
 
 

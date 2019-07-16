@@ -1,64 +1,39 @@
 """To build experiments in-place, a few things must be done:
 
-1. Call enable_inplace_mode().
-2. Call write_experiment_json with tile_opener=inplace_tile_opener.
-3. The TileFetcher should return an instance of a InplaceTileFetcher.
-
-Please note that enabling in-place experiment construction should be only done in an isolated script
-dedicated to constructing an experiment, as it modifies some existing code paths.
+1. Call write_experiment_json with writer_contract=InplaceWriterContract().
+2. The TileFetcher should return an instance of a InplaceTileFetcher.
 """
 
 
 import abc
-import io
-import sys
+import warnings
 from pathlib import Path
-from typing import BinaryIO
+from typing import Mapping, Optional
 
 import numpy as np
-from slicedimage import Tile
+from slicedimage import ImageFormat, Tile
+from slicedimage.io import WriterContract
 
 from starfish.core.types import Axes
 from .providers import FetchedTile
 
 
-def sha256_get(tile_self):
-    return tile_self.provider.sha256
+class InplaceWriterContract(WriterContract):
+    def tile_url_generator(self, tileset_url: str, tile: Tile, ext: str) -> str:
+        return f"file://{tile.provider.filepath}"
 
-
-def sha256_set(tile_self, value):
-    pass
+    def write_tile(
+            self,
+            tile_url: str,
+            tile: Tile,
+            tile_format: ImageFormat,
+            backend_config: Optional[Mapping] = None,
+    ) -> str:
+        return tile.provider.sha256
 
 
 def enable_inplace_mode():
-    Tile.sha256 = property(sha256_get, sha256_set)
-
-
-def inplace_tile_opener(toc_path: Path, tile: Tile, file_ext: str) -> BinaryIO:
-    return DevNull(tile.provider.filepath)
-
-
-class DevNull(io.BytesIO):
-    """A class meant to mimic an open(filepath, 'wb') operation but
-    prevents any actual writing, reading, or seeking.
-    This class is an ugly hack to prevent the slicedimage
-    Writer.generate_partition_document() function from needlessly creating
-    a copy of image data.
-    See: https://docs.python.org/3/library/io.html
-    See also: cpython/Lib/_pyio.py
-    """
-    def __init__(self, filepath: str, *args, **kwargs):
-        super(DevNull, self).__init__(*args, **kwargs)
-        self.name = filepath
-
-    def read(self, size=-1):
-        raise NotImplementedError()
-
-    def write(self, b):
-        return sys.getsizeof(b)
-
-    def seek(self, pos, whence=0):
-        raise NotImplementedError()
+    warnings.warn("`enable_inplace_mode()` is no longer necessary.", DeprecationWarning)
 
 
 class InplaceFetchedTile(FetchedTile):

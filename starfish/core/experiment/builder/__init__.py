@@ -1,6 +1,7 @@
 import functools
 import json
 import os
+import warnings
 from dataclasses import astuple, dataclass
 from pathlib import Path
 from typing import (
@@ -24,6 +25,7 @@ from slicedimage import (
     Tile,
     TileSet,
     Writer,
+    WriterContract,
 )
 
 from starfish import FieldOfView
@@ -46,18 +48,6 @@ class TileIdentifier:
     round_label: int
     ch_label: int
     zplane_label: int
-
-
-def _tile_opener(toc_path: Path, tile: Tile, file_ext: str) -> BinaryIO:
-    base = toc_path.parent / toc_path.stem
-    return open(
-        f"{os.fspath(base)}-Z{tile.indices[Axes.ZPLANE]}-"
-        f"R{tile.indices[Axes.ROUND]}-C{tile.indices[Axes.CH]}.{file_ext}",
-        "wb")
-
-
-def _fov_path_generator(parent_toc_path: Path, toc_name: str) -> Path:
-    return parent_toc_path.parent / "{}-{}.json".format(parent_toc_path.stem, toc_name)
 
 
 def build_irregular_image(
@@ -212,6 +202,7 @@ def write_irregular_experiment_json(
         default_shape: Optional[Mapping[Axes, int]]=None,
         fov_path_generator: Callable[[Path, str], Path] = None,
         tile_opener: Optional[Callable[[Path, Tile, str], BinaryIO]] = None,
+        writer_contract: Optional[WriterContract] = None,
 ) -> None:
     """
     Build and returns a top-level experiment description with the following characteristics:
@@ -235,19 +226,28 @@ def write_irregular_experiment_json(
     fov_path_generator : Optional[Callable[[Path, str], Path]]
         Generates the path for a FOV's json file.  If one is not provided, the default generates
         the FOV's json file at the same level as the top-level json file for an image.    If this is
-        not provided, a reasonable default will be provided.
+        not provided, a reasonable default will be provided.  If this is provided, writer_contract
+        should not be provided.
     tile_opener : Optional[Callable[[Path, Tile, str], BinaryIO]]
         Callable that gets invoked with the following arguments: 1. the directory of the experiment
         that is being constructed, 2. the tile that is being written, and 3. the file extension
         that the tile should be written with.  The callable is expected to return an open file
-        handle.  If this is not provided, a reasonable default will be provided.
+        handle.  If this is not provided, a reasonable default will be provided.  If this is
+        provided, writer_contract should not be provided.
+    writer_contract : Optional[WriterContract]
+        Contract for specifying how the slicedimage image is to be laid out.  If this is provided,
+        fov_path_generator and tile_opener should not be provided.
     """
     if postprocess_func is None:
         postprocess_func = lambda doc: doc
-    if fov_path_generator is None:
-        fov_path_generator = _fov_path_generator
-    if tile_opener is None:
-        tile_opener = _tile_opener
+    if fov_path_generator is not None or tile_opener is not None:
+        warnings.warn(
+            "`fov_path_generator` and `tile_opener` options for writing experiment files is "
+            "deprecated.  Use `writer_contract` instead.",
+            DeprecationWarning)
+        if writer_contract is not None:
+            raise ValueError(
+                "Cannot specify both `writer_contract` and `fov_path_generator` or `tile_opener`")
 
     experiment_doc: Dict[str, Any] = {
         'version': str(CURRENT_VERSION),
@@ -261,10 +261,11 @@ def write_irregular_experiment_json(
 
         Writer.write_to_path(
             image,
-            os.path.join(path, f"{image_type}.json"),
+            Path(path) / f"{image_type}.json",
             pretty=True,
             partition_path_generator=fov_path_generator,
             tile_opener=tile_opener,
+            writer_contract=writer_contract,
             tile_format=tile_format,
         )
         experiment_doc['images'][image_type] = f"{image_type}.json"
@@ -302,6 +303,7 @@ def write_experiment_json(
         dimension_order: Sequence[Axes]=(Axes.ZPLANE, Axes.ROUND, Axes.CH),
         fov_path_generator: Optional[Callable[[Path, str], Path]] = None,
         tile_opener: Optional[Callable[[Path, Tile, str], BinaryIO]] = None,
+        writer_contract: Optional[WriterContract] = None,
 ) -> None:
     """
     Build and returns a top-level experiment description with the following characteristics:
@@ -346,15 +348,20 @@ def write_experiment_json(
           (ROUND=1, CH=0, Z=1)
           (ROUND=1, CH=1, Z=1)
         (default = (Axes.Z, Axes.ROUND, Axes.CH))
-    fov_path_generator : Callable[[Path, str], Path]
+    fov_path_generator : Optional[Callable[[Path, str], Path]]
         Generates the path for a FOV's json file.  If one is not provided, the default generates
-        the FOV's json file at the same level as the top-level json file for an image.  If this is
-        not provided, a reasonable default will be provided.
-    tile_opener : Callable[[Path, Tile, str], BinaryIO]
+        the FOV's json file at the same level as the top-level json file for an image.    If this is
+        not provided, a reasonable default will be provided.  If this is provided, writer_contract
+        should not be provided.
+    tile_opener : Optional[Callable[[Path, Tile, str], BinaryIO]]
         Callable that gets invoked with the following arguments: 1. the directory of the experiment
         that is being constructed, 2. the tile that is being written, and 3. the file extension
         that the tile should be written with.  The callable is expected to return an open file
-        handle.  If this is not provided, a reasonable default will be provided.
+        handle.  If this is not provided, a reasonable default will be provided.  If this is
+        provided, writer_contract should not be provided.
+    writer_contract : Optional[WriterContract]
+        Contract for specifying how the slicedimage image is to be laid out.  If this is provided,
+        fov_path_generator and tile_opener should not be provided.
     """
     all_tile_fetcher: MutableMapping[str, TileFetcher] = {}
     if aux_tile_fetcher is not None:
@@ -393,4 +400,5 @@ def write_experiment_json(
         default_shape=default_shape,
         fov_path_generator=fov_path_generator,
         tile_opener=tile_opener,
+        writer_contract=writer_contract,
     )

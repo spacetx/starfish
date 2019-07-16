@@ -10,7 +10,7 @@ from slicedimage import ImageFormat
 
 from starfish.core.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.core.experiment.builder.inplace import (
-    enable_inplace_mode, inplace_tile_opener, InplaceFetchedTile
+    InplaceFetchedTile, InplaceWriterContract,
 )
 from starfish.core.experiment.experiment import Experiment, FieldOfView
 from starfish.core.types import Axes, Coordinates, CoordinateValue
@@ -80,8 +80,6 @@ def format_data(
         experiment_json_doc['codebook'] = "codebook.json"
         return experiment_json_doc
 
-    enable_inplace_mode()
-
     write_experiment_json(
         path=os.fspath(image_dir),
         fov_count=num_fovs,
@@ -95,8 +93,7 @@ def format_data(
         },
         postprocess_func=add_codebook,
         default_shape=SHAPE,
-        fov_path_generator=fov_path_generator,
-        tile_opener=inplace_tile_opener,
+        writer_contract=InplaceWriterContract(),
     )
 
 

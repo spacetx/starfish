@@ -6,22 +6,8 @@ from pstats import Stats
 
 import pkg_resources
 
-from starfish.core.experiment.builder.cli import build as build_cli
-from starfish.core.image import (
-    ApplyTransform,
-    Filter,
-    LearnTransform,
-    Segment,
-)
 from starfish.core.spacetx_format.cli import validate as validate_cli
-from starfish.core.spots import (
-    AssignTargets,
-    Decode,
-    DetectPixels,
-    DetectSpots,
-)
 from starfish.core.util import click
-
 
 PROFILER_KEY = "profiler"
 """This is the dictionary key we use to attach the profiler to pass to the resultcallback."""
@@ -92,16 +78,5 @@ def install_strict_dependencies():
     ])
 
 
-# Pipelines
-starfish.add_command(LearnTransform._cli)  # type: ignore
-starfish.add_command(ApplyTransform._cli)  # type: ignore
-starfish.add_command(Filter._cli)  # type: ignore
-starfish.add_command(DetectPixels._cli)
-starfish.add_command(DetectSpots._cli)  # type: ignore
-starfish.add_command(Segment._cli)  # type: ignore
-starfish.add_command(AssignTargets._cli)  # type: ignore
-starfish.add_command(Decode._cli)  # type: ignore
-
 # Other
-starfish.add_command(build_cli)  # type: ignore
 starfish.add_command(validate_cli)  # type: ignore

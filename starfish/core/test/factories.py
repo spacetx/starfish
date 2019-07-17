@@ -7,9 +7,9 @@ from scipy.ndimage.filters import gaussian_filter
 from skimage import img_as_float32, img_as_uint
 
 from starfish import Codebook, ImageStack, IntensityTable
-from starfish.core.image._filter.white_tophat import WhiteTophat
+from starfish.core.image.Filter.white_tophat import WhiteTophat
 from starfish.core.imagestack.test.factories import create_imagestack_from_codebook
-from starfish.core.spots._detect_spots.blob import BlobDetector
+from starfish.core.spots.DetectSpots.blob import BlobDetector
 from starfish.core.types import Axes, Features
 
 

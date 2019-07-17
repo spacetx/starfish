@@ -56,6 +56,3 @@ serialization for use in single-cell analysis environments such as Seurat_ and S
 
 .. toctree::
    intensity_table.rst
-
-.. toctree::
-   pipeline_component.rst

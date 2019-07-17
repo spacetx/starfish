@@ -75,20 +75,6 @@ origin. At this point, it's trivial to create a cell x gene matrix.
 
     tutorials/exec_feature_identification_and_annotation.rst
 
-Putting Together a Pipeline Recipe and Running it
--------------------------------------------------
-
-Pipeline recipes should describe the computational steps to get from the input files to the output files.  Pipeline
-recipes should manage file input and output through the injected ``file_inputs`` and ``file_outputs`` variables.  When a
-recipe is executed, the user should provide a list of file paths or URLs, which are loaded as starfish objects (i.e.,
-:ref:`ImageStack`, :ref:`Codebook`, :ref:`IntensityTable`, or :ref:`ExpressionMatrix`), and provided to the recipe in
-the ``file_inputs`` array.  Correspondingly, any results saved to the ``file_outputs`` array will be written to the
-file paths users provide.
-
-.. toctree::
-    :maxdepth: 1
-
-    tutorials/exec_running_a_pipeline.rst
 
 Old Content not to be deleted yet.
 ----------------------------------

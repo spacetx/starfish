@@ -18,5 +18,4 @@ from .core.experiment.experiment import Experiment, FieldOfView
 from .core.expression_matrix.expression_matrix import ExpressionMatrix
 from .core.imagestack.imagestack import ImageStack
 from .core.intensity_table.intensity_table import IntensityTable
-from .core.recipe import cli
 from .core.starfish import starfish

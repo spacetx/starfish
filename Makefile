@@ -115,6 +115,8 @@ slow: fast run-notebooks test-examples docker
 
 docker:
 	docker build -f docker/Dockerfile -t $(DOCKER_IMAGE) .
+	starfish --help
+
 
 help-integration:
 	$(call print_help, slow, alias for 'fast run-notebooks docker')

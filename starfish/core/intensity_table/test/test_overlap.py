@@ -1,7 +1,7 @@
 import numpy as np
 
 from starfish import IntensityTable
-from starfish.core.types import Coordinates, Features
+from starfish.core.types import Axes, Coordinates, Features
 from starfish.core.types._constants import OverlapStrategy
 from .factories import create_intensity_table_with_coords
 from ..overlap import (
@@ -122,3 +122,24 @@ def test_take_max():
     # and 10 from i21. It2 wins and the resulting concatenated table should have all the
     # spots from it2 (20) and 6 (one on the border) from it1 (6) for a total of 26 spots
     assert concatenated.sizes[Features.AXIS] == 26
+
+
+def test_take_max_per_round():
+    # Check that adding flag doesn't change the previous example
+    it1 = create_intensity_table_with_coords(Area(min_x=0, max_x=2,
+                                                  min_y=0, max_y=2), n_spots=10)
+    it2 = create_intensity_table_with_coords(Area(min_x=1, max_x=2,
+                                                  min_y=1, max_y=3), n_spots=20)
+
+    concatenated = IntensityTable.concatenate_intensity_tables(
+        [it1, it2], overlap_strategy=OverlapStrategy.TAKE_MAX, axis_to_compare=Axes.ROUND)
+    assert concatenated.sizes[Features.AXIS] == 26
+
+    # now make teo intensity tables where the axes comparison would differ the results
+    it1 = create_intensity_table_with_coords(Area(min_x=0, max_x=2,
+                                                  min_y=0, max_y=2), n_spots=10)
+    it2 = create_intensity_table_with_coords(Area(min_x=1, max_x=2,
+                                                  min_y=1, max_y=3), n_spots=20)
+
+    concatenated = IntensityTable.concatenate_intensity_tables(
+        [it1, it2], overlap_strategy=OverlapStrategy.TAKE_MAX, axis_to_compare=Axes.ROUND)

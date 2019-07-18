@@ -439,62 +439,73 @@ class IntensityTable(xr.DataArray):
     @staticmethod
     def _process_overlaps(
         intensity_tables: List["IntensityTable"],
-        overlap_strategy: OverlapStrategy,
-        axis_to_compare: Optional[Axes] = None
+        overlap_strategy: OverlapStrategy
     ) -> List["IntensityTable"]:
         """
         Find the overlapping sections between IntensityTables and process them according
         to the given overlap strategy
-        """
-        if axis_to_compare:
-            for i in intensity_tables[0][axis_to_compare.value].values:
-                try:
-                    tables_per_axis: List["IntensityTable"] = (it.sel({Axes.value: i}) for it in intensity_tables)
-                except Exception:
-                    raise ValueError(f"The provided intensity tables do not have a matching number of {Axes} "
-                                     f"they cannot be compared on that level.")
-                overlap_pairs = find_overlaps_of_xarrays(tables_per_axis)
-                for indices in overlap_pairs:
-                    overlap_method = OVERLAP_STRATEGY_MAP[overlap_strategy]
-                    idx1, idx2 = indices
-                    # modify IntensityTables based on overlap strategy
-                    it1, it2 = overlap_method(intensity_tables[idx1], intensity_tables[idx2])
-                    # replace IntensityTables in list
-                    intensity_tables[idx1] = it1
-                    intensity_tables[idx2] = it2
-        else:
-            overlap_pairs = find_overlaps_of_xarrays(intensity_tables)
-            for indices in overlap_pairs:
-                overlap_method = OVERLAP_STRATEGY_MAP[overlap_strategy]
-                idx1, idx2 = indices
-                # modify IntensityTables based on overlap strategy
-                it1, it2 = overlap_method(intensity_tables[idx1], intensity_tables[idx2])
-                # replace IntensityTables in list
-                intensity_tables[idx1] = it1
-                intensity_tables[idx2] = it2
-        return intensity_tables
 
-    @staticmethod
-    def concatenate_intensity_tables(
-        intensity_tables: List["IntensityTable"],
-        overlap_strategy: Optional[OverlapStrategy] = None
-    ) -> "IntensityTable":
-        """
         Parameters
         ----------
-        intensity_tables: List[IntensityTable]
-            List of IntensityTables to be combined.
-        overlap_strategy
-
+        intensity_tables : List[IntensityTable]
+            List of IntensityTables to be compared.
+        overlap_strategy : OverlapStrategy
+            The strategy in which to resolve overlapping sections
 
         Returns
         -------
 
         """
+        overlap_pairs = find_overlaps_of_xarrays(intensity_tables)
+        for indices in overlap_pairs:
+            overlap_method = OVERLAP_STRATEGY_MAP[overlap_strategy]
+            idx1, idx2 = indices
+            # modify IntensityTables based on overlap strategy
+            it1, it2 = overlap_method(intensity_tables[idx1], intensity_tables[idx2])
+            # replace IntensityTables in list
+            intensity_tables[idx1] = it1
+            intensity_tables[idx2] = it2
+        return intensity_tables
+
+    @staticmethod
+    def concatenate_intensity_tables(
+        intensity_tables: List["IntensityTable"],
+        overlap_strategy: Optional[OverlapStrategy] = None,
+        axis_to_compare: Optional[Axes] = None
+    ) -> "IntensityTable":
+        """
+        Parameters
+        ----------
+        intensity_tables : List[IntensityTable]
+            List of IntensityTables to be combined.
+        overlap_strategy : Optional[OverlapStrategy]
+            The strategy in which to resolve overlapping sections, if None
+            the IntensityTables are just concatenated using xr.concat
+        axis_to_compare : Optional[Axes]
+            If provided the given overlap strategy is applied on a per axes basis. If none
+            the strategy is applied to the entire IntensityTable.
+
+        Returns
+        -------
+        IntensityTable
+        """
         if overlap_strategy:
-            intensity_tables = IntensityTable._process_overlaps(
-                intensity_tables, overlap_strategy
-            )
+            if axis_to_compare:
+                modified_tables: List["IntensityTable"] = list()
+                for i in intensity_tables[0][axis_to_compare.value].values:
+                    try:
+                        tables_per_axis: List["IntensityTable"] = [it.sel({axis_to_compare.value: i}) for
+                                                                   it in intensity_tables]
+                    except Exception:
+                        raise ValueError(f"The provided intensity tables do not have a matching number of"
+                                         f" {axis_to_compare} they cannot be compared on that level.")
+
+                    IntensityTable._process_overlaps(tables_per_axis, overlap_strategy)
+                    modified_tables.extend(tables_per_axis)
+                intensity_tables = modified_tables
+            else:
+                intensity_tables = IntensityTable._process_overlaps(intensity_tables, overlap_strategy)
+
         return xr.concat(intensity_tables, dim=Features.AXIS)
 
     def to_features_dataframe(self) -> pd.DataFrame:

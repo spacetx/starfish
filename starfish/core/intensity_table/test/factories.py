@@ -37,3 +37,31 @@ def create_intensity_table_with_coords(area: Area, n_spots: int=10) -> Intensity
     it[Coordinates.Y.value] = xr.DataArray(np.linspace(area.min_y, area.max_y, n_spots),
                                            dims=Features.AXIS)
     return it
+
+
+def create_unenven_intensity_tables(area: Area, n_spots: int=10) -> IntensityTable:
+    """
+    Creates a 50X50 intensity table with physical coordinates within
+    the given Area.
+
+    Parameters
+    ----------
+    area: Area
+        The area of physical space the IntensityTable should be defined over
+    n_spots:
+        Number of spots to add to the IntensityTable
+    """
+    codebook = codebook_array_factory()
+    it = IntensityTable.synthetic_intensities(
+        codebook,
+        num_z=1,
+        height=50,
+        width=50,
+        n_spots=n_spots
+    )
+    # intensity table 1 has 10 spots, xmin = 0, ymin = 0, xmax = 2, ymax = 1
+    it[Coordinates.X.value] = xr.DataArray(np.linspace(area.min_x, area.max_x, n_spots),
+                                           dims=Features.AXIS)
+    it[Coordinates.Y.value] = xr.DataArray(np.linspace(area.min_y, area.max_y, n_spots),
+                                           dims=Features.AXIS)
+    return it

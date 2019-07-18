@@ -63,9 +63,6 @@ jobs:
     - name: Released Notebooks
       if: type = cron and branch =~ /^(master|merge)/
       script: make check-notebooks install-released-notebooks-support run-notebooks
-    - name: Check Requirements
-      if: type = cron and branch =~ /^master$/
-      script: make refresh-all-requirements check-requirements
 cache:
   directories:
   - $HOME/.cache/pip

@@ -447,18 +447,31 @@ class IntensityTable(xr.DataArray):
         to the given overlap strategy
         """
         if axis_to_compare:
-           # for each round in intensity tables
-            # select only that round in each itnesity table and compare those ( get those overlap pairs)
-            # repeat for each round
-        overlap_pairs = find_overlaps_of_xarrays(intensity_tables)
-        for indices in overlap_pairs:
-            overlap_method = OVERLAP_STRATEGY_MAP[overlap_strategy]
-            idx1, idx2 = indices
-            # modify IntensityTables based on overlap strategy
-            it1, it2 = overlap_method(intensity_tables[idx1], intensity_tables[idx2])
-            # replace IntensityTables in list
-            intensity_tables[idx1] = it1
-            intensity_tables[idx2] = it2
+            for i in intensity_tables[0][axis_to_compare.value].values:
+                try:
+                    tables_per_axis: List["IntensityTable"] = (it.sel({Axes.value: i}) for it in intensity_tables)
+                except Exception:
+                    raise ValueError(f"The provided intensity tables do not have a matching number of {Axes} "
+                                     f"they cannot be compared on that level.")
+                overlap_pairs = find_overlaps_of_xarrays(tables_per_axis)
+                for indices in overlap_pairs:
+                    overlap_method = OVERLAP_STRATEGY_MAP[overlap_strategy]
+                    idx1, idx2 = indices
+                    # modify IntensityTables based on overlap strategy
+                    it1, it2 = overlap_method(intensity_tables[idx1], intensity_tables[idx2])
+                    # replace IntensityTables in list
+                    intensity_tables[idx1] = it1
+                    intensity_tables[idx2] = it2
+        else:
+            overlap_pairs = find_overlaps_of_xarrays(intensity_tables)
+            for indices in overlap_pairs:
+                overlap_method = OVERLAP_STRATEGY_MAP[overlap_strategy]
+                idx1, idx2 = indices
+                # modify IntensityTables based on overlap strategy
+                it1, it2 = overlap_method(intensity_tables[idx1], intensity_tables[idx2])
+                # replace IntensityTables in list
+                intensity_tables[idx1] = it1
+                intensity_tables[idx2] = it2
         return intensity_tables
 
     @staticmethod

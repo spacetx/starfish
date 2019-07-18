@@ -115,7 +115,6 @@ slow: fast run-notebooks test-examples docker
 
 docker:
 	docker build -f docker/Dockerfile -t $(DOCKER_IMAGE) .
-	docker run -ti --rm $(DOCKER_IMAGE) build --fov-count 1 --primary-image-dimensions '{"z": 1}' /tmp/
 
 help-integration:
 	$(call print_help, slow, alias for 'fast run-notebooks docker')

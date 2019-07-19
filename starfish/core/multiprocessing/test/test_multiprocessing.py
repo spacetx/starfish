@@ -126,7 +126,7 @@ def test_imagestack_deepcopy(nitems: int=10) -> None:
     shape = (nitems, 3, 4, 5, 6)
     dtype = np.float32
     source = np.zeros(shape, dtype=np.float32)
-    imagestack = ImageStack.from_numpy(source)
+    imagestack = ImageStack.from_numpy(source)._ensure_data_loaded()
     imagestack_copy = copy.deepcopy(imagestack)
     _start_process_to_test_shmem(
         array_holder=imagestack_copy._data._backing_mp_array,

@@ -70,12 +70,13 @@ class CornerDifferentDtype(TileFetcher):
 
 
 def test_multiple_tiles_of_different_kind():
+    stack = synthetic_stack(
+        NUM_ROUND, NUM_CH, NUM_Z,
+        HEIGHT, WIDTH,
+        tile_fetcher=CornerDifferentDtype(np.uint32, np.float32),
+    )
     with pytest.raises(TypeError):
-        synthetic_stack(
-            NUM_ROUND, NUM_CH, NUM_Z,
-            HEIGHT, WIDTH,
-            tile_fetcher=CornerDifferentDtype(np.uint32, np.float32),
-        )
+        stack._ensure_data_loaded()
 
 
 def test_multiple_tiles_of_same_dtype():
@@ -94,12 +95,13 @@ def test_multiple_tiles_of_same_dtype():
 
 
 def test_int_type_promotion():
+    stack = synthetic_stack(
+        NUM_ROUND, NUM_CH, NUM_Z,
+        HEIGHT, WIDTH,
+        tile_fetcher=CornerDifferentDtype(np.int32, np.int8),
+    )
     with warnings.catch_warnings(record=True) as warnings_:
-        stack = synthetic_stack(
-            NUM_ROUND, NUM_CH, NUM_Z,
-            HEIGHT, WIDTH,
-            tile_fetcher=CornerDifferentDtype(np.int32, np.int8),
-        )
+        stack._ensure_data_loaded()
         assert len(warnings_) == 2
         assert issubclass(warnings_[0].category, UserWarning)
         assert issubclass(warnings_[1].category, DataFormatWarning)
@@ -117,12 +119,13 @@ def test_int_type_promotion():
 
 
 def test_uint_type_promotion():
+    stack = synthetic_stack(
+        NUM_ROUND, NUM_CH, NUM_Z,
+        HEIGHT, WIDTH,
+        tile_fetcher=CornerDifferentDtype(np.uint32, np.uint8),
+    )
     with warnings.catch_warnings(record=True) as warnings_:
-        stack = synthetic_stack(
-            NUM_ROUND, NUM_CH, NUM_Z,
-            HEIGHT, WIDTH,
-            tile_fetcher=CornerDifferentDtype(np.uint32, np.uint8),
-        )
+        stack._ensure_data_loaded()
         assert len(warnings_) == 2
         assert issubclass(warnings_[0].category, UserWarning)
         assert issubclass(warnings_[1].category, DataFormatWarning)
@@ -140,12 +143,13 @@ def test_uint_type_promotion():
 
 
 def test_float_type_demotion():
+    stack = synthetic_stack(
+        NUM_ROUND, NUM_CH, NUM_Z,
+        HEIGHT, WIDTH,
+        tile_fetcher=CornerDifferentDtype(np.float64, np.float32),
+    )
     with warnings.catch_warnings(record=True) as warnings_:
-        stack = synthetic_stack(
-            NUM_ROUND, NUM_CH, NUM_Z,
-            HEIGHT, WIDTH,
-            tile_fetcher=CornerDifferentDtype(np.float64, np.float32),
-        )
+        stack._ensure_data_loaded()
         assert len(warnings_) == 2
         assert issubclass(warnings_[0].category, UserWarning)
         assert issubclass(warnings_[1].category, DataFormatWarning)

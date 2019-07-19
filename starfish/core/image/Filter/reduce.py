@@ -180,7 +180,7 @@ class Reduce(FilterAlgorithmBase):
         """
 
         # Apply the reducing function
-        reduced = stack._data.reduce(
+        reduced = stack.xarray.reduce(
             self.func, dim=[Axes(dim).value for dim in self.dims], **self.kwargs)
 
         # Add the reduced dims back and align with the original stack

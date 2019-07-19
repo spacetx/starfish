@@ -1,10 +1,11 @@
 import collections
 import warnings
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from functools import partial
 from itertools import product
-from json import loads
 from pathlib import Path
+from threading import Lock
 from typing import (
     Any,
     Callable,
@@ -89,6 +90,7 @@ class ImageStack:
 
     def __init__(self, data: MPDataArray, tile_data: Optional[TileCollectionData]=None):
         self._data = data
+        self._data_loaded = False
         self._tile_data = tile_data
         self._log: List[dict] = list()
 
@@ -129,66 +131,44 @@ class ImageStack:
         data = MPDataArray.from_shape_and_dtype(
             shape=data_shape,
             dtype=np.float32,
-            initial_value=0,
+            initial_value=np.nan,
             dims=data_dimensions,
             coords=data_tick_marks,
         )
-
         imagestack = ImageStack(data, tile_data)
-
-        # TODO: (ttung) move more of the initialization code above the constructor call.
 
         all_selectors = list(imagestack._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}))
         first_selector = all_selectors[0]
-        tile = tile_data.get_tile(r=first_selector[Axes.ROUND],
-                                  ch=first_selector[Axes.CH],
-                                  z=first_selector[Axes.ZPLANE])
+        first_tile = tile_data.get_tile(
+            r=first_selector[Axes.ROUND],
+            ch=first_selector[Axes.CH],
+            z=first_selector[Axes.ZPLANE])
 
         # Set up coordinates
         imagestack._data[Coordinates.X.value] = xr.DataArray(
-            tile.coordinates[Coordinates.X], dims=Axes.X.value)
+            first_tile.coordinates[Coordinates.X], dims=Axes.X.value)
         imagestack._data[Coordinates.Y.value] = xr.DataArray(
-            tile.coordinates[Coordinates.Y], dims=Axes.Y.value)
+            first_tile.coordinates[Coordinates.Y], dims=Axes.Y.value)
         # Fill with nan for now, then replace with calculated midpoints
         imagestack._data[Coordinates.Z.value] = xr.DataArray(
-            np.full(imagestack.xarray.sizes[Axes.ZPLANE.value], np.nan),
+            np.full(imagestack._data.sizes[Axes.ZPLANE.value], np.nan),
             dims=Axes.ZPLANE.value)
 
-        # Get coords on first tile, then verify all subsequent tiles are aligned
-        starting_coords = tile.coordinates
-
-        tile_dtypes = set()
-        for selector in tqdm(all_selectors):
+        for selector in all_selectors:
             tile = tile_data.get_tile(
                 r=selector[Axes.ROUND], ch=selector[Axes.CH], z=selector[Axes.ZPLANE])
-            data = tile.numpy_array
-            tile_dtypes.add(data.dtype)
-
-            data = img_as_float32(data)
-            imagestack.set_slice(selector=selector, data=data)
 
             if not (
                     np.array_equal(
-                        starting_coords[Coordinates.X], tile.coordinates[Coordinates.X])
+                        first_tile.coordinates[Coordinates.X], tile.coordinates[Coordinates.X])
                     and np.array_equal(
-                        starting_coords[Coordinates.Y], tile.coordinates[Coordinates.Y])
+                        first_tile.coordinates[Coordinates.Y], tile.coordinates[Coordinates.Y])
             ):
                 raise ValueError(f"Tiles must be aligned")
             if Coordinates.Z in tile.coordinates:
                 assert len(tile.coordinates[Coordinates.Z]) == 1
                 imagestack._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = \
                     tile.coordinates[Coordinates.Z][0]
-
-        tile_dtype_kinds = set(tile_dtype.kind for tile_dtype in tile_dtypes)
-        tile_dtype_sizes = set(tile_dtype.itemsize for tile_dtype in tile_dtypes)
-        if len(tile_dtype_kinds) != 1:
-            raise TypeError("All tiles should have the same kind of dtype")
-        if len(tile_dtype_sizes) != 1:
-            warnings.warn("Not all tiles have the same precision data", DataFormatWarning)
-
-        # check for existing log info
-        if STARFISH_EXTRAS_KEY in tile_data.extras and LOG in tile_data.extras[STARFISH_EXTRAS_KEY]:
-            imagestack._log = loads(tile_data.extras[STARFISH_EXTRAS_KEY])[LOG]
 
         return imagestack
 
@@ -205,6 +185,48 @@ class ImageStack:
                 f"ImageStack data must be of type float32 and in the range [0, 1]. Please convert "
                 f"data using skimage.img_as_float32 prior to calling set_slice."
             )
+
+    def _ensure_data_loaded(self) -> "ImageStack":
+        """Loads the data into the imagestack object.  All operations should automatically call this
+        before operating on the data.
+        """
+        if self._data_loaded:
+            return self
+
+        all_selectors = list(self._iter_axes({Axes.ROUND, Axes.CH, Axes.ZPLANE}))
+        pbar = tqdm(total=len(all_selectors))
+        lock = Lock()
+
+        def load_by_selector(selector):
+            tile = self._tile_data.get_tile(
+                r=selector[Axes.ROUND], ch=selector[Axes.CH], z=selector[Axes.ZPLANE])
+            data = tile.numpy_array
+            tile_dtype = data.dtype
+
+            data = img_as_float32(data)
+            with lock:
+                # setting data is not thread-safe.
+                self.set_slice(selector=selector, data=data, from_loader=True)
+
+            pbar.update(1)
+
+            return tile_dtype
+
+        with ThreadPoolExecutor() as tpe:
+            # gather all the data types of the tiles to ensure that they are compatible.
+            tile_dtypes = set(tpe.map(load_by_selector, all_selectors))
+        pbar.close()
+
+        tile_dtype_kinds = set(tile_dtype.kind for tile_dtype in tile_dtypes)
+        tile_dtype_sizes = set(tile_dtype.itemsize for tile_dtype in tile_dtypes)
+        if len(tile_dtype_kinds) != 1:
+            raise TypeError("All tiles should have the same kind of dtype")
+        if len(tile_dtype_sizes) != 1:
+            warnings.warn("Not all tiles have the same precision data", DataFormatWarning)
+
+        self._data_loaded = True
+
+        return self
 
     def __repr__(self):
         shape = ', '.join(f'{k}: {v}' for k, v in self._data.sizes.items())
@@ -351,6 +373,7 @@ class ImageStack:
     @property
     def xarray(self) -> xr.DataArray:
         """Retrieves the image data as an :py:class:`xarray.DataArray`"""
+        self._ensure_data_loaded()
         return self._data.data
 
     def sel(self, indexers: Mapping[Axes, Union[int, tuple]]):
@@ -385,6 +408,7 @@ class ImageStack:
         ImageStack :
             a new image stack indexed by given value or range.
         """
+        self._ensure_data_loaded()
         stack = deepcopy(self)
         selector = indexing_utils.convert_to_selector(indexers)
         stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector)
@@ -506,7 +530,7 @@ class ImageStack:
         """
         formatted_indexers = indexing_utils.convert_to_selector(selector)
         _, axes = self._build_slice_list(selector)
-        result = self._data.sel(formatted_indexers).values
+        result = self.xarray.sel(formatted_indexers).values
 
         if result.dtype != np.float32:
             warnings.warn(
@@ -521,7 +545,9 @@ class ImageStack:
             self,
             selector: Mapping[Axes, Union[int, slice]],
             data: np.ndarray,
-            axes: Optional[Sequence[Axes]]=None):
+            axes: Optional[Sequence[Axes]]=None,
+            from_loader: bool = False,
+    ):
         """
         Given a dictionary mapping the index name to either a value or a slice range and a source
         numpy array, set the slice of the array of this ImageStack to the values in the source
@@ -596,6 +622,8 @@ class ImageStack:
             >>> new_data = np.zeros((3, 2, 10, 20), dtype=np.float32)
             >>> stack.set_slice({Axes.ZPLANE: 5, Axes.CH: slice(2, 4)}, new_data)
         """
+        if not from_loader:
+            self._ensure_data_loaded()
 
         self._validate_data_dtype_and_range(data)
 
@@ -764,7 +792,7 @@ class ImageStack:
 
         # scale based on values of whole image
         if clip_method == Clip.SCALE_BY_IMAGE:
-            self._data.data.values = preserve_float_range(self._data.data.values, rescale=True)
+            self._data.data.values = preserve_float_range(self._data.values, rescale=True)
 
         return self
 
@@ -813,6 +841,8 @@ class ImageStack:
         List[Any] :
             The results of applying func to stored image data
         """
+        self._ensure_data_loaded()
+
         # default grouping is by (x, y) tile
         if group_by is None:
             group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
@@ -1010,7 +1040,7 @@ class ImageStack:
         instance, ``imagestack.axis_labels(Axes.ROUND)`` returns all the round ids in this
         imagestack."""
 
-        return [int(val) for val in self.xarray.coords[axis.value].values]
+        return [int(val) for val in self._data.coords[axis.value].values]
 
     @property
     def tile_shape(self):
@@ -1147,6 +1177,7 @@ class ImageStack:
             max projection
 
         """
+        self._ensure_data_loaded()
         max_projection = self._data.max([dim.value for dim in dims])
         max_projection = max_projection.expand_dims(tuple(dim.value for dim in dims))
         max_projection = max_projection.transpose(*self.xarray.dims)

@@ -26,9 +26,7 @@ Also, here are a few points that need to be addressed:
 
 ### Resources:
 
-* Mockups: [Here goes a URL to or the name of the mockup(s) in inVision];
-* Testing URL: [Here goes a URL to the testing branch or IP];
-* Staging URL: [Here goes a URL to the feature on staging];
+* Sketches: [Here goes a URL to sketches]
 
 
 ### Notes

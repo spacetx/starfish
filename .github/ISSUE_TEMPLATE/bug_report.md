@@ -27,7 +27,12 @@ it in the issue: https://gist.github.com
 import platform; print(platform.platform())
 import sys; print("Python", sys.version)
 import numpy; print("NumPy", numpy.__version__)
-import skimage; print("Scikit-Image", skimage.__version__)
+import scipy; print("SciPy", scipy.__version__)
+import skimage; print("scikit-image", skimage.__version__)
+import pandas; print("pandas", pandas.__version__)
+import sklearn; print("sklearn", sklearn.__version__)
+import xarray; print("xarray", xarray.__version__)
+import sympy; print("sympy", sympy.__version__)
 import starfish; print("starfish", starfish.__version__)
 -->
 

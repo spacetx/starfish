@@ -1,6 +1,6 @@
 ---
-name: Agile User Story
-about: This is a template for an agile user story
+name: ":blue_book: User Story"
+about: This is a template for a user story
 title: ''
 labels: feature
 assignees: ''

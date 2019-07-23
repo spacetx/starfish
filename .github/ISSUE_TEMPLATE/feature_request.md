@@ -1,5 +1,5 @@
 ---
-name: ":sparkles: Feature request"
+name: "\U00002728 Feature request"
 about: Suggest an idea for this project
 title: ''
 labels: feature

@@ -1,5 +1,5 @@
 ---
-name: ":blue_book: User Story"
+name: "\U0001F4D8 User Story"
 about: This is a template for a user story
 title: ''
 labels: feature

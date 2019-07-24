@@ -23,7 +23,9 @@ class Translation(LearnTransformBase):
     upsampling : int
         upsampling factor (default=1). See
         http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.register_translation
-        for an explanation of this parameter.
+        for an explanation of this parameter. in brief, this parameter determines the resolution of
+        the registration. A value of 1 represents pixel resolution, a value of 10 is 1/10th of
+        a pixel, a value of 300 is 1/300th of a pixel, and so on.
     """
 
     def __init__(self, reference_stack: ImageStack, axes: Axes, upsampling: int=1):

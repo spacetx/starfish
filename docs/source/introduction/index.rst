@@ -38,8 +38,7 @@ through the `Windows Subsystem for Linux <wsl>`_.
 
 To validate starfish's performance, we are working in collaboration with the
 :ref:`SpaceTx consortium <spacetx consortium>` to reproduce author's pipelines for each of the
-following assays. This list is not comprehensive, and starfish's development team are
-always excited to learn about new assays. If you want to chat, please :ref:`contact us <contact>`
+following assays.
 
 ====================  ==========  ===================  ==================
  Assay                Loads Data  Single-FoV Pipeline  Multi-FoV Pipeline

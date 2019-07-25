@@ -12,16 +12,16 @@ what assay(s) are best applied to (a) spatially localizing cells by type based o
 
 Consortium members include:
 
-Ed Boyden, MIT
-Long Cai, Caltech
-Fei Chen, Broad Institute
-Karl Dieserroth, Stanford
-Ed Lein, Allen Institute for Brain Science
-Sten Linnarrson, Karolinska Institutet
-Joakim Lundeberg, SciLifeLab
-Jeffrey Moffit, Harvard
-Mats Nilsson, SciLifeLab
-Aviv Regev, Broad Institute
-Anthony Zador, Cold Spring Harbor Laboratory
-Kun Zhang, University of California San Diego
-Xiaowei Zhuang, Harvard
+- Ed Boyden, MIT
+- Long Cai, Caltech
+- Fei Chen, Broad Institute
+- Karl Dieserroth, Stanford
+- Ed Lein, Allen Institute for Brain Science
+- Sten Linnarrson, Karolinska Institutet
+- Joakim Lundeberg, SciLifeLab
+- Jeffrey Moffit, Harvard
+- Mats Nilsson, SciLifeLab
+- Aviv Regev, Broad Institute
+- Anthony Zador, Cold Spring Harbor Laboratory
+- Kun Zhang, University of California San Diego
+- Xiaowei Zhuang, Harvard

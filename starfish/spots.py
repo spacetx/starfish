@@ -3,4 +3,6 @@ from starfish.core.spots import (  # noqa: F401
     Decode,
     DetectPixels,
     DetectSpots,
+    LocateSpots,
+    MeaureSpots
 )

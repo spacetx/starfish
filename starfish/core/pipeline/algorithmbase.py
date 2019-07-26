@@ -4,7 +4,7 @@ from abc import ABCMeta
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.types import LOG
+from starfish.core.types import LOG, SpotAttributes
 from starfish.core.types._constants import STARFISH_EXTRAS_KEY
 from starfish.core.util.logging import LogEncoder
 
@@ -34,6 +34,9 @@ class AlgorithmBase(ABCMeta):
             # Scenario 1, Filtering, ApplyTransform
             if isinstance(result, ImageStack):
                 result.update_log(args[0])
+            if isinstance(result, SpotAttributes):
+                stack = args[1]
+                stack.update_log(args[0])
             # Scenario 2, Spot detection
             elif isinstance(result, tuple) or isinstance(result, IntensityTable):
                 if isinstance(args[1], ImageStack):

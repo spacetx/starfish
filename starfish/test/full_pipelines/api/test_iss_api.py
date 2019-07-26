@@ -88,9 +88,9 @@ def test_iss_pipeline_cropped_data():
 
     pipeline_log = registered_image.log
 
-    # assert pipeline_log[0]['method'] == 'WhiteTophat'
-    # assert pipeline_log[1]['method'] == 'Warp'
-    # assert pipeline_log[3]['method'] == 'BlobDetector'
+    assert pipeline_log[0]['method'] == 'WhiteTophat'
+    assert pipeline_log[1]['method'] == 'Warp'
+    assert pipeline_log[3]['method'] == 'BlobDetector'
 
     intensities = iss.intensities
 

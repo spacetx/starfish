@@ -711,7 +711,7 @@ class ImageStack:
             n_processes: Optional[int]=None,
             clip_method: Union[str, Clip]=Clip.CLIP,
             **kwargs
-    ) -> "ImageStack":
+    ) -> Optional["ImageStack"]:
         """Split the image along a set of axes and apply a function across all the components.  This
         function should yield data of the same dimensionality as the input components.  These
         resulting components are then constituted into an ImageStack and returned.
@@ -727,7 +727,7 @@ class ImageStack:
             3, 4) by X results in 3 arrays of size 4.  (default {Axes.ROUND, Axes.CH,
             Axes.ZPLANE})`
         in_place : bool
-            If True, function is executed in place. If n_proc is not 1, the tile or
+            If True, function is executed in place and returns None. If n_proc is not 1, the tile or
             volume will be copied once during execution. If false, a new ImageStack object will be
             produced. (Default False)
         verbose : bool
@@ -771,12 +771,13 @@ class ImageStack:
         if not in_place:
             # create a copy of the ImageStack, call apply on that stack with in_place=True
             image_stack = deepcopy(self)
-            return image_stack.apply(
+            image_stack.apply(
                 func=func,
                 group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes,
                 clip_method=clip_method,
                 **kwargs
             )
+            return image_stack
 
         # wrapper adds a target `data` parameter where the results from func will be stored
         # data are clipped or scaled by chunk using preserve_float_range if clip_method != 2
@@ -794,7 +795,7 @@ class ImageStack:
         if clip_method == Clip.SCALE_BY_IMAGE:
             self._data.data.values = preserve_float_range(self._data.values, rescale=True)
 
-        return self
+        return None
 
     @staticmethod
     def _in_place_apply(

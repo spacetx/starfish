@@ -163,7 +163,7 @@ class Reduce(FilterAlgorithmBase):
             self,
             stack: ImageStack,
             *args,
-    ) -> ImageStack:
+    ) -> Optional[ImageStack]:
         """Performs the dimension reduction with the specifed function
 
         Parameters

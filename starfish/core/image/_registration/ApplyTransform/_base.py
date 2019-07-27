@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Optional
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.pipeline.algorithmbase import AlgorithmBase
@@ -7,6 +8,6 @@ from starfish.core.pipeline.algorithmbase import AlgorithmBase
 class ApplyTransformBase(metaclass=AlgorithmBase):
 
     @abstractmethod
-    def run(self, stack, transforms_list, *args) -> ImageStack:
+    def run(self, stack, transforms_list, *args) -> Optional[ImageStack]:
         """Performs registration on the stack provided."""
         raise NotImplementedError()

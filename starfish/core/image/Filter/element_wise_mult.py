@@ -50,7 +50,7 @@ class ElementWiseMultiply(FilterAlgorithmBase):
             verbose: bool = False,
             n_processes: Optional[int] = None,
             *args,
-    ) -> ImageStack:
+    ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters
@@ -76,10 +76,12 @@ class ElementWiseMultiply(FilterAlgorithmBase):
         mult_array_aligned: np.ndarray = self.mult_array.transpose(*stack.xarray.dims).values
         if not in_place:
             stack = deepcopy(stack)
+            self.run(stack, in_place=True)
+            return stack
 
         stack._data.data.values *= mult_array_aligned
         if self.clip_method == Clip.CLIP:
             stack._data.data.values = preserve_float_range(stack._data.data.values, rescale=False)
         else:
             stack._data.data.values = preserve_float_range(stack._data.data.values, rescale=True)
-        return stack
+        return None

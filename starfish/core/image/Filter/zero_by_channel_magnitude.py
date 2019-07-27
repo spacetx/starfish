@@ -38,7 +38,7 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
             verbose=False,
             n_processes: Optional[int] = None,
             *args,
-    ) -> ImageStack:
+    ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters
@@ -66,7 +66,8 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
 
         if not in_place:
             new_stack = deepcopy(stack)
-            return self.run(new_stack, in_place=True)
+            self.run(new_stack, in_place=True)
+            return new_stack
 
         # compute channel magnitude mask
         for r, dat in channels_per_round:
@@ -90,4 +91,4 @@ class ZeroByChannelMagnitude(FilterAlgorithmBase):
                                                  ch_magnitude,
                                                  where=magnitude_mask
                                                  )
-        return stack
+        return None

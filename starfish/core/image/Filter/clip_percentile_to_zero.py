@@ -64,7 +64,7 @@ class ClipPercentileToZero(FilterAlgorithmBase):
 
     def run(self, stack: ImageStack, in_place: bool = False,
             verbose: bool = False, n_processes: Optional[int] = None,
-            *args) -> ImageStack:
+            *args) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters

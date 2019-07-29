@@ -38,7 +38,7 @@ class MaxProject(FilterAlgorithmBase):
             verbose: bool = False,
             n_processes: Optional[int] = None,
             *args,
-    ) -> ImageStack:
+    ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
 
         Parameters

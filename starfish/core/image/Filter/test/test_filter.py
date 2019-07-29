@@ -27,7 +27,7 @@ def test_gaussian_high_pass(sigma: Union[Number, Tuple[Number]], is_volume: bool
         sigma=sigma, is_volume=is_volume, clip_method=Clip.CLIP
     )
     result = ghp.run(image_stack, n_processes=1)
-    assert np.sum(result.xarray) < sum_before
+    assert np.sum(result.xarray) < sum_before  # type: ignore
 
 @pytest.mark.parametrize('size, is_volume', [
     (1, False),
@@ -40,7 +40,7 @@ def test_mean_high_pass(size: Union[Number, Tuple[Number]], is_volume: bool) -> 
     sum_before = np.sum(image_stack.xarray)
     mhp = mean_high_pass.MeanHighPass(size=size, is_volume=is_volume, clip_method=Clip.CLIP)
     result = mhp.run(image_stack)
-    assert np.sum(result.xarray) < sum_before
+    assert np.sum(result.xarray) < sum_before  # type: ignore
 
 
 def test_element_wise_mult() -> None:
@@ -51,5 +51,5 @@ def test_element_wise_mult() -> None:
     )
     ewm = element_wise_mult.ElementWiseMultiply(mult_array)
     multiplied = ewm.run(image_stack, in_place=False)
-    assert isinstance(multiplied.xarray, xr.DataArray)
-    assert multiplied.xarray.equals(image_stack.xarray * .5)
+    assert isinstance(multiplied.xarray, xr.DataArray)  # type: ignore
+    assert multiplied.xarray.equals(image_stack.xarray * .5)  # type: ignore

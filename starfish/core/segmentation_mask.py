@@ -1,6 +1,6 @@
 import io
 import tarfile
-from typing import Dict, List, Sequence, Tuple, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -74,12 +74,22 @@ class SegmentationMaskCollection:
     ----------
     masks : List[xr.DataArray]
         Segmentation masks.
+
+    Attributes
+    ----------
+    max_shape : Dict[Axes, Optional[int]]
+        Maximum index of contained masks.
     """
     def __init__(self, masks: List[xr.DataArray]):
-        for mask in masks:
-            validate_segmentation_mask(mask)
+        self._masks: List[xr.DataArray] = []
+        self.max_shape: Dict[Axes, int] = {
+            Axes.X: 0,
+            Axes.Y: 0,
+            Axes.ZPLANE: 0
+        }
 
-        self._masks = masks
+        for mask in masks:
+            self.append(mask)
 
     def __getitem__(self, index):
         return self._masks[index]
@@ -100,6 +110,12 @@ class SegmentationMaskCollection:
         """
         validate_segmentation_mask(mask)
         self._masks.append(mask)
+
+        for axis in Axes:
+            if axis.value in mask.coords:
+                max_val = mask.coords[axis.value].values[-1]
+                if max_val >= self.max_shape[axis]:
+                    self.max_shape[axis] = max_val + 1
 
     @classmethod
     def from_label_image(
@@ -153,6 +169,51 @@ class SegmentationMaskCollection:
             masks.append(mask)
 
         return cls(masks)
+
+    def to_label_image(
+            self,
+            shape: Optional[Tuple[int, ...]] = None,
+            *,
+            ordering: Sequence[Axes] = (Axes.ZPLANE, Axes.Y, Axes.X)
+    ):
+        """Create a label image from the contained masks.
+
+        Parameters
+        ----------
+        shape : Optional[Tuple[int, ...]]
+            Shape of the label image. If ``None``, use maximum index for each axis.
+        ordering : Sequence[Axes]
+            Ordering of the axes. Default is z, y, x.
+
+        Returns
+        -------
+        label_image : np.ndarray
+            uint16 array where each integer corresponds to a label
+        """
+        ordering = [o for o in ordering if self.max_shape[o] > 0]
+
+        max_shape = tuple(self.max_shape[o] for o in ordering)
+
+        if shape is None:
+            shape = max_shape
+        elif np.any(np.less(shape, max_shape)):
+            raise ValueError("shape less than the maximum of the data provided."
+                             "cropping is not supported at this time")
+
+        label_image = np.zeros(shape, dtype=np.uint16)
+
+        for i, mask in enumerate(self):
+            mask = mask.transpose(*[o.value for o in ordering if o in mask.coords])
+            coords = mask.values.nonzero()
+            j = 0
+            for o in ordering:
+                if o in mask.coords:
+                    coords[j][:] += mask.coords[o].values[0]
+                    j += 1
+            # align axes and insert into image
+            label_image[coords] = i + 1
+
+        return label_image
 
     @classmethod
     def from_disk(cls, path: str) -> "SegmentationMaskCollection":

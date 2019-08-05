@@ -17,14 +17,16 @@
 # EPY: END markdown
 
 # EPY: START code
-from pprint import pprint 
+from pprint import pprint
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
 import starfish
+from starfish import IntensityTable
 import starfish.data
+from starfish.core.imagestack import indexing_utils
 from starfish.types import Axes
 from starfish.util.plot import (
     diagnose_registration, imshow_plane, intensity_histogram
@@ -50,7 +52,10 @@ matplotlib.rcParams["figure.dpi"] = 150
 
 # EPY: START code
 experiment = starfish.data.STARmap(use_test_data=True)
-stack = experiment['fov_000'].get_image('primary')
+# stack = experiment['fov_000'].get_image('primary')
+stack = next(experiment['fov_000'].get_images(starfish.FieldOfView.PRIMARY_IMAGES, rounds=[0, 1]))
+
+codebook = indexing_utils.index_keep_dimensions(experiment.codebook, {Axes.ROUND: slice(0, 2)})
 # EPY: END code
 
 # EPY: START code
@@ -105,7 +110,7 @@ transforms = ltt.run(projection)
 # EPY: END code
 
 # EPY: START markdown
-#How big are the identified translations? 
+#How big are the identified translations?
 # EPY: END markdown
 
 # EPY: START code
@@ -231,7 +236,7 @@ intensities = lsbd.run(scaled, n_processes=8)
 # EPY: END markdown
 
 # EPY: START code
-decoded = experiment.codebook.decode_per_round_max(intensities.fillna(0))
+decoded = experiment.codebook.decode_per_round_max(IntensityTable(intensities.fillna(0)))
 decode_mask = decoded['target'] != 'nan'
 
 # %gui qt

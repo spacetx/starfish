@@ -16,7 +16,7 @@ from skimage.morphology import h_maxima
 from tqdm import tqdm
 
 from starfish.core.compat import blob_dog, blob_log
-from starfish.core.image._filter.util import determine_axes_to_group_by
+from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
@@ -334,7 +334,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
     def _runMaxFlowMinCost(
             self, data: pd.DataFrame,
             l: int, d_th: float,
-            k1: float, rounds: np.array[int],
+            k1: float, rounds: np.array,
             dth_max: float) -> Dict:
         """
         Build the graph model for the given connected component and solve the graph
@@ -705,6 +705,11 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
             search_radius=self.search_radius,
             search_radius_max=self.search_radius_max,
             anchor_round=self.anchor_round)
+
+        # Drop intensities with empty rounds
+        drop = [np.any(np.all(np.isnan(intensity_table.values[x, :, :]), axis=0))
+                for x in range(intensity_table.shape[0])]
+        intensity_table = intensity_table[np.arange(intensity_table.shape[0])[np.invert(drop)]]
 
         transfer_physical_coords_from_imagestack_to_intensity_table(
             image_stack=primary_image, intensity_table=intensity_table

@@ -146,7 +146,7 @@ imshow_plane(
 from starfish.image import ApplyTransform, LearnTransform
 
 learn_translation = LearnTransform.Translation(reference_stack=dots, axes=Axes.ROUND, upsampling=1000)
-transforms_list = learn_translation.run(imgs.max_proj(Axes.CH, Axes.ZPLANE))
+transforms_list = learn_translation.run(filtered_imgs.max_proj(Axes.CH, Axes.ZPLANE))
 warp = ApplyTransform.Warp()
 registered_imgs = warp.run(filtered_imgs, transforms_list=transforms_list, in_place=False, verbose=True)
 # EPY: END code
@@ -186,7 +186,7 @@ dots_max = dots.max_proj(Axes.ROUND, Axes.ZPLANE)
 spot_locations = lp.run(dots_max)
 ms = MeaureSpots.MeasureSpotIntensities(measurement_function=np.mean, radius_is_gyration=False)
 
-intensities = ms.run(spot_locations, registered_imgs)
+intensities = ms.run(registered_imgs, spot_locations)
 
 # EPY: END code
 

@@ -18,7 +18,7 @@ class MeasureSpotIntensities(MeasureSpotsAlgorithmBase):
         self.measurement_function = measurement_function
         self.radius_is_gyration = radius_is_gyration
 
-    def run(self, spot_locations: SpotAttributes, data_image: ImageStack, *args):
+    def run(self, data_image: ImageStack, spot_locations: SpotAttributes, *args):
         return MeasureSpotIntensities.measure_spot_intensities(
             data_image=data_image,
             spot_attributes=spot_locations,

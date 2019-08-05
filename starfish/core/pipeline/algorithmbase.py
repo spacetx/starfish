@@ -4,7 +4,7 @@ from abc import ABCMeta
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.types import LOG, SpotAttributes
+from starfish.core.types import LOG
 from starfish.core.types._constants import STARFISH_EXTRAS_KEY
 from starfish.core.util.logging import LogEncoder
 
@@ -31,22 +31,17 @@ class AlgorithmBase(ABCMeta):
         @functools.wraps(func)
         def helper(*args, **kwargs):
             result = func(*args, **kwargs)
-            # Scenario 1, Filtering, ApplyTransform
+            # Scenario 1: result is Imagestack
             if isinstance(result, ImageStack):
                 result.update_log(args[0])
-            if isinstance(result, SpotAttributes):
+            # Scenario 2: result not Imagestack (SpotAttributes/IntensityTable/LearnTransforms)
+            elif isinstance(args[1], ImageStack):
                 stack = args[1]
+                # update log with spot detection instance args[0]
                 stack.update_log(args[0])
-            # Scenario 2, Spot detection
-            elif isinstance(result, tuple) or isinstance(result, IntensityTable):
+            # If result was IntensityTable transfer log
+            if isinstance(result, IntensityTable):
                 if isinstance(args[1], ImageStack):
-                    stack = args[1]
-                    # update log with spot detection instance args[0]
-                    stack.update_log(args[0])
-                    # get resulting intensity table and set log
-                    it = result
-                    if isinstance(result, tuple):
-                        it = result[0]
-                    it.attrs[STARFISH_EXTRAS_KEY] = LogEncoder().encode({LOG: stack.log})
+                    result.attrs[STARFISH_EXTRAS_KEY] = LogEncoder().encode({LOG: args[1].log})
             return result
         return helper

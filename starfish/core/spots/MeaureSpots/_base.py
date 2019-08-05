@@ -9,7 +9,7 @@ from starfish.core.types import SpotAttributes
 class MeasureSpotsAlgorithmBase(metaclass=AlgorithmBase):
 
     @abstractmethod
-    def run(self, spot_locations: SpotAttributes, image_stack: ImageStack, *args
+    def run(self, image_stack: ImageStack, spot_locations: SpotAttributes, *args
             ) -> IntensityTable:
         """Measures the intensity of spots and given x/y/z locations."""
         raise NotImplementedError()

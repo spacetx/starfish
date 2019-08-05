@@ -646,6 +646,11 @@ class Codebook(xr.DataArray):
             intensities[Features.PASSES_THRESHOLDS] = (Features.AXIS, np.empty(0, dtype=bool))
             return intensities
 
+        # Drop intensities with empty rounds
+        drop = [np.any(np.all(np.isnan(intensities.values[x, :, :]), axis=0))
+                for x in range(intensities.shape[0])]
+        intensities = intensities[np.arange(intensities.shape[0])[np.invert(drop)]]
+
         max_channels = intensities.argmax(Axes.CH.value)
         codes = self.argmax(Axes.CH.value)
 

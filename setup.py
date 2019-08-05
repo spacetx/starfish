@@ -1,18 +1,25 @@
 #!/usr/bin/env python
 
 import os
+from pathlib import Path
 import setuptools
 import versioneer
 
 install_requires = [
-    line.rstrip() for line in open(os.path.join(os.path.dirname(__file__), "REQUIREMENTS.txt"))
+    line.rstrip() for line in open(Path(__file__).parent / "REQUIREMENTS.txt")
 ]
+
+with open(Path("starfish") / "core" / "_display.py") as f:
+    for line in f.readlines():
+        if line.startswith("NAPARI_VERSION"):
+            napari_version = line.split('"')[1]
+            break
 
 setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=install_requires,
     extras_require={
-        'napari': ['napari==0.0.6'],
+        'napari': [f"napari=={napari_version}"],
     },
     entry_points={
         'console_scripts': [

@@ -35,8 +35,12 @@ starfish. Finally, advanced users can examine the :ref:`Data Structures <data st
 :ref:`Help & Reference <help and reference>` sections to learn more details about _starfish_ and its
 object models.
 
+For questions, suggestions, or accolades, `join the #starfish-users channel on the CZI Science Slack <https://join-cziscience-slack.herokuapp.com/>`_ and say “hi!” or `email the starfish team directly <mailto:starfish@chanzuckerberg.com>`_
+
 To see the code or report a bug, please visit the `github repository
 <https://github.com/spacetx/starfish>`_.
+
+
 
 .. raw:: html
 
@@ -52,9 +56,9 @@ To see the code or report a bug, please visit the `github repository
    creating_an_image_processing_pipeline/index
    api/index
    help_and_reference/index
-   community/index
-   contributing/index
    usage/index
+   contributing/index
+   spacetx_consortium/index
 
 .. raw:: html
 

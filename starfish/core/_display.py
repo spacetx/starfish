@@ -7,15 +7,16 @@ import numpy as np
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
+from starfish.core.segmentation_mask import SegmentationMaskCollection
 from starfish.core.types import Axes, Features
 
 try:
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", module="vispy.visuals.isocurve", lineno=22)
-        from napari import Window, Viewer
+    from napari import Viewer
 except ImportError:
-    Window, Viewer = None, None
+    Viewer = None
 
+
+NAPARI_VERSION = "0.1.3"  # when changing this, update docs in display
 INTERACTIVE = not hasattr(__main__, "__file__")
 
 
@@ -100,17 +101,17 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
     # the cartesian product of (r, c) are created, and tiled once per feature (n_features)
     # we ensure that (ch, round) cycle in c-order to match the order of the linearized
     # array, used below for masking.
-    coords[:, 0] = np.repeat(intensity_table[Features.AXIS][Axes.X.value].values, code_length)
-    coords[:, 1] = np.repeat(intensity_table[Features.AXIS][Axes.Y.value].values, code_length)
-    coords[:, 2] = np.tile(np.tile(range(n_rounds), n_channels), n_features)
-    coords[:, 3] = np.tile(np.repeat(range(n_channels), n_rounds), n_features)
-    coords[:, 4] = np.repeat(intensity_table[Features.AXIS][Axes.ZPLANE.value].values, code_length)
+    coords[:, 0] = np.tile(np.tile(range(n_rounds), n_channels), n_features)
+    coords[:, 1] = np.tile(np.repeat(range(n_channels), n_rounds), n_features)
+    coords[:, 2] = np.repeat(intensity_table[Features.AXIS][Axes.ZPLANE.value].values, code_length)
+    coords[:, 3] = np.repeat(intensity_table[Features.AXIS][Axes.Y.value].values, code_length)
+    coords[:, 4] = np.repeat(intensity_table[Features.AXIS][Axes.X.value].values, code_length)
 
     sizes = np.repeat(intensity_table.radius.values, code_length)
-    xy = np.tile(sizes[:, np.newaxis], (1, 2))
     rc = np.zeros((sizes.shape[0], 2), dtype=int)
     z = sizes[:, np.newaxis]
-    sizes = np.concatenate((xy, rc, z), axis=1)
+    yx = np.tile(sizes[:, np.newaxis], (1, 2))
+    sizes = np.concatenate((rc, yx, z), axis=1)
 
     return coords, sizes
 
@@ -118,6 +119,7 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
 def display(
         stack: Optional[ImageStack] = None,
         spots: Optional[IntensityTable] = None,
+        masks: Optional[SegmentationMaskCollection] = None,
         viewer: Optional[Viewer] = None,
         project_axes: Optional[Set[Axes]] = None,
         mask_intensities: float = 0.,
@@ -125,7 +127,7 @@ def display(
         z_multiplier: float = 1
 ):
     """
-    Displays an image stack and/or detected spots using Napari (https://github.com/napari/Napari).
+    Displays an image stack and/or detected spots using napari (https://github.com/napari/napari).
 
     Parameters
     ----------
@@ -133,6 +135,8 @@ def display(
         ImageStack to display
     spots : IntensityTable
         IntensityTable containing spot information that was generated from the submitted stack.
+    masks : SegmentationMaskCollection
+        Segmentation instance masks used to annotate the submitted stack.
     viewer : napari.Viewer
         Napari viewer to append the ImageStack and/or spots to. If None, creates a new viewer.
         Note: appending is only supported in interactive environments.
@@ -190,50 +194,51 @@ def display(
     Notes
     -----
     - To use in ipython, use the `%gui qt5` magic.
-    - Napari axes currently cannot be labeled. Until such a time that they can, this function will
+    - napari axes currently cannot be labeled. Until such a time that they can, this function will
       order them by Round, Channel, and Z.
-    - Requires napari 0.0.6: install starfish using `pip install starfish[napari]` to install all
+    - Requires napari 0.1.3: install starfish using `pip install starfish[napari]` to install all
       necessary requirements
     """
     if stack is None and spots is None:
+        # masks without stack or spots have no context so don't check for that
         raise TypeError("expected a stack and/or spots; got nothing")
 
-    if Window is None or Viewer is None:
-        warnings.warn("Requires napari 0.0.6. Run `pip install starfish[napari]` to install the "
-                      "necessary requirements.")
-        return
+    try:
+        import napari
+    except ImportError:
+        raise ImportError(f"Requires napari {NAPARI_VERSION}. "
+                          "Run `pip install starfish[napari]` "
+                          "to install the necessary requirements.")
 
-    from PyQt5.QtWidgets import QApplication
+    try:
+        version = napari.__version__
+    except Exception as e:
+        raise RuntimeError("Could not identify napari version") from e
 
-    # Instantiate the napari viewer
+    if version != NAPARI_VERSION:
+        raise ValueError(f"Incorrect version {version} of napari installed."
+                         "Run `pip install starfish[napari]` "
+                         "to install the necessary requirements.")
+
+    # instantiate the napari viewer
     if viewer is None:
+        from qtpy.QtWidgets import QApplication
         app = QApplication.instance() or QApplication([])
 
-        # initialize the viewer
         viewer = Viewer()
-        window = Window(viewer, show=False)
-        viewer._window = window
         new_viewer = True
     elif isinstance(viewer, Viewer):
         new_viewer = False
     else:
-        raise TypeError("viewer must be a napari Viewer or None")
+        raise TypeError("viewer must be a napari.Viewer or None")
 
     if stack is not None:
         if project_axes is not None:
             stack = stack.max_proj(*project_axes)
 
-        # Switch axes to match napari expected order [x, y, round, channel, z]
-        reordered_array: np.ndarray = stack.xarray.transpose(
-            Axes.Y.value,
-            Axes.X.value,
-            Axes.ROUND.value,
-            Axes.CH.value,
-            Axes.ZPLANE.value
-        ).values
-
-        layer = viewer.add_image(np.squeeze(reordered_array), multichannel=False)
-        layer.colormap = "gray"
+        viewer.add_image(stack.xarray.values,
+                         multichannel=False,
+                         name="stack")
 
     if spots is not None:
         if project_axes is not None:
@@ -250,21 +255,28 @@ def display(
 
         if not np.sum(mask):
             warnings.warn(f"No spots passed provided intensity threshold of {mask_intensities}")
-            return viewer
+        else:
+            coords = coords[mask]
+            sizes = sizes[mask]
 
-        coords = coords[mask]
-        sizes = sizes[mask]
+            # adjust z-size
+            sizes[:, 4] *= z_multiplier
 
-        # adjust z-size
-        sizes[:, 4] *= z_multiplier
+            viewer.add_points(
+                coords,
+                face_color="red",
+                edge_color="red",
+                symbol="ring",
+                size=sizes * radius_multiplier,
+                n_dimensional=True,
+                name="spots"
+            )
 
-        viewer.add_markers(coords=coords, face_color="red", edge_color="red", symbol="ring",
-                           size=sizes * radius_multiplier, n_dimensional=True)
+    if masks:
+        viewer.add_labels(masks.to_label_image(),
+                          name="masks")
 
-    if new_viewer:
-        window.show()
-
-        if not INTERACTIVE:
-            app.exec()  # create blocking process to persist windows
+    if new_viewer and not INTERACTIVE:
+        app.exec_()  # create blocking process to persist windows
 
     return viewer

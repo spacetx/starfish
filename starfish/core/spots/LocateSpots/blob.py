@@ -7,7 +7,6 @@ import xarray as xr
 from skimage.feature import blob_dog, blob_doh, blob_log
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Axes, Features, Number, SpotAttributes
 from ._base import LocateSpotsAlgorithmBase
 
@@ -151,4 +150,3 @@ class BlobDetector(LocateSpotsAlgorithmBase):
         )
 
         return SpotAttributes(pd.concat([sa.data for sa, inds in spot_attributes_list], sort=True))
-

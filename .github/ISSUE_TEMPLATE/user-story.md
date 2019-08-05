@@ -1,6 +1,6 @@
 ---
-name: Agile User Story
-about: This is a template for an agile user story
+name: "\U0001F4D8 User Story"
+about: This is a template for a user story
 title: ''
 labels: feature
 assignees: ''

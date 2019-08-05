@@ -13,6 +13,7 @@ of constructing and applying an example data processing pipeline.
     installation/index
     data_model/index
     formatting_data/index
+    formatting_data/advanced
     loading_data/index
     example_workflow/index
 

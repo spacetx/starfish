@@ -75,14 +75,12 @@ def test_all_methods_adhere_to_contract(filter_class):
     # Max Proj and Reduce don't have an in_place, n_processes, verbose option,
     # so we need to skip these tests
     if filter_class not in [MaxProject, Reduce]:
-        # always emits an Image, even if in_place=True and the resulting filter operates in-place
+        # return None if in_place = True
         try:
             filtered = instance.run(data, in_place=True)
         except TypeError:
             raise AssertionError(f'{filter_class} must accept in_place parameter')
-        assert isinstance(filtered, ImageStack)
-        assert data is filtered, \
-            f'{filter_class} should return a reference to the input ImageStack when run in_place'
+        assert not filtered
 
         # operates out of place
         data = generate_default_data()
@@ -90,8 +88,6 @@ def test_all_methods_adhere_to_contract(filter_class):
         assert data is not filtered, \
             f'{filter_class} should output a new ImageStack when run out-of-place'
 
-        # accepts n_processes
-        # TODO shanaxel: verify that this causes more than one process to be generated
         data = generate_default_data()
         try:
             instance.run(data, n_processes=1)

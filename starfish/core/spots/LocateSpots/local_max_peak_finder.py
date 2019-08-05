@@ -12,7 +12,6 @@ from tqdm import tqdm
 
 from starfish.core.config import StarfishConfig
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Axes, Features, Number, SpotAttributes
 from ._base import LocateSpotsAlgorithmBase
 

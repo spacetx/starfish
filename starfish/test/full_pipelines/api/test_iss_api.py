@@ -90,7 +90,7 @@ def test_iss_pipeline_cropped_data():
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'Warp'
-    assert pipeline_log[3]['method'] == 'BlobDetector'
+    assert pipeline_log[2]['method'] == 'BlobDetector'
 
     intensities = iss.intensities
 
@@ -129,6 +129,7 @@ def test_iss_pipeline_cropped_data():
     # assert pipeline_log[1]['method'] == 'Warp'
     # assert pipeline_log[3]['method'] == 'BlobDetector'
 
+
     # Test serialization / deserialization of IntensityTable log
     fp = tempfile.NamedTemporaryFile()
     assigned.to_netcdf(fp.name)
@@ -138,6 +139,7 @@ def test_iss_pipeline_cropped_data():
     # assert pipeline_log[0]['method'] == 'WhiteTophat'
     # assert pipeline_log[1]['method'] == 'Warp'
     # assert pipeline_log[3]['method'] == 'BlobDetector'
+
 
     # 28 of the spots are assigned to cell 1 (although most spots do not decode!)
     assert np.sum(assigned['cell_id'] == '1') == 28

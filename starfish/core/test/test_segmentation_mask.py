@@ -105,6 +105,22 @@ def test_from_label_image():
                           physical_ticks[Coordinates.X][3:5])
 
 
+def test_to_label_image():
+    # test via roundtrip
+    label_image = np.zeros((5, 6), dtype=np.int32)
+    label_image[0] = 1
+    label_image[3:6, 3:6] = 2
+    label_image[-1, -1] = 0
+
+    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
+                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 15.5]}
+
+    masks = SegmentationMaskCollection.from_label_image(label_image,
+                                                        physical_ticks)
+
+    assert np.array_equal(masks.to_label_image(), label_image)
+
+
 def test_save_load():
     label_image = np.zeros((5, 5), dtype=np.int32)
     label_image[0] = 1

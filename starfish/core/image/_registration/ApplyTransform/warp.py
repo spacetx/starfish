@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import xarray as xr
@@ -27,7 +27,7 @@ class Warp(ApplyTransformBase):
         The list of skimage transform objects to apply to the ImageStack. See a list of valid
         transform objects at https://scikit-image.org/docs/dev/api/skimage.transform.html
     in_place : bool
-        if True, process ImageStack in-place, otherwise return a new stack
+        if True, process ImageStack in-place and return None, otherwise return a new stack
     verbose : bool
         if True, report on transformation progress (default = False)
 
@@ -40,11 +40,12 @@ class Warp(ApplyTransformBase):
     """
 
     def run(self, stack: ImageStack, transforms_list: TransformsList,
-            in_place: bool=False, verbose: bool=False, *args, **kwargs) -> ImageStack:
+            in_place: bool=False, verbose: bool=False, *args, **kwargs) -> Optional[ImageStack]:
         if not in_place:
             # create a copy of the ImageStack, call apply on that stack with in_place=True
             image_stack = deepcopy(stack)
-            return self.run(image_stack, transforms_list, in_place=True, **kwargs)
+            self.run(image_stack, transforms_list, in_place=True, **kwargs)
+            return image_stack
         if verbose and StarfishConfig().verbose:
             transforms_list.transforms = tqdm(transforms_list.transforms)
         all_axes = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
@@ -58,7 +59,7 @@ class Warp(ApplyTransformBase):
                 warped_image = warp(selected_image, transformation_object, **kwargs
                                     ).astype(np.float32)
                 stack.set_slice(selector, warped_image)
-        return stack
+        return None
 
 
 def warp(image: Union[xr.DataArray, np.ndarray],

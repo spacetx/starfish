@@ -9,6 +9,9 @@ Starfish
 .. image:: https://readthedocs.org/projects/spacetx-starfish/badge/?version=latest
     :target: https://spacetx-starfish.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+.. image:: https://join-cziscience-slack.herokuapp.com/badge.svg
+    :target: https://join-cziscience-slack.herokuapp.com/
+    :alt: Join the CZI Science slack
 
 .. ideally we could use the ..include directive here instead of copy and pasting the following
    information
@@ -68,21 +71,5 @@ We are very interested in contributions! See our contributing.rst_ and documenta
 Contact Starfish
 ----------------
 
-.. NOTE: If you update this, you should probably update
-   docs/source/community/contact/index.rst as well.
-
-You can get in touch with the starfish authors a variety of ways.
-
-1. We can be reached by `email`_.
-
-2. We have an active slack channel on czi-science slack, which you can sign up for
-   `here <heroku>`_. When you've joined, `#starfish-users` and `#starfish-dev` are good places to
-   get fast feedback from our team.
-
-3. The best place to discuss design issues or bug reports is on `github <starfish_github>`_.
-
-.. _email: starfish@chanzuckerberg.com
-
-.. _heroku: https://join-cziscience-slack.herokuapp.com/
-
-.. _starfish_github: `https://github.com/spacetx/starfish`
+- Slack: `join #starfish-users on the CZI Science Slack <https://join-cziscience-slack.herokuapp.com/>`_
+- Email: `starfish@chanzuckerberg.com <mailto:starfish@chanzuckerberg.com>`_

@@ -146,7 +146,7 @@ imshow_plane(
 from starfish.image import ApplyTransform, LearnTransform
 
 learn_translation = LearnTransform.Translation(reference_stack=dots, axes=Axes.ROUND, upsampling=1000)
-transforms_list = learn_translation.run(filtered_imgs.max_proj(Axes.CH, Axes.ZPLANE))
+transforms_list = learn_translation.run(imgs.max_proj(Axes.CH, Axes.ZPLANE))
 warp = ApplyTransform.Warp()
 registered_imgs = warp.run(filtered_imgs, transforms_list=transforms_list, in_place=False, verbose=True)
 # EPY: END code
@@ -162,17 +162,6 @@ from starfish.spots import DetectSpots
 import warnings
 from starfish.spots import LocateSpots, MeaureSpots
 
-# parameters to define the allowable gaussian sizes (parameter space)
-# p = DetectSpots.BlobDetector(
-#     min_sigma=1,
-#     max_sigma=10,
-#     num_sigma=30,
-#     threshold=0.01,
-#     measurement_type='mean',
-# )
-#
-# # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-# intensities = p.run(registered_imgs, blobs_image=dots, blobs_axes=(Axes.ROUND, Axes.ZPLANE))
 
 lp = LocateSpots.BlobDetector(
     min_sigma=1,

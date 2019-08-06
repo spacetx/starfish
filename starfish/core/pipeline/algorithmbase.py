@@ -31,17 +31,19 @@ class AlgorithmBase(ABCMeta):
         @functools.wraps(func)
         def helper(*args, **kwargs):
             result = func(*args, **kwargs)
-            # Scenario 1: result is Imagestack
+            # Scenario 1, Filtering, ApplyTransform
             if isinstance(result, ImageStack):
                 result.update_log(args[0])
-            # Scenario 2: result not Imagestack (SpotAttributes/IntensityTable/LearnTransforms)
-            elif isinstance(args[1], ImageStack):
-                stack = args[1]
-                # update log with spot detection instance args[0]
-                stack.update_log(args[0])
-            # If result was IntensityTable transfer log
-            if isinstance(result, IntensityTable):
+            # Scenario 2, Spot detection
+            elif isinstance(result, tuple) or isinstance(result, IntensityTable):
                 if isinstance(args[1], ImageStack):
-                    result.attrs[STARFISH_EXTRAS_KEY] = LogEncoder().encode({LOG: args[1].log})
+                    stack = args[1]
+                    # update log with spot detection instance args[0]
+                    stack.update_log(args[0])
+                    # get resulting intensity table and set log
+                    it = result
+                    if isinstance(result, tuple):
+                        it = result[0]
+                    it.attrs[STARFISH_EXTRAS_KEY] = LogEncoder().encode({LOG: stack.log})
             return result
         return helper

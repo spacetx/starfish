@@ -292,4 +292,4 @@ class LocalMaxPeakFinder(LocateSpotsAlgorithmBase):
             n_processes=n_processes
         )
 
-        return pd.concat([sa.data for sa, inds in spot_attributes_list], sort=True)
+        return SpotAttributes(pd.concat([sa.data for sa, inds in spot_attributes_list], sort=True))

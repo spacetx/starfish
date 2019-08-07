@@ -40,7 +40,7 @@ matplotlib.rcParams["figure.dpi"] = 150
 use_test_data = os.getenv("USE_TEST_DATA") is not None
 
 # An experiment contains a codebook, primary images, and auxiliary images
-experiment = data.ISS(use_test_data=True)
+experiment = data.ISS(use_test_data=use_test_data)
 pp = pprint.PrettyPrinter(indent=2)
 pp.pprint(experiment._src_doc)
 # EPY: END code
@@ -172,9 +172,11 @@ lp = LocateSpots.BlobDetector(
 )
 
 dots_max = dots.max_proj(Axes.ROUND, Axes.ZPLANE)
+# locate spots in a reference image
 spot_locations = lp.run(dots_max)
-ms = MeaureSpots.MeasureSpotIntensities(measurement_function=np.mean, radius_is_gyration=False)
 
+ms = MeaureSpots.MeasureSpotIntensities(measurement_function=np.mean, radius_is_gyration=False)
+# measure those spots across the entire imagestack
 intensities = ms.run(registered_imgs, spot_locations)
 
 # EPY: END code

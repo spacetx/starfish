@@ -13,6 +13,9 @@ A feature that is the target of quantification by an image-based assays. Common 
 ### IntensityTable
 An intensity Table contains the features identified in an ImageStack. It can be thought of as an array whose entries are the intensities of each feature across the imaging rounds and channels of a field of view. Starfish exposes several processing tools to decode the features of the table, estimate their qualities, and assign features to cells.
 
+### DecodedIntensityTable
+A representation of a decoded intensity table. Contains the features identified in an ImageStack as well as their associated target values.
+
 ### Codeword
 A codeword maps expected intensities across multiple image tiles within a field of view to the target that is encoded by the codeword.
 

@@ -8,6 +8,7 @@ import numpy as np
 from starfish.core.codebook.test.factories import codebook_array_factory
 from starfish.core.imagestack.test.factories import imagestack_with_coords_factory
 from starfish.core.types import Axes, Coordinates, Features, PhysicalCoordinateTypes
+from .factories import synthetic_decoded_intenisty_table
 from ..intensity_table import IntensityTable
 from ..intensity_table_coordinates import (
     transfer_physical_coords_from_imagestack_to_intensity_table,
@@ -91,7 +92,7 @@ def test_tranfering_physical_coords_to_expression_matrix():
     stack = imagestack_with_coords_factory(stack_shape, physical_coords)
     codebook = codebook_array_factory()
 
-    intensities = IntensityTable.synthetic_intensities(
+    decoded_intensities = synthetic_decoded_intenisty_table(
         codebook,
         num_z=stack_shape[Axes.ZPLANE],
         height=stack_shape[Axes.Y],
@@ -99,11 +100,12 @@ def test_tranfering_physical_coords_to_expression_matrix():
         n_spots=NUMBER_SPOTS
     )
 
-    intensities = transfer_physical_coords_from_imagestack_to_intensity_table(stack, intensities)
+    intensities = transfer_physical_coords_from_imagestack_to_intensity_table(
+        stack, decoded_intensities)
 
     # Check that error is thrown before target assignment
     try:
-        intensities.to_expression_matrix()
+        decoded_intensities.to_expression_matrix()
     except KeyError as e:
         # Assert value error is thrown with right message
         assert e.args[0] == "IntensityTable must have 'cell_id' assignments for each cell before " \
@@ -111,7 +113,7 @@ def test_tranfering_physical_coords_to_expression_matrix():
 
     # mock out come cell_ids
     cell_ids = random.sample(range(1, 20), NUMBER_SPOTS)
-    intensities[Features.CELL_ID] = (Features.AXIS, cell_ids)
+    decoded_intensities[Features.CELL_ID] = (Features.AXIS, cell_ids)
 
     expression_matrix = intensities.to_expression_matrix()
     # Assert that coords were transferred

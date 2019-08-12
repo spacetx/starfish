@@ -52,5 +52,5 @@ def process_fov(field_num: int, experiment_str: str):
     decoded = experiment.codebook.decode_per_round_max(intensities)
 
     # save results
-    df = decoded.to_decoded_spots()
+    df = decoded.to_decoded_dataframe()
     return df

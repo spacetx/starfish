@@ -62,5 +62,5 @@ def process_fov(field_num: int, experiment_str: str):
     intensities = detector.run(filtered_imgs, blobs_image=dots, blobs_axes=(Axes.ROUND, Axes.ZPLANE))
 
     decoded = experiment.codebook.decode_per_round_max(intensities)
-    df = decoded.to_decoded_spots()
+    df = decoded.to_decoded_dataframe()
     return df

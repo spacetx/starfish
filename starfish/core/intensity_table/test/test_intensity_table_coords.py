@@ -8,6 +8,7 @@ import numpy as np
 from starfish.core.codebook.test.factories import codebook_array_factory
 from starfish.core.imagestack.test.factories import imagestack_with_coords_factory
 from starfish.core.types import Axes, Coordinates, Features, PhysicalCoordinateTypes
+from ..decoded_intensity_table import DecodedIntensityTable
 from ..intensity_table import IntensityTable
 from ..intensity_table_coordinates import (
     transfer_physical_coords_from_imagestack_to_intensity_table,
@@ -91,7 +92,7 @@ def test_tranfering_physical_coords_to_expression_matrix():
     stack = imagestack_with_coords_factory(stack_shape, physical_coords)
     codebook = codebook_array_factory()
 
-    intensities = IntensityTable.synthetic_intensities(
+    intensities = DecodedIntensityTable.synthetic_intensities(
         codebook,
         num_z=stack_shape[Axes.ZPLANE],
         height=stack_shape[Axes.Y],

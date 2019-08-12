@@ -1,4 +1,5 @@
 from starfish.core.codebook.codebook import Codebook
+from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Number
 from ._base import DecodeAlgorithmBase
@@ -46,7 +47,7 @@ class MetricDistance(DecodeAlgorithmBase):
         self,
         intensities: IntensityTable,
         *args
-    ) -> IntensityTable:
+    ) -> DecodedIntensityTable:
         """Decode spots by selecting the max-valued channel in each sequencing round
 
         Parameters

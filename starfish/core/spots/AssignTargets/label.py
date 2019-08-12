@@ -1,5 +1,6 @@
 import numpy as np
 
+from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.segmentation_mask import SegmentationMaskCollection
 from starfish.core.types import Features
@@ -21,9 +22,9 @@ class Label(AssignTargetsAlgorithm):
     @staticmethod
     def _assign(
         masks: SegmentationMaskCollection,
-        intensities: IntensityTable,
+        intensities: DecodedIntensityTable,
         in_place: bool,
-    ) -> IntensityTable:
+    ) -> DecodedIntensityTable:
 
         intensities[Features.CELL_ID] = (
             Features.AXIS,
@@ -51,10 +52,10 @@ class Label(AssignTargetsAlgorithm):
     def run(
             self,
             masks: SegmentationMaskCollection,
-            intensity_table: IntensityTable,
+            decoded_intensity_table: DecodedIntensityTable,
             verbose: bool = False,
             in_place: bool = False,
-    ) -> IntensityTable:
+    ) -> DecodedIntensityTable:
         """Extract cell ids for features in IntensityTable from a segmentation label image
 
         Parameters
@@ -75,4 +76,4 @@ class Label(AssignTargetsAlgorithm):
             cells will be assigned zero.
 
         """
-        return self._assign(masks, intensity_table, in_place=in_place)
+        return self._assign(masks, decoded_intensity_table, in_place=in_place)

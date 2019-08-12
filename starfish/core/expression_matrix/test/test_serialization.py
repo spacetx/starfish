@@ -1,6 +1,6 @@
 import random
 
-from starfish import IntensityTable
+from starfish import DecodedIntensityTable
 from starfish.core.codebook.test.factories import codebook_array_factory
 from starfish.core.types import Features
 
@@ -11,7 +11,7 @@ def test_save_expression_matrix():
 
     codebook = codebook_array_factory()
 
-    intensities = IntensityTable.synthetic_intensities(
+    intensities = DecodedIntensityTable.synthetic_intensities(
         codebook,
         num_z=3,
         height=100,

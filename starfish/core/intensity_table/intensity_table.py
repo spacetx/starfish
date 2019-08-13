@@ -218,8 +218,6 @@ class IntensityTable(xr.DataArray):
         """
         super().to_netcdf(filename)
 
-
-
     @classmethod
     def open_netcdf(cls, filename: str) -> "IntensityTable":
         """
@@ -318,8 +316,6 @@ class IntensityTable(xr.DataArray):
 
         intensities = cls.from_spot_data(
             data, spot_attributes, np.arange(data.shape[1]), np.arange(data.shape[2]))
-        intensities[Features.TARGET] = (Features.AXIS, targets)
-
         return intensities
 
     @classmethod
@@ -450,4 +446,3 @@ class IntensityTable(xr.DataArray):
         pd.DataFrame
         """
         return pd.DataFrame(dict(self[Features.AXIS].coords))
-

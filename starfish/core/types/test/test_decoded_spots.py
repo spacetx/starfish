@@ -4,8 +4,8 @@ import tempfile
 import pandas as pd
 import pytest
 
-from starfish import IntensityTable
 from starfish import DecodedIntensityTable
+from starfish import IntensityTable
 from starfish.core.codebook.test.factories import codebook_array_factory
 from starfish.core.types import Coordinates, DecodedSpots, Features
 

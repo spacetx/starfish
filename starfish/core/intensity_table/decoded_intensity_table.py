@@ -1,3 +1,5 @@
+from typing import Optional, Tuple
+
 import numpy as np
 import pandas as pd
 
@@ -133,16 +135,35 @@ class DecodedIntensityTable(IntensityTable):
 
         intensities = cls.from_spot_data(
             data, spot_attributes, np.arange(data.shape[1]), np.arange(data.shape[2]))
-        intensities[Features.TARGET] = (Features.AXIS, targets)
 
-        return DecodedIntensityTable(intensities)
+        return cls.from_intensity_table(intensities, targets=(Features.AXIS, targets))
 
-    @staticmethod
-    def assign_synthetic_targets(intensities: IntensityTable) -> "DecodedIntensityTable":
-        intensities = DecodedIntensityTable(intensities)
-        intensities[Features.TARGET] = (Features.AXIS, np.random.choice(list('ABCD'), size=20))
-        intensities[Features.DISTANCE] = (Features.AXIS, np.random.rand(20))
+    @classmethod
+    def from_intensity_table(
+            cls,
+            intensities: IntensityTable,
+            targets: Tuple[str, np.ndarray],
+            distances: Optional[Tuple[str, np.ndarray]] = None,
+            passes_threshold: Optional[Tuple[str, np.ndarray]] = None):
+
+        intensities = cls(intensities)
+        intensities[Features.TARGET] = targets
+        if distances:
+            intensities[Features.DISTANCE] = distances
+        if passes_threshold:
+            intensities[Features.PASSES_THRESHOLDS] = passes_threshold
         return intensities
+
+    @classmethod
+    def assign_synthetic_targets(cls, intensities: IntensityTable) -> "DecodedIntensityTable":
+        intensities = DecodedIntensityTable(intensities)
+        return cls.from_intensity_table(
+            intensities,
+            targets=(Features.AXIS, np.random.choice(list('ABCD'), size=20)),
+            distances=(Features.AXIS, np.random.rand(20)))
+
+    def assign_cell_ids(self, cell_ids: Tuple[str, np.ndarray]):
+        self[Features.CELL_ID] = cell_ids
 
     def to_decoded_spots(self) -> DecodedSpots:
         """

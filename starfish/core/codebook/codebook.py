@@ -553,10 +553,11 @@ class Codebook(xr.DataArray):
 
         # add empty metadata fields and return
         if intensities.sizes[Features.AXIS] == 0:
-            intensities[Features.TARGET] = (Features.AXIS, np.empty(0, dtype='U'))
-            intensities[Features.DISTANCE] = (Features.AXIS, np.empty(0, dtype=float))
-            intensities[Features.PASSES_THRESHOLDS] = (Features.AXIS, np.empty(0, dtype=bool))
-            return DecodedIntensityTable(intensities)
+            return DecodedIntensityTable.from_intensity_table(
+                intensities,
+                targets=(Features.AXIS, np.empty(0, dtype='U')),
+                distances=(Features.AXIS, np.empty(0, dtype=float)),
+                passes_threshold=(Features.AXIS, np.empty(0, dtype=bool)))
 
         # normalize both the intensities and the codebook
         norm_intensities, norms = self._normalize_features(intensities, norm_order=norm_order)
@@ -572,13 +573,12 @@ class Codebook(xr.DataArray):
             dtype=np.bool
         )
 
-        # set targets, distances, and filtering results
-        norm_intensities[Features.TARGET] = (Features.AXIS, targets)
-        norm_intensities[Features.DISTANCE] = (Features.AXIS, metric_outputs)
-        norm_intensities[Features.PASSES_THRESHOLDS] = (Features.AXIS, passes_filters)
-
         # norm_intensities is a DataArray, make it back into an IntensityTable
-        return DecodedIntensityTable(norm_intensities)
+        return DecodedIntensityTable.from_intensity_table(
+            norm_intensities,
+            targets=(Features.AXIS, targets),
+            distances=(Features.AXIS, metric_outputs),
+            passes_threshold=(Features.AXIS, passes_filters))
 
     def decode_per_round_max(self, intensities: IntensityTable) -> DecodedIntensityTable:
         """
@@ -642,10 +642,11 @@ class Codebook(xr.DataArray):
 
         # add empty metadata fields and return
         if intensities.sizes[Features.AXIS] == 0:
-            intensities[Features.TARGET] = (Features.AXIS, np.empty(0, dtype='U'))
-            intensities[Features.DISTANCE] = (Features.AXIS, np.empty(0, dtype=float))
-            intensities[Features.PASSES_THRESHOLDS] = (Features.AXIS, np.empty(0, dtype=bool))
-            return intensities
+            return DecodedIntensityTable.from_intensity_table(
+                intensities,
+                targets=(Features.AXIS, np.empty(0, dtype='U')),
+                distances=(Features.AXIS, np.empty(0, dtype=float)),
+                passes_threshold=(Features.AXIS, np.empty(0, dtype=bool)))
 
         max_channels = intensities.argmax(Axes.CH.value)
         codes = self.argmax(Axes.CH.value)
@@ -669,11 +670,11 @@ class Codebook(xr.DataArray):
         # a code passes filters if it decodes successfully
         passes_filters = ~pd.isnull(targets)
 
-        intensities[Features.TARGET] = (Features.AXIS, targets.astype('U'))
-        intensities[Features.DISTANCE] = (Features.AXIS, distance)
-        intensities[Features.PASSES_THRESHOLDS] = (Features.AXIS, passes_filters)
-
-        return DecodedIntensityTable(intensities)
+        return DecodedIntensityTable.from_intensity_table(
+            intensities,
+            targets=(Features.AXIS, targets.astype('U')),
+            distances=(Features.AXIS, distance),
+            passes_threshold=(Features.AXIS, passes_filters))
 
     @classmethod
     def synthetic_one_hot_codebook(

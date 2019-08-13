@@ -145,6 +145,25 @@ class DecodedIntensityTable(IntensityTable):
             targets: Tuple[str, np.ndarray],
             distances: Optional[Tuple[str, np.ndarray]] = None,
             passes_threshold: Optional[Tuple[str, np.ndarray]] = None):
+        """
+        Assign target values to intensities.
+
+        Parameters
+        ----------
+        intensities : IntensityTable
+            intensity_table to assign target values to
+        targets : Tuple[str, np.ndarray]
+            Target values to assign
+        distances : Optional[Tuple[str, np.ndarray]]
+            Corresponding array of distances from target for each feature
+        passes_threshold : Optional[Tuple[str, np.ndarray]]
+            Corresponding array of boolean values indicating if each itensity passed
+            given thresholds.
+
+        Returns
+        -------
+        DecodedIntensityTable
+        """
 
         intensities = cls(intensities)
         intensities[Features.TARGET] = targets
@@ -156,6 +175,18 @@ class DecodedIntensityTable(IntensityTable):
 
     @classmethod
     def assign_synthetic_targets(cls, intensities: IntensityTable) -> "DecodedIntensityTable":
+        """
+        Assign fake target values to the given IntensityTable
+
+        Parameters
+        ----------
+        intensities : IntensityTable
+            intensity_table to assign target values to
+
+        Returns
+        -------
+        DecodedIntensityTable
+        """
         intensities = DecodedIntensityTable(intensities)
         return cls.from_intensity_table(
             intensities,
@@ -163,6 +194,9 @@ class DecodedIntensityTable(IntensityTable):
             distances=(Features.AXIS, np.random.rand(20)))
 
     def assign_cell_ids(self, cell_ids: Tuple[str, np.ndarray]):
+        """
+        Assign the given cell_ids to the DecodedIntensityTable
+        """
         self[Features.CELL_ID] = cell_ids
 
     def to_decoded_spots(self) -> DecodedSpots:

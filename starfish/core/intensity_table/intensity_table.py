@@ -64,7 +64,6 @@ class IntensityTable(xr.DataArray):
         - r          (features) float64 nan nan
         * c          (c) int64 0 1 2
         * h          (h) int64 0 1 2 3
-          target     (features) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
 
     """
 

@@ -10,6 +10,10 @@ dist: trusty
 os:
   - linux
   - windows
+before_install:
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; choco install python3
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; python -m pip install --upgrade pip wheel
 stages:
 - test
 jobs:
@@ -17,7 +21,7 @@ jobs:
     - name: Syntax and Fast Tests
       if: type != cron
       script: make install-dev fast
-      after_success:
+      after_success:3   `
         - bash <(curl -s https://codecov.io/bash)
     - name: Slow Tests
       if: type != cron

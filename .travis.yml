@@ -9,7 +9,7 @@ python:
 dist: trusty
 os:
   - linux
-  - osx
+  - windows
 stages:
 - test
 jobs:

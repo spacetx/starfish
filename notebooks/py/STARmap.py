@@ -17,13 +17,14 @@
 # EPY: END markdown
 
 # EPY: START code
-from pprint import pprint 
+from pprint import pprint
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
 import starfish
+from starfish import IntensityTable
 import starfish.data
 from starfish.types import Axes
 from starfish.util.plot import (
@@ -105,7 +106,7 @@ transforms = ltt.run(projection)
 # EPY: END code
 
 # EPY: START markdown
-#How big are the identified translations? 
+#How big are the identified translations?
 # EPY: END markdown
 
 # EPY: START code
@@ -231,7 +232,7 @@ intensities = lsbd.run(scaled, n_processes=8)
 # EPY: END markdown
 
 # EPY: START code
-decoded = experiment.codebook.decode_per_round_max(intensities.fillna(0))
+decoded = experiment.codebook.decode_per_round_max(IntensityTable(intensities.fillna(0)))
 decode_mask = decoded['target'] != 'nan'
 
 # %gui qt

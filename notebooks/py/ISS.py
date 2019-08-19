@@ -160,7 +160,7 @@ registered_imgs = warp.run(filtered_imgs, transforms_list=transforms_list, in_pl
 # EPY: START code
 from starfish.spots import DetectSpots
 import warnings
-from starfish.spots import LocateSpots, MeaureSpots
+from starfish.spots import LocateSpots, DecodeSpots
 
 
 lp = LocateSpots.BlobDetector(
@@ -175,28 +175,8 @@ dots_max = dots.max_proj(Axes.ROUND, Axes.ZPLANE)
 # locate spots in a reference image
 spot_locations = lp.run(dots_max)
 
-ms = MeaureSpots.MeasureSpotIntensities(measurement_function=np.mean, radius_is_gyration=False)
-# measure those spots across the entire imagestack
-intensities = ms.run(registered_imgs, spot_locations)
-
-# EPY: END code
-
-# EPY: START markdown
-#The resulting "Intensity Table" table is the standardized file format for the output of a spot detector, and is the first output file format in the pipeline that is not an image or set of images
-# EPY: END markdown
-
-# EPY: START code
-intensities
-# EPY: END code
-
-# EPY: START markdown
-#To decode the resulting intensity table, we simply match intensities to codewards in the codebook. This can be done by, for each round, selecting the color channel with the maximum intensity. This forms a potential quatenary code which serves as the key into a lookup in the codebook as to which gene this code corresponds to. Decoded genes are assigned to the ```target``` field in the decoded intensity table.
-# EPY: END markdown
-
-# EPY: START code
-decoded = experiment.codebook.decode_per_round_max(intensities)
-decoded
-# EPY: END code
+decoder = DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook)
+decoded = decoder.run(spot_attributes=spot_locations, image_stack=registered_imgs)
 
 # EPY: START code
 # Besides house keeping genes, VIM and HER2 should be most highly expessed, which is consistent here.

@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from starfish import ImageStack
-from starfish.core.types import Features
+from ..decoded_intensity_table import DecodedIntensityTable
 from ..intensity_table import IntensityTable
 
 
@@ -23,12 +23,11 @@ def test_to_mermaid_dataframe():
     intensities = IntensityTable.from_image_stack(image_stack)
 
     # without a target assignment, should raise RuntimeError.
-    with pytest.raises(RuntimeError):
+    with pytest.raises(AttributeError):
         with TemporaryDirectory() as dir_:
             intensities.to_mermaid(os.path.join(dir_, 'test.csv.gz'))
 
     # assign targets
-    intensities[Features.TARGET] = (Features.AXIS, np.random.choice(list('ABCD'), size=20))
-    intensities[Features.DISTANCE] = (Features.AXIS, np.random.rand(20))
+    intensities = DecodedIntensityTable.assign_synthetic_targets(intensities)
     with TemporaryDirectory() as dir_:
         intensities.to_mermaid(os.path.join(dir_, 'test.csv.gz'))

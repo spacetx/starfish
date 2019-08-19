@@ -6,7 +6,7 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 from skimage import img_as_float32, img_as_uint
 
-from starfish import Codebook, ImageStack, IntensityTable
+from starfish import Codebook, DecodedIntensityTable, ImageStack, IntensityTable
 from starfish.core.image.Filter.white_tophat import WhiteTophat
 from starfish.core.imagestack.test.factories import create_imagestack_from_codebook
 from starfish.core.spots.DetectSpots.blob import BlobDetector
@@ -107,7 +107,7 @@ class SyntheticData:
     def intensities(self, codebook=None) -> IntensityTable:
         if codebook is None:
             codebook = self.codebook()
-        intensities = IntensityTable.synthetic_intensities(
+        intensities = DecodedIntensityTable.synthetic_intensities(
             codebook, self.n_z, self.height, self.width, self.n_spots,
             self.mean_fluor_per_spot, self.mean_photons_per_fluor)
         assert intensities.dtype == np.float32 and intensities.max() <= 1

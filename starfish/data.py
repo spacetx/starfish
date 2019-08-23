@@ -53,7 +53,7 @@ def allen_smFISH(use_test_data: bool = False) -> Experiment:
 def DARTFISH(use_test_data: bool = False) -> Experiment:
     """
     Loads an experiment with a single field of view from unpublished data generated with DARTFISH v1
-    2017, produced by imaging human occipital cortex. These data were donated by the Zhuang lab as
+    2017, produced by imaging human occipital cortex. These data were donated by the Zhang lab as
     part of the SpaceTx consortium project.
 
     The data consist of 18 images from 3 channels, 6 rounds, and 1 z-plane. Each image is (998, 998)

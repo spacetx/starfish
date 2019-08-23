@@ -36,7 +36,8 @@ def process_fov(field_num: int, experiment_str: str):
 
     print("Learning Transform")
     learn_translation = LearnTransform.Translation(reference_stack=dots, axes=Axes.ROUND, upsampling=1000)
-    transforms_list = learn_translation.run(imgs.max_proj(Axes.CH, Axes.ZPLANE))
+    max_projector = Filter.Reduce((Axes.CH, Axes.ZPLANE))
+    transforms_list = learn_translation.run(max_projector.run(imgs))
 
     print("Applying transform")
     warp = ApplyTransform.Warp()

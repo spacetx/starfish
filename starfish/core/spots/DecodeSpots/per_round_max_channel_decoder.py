@@ -4,6 +4,7 @@ import numpy as np
 
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.imagestack.imagestack import ImageStack
+from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
 from starfish.core.types import SpotAttributes
 from ._base import DecodeSpotsAlgorithmBase
 from .decoding_utils import convert_spot_attributes_to_traces, measure_spot_intensities
@@ -28,7 +29,8 @@ class PerRoundMaxChannel(DecodeSpotsAlgorithmBase):
     def __init__(self, codebook: Codebook):
         self.codebook = codebook
 
-    def run(self, spot_attributes: SpotAttributes, image_stack: Optional[ImageStack] = None, *args):
+    def run(self, spot_attributes: SpotAttributes, image_stack: Optional[ImageStack] = None, *args
+            ) -> DecodedIntensityTable:
         """Decode spots by selecting the max-valued channel in each sequencing round
 
         Parameters
@@ -49,5 +51,4 @@ class PerRoundMaxChannel(DecodeSpotsAlgorithmBase):
                                                    measurement_function=np.mean)
         else:
             intensities = convert_spot_attributes_to_traces(spot_attributes)
-
         return self.codebook.decode_per_round_max(intensities)

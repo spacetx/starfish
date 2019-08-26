@@ -1,5 +1,4 @@
 import functools
-import inspect
 from abc import ABCMeta
 
 from starfish.core.imagestack.imagestack import ImageStack

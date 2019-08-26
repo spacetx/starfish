@@ -5,9 +5,8 @@ import tempfile
 import numpy as np
 
 import starfish
-from starfish import IntensityTable
 from starfish.spots import AssignTargets
-from starfish.types import Coordinates, Features
+from starfish.types import Coordinates
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(starfish.__file__)))
 os.environ["USE_TEST_DATA"] = "1"
@@ -132,7 +131,7 @@ def test_iss_pipeline_cropped_data():
     # Test serialization / deserialization of IntensityTable log
     fp = tempfile.NamedTemporaryFile()
     assigned.to_netcdf(fp.name)
-    loaded_intensities = IntensityTable.open_netcdf(fp.name)
+    # loaded_intensities = IntensityTable.open_netcdf(fp.name)
     # pipeline_log = loaded_intensities.get_log()
 
     # assert pipeline_log[0]['method'] == 'WhiteTophat'

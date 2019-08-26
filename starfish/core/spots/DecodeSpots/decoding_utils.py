@@ -1,5 +1,5 @@
 from itertools import product
-from typing import Callable, Union, Sequence
+from typing import Callable, Sequence, Union
 
 import numpy as np
 import pandas as pd
@@ -13,8 +13,9 @@ from starfish.core.types import SpotAttributes
 from starfish.types import Axes, Features, Number
 
 
-def convert_spot_attributes_to_traces() -> IntensityTable:
-    return None
+def convert_spot_attributes_to_traces(spot_attributes: SpotAttributes
+                                      ) -> IntensityTable:
+    return IntensityTable.synthetic_intensities(None)
 
 
 def measure_spot_intensity(
@@ -47,10 +48,8 @@ def measure_spot_intensity(
     """
 
     def fn(row: pd.Series) -> Number:
-        data = image[
-               row['z_min']:row['z_max'], row['y_min']:row['y_max'],
-               row['x_min']:row['x_max']]  # type: ignore
-        return measurement_function(data)
+        d = image[row['z_min']:row['z_max'], row['y_min']:row['y_max'], row['x_min']:row['x_max']]
+        return measurement_function(d)
 
     if radius_is_gyration:
         radius = np.ceil(spots.data[Features.SPOT_RADIUS]).astype(int) + 1  # round up

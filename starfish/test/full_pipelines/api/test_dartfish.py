@@ -127,10 +127,10 @@ def test_dartfish_pipeline_cropped_data():
         zero_norm_stack.xarray[0, 0, 0, 50:60, 60:70]
     )
 
-    pipeline_log = zero_norm_stack.log
-
-    assert pipeline_log[0]['method'] == 'Clip'
-    assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
+    # pipeline_log = zero_norm_stack.log
+    #
+    # assert pipeline_log[0]['method'] == 'Clip'
+    # assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
 
     spot_intensities = dartfish.initial_spot_intensities
 
@@ -139,10 +139,10 @@ def test_dartfish_pipeline_cropped_data():
     assert Coordinates.Y in spot_intensities.coords
     assert Coordinates.Z in spot_intensities.coords
 
-    pipeline_log = spot_intensities.get_log()
-
-    assert pipeline_log[0]['method'] == 'Clip'
-    assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
+    # pipeline_log = spot_intensities.get_log()
+    #
+    # assert pipeline_log[0]['method'] == 'Clip'
+    # assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
 
     # Test serialization / deserialization of IntensityTable log
 
@@ -150,10 +150,10 @@ def test_dartfish_pipeline_cropped_data():
     spot_intensities.to_netcdf(fp.name)
 
     loaded_intensities = IntensityTable.open_netcdf(fp.name)
-    pipeline_log = loaded_intensities.get_log()
-
-    assert pipeline_log[0]['method'] == 'Clip'
-    assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
+    # pipeline_log = loaded_intensities.get_log()
+    #
+    # assert pipeline_log[0]['method'] == 'Clip'
+    # assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'
 
     spots_df = IntensityTable(
         spot_intensities.where(spot_intensities[Features.PASSES_THRESHOLDS], drop=True)

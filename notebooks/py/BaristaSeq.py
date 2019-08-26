@@ -79,14 +79,16 @@ imshow_plane(nissl, sel=plane_selector, ax=ax2, title="nissl image")
 # EPY: START markdown
 #Project into 2D
 #---------------
-#BaristaSeq is typically processed in 2d. Starfish exposes
-#`ImageStack.max_proj` to enable a user to max-project any axes. Here
-#we max project Z for both the nissl images and the primary images.
+#BaristaSeq is typically processed in 2d. Starfish allows users to reduce data using arbitrary
+#methods via `starfish.image.Filter.Reduce`.  Here we max project Z for both the nissl images and
+#the primary images.
 # EPY: END markdown
 
 # EPY: START code
-z_projected_image = img.max_proj(Axes.ZPLANE)
-z_projected_nissl = nissl.max_proj(Axes.ZPLANE)
+from starfish.image import Filter
+max_projector = Filter.Reduce((Axes.ZPLANE,), func="max", module=Filter.Reduce.FunctionSource.np)
+z_projected_image = max_projector.run(img)
+z_projected_nissl = max_projector.run(nissl)
 
 # show the projected data
 f, (ax1, ax2) = plt.subplots(ncols=2)

@@ -68,17 +68,20 @@ print(cropped_image)
 # 2-dimensional algorithms are typically much faster than their 3-d counterparts.
 #
 # because the Image that we've downloaded has only one :py:class:`Axes.ZPLANE`, we will instead
-# demonstrate the use of :py:meth:`ImageStack.max_proj` by projecting over :py:class:`Axes.ROUND`
-# to produce an image of all the spots that appear in any channel in each round.
+# demonstrate the use of :py:meth:~`starfish.image.Filter.Reduce` by projecting over
+# :py:class:`Axes.CH` to produce an image of all the spots that appear in any channel in each round.
 #
-import matplotlib.pyplot as plt
-import xarray as xr
+from starfish.image import Filter
 
-projected_image: starfish.ImageStack = image.max_proj(Axes.CH)
+max_projector = Filter.Reduce((Axes.CH,), func="max", module=Filter.Reduce.FunctionSource.np)
+projected_image: starfish.ImageStack = max_projector.run(image)
 
 ###################################################################################################
 # To demonstrate the effect, the below figure displays each channel of round :code:`1` in the
 # left and center columns, and the maximum projection on the right.
+
+import matplotlib.pyplot as plt
+import xarray as xr
 
 # select an image for plotting in 2d
 round_1_ch_0: xr.DataArray = image.sel({Axes.CH: 0, Axes.ROUND: 1}).xarray.squeeze()

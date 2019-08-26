@@ -23,7 +23,7 @@ Filters can be imported using ``starfish.image.Filter``, which registers all cla
 
     from starfish.image import Filter
 
-.. autoclass:: starfish.image.Filter
+.. automodule:: starfish.image.Filter
    :members:
 
 

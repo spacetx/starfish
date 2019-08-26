@@ -1,3 +1,4 @@
+from ._base import FilterAlgorithmBase
 from .bandpass import Bandpass
 from .clip import Clip
 from .clip_percentile_to_zero import ClipPercentileToZero
@@ -14,3 +15,11 @@ from .reduce import Reduce
 from .richardson_lucy_deconvolution import DeconvolvePSF
 from .white_tophat import WhiteTophat
 from .zero_by_channel_magnitude import ZeroByChannelMagnitude
+
+# autodoc's automodule directive only captures the modules explicitly listed in __all__.
+all_filters = {
+    filter_name: filter_cls
+    for filter_name, filter_cls in locals().items()
+    if isinstance(filter_cls, type) and FilterAlgorithmBase in filter_cls.__mro__
+}
+__all__ = list(all_filters.keys())

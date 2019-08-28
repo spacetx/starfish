@@ -26,3 +26,6 @@ API
 
 .. toctree::
    utils/index.rst
+
+.. toctree::
+  datasets/index.rst

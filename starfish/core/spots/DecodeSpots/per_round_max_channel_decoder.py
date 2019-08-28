@@ -1,12 +1,7 @@
-from typing import Optional
-
-import numpy as np
-
 from starfish.core.codebook.codebook import Codebook
-from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
-from starfish.core.spots.DecodeSpots.decoding_uitls import build_spot_traces_exact_match
-from starfish.core.types import SpotAttributes
+from starfish.core.spots.DecodeSpots.decoding_uitls import build_spot_traces_exact_match, build_spot_traces_nearest_neighbor
+from starfish.core.types import SpotFindingResults
 from ._base import DecodeSpotsAlgorithmBase
 
 
@@ -29,20 +24,28 @@ class PerRoundMaxChannel(DecodeSpotsAlgorithmBase):
     def __init__(self, codebook: Codebook):
         self.codebook = codebook
 
-    def run(self, spot_attributes: SpotAttributes, image_stack, *args) -> DecodedIntensityTable:
+    def run(self, spots: SpotFindingResults,
+            exact_match: bool = True,
+            search_radius: int = 3,
+            anchor_round: int= 1,
+            *args) -> DecodedIntensityTable:
         """Decode spots by selecting the max-valued channel in each sequencing round
 
         Parameters
         ----------
-        spot_attributes
+        spots
 
-        image_stack
 
         Returns
         -------
-        IntensityTable :
+        DecodedIntensityTable :
             IntensityTable decoded and appended with Features.TARGET and Features.QUALITY values.
 
         """
-        intensities = build_spot_traces_exact_match(spot_attributes, imagestack=image_stack)
+        if exact_match:
+            intensities = build_spot_traces_exact_match(spots)
+        else:
+            intensities = build_spot_traces_nearest_neighbor(spot_results=spots,
+                                                             search_radius=search_radius,
+                                                             anchor_round=anchor_round)
         return self.codebook.decode_per_round_max(intensities)

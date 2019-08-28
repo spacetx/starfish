@@ -1,17 +1,18 @@
 from abc import abstractmethod
-from typing import Callable, Sequence
+from typing import Callable, Optional, Sequence
 
 import numpy as np
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.pipeline.algorithmbase import AlgorithmBase
-from starfish.core.types import Number, SpotAttributes
+from starfish.core.types import Number, SpotFindingResults
 
 
-class LocateSpotsAlgorithmBase(metaclass=AlgorithmBase):
+class FindSpotsAlgorithmBase(metaclass=AlgorithmBase):
 
     @abstractmethod
-    def run(self, image_stack: ImageStack, *args) -> SpotAttributes:
+    def run(self, image_stack: ImageStack,
+            reference_image: Optional[ImageStack] = None, *args) -> SpotFindingResults:
         """Measures the intensity of spots and given x/y/z locations."""
         raise NotImplementedError()
 

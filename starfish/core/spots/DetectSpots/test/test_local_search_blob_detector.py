@@ -3,6 +3,7 @@ from scipy.ndimage.filters import gaussian_filter
 
 from starfish import ImageStack
 from starfish.core.spots.DetectSpots.local_search_blob_detector import LocalSearchBlobDetector
+from starfish.core.spots.FindSpots.blob import BlobDetector
 from starfish.core.types import Axes
 
 
@@ -79,15 +80,23 @@ def two_perfect_codes() -> ImageStack:
     return ImageStack.from_numpy(img)
 
 
-def local_search_blob_detector(search_radius: int, anchor_channel=0) -> LocalSearchBlobDetector:
-    return LocalSearchBlobDetector(
+def local_search_blob_detector(search_radius: int, anchor_channel=0) -> BlobDetector:
+    # return LocalSearchBlobDetector(
+    #     min_sigma=(0.4, 1.2, 1.2),
+    #     max_sigma=(0.6, 1.7, 1.7),
+    #     num_sigma=3,
+    #     threshold=0.1,
+    #     overlap=0.5,
+    #     search_radius=search_radius,
+    #     anchor_round=anchor_channel,
+    # )
+
+    return BlobDetector(
         min_sigma=(0.4, 1.2, 1.2),
         max_sigma=(0.6, 1.7, 1.7),
         num_sigma=3,
         threshold=0.1,
-        overlap=0.5,
-        search_radius=search_radius,
-        anchor_round=anchor_channel,
+
     )
 
 

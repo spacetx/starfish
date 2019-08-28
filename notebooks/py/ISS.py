@@ -160,10 +160,10 @@ registered_imgs = warp.run(filtered_imgs, transforms_list=transforms_list, in_pl
 # EPY: START code
 from starfish.spots import DetectSpots
 import warnings
-from starfish.spots import LocateSpots, DecodeSpots
+from starfish.spots import FindSpots, DecodeSpots
 
 
-lp = LocateSpots.BlobDetector(
+lp = FindSpots.BlobDetector(
     min_sigma=1,
     max_sigma=10,
     num_sigma=30,
@@ -173,10 +173,10 @@ lp = LocateSpots.BlobDetector(
 
 dots_max = dots.max_proj(Axes.ROUND, Axes.ZPLANE)
 # locate spots in a reference image
-spot_locations = lp.run(reference_image=dots_max, image_stack=registered_imgs)
+spots = lp.run(reference_image=dots_max, image_stack=registered_imgs)
 
 decoder = DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook)
-decoded = decoder.run(spot_attributes=spot_locations, image_stack=registered_imgs)
+decoded = decoder.run(spots=spots)
 
 # EPY: START code
 # Besides house keeping genes, VIM and HER2 should be most highly expessed, which is consistent here.

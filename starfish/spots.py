@@ -4,5 +4,5 @@ from starfish.core.spots import (  # noqa: F401
     DecodeSpots,
     DetectPixels,
     DetectSpots,
-    LocateSpots,
+    FindSpots,
 )

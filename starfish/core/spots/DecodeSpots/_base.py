@@ -10,7 +10,6 @@ from starfish.core.types import SpotAttributes
 class DecodeSpotsAlgorithmBase(metaclass=AlgorithmBase):
 
     @abstractmethod
-    def run(self, spot_attributes: SpotAttributes, *args
-            ) -> DecodedIntensityTable:
+    def run(self, spot_attributes: SpotAttributes, *args) -> DecodedIntensityTable:
         """Performs decoding on the spots found, using the codebook specified."""
         raise NotImplementedError()

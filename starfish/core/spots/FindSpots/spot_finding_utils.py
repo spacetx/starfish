@@ -1,13 +1,12 @@
-from copy import copy
 from itertools import product
-from typing import Callable, Dict, Sequence, Union, Tuple
+from typing import Callable, Sequence, Union
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import SpotAttributes
+from starfish.core.types import SpotAttributes, SpotFindingResults
 from starfish.types import Axes, Features, Number
 
 
@@ -62,7 +61,7 @@ def measure_spot_intensities(
         data_image: ImageStack,
         reference_spots: SpotAttributes,
         measurement_function: Callable[[Sequence], Number],
-        radius_is_gyration: bool = False) -> Dict[Tuple[int, int], SpotAttributes]:
+        radius_is_gyration: bool = False) -> SpotFindingResults:
     """given spots found from a reference image, find those spots across a data_image
 
     Parameters
@@ -82,16 +81,15 @@ def measure_spot_intensities(
     Returns
     -------
     SpotFindingResults :
-        3d tensor of (spot, channel, round) information for each coded spot
+        A Dict of tile indices and their corresponding measured SpotAttributes
 
     """
 
-    # determine the shape of the intensity table
     ch_labels = data_image.axis_labels(Axes.CH)
     round_labels = data_image.axis_labels(Axes.ROUND)
 
-    spot_results = {}
-    # measure spots
+    spot_results = SpotFindingResults()
+    # measure spots in each tile
     indices = product(ch_labels, round_labels)
     for c, r in indices:
         image, _ = data_image.get_slice({Axes.CH: c, Axes.ROUND: r})
@@ -102,8 +100,8 @@ def measure_spot_intensities(
             radius_is_gyration=radius_is_gyration
         )
         # copy reference spot positions and attributes
-        all_spot_attributes = SpotAttributes(reference_spots.data.copy())
+        tile_spots = SpotAttributes(reference_spots.data.copy())
         # fill in intensities
-        all_spot_attributes.data[Features.INTENSITY] = blob_intensities
-        spot_results[r, c] = all_spot_attributes
+        tile_spots.data[Features.INTENSITY] = blob_intensities
+        spot_results[r, c] = tile_spots
     return spot_results

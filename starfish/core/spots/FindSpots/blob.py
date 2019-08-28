@@ -7,9 +7,9 @@ import xarray as xr
 from skimage.feature import blob_dog, blob_doh, blob_log
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.spots.LocateSpots import spot_finding_utils
-from starfish.core.types import Axes, Features, Number, SpotAttributes
-from ._base import LocateSpotsAlgorithmBase
+from starfish.core.spots.FindSpots import spot_finding_utils
+from starfish.core.types import Axes, Features, Number, SpotAttributes, SpotFindingResults
+from ._base import FindSpotsAlgorithmBase
 
 blob_detectors = {
     'blob_dog': blob_dog,
@@ -18,7 +18,7 @@ blob_detectors = {
 }
 
 
-class BlobDetector(LocateSpotsAlgorithmBase):
+class BlobDetector(FindSpotsAlgorithmBase):
     """
     Multi-dimensional gaussian spot detector
 
@@ -62,7 +62,8 @@ class BlobDetector(LocateSpotsAlgorithmBase):
             overlap: float = 0.5,
             measurement_type='max',
             is_volume: bool = True,
-            detector_method: str = 'blob_log'
+            detector_method: str = 'blob_log',
+            exclude_border: Optional[int] = None,
     ) -> None:
 
         self.min_sigma = min_sigma
@@ -72,6 +73,7 @@ class BlobDetector(LocateSpotsAlgorithmBase):
         self.overlap = overlap
         self.is_volume = is_volume
         self.measurement_function = self._get_measurement_function(measurement_type)
+        self.exclude_border = exclude_border
         try:
             self.detector_method = blob_detectors[detector_method]
         except ValueError:
@@ -125,7 +127,7 @@ class BlobDetector(LocateSpotsAlgorithmBase):
             reference_image: Optional[ImageStack] = None,
             n_processes: Optional[int] = None,
             *args,
-    ) -> Dict[Tuple, SpotAttributes]:
+    ) -> SpotFindingResults:
         """
         Find spots.
 
@@ -148,15 +150,13 @@ class BlobDetector(LocateSpotsAlgorithmBase):
                 group_by={Axes.ROUND, Axes.CH},
                 n_processes=n_processes
             )
-            # todo technically just need first one but this is kinda hacky
             reference_spots = spot_attributes_list[0][0]
-            measured_spots = spot_finding_utils.measure_spot_intensities(image_stack, reference_spots, np.mean)
-            return measured_spots
+            results = spot_finding_utils.measure_spot_intensities(image_stack, reference_spots, np.mean)
         else:
             spot_attributes_list = image_stack.transform(
                 func=spot_finding_method,
                 group_by={Axes.ROUND, Axes.CH},
                 n_processes=n_processes
             )
-         # todo will probs need a converter in new Datastructre from spot attributes list
-        return spot_attributes_list
+            results = SpotFindingResults(spot_attributes_list)
+        return results

@@ -17,7 +17,7 @@
 # EPY: END markdown
 
 # EPY: START code
-from pprint import pprint 
+from pprint import pprint
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -105,7 +105,7 @@ transforms = ltt.run(projection)
 # EPY: END code
 
 # EPY: START markdown
-#How big are the identified translations? 
+#How big are the identified translations?
 # EPY: END markdown
 
 # EPY: START code
@@ -210,16 +210,32 @@ f = plot_scaling_result(stack, scaled)
 # EPY: END markdown
 
 # EPY: START code
-lsbd = starfish.spots.DetectSpots.LocalSearchBlobDetector(
+
+# TODO use Regular Blob search then build traces nearest neighbors
+
+blob_finder = starfish.spots.FindSpots.BlobDetector(
     min_sigma=1,
     max_sigma=8,
     num_sigma=10,
     threshold=np.percentile(np.ravel(stack.xarray.values), 95),
-    exclude_border=2,
-    anchor_round=0,
-    search_radius=10,
 )
-intensities = lsbd.run(scaled, n_processes=8)
+
+spots = blob_finder.run(scaled, n_processes=8)
+
+decoder = starfish.spots.DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook)
+decoded = decoder.run(spots=spots, search_radius=10, anchor_round=0)
+
+
+# lsbd = starfish.spots.DetectSpots.LocalSearchBlobDetector(
+#     min_sigma=1,
+#     max_sigma=8,
+#     num_sigma=10,
+#     threshold=np.percentile(np.ravel(stack.xarray.values), 95),
+#     exclude_border=2,
+#     anchor_round=0,
+#     search_radius=10,
+# )
+# intensities = lsbd.run(scaled, n_processes=8)
 # EPY: END code
 
 # EPY: START markdown
@@ -230,9 +246,7 @@ intensities = lsbd.run(scaled, n_processes=8)
 #uncomment the below lines.
 # EPY: END markdown
 
-# EPY: START code
-decoded = experiment.codebook.decode_per_round_max(intensities.fillna(0))
-decode_mask = decoded['target'] != 'nan'
+
 
 # %gui qt
 # viewer = starfish.display(

@@ -8,11 +8,11 @@ from sklearn.neighbors import NearestNeighbors
 
 
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.types import Axes, Features, SpotAttributes
+from starfish.core.types import Axes, Features, SpotFindingResults
 
 
 def _merge_spots_by_round(
-        spot_results: Dict[Tuple[int, int], pd.DataFrame]
+        spot_results: SpotFindingResults
 ) -> Dict[int, pd.DataFrame]:
     """Merge DataFrames containing spots from different channels into one DataFrame per round.
 
@@ -34,7 +34,7 @@ def _merge_spots_by_round(
 
     # add channel information to each table and add it to round_data
     round_data: Mapping[int, List] = defaultdict(list)
-    for (r, c), df in spot_results.items():
+    for (r, c), df in spot_results.all_spots():
         df[Axes.CH.value] = np.full(df.shape[0], c)
         round_data[r].append(df)
 
@@ -107,7 +107,7 @@ def _match_spots(
     return dist, ind
 
 
-def build_intensity_table(
+def _build_intensity_table(
         round_dataframes: Dict[int, pd.DataFrame],
         dist: pd.DataFrame,
         ind: pd.DataFrame,
@@ -173,27 +173,29 @@ def build_intensity_table(
     return intensity_table
 
 
-def build_spot_traces_nearest_neighbor(spot_results, image_stack, search_radius, anchor_round):
+def build_spot_traces_nearest_neighbor(spot_results: SpotFindingResults,
+                                       search_radius: int,
+                                       anchor_round: int):
     per_round_spot_results = _merge_spots_by_round(spot_results)
     distances, indices = _match_spots(
         per_round_spot_results,
         search_radius=search_radius, anchor_round=anchor_round
     )
-    intensity_table = build_intensity_table(
+    intensity_table = _build_intensity_table(
         per_round_spot_results, distances, indices,
-        rounds=image_stack.xarray[Axes.ROUND.value].values,
-        channels=image_stack.xarray[Axes.CH.value].values,
+        rounds=spot_results.round_labels(),
+        channels=spot_results.ch_labels(),
         search_radius=search_radius,
         anchor_round=anchor_round
     )
     return intensity_table
 
 
-def build_spot_traces_exact_match(spot_results, imagestack):
-    # use first spot attribues as reference
+def build_spot_traces_exact_match(spot_results: SpotFindingResults):
+    # create IntensityTable with same x/y/z info accross all r/ch
     spot_attributes = spot_results[0, 0]
-    ch_labels = imagestack.xarray[Axes.CH.value].values
-    round_labels = imagestack.xarray[Axes.ROUND.value].values
+    ch_labels = spot_results.round_labels()
+    round_labels = spot_results.ch_labels()
     intensity_table = IntensityTable.zeros(
         spot_attributes=spot_attributes,
         ch_labels=ch_labels,

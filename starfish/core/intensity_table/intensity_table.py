@@ -82,6 +82,7 @@ class IntensityTable(xr.DataArray):
             Axes.CH.value: np.array(channel_values),
             Axes.ROUND.value: np.array(round_values),
         })
+        # TODO could maybe add transfering coords here
         return coordinates
 
     @classmethod

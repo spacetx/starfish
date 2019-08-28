@@ -173,7 +173,7 @@ lp = LocateSpots.BlobDetector(
 
 dots_max = dots.max_proj(Axes.ROUND, Axes.ZPLANE)
 # locate spots in a reference image
-spot_locations = lp.run(dots_max)
+spot_locations = lp.run(reference_image=dots_max, image_stack=registered_imgs)
 
 decoder = DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook)
 decoded = decoder.run(spot_attributes=spot_locations, image_stack=registered_imgs)

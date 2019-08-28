@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Optional, Union
+from typing import Dict, Optional, Union, Tuple
 
 import numpy as np
 import pandas as pd
@@ -7,6 +7,7 @@ import xarray as xr
 from skimage.feature import blob_dog, blob_doh, blob_log
 
 from starfish.core.imagestack.imagestack import ImageStack
+from starfish.core.spots.LocateSpots import spot_finding_utils
 from starfish.core.types import Axes, Features, Number, SpotAttributes
 from ._base import LocateSpotsAlgorithmBase
 
@@ -102,7 +103,7 @@ class BlobDetector(LocateSpotsAlgorithmBase):
         )
 
         if fitted_blobs_array.shape[0] == 0:
-            return SpotAttributes.empty(extra_fields=['intensity', 'spot_id'])
+            return SpotAttributes.empty(extra_fields=[Features.INTENSITY, Features.SPOT_ID])
 
         # create the SpotAttributes Table
         columns = [Axes.ZPLANE.value, Axes.Y.value, Axes.X.value, Features.SPOT_RADIUS]
@@ -114,39 +115,48 @@ class BlobDetector(LocateSpotsAlgorithmBase):
 
         # convert the array to int so it can be used to index
         spots = SpotAttributes(fitted_blobs)
-        spots.data['spot_id'] = np.arange(spots.data.shape[0])
+        spots.data[Features.SPOT_ID] = np.arange(spots.data.shape[0])
 
         return spots
 
     def run(
             self,
             image_stack: ImageStack,
+            reference_image: Optional[ImageStack] = None,
             n_processes: Optional[int] = None,
             *args,
-    ) -> SpotAttributes:
+    ) -> Dict[Tuple, SpotAttributes]:
         """
         Find spots.
 
         Parameters
         ----------
-        primary_image : ImageStack
+        image_stack : ImageStack
             ImageStack where we find the spots in.
-        blobs_image : Optional[ImageStack]
-            If provided, spots will be found in the blobs image, and intensities will be measured
-            across rounds and channels. Otherwise, spots are measured independently for each channel
-            and round.
-        blobs_axes : Optional[Tuple[Axes, ...]]
-            If blobs_image is provided, blobs_axes must be provided as well.  blobs_axes represents
-            the axes across which the blobs image is max projected before spot detection is done.
+        reference_image : xr.DataArray
+            (Optional) a reference image. If provided, spots will be found in this image, and then
+            the locations that correspond to these spots will be measured across each channel and round,
+            filling in the values in the IntensityTable
         n_processes : Optional[int] = None,
             Number of processes to devote to spot finding.
         """
 
         spot_finding_method = partial(self.image_to_spots, *args)
-        spot_attributes_list = image_stack.transform(
-            func=spot_finding_method,
-            group_by={Axes.ROUND, Axes.CH},
-            n_processes=n_processes
-        )
-
-        return SpotAttributes(pd.concat([sa.data for sa, inds in spot_attributes_list], sort=True))
+        if reference_image:
+            spot_attributes_list = reference_image.transform(
+                func=spot_finding_method,
+                group_by={Axes.ROUND, Axes.CH},
+                n_processes=n_processes
+            )
+            # todo technically just need first one but this is kinda hacky
+            reference_spots = spot_attributes_list[0][0]
+            measured_spots = spot_finding_utils.measure_spot_intensities(image_stack, reference_spots, np.mean)
+            return measured_spots
+        else:
+            spot_attributes_list = image_stack.transform(
+                func=spot_finding_method,
+                group_by={Axes.ROUND, Axes.CH},
+                n_processes=n_processes
+            )
+         # todo will probs need a converter in new Datastructre from spot attributes list
+        return spot_attributes_list

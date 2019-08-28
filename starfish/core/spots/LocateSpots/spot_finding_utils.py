@@ -1,21 +1,14 @@
+from copy import copy
 from itertools import product
-from typing import Callable, Sequence, Union
+from typing import Callable, Dict, Sequence, Union, Tuple
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.intensity_table.intensity_table_coordinates import \
-    transfer_physical_coords_from_imagestack_to_intensity_table
 from starfish.core.types import SpotAttributes
 from starfish.types import Axes, Features, Number
-
-
-def convert_spot_attributes_to_traces(spot_attributes: SpotAttributes
-                                      ) -> IntensityTable:
-    return IntensityTable.synthetic_intensities(None)
 
 
 def measure_spot_intensity(
@@ -67,18 +60,17 @@ def measure_spot_intensity(
 
 def measure_spot_intensities(
         data_image: ImageStack,
-        spot_attributes: SpotAttributes,
+        reference_spots: SpotAttributes,
         measurement_function: Callable[[Sequence], Number],
-        radius_is_gyration: bool = False,
-) -> IntensityTable:
+        radius_is_gyration: bool = False) -> Dict[Tuple[int, int], SpotAttributes]:
     """given spots found from a reference image, find those spots across a data_image
 
     Parameters
     ----------
     data_image : ImageStack
         ImageStack containing multiple volumes for which spots' intensities must be calculated
-    spot_attributes : pd.Dataframe
-        Locations and radii of spots
+    reference_spots : SpotAttributes
+        Spots found in a reference image
     measurement_function : Callable[[Sequence], Number])
         Function to apply over the spot volumes to identify the intensity (e.g. max, mean, ...)
     radius_is_gyration : bool
@@ -89,7 +81,7 @@ def measure_spot_intensities(
 
     Returns
     -------
-    IntensityTable :
+    SpotFindingResults :
         3d tensor of (spot, channel, round) information for each coded spot
 
     """
@@ -98,30 +90,20 @@ def measure_spot_intensities(
     ch_labels = data_image.axis_labels(Axes.CH)
     round_labels = data_image.axis_labels(Axes.ROUND)
 
-    # construct the empty intensity table
-    intensity_table = IntensityTable.zeros(
-        spot_attributes=spot_attributes,
-        ch_labels=ch_labels,
-        round_labels=round_labels,
-    )
-
-    # if no spots were detected, return the empty IntensityTable
-    if intensity_table.sizes[Features.AXIS] == 0:
-        return intensity_table
-
-    # fill the intensity table
+    spot_results = {}
+    # measure spots
     indices = product(ch_labels, round_labels)
     for c, r in indices:
         image, _ = data_image.get_slice({Axes.CH: c, Axes.ROUND: r})
         blob_intensities: pd.Series = measure_spot_intensity(
             image,
-            spot_attributes,
+            reference_spots,
             measurement_function,
             radius_is_gyration=radius_is_gyration
         )
-        intensity_table.loc[dict(c=c, r=r)] = blob_intensities
-
-    transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=data_image,
-                                                                intensity_table=intensity_table)
-
-    return intensity_table
+        # copy reference spot positions and attributes
+        all_spot_attributes = SpotAttributes(reference_spots.data.copy())
+        # fill in intensities
+        all_spot_attributes.data[Features.INTENSITY] = blob_intensities
+        spot_results[r, c] = all_spot_attributes
+    return spot_results

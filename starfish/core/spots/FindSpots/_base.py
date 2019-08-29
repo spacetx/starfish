@@ -1,7 +1,8 @@
 from abc import abstractmethod
-from typing import Callable, Optional, Sequence
+from typing import Callable, Optional, Union
 
 import numpy as np
+import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.pipeline.algorithmbase import AlgorithmBase
@@ -46,7 +47,9 @@ class FindSpotsAlgorithm(metaclass=AlgorithmBase):
         raise NotImplementedError()
 
     @staticmethod
-    def _get_measurement_function(measurement_type: str) -> Callable[[Sequence], Number]:
+    def _get_measurement_function(
+            measurement_type: str
+    ) -> Callable[[Union[np.ndarray, xr.DataArray]], Number]:
         try:
             measurement_function = getattr(np, measurement_type)
         except AttributeError:

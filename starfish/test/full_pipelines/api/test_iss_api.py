@@ -5,9 +5,9 @@ import tempfile
 import numpy as np
 
 import starfish
-from starfish import IntensityTable
+from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.spots import AssignTargets
-from starfish.types import Coordinates, Features
+from starfish.types import Coordinates
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(starfish.__file__)))
 os.environ["USE_TEST_DATA"] = "1"
@@ -90,12 +90,6 @@ def test_iss_pipeline_cropped_data(tmpdir):
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'Warp'
-    assert pipeline_log[2]['method'] == 'BlobDetector'
-
-    intensities = iss.intensities
-
-    # assert that the number of spots detected is 99
-    assert intensities.sizes[Features.AXIS] == 99
 
     # decode
     decoded = iss.decoded
@@ -128,6 +122,7 @@ def test_iss_pipeline_cropped_data(tmpdir):
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'Warp'
     assert pipeline_log[2]['method'] == 'BlobDetector'
+    assert pipeline_log[3]['method'] == 'PerRoundMaxChannel'
 
     # Test serialization / deserialization of IntensityTable log
     with tempfile.NamedTemporaryFile(dir=tmpdir, delete=False) as ntf:
@@ -139,6 +134,7 @@ def test_iss_pipeline_cropped_data(tmpdir):
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'Warp'
     assert pipeline_log[2]['method'] == 'BlobDetector'
+    assert pipeline_log[3]['method'] == 'PerRoundMaxChannel'
 
     # 28 of the spots are assigned to cell 1 (although most spots do not decode!)
     assert np.sum(assigned['cell_id'] == '1') == 28

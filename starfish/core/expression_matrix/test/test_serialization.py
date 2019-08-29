@@ -11,7 +11,7 @@ def test_save_expression_matrix():
 
     codebook = codebook_array_factory()
 
-    decoded_intensities = factories.synthetic_decoded_intenisty_table(
+    decoded_intensities = factories.synthetic_decoded_intensity_table(
         codebook,
         num_z=3,
         height=100,

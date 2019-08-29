@@ -184,7 +184,7 @@ spots = lp.run(image_stack=registered_imgs, reference_image=dots_max)
 decoder = DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook)
 decoded = decoder.run(spots=spots)
 
-# EPY: START code
+# EPY: ESCAPE # EPY: START code
 # Besides house keeping genes, VIM and HER2 should be most highly expessed, which is consistent here.
 genes, counts = np.unique(decoded.loc[decoded[Features.PASSES_THRESHOLDS]][Features.TARGET], return_counts=True)
 table = pd.Series(counts, index=genes).sort_values(ascending=False)

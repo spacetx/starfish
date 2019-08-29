@@ -5,6 +5,7 @@ import tempfile
 import numpy as np
 
 import starfish
+from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.spots import AssignTargets
 from starfish.types import Coordinates
 
@@ -85,10 +86,10 @@ def test_iss_pipeline_cropped_data():
         registered_image.xarray[2, 2, 0, 40:50, 40:50]
     )
 
-    # pipeline_log = registered_image.log
-    #
-    # assert pipeline_log[0]['method'] == 'WhiteTophat'
-    # assert pipeline_log[1]['method'] == 'Warp'
+    pipeline_log = registered_image.log.data
+
+    assert pipeline_log[0]['method'] == 'WhiteTophat'
+    assert pipeline_log[1]['method'] == 'Warp'
 
     # decode
     decoded = iss.decoded
@@ -111,26 +112,28 @@ def test_iss_pipeline_cropped_data():
     lab = AssignTargets.Label()
     assigned = lab.run(masks, decoded)
 
-    # pipeline_log = assigned.get_log()
+    pipeline_log = assigned.get_log()
 
     # assert tht physical coordinates were transferred
     assert Coordinates.X in assigned.coords
     assert Coordinates.Y in assigned.coords
     assert Coordinates.Z in assigned.coords
 
-    # assert pipeline_log[0]['method'] == 'WhiteTophat'
-    # assert pipeline_log[1]['method'] == 'Warp'
-    # assert pipeline_log[2]['method'] == 'MeasureSpotIntensities'
+    assert pipeline_log[0]['method'] == 'WhiteTophat'
+    assert pipeline_log[1]['method'] == 'Warp'
+    assert pipeline_log[2]['method'] == 'BlobDetector'
+    assert pipeline_log[3]['method'] == 'PerRoundMaxChannel'
 
     # Test serialization / deserialization of IntensityTable log
     fp = tempfile.NamedTemporaryFile()
     assigned.to_netcdf(fp.name)
-    # loaded_intensities = IntensityTable.open_netcdf(fp.name)
-    # pipeline_log = loaded_intensities.get_log()
+    loaded_intensities = IntensityTable.open_netcdf(fp.name)
+    pipeline_log = loaded_intensities.get_log()
 
-    # assert pipeline_log[0]['method'] == 'WhiteTophat'
-    # assert pipeline_log[1]['method'] == 'Warp'
-    # assert pipeline_log[2]['method'] == 'MeasureSpotIntensities'
+    assert pipeline_log[0]['method'] == 'WhiteTophat'
+    assert pipeline_log[1]['method'] == 'Warp'
+    assert pipeline_log[2]['method'] == 'BlobDetector'
+    assert pipeline_log[3]['method'] == 'PerRoundMaxChannel'
 
     # 28 of the spots are assigned to cell 1 (although most spots do not decode!)
     assert np.sum(assigned['cell_id'] == '1') == 28

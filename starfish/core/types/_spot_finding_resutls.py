@@ -3,6 +3,7 @@ from typing import List, Mapping, Optional, Tuple
 import xarray as xr
 
 from starfish.core.types import Axes, Coordinates, SpotAttributes
+from starfish.core.util.logging import Log
 
 
 AXES_ORDER = (Axes.ROUND, Axes.CH)
@@ -34,6 +35,7 @@ class SpotFindingResults:
             Axes.X.value: imagestack.xarray[Coordinates.X.value],
             Axes.Y.value: imagestack.xarray[Coordinates.Y.value],
             Axes.ZPLANE.value: imagestack.xarray[Coordinates.Z.value]}
+        self._log: Log = imagestack.log
 
     def set_spots_for_round_ch(self, indices: Mapping[Axes, int], spots: SpotAttributes
                                ) -> None:
@@ -99,3 +101,19 @@ class SpotFindingResults:
         information for calculating the physical coordinate values of decoded spots.
         """
         return self.physical_coord_ranges
+
+    @property
+    def log(self) -> Log:
+        """
+        Returns a list of pipeline components that have been applied to this get these SpotResults
+        as well as their corresponding runtime parameters.
+
+        For more information about provenance logging see
+        `Provenance Logging
+        <https://spacetx-starfish.readthedocs.io/en/latest/help_and_reference/api/utils/ilogging.html>`_
+
+        Returns
+        -------
+        List[dict]
+        """
+        return self._log

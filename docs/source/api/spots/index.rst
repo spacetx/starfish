@@ -38,6 +38,18 @@ Spot Detectors can be imported using ``starfish.spots.DetectSpots``, which regis
 .. autoclass:: starfish.spots.DetectSpots
     :members:
 
+NOTE: Starfish is embarking on a SpotFinding data structures refactor see `Spot Finding Refactor Plan`_
+DetectSpots will be replaced by the FindSpots module documented below.
+
+.. _`Spot Finding Refactor Plan`: https://github.com/spacetx/starfish/issues/1514
+
+.. code-block:: python
+
+    from starfish.spots import FindSpots
+
+.. automodule:: starfish.spots.FindSpots
+    :members:
+
 
 .. _decoding:
 
@@ -51,6 +63,15 @@ Decoders can be imported using ``starfish.spots.Decode``, which registers all cl
     from starfish.spots import Decode
 
 .. autoclass:: starfish.spots.Decode
+   :members:
+
+NOTE: Starfish is embarking on a SpotFinding data structures refactor see `Spot Finding Refactor Plan`_
+
+.. code-block:: python
+
+    from starfish.spots import DecodeSpots
+
+.. automodule:: starfish.spots.DecodeSpots
    :members:
 
 

@@ -11,7 +11,7 @@ from starfish.core.types import Axes, Coordinates, Features, PhysicalCoordinateT
 from .factories import synthetic_decoded_intenisty_table
 from ..intensity_table import IntensityTable
 from ..intensity_table_coordinates import (
-    transfer_physical_coords_from_imagestack_to_intensity_table,
+    transfer_physical_coords_to_intensity_table,
 )
 
 NUMBER_SPOTS = 10
@@ -46,7 +46,8 @@ def test_tranfering_physical_coords_to_intensity_table():
         n_spots=NUMBER_SPOTS
     )
 
-    intensities = transfer_physical_coords_from_imagestack_to_intensity_table(stack, intensities)
+    intensities = transfer_physical_coords_to_intensity_table(intensity_table=intensities,
+                                                              image_stack=stack)
 
     # Assert that new cords were added
     xc = intensities.coords[Coordinates.X]
@@ -100,8 +101,8 @@ def test_tranfering_physical_coords_to_expression_matrix():
         n_spots=NUMBER_SPOTS
     )
 
-    intensities = transfer_physical_coords_from_imagestack_to_intensity_table(
-        stack, decoded_intensities)
+    intensities = transfer_physical_coords_to_intensity_table(
+        image_stack=stack, intensity_table=decoded_intensities)
 
     # Check that error is thrown before target assignment
     try:

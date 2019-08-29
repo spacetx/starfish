@@ -1,6 +1,9 @@
-from typing import List, Mapping, MutableMapping, Optional, Tuple
+from typing import Hashable, List, Mapping, MutableMapping, Optional, Tuple
 
-from starfish.core.types import Axes, SpotAttributes
+import xarray as xr
+
+from starfish.core.types import Axes, Coordinates, SpotAttributes
+
 
 AXES_ORDER = (Axes.ROUND, Axes.CH)
 
@@ -12,7 +15,7 @@ class SpotFindingResults:
     SpotAttributes.
     """
 
-    def __init__(self, spot_attributes_list: Optional[List[Tuple]] = None):
+    def __init__(self, imagestack_coords, spot_attributes_list: Optional[List[Tuple]] = None):
         """
         Construct a SpotFindingResults instance
 
@@ -28,6 +31,10 @@ class SpotFindingResults:
             indices: spots
             for indices, spots in spot_attributes_list
         }
+        self.physical_coord_ranges: Mapping[Hashable, xr.DataArray] = {
+            Axes.X.value: imagestack_coords[Coordinates.X.value],
+            Axes.Y.value: imagestack_coords[Coordinates.Y.value],
+            Axes.ZPLANE.value: imagestack_coords[Coordinates.Z.value]}
 
     def __setitem__(self, indices: Mapping[Axes, int], spots: SpotAttributes):
         """
@@ -83,4 +90,13 @@ class SpotFindingResults:
         """
         Return the set of ch labels in the SpotFindingResults
         """
+
         return sorted(set(ch for (r, ch) in self.keys()))
+
+    @property
+    def get_physical_coord_ranges(self) -> Mapping[Hashable, xr.DataArray]:
+        """
+        Returns the physical coordinate ranges the SpotResults cover. Needed
+        information for calculating the physical coordinate values of decoded spots.
+        """
+        return self.physical_coord_ranges

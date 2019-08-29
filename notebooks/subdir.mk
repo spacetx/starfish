@@ -29,10 +29,10 @@ $(ipynb_validate_targets): validate__notebooks/%.ipynb :
 	nbencdec encode notebooks/$*.ipynb $(TEMPFILE)
 	diff -q <(cat notebooks/py/$*.py | egrep -v '^# EPY: stripped_notebook: ') <(cat $(TEMPFILE) | egrep -v '# EPY: stripped_notebook: ')
 
-$(ipynb_regenerate_targets): regenerate__notebooks/%.ipynb : notebooks/py/%.py
+$(ipynb_regenerate_targets): regenerate__notebooks/%.ipynb :
 	nbencdec decode notebooks/py/$*.py notebooks/$*.ipynb
 
-$(py_regenerate_targets): regenerate__notebooks/py/%.py : notebooks/%.ipynb
+$(py_regenerate_targets): regenerate__notebooks/py/%.py :
 	nbencdec encode notebooks/$*.ipynb notebooks/py/$*.py
 
-.PHONY : $(py_files)
+.PHONY : $(py_files) $(ipynb_regenerate_targets) $(py_regenerate_targets)

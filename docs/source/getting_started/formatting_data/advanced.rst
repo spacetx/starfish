@@ -67,7 +67,7 @@ data, you can run the following commands:
         --exclude "*" \
         --include "slideA_1_*" \
         --include "slideA_2_*" \
-        --include "coordinates.json" \
+        --include "fabricated_test_coordinates.json" \
         --no-sign-request
     ls iss/raw
 

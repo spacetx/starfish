@@ -36,7 +36,13 @@ barcode a given trace was.
 to create a pipeline that can be run either on the API, or using starfish's CLI. This vignette will
 demonstrate the API.
 
-The above steps can be recapitulated using starfish as follows:
+The above steps can be recapitulated using starfish, after downloading
+an example codeblock, as follows:
+
+.. code-block: bash
+
+    aws s3 cp s3://spacetx.starfish.data.public/browse/formatted/20180926/iss_breast/codebook.json iss/formatted/ \
+        --no-sign-request
+   python docs/source/_static/data_processing_examples/iss_pipeline.py
 
 .. literalinclude:: ../../_static/data_processing_examples/iss_pipeline.py
-

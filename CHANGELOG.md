@@ -1,3 +1,19 @@
+## [0.1.5] - 2019-08-12
+- Update the documentation for data formatters (#1476)
+- add ability to convert segmentation masks to a label image
+- If in_place=True, we should return None (#1473)
+- downgrade pyparsing (#1467)
+- fixes unicode in issue template (#1464)
+- Adds issue templates (#1460)
+- Updating requirements. (#1461)
+- Bump to slicedimage 4.0.1 (#1458)
+- on-demand loading of data. (#1456)
+- Get rid of the check-requirements cron job. (#1448)
+- Fixing travis build  (#1457)
+- removing duplicate file (#1455)
+- Remove Cli (#1444)
+
+
 ## [0.1.4] - 2019-07-16
 - Update in-place experiment writing to use the new WriterContract API in slicedimage 4.0.0 (#1447)
 - data set formatter with fixed filenames (#1421)

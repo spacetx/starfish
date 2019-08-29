@@ -39,6 +39,30 @@ class LocalSearchBlobDetector(DetectSpotsAlgorithmBase):
     consensus filtering can be used to extract codes that are consistently extracted across
     rounds.
 
+    In brief, this spot finder operates on a few assumptions:
+    1. Codes that represent transcripts are one-hot, meaning that in each round, one and only one
+       channel should be "on" for a given transcript.
+    2. Due to experimental conditions, there may be a small amount of jitter the the exact position
+       of each spots.
+    3. To build codes in these circumstances, one must be able to account for small deviations in
+       physical position to reconstruct codes.
+
+    The LocalSearchBlobDetector accomplishes this as follows:
+
+    1. Identify spots independently in all rounds and channels.
+    2. Identify an `anchor round`. Spots in this round will serve as the central location of a
+       local search. The best round to select for the anchor round is the one that has the best
+       signal to noise ratio.
+    3. In rounds other than the anchor round, search for the closest spot that is within
+       `search_radius` pixels of the anchor spot. Intuitively, search radius should be the smallest
+       value possible that accounts for local jitter in spot position introduced by your
+       experimental approach. A common value is 2.5 pixels.
+    4. Construct an IntensityTable, where for each anchor spot, spots in other rounds and channels
+       are merged into single features, storing the (z, y, x) coordinates of the anchor spots.
+
+    The IntensityTable can then be decoded with downstream tools. This approach was used to good
+    effect in the STARmap paper (DOI: 10.1126/science.aat5691)
+
     Parameters
     ----------
     min_sigma : float

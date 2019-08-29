@@ -5,11 +5,11 @@ Format In-Situ Sequencing Data
 The following script formats In-Situ Sequencing data in SpaceTx-Format
 """
 import argparse
+import json
 import os
 from typing import Mapping, Union
 
 import numpy as np
-import pandas as pd
 from skimage.io import imread
 from slicedimage import ImageFormat
 
@@ -48,8 +48,9 @@ class IssCroppedBreastTile(FetchedTile):
 class ISSCroppedBreastPrimaryTileFetcher(TileFetcher):
     def __init__(self, input_dir):
         self.input_dir = input_dir
-        coordinates = os.path.join(input_dir, "coordinates.csv")
-        self.coordinates_df = pd.read_csv(coordinates, index_col=0)
+        coordinates = os.path.join(input_dir, "fabricated_test_coordinates.json")
+        with open(coordinates) as f:
+            self.coordinates_dict = json.load(f)
 
     @property
     def ch_dict(self):
@@ -73,15 +74,10 @@ class ISSCroppedBreastPrimaryTileFetcher(TileFetcher):
         file_path = os.path.join(self.input_dir, filename)
 
         # get coordinates
+        fov_c_id = f"fov_{fov_id:03d}"
         coordinates = {
-            Coordinates.X: (
-                self.coordinates_df.loc[fov_id, "x_min"],
-                self.coordinates_df.loc[fov_id, "x_max"]
-            ),
-            Coordinates.Y: (
-                self.coordinates_df.loc[fov_id, "y_min"],
-                self.coordinates_df.loc[fov_id, "y_max"]
-            ),
+            Coordinates.X: self.coordinates_dict[fov_c_id]["xc"],
+            Coordinates.Y: self.coordinates_dict[fov_c_id]["yc"],
         }
 
         return IssCroppedBreastTile(file_path, coordinates)
@@ -91,8 +87,9 @@ class ISSCroppedBreastAuxTileFetcher(TileFetcher):
     def __init__(self, input_dir, aux_type):
         self.input_dir = input_dir
         self.aux_type = aux_type
-        coordinates = os.path.join(input_dir, "coordinates.csv")
-        self.coordinates_df = pd.read_csv(coordinates, index_col=0)
+        coordinates = os.path.join(input_dir, "fabricated_test_coordinates.json")
+        with open(coordinates) as f:
+            self.coordinates_dict = json.load(f)
 
     def get_tile(
             self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
@@ -108,21 +105,16 @@ class ISSCroppedBreastAuxTileFetcher(TileFetcher):
         file_path = os.path.join(self.input_dir, filename)
 
         # get coordinates
+        fov_c_id = f"fov_{fov_id:03d}"
         coordinates = {
-            Coordinates.X: (
-                self.coordinates_df.loc[fov_id, "x_min"],
-                self.coordinates_df.loc[fov_id, "x_max"]
-            ),
-            Coordinates.Y: (
-                self.coordinates_df.loc[fov_id, "y_min"],
-                self.coordinates_df.loc[fov_id, "y_max"]
-            ),
+            Coordinates.X: self.coordinates_dict[fov_c_id]["xc"],
+            Coordinates.Y: self.coordinates_dict[fov_c_id]["yc"],
         }
 
         return IssCroppedBreastTile(file_path, coordinates=coordinates)
 
 
-def format_data(input_dir, output_dir):
+def format_data(input_dir, output_dir, num_fov):
 
     primary_image_dimensions = {
         Axes.ROUND: 4,
@@ -145,7 +137,7 @@ def format_data(input_dir, output_dir):
 
     write_experiment_json(
         path=output_dir,
-        fov_count=16,
+        fov_count=num_fov,
         tile_format=ImageFormat.TIFF,
         primary_image_dimensions=primary_image_dimensions,
         aux_name_to_dimensions=aux_name_to_dimensions,
@@ -174,6 +166,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("input_dir", type=FsExistsType(), help=input_help_msg)
     parser.add_argument("output_dir", type=FsExistsType(), help=output_help_msg)
+    parser.add_argument("num_fov", type=int, help=fov_help_msg)
 
     args = parser.parse_args()
-    format_data(args.input_dir, args.output_dir)
+    format_data(args.input_dir, args.output_dir, args.num_fov)

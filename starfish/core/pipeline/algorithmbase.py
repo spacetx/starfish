@@ -1,5 +1,4 @@
 import functools
-import inspect
 from abc import ABCMeta
 
 from starfish.core.imagestack.imagestack import ImageStack
@@ -12,8 +11,9 @@ from starfish.core.util.logging import LogEncoder
 class AlgorithmBase(ABCMeta):
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
-        if not inspect.isabstract(cls):
-            cls.run = AlgorithmBase.run_with_logging(cls.run)
+        # TODO DISABLING LOGGING DURING SPOT FINDING REFACTOR WORK
+        # if not inspect.isabstract(cls):
+        #         #     cls.run = AlgorithmBase.run_with_logging(cls.run)
 
     @staticmethod
     def run_with_logging(func):

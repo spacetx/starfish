@@ -1,5 +1,5 @@
 from ._base import FindSpotsAlgorithm
-
+from .blob import BlobDetector
 
 # autodoc's automodule directive only captures the modules explicitly listed in __all__.
 all_filters = {

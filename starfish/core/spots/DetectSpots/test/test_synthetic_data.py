@@ -88,5 +88,4 @@ def test_medium_synthetic_stack():
     calculated_intensities = codebook.decode_metric(
         calculated_intensities, max_distance=1, min_intensity=0, norm_order=2
     )
-
     assert len(calculated_intensities.coords[Features.TARGET]) == 80

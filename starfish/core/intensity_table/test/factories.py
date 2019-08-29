@@ -11,7 +11,7 @@ def synthetic_intensity_table() -> IntensityTable:
     return IntensityTable.synthetic_intensities(loaded_codebook(), n_spots=2)
 
 
-def synthetic_decoded_intenisty_table(
+def synthetic_decoded_intensity_table(
         codebook,
         num_z: int = 12,
         height: int = 50,

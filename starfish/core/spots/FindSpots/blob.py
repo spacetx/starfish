@@ -1,15 +1,16 @@
-from typing import Optional, Tuple, Union
+from functools import partial
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 from skimage.feature import blob_dog, blob_doh, blob_log
 
+from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.types import Axes, Features, Number, SpotAttributes
-from ._base import DetectSpotsAlgorithm
-from .detect import detect_spots, measure_spot_intensity
+from starfish.core.spots.FindSpots import spot_finding_utils
+from starfish.core.types import Axes, Features, Number, SpotAttributes, SpotFindingResults
+from ._base import FindSpotsAlgorithm
 
 blob_detectors = {
     'blob_dog': blob_dog,
@@ -18,7 +19,7 @@ blob_detectors = {
 }
 
 
-class BlobDetector(DetectSpotsAlgorithm):
+class BlobDetector(FindSpotsAlgorithm):
     """
     Multi-dimensional gaussian spot detector
 
@@ -26,10 +27,10 @@ class BlobDetector(DetectSpotsAlgorithm):
 
     Parameters
     ----------
-    min_sigma : float
+    min_sigma : Number
         The minimum standard deviation for Gaussian Kernel. Keep this low to
         detect smaller blobs.
-    max_sigma : float
+    max_sigma : Number
         The maximum standard deviation for Gaussian Kernel. Keep this high to
         detect larger blobs.
     num_sigma : int
@@ -37,15 +38,19 @@ class BlobDetector(DetectSpotsAlgorithm):
         between `min_sigma` and `max_sigma`.
     threshold : float
         The absolute lower bound for scale space maxima. Local maxima smaller
-        than thresh are ignored. Reduce this to detect blobs with less
+        than threshold are ignored. Reduce this to detect blobs with less
         intensities.
+    is_volume: bool
+        If True, pass 3d volumes (x, y, z) to func, else pass 2d tiles (x, y) to func. (default:
+        True)
     overlap : float [0, 1]
         If two spots have more than this fraction of overlap, the spots are combined
-        (default = 0.5)
+        (default: 0.5)
     measurement_type : str ['max', 'mean']
         name of the function used to calculate the intensity for each identified spot area
+        (default: max)
     detector_method: str ['blob_dog', 'blob_doh', 'blob_log']
-        name of the type of detection method used from skimage.feature, default: blob_log
+        name of the type of detection method used from skimage.feature (default: blob_log)
 
     Notes
     -----
@@ -62,7 +67,8 @@ class BlobDetector(DetectSpotsAlgorithm):
             overlap: float = 0.5,
             measurement_type='max',
             is_volume: bool = True,
-            detector_method: str = 'blob_log'
+            detector_method: str = 'blob_log',
+            exclude_border: Optional[int] = None,
     ) -> None:
 
         self.min_sigma = min_sigma
@@ -72,6 +78,7 @@ class BlobDetector(DetectSpotsAlgorithm):
         self.overlap = overlap
         self.is_volume = is_volume
         self.measurement_function = self._get_measurement_function(measurement_type)
+        self.exclude_border = exclude_border
         try:
             self.detector_method = blob_detectors[detector_method]
         except ValueError:
@@ -103,7 +110,7 @@ class BlobDetector(DetectSpotsAlgorithm):
         )
 
         if fitted_blobs_array.shape[0] == 0:
-            return SpotAttributes.empty(extra_fields=['intensity', 'spot_id'])
+            return SpotAttributes.empty(extra_fields=[Features.INTENSITY, Features.SPOT_ID])
 
         # create the SpotAttributes Table
         columns = [Axes.ZPLANE.value, Axes.Y.value, Axes.X.value, Features.SPOT_RADIUS]
@@ -115,49 +122,49 @@ class BlobDetector(DetectSpotsAlgorithm):
 
         # convert the array to int so it can be used to index
         spots = SpotAttributes(fitted_blobs)
-
-        spots.data['intensity'] = measure_spot_intensity(
-            data_image, spots, self.measurement_function)
-        spots.data['spot_id'] = np.arange(spots.data.shape[0])
+        spots.data[Features.SPOT_ID] = np.arange(spots.data.shape[0])
 
         return spots
 
     def run(
             self,
-            primary_image: ImageStack,
-            blobs_image: Optional[ImageStack] = None,
-            blobs_axes: Optional[Tuple[Axes, ...]] = None,
+            image_stack: ImageStack,
+            reference_image: Optional[ImageStack] = None,
             n_processes: Optional[int] = None,
             *args,
-    ) -> IntensityTable:
+    ) -> SpotFindingResults:
         """
-        Find spots.
+        Find spots in the given ImageStack using a gaussian blob finding algorithm.
+        If a reference image is provided the spots will be detected there then measured
+        across all rounds and channels in the corresponding ImageStack. If a reference_image
+        is not provided spots will be detected _independently_ in each channel. This assumes
+        a non-multiplex imaging experiment, as only one (ch, round) will be measured for each spot.
 
         Parameters
         ----------
-        primary_image : ImageStack
+        image_stack : ImageStack
             ImageStack where we find the spots in.
-        blobs_image : Optional[ImageStack]
-            If provided, spots will be found in the blobs image, and intensities will be measured
-            across rounds and channels. Otherwise, spots are measured independently for each channel
-            and round.
-        blobs_axes : Optional[Tuple[Axes, ...]]
-            If blobs_image is provided, blobs_axes must be provided as well.  blobs_axes represents
-            the axes across which the blobs image is max projected before spot detection is done.
+        reference_image : xr.DataArray
+            (Optional) a reference image. If provided, spots will be found in this image, and then
+            the locations that correspond to these spots will be measured across each channel.
         n_processes : Optional[int] = None,
             Number of processes to devote to spot finding.
         """
-        DeprecationWarning("Starfish is embarking on a SpotFinding data structures refactor"
-                           "(See https://github.com/spacetx/starfish/issues/1514) This version of "
-                           "BlobDetection will soon be deleted. To find and decode your spots "
-                           "please instead use FindSpots.BlobDetector followed by DecodeSpots.")
-        intensity_table = detect_spots(
-            data_stack=primary_image,
-            spot_finding_method=self.image_to_spots,
-            reference_image=blobs_image,
-            reference_image_max_projection_axes=blobs_axes,
-            measurement_function=self.measurement_function,
-            n_processes=n_processes,
-            radius_is_gyration=False)
-
-        return intensity_table
+        spot_finding_method = partial(self.image_to_spots, *args)
+        if reference_image:
+            data_image = reference_image._squeezed_numpy(*{Axes.ROUND, Axes.CH})
+            reference_spots = spot_finding_method(data_image)
+            results = spot_finding_utils.measure_intensities_at_spot_locations_across_imagestack(
+                data_image=image_stack,
+                reference_spots=reference_spots,
+                measurement_function=self.measurement_function)
+        else:
+            spot_attributes_list = image_stack.transform(
+                func=spot_finding_method,
+                group_by=determine_axes_to_group_by(self.is_volume),
+                n_processes=n_processes
+            )
+            results = SpotFindingResults(imagestack_coords=image_stack.xarray.coords,
+                                         log=image_stack.log,
+                                         spot_attributes_list=spot_attributes_list)
+        return results

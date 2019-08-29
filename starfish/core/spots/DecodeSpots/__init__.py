@@ -1,5 +1,5 @@
 from ._base import DecodeSpotsAlgorithm
-
+from .per_round_max_channel_decoder import PerRoundMaxChannel
 
 # autodoc's automodule directive only captures the modules explicitly listed in __all__.
 all_filters = {

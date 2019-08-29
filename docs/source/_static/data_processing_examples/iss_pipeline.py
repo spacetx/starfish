@@ -7,7 +7,7 @@ import os
 
 import starfish
 from starfish.image import ApplyTransform, Filter, LearnTransform, Segment
-from starfish.spots import DetectSpots, AssignTargets
+from starfish.spots import FindSpots, DecodeSpots, AssignTargets
 from starfish.types import Axes
 
 test = os.getenv("TESTING") is not None
@@ -30,8 +30,7 @@ def iss_pipeline(fov, codebook):
     filt = Filter.WhiteTophat(masking_radius, is_volume=False)
     filtered = filt.run(registered, verbose=True, in_place=False)
 
-    # detect spots using laplacian of gaussians approach
-    p = DetectSpots.BlobDetector(
+    bd = FindSpots.BlobDetector(
         min_sigma=1,
         max_sigma=10,
         num_sigma=30,
@@ -39,13 +38,15 @@ def iss_pipeline(fov, codebook):
         measurement_type='mean',
     )
 
-    intensities = p.run(
-        filtered,
-        blobs_image=fov.get_image('dots'),
-        blobs_axes=(Axes.ROUND, Axes.ZPLANE))
+    # detect spots using laplacian of gaussians approach
+    dots_max_projector = Filter.Reduce((Axes.ROUND, Axes.ZPLANE), func="max", module=Filter.Reduce.FunctionSource.np)
+    dots_max = dots_max_projector.run(fov.get_image('dots'))
+    # locate spots in a reference image
+    spots = bd.run(reference_image=dots_max, image_stack=filtered)
 
     # decode the pixel traces using the codebook
-    decoded = codebook.decode_per_round_max(intensities)
+    decoder = DecodeSpots.PerRoundMaxChannel(codebook=codebook)
+    decoded = decoder.run(spots=spots)
 
     # segment cells
     seg = Segment.Watershed(

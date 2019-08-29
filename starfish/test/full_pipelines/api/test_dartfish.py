@@ -127,7 +127,7 @@ def test_dartfish_pipeline_cropped_data(tmpdir):
         zero_norm_stack.xarray[0, 0, 0, 50:60, 60:70]
     )
 
-    pipeline_log = zero_norm_stack.log
+    pipeline_log = zero_norm_stack.log.data
 
     assert pipeline_log[0]['method'] == 'Clip'
     assert pipeline_log[1]['method'] == 'ZeroByChannelMagnitude'

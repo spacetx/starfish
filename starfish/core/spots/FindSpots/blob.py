@@ -125,13 +125,14 @@ class BlobDetector(FindSpotsAlgorithmBase):
             self,
             image_stack: ImageStack,
             reference_image: Optional[ImageStack] = None,
+            is_volume: bool = False,
             n_processes: Optional[int] = None,
             *args,
     ) -> SpotFindingResults:
         """
         Find spots in the given ImageStack using a gaussian blob finding algorithm.
-        If a reference image is provided the spots will be detected there then measured accross the
-        corresponding ImageStack. If a reference_image is not provided spots will be detected _independently_
+        If a reference image is provided the spots will be detected there then measured across all rounds and channels
+        in the corresponding ImageStack. If a reference_image is not provided spots will be detected _independently_
         in each channel. This assumes a non-multiplex imaging experiment, as only one (ch, round) will
         be measured for each spot.
 
@@ -141,15 +142,13 @@ class BlobDetector(FindSpotsAlgorithmBase):
             ImageStack where we find the spots in.
         reference_image : xr.DataArray
             (Optional) a reference image. If provided, spots will be found in this image, and then
-            the locations that correspond to these spots will be measured across each channel and round,
-            filling in the values in the IntensityTable
+            the locations that correspond to these spots will be measured across each channel.
         n_processes : Optional[int] = None,
             Number of processes to devote to spot finding.
         """
-
         spot_finding_method = partial(self.image_to_spots, *args)
         if reference_image:
-            data_image = reference_image._squeezed_numpy(*(Axes.ROUND, Axes.CH))
+            data_image = reference_image._squeezed_numpy(*{Axes.ROUND, Axes.CH})
             reference_spots = spot_finding_method(data_image)
             results = spot_finding_utils.measure_spot_intensities(image_stack, reference_spots, np.mean)
         else:
@@ -158,5 +157,6 @@ class BlobDetector(FindSpotsAlgorithmBase):
                 group_by={Axes.ROUND, Axes.CH},
                 n_processes=n_processes
             )
-            results = SpotFindingResults(spot_attributes_list)
+            results = SpotFindingResults(imagestack=image_stack,
+                                         spot_attributes_list=spot_attributes_list)
         return results

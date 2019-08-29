@@ -11,6 +11,7 @@ from starfish.core.util.logging import LogEncoder
 class AlgorithmBase(ABCMeta):
     def __init__(cls, name, bases, namespace):
         super().__init__(name, bases, namespace)
+        # TODO DISABLING LOGGING DURING SPOT FINDING REFACTOR WORK
         # if not inspect.isabstract(cls):
         #         #     cls.run = AlgorithmBase.run_with_logging(cls.run)
 

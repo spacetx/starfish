@@ -89,7 +89,6 @@ def test_iss_pipeline_cropped_data():
     #
     # assert pipeline_log[0]['method'] == 'WhiteTophat'
     # assert pipeline_log[1]['method'] == 'Warp'
-    # assert pipeline_log[2]['method'] == 'MeasureSpotIntensities'
 
     # decode
     decoded = iss.decoded

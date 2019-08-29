@@ -24,8 +24,7 @@ class PerRoundMaxChannel(DecodeSpotsAlgorithmBase):
     def __init__(self, codebook: Codebook):
         self.codebook = codebook
 
-    def run(self, spots: SpotFindingResults,
-            *args) -> DecodedIntensityTable:
+    def run(self, spots: SpotFindingResults, *args) -> DecodedIntensityTable:
         """Decode spots by selecting the max-valued channel in each sequencing round
 
         Parameters

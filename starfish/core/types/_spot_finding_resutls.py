@@ -1,20 +1,19 @@
 from typing import Mapping, Optional, List, Tuple
 
-from starfish.core.types import Axes, SpotAttributes
+from starfish.core.types import Axes, Coordinates, SpotAttributes
 
 
 AXES_ORDER = (Axes.ROUND, Axes.CH)
-AXES_ORDER_IS_VOLUME = (Axes.ROUND, Axes.CH, Axes.ZPLANE)
 
 
 class SpotFindingResults:
     """
     Wrapper class that describes the results from a spot finding method. The
-    results dict is a collection of tile indices and their corresponding measured
+    results dict is a collection of (round,ch indices) and their corresponding measured
     SpotAttributes.
     """
 
-    def __init__(self, spot_attributes_list: Optional[List[Tuple]] = None):
+    def __init__(self, imagestack, spot_attributes_list: Optional[List[Tuple]] = None):
         """
         Construct a SpotFindingResults instance
 
@@ -30,6 +29,10 @@ class SpotFindingResults:
                 self._results[indices] = spots
         else:
             self._results: Mapping[Tuple, SpotAttributes] = dict()
+        self.physical_coord_ranges = {
+            Axes.X: imagestack.xarray[Coordinates.X.value],
+            Axes.Y: imagestack.xarray[Coordinates.Y.value],
+            Axes.Z: imagestack.xarray[Coordinates.Z.value]}
 
     def set_tile_spots(self, indices: Mapping[Axes, int], spots: SpotAttributes
                        ) -> None:
@@ -43,10 +46,7 @@ class SpotFindingResults:
         spots: SpotAttributes
             Describes spots found on this tile.
         """
-        if Axes.ZPLANE in indices:
-            tile_index = tuple(indices[i] for i in AXES_ORDER_IS_VOLUME)
-        else:
-            tile_index = tuple(indices[i] for i in AXES_ORDER)
+        tile_index = tuple(indices[i] for i in AXES_ORDER)
         self._results[tile_index] = spots
 
     def get_tile_spots(self, indices: Mapping[Axes, int]) -> SpotAttributes:
@@ -62,13 +62,10 @@ class SpotFindingResults:
         --------
         SpotAttributes
         """
-        if Axes.ZPLANE in indices:
-            tile_index = tuple(indices[i] for i in AXES_ORDER_IS_VOLUME)
-        else:
-            tile_index = tuple(indices[i] for i in AXES_ORDER)
-        return self._results[tile_index]
+        round_ch_index = tuple(indices[i] for i in AXES_ORDER)
+        return self._results[round_ch_index]
 
-    def tile_indices(self):
+    def round_ch_indices(self):
         """
         Return all tile indices.
         """
@@ -84,20 +81,13 @@ class SpotFindingResults:
         """
         Return the set of Round labels in the SpotFindingResults
         """
-        return list(set(sorted(tile_index[0] for tile_index in self.tile_indices())))
+        return list(set(sorted(r for (r, ch) in self.round_ch_indices())))
 
     def ch_labels(self):
         """
         Return the set of Ch labels in the SpotFindingResults
         """
-        return list(set(sorted(tile_index[1] for tile_index in self.tile_indices())))
+        return list(set(sorted(ch for (c, ch) in self.round_ch_indices())))
 
-    def z_planes(self):
-        """
-        Return the set of z planes in the SpotFindingResults, if spots were found in 3d.
-        If not return a value error.
-        """
-        try:
-            return list(set(sorted(tile_index[2] for tile_index in self.tile_indices())))
-        except IndexError:
-            raise ValueError("These SpotResults do not contain z values.")
+    def get_physical_coord_range(self, axes: Axes):
+        return self.physical_coord_ranges[axes]

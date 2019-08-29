@@ -88,7 +88,7 @@ def measure_spot_intensities(
     ch_labels = data_image.axis_labels(Axes.CH)
     round_labels = data_image.axis_labels(Axes.ROUND)
 
-    spot_results = SpotFindingResults()
+    spot_results = SpotFindingResults(imagestack=data_image)
     # measure spots in each tile
     indices = product(ch_labels, round_labels)
     for c, r in indices:

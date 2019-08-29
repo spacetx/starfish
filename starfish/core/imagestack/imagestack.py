@@ -50,12 +50,11 @@ from starfish.core.types import (
     Clip,
     Coordinates,
     CoordinateValue,
-    LOG,
     Number,
     STARFISH_EXTRAS_KEY
 )
-from starfish.core.util import logging
 from starfish.core.util.dtype import preserve_float_range
+from starfish.core.util.logging import Log
 from .dataorder import AXES_DATA, N_AXES
 
 
@@ -91,7 +90,7 @@ class ImageStack:
         self._data = data
         self._data_loaded = False
         self._tile_data = tile_data
-        self._log: List[dict] = list()
+        self._log: Log = Log()
 
     @classmethod
     def from_tile_collection_data(cls, tile_data: TileCollectionData) -> "ImageStack":
@@ -948,7 +947,7 @@ class ImageStack:
         return pd.DataFrame(data)
 
     @property
-    def log(self) -> List[dict]:
+    def log(self) -> Log:
         """
         Returns a list of pipeline components that have been applied to this imagestack
         as well as their corresponding runtime parameters.
@@ -962,23 +961,6 @@ class ImageStack:
         List[dict]
         """
         return self._log
-
-    def update_log(self, class_instance) -> None:
-        """
-        Adds a new entry to the log list.
-
-        Parameters
-        ----------
-        class_instance: The instance of a class being applied to the imagestack
-        """
-        entry = {"method": class_instance.__class__.__name__,
-                 "arguments": class_instance.__dict__,
-                 "os": logging.get_os_info(),
-                 "dependencies": logging.get_core_dependency_info(),
-                 "release tag": logging.get_release_tag(),
-                 "starfish version": logging.get_dependency_version('starfish')
-                 }
-        self._log.append(entry)
 
     @property
     def raw_shape(self) -> Tuple[int, int, int, int, int]:
@@ -1087,7 +1069,7 @@ class ImageStack:
         """
         # Add log data to extras
         tileset_extras = self._tile_data.extras if self._tile_data else {}
-        tileset_extras[STARFISH_EXTRAS_KEY] = logging.LogEncoder().encode({LOG: self.log})
+        tileset_extras[STARFISH_EXTRAS_KEY] = self.log.encode()
         tileset = TileSet(
             dimensions={
                 Axes.ROUND,

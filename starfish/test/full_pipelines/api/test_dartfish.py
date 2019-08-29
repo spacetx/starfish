@@ -149,7 +149,7 @@ def test_dartfish_pipeline_cropped_data():
     fp = tempfile.NamedTemporaryFile()
     spot_intensities.to_netcdf(fp.name)
 
-    loaded_intensities = IntensityTable.open_netcdf(fp.name)
+    # loaded_intensities = IntensityTable.open_netcdf(fp.name)
     # pipeline_log = loaded_intensities.get_log()
     #
     # assert pipeline_log[0]['method'] == 'Clip'

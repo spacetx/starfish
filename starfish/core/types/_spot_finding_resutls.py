@@ -1,6 +1,6 @@
-import xarray as xr
+from typing import List, Mapping, Optional, Tuple
 
-from typing import Mapping, Optional, List, Tuple
+import xarray as xr
 
 from starfish.core.types import Axes, Coordinates, SpotAttributes
 
@@ -26,14 +26,14 @@ class SpotFindingResults:
             tuples (indices, SpotAttributes). Instantiating SpotFindingResults with
             this list will convert the information to a dictionary.
         """
-        self._results = dict()
+        self._results: Mapping[Tuple, SpotAttributes] = dict()
         if spot_attributes_list:
             for indices, spots in spot_attributes_list:
                 self._results[indices] = spots
-        self.physical_coord_ranges = {
-            Axes.X: imagestack.xarray[Coordinates.X.value],
-            Axes.Y: imagestack.xarray[Coordinates.Y.value],
-            Axes.ZPLANE: imagestack.xarray[Coordinates.Z.value]}
+        self.physical_coord_ranges: Mapping[str, xr.DataArray] = {
+            Axes.X.value: imagestack.xarray[Coordinates.X.value],
+            Axes.Y.value: imagestack.xarray[Coordinates.Y.value],
+            Axes.ZPLANE.value: imagestack.xarray[Coordinates.Z.value]}
 
     def set_spots_for_round_ch(self, indices: Mapping[Axes, int], spots: SpotAttributes
                                ) -> None:
@@ -48,7 +48,7 @@ class SpotFindingResults:
             Describes spots found on this tile.
         """
         tile_index = tuple(indices[i] for i in AXES_ORDER)
-        self._results[tile_index] = spots
+        self._results[tile_index] = spots  # type: ignore
 
     def get_spots_for_round_ch(self, indices: Mapping[Axes, int]) -> SpotAttributes:
         """
@@ -93,7 +93,7 @@ class SpotFindingResults:
         return list(set(sorted(ch for (c, ch) in self.round_ch_indices())))
 
     @property
-    def get_physical_coord_ranges(self) -> Mapping[Axes, xr.DataArray]:
+    def get_physical_coord_ranges(self) -> Mapping[str, xr.DataArray]:
         """
         Returns the physical coordinate ranges the SpotResults cover. Needed
         information for calculating the physical coordinate values of decoded spots.

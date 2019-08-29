@@ -18,8 +18,6 @@ def build_spot_traces_exact_match(spot_results: SpotFindingResults):
     indices = product(ch_labels, round_labels)
     for c, r in indices:
         intensity_table.loc[dict(c=c, r=r)] = \
-            spot_results.get_spots_for_round_ch({Axes.ROUND: r, Axes.CH: c}).data[Features.INTENSITY]
+            spot_results.get_spots_for_round_ch({Axes.ROUND: r, Axes.CH: c}
+                                                ).data[Features.INTENSITY]
     return intensity_table
-
-
-

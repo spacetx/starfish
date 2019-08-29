@@ -131,10 +131,10 @@ class BlobDetector(FindSpotsAlgorithmBase):
     ) -> SpotFindingResults:
         """
         Find spots in the given ImageStack using a gaussian blob finding algorithm.
-        If a reference image is provided the spots will be detected there then measured across all rounds and channels
-        in the corresponding ImageStack. If a reference_image is not provided spots will be detected _independently_
-        in each channel. This assumes a non-multiplex imaging experiment, as only one (ch, round) will
-        be measured for each spot.
+        If a reference image is provided the spots will be detected there then measured
+        across all rounds and channels in the corresponding ImageStack. If a reference_image
+        is not provided spots will be detected _independently_ in each channel. This assumes
+        a non-multiplex imaging experiment, as only one (ch, round) will be measured for each spot.
 
         Parameters
         ----------
@@ -150,7 +150,8 @@ class BlobDetector(FindSpotsAlgorithmBase):
         if reference_image:
             data_image = reference_image._squeezed_numpy(*{Axes.ROUND, Axes.CH})
             reference_spots = spot_finding_method(data_image)
-            results = spot_finding_utils.measure_spot_intensities(image_stack, reference_spots, np.mean)
+            results = spot_finding_utils.measure_spot_intensities(image_stack,
+                                                                  reference_spots, np.mean)
         else:
             spot_attributes_list = image_stack.transform(
                 func=spot_finding_method,

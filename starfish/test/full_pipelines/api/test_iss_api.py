@@ -91,11 +91,6 @@ def test_iss_pipeline_cropped_data():
     # assert pipeline_log[1]['method'] == 'Warp'
     # assert pipeline_log[2]['method'] == 'MeasureSpotIntensities'
 
-    # intensities = iss.intensities
-    #
-    # # assert that the number of spots detected is 99
-    # assert intensities.sizes[Features.AXIS] == 99
-
     # decode
     decoded = iss.decoded
 

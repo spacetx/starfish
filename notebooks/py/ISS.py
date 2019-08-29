@@ -158,10 +158,8 @@ registered_imgs = warp.run(filtered_imgs, transforms_list=transforms_list, in_pl
 # EPY: END markdown
 
 # EPY: START code
-from starfish.spots import DetectSpots
 import warnings
 from starfish.spots import FindSpots, DecodeSpots
-
 
 lp = FindSpots.BlobDetector(
     min_sigma=1,

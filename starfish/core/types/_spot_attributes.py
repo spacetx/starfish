@@ -16,11 +16,6 @@ class SpotAttributes(ValidatedTable):
         Axes.Y.value,          # spot y-coordinate
         Axes.ZPLANE.value,     # spot z-coordinate
         Features.SPOT_RADIUS,  # spot radius
-        # Features.INTENSITY,    # spot intensity
-        # Features.SPOT_ID,      # spot ID
-        # Coordinates.X.value,   # physical x
-        # Coordinates.Y.value,   # physical y
-        # Coordinates.Z.value    # physical Z
     }
 
     def __init__(self, spot_attributes: pd.DataFrame) -> None:

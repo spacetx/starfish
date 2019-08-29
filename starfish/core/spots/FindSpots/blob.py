@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Dict, Optional, Union, Tuple
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -129,7 +129,11 @@ class BlobDetector(FindSpotsAlgorithmBase):
             *args,
     ) -> SpotFindingResults:
         """
-        Find spots.
+        Find spots in the given ImageStack using a gaussian blob finding algorithm.
+        If a reference image is provided the spots will be detected there then measured accross the
+        corresponding ImageStack. If a reference_image is not provided spots will be detected _independently_
+        in each channel. This assumes a non-multiplex imaging experiment, as only one (ch, round) will
+        be measured for each spot.
 
         Parameters
         ----------
@@ -145,12 +149,8 @@ class BlobDetector(FindSpotsAlgorithmBase):
 
         spot_finding_method = partial(self.image_to_spots, *args)
         if reference_image:
-            spot_attributes_list = reference_image.transform(
-                func=spot_finding_method,
-                group_by={Axes.ROUND, Axes.CH},
-                n_processes=n_processes
-            )
-            reference_spots = spot_attributes_list[0][0]
+            data_image = reference_image._squeezed_numpy(*(Axes.ROUND, Axes.CH))
+            reference_spots = spot_finding_method(data_image)
             results = spot_finding_utils.measure_spot_intensities(image_stack, reference_spots, np.mean)
         else:
             spot_attributes_list = image_stack.transform(

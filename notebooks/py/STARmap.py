@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import starfish
+from starfish import IntensityTable
 import starfish.data
 from starfish.types import Axes
 from starfish.util.plot import (
@@ -210,32 +211,16 @@ f = plot_scaling_result(stack, scaled)
 # EPY: END markdown
 
 # EPY: START code
-
-# TODO use Regular Blob search then build traces nearest neighbors
-
-blob_finder = starfish.spots.FindSpots.BlobDetector(
+lsbd = starfish.spots.DetectSpots.LocalSearchBlobDetector(
     min_sigma=1,
     max_sigma=8,
     num_sigma=10,
     threshold=np.percentile(np.ravel(stack.xarray.values), 95),
+    exclude_border=2,
+    anchor_round=0,
+    search_radius=10,
 )
-
-spots = blob_finder.run(scaled, n_processes=8)
-
-decoder = starfish.spots.DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook)
-decoded = decoder.run(spots=spots, search_radius=10, anchor_round=0)
-
-
-# lsbd = starfish.spots.DetectSpots.LocalSearchBlobDetector(
-#     min_sigma=1,
-#     max_sigma=8,
-#     num_sigma=10,
-#     threshold=np.percentile(np.ravel(stack.xarray.values), 95),
-#     exclude_border=2,
-#     anchor_round=0,
-#     search_radius=10,
-# )
-# intensities = lsbd.run(scaled, n_processes=8)
+intensities = lsbd.run(scaled, n_processes=8)
 # EPY: END code
 
 # EPY: START markdown
@@ -246,7 +231,9 @@ decoded = decoder.run(spots=spots, search_radius=10, anchor_round=0)
 #uncomment the below lines.
 # EPY: END markdown
 
-
+# EPY: START code
+decoded = experiment.codebook.decode_per_round_max(IntensityTable(intensities.fillna(0)))
+decode_mask = decoded['target'] != 'nan'
 
 # %gui qt
 # viewer = starfish.display(

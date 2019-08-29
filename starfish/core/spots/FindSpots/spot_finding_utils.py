@@ -104,5 +104,5 @@ def measure_spot_intensities(
         # fill in intensities
         tile_spots.data[Features.INTENSITY] = blob_intensities
         tile_indices = {Axes.ROUND: r, Axes.CH: c}
-        spot_results.set_tile_spots(tile_indices, tile_spots)
+        spot_results.set_spots_for_round_ch(tile_indices, tile_spots)
     return spot_results

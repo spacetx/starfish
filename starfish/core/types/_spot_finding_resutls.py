@@ -1,3 +1,5 @@
+import xarray as xr
+
 from typing import Mapping, Optional, List, Tuple
 
 from starfish.core.types import Axes, Coordinates, SpotAttributes
@@ -24,20 +26,19 @@ class SpotFindingResults:
             tuples (indices, SpotAttributes). Instantiating SpotFindingResults with
             this list will convert the information to a dictionary.
         """
+        self._results = dict()
         if spot_attributes_list:
             for indices, spots in spot_attributes_list:
                 self._results[indices] = spots
-        else:
-            self._results: Mapping[Tuple, SpotAttributes] = dict()
         self.physical_coord_ranges = {
             Axes.X: imagestack.xarray[Coordinates.X.value],
             Axes.Y: imagestack.xarray[Coordinates.Y.value],
-            Axes.Z: imagestack.xarray[Coordinates.Z.value]}
+            Axes.ZPLANE: imagestack.xarray[Coordinates.Z.value]}
 
-    def set_tile_spots(self, indices: Mapping[Axes, int], spots: SpotAttributes
-                       ) -> None:
+    def set_spots_for_round_ch(self, indices: Mapping[Axes, int], spots: SpotAttributes
+                               ) -> None:
         """
-        Add the tile indices and corresponding SpotAttributes to the results dict.
+        Add the r,ch indices and corresponding SpotAttributes to the results dict.
 
         Parameters
         ----------
@@ -49,9 +50,9 @@ class SpotFindingResults:
         tile_index = tuple(indices[i] for i in AXES_ORDER)
         self._results[tile_index] = spots
 
-    def get_tile_spots(self, indices: Mapping[Axes, int]) -> SpotAttributes:
+    def get_spots_for_round_ch(self, indices: Mapping[Axes, int]) -> SpotAttributes:
         """
-        Returns the spots found on a given tile.
+        Returns the spots found in a given round and ch.
 
         Parameters
         ----------
@@ -67,27 +68,34 @@ class SpotFindingResults:
 
     def round_ch_indices(self):
         """
-        Return all tile indices.
+        Return all round, ch index pairs.
         """
         return self._results.keys()
 
     def all_spots(self):
         """
-        Return all SpotAttributes
+        Return all list of SpotAttributes.
         """
         return self._results.values()
 
+    @property
     def round_labels(self):
         """
         Return the set of Round labels in the SpotFindingResults
         """
         return list(set(sorted(r for (r, ch) in self.round_ch_indices())))
 
+    @property
     def ch_labels(self):
         """
         Return the set of Ch labels in the SpotFindingResults
         """
         return list(set(sorted(ch for (c, ch) in self.round_ch_indices())))
 
-    def get_physical_coord_range(self, axes: Axes):
-        return self.physical_coord_ranges[axes]
+    @property
+    def get_physical_coord_ranges(self) -> Mapping[Axes, xr.DataArray]:
+        """
+        Returns the physical coordinate ranges the SpotResults cover. Needed
+        information for calculating the physical coordinate values of decoded spots.
+        """
+        return self.physical_coord_ranges

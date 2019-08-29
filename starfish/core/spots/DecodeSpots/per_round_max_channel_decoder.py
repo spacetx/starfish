@@ -1,5 +1,7 @@
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
+from starfish.core.intensity_table.intensity_table_coordinates import \
+    transfer_physical_coords_to_intensity_table
 from starfish.core.spots.DecodeSpots.decoding_uitls import build_spot_traces_exact_match
 from starfish.core.types import SpotFindingResults
 from ._base import DecodeSpotsAlgorithmBase
@@ -39,4 +41,5 @@ class PerRoundMaxChannel(DecodeSpotsAlgorithmBase):
 
         """
         intensities = build_spot_traces_exact_match(spots)
+        transfer_physical_coords_to_intensity_table(intensities, spots=spots)
         return self.codebook.decode_per_round_max(intensities)

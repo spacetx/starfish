@@ -1,16 +1,19 @@
+from typing import Optional
+
 import numpy as np
 import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.types import Axes, Coordinates, Features
+from starfish.core.types import Axes, Coordinates, Features, SpotFindingResults
 
 
-def transfer_physical_coords_from_imagestack_to_intensity_table(
-        image_stack: ImageStack, intensity_table: IntensityTable
-) -> IntensityTable:
+def transfer_physical_coords_to_intensity_table(intensity_table: IntensityTable,
+                                                image_stack: Optional[ImageStack] = None,
+                                                spots: Optional[SpotFindingResults] = None,
+                                                ) -> IntensityTable:
     """
-    Transfers physical coordinates from an Imagestack's coordinates xarray to an intensity table
+    Transfers physical coordinates from either an Imagestack or SpotFindingResults to an intensity table
 
     1. Creates three new coords on the intensity table (xc, yc, zc)
     2. For every spot:
@@ -26,6 +29,15 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(
         (Axes.ZPLANE.value, Coordinates.Z.value)
     )
 
+    if spots:
+        coord_ranges = spots.physical_coord_ranges
+    else:
+        coord_ranges = {
+            Axes.X: image_stack.xarray[Coordinates.X.value],
+            Axes.Y: image_stack.xarray[Coordinates.Y.value],
+            Axes.ZPLANE: image_stack.xarray[Coordinates.Z.value]
+        }
+
     # make sure the intensity table gets empty metadata if there are no intensities
     if intensity_table.sizes[Features.AXIS] == 0:
         for axis, coord in pairs:
@@ -33,7 +45,7 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(
         return intensity_table
 
     for axis, coord in pairs:
-        imagestack_pixels: xr.DataArray = image_stack.xarray[axis]
+        imagestack_pixels: xr.DataArray = coord_ranges[axis]
         intensity_table_pixel_offsets: np.ndarray = intensity_table[axis].values
 
         # can't interpolate if the axis size == 1, so just select in that case.
@@ -46,3 +58,5 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(
         intensity_table[coord] = xr.DataArray(coordinates.values, dims='features')
 
     return intensity_table
+
+

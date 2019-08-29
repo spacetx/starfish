@@ -19,7 +19,7 @@ from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
-    transfer_physical_coords_from_imagestack_to_intensity_table
+    transfer_physical_coords_to_intensity_table
 from starfish.core.types import Axes, Features, Number, SpotAttributes
 from ._base import DetectSpotsAlgorithmBase
 
@@ -411,7 +411,7 @@ class LocalSearchBlobDetector(DetectSpotsAlgorithmBase):
             anchor_round=self.anchor_round
         )
 
-        transfer_physical_coords_from_imagestack_to_intensity_table(
+        transfer_physical_coords_to_intensity_table(
             image_stack=primary_image, intensity_table=intensity_table
         )
 

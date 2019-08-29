@@ -114,9 +114,9 @@ def test_iss_pipeline_cropped_data():
     # pipeline_log = assigned.get_log()
 
     # assert tht physical coordinates were transferred
-    # assert Coordinates.X in assigned.coords
-    # assert Coordinates.Y in assigned.coords
-    # assert Coordinates.Z in assigned.coords
+    assert Coordinates.X in assigned.coords
+    assert Coordinates.Y in assigned.coords
+    assert Coordinates.Z in assigned.coords
 
     # assert pipeline_log[0]['method'] == 'WhiteTophat'
     # assert pipeline_log[1]['method'] == 'Warp'

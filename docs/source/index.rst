@@ -35,12 +35,14 @@ starfish. Finally, advanced users can examine the :ref:`Data Structures <data st
 :ref:`Help & Reference <help and reference>` sections to learn more details about _starfish_ and its
 object models.
 
-For questions, suggestions, or accolades, `join the #starfish-users channel on the CZI Science Slack <https://join-cziscience-slack.herokuapp.com/>`_ and say “hi!” or `email the starfish team directly <mailto:starfish@chanzuckerberg.com>`_
+For questions, suggestions, or accolades, `join the #starfish-users channel on the CZI Science Slack
+<https://join-cziscience-slack.herokuapp.com/>`_ and say “hi!” or
+`email the starfish team directly <mailto:starfish@chanzuckerberg.com>`_
 
 To see the code or report a bug, please visit the `github repository
 <https://github.com/spacetx/starfish>`_.
 
-
+To see what improvements the developers have planned for starfish, please see the :ref:`roadmap`.
 
 .. raw:: html
 

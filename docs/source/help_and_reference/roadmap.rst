@@ -8,13 +8,13 @@ process multi-terabyte image-based transcriptomics datasets, generating single-c
 spatial information.  These are the features we believe will deliver value to users of starfish:
 
 * Support for most in-situ hybridization (smFISH, MERFISH, seqFISH) and in-situ sequencing (STARMAP, DARTFISH,
-BARRISTASEQ, etc) assays
+  BARRISTASEQ, etc) assays
 
 * Support of a next-generation chunked file format amenable to distributed processing of images from multiple
-fields of view.
+  fields of view.
 
 * Common data processing components for extracting the location and identity of individual mRNA molecules
-from raw images and building cell x gene expression matrices annotated with spatial coordinates of each cell
+  from raw images and building cell x gene expression matrices annotated with spatial coordinates of each cell
 
 This document describes the two major foci of starfish for the coming months that we believe will deliver the most
 value to our users, followed by work we believe is important but that is not yet prioritized. If you have questions or

@@ -1,17 +1,29 @@
 Starfish
 ========
 
-.. image:: https://travis-ci.com/spacetx/starfish.svg?branch=master
-    :target: https://travis-ci.com/spacetx/starfish
-    :width: 20%
-.. image:: https://codecov.io/gh/spacetx/starfish/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/spacetx/starfish
+
+.. image:: https://img.shields.io/pypi/v/starfish   
+    :target: https://pypi.org/project/starfish/
+    :alt: PyPI
+    
+.. image:: https://img.shields.io/pypi/dm/starfish   
+   :target: https://pypistats.org/packages/starfish
+   :alt: PyPI - Downloads
+
 .. image:: https://readthedocs.org/projects/spacetx-starfish/badge/?version=latest
     :target: https://spacetx-starfish.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+    
 .. image:: https://join-cziscience-slack.herokuapp.com/badge.svg
     :target: https://join-cziscience-slack.herokuapp.com/
     :alt: Join the CZI Science slack
+    
+.. image:: https://travis-ci.com/spacetx/starfish.svg?branch=master
+    :target: https://travis-ci.com/spacetx/starfish
+    
+.. image:: https://codecov.io/gh/spacetx/starfish/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/spacetx/starfish
+    
 
 .. ideally we could use the ..include directive here instead of copy and pasting the following
    information

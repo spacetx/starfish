@@ -5,16 +5,18 @@ Roadmap
 
 starfish is an open-source Python package that enables researchers using in situ transcriptomics techniques to
 process multi-terabyte image-based transcriptomics datasets, generating single-cell gene expression matrices with
-spatial information.  These are the features we believe will deliver value to users of starfish:
+spatial information.  These are the features we believe will deliver value to scientists piloting image-based
+transcriptomics assays or using them at scale:
 
 * Support for most in-situ hybridization (smFISH, MERFISH, seqFISH) and in-situ sequencing (STARMAP, DARTFISH,
-  BARRISTASEQ, etc) assays
+  BARRISTASEQ, etc) assays, to enable easy switching between different chemistries.
 
 * Support of a next-generation chunked file format amenable to distributed processing of images from multiple
-  fields of view.
+  fields of view, to enable fast, parallel processing of large volumes of image data.
 
 * Common data processing components for extracting the location and identity of individual mRNA molecules
-  from raw images and building cell x gene expression matrices annotated with spatial coordinates of each cell
+  from raw images and building cell x gene expression matrices annotated with spatial coordinates of each cell, to
+  enable comparative analysis between different chemistries or imaging approaches.
 
 This document describes the two major foci of starfish for the coming months that we believe will deliver the most
 value to our users, followed by work we believe is important but that is not yet prioritized. If you have questions or
@@ -30,21 +32,23 @@ Core Algorithm Functionality
 The first stage of starfish development implemented the minimum set of methods needed to ensure that starfish matches
 the spot calling results from published analysis for image-based transcriptomics assays developed by SpaceTx labs.
 However, this came at the expense of upstream issues such as stitching and registration, downstream methods like
-segmentation, general ease of use, and documentation, which we will now improve.
+segmentation, general ease of use, and documentation. Improvements to each of these are necessary to enable users
+who are not image analysis experts to process image-based transcriptomics data.
 
 Image segmentation improvements `#1500 <https://github.com/spacetx/starfish/issues/1500>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Currently, starfish implements a watershed algorithm to enable segmenting cells, however, this implementation is
-somewhat limited, and we've noticed that many users call spots and then use external tools to carry out segmentation.
-We plan to simplify the watershed method and enable support for 3D segmentation, accept hand-drawn (manual) polygons
-from software such as FIJI, and apply pre-trained Ilastik models. We will add vignettes that demonstrate how these
-segmentation approaches can be used, and where applicable, how to tune parameters to effectively segment cells in
-different assays and tissue types.
+Currently, starfish implements a watershed algorithm to enable segmenting cells, however, most of our users find our
+implementation confusing and difficult to use. We've noticed that as a result, many users call spots and then use
+external tools to carry out segmentation. We plan to simplify the watershed method and enable support for 3D
+segmentation, accept hand-drawn (manual) polygons from software such as FIJI, and apply pre-trained Ilastik models.
+We will add vignettes that demonstrate how these segmentation approaches can be used, and where applicable, how to
+tune parameters to effectively segment cells in different assays and tissue types.
 
 Affine image registration `#1320 <https://github.com/spacetx/starfish/issues/1320>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Starfish currently supports image registration through linear transformations. However, many acquisition set-ups require
-more forms of fine registration to align spots prior to decoding. Once scikit-image implements affine image registration
+Starfish currently supports image registration through linear transformations. However, many image acquisition
+strategies require more forms of fine registration to align spots prior to decoding. Once scikit-image implements
+affine image registration
 (see `scikit-image/scikit-image PR #4023 <https://github.com/scikit-image/scikit-image/pull/4023>`_),
 we plan to support this in starfish.
 
@@ -53,7 +57,8 @@ Unification of spot finding `#1450 <https://github.com/spacetx/starfish/issues/1
 We plan to standardize the common steps in starfish's spot finding approaches, so that they can be used in coordination
 to flexibly detect, group, decode, and filter spot data for both multiplexed and non-multiplexed assays, and for both
 per-round and aggregated data flows. We will add vignettes that demonstrate how these spot finders can be used, and how
-to tune parameters to effectively detect spots in a variety of image signal-to-noise regimes.
+to tune parameters to effectively detect spots in a variety of image signal-to-noise regimes. We hope this will clarify
+how to leverage starfish's methods for users who are not image analysis experts.
 
 Data flow & Usability
 ---------------------
@@ -62,9 +67,11 @@ will make it easier and more enjoyable to use.
 
 Windows support `#1296 <https://github.com/spacetx/starfish/issues/1296>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-A large number of our image-based transcriptomics users would prefer to use windows for their image processing.
-While starfish supports Windows through the Windows Subsystem for Linux, we will support native Windows to allow
-Windows users to leverage starfish's parallelism and run starfish on Windows servers.
+Over half of the scientists we've spoken to would prefer to use Windows for their image processing.
+While starfish can be run on Windows machines through the Windows Subsystem for Linux, this feature is not available on
+older versions of Windows or Windows Servers, and requires knowledge of Linux, which not all image-based
+transcriptomics data analysts may have. We will enable native Windows support so that users can run starfish
+on their machine of choice directly.
 
 Multi Field of View Workflows `#1338 <https://github.com/spacetx/starfish/issues/1338>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -78,9 +85,10 @@ transforms and resolving overlapping regions to produce image collages.
 Simplified Documentation `#1522 <https://github.com/spacetx/starfish/issues/1522>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Many users question how to format data for starfish, and how to tune parameters for image correction, spot finding, and
-segmentation. To Address this, Starfish will document how to set up a workflow for formatting data into SpaceTx format
-from common data formats, processing sequential, coded, or mixed experiments, tune parameters for each of its
-algorithms, and carry out quality control checks to verify that starfish is producing accurate results.
+segmentation. To make starfish faster to set up, and to clarify how to create an image processing workflow for
+non-experts, Starfish will document how to set up a workflow for formatting data into SpaceTx format from common data
+formats, processing sequential, coded, or mixed experiments, tune parameters for each of its algorithms, and carry out
+quality control checks to verify that starfish is producing accurate results.
 
 What's next for starfish?
 -------------------------
@@ -89,11 +97,10 @@ address these areas after the above work is completed.
 
 Speed
 ~~~~~
-Starfish should be *fast*. We will ensure that starfish fully leverages parallelism
-on host machines, be they local machines, HPC clusters, or distributed environments. We will add
-support for GPU computation in starfish such that future work or enterprising users can add
-GPU-enabled methods to starfish. Finally, we will create benchmarks to track the speed of starfish
-operations to catch performance regressions.
+Image processing, particularly of volumetric data, is a time intensive process. Starfish will explore support for
+parallelism on HPC clusters and support for GPU computation in starfish, such that future work or enterprising users
+can add GPU-enabled methods to starfish. Finally, we will create benchmarks to track the speed of starfish operations
+to catch performance regressions.
 
 Resolving overlaps between fields of view
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

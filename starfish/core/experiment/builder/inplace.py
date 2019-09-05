@@ -20,7 +20,7 @@ from .providers import FetchedTile
 
 class InplaceWriterContract(WriterContract):
     def tile_url_generator(self, tileset_url: str, tile: Tile, ext: str) -> str:
-        return f"file://{tile.provider.filepath}"
+        return tile.provider.filepath.as_uri()
 
     def write_tile(
             self,

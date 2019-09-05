@@ -29,6 +29,8 @@ For detailed information on installation and usage, see the documentation_.
 
 .. _documentation: https://spacetx-starfish.readthedocs.io/en/latest/
 
+To see what improvements the developers have planned for starfish, please see the :ref:`roadmap`.
+
 Quickstart
 ------------
 

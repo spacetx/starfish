@@ -30,6 +30,7 @@ from slicedimage import (
 
 from starfish import FieldOfView
 from starfish.core.codebook.codebook import Codebook
+from starfish.core.errors import DataFormatWarning
 from starfish.core.experiment.builder.orderediterator import join_axes_labels, ordered_iterator
 from starfish.core.experiment.version import CURRENT_VERSION
 from starfish.core.types import Axes, Coordinates
@@ -116,6 +117,14 @@ def build_irregular_image(
                 current_ch,
                 current_zplane
             )
+            for axis in (Axes.X, Axes.Y):
+                if image.shape[axis] < max(len(rounds), len(chs), len(zplanes)):
+                    warnings.warn(
+                        f"{axis} axis appears to be smaller than rounds/chs/zplanes, which is "
+                        "unusual",
+                        DataFormatWarning
+                    )
+
             tile = Tile(
                 image.coordinates,
                 {

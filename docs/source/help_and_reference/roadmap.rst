@@ -30,40 +30,39 @@ Last updated: August 29, 2019
 Core Algorithm Functionality
 ----------------------------
 The first stage of starfish development implemented the minimum set of methods needed to ensure that starfish matches
-the spot calling results from published analysis for image-based transcriptomics assays developed by SpaceTx labs.
-However, this came at the expense of upstream issues such as stitching and registration, downstream methods like
+the spot calling results from published analyses of the image-based transcriptomics assays developed by SpaceTx labs.
+However, this came at the expense of upstream features such as stitching and registration, downstream features like
 segmentation, general ease of use, and documentation. Improvements to each of these are necessary to enable users
-who are not image analysis experts to process image-based transcriptomics data.
+who are not themselves image analysis experts to process image-based transcriptomics data.
 
 Image segmentation improvements `#1500 <https://github.com/spacetx/starfish/issues/1500>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Currently, starfish implements a watershed algorithm to enable segmenting cells, however, some of our users find our
 implementation difficult to use. We've noticed that as a result, our users call spots and then use
 external tools to carry out segmentation. We plan to simplify the watershed method and enable support for 3D
-segmentation, accept hand-drawn (manual) polygons from software such as FIJI, and apply pre-trained Ilastik models.
+segmentation, accept hand-drawn polygons from software such as FIJI, and apply pre-trained Ilastik models.
 We will add vignettes that demonstrate how these segmentation approaches can be used, and where applicable, how to
 tune parameters to effectively segment cells in different assays and tissue types.
 
 Affine image registration `#1320 <https://github.com/spacetx/starfish/issues/1320>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Starfish currently supports image registration through linear transformations. However, many image acquisition
-strategies require more sophisticate fine registration to align spots prior to decoding. Once scikit-image implements
+Starfish currently supports image registration through linear translations. However, many image acquisition
+strategies require more sophisticated transformations to align spots prior to decoding. Once scikit-image implements
 affine image registration
 (see `scikit-image/scikit-image PR #4023 <https://github.com/scikit-image/scikit-image/pull/4023>`_),
 we plan to support this in starfish.
 
 Unification of spot finding `#1450 <https://github.com/spacetx/starfish/issues/1450>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To clarify how to leverage starfish's methods for non-experts, We plan to standardize the common steps in starfish's
-spot finding approaches, so that they can be used in coordination to flexibly detect, group, decode, and filter spot
-data for both multiplexed and non-multiplexed assays, and for both per-round and aggregated data flows. We will add
+To improve our user's ability to compare different spot finding appraoches, we will standardize them so each can be
+applied to both multiplexed and non-multiplexed assays, and for both per-round and aggregated data flows. We will add
 vignettes that demonstrate how these spot finders can be used, and how to tune parameters to effectively detect spots
 in a variety of image signal-to-noise regimes.
 
 Data flow & Usability
 ---------------------
 In addition to ensuring that starfish has the necessary features to support our users, we believe the following work
-will make it easier and more enjoyable to use.
+will make starfish easier and more enjoyable to use.
 
 Windows support `#1296 <https://github.com/spacetx/starfish/issues/1296>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,7 +79,7 @@ images in global physical space have been pre-corrected. We recognize that this 
 for some data generation patterns, which adds a significant speed penalty to starfish. To address this, we will
 implement a registration workflow that identifies and stores optimal transforms for each image, such that spots
 and cells extracted from the images have correct global positions. Starfish will not (yet) support applying the
-transforms and resolving overlapping regions to produce image collages.
+transforms and resolving overlapping regions to produce fused image collages.
 
 Simplified Documentation `#1522 <https://github.com/spacetx/starfish/issues/1522>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -104,8 +103,7 @@ to catch performance regressions.
 
 Resolving overlaps between fields of view
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Work to date has focused on processing individual fields of view, with limited
+Work to date has focused on processing individual fields of view, with functional but limited
 support for combining results across fields of view. We plan to improve the ability to merge
 features, such as spots or cells, that overlap multiple fields of view.
 
@@ -122,7 +120,8 @@ data processing routines.
 
 Simplifying Contribution Patterns `#1521 <https://github.com/spacetx/starfish/issues/1521>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We want to make starfish easy and fun to contribute to. We recognize that parts of starfish, by virtue of the
+We are very interested in contribution of algorithms in active research areas, such as segmentation, or spot decoding.
+Therefore, we want to make starfish easy and fun to contribute to. We recognize that parts of starfish, by virtue of the
 multi-field of view data flow, are quite complex. We will endeavor to simplify the package and clarify API documentation
 to streamline future contribution. We've opened an issue to source points of confusion. Comments on this issue will help
 us identify places where our development team can focus our efforts.

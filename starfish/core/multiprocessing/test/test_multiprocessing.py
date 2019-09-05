@@ -7,6 +7,7 @@ maintained.
 import copy
 import ctypes
 import multiprocessing
+import os
 import warnings
 from functools import partial
 # Even though we import multiprocessing, mypy can't find the Array class.  To avoid sprinkling
@@ -15,6 +16,7 @@ from multiprocessing import Array as mp_array  # type: ignore
 from typing import Any, Callable, Tuple
 
 import numpy as np
+import pytest
 import xarray as xr
 
 from starfish import ImageStack
@@ -22,6 +24,7 @@ from starfish.core.imagestack import _mp_dataarray
 from ..shmem import SharedMemory
 
 
+@pytest.mark.skipif(os.name == "nt", reason="requires posix")
 def test_numpy_array(nitems: int=10):
     """
     Try to share a numpy array directly.  This should fail as numpy is by default a copy-on-write
@@ -44,6 +47,7 @@ def _decode_numpy_array_to_numpy_array(array):
     return array
 
 
+@pytest.mark.skipif(os.name == "nt", reason="requires posix")
 def test_shmem_numpy_array(nitems: int=10):
     """
     Try to share a numpy array based on a multiprocessing Array object.  The array object is passed
@@ -74,6 +78,7 @@ class WrappedArray:
         self.array = array
 
 
+@pytest.mark.skipif(os.name == "nt", reason="requires posix")
 def test_wrapped_shmem_numpy_array(nitems: int=10):
     """
     Try to share a numpy array based on a multiprocessing Array object.  The array object is wrapped
@@ -96,6 +101,7 @@ def _decode_wrapped_array_to_numpy_array(wrapped_array: WrappedArray) -> np.ndar
     return np.frombuffer(wrapped_array.array.get_obj(), dtype=np.uint8)
 
 
+@pytest.mark.skipif(os.name == "nt", reason="requires posix")
 def test_xr_deepcopy(nitems: int=10) -> None:
     """
     Instantiate an :py:class:`xarray.DataArray` and run
@@ -117,6 +123,7 @@ def test_xr_deepcopy(nitems: int=10) -> None:
         assert copy[ix] == ix
 
 
+@pytest.mark.skipif(os.name == "nt", reason="requires posix")
 def test_imagestack_deepcopy(nitems: int=10) -> None:
     """
     Instantiate an :py:class:`ImageStack` and deepcopy it.  Worker processes reconstitute a numpy
@@ -143,6 +150,7 @@ def _decode_imagestack_array_to_numpy_array(
     return unshaped_np_array.reshape(shape)
 
 
+@pytest.mark.skipif(os.name == "nt", reason="requires posix")
 def test_imagestack_xarray_deepcopy(nitems: int=10) -> None:
     """
     Instantiate an :py:class:`ImageStack` and deepcopy the xarray directly.  This should work, but

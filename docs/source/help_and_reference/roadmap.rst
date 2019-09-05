@@ -37,8 +37,8 @@ who are not image analysis experts to process image-based transcriptomics data.
 
 Image segmentation improvements `#1500 <https://github.com/spacetx/starfish/issues/1500>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Currently, starfish implements a watershed algorithm to enable segmenting cells, however, most of our users find our
-implementation confusing and difficult to use. We've noticed that as a result, many users call spots and then use
+Currently, starfish implements a watershed algorithm to enable segmenting cells, however, some of our users find our
+implementation difficult to use. We've noticed that as a result, our users call spots and then use
 external tools to carry out segmentation. We plan to simplify the watershed method and enable support for 3D
 segmentation, accept hand-drawn (manual) polygons from software such as FIJI, and apply pre-trained Ilastik models.
 We will add vignettes that demonstrate how these segmentation approaches can be used, and where applicable, how to
@@ -47,18 +47,18 @@ tune parameters to effectively segment cells in different assays and tissue type
 Affine image registration `#1320 <https://github.com/spacetx/starfish/issues/1320>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Starfish currently supports image registration through linear transformations. However, many image acquisition
-strategies require more forms of fine registration to align spots prior to decoding. Once scikit-image implements
+strategies require more sophisticate fine registration to align spots prior to decoding. Once scikit-image implements
 affine image registration
 (see `scikit-image/scikit-image PR #4023 <https://github.com/scikit-image/scikit-image/pull/4023>`_),
 we plan to support this in starfish.
 
 Unification of spot finding `#1450 <https://github.com/spacetx/starfish/issues/1450>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We plan to standardize the common steps in starfish's spot finding approaches, so that they can be used in coordination
-to flexibly detect, group, decode, and filter spot data for both multiplexed and non-multiplexed assays, and for both
-per-round and aggregated data flows. We will add vignettes that demonstrate how these spot finders can be used, and how
-to tune parameters to effectively detect spots in a variety of image signal-to-noise regimes. We hope this will clarify
-how to leverage starfish's methods for users who are not image analysis experts.
+To clarify how to leverage starfish's methods for non-experts, We plan to standardize the common steps in starfish's
+spot finding approaches, so that they can be used in coordination to flexibly detect, group, decode, and filter spot
+data for both multiplexed and non-multiplexed assays, and for both per-round and aggregated data flows. We will add
+vignettes that demonstrate how these spot finders can be used, and how to tune parameters to effectively detect spots
+in a variety of image signal-to-noise regimes.
 
 Data flow & Usability
 ---------------------

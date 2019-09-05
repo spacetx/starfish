@@ -50,4 +50,4 @@ def test_decoded_spots() -> None:
 
     # load back into memory
     ds2 = DecodedSpots.load_csv(filename)
-    pd.testing.assert_frame_equal(ds.data, ds2.data)
+    pd.testing.assert_frame_equal(ds.data, ds2.data, check_dtype=False)

@@ -22,13 +22,15 @@ class Pool:
 
     def map(self, func, iterable, chunksize=None):
         if self.pool is None:
-            self.initializer(*self.initargs)
+            if self.initializer is not None:
+                self.initializer(*self.initargs)
             return map(func, iterable)
         return self.pool.map(func, iterable, chunksize)
 
     def imap(self, func, iterable, chunksize=1):
         if self.pool is None:
-            self.initializer(*self.initargs)
+            if self.initializer is not None:
+                self.initializer(*self.initargs)
             return map(func, iterable)
         return self.pool.imap(func, iterable, chunksize)
 

@@ -120,7 +120,7 @@ We’ve begun to explore assay-agnostic quality control metrics that can be used
 We plan to add support for these metrics so our users are better equippied to evaluate the quality of their data and
 data processing routines.
 
-Simplifying Contribution Patterns <#1521 <https://github.com/spacetx/starfish/issues/1521>`_
+Simplifying Contribution Patterns `#1521 <https://github.com/spacetx/starfish/issues/1521>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 We want to make starfish easy and fun to contribute to. We recognize that parts of starfish, by virtue of the
 multi-field of view data flow, are quite complex. We will endeavor to simplify the package and clarify API documentation

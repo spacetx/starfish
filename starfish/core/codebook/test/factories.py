@@ -1,4 +1,6 @@
+import os
 import tempfile
+from typing import Optional
 
 from starfish.core.types import Axes, Features
 from ..codebook import Codebook
@@ -31,11 +33,18 @@ def simple_codebook_array():
 
 
 def loaded_codebook():
-    with tempfile.NamedTemporaryFile() as tf:
-        codebook = Codebook.from_code_array(simple_codebook_array())
-        codebook.to_json(tf.name)
+    tfn: Optional[str] = None
+    try:
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            tfn = tf.name
+            codebook = Codebook.from_code_array(simple_codebook_array())
+            codebook.to_json(tfn)
 
         result = Codebook.open_json(tf.name, n_channel=2, n_round=2)
+    finally:
+        if tfn is not None:
+            os.remove(tfn)
+
     return result
 
 

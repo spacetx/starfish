@@ -21,6 +21,34 @@ jobs:
       script: make install-dev && make -j check-notebooks slow-test
       after_success:
         - bash <(curl -s https://codecov.io/bash)
+    - name: Fast Tests (Windows)
+      if: type = push and branch =~ /^(master|merge)/
+      os: windows
+      language: sh
+      python: "3.6"
+      before_install:
+        - choco install python3 --version 3.6.8
+        - choco install make
+        - export PATH="/c/Python36:/c/Python36/Scripts:$PATH"
+        - python -m pip install --upgrade pip wheel
+      script:
+        - make install-dev fast-test
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+    - name: Slow Tests (Windows)
+      if: type = push and branch =~ /^(master|merge)/
+      os: windows
+      language: sh
+      python: "3.6"
+      before_install:
+        - choco install python3 --version 3.6.8
+        - choco install make
+        - export PATH="/c/Python36:/c/Python36/Scripts:$PATH"
+        - python -m pip install --upgrade pip wheel
+      script:
+        - make install-dev slow-test
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
     - name: Install Napari
       if: type = push and branch =~ /^(master|merge)/
       script: pip install .[napari]

@@ -22,7 +22,7 @@ jobs:
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Fast Tests (Windows)
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       os: windows
       language: sh
       python: "3.6"
@@ -36,7 +36,7 @@ jobs:
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Slow Tests (Windows)
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       os: windows
       language: sh
       python: "3.6"
@@ -50,46 +50,46 @@ jobs:
       after_success:
         - bash <(curl -s https://codecov.io/bash)
     - name: Install Napari
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       script: pip install .[napari]
     - name: Docker
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       script: make docker
     - name: smFISH Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       script: travis_wait make install-dev notebooks/py/smFISH.py
     - name: MERFISH Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       script: travis_wait make install-dev notebooks/py/MERFISH.py
     - name: osmFISH Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       script: make install-dev notebooks/py/osmFISH.py
     - name: DARTFISH Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       script: make install-dev notebooks/py/DARTFISH.py
     - name: Simulation Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       script: make install-dev notebooks/py/Starfish_simulation.py
     - name: ISS Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       script: make install-dev notebooks/py/ISS.py
     - name: BaristaSeq Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       script: make install-dev notebooks/py/BaristaSeq.py
     - name: SeqFISH Notebook
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       script: make install-dev notebooks/py/SeqFISH.py
 #    - name: STARmap Notebook
-#      if: type = push and branch =~ /^(master|merge)/
+#      if: type = push and (branch = master or branch =~ /-alltest/)
 #      script: make install-dev notebooks/py/STARmap.py
     - name: 3D smFISH data processing example
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       script: make install-dev 3d_smFISH.py
     - name: iss_pipeline.py data processing example
-      if: type = push and branch =~ /^(master|merge)/
+      if: type = push and (branch = master or branch =~ /-alltest/)
       script: make TESTING=1 install-dev iss_pipeline.py
     - name: Released Notebooks
-      if: type = cron and branch =~ /^(master|merge)/
+      if: type = cron and (branch = master or branch =~ /-alltest/)
       script: make check-notebooks install-released-notebooks-support run-notebooks
 cache:
   directories:

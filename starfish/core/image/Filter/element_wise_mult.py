@@ -79,9 +79,9 @@ class ElementWiseMultiply(FilterAlgorithmBase):
             self.run(stack, in_place=True)
             return stack
 
-        stack._data.data.values *= mult_array_aligned
+        stack.xarray.values *= mult_array_aligned
         if self.clip_method == Clip.CLIP:
-            stack._data.data.values = preserve_float_range(stack._data.data.values, rescale=False)
+            stack.xarray.values = preserve_float_range(stack.xarray.values, rescale=False)
         else:
-            stack._data.data.values = preserve_float_range(stack._data.data.values, rescale=True)
+            stack.xarray.values = preserve_float_range(stack.xarray.values, rescale=True)
         return None

@@ -25,7 +25,6 @@ jobs:
       if: type = push and branch =~ /^(master|merge)/
       os: windows
       language: sh
-      python: "3.6"
       before_install:
         - choco install python3 --version 3.6.8
         - choco install make
@@ -39,7 +38,6 @@ jobs:
       if: type = push and branch =~ /^(master|merge)/
       os: windows
       language: sh
-      python: "3.6"
       before_install:
         - choco install python3 --version 3.6.8
         - choco install make

@@ -705,6 +705,7 @@ class ImageStack:
     def apply(
             self,
             func: Callable,
+            *args,
             group_by: Set[Axes]=None,
             in_place=False,
             verbose: bool=False,
@@ -772,7 +773,8 @@ class ImageStack:
             # create a copy of the ImageStack, call apply on that stack with in_place=True
             image_stack = deepcopy(self)
             image_stack.apply(
-                func=func,
+                func,
+                *args,
                 group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes,
                 clip_method=clip_method,
                 **kwargs
@@ -780,12 +782,14 @@ class ImageStack:
             return image_stack
 
         # wrapper adds a target `data` parameter where the results from func will be stored
-        # data are clipped or scaled by chunk using preserve_float_range if clip_method != 2
+        # data are clipped or scaled by chunk using preserve_float_range if
+        # clip_method != SCALE_BY_IMAGE
         bound_func = partial(ImageStack._in_place_apply, func, clip_method=clip_method)
 
         # execute the processing workflow
         self.transform(
-            func=bound_func,
+            bound_func,
+            *args,
             group_by=group_by,
             verbose=verbose,
             n_processes=n_processes,
@@ -799,10 +803,13 @@ class ImageStack:
 
     @staticmethod
     def _in_place_apply(
-        apply_func: Callable[..., Union[xr.DataArray, np.ndarray]], data: np.ndarray,
-        clip_method: Union[str, Clip], **kwargs
+            apply_func: Callable[..., Union[xr.DataArray, np.ndarray]],
+            data: np.ndarray,
+            *args,
+            clip_method: Union[str, Clip],
+            **kwargs
     ) -> None:
-        result = apply_func(data, **kwargs)
+        result = apply_func(data, *args, **kwargs)
         if clip_method == Clip.CLIP:
             data[:] = preserve_float_range(result, rescale=False)
         elif clip_method == Clip.SCALE_BY_CHUNK:
@@ -813,6 +820,7 @@ class ImageStack:
     def transform(
             self,
             func: Callable,
+            *args,
             group_by: Set[Axes]=None,
             verbose=False,
             n_processes: Optional[int]=None,
@@ -862,7 +870,13 @@ class ImageStack:
         }
 
         mp_applyfunc: Callable = partial(
-            self._processing_workflow, partial(func, **kwargs), self.xarray.dims, coordinates)
+            self._processing_workflow,
+            func,
+            self.xarray.dims,
+            coordinates,
+            args,
+            kwargs,
+        )
 
         with Pool(
                 processes=n_processes,
@@ -878,9 +892,11 @@ class ImageStack:
 
     @staticmethod
     def _processing_workflow(
-            worker_callable: Callable[[np.ndarray], Any],
+            worker_callable: Callable,
             xarray_dims: Sequence[str],
             xarray_coordinates: Mapping[str, np.ndarray],
+            args: Sequence,
+            kwargs: Mapping,
             selector_and_slice_list: Tuple[Mapping[Axes, int],
                                            Tuple[Union[int, slice], ...]],
     ):
@@ -897,7 +913,7 @@ class ImageStack:
         sliced = data_array.sel(selector_and_slice_list[0])
 
         # pass worker_callable a view into the backing array, which will be overwritten
-        return worker_callable(sliced)  # type: ignore
+        return worker_callable(sliced, *args, **kwargs)  # type: ignore
 
     @property
     def tile_metadata(self) -> pd.DataFrame:

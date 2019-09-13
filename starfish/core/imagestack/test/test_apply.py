@@ -21,6 +21,15 @@ def test_apply():
     assert (output.xarray == 0.5).all()
 
 
+def test_apply_positional():
+    """test that apply correctly applies a simple function across 2d tiles of a Stack.  Unlike
+    test_apply, the parameter is passed in as a positional parameter."""
+    stack = synthetic_stack()
+    assert (stack.xarray == 1).all()
+    output = stack.apply(divide, 2, n_processes=1)
+    assert (output.xarray == 0.5).all()
+
+
 def test_apply_3d():
     """test that apply correctly applies a simple function across 3d volumes of a Stack"""
     stack = synthetic_stack()

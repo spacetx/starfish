@@ -25,7 +25,7 @@ class Reduce(FilterAlgorithmBase):
 
     Parameters
     ----------
-    dims : Axes
+    dims : Iterable[Union[Axes, str]]
         one or more Axes to reduce over
     func : str
         Name of a function in the module specified by the ``module`` parameter to apply across the
@@ -152,7 +152,7 @@ class Reduce(FilterAlgorithmBase):
             clip_method: Clip = Clip.CLIP,
             **kwargs
     ) -> None:
-        self.dims = dims
+        self.dims: Iterable[Axes] = set(Axes(dim) for dim in dims)
         self.func = module._resolve_method(func)
         self.clip_method = clip_method
         self.kwargs = kwargs
@@ -181,10 +181,10 @@ class Reduce(FilterAlgorithmBase):
 
         # Apply the reducing function
         reduced = stack.xarray.reduce(
-            self.func, dim=[Axes(dim).value for dim in self.dims], **self.kwargs)
+            self.func, dim=[dim.value for dim in self.dims], **self.kwargs)
 
         # Add the reduced dims back and align with the original stack
-        reduced = reduced.expand_dims(tuple(Axes(dim).value for dim in self.dims))
+        reduced = reduced.expand_dims(tuple(dim.value for dim in self.dims))
         reduced = reduced.transpose(*stack.xarray.dims)
 
         if self.clip_method == Clip.CLIP:

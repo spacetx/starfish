@@ -8,6 +8,7 @@ from .gaussian_high_pass import GaussianHighPass
 from .gaussian_low_pass import GaussianLowPass
 from .laplace import Laplace
 from .linear_unmixing import LinearUnmixing
+from .map import Map
 from .match_histograms import MatchHistograms
 from .max_proj import MaxProject
 from .mean_high_pass import MeanHighPass

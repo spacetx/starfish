@@ -10,6 +10,9 @@ class MaxProject(FilterAlgorithmBase):
     """
     Creates a maximum projection over one or more axis of the image tensor
 
+    .. deprecated:: 0.1.2
+        Use `Filter.Reduce(func='max')` instead.
+
     Parameters
     ----------
     dims : Axes

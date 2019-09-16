@@ -236,16 +236,18 @@ def write_irregular_experiment_json(
         Generates the path for a FOV's json file.  If one is not provided, the default generates
         the FOV's json file at the same level as the top-level json file for an image.    If this is
         not provided, a reasonable default will be provided.  If this is provided, writer_contract
-        should not be provided.
+        should not be provided.  This parameter is deprecated and `writer_contract` should be used
+        instead.
     tile_opener : Optional[Callable[[Path, Tile, str], BinaryIO]]
         Callable that gets invoked with the following arguments: 1. the directory of the experiment
         that is being constructed, 2. the tile that is being written, and 3. the file extension
         that the tile should be written with.  The callable is expected to return an open file
         handle.  If this is not provided, a reasonable default will be provided.  If this is
-        provided, writer_contract should not be provided.
+        provided, `writer_contract` should not be provided.  This parameter is deprecated and
+        `writer_contract` should be used instead.
     writer_contract : Optional[WriterContract]
         Contract for specifying how the slicedimage image is to be laid out.  If this is provided,
-        fov_path_generator and tile_opener should not be provided.
+        `fov_path_generator` and `tile_opener` should not be provided.
     """
     if postprocess_func is None:
         postprocess_func = lambda doc: doc

@@ -33,6 +33,11 @@ class InplaceWriterContract(WriterContract):
 
 
 def enable_inplace_mode():
+    """
+    .. deprecated:: 0.1.4
+        This method is no longer necessary.  Call `write_experiment_json` with
+        `writer_contract=InplaceWriterContract()`.
+    """
     warnings.warn("`enable_inplace_mode()` is no longer necessary.", DeprecationWarning)
 
 

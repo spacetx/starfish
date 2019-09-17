@@ -781,9 +781,10 @@ class ImageStack:
             )
             return image_stack
 
-        # wrapper adds a target `data` parameter where the results from func will be stored
-        # data are clipped or scaled by chunk using preserve_float_range if
-        # clip_method != SCALE_BY_IMAGE
+        # Add a wrapper to the function to be applied.  This wrapper will grab control after the
+        # function has been applied and perform per-chunk transformations like clip and
+        # scale-by-chunk.  Scaling across an entire ImageStack is performed after all the chunks are
+        # returned.
         bound_func = partial(ImageStack._in_place_apply, func, clip_method=clip_method)
 
         # execute the processing workflow

@@ -17,7 +17,7 @@ Filtering
 ---------
 
 Filters can be imported using ``starfish.image.Filter``, which registers all classes that subclass
-``FilterAlgorithmBase``:
+``FilterAlgorithm``:
 
 .. code-block:: python
 
@@ -33,7 +33,7 @@ Learn Transform
 ---------------
 
 LearnTransform can be imported using ``starfish.image.LearnTransform``, the subclasses of
-``LearnTransformBase`` are available for transform learning.
+``LearnTransformAlgorithm`` are available for transform learning.
 
 .. code-block:: python
 
@@ -49,7 +49,7 @@ Apply Transform
 ---------------
 
 ApplyTransform can be imported using ``starfish.image.ApplyTransform``, the subclasses of
-``ApplyTransformBase`` are available for transform learning.
+``ApplyTransformAlgorithm`` are available for transform learning.
 
 .. code-block:: python
 
@@ -65,7 +65,7 @@ Segmentation
 ------------
 
 Segmentation can be imported using ``starfish.image.Segment``, which registers all classes that subclass
-``SegmentAlgorithmBase``:
+``SegmentAlgorithm``:
 
 .. code-block:: python
 

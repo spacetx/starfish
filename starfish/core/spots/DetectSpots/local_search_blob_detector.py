@@ -21,7 +21,7 @@ from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
     transfer_physical_coords_from_imagestack_to_intensity_table
 from starfish.core.types import Axes, Features, Number, SpotAttributes
-from ._base import DetectSpotsAlgorithmBase
+from ._base import DetectSpotsAlgorithm
 
 blob_detectors = {
     'blob_dog': blob_dog,
@@ -29,7 +29,7 @@ blob_detectors = {
 }
 
 
-class LocalSearchBlobDetector(DetectSpotsAlgorithmBase):
+class LocalSearchBlobDetector(DetectSpotsAlgorithm):
     """
     Multi-dimensional gaussian spot detector.
 

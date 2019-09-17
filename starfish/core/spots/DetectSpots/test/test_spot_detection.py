@@ -9,7 +9,7 @@ from starfish.core.test.factories import (
     two_spot_sparse_coded_data_factory,
 )
 from starfish.types import Axes, Features
-from .._base import DetectSpotsAlgorithmBase
+from .._base import DetectSpotsAlgorithm
 from ..blob import BlobDetector
 from ..detect import detect_spots
 from ..local_max_peak_finder import LocalMaxPeakFinder
@@ -74,7 +74,7 @@ test_parameters = (
 @pytest.mark.parametrize(*test_parameters)
 def test_spot_detection_with_reference_image(
         data_stack: ImageStack,
-        spot_detector: DetectSpotsAlgorithmBase,
+        spot_detector: DetectSpotsAlgorithm,
         radius_is_gyration: bool,
         max_intensity: float,
 ):
@@ -106,7 +106,7 @@ def test_spot_detection_with_reference_image(
 @pytest.mark.parametrize(*test_parameters)
 def test_spot_detection_with_reference_image_from_max_projection(
         data_stack: ImageStack,
-        spot_detector: DetectSpotsAlgorithmBase,
+        spot_detector: DetectSpotsAlgorithm,
         radius_is_gyration: bool,
         max_intensity: float,
 ):
@@ -135,7 +135,7 @@ def test_spot_detection_with_reference_image_from_max_projection(
 @pytest.mark.parametrize(*test_parameters)
 def test_spot_finding_no_reference_image(
         data_stack: ImageStack,
-        spot_detector: DetectSpotsAlgorithmBase,
+        spot_detector: DetectSpotsAlgorithm,
         radius_is_gyration: bool,
         max_intensity: float,
 ):

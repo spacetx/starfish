@@ -20,21 +20,15 @@ Creating a new algorithm for an existing `pipeline_component`
 
 For example, to add a new image filter, one would:
 
-1. Create a new python file `new_filter.py` in the `starfish/pipeline/filter/` directory.
+1. Create a new python file `new_filter.py` in the `starfish/core/image/Filter/` directory.
 2. Find the corresponding `AlgorithmBase` for your component.
-   For filters, this is `FilterAlgorithmBase`, which is found in `starfish/pipeline/filter/_base.py`.
+   For filters, this is `FilterAlgorithm`, which is found in `starfish/core/image/Filter/_base.py`.
    Import that base into `new_filter.py`, and have your new algorithm subclass it,
-   e.g. create `class NewFilter(FilterAlgorithmBase)`
+   e.g. create `class NewFilter(FilterAlgorithm)`
 3. Implement all required methods from the base class.
-4. For the command line arguments to mimic the API, the arguments passed to the CLI must exactly
-   match the names of the parameters for `NewFilter.__init__`, after dashes are automatically converted by argparse.
-   For example, `--foo-bar` would convert to `foo_bar` and init must accept such an argument:
-   `NewFilter.__init__(foo_bar, ..., **kwargs)`
-5. `NewFilter.__init__()` must have a `**kwargs` parameter to accept arbitrary CLI args.
 
-That's it! Your `NewFilter` algoritm will automatically register and be available under `starfish filter` in the CLI.
-If at any point something gets confusing, it should be possible to look at existing pipeline components of the same
-category for guidance on implementation.
+That's it! If at any point something gets confusing, it should be possible to look at existing pipeline components of
+the same category for guidance on implementation.
 
 Reporting bugs
 --------------

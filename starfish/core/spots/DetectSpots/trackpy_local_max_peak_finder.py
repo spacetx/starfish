@@ -8,11 +8,11 @@ from trackpy import locate
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Axes, SpotAttributes
-from ._base import DetectSpotsAlgorithmBase
+from ._base import DetectSpotsAlgorithm
 from .detect import detect_spots
 
 
-class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithmBase):
+class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithm):
     """
     Find spots using a local max peak finding algorithm
 

@@ -1,4 +1,4 @@
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 from .bandpass import Bandpass
 from .clip import Clip
 from .clip_percentile_to_zero import ClipPercentileToZero
@@ -21,6 +21,6 @@ from .zero_by_channel_magnitude import ZeroByChannelMagnitude
 all_filters = {
     filter_name: filter_cls
     for filter_name, filter_cls in locals().items()
-    if isinstance(filter_cls, type) and FilterAlgorithmBase in filter_cls.__mro__
+    if isinstance(filter_cls, type) and FilterAlgorithm in filter_cls.__mro__
 }
 __all__ = list(all_filters.keys())

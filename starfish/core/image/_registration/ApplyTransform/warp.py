@@ -8,13 +8,13 @@ from skimage.transform._geometric import GeometricTransform
 from tqdm import tqdm
 
 from starfish.core.config import StarfishConfig
-from starfish.core.image._registration.ApplyTransform._base import ApplyTransformBase
+from starfish.core.image._registration.ApplyTransform._base import ApplyTransformAlgorithm
 from starfish.core.image._registration.transforms_list import TransformsList
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes
 
 
-class Warp(ApplyTransformBase):
+class Warp(ApplyTransformAlgorithm):
     """
     Applies a list of geometric transformations to an ImageStack using
     :py:func:skimage.transform.warp

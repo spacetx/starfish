@@ -11,10 +11,10 @@ from typing import (
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes, Clip
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 
 
-class Map(FilterAlgorithmBase):
+class Map(FilterAlgorithm):
     """
     Map from input to output by applying a specified function to the input.  The output must have
     the same shape as the input.

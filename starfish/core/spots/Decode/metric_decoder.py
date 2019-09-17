@@ -1,11 +1,11 @@
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Number
-from ._base import DecodeAlgorithmBase
+from ._base import DecodeAlgorithm
 
 
 # TODO ambrosejcarr add tests
-class MetricDistance(DecodeAlgorithmBase):
+class MetricDistance(DecodeAlgorithm):
     """
     Normalizes both the magnitudes of the codes and the spot intensities, then decodes spots by
     assigning each spot to the closest code, measured by the provided metric.

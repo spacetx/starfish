@@ -8,7 +8,7 @@ from skimage.feature import blob_dog, blob_doh, blob_log
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Axes, Features, Number, SpotAttributes
-from ._base import DetectSpotsAlgorithmBase
+from ._base import DetectSpotsAlgorithm
 from .detect import detect_spots, measure_spot_intensity
 
 blob_detectors = {
@@ -18,7 +18,7 @@ blob_detectors = {
 }
 
 
-class BlobDetector(DetectSpotsAlgorithmBase):
+class BlobDetector(DetectSpotsAlgorithm):
     """
     Multi-dimensional gaussian spot detector
 

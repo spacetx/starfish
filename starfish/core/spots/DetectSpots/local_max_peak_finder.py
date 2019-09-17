@@ -13,7 +13,7 @@ from starfish.core.config import StarfishConfig
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Axes, Features, Number, SpotAttributes
-from ._base import DetectSpotsAlgorithmBase
+from ._base import DetectSpotsAlgorithm
 from .detect import detect_spots
 
 
@@ -22,7 +22,7 @@ from .detect import detect_spots
 # spot finder confusing. One would expect to have access to the private parameters
 # however, they are lost due to the memory-space forking induced by multi-processing.
 
-class LocalMaxPeakFinder(DetectSpotsAlgorithmBase):
+class LocalMaxPeakFinder(DetectSpotsAlgorithm):
     """
     2-dimensional local-max peak finder that wraps skimage.feature.peak_local_max
 

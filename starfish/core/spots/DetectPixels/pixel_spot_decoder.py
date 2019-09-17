@@ -6,11 +6,11 @@ from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
     transfer_physical_coords_from_imagestack_to_intensity_table
-from ._base import DetectPixelsAlgorithmBase
+from ._base import DetectPixelsAlgorithm
 from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedComponentDecodingResult
 
 
-class PixelSpotDecoder(DetectPixelsAlgorithmBase):
+class PixelSpotDecoder(DetectPixelsAlgorithm):
     """Decode an image by first coding each pixel, then combining the results into spots
 
     Parameters

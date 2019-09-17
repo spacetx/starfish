@@ -10,7 +10,7 @@ from starfish.core.pipeline.algorithmbase import AlgorithmBase
 from starfish.core.types import Axes, Number, SpotAttributes
 
 
-class DetectSpotsAlgorithmBase(metaclass=AlgorithmBase):
+class DetectSpotsAlgorithm(metaclass=AlgorithmBase):
     """
     Starfish spot detectors use a variety of means to detect bright spots against
     dark backgrounds. Starfish's spot detectors each have different strengths and weaknesses.

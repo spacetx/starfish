@@ -21,6 +21,6 @@ from .zero_by_channel_magnitude import ZeroByChannelMagnitude
 all_filters = {
     filter_name: filter_cls
     for filter_name, filter_cls in locals().items()
-    if isinstance(filter_cls, type) and FilterAlgorithm in filter_cls.__mro__
+    if isinstance(filter_cls, type) and issubclass(filter_cls, FilterAlgorithm)
 }
 __all__ = list(all_filters.keys())

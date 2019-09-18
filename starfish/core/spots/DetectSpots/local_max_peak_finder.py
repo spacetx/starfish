@@ -70,13 +70,6 @@ class LocalMaxPeakFinder(DetectSpotsAlgorithm):
         self.is_volume = is_volume
         self.verbose = verbose
 
-        # these parameters are useful for debugging spot-calls
-        self._thresholds: Optional[np.ndarray] = None
-        self._spot_counts: Optional[List[int]] = None
-        self._grad = None
-        self._spot_props = None
-        self._labels = None
-
     def _compute_num_spots_per_threshold(self, img: np.ndarray) -> Tuple[np.ndarray, List[int]]:
         """Computes the number of detected spots for each threshold
 
@@ -137,16 +130,11 @@ class LocalMaxPeakFinder(DetectSpotsAlgorithm):
             thresholds = thresholds[:stop_index]
             spot_counts = spot_counts[:stop_index]
 
-        # TODO ambrosejcarr: these two lists should be a dict
-        self._thresholds = thresholds
-        self._spot_counts = spot_counts
-
         return thresholds, spot_counts
 
     def _select_optimal_threshold(self, thresholds: np.ndarray, spot_counts: List[int]) -> float:
         # calculate the gradient of the number of spots
         grad = np.gradient(spot_counts)
-        self._grad = grad
         optimal_threshold_index = np.argmin(grad)
 
         # only consider thresholds > than optimal threshold
@@ -205,8 +193,10 @@ class LocalMaxPeakFinder(DetectSpotsAlgorithm):
         """
         img = np.asarray(img)
         thresholds, spot_counts = self._compute_num_spots_per_threshold(img)
-        threshold = self._select_optimal_threshold(thresholds, spot_counts)
-        return threshold
+        if len(spot_counts) == 0:
+            # this only happens when we never find more spots than `self.min_num_spots_detected`
+            return img.min()
+        return self._select_optimal_threshold(thresholds, spot_counts)
 
     def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
         """measure attributes of spots detected by binarizing the image using the selected threshold
@@ -222,13 +212,12 @@ class LocalMaxPeakFinder(DetectSpotsAlgorithm):
             Attributes for each detected spot
         """
 
-        if self.threshold is None:
-            self.threshold = self._compute_threshold(data_image)
+        threshold = self._compute_threshold(data_image)
 
         data_image = np.asarray(data_image)
 
         # identify each spot's size by binarizing and calculating regionprops
-        masked_image = data_image[:, :] > self.threshold
+        masked_image = data_image[:, :] > threshold
         labels = label(masked_image)[0]
         spot_props = regionprops(np.squeeze(labels))
 
@@ -238,34 +227,33 @@ class LocalMaxPeakFinder(DetectSpotsAlgorithm):
                 masked_image[0, spot_prop.coords[:, 0], spot_prop.coords[:, 1]] = 0
 
         # store re-calculated regionprops and labels based on the area-masked image
-        self._labels = label(masked_image)[0]
-        self._spot_props = regionprops(np.squeeze(self._labels))
+        labels = label(masked_image)[0]
 
         if self.verbose:
             print('computing final spots ...')
 
-        self._spot_coords = peak_local_max(
+        spot_coords = peak_local_max(
             data_image,
             min_distance=self.min_distance,
-            threshold_abs=self.threshold,
+            threshold_abs=threshold,
             exclude_border=False,
             indices=True,
             num_peaks=np.inf,
             footprint=None,
-            labels=self._labels
+            labels=labels
         )
 
         # TODO how to get the radius? unlikely that this can be pulled out of
         # self._spot_props, since the last call to peak_local_max can find multiple
         # peaks per label
-        res = {Axes.X.value: self._spot_coords[:, 2],
-               Axes.Y.value: self._spot_coords[:, 1],
-               Axes.ZPLANE.value: self._spot_coords[:, 0],
+        res = {Axes.X.value: spot_coords[:, 2],
+               Axes.Y.value: spot_coords[:, 1],
+               Axes.ZPLANE.value: spot_coords[:, 0],
                Features.SPOT_RADIUS: 1,
-               Features.SPOT_ID: np.arange(self._spot_coords.shape[0]),
-               Features.INTENSITY: data_image[self._spot_coords[:, 0],
-                                              self._spot_coords[:, 1],
-                                              self._spot_coords[:, 2]]
+               Features.SPOT_ID: np.arange(spot_coords.shape[0]),
+               Features.INTENSITY: data_image[spot_coords[:, 0],
+                                              spot_coords[:, 1],
+                                              spot_coords[:, 2]]
                }
 
         return SpotAttributes(pd.DataFrame(res))

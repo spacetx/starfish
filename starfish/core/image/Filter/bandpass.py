@@ -7,11 +7,11 @@ from trackpy import bandpass
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip, Number
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 from .util import determine_axes_to_group_by
 
 
-class Bandpass(FilterAlgorithmBase):
+class Bandpass(FilterAlgorithm):
     """
     Convolve with a Gaussian to remove short-wavelength noise and subtract out long-wavelength
     variations, retaining features of intermediate scale. This implementation relies on

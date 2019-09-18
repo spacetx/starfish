@@ -7,14 +7,14 @@ from scipy.signal import convolve, fftconvolve
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip, Number
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 from .util import (
     determine_axes_to_group_by,
     gaussian_kernel,
 )
 
 
-class DeconvolvePSF(FilterAlgorithmBase):
+class DeconvolvePSF(FilterAlgorithm):
     """
     Deconvolve a point spread function from the image. The point spread function is assumed to be
     an isotropic Gaussian, with a user specified standard deviation, sigma.

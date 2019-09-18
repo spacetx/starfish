@@ -6,10 +6,10 @@ import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes, Clip
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 
 
-class LinearUnmixing(FilterAlgorithmBase):
+class LinearUnmixing(FilterAlgorithm):
     """
     LinearUnmixing enables the user to correct fluorescent bleed by subtracting fractions of the
     intensities of other channels from each channel in the ImageStack.

@@ -16,10 +16,10 @@ import numpy as np
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes, Clip, Coordinates, Number
 from starfish.core.util.dtype import preserve_float_range
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 
 
-class Reduce(FilterAlgorithmBase):
+class Reduce(FilterAlgorithm):
     """
     Reduces the cardinality of one or more axes to 1 by applying a function across those axes.
 

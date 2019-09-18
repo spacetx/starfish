@@ -6,7 +6,7 @@ import numpy as np
 import xarray as xr
 from scipy.ndimage import gaussian_laplace
 
-from starfish.core.image.Filter._base import FilterAlgorithmBase
+from starfish.core.image.Filter._base import FilterAlgorithm
 from starfish.core.image.Filter.util import (
     determine_axes_to_group_by,
     validate_and_broadcast_kernel_size,
@@ -15,7 +15,7 @@ from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip, Number
 
 
-class Laplace(FilterAlgorithmBase):
+class Laplace(FilterAlgorithm):
     """
     Multi-dimensional Gaussian-Laplacian filter used to enhance dots against background
 

@@ -6,11 +6,11 @@ from skimage.morphology import ball, disk, white_tophat
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 from .util import determine_axes_to_group_by
 
 
-class WhiteTophat(FilterAlgorithmBase):
+class WhiteTophat(FilterAlgorithm):
     """
     Performs "white top hat" filtering of an image to enhance spots. White top hat filtering
     finds spots that are both smaller and brighter than their surroundings by subtracting an

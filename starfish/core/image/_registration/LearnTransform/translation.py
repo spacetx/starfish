@@ -5,10 +5,10 @@ from skimage.transform._geometric import SimilarityTransform
 from starfish.core.image._registration.transforms_list import TransformsList
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes, TransformType
-from ._base import LearnTransformBase
+from ._base import LearnTransformAlgorithm
 
 
-class Translation(LearnTransformBase):
+class Translation(LearnTransformAlgorithm):
     """
     Iterate over the given axes of an ImageStack and learn the translation transform
     based off the reference_stack passed into :py:class:`Translation`'s constructor.

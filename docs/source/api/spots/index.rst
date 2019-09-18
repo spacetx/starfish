@@ -14,7 +14,7 @@ These include :py:class:`starfish.spots.DetectPixels`, which exposes methods tha
 Detecting Pixels
 ----------------
 
-Pixel Detectors can be imported using ``starfish.spots.DetectPixels``, which registers all classes that subclass ``DetectPixelsAlgorithmBase``:
+Pixel Detectors can be imported using ``starfish.spots.DetectPixels``, which registers all classes that subclass ``DetectPixelsAlgorithm``:
 
 .. code-block:: python
 
@@ -29,7 +29,7 @@ Pixel Detectors can be imported using ``starfish.spots.DetectPixels``, which reg
 Detecting Spots
 ---------------
 
-Spot Detectors can be imported using ``starfish.spots.DetectSpots``, which registers all classes that subclass ``DetectSpotsAlgorithmBase``:
+Spot Detectors can be imported using ``starfish.spots.DetectSpots``, which registers all classes that subclass ``DetectSpotsAlgorithm``:
 
 .. code-block:: python
 
@@ -44,7 +44,7 @@ Spot Detectors can be imported using ``starfish.spots.DetectSpots``, which regis
 Decoding
 --------
 
-Decoders can be imported using ``starfish.spots.Decode``, which registers all classes that subclass ``DecodeAlgorithmBase``:
+Decoders can be imported using ``starfish.spots.Decode``, which registers all classes that subclass ``DecodeAlgorithm``:
 
 .. code-block:: python
 
@@ -59,7 +59,7 @@ Decoders can be imported using ``starfish.spots.Decode``, which registers all cl
 Target Assignment
 -----------------
 
-Target Assignment can be imported using ``starfish.spots.AssignTargets``, which registers all classes that subclass ``AssignTargetsAlgorithmBase``:
+Target Assignment can be imported using ``starfish.spots.AssignTargets``, which registers all classes that subclass ``AssignTargetsAlgorithm``:
 
 .. code-block:: python
 

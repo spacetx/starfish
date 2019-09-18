@@ -8,10 +8,10 @@ from starfish.core.compat import match_histograms
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes
 from starfish.core.util import enum
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 
 
-class MatchHistograms(FilterAlgorithmBase):
+class MatchHistograms(FilterAlgorithm):
     """
     Normalize data by matching distributions of each tile or volume to a reference volume
 

@@ -6,11 +6,11 @@ import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Number
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 from .util import determine_axes_to_group_by
 
 
-class ClipValueToZero(FilterAlgorithmBase):
+class ClipValueToZero(FilterAlgorithm):
     """
     Image clipping filter that clips values below a minimum value and above a
     maximum value. The filter then subtracts the minimum value from the

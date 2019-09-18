@@ -1,9 +1,9 @@
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from ._base import DecodeAlgorithmBase
+from ._base import DecodeAlgorithm
 
 
-class PerRoundMaxChannel(DecodeAlgorithmBase):
+class PerRoundMaxChannel(DecodeAlgorithm):
     """
     Decode spots by selecting the max-valued channel in each sequencing round.
 

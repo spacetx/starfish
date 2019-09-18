@@ -7,10 +7,10 @@ import xarray as xr
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip
 from starfish.core.util.dtype import preserve_float_range
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 
 
-class ElementWiseMultiply(FilterAlgorithmBase):
+class ElementWiseMultiply(FilterAlgorithm):
     """
     Perform element-wise multiplication on the image tensor. This is useful for
     performing operations such as image normalization or field flatness correction

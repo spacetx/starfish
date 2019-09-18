@@ -1,4 +1,5 @@
 import collections
+import os
 import warnings
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
@@ -43,8 +44,6 @@ from starfish.core.imagestack.parser import TileCollectionData, TileKey
 from starfish.core.imagestack.parser.crop import CropParameters, CroppedTileCollectionData
 from starfish.core.imagestack.parser.numpy import NumpyData
 from starfish.core.imagestack.parser.tileset import TileSetData
-from starfish.core.multiprocessing.pool import Pool
-from starfish.core.multiprocessing.shmem import SharedMemory
 from starfish.core.types import (
     Axes,
     Clip,
@@ -56,7 +55,6 @@ from starfish.core.types import (
 )
 from starfish.core.util import logging
 from starfish.core.util.dtype import preserve_float_range
-from ._mp_dataarray import MPDataArray
 from .dataorder import AXES_DATA, N_AXES
 
 
@@ -88,7 +86,7 @@ class ImageStack:
            the shape of the image tensor by categorical index (channels, imaging rounds, z-layers)
     """
 
-    def __init__(self, data: MPDataArray, tile_data: Optional[TileCollectionData]=None):
+    def __init__(self, data: xr.DataArray, tile_data: Optional[TileCollectionData]=None):
         self._data = data
         self._data_loaded = False
         self._tile_data = tile_data
@@ -128,10 +126,10 @@ class ImageStack:
         data_dimensions.extend([Axes.Y.value, Axes.X.value])
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
-        data = MPDataArray.from_shape_and_dtype(
-            shape=data_shape,
-            dtype=np.float32,
-            initial_value=np.nan,
+        np_array = np.empty(shape=data_shape, dtype=np.float32)
+        np_array.fill(np.nan)
+        data = xr.DataArray(
+            np_array,
             dims=data_dimensions,
             coords=data_tick_marks,
         )
@@ -374,7 +372,7 @@ class ImageStack:
     def xarray(self) -> xr.DataArray:
         """Retrieves the image data as an :py:class:`xarray.DataArray`"""
         self._ensure_data_loaded()
-        return self._data.data
+        return self._data
 
     def sel(self, indexers: Mapping[Axes, Union[int, tuple]]):
         """Given a dictionary mapping the index name to either a value or a range represented as a
@@ -411,7 +409,7 @@ class ImageStack:
         self._ensure_data_loaded()
         stack = deepcopy(self)
         selector = indexing_utils.convert_to_selector(indexers)
-        stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector)
+        stack._data = indexing_utils.index_keep_dimensions(self.xarray, selector)
         return stack
 
     def isel(self, indexers: Mapping[Axes, Union[int, tuple]]):
@@ -447,7 +445,7 @@ class ImageStack:
         """
         stack = deepcopy(self)
         selector = indexing_utils.convert_to_selector(indexers)
-        stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector, by_pos=True)
+        stack._data = indexing_utils.index_keep_dimensions(self.xarray, selector, by_pos=True)
         return stack
 
     def sel_by_physical_coords(
@@ -798,7 +796,7 @@ class ImageStack:
 
         # scale based on values of whole image
         if clip_method == Clip.SCALE_BY_IMAGE:
-            self._data.data.values = preserve_float_range(self._data.values, rescale=True)
+            self._data.values = preserve_float_range(self._data.values, rescale=True)
 
         return None
 
@@ -856,36 +854,24 @@ class ImageStack:
         # default grouping is by (x, y) tile
         if group_by is None:
             group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
+        if n_processes is None:
+            n_processes = os.cpu_count()
 
         selectors = list(self._iter_axes(group_by))
-        slice_lists = [self._build_slice_list(index)[0]
-                       for index in selectors]
 
-        selectors_and_slice_lists = zip(selectors, slice_lists)
         if verbose and StarfishConfig().verbose:
-            selectors_and_slice_lists = tqdm(selectors_and_slice_lists)
-
-        coordinates = {
-            dim: self.xarray.coords[dim]
-            for dim in self.xarray.coords.dims
-        }
+            selectors = tqdm(selectors)
 
         mp_applyfunc: Callable = partial(
             self._processing_workflow,
             func,
-            self.xarray.dims,
-            coordinates,
+            self.xarray,
             args,
             kwargs,
         )
 
-        with Pool(
-                processes=n_processes,
-                initializer=SharedMemory.initializer,
-                initargs=((self._data._backing_mp_array,
-                           self._data._data.shape,
-                           self._data._data.dtype),)) as pool:
-            results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
+        with ThreadPoolExecutor(max_workers=n_processes) as tpe:
+            results = tpe.map(mp_applyfunc, selectors)
 
             # Note: results is [None, ...] if executing an in-place workflow
             # Note: this return must be inside the context manager or the Pool will deadlock
@@ -893,25 +879,13 @@ class ImageStack:
 
     @staticmethod
     def _processing_workflow(
-            worker_callable: Callable,
-            xarray_dims: Sequence[str],
-            xarray_coordinates: Mapping[str, np.ndarray],
+            worker_callable: Callable[[np.ndarray], Any],
+            data_array: xr.DataArray,
             args: Sequence,
             kwargs: Mapping,
-            selector_and_slice_list: Tuple[Mapping[Axes, int],
-                                           Tuple[Union[int, slice], ...]],
+            selectors: Mapping[Axes, int],
     ):
-        # build the numpy array from the shared memory object
-        backing_mp_array, shape, dtype = SharedMemory.get_payload()
-        unshaped_numpy_array = np.frombuffer(backing_mp_array.get_obj(), dtype=dtype)
-
-        # build and then slice the xarray to get the piece needed for this worker
-        data_array = xr.DataArray(
-            data=unshaped_numpy_array.reshape(shape),
-            dims=xarray_dims,
-            coords=xarray_coordinates,
-        )
-        sliced = data_array.sel(selector_and_slice_list[0])
+        sliced = data_array.sel(selectors)
 
         # pass worker_callable a view into the backing array, which will be overwritten
         return worker_callable(sliced, *args, **kwargs)  # type: ignore

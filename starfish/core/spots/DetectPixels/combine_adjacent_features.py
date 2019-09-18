@@ -1,4 +1,5 @@
 import warnings
+from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
@@ -10,7 +11,6 @@ from tqdm import tqdm
 
 from starfish.core.config import StarfishConfig
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.multiprocessing.pool import Pool
 from starfish.core.types import Axes, Features, Number, SpotAttributes
 
 
@@ -321,8 +321,8 @@ class CombineAdjacentFeatures:
             An array with length equal to the number of features. If zero, indicates that a feature
             has failed area filters.
         """
-        with Pool(processes=n_processes) as pool:
-            mapfunc = pool.map
+        with ThreadPoolExecutor(max_workers=n_processes) as tpe:
+            mapfunc = tpe.map
             applyfunc = partial(
                 self._single_spot_attributes,
                 decoded_image=decoded_image,

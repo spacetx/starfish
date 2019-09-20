@@ -1,4 +1,4 @@
-from typing import Dict, Mapping, MutableMapping, Tuple, Union
+from typing import Dict, Hashable, Mapping, MutableMapping, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -8,7 +8,7 @@ from starfish.core.types import Axes, Coordinates, CoordinateValue
 
 
 def convert_to_selector(
-        indexers: Mapping[Axes, Union[int, slice, tuple]]) -> Mapping[str, Union[int, slice]]:
+        indexers: Mapping[Axes, Union[int, slice, tuple]]) -> Mapping[Hashable, Union[int, slice]]:
     """Converts a mapping of Axis to int, slice, or tuple to a mapping of str to int or slice.  The
     latter format is required for standard xarray indexing methods.
 
@@ -18,7 +18,7 @@ def convert_to_selector(
             A dictionary of dim:index where index is the value or range to index the dimension
 
     """
-    return_dict: MutableMapping[str, Union[int, slice]] = {
+    return_dict: MutableMapping[Hashable, Union[int, slice]] = {
         ind.value: slice(None, None) for ind in Axes}
     for key, value in indexers.items():
         if isinstance(value, tuple):
@@ -63,7 +63,7 @@ def convert_coords_to_indices(
 
 
 def index_keep_dimensions(data: xr.DataArray,
-                          indexers: Mapping[str, Union[int, slice]],
+                          indexers: Mapping[Hashable, Union[int, slice]],
                           by_pos: bool=False
                           ) -> xr.DataArray:
     """Takes an xarray and key to index it. Indexes then adds back in lost dimensions"""

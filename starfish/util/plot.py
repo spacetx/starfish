@@ -9,7 +9,7 @@ for their plotting needs, as the interactive viewer is better able to handle the
 that starfish needs.
 """
 import itertools
-from typing import Any, Mapping, Optional, Union
+from typing import Any, cast, Mapping, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -150,7 +150,7 @@ def overlay_spot_calls(
         intensity_keys = (Axes.ROUND, Axes.CH, Axes.ZPLANE)
         intensity_sel = {x.value: sel[x] for x in intensity_keys if x in sel}
         if intensity_sel:
-            intensities = intensities.sel(intensity_sel)
+            intensities = cast(IntensityTable, intensities.sel(intensity_sel))
 
     imshow_kwargs = imshow_kwargs if imshow_kwargs else {}
     scatter_kwargs = scatter_kwargs if scatter_kwargs else {}

@@ -1,6 +1,6 @@
 import io
 import tarfile
-from typing import Dict, List, Optional, Sequence, Tuple, Union
+from typing import cast, Dict, Hashable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -143,7 +143,7 @@ class SegmentationMaskCollection:
 
         masks: List[xr.DataArray] = []
 
-        coords: Dict[str, Union[list, Tuple[str, Sequence]]]
+        coords: Dict[Hashable, Union[list, Tuple[str, Sequence]]]
 
         # for each region (and its properties):
         for label, prop in enumerate(props):
@@ -249,7 +249,7 @@ class SegmentationMaskCollection:
         """
         with tarfile.open(path, 'w:gz') as t:
             for i, mask in enumerate(self._masks):
-                data = mask.to_netcdf()
+                data = cast(bytes, mask.to_netcdf())
                 with io.BytesIO(data) as buff:
                     info = tarfile.TarInfo(name=str(i) + '.nc')
                     info.size = len(data)

@@ -10,6 +10,7 @@ from threading import Lock
 from typing import (
     Any,
     Callable,
+    Hashable,
     Iterator,
     List,
     Mapping,
@@ -102,7 +103,7 @@ class ImageStack:
 
         data_shape: MutableSequence[int] = []
         data_dimensions: MutableSequence[str] = []
-        data_tick_marks: MutableMapping[str, Sequence[int]] = dict()
+        data_tick_marks: MutableMapping[Hashable, Sequence[int]] = dict()
         for ix in range(N_AXES):
             size_for_axis: Optional[int] = None
             dim_for_axis: Optional[Axes] = None
@@ -885,7 +886,9 @@ class ImageStack:
             kwargs: Mapping,
             selectors: Mapping[Axes, int],
     ):
-        sliced = data_array.sel(selectors)
+        formatted_selectors: Mapping[Hashable, int] = {
+            str(axis): axis_val for axis, axis_val in selectors.items()}
+        sliced = data_array.sel(formatted_selectors)
 
         # pass worker_callable a view into the backing array, which will be overwritten
         return worker_callable(sliced, *args, **kwargs)  # type: ignore
@@ -987,7 +990,7 @@ class ImageStack:
         Tuple[int, int, int, int, int] :
             The size of the image tensor
         """
-        return self._data.shape
+        return self._data.shape  # type: ignore
 
     @property
     def shape(self) -> collections.OrderedDict:
@@ -1004,7 +1007,7 @@ class ImageStack:
         # has a bug where this # breaks horribly.  Can't find a bug id to link to, but see
         # https://stackoverflow.com/questions/41207128/how-do-i-specify-ordereddict-k-v-types-for-\
         # mypy-type-annotation
-        result: collections.OrderedDict[Any, str] = collections.OrderedDict()
+        result: collections.OrderedDict[Any, Any] = collections.OrderedDict()
         for name, data in AXES_DATA.items():
             result[name] = self._data.shape[data.order]
         result['y'] = self._data.shape[-2]

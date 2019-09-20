@@ -203,7 +203,7 @@ class Reduce(FilterAlgorithm):
                 assert coord.value not in reduced.coords
                 physical_coords[coord] = [np.average(stack._data.coords[coord.value])]
             else:
-                physical_coords[coord] = reduced.coords[coord.value]
+                physical_coords[coord] = cast(Sequence[Number], reduced.coords[coord.value])
         reduced_stack = ImageStack.from_numpy(reduced.values, coordinates=physical_coords)
 
         return reduced_stack

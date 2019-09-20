@@ -44,7 +44,7 @@ class Label(AssignTargetsAlgorithm):
                 drop=True
             )
 
-            in_mask = mask.sel_points(y=in_bbox.y, x=in_bbox.x)
+            in_mask = mask.sel(y=in_bbox.y, x=in_bbox.x)
             spot_ids = in_bbox[Features.SPOT_ID][in_mask.values]
             decoded_intensities[Features.CELL_ID].loc[spot_ids] = mask.name
 

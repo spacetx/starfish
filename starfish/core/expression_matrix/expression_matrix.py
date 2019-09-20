@@ -70,7 +70,7 @@ class ExpressionMatrix(xr.DataArray):
         anndata.write(filename)
 
     @classmethod
-    def load(cls, filename: str) -> "ExpressionMatrix":
+    def load(cls, filename: str) -> "ExpressionMatrix":  # type: ignore
         """load an ExpressionMatrix from Netcdf
 
         Parameters

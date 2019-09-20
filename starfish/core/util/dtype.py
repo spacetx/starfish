@@ -1,14 +1,17 @@
-from typing import Union
+from typing import TypeVar
 
 import numpy as np
 import xarray as xr
 
 
+PreserveFloatRangeType = TypeVar("PreserveFloatRangeType", xr.DataArray, np.ndarray)
+
+
 def preserve_float_range(
-        array: Union[xr.DataArray, np.ndarray],
+        array: PreserveFloatRangeType,
         rescale: bool = False,
         preserve_input: bool = False,
-) -> Union[xr.DataArray, np.ndarray]:
+) -> PreserveFloatRangeType:
     """
     Clips values below zero to zero. If values above one are detected, clips them
     to 1 unless `rescale` is True, in which case the input is scaled by

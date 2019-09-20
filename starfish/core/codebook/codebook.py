@@ -1,6 +1,6 @@
 import json
 import uuid
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, TypeVar, Union
 
 import numpy as np
 import pandas as pd
@@ -20,6 +20,9 @@ from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensi
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.spacetx_format.util import CodebookValidator
 from starfish.core.types import Axes, Features, Number
+
+
+NormalizedFeaturesArgtype = TypeVar("NormalizedFeaturesArgtype", "Codebook", IntensityTable)
 
 
 class Codebook(xr.DataArray):
@@ -419,9 +422,9 @@ class Codebook(xr.DataArray):
 
     @staticmethod
     def _normalize_features(
-            array: Union["Codebook", IntensityTable],
+            array: NormalizedFeaturesArgtype,
             norm_order: int,
-    ) -> Tuple[Union["Codebook", IntensityTable], np.ndarray]:
+    ) -> Tuple[NormalizedFeaturesArgtype, np.ndarray]:
         """Unit normalize each feature of array
 
         Parameters

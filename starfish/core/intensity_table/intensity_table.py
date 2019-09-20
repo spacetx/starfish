@@ -1,6 +1,6 @@
 from itertools import product
 from json import loads
-from typing import Dict, List, Optional, Sequence, Union
+from typing import Dict, Hashable, List, Optional, Sequence, Union
 
 import numpy as np
 import pandas as pd
@@ -72,7 +72,7 @@ class IntensityTable(xr.DataArray):
             spot_attributes: SpotAttributes,
             channel_values: Sequence[int],
             round_values: Sequence[int]
-    ) -> Dict[str, np.ndarray]:
+    ) -> Dict[Hashable, np.ndarray]:
         """build coordinates for intensity-table"""
         coordinates = {
             k: (Features.AXIS, spot_attributes.data[k].values)
@@ -205,7 +205,7 @@ class IntensityTable(xr.DataArray):
         """Returns True if this table's features have physical-space loci."""
         return Coordinates.X in self.coords and Coordinates.Y in self.coords
 
-    def to_netcdf(self, filename: str) -> None:
+    def to_netcdf(self, filename: str) -> None:  # type: ignore
         """
         Save an IntensityTable as a Netcdf File.
 

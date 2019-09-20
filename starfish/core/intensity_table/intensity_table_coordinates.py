@@ -1,3 +1,5 @@
+from typing import Callable
+
 import numpy as np
 import xarray as xr
 
@@ -37,6 +39,7 @@ def transfer_physical_coords_from_imagestack_to_intensity_table(
         intensity_table_pixel_offsets: np.ndarray = intensity_table[axis].values
 
         # can't interpolate if the axis size == 1, so just select in that case.
+        coordinate_fetcher: Callable
         if len(imagestack_pixels) == 1:
             coordinate_fetcher = imagestack_pixels.sel
         else:

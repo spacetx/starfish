@@ -7,7 +7,7 @@ See: https://github.com/spacetx/starfish/issues/1005
 """
 
 from collections import defaultdict
-from typing import Dict, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, Hashable, List, Mapping, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -344,7 +344,7 @@ class LocalSearchBlobDetector(DetectSpotsAlgorithm):
         # create empty IntensityTable filled with np.nan
         data = np.full((dist.shape[0], len(channels), len(rounds)), fill_value=np.nan)
         dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
-        coords = {
+        coords: Mapping[Hashable, Tuple[str, Any]] = {
             Features.SPOT_RADIUS: (Features.AXIS, anchor_df[Features.SPOT_RADIUS]),
             Axes.ZPLANE.value: (Features.AXIS, anchor_df[Axes.ZPLANE]),
             Axes.Y.value: (Features.AXIS, anchor_df[Axes.Y]),

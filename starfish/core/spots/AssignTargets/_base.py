@@ -2,7 +2,7 @@ from abc import abstractmethod
 
 import numpy as np
 
-from starfish.core.intensity_table.intensity_table import IntensityTable
+from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
 from starfish.core.pipeline.algorithmbase import AlgorithmBase
 
 
@@ -16,9 +16,9 @@ class AssignTargetsAlgorithm(metaclass=AlgorithmBase):
     def run(
             self,
             label_image: np.ndarray,
-            intensity_table: IntensityTable,
+            decoded_intensity_table: DecodedIntensityTable,
             verbose: bool=False,
             in_place: bool=False,
-    ) -> IntensityTable:
+    ) -> DecodedIntensityTable:
         """Performs target (e.g. gene) assignment given the spots and the regions."""
         raise NotImplementedError()

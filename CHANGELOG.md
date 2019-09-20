@@ -1,3 +1,14 @@
+## [0.1.6] - 2019-09-18
+- Switch to python multithreading (#1544)
+- Don't waste memory/compute in preserve_float_range (#1545)
+- Get rid of shared state for LocalMaxPeakFinder (#1541)
+- map filter (#1520)
+- funcs passed to apply and transform can use positional arguments (#1519)
+- import SegmentationMaskCollection in main starfish (#1527)
+- Enable Windows builds on master (#1538)
+- Throw a warning when the data size is unusual. (#1525)
+
+
 ## [0.1.5] - 2019-08-12
 - Update the documentation for data formatters (#1476)
 - add ability to convert segmentation masks to a label image
@@ -110,6 +121,8 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.1.6]: https://github.com/spacetx/starfish/releases/tag/0.1.6
+[0.1.5]: https://github.com/spacetx/starfish/releases/tag/0.1.5
 [0.1.4]: https://github.com/spacetx/starfish/releases/tag/0.1.4
 [0.1.3]: https://github.com/spacetx/starfish/releases/tag/0.1.3
 [0.1.2]: https://github.com/spacetx/starfish/releases/tag/0.1.2

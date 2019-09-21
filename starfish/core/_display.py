@@ -4,6 +4,7 @@ from collections import OrderedDict
 from typing import Iterable, List, Optional, Set, Tuple, Union
 
 import numpy as np
+from packaging.version import parse as parse_version
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
@@ -16,7 +17,7 @@ except ImportError:
     Viewer = None
 
 
-NAPARI_VERSION = "0.1.3"  # when changing this, update docs in display
+NAPARI_VERSION = "0.1.5"  # when changing this, update docs in display
 INTERACTIVE = not hasattr(__main__, "__file__")
 
 
@@ -127,7 +128,8 @@ def display(
         z_multiplier: float = 1
 ):
     """
-    Displays an image stack and/or detected spots using napari (https://github.com/napari/napari).
+    Display an image stack, detected spots, and masks using
+    `napari <https://github.com/napari/napari>`.
 
     Parameters
     ----------
@@ -193,20 +195,19 @@ def display(
 
     Notes
     -----
-    - To use in ipython, use the `%gui qt5` magic.
+    - To use in ipython, use the `%gui qt` magic.
     - napari axes currently cannot be labeled. Until such a time that they can, this function will
       order them by Round, Channel, and Z.
-    - Requires napari 0.1.3: install starfish using `pip install starfish[napari]` to install all
-      necessary requirements
+    - Requires at least napari 0.1.5: use `pip install starfish[napari]`
+      to install all necessary requirements
     """
-    if stack is None and spots is None:
-        # masks without stack or spots have no context so don't check for that
-        raise TypeError("expected a stack and/or spots; got nothing")
+    if stack is None and spots is None and masks is None:
+        raise TypeError("expected a stack, spots, or masks; got nothing")
 
     try:
         import napari
     except ImportError:
-        raise ImportError(f"Requires napari {NAPARI_VERSION}. "
+        raise ImportError(f"Requires at least napari {NAPARI_VERSION}. "
                           "Run `pip install starfish[napari]` "
                           "to install the necessary requirements.")
 
@@ -215,7 +216,7 @@ def display(
     except Exception as e:
         raise RuntimeError("Could not identify napari version") from e
 
-    if version != NAPARI_VERSION:
+    if parse_version(version) < parse_version(NAPARI_VERSION):
         raise ValueError(f"Incorrect version {version} of napari installed."
                          "Run `pip install starfish[napari]` "
                          "to install the necessary requirements.")

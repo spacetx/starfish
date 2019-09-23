@@ -47,9 +47,19 @@ jobs:
         - make install-dev slow-test
       after_success:
         - bash <(curl -s https://codecov.io/bash)
-    - name: Install Napari
+    - name: Install Napari & Test napari
       if: type = push and (branch = master or branch =~ /-alltest/)
-      script: pip install .[napari]
+      dist: xenial
+      before_install:
+        - sudo apt-get install -y libgl1-mesa-glx libqt5x11extras5 xvfb
+        - make install-dev
+        - pip install .[napari]
+        - export DISPLAY=:99
+        - Xvfb $DISPLAY -ac -screen 0 1024x768x24 &
+        - sleep 10
+      script:
+        - python -c "import vispy; print(vispy.sys_info())"
+        - make napari-test
     - name: Docker
       if: type = push and (branch = master or branch =~ /-alltest/)
       script: make docker
@@ -88,7 +98,7 @@ jobs:
       script: make TESTING=1 install-dev iss_pipeline.py
     - name: Released Notebooks
       if: type = cron and (branch = master or branch =~ /-alltest/)
-      script: make check-notebooks install-released-notebooks-support run-notebooks
+            script: make check-notebooks install-released-notebooks-support run-notebooks
 cache:
   directories:
   - $HOME/.cache/pip

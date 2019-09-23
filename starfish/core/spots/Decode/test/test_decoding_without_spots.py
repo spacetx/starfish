@@ -11,12 +11,12 @@ def test_per_round_max_spot_decoding_without_spots():
 
     codebook, image_stack, max_intensity = two_spot_sparse_coded_data_factory()
 
-    bd = starfish.spots.DetectSpots.BlobDetector(
+    bd = starfish.spots.FindSpots.BlobDetector(
         min_sigma=1, max_sigma=1, num_sigma=1, threshold=max_intensity + 0.1)
     no_spots = bd.run(image_stack)
 
-    decode = starfish.spots.Decode.PerRoundMaxChannel(codebook)
-    decoded_no_spots: starfish.DecodedIntensityTable = decode.run(no_spots)
+    decode = starfish.spots.DecodeSpots.PerRoundMaxChannel(codebook)
+    decoded_no_spots: starfish.DecodedIntensityTable = decode.run(spots=no_spots)
 
     decoded_spot_table = decoded_no_spots.to_decoded_dataframe()
 

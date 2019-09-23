@@ -40,6 +40,7 @@ class PerRoundMaxChannel(DecodeSpotsAlgorithm):
             IntensityTable decoded and appended with Features.TARGET and Features.QUALITY values.
 
         """
+        # if no spots
         intensities = build_spot_traces_exact_match(spots)
         transfer_physical_coords_to_intensity_table(intensity_table=intensities, spots=spots)
         return self.codebook.decode_per_round_max(intensities)

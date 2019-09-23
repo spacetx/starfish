@@ -36,8 +36,7 @@ def process_fov(field_num: int, experiment_str: str):
     tmp = dots.sel({Axes.ROUND:0, Axes.CH:0, Axes.ZPLANE:0})
     dots_threshold = np.percentile(np.ravel(tmp.xarray.values), 50)
 
-    # find spots
-    p = starfish.spots.DetectSpots.BlobDetector(
+    bd = starfish.spots.FindSpots.BlobDetector(
         min_sigma=1,
         max_sigma=10,
         num_sigma=30,
@@ -45,12 +44,15 @@ def process_fov(field_num: int, experiment_str: str):
         measurement_type='mean',
     )
 
-    # blobs = dots; define the spots in the dots image, but then find them again in the stack.
-    intensities = p.run(filtered_imgs, blobs_image=dots, blobs_axes=(Axes.ROUND, Axes.ZPLANE))
+    dots_max_projector = starfish.image.Filter.Reduce(
+        (Axes.ROUND, Axes.ZPLANE), func="max",
+        module=starfish.image.Filter.Reduce.FunctionSource.np)
+    dots_max = dots_max_projector.run(dots)
 
-    # decode
-    decoded = experiment.codebook.decode_per_round_max(intensities)
+    spots = bd.run(image_stack=filtered_imgs, reference_image=dots_max)
 
-    # save results
+    decoder = starfish.spots.DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook)
+    decoded = decoder.run(spots=spots)
+
     df = decoded.to_decoded_dataframe()
     return df

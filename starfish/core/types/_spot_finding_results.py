@@ -30,8 +30,8 @@ class SpotFindingResults:
         """
         spot_attributes_list = spot_attributes_list or []
         self._results: MutableMapping[Tuple, SpotAttributes] = {
-            indices: spots
-            for indices, spots in spot_attributes_list
+            tuple(indices[i] for i in AXES_ORDER): spots
+            for spots, indices in spot_attributes_list
         }
         self.physical_coord_ranges: Mapping[Hashable, xr.DataArray] = {
             Axes.X.value: imagestack_coords[Coordinates.X.value],

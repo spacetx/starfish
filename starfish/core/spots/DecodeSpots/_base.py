@@ -6,8 +6,8 @@ from starfish.core.types import SpotFindingResults
 
 
 class DecodeSpotsAlgorithm(metaclass=AlgorithmBase):
+    """Performs decoding on the spots found, using the codebook specified."""
 
     @abstractmethod
     def run(self, spot_attributes: SpotFindingResults, *args) -> DecodedIntensityTable:
-        """Performs decoding on the spots found, using the codebook specified."""
         raise NotImplementedError()

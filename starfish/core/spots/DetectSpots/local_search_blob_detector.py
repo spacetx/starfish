@@ -41,11 +41,11 @@ class LocalSearchBlobDetector(DetectSpotsAlgorithm):
 
     In brief, this spot finder operates on a few assumptions:
     1. Codes that represent transcripts are one-hot, meaning that in each round, one and only one
-       channel should be "on" for a given transcript.
+    channel should be "on" for a given transcript.
     2. Due to experimental conditions, there may be a small amount of jitter the the exact position
-       of each spots.
+    of each spots.
     3. To build codes in these circumstances, one must be able to account for small deviations in
-       physical position to reconstruct codes.
+    physical position to reconstruct codes.
 
     The LocalSearchBlobDetector accomplishes this as follows:
 

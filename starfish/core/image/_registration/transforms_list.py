@@ -2,10 +2,17 @@ import json
 from typing import List, Mapping, Tuple
 
 import numpy as np
+from semantic_version import Version
 from skimage.transform._geometric import GeometricTransform, SimilarityTransform
 from slicedimage.io import resolve_path_or_url
 
 from starfish.core.config import StarfishConfig
+from starfish.core.image._registration._format import (
+    CURRENT_VERSION,
+    DocumentKeys,
+    MAX_SUPPORTED_VERSION,
+    MIN_SUPPORTED_VERSION,
+)
 from starfish.core.types import Axes, TransformType
 
 
@@ -65,6 +72,15 @@ class TransformsList:
         """
         self.transforms.append((selectors, transform_type, transform_object))
 
+    @classmethod
+    def _verify_version(cls, semantic_version_str: str) -> None:
+        version = Version(semantic_version_str)
+        if not (MIN_SUPPORTED_VERSION <= version <= MAX_SUPPORTED_VERSION):
+            raise ValueError(
+                f"version {version} not supported.  This version of the starfish library only "
+                f"supports transform list formats from {MIN_SUPPORTED_VERSION} to "
+                f"{MAX_SUPPORTED_VERSION}")
+
     def to_json(self, filename: str) -> None:
         """
         Saves the TransformsList to a json file.
@@ -79,8 +95,12 @@ class TransformsList:
             transforms_matrix = transforms_object.params.tolist()
             selectors_str = {k.value: v for k, v in selectors.items()}
             transforms_array.append((selectors_str, transform_type.value, transforms_matrix))
+            transforms_document = {
+                DocumentKeys.TRANSFORMS_LIST: transforms_array,
+                DocumentKeys.VERSION_KEY: str(CURRENT_VERSION)
+            }
         with open(filename, 'w') as f:
-            json.dump(transforms_array, f)
+            json.dump(transforms_document, f)
 
     @classmethod
     def from_json(cls, url_or_path: str) -> "TransformsList":
@@ -101,7 +121,10 @@ class TransformsList:
         transforms_list: List[Tuple[Mapping[Axes, int], TransformType, GeometricTransform]] = list()
         backend, name, _ = resolve_path_or_url(url_or_path, backend_config=config.slicedimage)
         with backend.read_contextmanager(name) as fh:
-            transforms_array = json.load(fh)
+            transforms_document = json.load(fh)
+            version_str = transforms_document[DocumentKeys.VERSION_KEY]
+            cls._verify_version(version_str)
+            transforms_array = transforms_document[DocumentKeys.TRANSFORMS_LIST]
         for selectors_str, transform_type_str, transforms_matrix in transforms_array:
             selectors = {Axes(k): v for k, v in selectors_str.items()}
             transform_type = TransformType(transform_type_str)

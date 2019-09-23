@@ -1,18 +1,11 @@
 #!/usr/bin/env python
-import cProfile
 import subprocess
 import sys
-from pstats import Stats
 
 import pkg_resources
 
 from starfish.core.spacetx_format.cli import validate as validate_cli
 from starfish.core.util import click
-
-PROFILER_KEY = "profiler"
-"""This is the dictionary key we use to attach the profiler to pass to the resultcallback."""
-PROFILER_LINES = 15
-"""This is the number of profiling rows to dump when --profile is enabled."""
 
 
 def art_string():
@@ -26,10 +19,10 @@ def art_string():
 
     """
 
+
 @click.group()
-@click.option("--profile", is_flag=True)
 @click.pass_context
-def starfish(ctx, profile):
+def starfish(ctx):
     """
     standardized analysis pipeline for image-based transcriptomics
     see: https://spacetx-starfish.readthedocs.io for more information.
@@ -41,15 +34,6 @@ def starfish(ctx, profile):
         print_art = not sub.no_art
     if print_art:
         print(art)
-    if profile:
-        profiler = cProfile.Profile()
-        profiler.enable()
-
-        def print_profile():
-            stats = Stats(profiler)
-            stats.sort_stats('tottime').print_stats(PROFILER_LINES)
-
-        ctx.call_on_close(print_profile)
 
 
 @starfish.command()
@@ -65,6 +49,7 @@ def util():
     house-keeping commands for the starfish library
     """
     pass
+
 
 @util.command()
 def install_strict_dependencies():

@@ -5,7 +5,7 @@ from starfish.core.codebook.codebook import Codebook
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
-    transfer_physical_coords_from_imagestack_to_intensity_table
+    transfer_physical_coords_to_intensity_table
 from ._base import DetectPixelsAlgorithm
 from .combine_adjacent_features import CombineAdjacentFeatures, ConnectedComponentDecodingResult
 
@@ -85,6 +85,6 @@ class PixelSpotDecoder(DetectPixelsAlgorithm):
         decoded_spots, image_decoding_results = caf.run(intensities=decoded_intensities,
                                                         n_processes=n_processes)
 
-        transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=primary_image,
-                                                                    intensity_table=decoded_spots)
+        transfer_physical_coords_to_intensity_table(image_stack=primary_image,
+                                                    intensity_table=decoded_spots)
         return decoded_spots, image_decoding_results

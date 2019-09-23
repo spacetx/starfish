@@ -9,7 +9,7 @@ import xarray as xr
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
-    transfer_physical_coords_from_imagestack_to_intensity_table
+    transfer_physical_coords_to_intensity_table
 from starfish.core.types import Axes, Features, Number, SpotAttributes
 
 
@@ -242,7 +242,7 @@ def detect_spots(data_stack: ImageStack,
         )
         intensity_table = concatenate_spot_attributes_to_intensities(spot_attributes_list)
 
-    transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=data_stack,
-                                                                intensity_table=intensity_table)
+    transfer_physical_coords_to_intensity_table(image_stack=data_stack,
+                                                intensity_table=intensity_table)
 
     return intensity_table

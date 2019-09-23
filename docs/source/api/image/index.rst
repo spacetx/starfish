@@ -39,7 +39,7 @@ LearnTransform can be imported using ``starfish.image.LearnTransform``, the subc
 
     from starfish.image import LearnTransform
 
-.. autoclass:: starfish.image.LearnTransform
+.. automodule:: starfish.image.LearnTransform
    :members:
 
 
@@ -55,7 +55,7 @@ ApplyTransform can be imported using ``starfish.image.ApplyTransform``, the subc
 
     from starfish.image import ApplyTransform
 
-.. autoclass:: starfish.image.ApplyTransform
+.. automodule:: starfish.image.ApplyTransform
    :members:
 
 
@@ -71,5 +71,5 @@ Segmentation can be imported using ``starfish.image.Segment``, which registers a
 
     from starfish.image import Segment
 
-.. autoclass:: starfish.image.Segment
+.. automodule:: starfish.image.Segment
    :members:

@@ -408,6 +408,12 @@ class LocalSearchBlobDetector(DetectSpotsAlgorithm):
             Contains detected coded spots.
 
         """
+        DeprecationWarning("Starfish is embarking on a SpotFinding data structures refactor"
+                           "(See https://github.com/spacetx/starfish/issues/1514) This version of "
+                           "LocalSearchBlobDetector will soon be deleted. To find and decode your"
+                           " spots please instead use FindSpots.BlobDetector then "
+                           "DecodeSpots.PerRoundMaxChannel with the parameter "
+                           "TraceBuildingStrategies.NEAREST_NEIGHBOR. See example in STARmap.py")
 
         if blobs_image is not None:
             raise ValueError(

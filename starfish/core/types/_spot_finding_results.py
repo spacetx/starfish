@@ -69,6 +69,12 @@ class SpotFindingResults:
         round_ch_index = tuple(indices[i] for i in AXES_ORDER)
         return self._results[round_ch_index]
 
+    def items(self):
+        """
+        Return iterator for Spot finding results
+        """
+        return self._results.items()
+
     def keys(self):
         """
         Return all round, ch index pairs.

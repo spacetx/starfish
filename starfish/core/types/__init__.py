@@ -11,6 +11,7 @@ from ._constants import (
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
     STARFISH_EXTRAS_KEY,
+    TraceBuildingStrategies,
     TransformType
 )
 from ._decoded_spots import DecodedSpots

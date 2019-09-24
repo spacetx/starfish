@@ -23,8 +23,7 @@ from tqdm import tqdm
 
 import starfish
 import starfish.data
-from starfish.spots import DetectSpots
-from starfish.types import Axes
+from starfish.types import Axes, TraceBuildingStrategies
 # EPY: END code
 
 # EPY: START markdown
@@ -117,19 +116,22 @@ starfish.display(clipped)
 # EPY: START code
 threshold = 0.5
 
-lsbd = starfish.spots.DetectSpots.LocalSearchBlobDetector(
-    min_sigma=(1.5, 1.5, 1.5),
-    max_sigma=(8, 8, 8),
-    num_sigma=10,
-    threshold=threshold,
-    search_radius=7
-)
-intensities = lsbd.run(clipped)
-decoded = exp.codebook.decode_per_round_max(intensities.fillna(0))
+bd = starfish.spots.FindSpots.BlobDetector(min_sigma=(1.5, 1.5, 1.5),
+                                           max_sigma=(8, 8, 8),
+                                           num_sigma=10,
+                                           threshold=threshold)
+
+spots = bd.run(clipped)
+decoder = starfish.spots.DecodeSpots.PerRoundMaxChannel(codebook=exp.codebook,
+                                                        search_radius=7,
+                                                        trace_building_strategy=
+                                                        TraceBuildingStrategies.NEAREST_NEIGHBOR)
+
+decoded = decoder.run(spots=spots)
 # EPY: END code
 
 # EPY: START code
-starfish.display(clipped, intensities)
+starfish.display(clipped, decoded)
 # EPY: END code
 
 # EPY: START markdown

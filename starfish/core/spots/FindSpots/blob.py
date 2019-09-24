@@ -1,11 +1,12 @@
 from functools import partial
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 from skimage.feature import blob_dog, blob_doh, blob_log
 
+from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.spots.FindSpots import spot_finding_utils
 from starfish.core.types import Axes, Features, Number, SpotAttributes, SpotFindingResults
@@ -55,8 +56,8 @@ class BlobDetector(FindSpotsAlgorithm):
 
     def __init__(
             self,
-            min_sigma: Number,
-            max_sigma: Number,
+            min_sigma: Union[Number, Tuple[Number, ...]],
+            max_sigma: Union[Number, Tuple[Number, ...]],
             num_sigma: int,
             threshold: Number,
             overlap: float = 0.5,
@@ -97,28 +98,37 @@ class BlobDetector(FindSpotsAlgorithm):
 
         fitted_blobs_array: np.ndarray = self.detector_method(
             data_image,
-            self.min_sigma,
-            self.max_sigma,
-            self.num_sigma,
-            self.threshold,
-            self.overlap
+            min_sigma=self.min_sigma,
+            max_sigma=self.max_sigma,
+            threshold=self.threshold,
+            exclude_border=self.exclude_border,
+            overlap=self.overlap,
+            num_sigma=self.num_sigma
         )
 
         if fitted_blobs_array.shape[0] == 0:
             return SpotAttributes.empty(extra_fields=[Features.INTENSITY, Features.SPOT_ID])
 
-        # create the SpotAttributes Table
-        columns = [Axes.ZPLANE.value, Axes.Y.value, Axes.X.value, Features.SPOT_RADIUS]
-        fitted_blobs = pd.DataFrame(data=fitted_blobs_array, columns=columns)
+        # measure intensities
+        z_inds = fitted_blobs_array[:, 0].astype(int)
+        y_inds = fitted_blobs_array[:, 1].astype(int)
+        x_inds = fitted_blobs_array[:, 2].astype(int)
+        radius = np.round(fitted_blobs_array[:, 3] * np.sqrt(3))
+        data_image = data_image.values if isinstance(data_image, xr.DataArray) else data_image
+        intensities = data_image[tuple([z_inds, y_inds, x_inds])]
 
-        # convert standard deviation of gaussian kernel used to identify spot to radius of spot
-        converted_radius = np.round(fitted_blobs[Features.SPOT_RADIUS] * np.sqrt(3))
-        fitted_blobs[Features.SPOT_RADIUS] = converted_radius
-
-        # convert the array to int so it can be used to index
-        spots = SpotAttributes(fitted_blobs)
+        # construct dataframe
+        spot_data = pd.DataFrame(
+            data={
+                Features.INTENSITY: intensities,
+                Axes.ZPLANE.value: z_inds,
+                Axes.Y.value: y_inds,
+                Axes.X.value: x_inds,
+                Features.SPOT_RADIUS: radius,
+            }
+        )
+        spots = SpotAttributes(spot_data)
         spots.data[Features.SPOT_ID] = np.arange(spots.data.shape[0])
-
         return spots
 
     def run(
@@ -157,7 +167,7 @@ class BlobDetector(FindSpotsAlgorithm):
         else:
             spot_attributes_list = image_stack.transform(
                 func=spot_finding_method,
-                group_by={Axes.ROUND, Axes.CH},
+                group_by=determine_axes_to_group_by(self.is_volume),
                 n_processes=n_processes
             )
             results = SpotFindingResults(imagestack_coords=image_stack.xarray.coords,

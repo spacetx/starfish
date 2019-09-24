@@ -11,6 +11,7 @@ from starfish.core.types import (  # noqa: F401
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
     STARFISH_EXTRAS_KEY,
+    TraceBuildingStrategies,
     TransformType,
 )
 from starfish.core.types import CoordinateValue, Number  # noqa: F401

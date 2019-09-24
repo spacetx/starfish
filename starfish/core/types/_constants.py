@@ -104,3 +104,11 @@ class TransformType(AugmentedEnum):
     currently supported transform types
     """
     SIMILARITY = 'similarity'
+
+
+class TraceBuildingStrategies(AugmentedEnum):
+    """
+    currently support spot trace building strategies
+    """
+    EXACT_MATCH = 'exact_match'
+    NEAREST_NEIGHBOR = 'nearest_neighbor'

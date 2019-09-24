@@ -39,14 +39,20 @@ lint-non-init:
 lint-init:
 	flake8 --ignore 'E252, E301, E302, E305, E401, F401, W503, E731, F811' --filename='*__init__.py' $(MODULES)
 
+# note that napari tests shouldn't be run in parallel because Qt seems to intermittently fail when multiple QApplications are spawned on threads.
 test:
-	pytest -v -n 8 --cov starfish
+	pytest -v -n 8 --cov starfish -m 'not napari'
+	pytest -v --cov starfish -m 'napari'
 
 fast-test:
-	pytest -v -n 8 --cov starfish -m 'not slow'
+	pytest -v -n 8 --cov starfish -m 'not (slow or napari)'
 
 slow-test:
-	pytest -v -n 8 --cov starfish -m 'slow'
+	pytest -v -n 8 --cov starfish -m 'slow and (not napari)'
+
+# note that this shouldn't be run in parallel because Qt seems to intermittently fail when multiple QApplications are spawned on threads.
+napari-test:
+	pytest -v --cov starfish -m 'napari'
 
 mypy:
 	mypy --ignore-missing-imports $(MODULES)

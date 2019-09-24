@@ -1,8 +1,5 @@
-import napari
 import numpy as np
 import pytest
-from qtpy.QtCore import QTimer
-from qtpy.QtWidgets import QApplication
 
 from starfish import display, SegmentationMaskCollection
 from starfish.core.test.factories import SyntheticData
@@ -30,10 +27,15 @@ masks = SegmentationMaskCollection.from_label_image(
 )
 
 
+@pytest.mark.napari
 @pytest.mark.parametrize('masks', [masks, None], ids=['masks', '     '])
 @pytest.mark.parametrize('spots', [spots, None], ids=['spots', '     '])
 @pytest.mark.parametrize('stack', [stack, None], ids=['stack', '     '])
 def test_display(stack, spots, masks):
+    import napari
+    from qtpy.QtCore import QTimer
+    from qtpy.QtWidgets import QApplication
+
     def run():
         app = QApplication.instance() or QApplication([])
         viewer = napari.Viewer()

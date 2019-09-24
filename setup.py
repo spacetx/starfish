@@ -19,7 +19,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=install_requires,
     extras_require={
-        'napari': [f"napari=={napari_version}"],
+        'napari': [f"napari>={napari_version}"],
     },
     entry_points={
         'console_scripts': [

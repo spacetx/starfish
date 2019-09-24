@@ -5,7 +5,7 @@ mypy
 numpydoc
 nbencdec >= 0.0.5
 pycodestyle==2.5.0
-pytest>=3.6.3
+pytest>=4.4.0
 pytest-cov>=2.5.1
 pytest-xdist
 recommonmark

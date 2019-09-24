@@ -1,5 +1,5 @@
 import json
-from typing import Iterable
+from typing import Collection
 
 import numpy as np
 import pandas as pd
@@ -10,12 +10,12 @@ from ._validated_table import ValidatedTable
 
 class SpotAttributes(ValidatedTable):
 
-    required_fields = {
-        Axes.X.value,          # spot x-coordinate
-        Axes.Y.value,          # spot y-coordinate
-        Axes.ZPLANE.value,     # spot z-coordinate
-        Features.SPOT_RADIUS,  # spot radius
-    }
+    required_fields = [
+        (Axes.X.value, int),            # spot x-coordinate
+        (Axes.Y.value, int),            # spot y-coordinate
+        (Axes.ZPLANE.value, int),       # spot z-coordinate
+        (Features.SPOT_RADIUS, float)   # spot radius
+    ]
 
     def __init__(self, spot_attributes: pd.DataFrame) -> None:
         """Construct a SpotAttributes instance
@@ -25,13 +25,13 @@ class SpotAttributes(ValidatedTable):
         spot_attributes : pd.DataFrame
 
         """
-        super().__init__(spot_attributes, SpotAttributes.required_fields)
+        super().__init__(spot_attributes, {i[0] for i in SpotAttributes.required_fields})
 
     @classmethod
-    def empty(cls, extra_fields: Iterable = tuple()) -> "SpotAttributes":
+    def empty(cls, extra_fields: Collection = tuple()) -> "SpotAttributes":
         """return an empty SpotAttributes object"""
-        fields = list(cls.required_fields.union(extra_fields))
-        dtype = list(zip(fields, [np.object] * len(fields)))
+        extra_dtypes = list(zip(extra_fields, [np.object] * len(extra_fields)))
+        dtype = cls.required_fields + extra_dtypes
         return cls(pd.DataFrame(np.array([], dtype=dtype)))
 
     def save_geojson(self, output_file_name: str) -> None:

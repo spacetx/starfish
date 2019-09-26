@@ -102,15 +102,22 @@ plt.axis('off');
 # EPY: END markdown
 
 # EPY: START code
-from starfish.spots import DetectSpots
+from starfish.spots import DecodeSpots, FindSpots
+from starfish.types import TraceBuildingStrategies
 
-lmp = DetectSpots.LocalMaxPeakFinder(
+
+lmp = FindSpots.LocalMaxPeakFinder(
     min_distance=6,
     stringency=0,
     min_obj_area=6,
     max_obj_area=600,
+    is_volume=True
 )
-spot_intensities = lmp.run(mp)
+spots = lmp.run(mp)
+
+decoder = DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook,
+                                         trace_building_strategy=TraceBuildingStrategies.SEQUENTIAL)
+decoded_intensities = decoder.run(spots=spots)
 # EPY: END code
 
 # EPY: START markdown
@@ -162,11 +169,11 @@ benchmark_peaks = get_benchmark_peaks(benchmark_results, redo_flag=False)
 
 # EPY: START code
 benchmark_spot_count = len(benchmark_peaks)
-starfish_spot_count = len(spot_intensities)
+starfish_spot_count = len(decoded_intensities)
 
 plt.figure(figsize=(10,10))
 plt.plot(benchmark_peaks.x, -benchmark_peaks.y, "o")
-plt.plot(spot_intensities[Axes.X.value], -spot_intensities[Axes.Y.value], "x")
+plt.plot(decoded_intensities[Axes.X.value], -decoded_intensities[Axes.Y.value], "x")
 
 plt.legend(["Benchmark: {} spots".format(benchmark_spot_count),
             "Starfish: {} spots".format(starfish_spot_count)])

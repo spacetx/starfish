@@ -56,7 +56,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithm):
     Notes
     -----
     [1] Partel, G. et al. Identification of spatial compartments in tissue from in situ sequencing
-    data. BioRxiv, https://doi.org/10.1101/765842/biorxiv, (2019).
+    data. BioRxiv, https://doi.org/10.1101/765842, (2019).
     """
 
     def __init__(

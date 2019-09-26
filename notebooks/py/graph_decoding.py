@@ -12,7 +12,7 @@
 #
 #<sup>In details, ```LocalGraphBlobDetector``` first finds spots for every channel and round. Four possible spot detectors are integrated from [scikit-image](https://scikit-image.org/), two based local maxima and two blob detection algorithms. Secondly, overlapping spots are merged across channels within each round in order to handle fluorescent bleed-trough. Next, a quality score is assigned for each detected spot (maximum channel intensity divided by channel intensity vector l2-norm). Detected spots belonging to different sequencing rounds and closer than `search_radius` are connected in a graph, forming connected components of spot detections. Next, for each connected component, edges between not connected spots belonging to consecutive rounds are forced if they are closer than `search_radius_max`. Finally, all the edges that connect spots not belonging to consecutive rounds are removed and each connected component is solved by maximum flow minimum cost algorithm. Where, costs are proportional to spot quality and distances.</sup>
 #
-#[1] Partel, G. <em>et al.</em> Identification of spatial compartments in tissue from in situ sequencing data. BioRxiv, https://doi.org/10.1101/765842/biorxiv, (2019).
+#[1] Partel, G. <em>et al.</em> Identification of spatial compartments in tissue from in situ sequencing data. BioRxiv, https://doi.org/10.1101/765842, (2019).
 # EPY: END markdown
 
 # EPY: START code

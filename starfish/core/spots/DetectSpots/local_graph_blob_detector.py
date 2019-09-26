@@ -1,6 +1,6 @@
 import itertools
 from collections import defaultdict
-from typing import Dict, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, Hashable, List, Mapping, Optional, Sequence, Tuple, Union
 
 import networkx as nx
 import numpy as np
@@ -221,7 +221,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithm):
 
         Returns
         -------
-        Dict[int, pd.DataFrame]
+        Dict[int, IntensityTable]
             Dictionary mapping round to the relative IntensityTable.
         """
         intensity_tables = {}
@@ -282,7 +282,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithm):
 
             # create IntensityTable
             dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
-            coords = {
+            coords: Mapping[Hashable, Tuple[str, Any]] = {
                 Features.SPOT_RADIUS: (Features.AXIS, feature_index),
                 Axes.ZPLANE.value: (Features.AXIS, z),
                 Axes.Y.value: (Features.AXIS, y),
@@ -667,7 +667,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithm):
                 intensity_table.values[
                     idx[:, anchor_round], :, r] = intensity_tables[r].values[idx[:, r], :, r]
 
-        return intensity_table
+        return IntensityTable(intensity_table)
 
     def run(self,
             primary_image: ImageStack,
@@ -714,7 +714,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithm):
             rounds = primary_image.xarray[Axes.ROUND.value].values
             data = np.full((0, len(channels), len(rounds)), fill_value=np.nan)
             dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
-            coords = {
+            coords: Mapping[Hashable, Tuple[str, Any]] = {
                 Features.SPOT_RADIUS: (Features.AXIS, []),
                 Axes.ZPLANE.value: (Features.AXIS, []),
                 Axes.Y.value: (Features.AXIS, []),
@@ -758,7 +758,8 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithm):
             # Drop intensities with empty rounds
             drop = [np.any(np.all(np.isnan(intensity_table.values[x, :, :]), axis=0))
                     for x in range(intensity_table.shape[0])]
-            intensity_table = intensity_table[np.arange(intensity_table.shape[0])[np.invert(drop)]]
+            intensity_table = IntensityTable(
+                intensity_table[np.arange(intensity_table.shape[0])[np.invert(drop)]])
 
             transfer_physical_coords_to_intensity_table(
                 image_stack=primary_image, intensity_table=intensity_table

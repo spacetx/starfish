@@ -112,3 +112,4 @@ class TraceBuildingStrategies(AugmentedEnum):
     """
     EXACT_MATCH = 'exact_match'
     NEAREST_NEIGHBOR = 'nearest_neighbor'
+    SEQUENTIAL = 'sequential'

@@ -48,6 +48,8 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
     search_radius_max : int
         The maximum (euclidian) distance in pixels allowed between nodes belonging to the
         same sequence
+    k_d : float
+        distance weight
     detector_kwargs : Dict[str, Any]
         Additional keyword arguments to pass to the detector_method.
     """
@@ -57,11 +59,13 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
             detector_method: str='h_maxima',
             search_radius: int=3,
             search_radius_max: int=5,
+            k_d: float=0.33,
             **detector_kwargs,
     ) -> None:
         self.is_volume = True  # TODO test 2-d spot calling
         self.search_radius = search_radius
         self.search_radius_max = search_radius_max
+        self.k_d = k_d
         self.anchor_round = 0
         self.detector_kwargs = detector_kwargs
         try:
@@ -88,27 +92,32 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
 
         if (self.detector_method == h_maxima):
             label_h_max = label(results, neighbors=4)
-            labels = pd.DataFrame(data={'labels': np.sort(label_h_max[np.where(label_h_max != 0)])})
-            # find duplicates labels (=connected components)
-            dup = labels.index[labels.duplicated()].tolist()
+            # no maxima present in image
+            if (label_h_max == np.ones(label_h_max.shape)).all():
+                max_mask = np.zeros(data.shape)
+            else:
+                labels = pd.DataFrame(
+                    data={'labels': np.sort(label_h_max[np.where(label_h_max != 0)])})
+                # find duplicates labels (=connected components)
+                dup = labels.index[labels.duplicated()].tolist()
 
-            # splitting connected regional maxima to get only one local maxima
-            max_mask = np.zeros(data.shape)
-            max_mask[label_h_max != 0] = 1
+                # splitting connected regional maxima to get only one local maxima
+                max_mask = np.zeros(data.shape)
+                max_mask[label_h_max != 0] = 1
 
-            # Compute medoid for connected regional maxima
-            for i in range(len(dup)):
-                # find coord of points having the same label
-                z, r, c = np.where(label_h_max == labels.loc[dup[i], 'labels'])
-                meanpoint_x = np.mean(c)
-                meanpoint_y = np.mean(r)
-                meanpoint_z = np.mean(z)
-                dist = [distance.euclidean([meanpoint_z, meanpoint_y, meanpoint_x],
-                                           [z[j], r[j], c[j]]) for j in range(len(r))]
-                ind = dist.index(min(dist))
-                # delete values at ind position.
-                z, r, c = np.delete(z, ind), np.delete(r, ind), np.delete(c, ind)
-                max_mask[z, r, c] = 0  # set to 0 points != medoid coordinates
+                # Compute medoid for connected regional maxima
+                for i in range(len(dup)):
+                    # find coord of points having the same label
+                    z, r, c = np.where(label_h_max == labels.loc[dup[i], 'labels'])
+                    meanpoint_x = np.mean(c)
+                    meanpoint_y = np.mean(r)
+                    meanpoint_z = np.mean(z)
+                    dist = [distance.euclidean([meanpoint_z, meanpoint_y, meanpoint_x],
+                                               [z[j], r[j], c[j]]) for j in range(len(r))]
+                    ind = dist.index(min(dist))
+                    # delete values at ind position.
+                    z, r, c = np.delete(z, ind), np.delete(r, ind), np.delete(c, ind)
+                    max_mask[z, r, c] = 0  # set to 0 points != medoid coordinates
             results = max_mask.nonzero()
             results = np.vstack(results).T
 
@@ -334,7 +343,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
     def _runMaxFlowMinCost(
             self, data: pd.DataFrame,
             l: int, d_th: float,
-            k1: float, rounds: np.array,
+            k_d: float, rounds: np.array,
             dth_max: float) -> Dict:
         """
         Build the graph model for the given connected component and solve the graph
@@ -348,7 +357,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
             connected component index
         d_th : float
             maximum distance inside connected component between two connected spots
-        k1 : float
+        k_d : float
             distance weight
         rounds : np.array[int]
             Channels and rounds present in the ImageStack from which spots were detected.
@@ -395,7 +404,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
                         if len(query[i]):
                             X_idx = [(X_idx_tmp + x) for x in range(len(query[i]))]
                             d = [np.linalg.norm(df1_coords[i] - df2_coords[x]) for x in query[i]]
-                            mu_d = [1 / (1 + k1 * x) for x in d]
+                            mu_d = [1 / (1 + k_d * x) for x in d]
 
                             Tvar_tmp = Tvar_tmp.append(
                                 pd.DataFrame(data={
@@ -481,7 +490,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
     def _runGraphDecoder(self,
                          data: pd.DataFrame,
                          d_th: float,
-                         k1: float,
+                         k_d: float,
                          dth_max: float) -> list:
         """
         Find connected components of detected spots across rounds and call the graph
@@ -493,7 +502,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
             [x, y, z, r, c, idx, p0, p1, feature_id]
         d_th : flaot
              maximum distance inside connected component between two connected spots
-        k1 : float
+        k_d : float
             distance weight
         dth_max : float
             maximum distance inside connected component between every pair of spots
@@ -541,7 +550,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
             print("Run Graph Model...\n")
             res = []
             for l in tqdm(np.nditer(labels), total=len(labels)):
-                res.append(self._runMaxFlowMinCost(data, int(l), d_th, k1, num_hyb, dth_max))
+                res.append(self._runMaxFlowMinCost(data, int(l), d_th, k_d, num_hyb, dth_max))
             # return maxFlowMinCost
             return [x for x in res if x['G'] is not None]
         else:
@@ -573,7 +582,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
                     c = c[c <= Dvar.X_idx.max()]
                     Dvar_c = Dvar[(Dvar.X_idx.isin(c))]
                     if len(Dvar_c) == len(rounds):
-                        k1 = KDTree(Dvar[['x', 'y', 'z']].values)
+                        k1 = KDTree(Dvar_c[['x', 'y', 'z']].values)
                         max_d = np.amax(list(k1.sparse_distance_matrix(k1, np.inf).values()))
                         if max_d <= search_radius_max:
                             idx.append(Dvar[
@@ -586,6 +595,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
                       rounds: Sequence[int],
                       search_radius: int,
                       search_radius_max: int,
+                      k_d: float,
                       anchor_round: int
                       ) -> IntensityTable:
         """Construct an intensity table from the results of a graph based search of detected spots
@@ -601,6 +611,8 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
         search_radius_max : int
             The maximum (euclidian) distance in pixels allowed between nodes belonging
             to the same sequence
+        k_d : float
+            distance weight
         anchor_round : int
             The imaging round to seed the search from.
         Returns
@@ -625,7 +637,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
                               'feature_id': intensity_tables[i].features.values}),
                 ignore_index=True)
 
-        res = self._runGraphDecoder(data, search_radius, 0.33, search_radius_max)
+        res = self._runGraphDecoder(data, search_radius, k_d, search_radius_max)
         idx = self._baseCalling(res, rounds, search_radius_max)
 
         # Initialize IntensityTable with anchor round IntensityTable
@@ -678,44 +690,62 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
         per_tile_spot_results = self._find_spots(
             primary_image, verbose=verbose, n_processes=n_processes)
 
-        round_data: Mapping[int, List] = defaultdict(list)
-        for (r, c), df in per_tile_spot_results.items():
-            df[Axes.CH.value] = np.full(df.shape[0], c)
-            round_data[r].append(df)
+        if np.all([v.empty for k, v in per_tile_spot_results.items()]):
+            channels = primary_image.xarray[Axes.CH.value].values
+            rounds = primary_image.xarray[Axes.ROUND.value].values
+            data = np.full((0, len(channels), len(rounds)), fill_value=np.nan)
+            dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
+            coords = {
+                Features.SPOT_RADIUS: (Features.AXIS, []),
+                Axes.ZPLANE.value: (Features.AXIS, []),
+                Axes.Y.value: (Features.AXIS, []),
+                Axes.X.value: (Features.AXIS, []),
+                Axes.ROUND.value: (Axes.ROUND.value, rounds),
+                Axes.CH.value: (Axes.CH.value, channels)
+            }
+            intensity_table = IntensityTable(data=data, dims=dims, coords=coords)
 
-        # create one dataframe per round
-        round_dataframes = {
-            k: pd.concat(v, axis=0).reset_index().drop('index', axis=1)
-            for k, v in round_data.items()
-        }
+            return intensity_table
+        else:
+            round_data: Mapping[int, List] = defaultdict(list)
+            for (r, c), df in per_tile_spot_results.items():
+                df[Axes.CH.value] = np.full(df.shape[0], c)
+                round_data[r].append(df)
 
-        intensity_tables = self._merge_spots_by_round(
-            round_dataframes,
-            channels=primary_image.xarray[Axes.CH.value].values,
-            rounds=primary_image.xarray[Axes.ROUND.value].values)
+            # create one dataframe per round
+            round_dataframes = {
+                k: pd.concat(v, axis=0).reset_index().drop('index', axis=1)
+                for k, v in round_data.items()
+            }
 
-        intensity_tables = self._compute_spot_qualities(
-            primary_image,
-            intensity_tables)
+            intensity_tables = self._merge_spots_by_round(
+                round_dataframes,
+                channels=primary_image.xarray[Axes.CH.value].values,
+                rounds=primary_image.xarray[Axes.ROUND.value].values)
 
-        intensity_table = self._decode_spots(
-            intensity_tables=intensity_tables,
-            channels=primary_image.xarray[Axes.CH.value].values,
-            rounds=primary_image.xarray[Axes.ROUND.value].values,
-            search_radius=self.search_radius,
-            search_radius_max=self.search_radius_max,
-            anchor_round=self.anchor_round)
+            intensity_tables = self._compute_spot_qualities(
+                primary_image,
+                intensity_tables)
 
-        # Drop intensities with empty rounds
-        drop = [np.any(np.all(np.isnan(intensity_table.values[x, :, :]), axis=0))
-                for x in range(intensity_table.shape[0])]
-        intensity_table = intensity_table[np.arange(intensity_table.shape[0])[np.invert(drop)]]
+            intensity_table = self._decode_spots(
+                intensity_tables=intensity_tables,
+                channels=primary_image.xarray[Axes.CH.value].values,
+                rounds=primary_image.xarray[Axes.ROUND.value].values,
+                search_radius=self.search_radius,
+                search_radius_max=self.search_radius_max,
+                k_d=self.k_d,
+                anchor_round=self.anchor_round)
 
-        transfer_physical_coords_from_imagestack_to_intensity_table(
-            image_stack=primary_image, intensity_table=intensity_table
-        )
+            # Drop intensities with empty rounds
+            drop = [np.any(np.all(np.isnan(intensity_table.values[x, :, :]), axis=0))
+                    for x in range(intensity_table.shape[0])]
+            intensity_table = intensity_table[np.arange(intensity_table.shape[0])[np.invert(drop)]]
 
-        return intensity_table
+            transfer_physical_coords_from_imagestack_to_intensity_table(
+                image_stack=primary_image, intensity_table=intensity_table
+            )
+
+            return intensity_table
 
     def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
         # LocalGraphBlobDetector does not follow the same contract as the remaining spot detectors.
@@ -743,14 +773,18 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
         "--search-radius-max", default=5, type=int,
         help="""The maximum (euclidian) distance in pixels allowed between nodes
         belonging to the same sequence.""")
+    @click.option(
+        "--kd", default=0.33, type=int,
+        help="""Cost distance weight parameter""")
     @click.pass_context
     def _cli(
         ctx, min_sigma, max_sigma, threshold, overlap, show, detector_method,
-        search_radius, search_radius_max
+        search_radius, search_radius_max, k_d
     ) -> None:
         instance = LocalGraphBlobDetector(detector_method=detector_method,
                                           search_radius=search_radius,
                                           search_radius_max=search_radius_max,
+                                          k_d=k_d,
                                           min_sigma=min_sigma,
                                           max_sigma=max_sigma,
                                           threshold=threshold,

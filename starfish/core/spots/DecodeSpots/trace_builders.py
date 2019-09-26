@@ -1,7 +1,10 @@
 from typing import Callable, Mapping
 
+import pandas as pd
+
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.types import Axes, Features, SpotFindingResults, TraceBuildingStrategies
+from starfish.core.types import Axes, Features, SpotAttributes, SpotFindingResults, \
+    TraceBuildingStrategies
 from .util import _build_intensity_table, _match_spots, _merge_spots_by_round
 
 
@@ -27,6 +30,40 @@ def build_spot_traces_exact_match(spot_results: SpotFindingResults, **kwargs) ->
         # if no exact match set value to 0
         value = 0 if value.empty else value
         intensity_table.loc[dict(c=c, r=r)] = value
+    return intensity_table
+
+
+def build_traces_sequential(spot_results: SpotFindingResults, **kwargs) -> IntensityTable:
+    """
+    Build spot traces  without merging across channels and imaging rounds. Used for sequential
+    methods like smFIsh.
+
+    Parameters
+    ----------
+    spot_results: SpotFindingResults
+        Spots found across rounds/channels of an ImageStack
+
+    Returns
+    -------
+    IntensityTable :
+        concatenated input SpotAttributes, converted to an IntensityTable object
+
+    """
+
+    all_spots = pd.concat([sa.data for sa in spot_results.values()], sort=True)
+
+    intensity_table = IntensityTable.zeros(
+        spot_attributes=SpotAttributes(all_spots),
+        ch_labels=spot_results.ch_labels,
+        round_labels=spot_results.round_labels,
+    )
+
+    i = 0
+    for (r, c), attrs in spot_results.items():
+        for _, row in attrs.data.iterrows():
+            selector = dict(features=i, c=c, r=r)
+            intensity_table.loc[selector] = row[Features.INTENSITY]
+            i += 1
     return intensity_table
 
 
@@ -65,5 +102,6 @@ def build_traces_nearest_neighbors(spot_results: SpotFindingResults, anchor_roun
 
 TRACE_BUILDERS: Mapping[TraceBuildingStrategies, Callable] = {
     TraceBuildingStrategies.EXACT_MATCH: build_spot_traces_exact_match,
-    TraceBuildingStrategies.NEAREST_NEIGHBOR: build_traces_nearest_neighbors
+    TraceBuildingStrategies.NEAREST_NEIGHBOR: build_traces_nearest_neighbors,
+    TraceBuildingStrategies.SEQUENTIAL: build_traces_sequential,
 }

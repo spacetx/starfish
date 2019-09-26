@@ -1,18 +1,19 @@
 import warnings
+from functools import partial
 from typing import Optional, Tuple, Union
 
 import numpy as np
 import xarray as xr
 from trackpy import locate
 
+from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.types import Axes, SpotAttributes
-from ._base import DetectSpotsAlgorithm
-from .detect import detect_spots
+from starfish.core.spots.FindSpots import spot_finding_utils
+from starfish.core.types import Axes, SpotAttributes, SpotFindingResults
+from ._base import FindSpotsAlgorithm
 
 
-class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithm):
+class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
     """
     Find spots using a local max peak finding algorithm
 
@@ -24,27 +25,28 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithm):
     Parameters
     ----------
 
-    spot_diameter : odd integer or tuple of odd integers.
+    spot_diameter :
+        odd integer or tuple of odd integers.
         This may be a single number or a tuple giving the feature’s extent in each dimension,
         useful when the dimensions do not have equal resolution (e.g. confocal microscopy).
         The tuple order is the same as the image shape, conventionally (z, y, x) or (y, x).
         The number(s) must be odd integers. When in doubt, round up.
-    min_mass : float, optional
+    min_mass : Optional[float]
         The minimum integrated brightness. This is a crucial parameter for eliminating spurious
         features. Recommended minimum values are 100 for integer images and 1 for float images.
         Defaults to 0 (no filtering).
     max_size : float
         maximum radius-of-gyration of brightness, default None
-    separation : float or tuple
-        Minimum separtion between features. Default is diameter + 1. May be a tuple, see
+    separation : Union[float, tuple]
+        Minimum separation between features. Default is diameter + 1. May be a tuple, see
         diameter for details.
     percentile : float
         Features must have a peak brighter than pixels in this percentile. This helps eliminate
-        spurious peaks.
-    noise_size : float or tuple
+        spurious peaks. (default = 0)
+    noise_size : Union[float, tuple]
         Width of Gaussian blurring kernel, in pixels Default is 1. May be a tuple, see diameter
         for details.
-    smoothing_size : float or tuple
+    smoothing_size : Union[float, tuple]
         The size of the sides of the square kernel used in boxcar (rolling average) smoothing,
         in pixels Default is diameter. May be a tuple, making the kernel rectangular.
     threshold : float
@@ -53,12 +55,13 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithm):
         images.
     measurement_type : str ['max', 'mean']
         name of the function used to calculate the intensity for each identified spot area
+        (default = max)
     preprocess : boolean
-        Set to False to turn off bandpass preprocessing.
+        Set to False to turn off bandpass prepossessing.
     max_iterations : integer
-        Max number of loops to refine the center of mass, default 10
+        Max number of loops to refine the center of mass, (default = 10)
     is_volume : bool
-        if True, run the algorithm on 3d volumes of the provided stack
+        if True, run the algorithm on 3d volumes of the provided stack (default = False)
     verbose : bool
         If True, report the percentage completed (default = False) during processing
 
@@ -72,7 +75,7 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithm):
             self, spot_diameter, min_mass, max_size, separation, percentile=0,
             noise_size: Tuple[int, int, int] = (1, 1, 1), smoothing_size=None, threshold=None,
             preprocess: bool = False, max_iterations: int = 10, measurement_type: str = 'max',
-            is_volume: bool = False, verbose=False) -> None:
+            is_volume: bool = False, verbose=False, radius_is_gyration: bool = False) -> None:
 
         self.diameter = spot_diameter
         self.minmass = min_mass
@@ -87,6 +90,7 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithm):
         self.max_iterations = max_iterations
         self.is_volume = is_volume
         self.verbose = verbose
+        self.radius_is_gyration = radius_is_gyration
 
     def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
         """
@@ -140,42 +144,40 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithm):
 
     def run(
             self,
-            primary_image: ImageStack,
-            blobs_image: Optional[ImageStack] = None,
-            blobs_axes: Optional[Tuple[Axes, ...]] = None,
+            image_stack: ImageStack,
+            reference_image: Optional[ImageStack] = None,
             n_processes: Optional[int] = None,
             *args,
-    ) -> IntensityTable:
+    ) -> SpotFindingResults:
         """
         Find spots.
 
         Parameters
         ----------
-        primary_image : ImageStack
+        image_stack : ImageStack
             ImageStack where we find the spots in.
-        blobs_image : Optional[ImageStack]
-            If provided, spots will be found in the blobs image, and intensities will be measured
-            across rounds and channels. Otherwise, spots are measured independently for each channel
-            and round.
-        blobs_axes : Optional[Tuple[Axes, ...]]
-            If blobs_image is provided, blobs_axes must be provided as well.  blobs_axes represents
-            the axes across which the blobs image is max projected before spot detection is done.
+        reference_image : xr.DataArray
+            (Optional) a reference image. If provided, spots will be found in this image, and then
+            the locations that correspond to these spots will be measured across each channel.
         n_processes : Optional[int] = None,
             Number of processes to devote to spot finding.
         """
-        DeprecationWarning("Starfish is embarking on a SpotFinding data structures refactor"
-                           "(See https://github.com/spacetx/starfish/issues/1514) This version of "
-                           "TrackpyLocalMaxPeakFinder will soon be deleted. To find and decode your"
-                           "spots please instead use FindSpots.TrackpyLocalMaxPeakFinder then "
-                           "DecodeSpots.PerRoundMaxChannel with the parameter "
-                           "TraceBuildingStrategies.SEQUENTIAL. See example in smFISH.py")
-        intensity_table = detect_spots(
-            data_stack=primary_image,
-            spot_finding_method=self.image_to_spots,
-            reference_image=blobs_image,
-            reference_image_max_projection_axes=blobs_axes,
-            measurement_function=self.measurement_function,
-            n_processes=n_processes,
-            radius_is_gyration=True)
-
-        return intensity_table
+        spot_finding_method = partial(self.image_to_spots, *args)
+        if reference_image:
+            data_image = reference_image._squeezed_numpy(*{Axes.ROUND, Axes.CH})
+            reference_spots = spot_finding_method(data_image)
+            results = spot_finding_utils.measure_intensities_at_spot_locations_across_imagestack(
+                image_stack,
+                reference_spots,
+                measurement_function=self.measurement_function,
+                radius_is_gyration=self.radius_is_gyration)
+        else:
+            spot_attributes_list = image_stack.transform(
+                func=spot_finding_method,
+                group_by=determine_axes_to_group_by(self.is_volume),
+                n_processes=n_processes
+            )
+            results = SpotFindingResults(imagestack_coords=image_stack.xarray.coords,
+                                         log=image_stack.log,
+                                         spot_attributes_list=spot_attributes_list)
+        return results

@@ -1,18 +1,19 @@
 import warnings
+from functools import partial
 from typing import Optional, Tuple, Union
 
 import numpy as np
 import xarray as xr
 from trackpy import locate
 
+from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.types import Axes, SpotAttributes
-from ._base import DetectSpotsAlgorithm
-from .detect import detect_spots
+from starfish.core.spots.FindSpots import spot_finding_utils
+from starfish.core.types import Axes, SpotAttributes, SpotFindingResults
+from ._base import FindSpotsAlgorithm
 
 
-class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithm):
+class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
     """
     Find spots using a local max peak finding algorithm
 
@@ -141,11 +142,10 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithm):
     def run(
             self,
             primary_image: ImageStack,
-            blobs_image: Optional[ImageStack] = None,
-            blobs_axes: Optional[Tuple[Axes, ...]] = None,
+            reference_image: Optional[ImageStack] = None,
             n_processes: Optional[int] = None,
             *args,
-    ) -> IntensityTable:
+    ) -> SpotFindingResults:
         """
         Find spots.
 
@@ -153,29 +153,27 @@ class TrackpyLocalMaxPeakFinder(DetectSpotsAlgorithm):
         ----------
         primary_image : ImageStack
             ImageStack where we find the spots in.
-        blobs_image : Optional[ImageStack]
-            If provided, spots will be found in the blobs image, and intensities will be measured
-            across rounds and channels. Otherwise, spots are measured independently for each channel
-            and round.
-        blobs_axes : Optional[Tuple[Axes, ...]]
-            If blobs_image is provided, blobs_axes must be provided as well.  blobs_axes represents
-            the axes across which the blobs image is max projected before spot detection is done.
+        reference_image : xr.DataArray
+            (Optional) a reference image. If provided, spots will be found in this image, and then
+            the locations that correspond to these spots will be measured across each channel.
         n_processes : Optional[int] = None,
             Number of processes to devote to spot finding.
         """
-        DeprecationWarning("Starfish is embarking on a SpotFinding data structures refactor"
-                           "(See https://github.com/spacetx/starfish/issues/1514) This version of "
-                           "TrackpyLocalMaxPeakFinder will soon be deleted. To find and decode your"
-                           "spots please instead use FindSpots.TrackpyLocalMaxPeakFinder then "
-                           "DecodeSpots.PerRoundMaxChannel with the parameter "
-                           "TraceBuildingStrategies.SEQUENTIAL. See example in smFISH.py")
-        intensity_table = detect_spots(
-            data_stack=primary_image,
-            spot_finding_method=self.image_to_spots,
-            reference_image=blobs_image,
-            reference_image_max_projection_axes=blobs_axes,
-            measurement_function=self.measurement_function,
-            n_processes=n_processes,
-            radius_is_gyration=True)
-
-        return intensity_table
+        spot_finding_method = partial(self.image_to_spots, *args)
+        if reference_image:
+            data_image = reference_image._squeezed_numpy(*{Axes.ROUND, Axes.CH})
+            reference_spots = spot_finding_method(data_image)
+            results = spot_finding_utils.measure_spot_intensities(
+                primary_image,
+                reference_spots,
+                measurement_function=self.measurement_function)
+        else:
+            spot_attributes_list = primary_image.transform(
+                func=spot_finding_method,
+                group_by=determine_axes_to_group_by(self.is_volume),
+                n_processes=n_processes
+            )
+            results = SpotFindingResults(imagestack_coords=primary_image.xarray.coords,
+                                         log=primary_image.log,
+                                         spot_attributes_list=spot_attributes_list)
+        return results

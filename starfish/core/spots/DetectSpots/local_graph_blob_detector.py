@@ -20,10 +20,10 @@ from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
-    transfer_physical_coords_from_imagestack_to_intensity_table
+    transfer_physical_coords_to_intensity_table
 from starfish.core.types import Axes, Features, SpotAttributes
 from starfish.core.util import click
-from ._base import DetectSpotsAlgorithmBase
+from ._base import DetectSpotsAlgorithm
 
 detectors = {
     'h_maxima': h_maxima,
@@ -33,12 +33,12 @@ detectors = {
 }
 
 
-class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
+class LocalGraphBlobDetector(DetectSpotsAlgorithm):
     """
     Multi-dimensional spot detector.
     This method includes four different spot detectors from skimage and merge the detected
-    spots across channels and rounds based on a graphical model.
-    implementation.
+    spots across channels and rounds based on a graph-based decoding approach implemented in [1].
+
     Parameters
     ----------
     detector_method : str ['h_maxima', 'peak_local_max', 'blob_dog', 'blob_log']
@@ -52,6 +52,11 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
         distance weight
     detector_kwargs : Dict[str, Any]
         Additional keyword arguments to pass to the detector_method.
+
+    Notes
+    -----
+    [1] Partel, G. et al. Identification of spatial compartments in tissue from in situ sequencing
+    data. BioRxiv, https://doi.org/10.1101/765842/biorxiv, (2019).
     """
 
     def __init__(
@@ -75,10 +80,12 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
 
     def _spot_finder(self, data: xr.DataArray) -> pd.DataFrame:
         """Find spots in a data volume.
+
         Parameters
         ----------
         data : xr.DataArray
             3D (z, y, x) data volume in which spots will be identified.
+
         Returns
         -------
         pd.DataFrame
@@ -169,10 +176,12 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
         n_processes: Optional[int]=None
     ) -> Dict[Tuple[int, int], np.ndarray]:
         """Find spots in all (z, y, x) volumes of an ImageStack.
+
         Parameters
         ----------
         data_stack : ImageStack
             Stack containing spots to find.
+
         Returns
         -------
         Dict[Tuple[int, int], np.ndarray]
@@ -201,6 +210,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
     ) -> Dict[int, IntensityTable]:
         """ For each round, find connected components of spots across channels and merge them
         in a single feature.
+
         Parameters
         ----------
         round_dataframes : Dict[int, pd.DataFrame]
@@ -208,6 +218,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
             all the spots detected in them.
         channels, rounds : Sequence[int]
             Channels and rounds present in the ImageStack from which spots were detected.
+
         Returns
         -------
         Dict[int, pd.DataFrame]
@@ -289,16 +300,17 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
             self, data_stack: ImageStack, intensity_tables: Dict[int, IntensityTable]
     ) -> Dict[int, IntensityTable]:
         """Interate over the intesity tables of each round and assign to each feature a quality score
+
         Parameters
         ----------
         data_stack : ImageStack
             Stack containing spots to find.
+
         Returns
         -------
         Dict[int,IntensityTable]:
             Dictionary mapping round to the relative IntensityTable with quality coordinate Q
             representing the quality score of each feature.
-        -------
         """
         # Fill NaN values of intensity table with intensity values from ImageStack
         for r in intensity_tables:
@@ -329,10 +341,12 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
 
     def _prob2Eng(self, p: float) -> float:
         """Convert probability values into energy by inverse Gibbs distribution
+
         Parameters
         ----------
         p : float
             probability value
+
         Returns
         -------
         float
@@ -345,9 +359,9 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
             l: int, d_th: float,
             k_d: float, rounds: np.array,
             dth_max: float) -> Dict:
-        """
-        Build the graph model for the given connected component and solve the graph
+        """Build the graph model for the given connected component and solve the graph
         with max flow min cost alghorithm
+
         Parameters
         ----------
         data : pd.DataFrame
@@ -369,7 +383,6 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
         Dict[str, Any]
             Dictionary mapping the decoded graph, Dataframe of detected spots with
             probability values, Dataframe of connected spots
-
         """
 
         if len(data[data.conn_comp == l]):
@@ -492,9 +505,9 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
                          d_th: float,
                          k_d: float,
                          dth_max: float) -> list:
-        """
-        Find connected components of detected spots across rounds and call the graph
+        """Find connected components of detected spots across rounds and call the graph
         decoder for each connected component instance.
+
         Parameters
         ----------
         data : pd.DataFrame
@@ -558,6 +571,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
 
     def _baseCalling(self, data: list, rounds: Sequence[int], search_radius_max: int) -> np.ndarray:
         """Extract intensity table feature indeces and channels from each connected component graph
+
         Parameters
         ----------
         data : list
@@ -567,6 +581,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
         search_radius_max : int
             The maximum (euclidian) distance in pixels allowed between nodes belonging
             to the same sequence
+
         Returns
         -------
         np.ndarray
@@ -599,6 +614,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
                       anchor_round: int
                       ) -> IntensityTable:
         """Construct an intensity table from the results of a graph based search of detected spots
+
         Parameters
         ----------
         intensity_tables : Dict[int, IntensityTable]
@@ -615,6 +631,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
             distance weight
         anchor_round : int
             The imaging round to seed the search from.
+
         Returns
         -------
         IntensityTable
@@ -652,16 +669,16 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
 
         return intensity_table
 
-    def run(
-            self,
+    def run(self,
             primary_image: ImageStack,
             blobs_image: Optional[ImageStack] = None,
             blobs_axes: Optional[Tuple[Axes, ...]] = None,
             verbose: bool = False,
             n_processes: Optional[int] = None,
             *args,
-    ) -> IntensityTable:
+            ) -> IntensityTable:
         """Find 1-hot coded spots in data.
+
         Parameters
         ----------
         primary_image : ImageStack
@@ -671,10 +688,12 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
         n_processes : Optional[int]
             Number of processes to devote to spot finding. If None, will use the number of available
             cpus (Default None).
+
         Notes
         -----
         blobs_image is an unused parameter that is included for testing purposes. It should not
         be passed to this method. If it is passed, the method will trigger a ValueError.
+
         Returns
         -------
         IntensityTable
@@ -741,7 +760,7 @@ class LocalGraphBlobDetector(DetectSpotsAlgorithmBase):
                     for x in range(intensity_table.shape[0])]
             intensity_table = intensity_table[np.arange(intensity_table.shape[0])[np.invert(drop)]]
 
-            transfer_physical_coords_from_imagestack_to_intensity_table(
+            transfer_physical_coords_to_intensity_table(
                 image_stack=primary_image, intensity_table=intensity_table
             )
 

@@ -1,4 +1,5 @@
 import collections
+import os
 import warnings
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
@@ -9,6 +10,7 @@ from threading import Lock
 from typing import (
     Any,
     Callable,
+    Hashable,
     Iterator,
     List,
     Mapping,
@@ -43,8 +45,6 @@ from starfish.core.imagestack.parser import TileCollectionData, TileKey
 from starfish.core.imagestack.parser.crop import CropParameters, CroppedTileCollectionData
 from starfish.core.imagestack.parser.numpy import NumpyData
 from starfish.core.imagestack.parser.tileset import TileSetData
-from starfish.core.multiprocessing.pool import Pool
-from starfish.core.multiprocessing.shmem import SharedMemory
 from starfish.core.types import (
     Axes,
     Clip,
@@ -56,7 +56,6 @@ from starfish.core.types import (
 )
 from starfish.core.util import logging
 from starfish.core.util.dtype import preserve_float_range
-from ._mp_dataarray import MPDataArray
 from .dataorder import AXES_DATA, N_AXES
 
 
@@ -88,7 +87,7 @@ class ImageStack:
            the shape of the image tensor by categorical index (channels, imaging rounds, z-layers)
     """
 
-    def __init__(self, data: MPDataArray, tile_data: Optional[TileCollectionData]=None):
+    def __init__(self, data: xr.DataArray, tile_data: Optional[TileCollectionData]=None):
         self._data = data
         self._data_loaded = False
         self._tile_data = tile_data
@@ -104,7 +103,7 @@ class ImageStack:
 
         data_shape: MutableSequence[int] = []
         data_dimensions: MutableSequence[str] = []
-        data_tick_marks: MutableMapping[str, Sequence[int]] = dict()
+        data_tick_marks: MutableMapping[Hashable, Sequence[int]] = dict()
         for ix in range(N_AXES):
             size_for_axis: Optional[int] = None
             dim_for_axis: Optional[Axes] = None
@@ -128,10 +127,10 @@ class ImageStack:
         data_dimensions.extend([Axes.Y.value, Axes.X.value])
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
-        data = MPDataArray.from_shape_and_dtype(
-            shape=data_shape,
-            dtype=np.float32,
-            initial_value=np.nan,
+        np_array = np.empty(shape=data_shape, dtype=np.float32)
+        np_array.fill(np.nan)
+        data = xr.DataArray(
+            np_array,
             dims=data_dimensions,
             coords=data_tick_marks,
         )
@@ -374,7 +373,7 @@ class ImageStack:
     def xarray(self) -> xr.DataArray:
         """Retrieves the image data as an :py:class:`xarray.DataArray`"""
         self._ensure_data_loaded()
-        return self._data.data
+        return self._data
 
     def sel(self, indexers: Mapping[Axes, Union[int, tuple]]):
         """Given a dictionary mapping the index name to either a value or a range represented as a
@@ -411,7 +410,7 @@ class ImageStack:
         self._ensure_data_loaded()
         stack = deepcopy(self)
         selector = indexing_utils.convert_to_selector(indexers)
-        stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector)
+        stack._data = indexing_utils.index_keep_dimensions(self.xarray, selector)
         return stack
 
     def isel(self, indexers: Mapping[Axes, Union[int, tuple]]):
@@ -447,7 +446,7 @@ class ImageStack:
         """
         stack = deepcopy(self)
         selector = indexing_utils.convert_to_selector(indexers)
-        stack._data._data = indexing_utils.index_keep_dimensions(self.xarray, selector, by_pos=True)
+        stack._data = indexing_utils.index_keep_dimensions(self.xarray, selector, by_pos=True)
         return stack
 
     def sel_by_physical_coords(
@@ -705,6 +704,7 @@ class ImageStack:
     def apply(
             self,
             func: Callable,
+            *args,
             group_by: Set[Axes]=None,
             in_place=False,
             verbose: bool=False,
@@ -772,20 +772,24 @@ class ImageStack:
             # create a copy of the ImageStack, call apply on that stack with in_place=True
             image_stack = deepcopy(self)
             image_stack.apply(
-                func=func,
+                func,
+                *args,
                 group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes,
                 clip_method=clip_method,
                 **kwargs
             )
             return image_stack
 
-        # wrapper adds a target `data` parameter where the results from func will be stored
-        # data are clipped or scaled by chunk using preserve_float_range if clip_method != 2
+        # Add a wrapper to the function to be applied.  This wrapper will grab control after the
+        # function has been applied and perform per-chunk transformations like clip and
+        # scale-by-chunk.  Scaling across an entire ImageStack is performed after all the chunks are
+        # returned.
         bound_func = partial(ImageStack._in_place_apply, func, clip_method=clip_method)
 
         # execute the processing workflow
         self.transform(
-            func=bound_func,
+            bound_func,
+            *args,
             group_by=group_by,
             verbose=verbose,
             n_processes=n_processes,
@@ -793,16 +797,19 @@ class ImageStack:
 
         # scale based on values of whole image
         if clip_method == Clip.SCALE_BY_IMAGE:
-            self._data.data.values = preserve_float_range(self._data.values, rescale=True)
+            self._data.values = preserve_float_range(self._data.values, rescale=True)
 
         return None
 
     @staticmethod
     def _in_place_apply(
-        apply_func: Callable[..., Union[xr.DataArray, np.ndarray]], data: np.ndarray,
-        clip_method: Union[str, Clip], **kwargs
+            apply_func: Callable[..., Union[xr.DataArray, np.ndarray]],
+            data: np.ndarray,
+            *args,
+            clip_method: Union[str, Clip],
+            **kwargs
     ) -> None:
-        result = apply_func(data, **kwargs)
+        result = apply_func(data, *args, **kwargs)
         if clip_method == Clip.CLIP:
             data[:] = preserve_float_range(result, rescale=False)
         elif clip_method == Clip.SCALE_BY_CHUNK:
@@ -813,6 +820,7 @@ class ImageStack:
     def transform(
             self,
             func: Callable,
+            *args,
             group_by: Set[Axes]=None,
             verbose=False,
             n_processes: Optional[int]=None,
@@ -847,30 +855,24 @@ class ImageStack:
         # default grouping is by (x, y) tile
         if group_by is None:
             group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
+        if n_processes is None:
+            n_processes = os.cpu_count()
 
         selectors = list(self._iter_axes(group_by))
-        slice_lists = [self._build_slice_list(index)[0]
-                       for index in selectors]
 
-        selectors_and_slice_lists = zip(selectors, slice_lists)
         if verbose and StarfishConfig().verbose:
-            selectors_and_slice_lists = tqdm(selectors_and_slice_lists)
-
-        coordinates = {
-            dim: self.xarray.coords[dim]
-            for dim in self.xarray.coords.dims
-        }
+            selectors = tqdm(selectors)
 
         mp_applyfunc: Callable = partial(
-            self._processing_workflow, partial(func, **kwargs), self.xarray.dims, coordinates)
+            self._processing_workflow,
+            func,
+            self.xarray,
+            args,
+            kwargs,
+        )
 
-        with Pool(
-                processes=n_processes,
-                initializer=SharedMemory.initializer,
-                initargs=((self._data._backing_mp_array,
-                           self._data._data.shape,
-                           self._data._data.dtype),)) as pool:
-            results = pool.imap(mp_applyfunc, selectors_and_slice_lists)
+        with ThreadPoolExecutor(max_workers=n_processes) as tpe:
+            results = tpe.map(mp_applyfunc, selectors)
 
             # Note: results is [None, ...] if executing an in-place workflow
             # Note: this return must be inside the context manager or the Pool will deadlock
@@ -879,25 +881,17 @@ class ImageStack:
     @staticmethod
     def _processing_workflow(
             worker_callable: Callable[[np.ndarray], Any],
-            xarray_dims: Sequence[str],
-            xarray_coordinates: Mapping[str, np.ndarray],
-            selector_and_slice_list: Tuple[Mapping[Axes, int],
-                                           Tuple[Union[int, slice], ...]],
+            data_array: xr.DataArray,
+            args: Sequence,
+            kwargs: Mapping,
+            selectors: Mapping[Axes, int],
     ):
-        # build the numpy array from the shared memory object
-        backing_mp_array, shape, dtype = SharedMemory.get_payload()
-        unshaped_numpy_array = np.frombuffer(backing_mp_array.get_obj(), dtype=dtype)
-
-        # build and then slice the xarray to get the piece needed for this worker
-        data_array = xr.DataArray(
-            data=unshaped_numpy_array.reshape(shape),
-            dims=xarray_dims,
-            coords=xarray_coordinates,
-        )
-        sliced = data_array.sel(selector_and_slice_list[0])
+        formatted_selectors: Mapping[Hashable, int] = {
+            str(axis): axis_val for axis, axis_val in selectors.items()}
+        sliced = data_array.sel(formatted_selectors)
 
         # pass worker_callable a view into the backing array, which will be overwritten
-        return worker_callable(sliced)  # type: ignore
+        return worker_callable(sliced, *args, **kwargs)  # type: ignore
 
     @property
     def tile_metadata(self) -> pd.DataFrame:
@@ -996,7 +990,7 @@ class ImageStack:
         Tuple[int, int, int, int, int] :
             The size of the image tensor
         """
-        return self._data.shape
+        return self._data.shape  # type: ignore
 
     @property
     def shape(self) -> collections.OrderedDict:
@@ -1013,7 +1007,7 @@ class ImageStack:
         # has a bug where this # breaks horribly.  Can't find a bug id to link to, but see
         # https://stackoverflow.com/questions/41207128/how-do-i-specify-ordereddict-k-v-types-for-\
         # mypy-type-annotation
-        result: collections.OrderedDict[Any, str] = collections.OrderedDict()
+        result: collections.OrderedDict[Any, Any] = collections.OrderedDict()
         for name, data in AXES_DATA.items():
             result[name] = self._data.shape[data.order]
         result['y'] = self._data.shape[-2]

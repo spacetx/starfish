@@ -5,7 +5,7 @@ from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.pipeline.algorithmbase import AlgorithmBase
 
 
-class ApplyTransformBase(metaclass=AlgorithmBase):
+class ApplyTransformAlgorithm(metaclass=AlgorithmBase):
 
     @abstractmethod
     def run(self, stack, transforms_list, *args) -> Optional[ImageStack]:

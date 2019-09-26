@@ -5,11 +5,11 @@ import numpy as np
 import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 from .util import determine_axes_to_group_by
 
 
-class Clip(FilterAlgorithmBase):
+class Clip(FilterAlgorithm):
     """
     Image clipping filter that clips values below a minimum percentile and above a maximum
     percentile.

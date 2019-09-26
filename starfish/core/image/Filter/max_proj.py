@@ -3,12 +3,15 @@ from typing import Iterable, Optional, Union
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 
 
-class MaxProject(FilterAlgorithmBase):
+class MaxProject(FilterAlgorithm):
     """
     Creates a maximum projection over one or more axis of the image tensor
+
+    .. deprecated:: 0.1.2
+        Use `Filter.Reduce(func='max')` instead.
 
     Parameters
     ----------

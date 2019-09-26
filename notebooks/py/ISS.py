@@ -85,8 +85,15 @@ imshow_plane(single_plane, title="Round: 0, Channel: 0")
 # EPY: END markdown
 
 # EPY: START code
+from starfish.image import Filter
+
+rcz_max_projector = Filter.Reduce(
+    (Axes.ROUND, Axes.CH, Axes.ZPLANE,), func="max", module=Filter.Reduce.FunctionSource.np)
+per_round_max_projector = Filter.Reduce(
+    (Axes.CH, Axes.ZPLANE,), func="max", module=Filter.Reduce.FunctionSource.np)
+
 dots = fov.get_image("dots")
-dots_single_plane = dots.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+dots_single_plane = rcz_max_projector.run(dots)
 imshow_plane(dots_single_plane, title="Anchor channel, all RNA molecules")
 # EPY: END code
 
@@ -96,7 +103,7 @@ imshow_plane(dots_single_plane, title="Anchor channel, all RNA molecules")
 
 # EPY: START code
 nuclei = fov.get_image("nuclei")
-nuclei_single_plane = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+nuclei_single_plane = rcz_max_projector.run(nuclei)
 imshow_plane(nuclei_single_plane, title="Nuclei (DAPI) channel")
 # EPY: END code
 
@@ -146,7 +153,7 @@ imshow_plane(
 from starfish.image import ApplyTransform, LearnTransform
 
 learn_translation = LearnTransform.Translation(reference_stack=dots, axes=Axes.ROUND, upsampling=1000)
-transforms_list = learn_translation.run(imgs.max_proj(Axes.CH, Axes.ZPLANE))
+transforms_list = learn_translation.run(per_round_max_projector.run(imgs))
 warp = ApplyTransform.Warp()
 registered_imgs = warp.run(filtered_imgs, transforms_list=transforms_list, in_place=False, verbose=True)
 # EPY: END code
@@ -211,10 +218,10 @@ dapi_thresh = .18  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
 min_dist = 57
 
-registered_mp = registered_imgs.max_proj(Axes.CH, Axes.ZPLANE).xarray.squeeze()
+registered_mp = per_round_max_projector.run(registered_imgs).xarray.squeeze()
 stain = np.mean(registered_mp, axis=0)
 stain = stain/stain.max()
-nuclei = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+nuclei = rcz_max_projector.run(nuclei)
 
 
 seg = Segment.Watershed(
@@ -255,12 +262,10 @@ GENE1 = 'HER2'
 GENE2 = 'VIM'
 
 rgb = np.zeros(registered_imgs.tile_shape + (3,))
-nuclei_mp = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
-nuclei_numpy = nuclei_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+nuclei_numpy = rcz_max_projector.run(nuclei)._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 rgb[:,:,0] = nuclei_numpy
-dots_mp = dots.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
-dots_mp_numpy = dots_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
-rgb[:,:,1] = dots_mp_numpy
+dots_numpy = rcz_max_projector.run(dots)._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+rgb[:,:,1] = dots_numpy
 do = rgb2gray(rgb)
 do = do/(do.max())
 

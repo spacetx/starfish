@@ -17,13 +17,14 @@
 # EPY: END markdown
 
 # EPY: START code
-from pprint import pprint 
+from pprint import pprint
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
 import starfish
+from starfish import IntensityTable
 import starfish.data
 from starfish.types import Axes
 from starfish.util.plot import (
@@ -54,10 +55,11 @@ stack = experiment['fov_000'].get_image('primary')
 # EPY: END code
 
 # EPY: START code
-ch_r_projection = stack.max_proj(Axes.CH, Axes.ROUND)
+ch_r_max_projector = starfish.image.Filter.Reduce((Axes.CH, Axes.ROUND), func="max")
+ch_r_max_projection = ch_r_max_projector.run(stack)
 
 f = plt.figure(dpi=150)
-imshow_plane(ch_r_projection, sel={Axes.ZPLANE: 15})
+imshow_plane(ch_r_max_projection, sel={Axes.ZPLANE: 15})
 # EPY: END code
 
 # EPY: START markdown
@@ -93,7 +95,8 @@ print(experiment.codebook)
 # EPY: END markdown
 
 # EPY: START code
-projection = stack.max_proj(Axes.CH, Axes.ZPLANE)
+ch_z_max_projector = starfish.image.Filter.Reduce((Axes.CH, Axes.ZPLANE), func="max")
+projection = ch_r_max_projector.run(stack)
 reference_image = projection.sel({Axes.ROUND: 1})
 
 ltt = starfish.image.LearnTransform.Translation(
@@ -105,7 +108,7 @@ transforms = ltt.run(projection)
 # EPY: END code
 
 # EPY: START markdown
-#How big are the identified translations? 
+#How big are the identified translations?
 # EPY: END markdown
 
 # EPY: START code
@@ -129,7 +132,7 @@ stack = warp.run(
 # EPY: END markdown
 
 # EPY: START code
-post_projection = stack.max_proj(Axes.CH, Axes.ZPLANE)
+post_projection = ch_z_max_projector.run(stack)
 # EPY: END code
 
 # EPY: START code
@@ -231,7 +234,7 @@ intensities = lsbd.run(scaled, n_processes=8)
 # EPY: END markdown
 
 # EPY: START code
-decoded = experiment.codebook.decode_per_round_max(intensities.fillna(0))
+decoded = experiment.codebook.decode_per_round_max(IntensityTable(intensities.fillna(0)))
 decode_mask = decoded['target'] != 'nan'
 
 # %gui qt

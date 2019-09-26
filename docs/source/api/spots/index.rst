@@ -14,13 +14,13 @@ These include :py:class:`starfish.spots.DetectPixels`, which exposes methods tha
 Detecting Pixels
 ----------------
 
-Pixel Detectors can be imported using ``starfish.spots.DetectPixels``, which registers all classes that subclass ``DetectPixelsAlgorithmBase``:
+Pixel Detectors can be imported using ``starfish.spots.DetectPixels``, which registers all classes that subclass ``DetectPixelsAlgorithm``:
 
 .. code-block:: python
 
     from starfish.spots import DetectPixels
 
-.. autoclass:: starfish.spots.DetectPixels
+.. automodule:: starfish.spots.DetectPixels
     :members:
 
 
@@ -29,13 +29,33 @@ Pixel Detectors can be imported using ``starfish.spots.DetectPixels``, which reg
 Detecting Spots
 ---------------
 
-Spot Detectors can be imported using ``starfish.spots.DetectSpots``, which registers all classes that subclass ``DetectSpotsAlgorithmBase``:
+Spot Detectors can be imported using ``starfish.spots.DetectSpots``, which registers all classes that subclass ``DetectSpotsAlgorithm``:
 
 .. code-block:: python
 
     from starfish.spots import DetectSpots
 
-.. autoclass:: starfish.spots.DetectSpots
+.. automodule:: starfish.spots.DetectSpots
+    :members:
+
+.. _spot_finding:
+
+Finding Spots
+---------------
+
+NOTE: Starfish is embarking on a SpotFinding data structures refactor see `Spot Finding Refactor Plan`_
+DetectSpots will be replaced by the FindSpots module documented below.
+
+Spot Finders can be imported using ``starfish.spots.FindSpots``, which registers all classes that subclass ``FindSpotsAlgorithm``:
+
+
+.. _`Spot Finding Refactor Plan`: https://github.com/spacetx/starfish/issues/1514
+
+.. code-block:: python
+
+    from starfish.spots import FindSpots
+
+.. automodule:: starfish.spots.FindSpots
     :members:
 
 
@@ -44,13 +64,29 @@ Spot Detectors can be imported using ``starfish.spots.DetectSpots``, which regis
 Decoding
 --------
 
-Decoders can be imported using ``starfish.spots.Decode``, which registers all classes that subclass ``DecodeAlgorithmBase``:
+Decoders can be imported using ``starfish.spots.Decode``, which registers all classes that subclass ``DecodeAlgorithm``:
 
 .. code-block:: python
 
     from starfish.spots import Decode
 
-.. autoclass:: starfish.spots.Decode
+.. automodule:: starfish.spots.Decode
+   :members:
+
+.. _decode_spots:
+
+Decoding Spots
+---------------
+
+NOTE: Starfish is embarking on a SpotFinding data structures refactor see `Spot Finding Refactor Plan`_
+
+Spot Decoders can be imported using ``starfish.spots.DecodeSpots``, which registers all classes that subclass ``DecodeSpotsAlgorithm``:
+
+.. code-block:: python
+
+    from starfish.spots import DecodeSpots
+
+.. automodule:: starfish.spots.DecodeSpots
    :members:
 
 
@@ -59,11 +95,11 @@ Decoders can be imported using ``starfish.spots.Decode``, which registers all cl
 Target Assignment
 -----------------
 
-Target Assignment can be imported using ``starfish.spots.AssignTargets``, which registers all classes that subclass ``AssignTargetsAlgorithmBase``:
+Target Assignment can be imported using ``starfish.spots.AssignTargets``, which registers all classes that subclass ``AssignTargetsAlgorithm``:
 
 .. code-block:: python
 
     from starfish.spots import AssignTargets
 
-.. autoclass:: starfish.spots.AssignTargets
+.. automodule:: starfish.spots.AssignTargets
    :members:

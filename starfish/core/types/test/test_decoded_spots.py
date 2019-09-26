@@ -6,13 +6,14 @@ import pytest
 
 from starfish import IntensityTable
 from starfish.core.codebook.test.factories import codebook_array_factory
+from starfish.core.intensity_table.test import factories
 from starfish.core.types import Coordinates, DecodedSpots, Features
 
 
 def dummy_intensities() -> IntensityTable:
 
     codebook = codebook_array_factory()
-    intensities = IntensityTable.synthetic_intensities(
+    intensities = factories.synthetic_decoded_intenisty_table(
         codebook,
         num_z=10,
         height=10,
@@ -33,13 +34,13 @@ def dummy_intensities() -> IntensityTable:
 def test_decoded_spots() -> None:
     data = dummy_intensities()
 
-    with pytest.raises(RuntimeError):
-        data.to_decoded_spots()
+    with pytest.raises(ValueError):
+        data.to_decoded_dataframe()
 
     # mock decoder run by adding target list
     data[Features.TARGET] = (Features.AXIS, list('abcde'))
 
-    ds = data.to_decoded_spots()
+    ds = data.to_decoded_dataframe()
 
     assert ds.data.shape[0] == 5
 
@@ -50,4 +51,4 @@ def test_decoded_spots() -> None:
 
     # load back into memory
     ds2 = DecodedSpots.load_csv(filename)
-    pd.testing.assert_frame_equal(ds.data, ds2.data)
+    pd.testing.assert_frame_equal(ds.data, ds2.data, check_dtype=False)

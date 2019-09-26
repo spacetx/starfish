@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Optional, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -10,7 +10,7 @@ from starfish.core.pipeline.algorithmbase import AlgorithmBase
 from starfish.core.types import Axes, Number, SpotAttributes
 
 
-class DetectSpotsAlgorithmBase(metaclass=AlgorithmBase):
+class DetectSpotsAlgorithm(metaclass=AlgorithmBase):
     """
     Starfish spot detectors use a variety of means to detect bright spots against
     dark backgrounds. Starfish's spot detectors each have different strengths and weaknesses.
@@ -92,7 +92,9 @@ class DetectSpotsAlgorithmBase(metaclass=AlgorithmBase):
         raise NotImplementedError()
 
     @staticmethod
-    def _get_measurement_function(measurement_type: str) -> Callable[[Sequence], Number]:
+    def _get_measurement_function(
+            measurement_type: str
+    ) -> Callable[[Union[np.ndarray, xr.DataArray]], Number]:
         try:
             measurement_function = getattr(np, measurement_type)
         except AttributeError:

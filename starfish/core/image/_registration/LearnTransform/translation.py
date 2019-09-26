@@ -5,10 +5,10 @@ from skimage.transform._geometric import SimilarityTransform
 from starfish.core.image._registration.transforms_list import TransformsList
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes, TransformType
-from ._base import LearnTransformBase
+from ._base import LearnTransformAlgorithm
 
 
-class Translation(LearnTransformBase):
+class Translation(LearnTransformAlgorithm):
     """
     Iterate over the given axes of an ImageStack and learn the translation transform
     based off the reference_stack passed into :py:class:`Translation`'s constructor.
@@ -23,7 +23,9 @@ class Translation(LearnTransformBase):
     upsampling : int
         upsampling factor (default=1). See
         http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.register_translation
-        for an explanation of this parameter.
+        for an explanation of this parameter. in brief, this parameter determines the resolution of
+        the registration. A value of 1 represents pixel resolution, a value of 10 is 1/10th of
+        a pixel, a value of 300 is 1/300th of a pixel, and so on.
     """
 
     def __init__(self, reference_stack: ImageStack, axes: Axes, upsampling: int=1):

@@ -7,7 +7,7 @@ See: https://github.com/spacetx/starfish/issues/1005
 """
 
 from collections import defaultdict
-from typing import Dict, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, Hashable, List, Mapping, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -19,9 +19,9 @@ from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
-    transfer_physical_coords_from_imagestack_to_intensity_table
+    transfer_physical_coords_to_intensity_table
 from starfish.core.types import Axes, Features, Number, SpotAttributes
-from ._base import DetectSpotsAlgorithmBase
+from ._base import DetectSpotsAlgorithm
 
 blob_detectors = {
     'blob_dog': blob_dog,
@@ -29,7 +29,7 @@ blob_detectors = {
 }
 
 
-class LocalSearchBlobDetector(DetectSpotsAlgorithmBase):
+class LocalSearchBlobDetector(DetectSpotsAlgorithm):
     """
     Multi-dimensional gaussian spot detector.
 
@@ -38,6 +38,30 @@ class LocalSearchBlobDetector(DetectSpotsAlgorithmBase):
     with a relatively large radius. In crowded images, the spots can be seeded in all rounds and
     consensus filtering can be used to extract codes that are consistently extracted across
     rounds.
+
+    In brief, this spot finder operates on a few assumptions:
+    1. Codes that represent transcripts are one-hot, meaning that in each round, one and only one
+    channel should be "on" for a given transcript.
+    2. Due to experimental conditions, there may be a small amount of jitter the the exact position
+    of each spots.
+    3. To build codes in these circumstances, one must be able to account for small deviations in
+    physical position to reconstruct codes.
+
+    The LocalSearchBlobDetector accomplishes this as follows:
+
+    1. Identify spots independently in all rounds and channels.
+    2. Identify an `anchor round`. Spots in this round will serve as the central location of a
+       local search. The best round to select for the anchor round is the one that has the best
+       signal to noise ratio.
+    3. In rounds other than the anchor round, search for the closest spot that is within
+       `search_radius` pixels of the anchor spot. Intuitively, search radius should be the smallest
+       value possible that accounts for local jitter in spot position introduced by your
+       experimental approach. A common value is 2.5 pixels.
+    4. Construct an IntensityTable, where for each anchor spot, spots in other rounds and channels
+       are merged into single features, storing the (z, y, x) coordinates of the anchor spots.
+
+    The IntensityTable can then be decoded with downstream tools. This approach was used to good
+    effect in the STARmap paper (DOI: 10.1126/science.aat5691)
 
     Parameters
     ----------
@@ -320,7 +344,7 @@ class LocalSearchBlobDetector(DetectSpotsAlgorithmBase):
         # create empty IntensityTable filled with np.nan
         data = np.full((dist.shape[0], len(channels), len(rounds)), fill_value=np.nan)
         dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
-        coords = {
+        coords: Mapping[Hashable, Tuple[str, Any]] = {
             Features.SPOT_RADIUS: (Features.AXIS, anchor_df[Features.SPOT_RADIUS]),
             Axes.ZPLANE.value: (Features.AXIS, anchor_df[Axes.ZPLANE]),
             Axes.Y.value: (Features.AXIS, anchor_df[Axes.Y]),
@@ -411,7 +435,7 @@ class LocalSearchBlobDetector(DetectSpotsAlgorithmBase):
             anchor_round=self.anchor_round
         )
 
-        transfer_physical_coords_from_imagestack_to_intensity_table(
+        transfer_physical_coords_to_intensity_table(
             image_stack=primary_image, intensity_table=intensity_table
         )
 

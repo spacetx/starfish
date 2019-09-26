@@ -7,10 +7,10 @@ from tqdm import tqdm
 from starfish.core.config import StarfishConfig
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 
 
-class ZeroByChannelMagnitude(FilterAlgorithmBase):
+class ZeroByChannelMagnitude(FilterAlgorithm):
     """
     For assays in which we expect codewords to have explicit zero values,
     e.g., DARTFISH, this filter allows for the explicit zeroing

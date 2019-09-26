@@ -17,13 +17,13 @@ Filtering
 ---------
 
 Filters can be imported using ``starfish.image.Filter``, which registers all classes that subclass
-``FilterAlgorithmBase``:
+``FilterAlgorithm``:
 
 .. code-block:: python
 
     from starfish.image import Filter
 
-.. autoclass:: starfish.image.Filter
+.. automodule:: starfish.image.Filter
    :members:
 
 
@@ -33,13 +33,13 @@ Learn Transform
 ---------------
 
 LearnTransform can be imported using ``starfish.image.LearnTransform``, the subclasses of
-``LearnTransformBase`` are available for transform learning.
+``LearnTransformAlgorithm`` are available for transform learning.
 
 .. code-block:: python
 
     from starfish.image import LearnTransform
 
-.. autoclass:: starfish.image.LearnTransform
+.. automodule:: starfish.image.LearnTransform
    :members:
 
 
@@ -49,13 +49,13 @@ Apply Transform
 ---------------
 
 ApplyTransform can be imported using ``starfish.image.ApplyTransform``, the subclasses of
-``ApplyTransformBase`` are available for transform learning.
+``ApplyTransformAlgorithm`` are available for transform learning.
 
 .. code-block:: python
 
     from starfish.image import ApplyTransform
 
-.. autoclass:: starfish.image.ApplyTransform
+.. automodule:: starfish.image.ApplyTransform
    :members:
 
 
@@ -65,11 +65,11 @@ Segmentation
 ------------
 
 Segmentation can be imported using ``starfish.image.Segment``, which registers all classes that subclass
-``SegmentAlgorithmBase``:
+``SegmentAlgorithm``:
 
 .. code-block:: python
 
     from starfish.image import Segment
 
-.. autoclass:: starfish.image.Segment
+.. automodule:: starfish.image.Segment
    :members:

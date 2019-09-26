@@ -1,6 +1,7 @@
 import warnings
+from concurrent.futures import ThreadPoolExecutor
 from functools import partial
-from typing import Dict, List, NamedTuple, Optional, Tuple
+from typing import cast, Dict, List, NamedTuple, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -10,7 +11,6 @@ from tqdm import tqdm
 
 from starfish.core.config import StarfishConfig
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.multiprocessing.pool import Pool
 from starfish.core.types import Axes, Features, Number, SpotAttributes
 
 
@@ -140,7 +140,7 @@ class CombineAdjacentFeatures:
 
         int_targets = target_map.targets_as_int(intensities[Features.TARGET].values)
         if mask_filtered_features:
-            fails_filters = np.where(~intensities[Features.PASSES_THRESHOLDS])[0]
+            fails_filters = np.where(~intensities[Features.PASSES_THRESHOLDS])[0]  # type: ignore
             int_targets[fails_filters] = 0
 
         decoded_image: np.ndarray = int_targets.reshape((max_z, max_y, max_x))
@@ -170,7 +170,6 @@ class CombineAdjacentFeatures:
 
         """
 
-        import xarray as xr
         pixel_labels = label_image.reshape(-1)
 
         # Use a pandas groupby approach-based approach, because it is much faster than xarray
@@ -200,7 +199,7 @@ class CombineAdjacentFeatures:
         grouped = distances.groupby(level=0)
         pd_mean_distances = grouped.mean()
 
-        pd_xarray = xr.DataArray(
+        pd_xarray = IntensityTable(
             pd_mean_pixel_traces,
             dims=(Features.AXIS, 'traces'),
             coords=dict(
@@ -217,7 +216,7 @@ class CombineAdjacentFeatures:
         except KeyError:
             pass
 
-        return mean_pixel_traces
+        return cast(IntensityTable, mean_pixel_traces)
 
     @staticmethod
     def _single_spot_attributes(
@@ -321,8 +320,8 @@ class CombineAdjacentFeatures:
             An array with length equal to the number of features. If zero, indicates that a feature
             has failed area filters.
         """
-        with Pool(processes=n_processes) as pool:
-            mapfunc = pool.map
+        with ThreadPoolExecutor(max_workers=n_processes) as tpe:
+            mapfunc = tpe.map
             applyfunc = partial(
                 self._single_spot_attributes,
                 decoded_image=decoded_image,

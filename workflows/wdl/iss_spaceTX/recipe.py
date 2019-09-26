@@ -24,7 +24,8 @@ def process_fov(field_num: int, experiment_str: str):
 
     fov = experiment[fov_str]
     imgs = fov.get_image(starfish.FieldOfView.PRIMARY_IMAGES)
-    dots = imgs.max_proj(Axes.CH)
+    max_projector = starfish.image.Filter.Reduce((Axes.CH, Axes.ZPLANE))
+    dots = max_projector.run(imgs)
 
     # filter
     filt = starfish.image.Filter.WhiteTophat(masking_radius=15, is_volume=False)
@@ -51,5 +52,5 @@ def process_fov(field_num: int, experiment_str: str):
     decoded = experiment.codebook.decode_per_round_max(intensities)
 
     # save results
-    df = decoded.to_decoded_spots()
+    df = decoded.to_decoded_dataframe()
     return df

@@ -68,7 +68,8 @@ imgs_ghp_laplace = filter_laplace.run(imgs_ghp, in_place=False)
 # EPY: END markdown
 
 # EPY: START code
-mp = imgs_ghp_laplace.max_proj(Axes.ZPLANE)
+z_max_projector = Filter.Reduce((Axes.ZPLANE,))
+mp = z_max_projector.run(imgs_ghp_laplace)
 # EPY: END code
 
 # EPY: START markdown

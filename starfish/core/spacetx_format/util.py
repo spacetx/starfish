@@ -1,9 +1,9 @@
 import copy
 import json
-import os
 import posixpath
 import sys
 import warnings
+from pathlib import Path
 from typing import Any, Dict, IO, Iterator, List, Optional, Union
 
 from jsonschema import Draft4Validator, RefResolver, ValidationError
@@ -56,11 +56,11 @@ class SpaceTxValidator:
 
         # Note: we are using 5.0.0 here as the first known file. It does *not* need to
         # be upgraded with each version bump since only the dirname is used.
-        experiment_schema_path = resource_filename(
-            package_name, "spacetx_format/schema/experiment_5.0.0.json")
+        experiment_schema_path = Path(resource_filename(
+            package_name, "spacetx_format/schema/experiment_5.0.0.json"))
 
-        package_root = os.path.dirname(os.path.dirname(experiment_schema_path))
-        base_uri = 'file://' + package_root + '/'
+        package_root_path = experiment_schema_path.parent.parent
+        base_uri = f"{package_root_path.as_uri()}/"
         resolver = RefResolver(base_uri, schema)
         return Draft4Validator(schema, resolver=resolver)
 

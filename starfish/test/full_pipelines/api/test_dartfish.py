@@ -14,7 +14,7 @@ os.environ["USE_TEST_DATA"] = "1"
 sys.path.append(os.path.join(ROOT_DIR, "notebooks", "py"))
 
 
-def test_dartfish_pipeline_cropped_data():
+def test_dartfish_pipeline_cropped_data(tmpdir):
 
     # set random seed to errors provoked by optimization functions
     np.random.seed(777)
@@ -146,10 +146,11 @@ def test_dartfish_pipeline_cropped_data():
 
     # Test serialization / deserialization of IntensityTable log
 
-    fp = tempfile.NamedTemporaryFile()
-    spot_intensities.to_netcdf(fp.name)
+    with tempfile.NamedTemporaryFile(dir=tmpdir, delete=False) as ntf:
+        tfp = ntf.name
+    spot_intensities.to_netcdf(tfp)
 
-    loaded_intensities = IntensityTable.open_netcdf(fp.name)
+    loaded_intensities = IntensityTable.open_netcdf(tfp)
     pipeline_log = loaded_intensities.get_log()
 
     assert pipeline_log[0]['method'] == 'Clip'

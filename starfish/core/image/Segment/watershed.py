@@ -11,10 +11,10 @@ from starfish.core.image.Filter.util import bin_open, bin_thresh
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.segmentation_mask import SegmentationMaskCollection
 from starfish.core.types import Axes, Coordinates, Number
-from ._base import SegmentAlgorithmBase
+from ._base import SegmentAlgorithm
 
 
-class Watershed(SegmentAlgorithmBase):
+class Watershed(SegmentAlgorithm):
     """
     Implements watershed segmentation of cells.
 

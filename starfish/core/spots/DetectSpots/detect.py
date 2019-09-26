@@ -9,14 +9,14 @@ import xarray as xr
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
-    transfer_physical_coords_from_imagestack_to_intensity_table
+    transfer_physical_coords_to_intensity_table
 from starfish.core.types import Axes, Features, Number, SpotAttributes
 
 
 def measure_spot_intensity(
         image: Union[np.ndarray, xr.DataArray],
         spots: SpotAttributes,
-        measurement_function: Callable[[Sequence], Number],
+        measurement_function: Callable[[Union[np.ndarray, xr.DataArray]], Number],
         radius_is_gyration: bool=False,
 ) -> pd.Series:
     """measure the intensity of each spot in spots in the corresponding image
@@ -27,7 +27,7 @@ def measure_spot_intensity(
         3-d volume in which to measure intensities
     spots : pd.DataFrame
         SpotAttributes table containing coordinates and radii of spots
-    measurement_function : Callable[[Sequence], Number])
+    measurement_function : Callable[[Union[np.ndarray, xr.DataArray]], Number])
         Function to apply over the spot volumes to identify the intensity (e.g. max, mean, ...)
     radius_is_gyration : bool
         if True, indicates that the radius corresponds to radius of gyration, which is a function of
@@ -67,7 +67,7 @@ def measure_spot_intensity(
 def measure_spot_intensities(
         data_image: ImageStack,
         spot_attributes: SpotAttributes,
-        measurement_function: Callable[[Sequence], Number],
+        measurement_function: Callable[[Union[np.ndarray, xr.DataArray]], Number],
         radius_is_gyration: bool=False,
 ) -> IntensityTable:
     """given spots found from a reference image, find those spots across a data_image
@@ -78,7 +78,7 @@ def measure_spot_intensities(
         ImageStack containing multiple volumes for which spots' intensities must be calculated
     spot_attributes : pd.Dataframe
         Locations and radii of spots
-    measurement_function : Callable[[Sequence], Number])
+    measurement_function : Callable[[Union[np.ndarray, xr.DataArray]], Number])
         Function to apply over the spot volumes to identify the intensity (e.g. max, mean, ...)
     radius_is_gyration : bool
         if True, indicates that the radius corresponds to radius of gyration, which is a function of
@@ -168,7 +168,7 @@ def detect_spots(data_stack: ImageStack,
                  spot_finding_kwargs: Dict = None,
                  reference_image: Optional[ImageStack] = None,
                  reference_image_max_projection_axes: Optional[Tuple[Axes, ...]] = None,
-                 measurement_function: Callable[[Sequence], Number] = np.max,
+                 measurement_function: Callable[[Union[np.ndarray, xr.DataArray]], Number] = np.max,
                  radius_is_gyration: bool = False,
                  n_processes: Optional[int] = None) -> IntensityTable:
     """Apply a spot_finding_method to a ImageStack
@@ -187,7 +187,7 @@ def detect_spots(data_stack: ImageStack,
         filling in the values in the IntensityTable
     reference_image_max_projection_axes : Tuple[Axes]
         Generate the reference image by max-projecting reference_image across these axes.
-    measurement_function : Callable[[Sequence], Number]
+    measurement_function : Callable[[Union[np.ndarray, xr.DataArray]], Number]
         the function to apply over the spot area to extract the intensity value (default 'np.max')
     radius_is_gyration : bool
         if True, indicates that the radius corresponds to radius of gyration, which is a function of
@@ -242,7 +242,7 @@ def detect_spots(data_stack: ImageStack,
         )
         intensity_table = concatenate_spot_attributes_to_intensities(spot_attributes_list)
 
-    transfer_physical_coords_from_imagestack_to_intensity_table(image_stack=data_stack,
-                                                                intensity_table=intensity_table)
+    transfer_physical_coords_to_intensity_table(image_stack=data_stack,
+                                                intensity_table=intensity_table)
 
     return intensity_table

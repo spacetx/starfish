@@ -16,16 +16,16 @@ import numpy as np
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes, Clip, Coordinates, Number
 from starfish.core.util.dtype import preserve_float_range
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 
 
-class Reduce(FilterAlgorithmBase):
+class Reduce(FilterAlgorithm):
     """
     Reduces the cardinality of one or more axes to 1 by applying a function across those axes.
 
     Parameters
     ----------
-    dims : Axes
+    dims : Iterable[Union[Axes, str]]
         one or more Axes to reduce over
     func : str
         Name of a function in the module specified by the ``module`` parameter to apply across the
@@ -152,7 +152,7 @@ class Reduce(FilterAlgorithmBase):
             clip_method: Clip = Clip.CLIP,
             **kwargs
     ) -> None:
-        self.dims = dims
+        self.dims: Iterable[Axes] = set(Axes(dim) for dim in dims)
         self.func = module._resolve_method(func)
         self.clip_method = clip_method
         self.kwargs = kwargs
@@ -181,10 +181,10 @@ class Reduce(FilterAlgorithmBase):
 
         # Apply the reducing function
         reduced = stack.xarray.reduce(
-            self.func, dim=[Axes(dim).value for dim in self.dims], **self.kwargs)
+            self.func, dim=[dim.value for dim in self.dims], **self.kwargs)
 
         # Add the reduced dims back and align with the original stack
-        reduced = reduced.expand_dims(tuple(Axes(dim).value for dim in self.dims))
+        reduced = reduced.expand_dims(tuple(dim.value for dim in self.dims))
         reduced = reduced.transpose(*stack.xarray.dims)
 
         if self.clip_method == Clip.CLIP:
@@ -203,7 +203,7 @@ class Reduce(FilterAlgorithmBase):
                 assert coord.value not in reduced.coords
                 physical_coords[coord] = [np.average(stack._data.coords[coord.value])]
             else:
-                physical_coords[coord] = reduced.coords[coord.value]
+                physical_coords[coord] = cast(Sequence[Number], reduced.coords[coord.value])
         reduced_stack = ImageStack.from_numpy(reduced.values, coordinates=physical_coords)
 
         return reduced_stack

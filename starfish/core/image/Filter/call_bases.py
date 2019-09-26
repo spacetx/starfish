@@ -6,10 +6,10 @@ import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.types import Axes
-from ._base import FilterAlgorithmBase
+from ._base import FilterAlgorithm
 
 
-class CallBases(FilterAlgorithmBase):
+class CallBases(FilterAlgorithm):
     """
     The CallBases filter determines the nucleotide present in each pixel of each
     (round, channel). The pixel values in the resulting image are the base quality

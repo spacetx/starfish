@@ -16,9 +16,9 @@ def test_per_round_max_spot_decoding_without_spots():
     no_spots = bd.run(image_stack)
 
     decode = starfish.spots.Decode.PerRoundMaxChannel(codebook)
-    decoded_no_spots: starfish.IntensityTable = decode.run(no_spots)
+    decoded_no_spots: starfish.DecodedIntensityTable = decode.run(no_spots)
 
-    decoded_spot_table = decoded_no_spots.to_decoded_spots()
+    decoded_spot_table = decoded_no_spots.to_decoded_dataframe()
 
     with TemporaryDirectory() as dir_:
         filename = os.path.join(dir_, 'test.csv')
@@ -40,9 +40,9 @@ def test_metric_decoding_without_spots():
     decode = starfish.spots.Decode.MetricDistance(
         codebook, max_distance=0, min_intensity=max_intensity + 0.1
     )
-    decoded_no_spots: starfish.IntensityTable = decode.run(no_spots)
+    decoded_no_spots: starfish.DecodedIntensityTable = decode.run(no_spots)
 
-    decoded_spot_table = decoded_no_spots.to_decoded_spots()
+    decoded_spot_table = decoded_no_spots.to_decoded_dataframe()
 
     with TemporaryDirectory() as dir_:
         filename = os.path.join(dir_, 'test.csv')

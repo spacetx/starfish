@@ -1,7 +1,10 @@
 from typing import Callable, Mapping
 
+import pandas as pd
+
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.types import Axes, Features, SpotFindingResults, TraceBuildingStrategies
+from starfish.core.types import Axes, Features, SpotAttributes, SpotFindingResults, \
+    TraceBuildingStrategies
 from .util import _build_intensity_table, _match_spots, _merge_spots_by_round
 
 

@@ -1,12 +1,13 @@
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
-from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.types import Number
-from ._base import DecodeAlgorithm
+from starfish.core.intensity_table.intensity_table_coordinates import \
+    transfer_physical_coords_to_intensity_table
+from starfish.core.spots.DecodeSpots.trace_builders import trace_builders
+from starfish.core.types import Number, SpotFindingResults, TraceBuildingStrategies
+from ._base import DecodeSpotsAlgorithm
 
 
-# TODO ambrosejcarr add tests
-class MetricDistance(DecodeAlgorithm):
+class MetricDistance(DecodeSpotsAlgorithm):
     """
     Normalizes both the magnitudes of the codes and the spot intensities, then decodes spots by
     assigning each spot to the closest code, measured by the provided metric.
@@ -36,33 +37,42 @@ class MetricDistance(DecodeAlgorithm):
         min_intensity: Number,
         norm_order: int = 2,
         metric: str = "euclidean",
+        anchor_round: int = 1,
+        search_radius: int = 3,
+        trace_building_strategy: TraceBuildingStrategies = TraceBuildingStrategies.EXACT_MATCH
     ) -> None:
         self.codebook = codebook
         self.max_distance = max_distance
         self.min_intensity = min_intensity
         self.norm_order = norm_order
         self.metric = metric
+        self.trace_builder = trace_builders[trace_building_strategy]
+        self.anchor_round = anchor_round
+        self.search_radius = search_radius
 
     def run(
         self,
-        intensities: IntensityTable,
+        spots: SpotFindingResults,
         *args
     ) -> DecodedIntensityTable:
         """Decode spots by selecting the max-valued channel in each sequencing round
 
         Parameters
         ----------
-        intensities : IntensityTable
-            IntensityTable to be decoded
-        codebook : Codebook
-            Contains codes to decode IntensityTable
+        spots : SpotFindingResults
+            A Dict of tile indices and their corresponding measured spots
 
         Returns
         -------
-        IntensityTable :
+        DecodedIntensityTable :
             IntensityTable decoded and appended with Features.TARGET and Features.QUALITY values.
 
         """
+
+        intensities = self.trace_builder(spot_results=spots,
+                                         anchor_round=self.anchor_round,
+                                         search_radius=self.search_radius)
+        transfer_physical_coords_to_intensity_table(intensity_table=intensities, spots=spots)
         return self.codebook.decode_metric(
             intensities,
             max_distance=self.max_distance,

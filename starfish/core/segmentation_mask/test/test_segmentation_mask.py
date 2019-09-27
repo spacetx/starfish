@@ -4,11 +4,8 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from starfish.core.segmentation_mask import (
-    SegmentationMaskCollection,
-    validate_segmentation_mask,
-)
 from starfish.core.types import Axes, Coordinates
+from ..segmentation_mask import _validate_segmentation_mask, SegmentationMaskCollection
 
 
 def test_validate_segmentation_mask():
@@ -19,7 +16,7 @@ def test_validate_segmentation_mask():
                                     y=[0, 1],
                                     xc=('x', [0.5, 1.5, 2.5]),
                                     yc=('y', [0.5, 1.5])))
-    validate_segmentation_mask(good)
+    _validate_segmentation_mask(good)
 
     good = xr.DataArray([[[True], [False], [False]],
                          [[False], [True], [True]]],
@@ -30,7 +27,7 @@ def test_validate_segmentation_mask():
                                     zc=('z', [0.5, 1.5]),
                                     yc=('y', [1.5, 2.5, 3.5]),
                                     xc=('x', [42.5])))
-    validate_segmentation_mask(good)
+    _validate_segmentation_mask(good)
 
     bad = xr.DataArray([[1, 2, 3],
                         [4, 5, 6]],
@@ -40,14 +37,14 @@ def test_validate_segmentation_mask():
                                    xc=('x', [0.5, 1.5, 2.5]),
                                    yc=('y', [0.5, 1.5])))
     with pytest.raises(TypeError):
-        validate_segmentation_mask(bad)
+        _validate_segmentation_mask(bad)
 
     bad = xr.DataArray([True],
                        dims=('x'),
                        coords=dict(x=[0],
                                    xc=('x', [0.5])))
     with pytest.raises(TypeError):
-        validate_segmentation_mask(bad)
+        _validate_segmentation_mask(bad)
 
     bad = xr.DataArray([[True]],
                        dims=('z', 'y'),
@@ -56,12 +53,12 @@ def test_validate_segmentation_mask():
                                    zc=('z', [0.5]),
                                    yc=('y', [0.5])))
     with pytest.raises(TypeError):
-        validate_segmentation_mask(bad)
+        _validate_segmentation_mask(bad)
 
     bad = xr.DataArray([[True]],
                        dims=('x', 'y'))
     with pytest.raises(TypeError):
-        validate_segmentation_mask(bad)
+        _validate_segmentation_mask(bad)
 
 
 def test_from_label_image():

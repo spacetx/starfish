@@ -35,16 +35,12 @@ class AlgorithmBase(ABCMeta):
                     spot_results = kwargs['spots']
                     spot_results.log.update_log(args[0])
                     result.attrs[STARFISH_EXTRAS_KEY] = spot_results.log.encode()
-                # OLD CODE FOR DETECT WILL GET REMOVED
-                if 'DetectSpots' in method_class_str or 'DetectPixels' in method_class_str:
-                    if isinstance(args[1], ImageStack):
-                        stack = args[1]
-                        # update log with spot detection instance args[0]
-                        stack.log.update_log(args[0])
-                        # get resulting intensity table and set log
-                        it = result
-                        if isinstance(result, tuple):
-                            it = result[0]
-                        it.attrs[STARFISH_EXTRAS_KEY] = stack.log.encode()
+                if 'DetectPixels' in method_class_str:
+                    stack = args[1]
+                    # update log with spot detection instance args[0]
+                    stack.log.update_log(args[0])
+                    # get resulting intensity table and set log
+                    it = result[0]
+                    it.attrs[STARFISH_EXTRAS_KEY] = stack.log.encode()
             return result
         return helper

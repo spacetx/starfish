@@ -9,7 +9,8 @@ from skimage import img_as_float32, img_as_uint
 from starfish import Codebook, ImageStack, IntensityTable
 from starfish.core.image.Filter.white_tophat import WhiteTophat
 from starfish.core.imagestack.test.factories import create_imagestack_from_codebook
-from starfish.core.spots.DetectSpots.blob import BlobDetector
+from starfish.core.spots.DecodeSpots import MetricDistance
+from starfish.core.spots.FindSpots import BlobDetector
 from starfish.core.types import Axes, Features
 
 
@@ -414,13 +415,11 @@ def synthetic_dataset_with_truth_values_and_called_spots():
                        num_sigma=num_sigma,
                        threshold=threshold,
                        measurement_type='max')
-
-    intensities = gsd.run(data_stack=filtered, blobs_image=filtered)
-    assert intensities.shape[0] == 5
-
-    codebook.decode_metric(intensities, max_distance=1, min_intensity=0, norm_order=2)
-
-    return codebook, true_intensities, image, intensities
+    spots = gsd.run(image_stack=filtered)
+    decoder = MetricDistance(codebook=codebook, max_distance=1, min_intensity=0, norm_order=2)
+    decoded_intensities = decoder.run(spots)
+    assert decoded_intensities.shape[0] == 5
+    return codebook, true_intensities, image, decoded_intensities
 
 
 def synthetic_spot_pass_through_stack():

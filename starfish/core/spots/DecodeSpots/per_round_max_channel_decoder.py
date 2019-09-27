@@ -25,9 +25,12 @@ class PerRoundMaxChannel(DecodeSpotsAlgorithm):
 
     """
 
-    def __init__(self, codebook: Codebook, anchor_round: int=1, search_radius: int=3,
-                 trace_building_strategy:
-                 TraceBuildingStrategies=TraceBuildingStrategies.EXACT_MATCH):
+    def __init__(
+            self,
+            codebook: Codebook,
+            anchor_round: int=1,
+            search_radius: int=3,
+            trace_building_strategy: TraceBuildingStrategies=TraceBuildingStrategies.EXACT_MATCH):
         self.codebook = codebook
         self.trace_builder: Callable = trace_builders[trace_building_strategy]
         self.anchor_round = anchor_round

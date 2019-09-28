@@ -9,7 +9,6 @@ from starfish.core.experiment.experiment import Experiment, FieldOfView
 from starfish.core.imagestack.test.imagestack_test_utils import verify_physical_coordinates
 from starfish.core.types import Axes, Coordinates, CoordinateValue
 from .util import (
-    format_data,
     render_coordinates_to_rows,
     UniqueTiles,
     write_coordinates_csv,
@@ -21,6 +20,7 @@ from ... import (
     TileFetcher,
     TileIdentifier,
 )
+from ...structured_formatter import format_structured_dataset
 
 
 def test_multiple_aligned_regular_fov(
@@ -87,7 +87,7 @@ def test_multiple_aligned_regular_fov(
     rows = render_coordinates_to_rows(tile_coordinates)
     write_coordinates_csv(coordinates_csv_path, rows, True)
 
-    format_data(
+    format_structured_dataset(
         os.fspath(tmpdir_path),
         os.fspath(coordinates_csv_path),
         os.fspath(tmpdir_path),

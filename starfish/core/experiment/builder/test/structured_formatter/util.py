@@ -1,8 +1,6 @@
 import csv
 import dataclasses
 import os
-import subprocess
-import sys
 from pathlib import Path
 from typing import Callable, Mapping, MutableMapping, MutableSequence, Optional, Sequence
 
@@ -13,30 +11,6 @@ from starfish.core.types import Axes, Coordinates, CoordinateValue
 from ..factories import unique_data
 from ... import FetchedTile, TileFetcher, TileIdentifier
 from ...structured_formatter import TILE_COORDINATE_NAMES
-
-
-def format_data(
-        image_directory_path: Path,
-        coordinates_csv_path: Path,
-        output_path: Path,
-        tile_format: ImageFormat,
-        in_place: bool,
-) -> None:
-    """Inplace experiment construction monkeypatches the code destructively.  To isolate these side
-    effects, we run the experiment construction in a separate process."""
-    this = Path(__file__)
-    structured_formatter_script_path = this.parent / "structured_formatter_script.py"
-
-    subprocess.check_call(
-        [sys.executable,
-         os.fspath(structured_formatter_script_path),
-         os.fspath(image_directory_path),
-         os.fspath(coordinates_csv_path),
-         os.fspath(output_path),
-         tile_format.name,
-         str(in_place),
-         ]
-    )
 
 
 class UniqueTiles(FetchedTile):

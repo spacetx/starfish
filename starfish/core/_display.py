@@ -17,7 +17,7 @@ except ImportError:
     Viewer = None
 
 
-NAPARI_VERSION = "0.1.5"  # when changing this, update docs in display
+NAPARI_VERSION = "0.2.0"  # when changing this, update docs in display
 INTERACTIVE = not hasattr(__main__, "__file__")
 
 
@@ -109,10 +109,6 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
     coords[:, 4] = np.repeat(intensity_table[Features.AXIS][Axes.X.value].values, code_length)
 
     sizes = np.repeat(intensity_table.radius.values, code_length)
-    rc = np.zeros((sizes.shape[0], 2), dtype=int)
-    z = sizes[:, np.newaxis]
-    yx = np.tile(sizes[:, np.newaxis], (1, 2))
-    sizes = np.concatenate((rc, yx, z), axis=1)
 
     return coords, sizes
 
@@ -198,7 +194,7 @@ def display(
     - To use in ipython, use the `%gui qt` magic.
     - napari axes currently cannot be labeled. Until such a time that they can, this function will
       order them by Round, Channel, and Z.
-    - Requires at least napari 0.1.5: use `pip install starfish[napari]`
+    - Requires at least napari 0.2.0: use `pip install starfish[napari]`
       to install all necessary requirements
     """
     if stack is None and spots is None and masks is None:
@@ -238,7 +234,7 @@ def display(
             stack = stack.max_proj(*project_axes)
 
         viewer.add_image(stack.xarray.values,
-                         multichannel=False,
+                         rgb=False,
                          name="stack")
 
     if spots is not None:
@@ -260,15 +256,16 @@ def display(
             coords = coords[mask]
             sizes = sizes[mask]
 
-            # adjust z-size
-            sizes[:, 4] *= z_multiplier
+            # Set anisotropy factor for data orderd r, c, z, y, x.
+            anisotropy = np.multiply((0, 0, z_multiplier, 1, 1), radius_multiplier)
 
             viewer.add_points(
                 coords,
                 face_color="red",
                 edge_color="red",
                 symbol="ring",
-                size=sizes * radius_multiplier,
+                size=sizes,
+                anisotropy=anisotropy,
                 n_dimensional=True,
                 name="spots"
             )

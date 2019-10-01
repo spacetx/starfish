@@ -2,8 +2,8 @@ import starfish
 from starfish import FieldOfView
 from starfish.image import Filter
 from starfish.image import ApplyTransform, LearnTransform
-from starfish.spots import DetectSpots
-from starfish.types import Axes
+from starfish.spots import FindSpots, DecodeSpots
+from starfish.types import Axes, FunctionSource
 
 
 def process_fov(field_num: int, experiment_str: str):
@@ -50,16 +50,20 @@ def process_fov(field_num: int, experiment_str: str):
     filt.run(nuclei, verbose=True, in_place=True)
 
     print("Detecting")
-    detector = DetectSpots.BlobDetector(
+    detector = FindSpots.BlobDetector(
         min_sigma=1,
         max_sigma=10,
         num_sigma=30,
         threshold=0.01,
         measurement_type='mean',
     )
+    dots_max_projector = Filter.Reduce((Axes.ROUND, Axes.ZPLANE), func="max",
+                                       module=FunctionSource.np)
+    dots_max = dots_max_projector.run(dots)
 
-    intensities = detector.run(filtered_imgs, blobs_image=dots, blobs_axes=(Axes.ROUND, Axes.ZPLANE))
+    spots = detector.run(image_stack=filtered_imgs, reference_image=dots_max)
 
-    decoded = experiment.codebook.decode_per_round_max(intensities)
+    decoder = DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook)
+    decoded = decoder.run(spots=spots)
     df = decoded.to_decoded_dataframe()
     return df

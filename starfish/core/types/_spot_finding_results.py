@@ -102,6 +102,15 @@ class SpotFindingResults:
 
         return sorted(set(ch for (r, ch) in self.keys()))
 
+    def count_total_spots(self):
+        """
+        Return the total number of unique spots represented in the SpotFindingResults.
+        """
+        total = 0
+        for spot_attrs in self.values():
+            total += spot_attrs.data.spot_id.size
+        return total
+
     @property
     def get_physical_coord_ranges(self) -> Mapping[Hashable, xr.DataArray]:
         """

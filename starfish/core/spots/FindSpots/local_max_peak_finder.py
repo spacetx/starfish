@@ -11,7 +11,6 @@ from sympy import Line, Point
 from tqdm import tqdm
 
 from starfish.core.config import StarfishConfig
-from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.spots.FindSpots import spot_finding_utils
 from starfish.core.types import Axes, Features, Number, SpotAttributes, SpotFindingResults
@@ -287,7 +286,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         else:
             spot_attributes_list = image_stack.transform(
                 func=spot_finding_method,
-                group_by=determine_axes_to_group_by(self.is_volume),
+                group_by={Axes.ROUND, Axes.CH},
                 n_processes=n_processes
             )
             results = SpotFindingResults(imagestack_coords=image_stack.xarray.coords,

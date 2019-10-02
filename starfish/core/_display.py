@@ -17,7 +17,7 @@ except ImportError:
     Viewer = None
 
 
-NAPARI_VERSION = "0.1.5"  # when changing this, update docs in display
+NAPARI_VERSION = "0.2.0"  # when changing this, update docs in display
 INTERACTIVE = not hasattr(__main__, "__file__")
 
 
@@ -198,7 +198,7 @@ def display(
     - To use in ipython, use the `%gui qt` magic.
     - napari axes currently cannot be labeled. Until such a time that they can, this function will
       order them by Round, Channel, and Z.
-    - Requires at least napari 0.1.5: use `pip install starfish[napari]`
+    - Requires at least napari 0.2.0: use `pip install starfish[napari]`
       to install all necessary requirements
     """
     if stack is None and spots is None and masks is None:
@@ -238,7 +238,7 @@ def display(
             stack = stack.max_proj(*project_axes)
 
         viewer.add_image(stack.xarray.values,
-                         multichannel=False,
+                         rgb=False,
                          name="stack")
 
     if spots is not None:

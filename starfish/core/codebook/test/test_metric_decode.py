@@ -66,10 +66,10 @@ def test_metric_decode():
     match
     """
     data = np.array(
-        [[[0, 3],  # this code is decoded "right"
-          [4, 0]],
-         [[0, 0.4],  # this code should be filtered based on magnitude
-          [0, 0.3]],
+        [[[0, 4],  # this code is decoded "right"
+          [3, 0]],
+         [[0, 0],  # this code should be filtered based on magnitude
+          [0.4, 0.3]],
          [[30, 0],  # this code should be filtered based on distance
           [0, 40]]]
     )

@@ -153,7 +153,7 @@ class CombineAdjacentFeatures:
     ) -> IntensityTable:
         """
         For all pixels that contribute to a connected component, calculate the mean value for
-        each (ch, round), producing an average "trace" of a feature across the imaging experiment
+        each (round, ch), producing an average "trace" of a feature across the imaging experiment
 
         Parameters
         ----------
@@ -179,7 +179,7 @@ class CombineAdjacentFeatures:
         # faster-alternative-to-perform-pandas-groupby-operation
 
         # stack intensities
-        stacked = intensities.stack(traces=(Axes.CH.value, Axes.ROUND.value))
+        stacked = intensities.stack(traces=(Axes.ROUND.value, Axes.CH.value))
 
         # drop into pandas to use their faster groupby
         traces: pd.DataFrame = pd.DataFrame(

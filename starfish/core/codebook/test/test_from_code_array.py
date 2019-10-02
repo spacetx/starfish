@@ -44,10 +44,10 @@ def assert_sizes(codebook, check_values=True):
         return
 
     # codebook should have 4 "on" combinations
-    expected_values = np.zeros((2, 3, 2))
+    expected_values = np.zeros((2, 2, 3))
     expected_values[0, 0, 0] = 1
     expected_values[0, 1, 1] = 1
-    expected_values[1, 2, 0] = 1
+    expected_values[1, 0, 2] = 1
     expected_values[1, 1, 1] = 1
 
     assert np.array_equal(codebook.values, expected_values)
@@ -129,7 +129,7 @@ def test_from_code_array_throws_exception_when_data_is_improperly_formatted():
 def test_empty_codebook():
     code_array: List = codebook_array_factory()
     targets = [x[Features.TARGET] for x in code_array]
-    codebook = Codebook.zeros(targets, n_channel=3, n_round=2)
+    codebook = Codebook.zeros(targets, n_round=2, n_channel=3)
     assert_sizes(codebook, False)
 
 def test_create_codebook():
@@ -137,12 +137,12 @@ def test_create_codebook():
     targets = [x[Features.TARGET] for x in code_array]
 
     # Loop performed by from_code_array
-    data = np.zeros((2, 3, 2), dtype=np.uint8)
+    data = np.zeros((2, 2, 3), dtype=np.uint8)
     for i, code_dict in enumerate(code_array):
         for bit in code_dict[Features.CODEWORD]:
             ch = int(bit[Axes.CH])
             r = int(bit[Axes.ROUND])
-            data[i, ch, r] = int(bit[Features.CODE_VALUE])
+            data[i, r, ch] = int(bit[Features.CODE_VALUE])
 
-    codebook = Codebook.from_numpy(targets, n_channel=3, n_round=2, data=data)
+    codebook = Codebook.from_numpy(targets, n_round=2, n_channel=3, data=data)
     assert_sizes(codebook)

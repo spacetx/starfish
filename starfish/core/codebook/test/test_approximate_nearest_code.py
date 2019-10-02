@@ -16,12 +16,12 @@ def test_simple_intensities_find_correct_nearest_code():
     data = np.array(
         [[[0, 0.5],
           [0.5, 0]],
-         [[0, 0.5],
-          [0, 0.5]],
-         [[0.5, 0],
-          [0.5, 0]],
          [[0, 0],
-          [0.5, 0.5]]]
+          [0.5, 0.5]],
+         [[0.5, 0.5],
+          [0, 0]],
+         [[0, 0.5],
+          [0, 0.5]]]
     )
     intensities = intensity_table_factory(data=data)
     codebook = codebook_factory()

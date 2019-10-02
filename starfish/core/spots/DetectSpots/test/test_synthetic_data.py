@@ -37,11 +37,11 @@ def test_round_trip_synthetic_data():
     # applying the gaussian blur to the intensities causes them to be reduced in magnitude, so
     # they won't be the same size, but they should be in the same place, and decode the same
     # way
-    spot1, ch1, round1 = np.where(intensities.values)
-    spot2, ch2, round2 = np.where(calculated_intensities.values)
+    spot1, round1, ch1 = np.where(intensities.values)
+    spot2, round2, ch2 = np.where(calculated_intensities.values)
     assert np.array_equal(spot1, spot2)
-    assert np.array_equal(ch1, ch2)
     assert np.array_equal(round1, round2)
+    assert np.array_equal(ch1, ch2)
     assert len(decoded_intensities.coords[Features.TARGET]) == 1
 
 

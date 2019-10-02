@@ -206,8 +206,8 @@ class SyntheticData:
         # at the end of the function
         intensities.values = img_as_uint(intensities)
 
-        for ch, round_ in product(*(range(s) for s in intensities.shape[1:])):
-            spots = intensities[:, ch, round_]
+        for round_, ch in product(*(range(s) for s in intensities.shape[1:])):
+            spots = intensities[{Axes.ROUND.value: round_, Axes.CH.value: ch}]
 
             # numpy deprecated casting a specific way of casting floats that is triggered in xarray
             with warnings.catch_warnings():

@@ -28,7 +28,7 @@ NormalizedFeaturesArgtype = TypeVar("NormalizedFeaturesArgtype", "Codebook", Int
 class Codebook(xr.DataArray):
     """Codebook for an image-based transcriptomics experiment
 
-    The codebook is a three dimensional tensor with shape :code:`(feature, channel, round)` whose
+    The codebook is a three dimensional tensor with shape :code:`(feature, round, channel)` whose
     values are the expected intensity of features (spots or pixels) that correspond to each target
     (gene or protein) in each of the image tiles of an experiment.
 
@@ -44,9 +44,9 @@ class Codebook(xr.DataArray):
     Build a codebook using :py:meth:`Codebook.synthetic_one_hot_codebook`::
 
         >>> from starfish import Codebook
-        >>> sd = Codebook.synthetic_one_hot_codebook(n_channel=3, n_round=4, n_codes=2)
+        >>> sd = Codebook.synthetic_one_hot_codebook(n_round=4, n_channel=3, n_codes=2)
         >>> sd.codebook()
-        <xarray.Codebook (target: 2, c: 3, r: 4)>
+        <xarray.Codebook (target: 2, r: 4, c: 3)>
         array([[[0, 0, 0, 0],
                 [0, 0, 1, 1],
                 [1, 1, 0, 0]],
@@ -67,25 +67,25 @@ class Codebook(xr.DataArray):
         return int(np.dot(*self.shape[1:]))
 
     @classmethod
-    def zeros(cls, code_names: Sequence[str], n_channel: int, n_round: int):
+    def zeros(cls, code_names: Sequence[str], n_round: int, n_channel: int):
         """
-        Create an empty codebook of shape (code_names, n_channel, n_round)
+        Create an empty codebook of shape (code_names, n_round, n_channel)
 
         Parameters
         ----------
         code_names : Sequence[str]
             The targets to be coded.
-        n_channel : int
-            Number of channels used to build the codes.
         n_round : int
             Number of imaging rounds used to build the codes.
+        n_channel : int
+            Number of channels used to build the codes.
 
         Examples
         --------
         Build an empty 2-round 3-channel codebook::
 
             >>> from starfish import Codebook
-            >>> Codebook.zeros(['ACTA', 'ACTB'], n_channel=3, n_round=2)
+            >>> Codebook.zeros(['ACTA', 'ACTB'], n_round=2, n_channel=3)
             <xarray.Codebook (target: 2, c: 3, r: 2)>
             array([[[0, 0],
                     [0, 0],
@@ -105,27 +105,27 @@ class Codebook(xr.DataArray):
             codebook whose values are all zero
 
         """
-        data = np.zeros((len(code_names), n_channel, n_round), dtype=np.uint8)
-        return cls.from_numpy(code_names, n_channel, n_round, data)
+        data = np.zeros((len(code_names), n_round, n_channel), dtype=np.uint8)
+        return cls.from_numpy(code_names, n_round, n_channel, data)
 
     @classmethod
     def from_numpy(
             cls,
             code_names: Sequence[str],
-            n_channel: int,
             n_round: int,
+            n_channel: int,
             data: np.ndarray,
     ) -> "Codebook":
-        """create a codebook of shape (code_names, n_channel, n_round) from a 3-d numpy array
+        """create a codebook of shape (code_names, n_round, n_channel) from a 3-d numpy array
 
         Parameters
         ----------
         code_names : Sequence[str]
             the targets to be coded
-        n_channel : int
-            number of channels used to build the codes
         n_round : int
             number of imaging rounds used to build the codes
+        n_channel : int
+            number of channels used to build the codes
         data : np.ndarray
             array of unit8 values with len(code_names) x n_channel x n_round elements
 
@@ -164,8 +164,8 @@ class Codebook(xr.DataArray):
             data=data,
             coords=(
                 pd.Index(code_names, name=Features.TARGET),
-                pd.Index(np.arange(n_channel), name=Axes.CH.value),
                 pd.Index(np.arange(n_round), name=Axes.ROUND.value),
+                pd.Index(np.arange(n_channel), name=Axes.CH.value),
             )
         )
 
@@ -284,13 +284,13 @@ class Codebook(xr.DataArray):
         target_names = [w[Features.TARGET] for w in code_array]
 
         # fill the codebook
-        data = np.zeros((len(target_names), n_channel, n_round), dtype=np.uint8)
+        data = np.zeros((len(target_names), n_round, n_channel), dtype=np.uint8)
         for i, code_dict in enumerate(code_array):
             for bit in code_dict[Features.CODEWORD]:
                 ch = int(bit[Axes.CH])
                 r = int(bit[Axes.ROUND])
-                data[i, ch, r] = int(bit[Features.CODE_VALUE])
-        return cls.from_numpy(target_names, n_channel, n_round, data)
+                data[i, r, ch] = int(bit[Features.CODE_VALUE])
+        return cls.from_numpy(target_names, n_round, n_channel, data)
 
     @classmethod
     def open_json(

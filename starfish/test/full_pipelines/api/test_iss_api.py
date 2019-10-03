@@ -86,7 +86,7 @@ def test_iss_pipeline_cropped_data(tmpdir):
         registered_image.xarray[2, 2, 0, 40:50, 40:50]
     )
 
-    pipeline_log = registered_image.log
+    pipeline_log = registered_image.log.data
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'Warp'

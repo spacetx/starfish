@@ -24,8 +24,8 @@ def intensity_table_factory(data: np.ndarray=np.array([[[0, 3], [4, 0]]])) -> In
     spot_attributes = SpotAttributes(spot_attributes_data)
     intensity_table = IntensityTable.from_spot_data(
         data, spot_attributes,
-        ch_values=np.arange(data.shape[1]),
-        round_values=np.arange(data.shape[2]),
+        round_values=np.arange(data.shape[1]),
+        ch_values=np.arange(data.shape[2]),
     )
     return intensity_table
 
@@ -54,14 +54,17 @@ def codebook_factory() -> Codebook:
     return Codebook.from_code_array(codebook_array)
 
 
-def test_intensity_tables_with_different_nubmers_of_codes_or_channels_throw_value_error():
+def test_intensity_tables_with_different_numbers_of_codes_or_channels_throw_value_error():
     """
     The test passes a 3-round and 1-round IntensityTable to a 2-round codebook. Both should
     raise a ValueError.
     """
     data = np.array(
-        [[[4, 3, 1],
-          [4, 0, 2]]]
+        [[[4, 4],
+          [3, 0],
+          [1, 2],
+          ]
+         ]
     )
     codebook = codebook_factory()
     intensities = intensity_table_factory(data)

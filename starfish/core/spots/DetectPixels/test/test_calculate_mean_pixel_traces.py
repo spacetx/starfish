@@ -61,19 +61,15 @@ def test_calculate_mean_pixel_traces():
     # evaluate the mean pixel traces, we have 4 different spot ids
     assert np.unique(label_image).shape[0] == mean_pixel_traces.shape[0]
 
-    # there should be two channels and 1 round
+    # there should be one round and two channels
     assert np.array_equal(intensity_table.shape[1:], mean_pixel_traces.shape[1:])
 
     # values can be calculated from the simple example, and should match the mean pixel traces
     expected_values = np.array(
-        [[[.25],
-          [.15]],
-         [[.25],
-          [.2]],
-         [[.15],
-          [.25]],
-         [[.2],
-          [.25]]],
+        [[[.25, .15]],
+         [[.25, .2]],
+         [[.15, .25]],
+         [[.2, .25]]],
         dtype=np.float32
     )
     assert np.allclose(expected_values, mean_pixel_traces.values)

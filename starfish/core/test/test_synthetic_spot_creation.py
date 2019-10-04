@@ -20,7 +20,7 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
 
     codebook, true_intensities, image = synthetic_spot_pass_through_stack()
 
-    g, c, r = np.where(true_intensities.values)
+    g, r, c = np.where(true_intensities.values)
 
     x = np.empty_like(g)
     y = np.empty_like(g)

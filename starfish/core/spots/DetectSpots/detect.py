@@ -100,8 +100,8 @@ def measure_spot_intensities(
     # construct the empty intensity table
     intensity_table = IntensityTable.zeros(
         spot_attributes=spot_attributes,
-        ch_labels=ch_labels,
         round_labels=round_labels,
+        ch_labels=ch_labels,
     )
 
     # if no spots were detected, return the empty IntensityTable
@@ -150,7 +150,7 @@ def concatenate_spot_attributes_to_intensities(
     features_coordinates = all_spots.drop(['spot_id', 'intensity'], axis=1)
 
     intensity_table = IntensityTable.zeros(
-        SpotAttributes(features_coordinates), ch_values, round_values,
+        SpotAttributes(features_coordinates), round_values, ch_values,
     )
 
     i = 0

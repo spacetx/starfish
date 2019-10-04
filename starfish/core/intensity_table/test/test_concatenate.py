@@ -43,7 +43,7 @@ def test_intensity_table_concatenation():
 
     # slice out z in addition to reduce the total feature number by 1/2
     i4 = intensities.where(np.logical_and(intensities.r == 0, intensities.z == 1), drop=True)
-    expected_shape = (i1.shape[0] + i4.shape[0], 3, 1)
+    expected_shape = (i1.shape[0] + i4.shape[0], 1, 3)
     result = concatenate([i1, i4])
 
     assert expected_shape == result.shape

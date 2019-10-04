@@ -40,9 +40,7 @@ def test_synthetic_intensity_generation():
     assert np.all(intensities[Axes.X.value] <= width)
 
     # both codes should match GENE_B
-    assert np.array_equal(
-        np.where(intensities.values),
-        [[0, 0, 1, 1],  # two each in feature 0 & 1
-         [1, 2, 1, 2],  # one each in channel 1 & 2
-         [1, 0, 1, 0]],  # channel 1 matches round 1, channel 2 matches round zero
-    )
+    gene_b_intensities = codebook.sel(target="GENE_B")
+    for feature_id in range(intensities.sizes[Features.AXIS]):
+        feature_intensities = intensities[{Features.AXIS: feature_id}]
+        assert np.array_equal(gene_b_intensities.values, feature_intensities.values)

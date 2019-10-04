@@ -42,7 +42,7 @@ def pixel_intensities_to_imagestack(
     # reverses the process used to produce the intensity table in to_pixel_intensities
     data = intensities.values.reshape([
         *image_shape,
-        intensities.sizes[Axes.CH],
-        intensities.sizes[Axes.ROUND]])
-    data = data.transpose(4, 3, 0, 1, 2)
+        intensities.sizes[Axes.ROUND],
+        intensities.sizes[Axes.CH]])
+    data = data.transpose(3, 4, 0, 1, 2)
     return ImageStack.from_numpy(data)

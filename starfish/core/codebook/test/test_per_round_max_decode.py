@@ -155,3 +155,42 @@ def test_argmax_selects_the_last_equal_intensity_channel_and_decodes_consistentl
 
     decoded_intensities = codebook.decode_per_round_max(intensities)
     assert np.array_equal(decoded_intensities[Features.TARGET].values, ['nan', 'GENE_A'])
+
+
+def test_argmax_does_not_select_first_code():
+    """
+    When all the channels in a round are uniform, argmax erroneously picks the first channel as the
+    max.  In this case, it incorrectly assigns the wrong code for that round.  This test ensures
+    that the workaround we put in for this works correctly.
+    """
+
+    data = np.array(
+        [[[0.0, 1.0],
+          [1.0, 1.0]],  # this round is uniform, so it will erroneously be decoded as the first ch.
+         [[0.0, 1.0],
+          [1.0, 0.0]]]
+    )
+    intensities = intensity_table_factory(data)
+    codebook = codebook_factory()
+
+    decoded_intensities = codebook.decode_per_round_max(intensities)
+    assert np.array_equal(decoded_intensities[Features.TARGET].values, ['nan', 'GENE_A'])
+
+
+def test_feature_round_all_nan():
+    """
+    When all the channels in a round are NaN, argmax chokes.  This test ensures that the workaround
+    we put in for this works correctly.
+    """
+
+    data = np.array(
+        [[[0.0, 1.0],
+          [np.nan, np.nan]],
+         [[0.0, 1.0],
+          [1.0, 0.0]]]
+    )
+    intensities = intensity_table_factory(data)
+    codebook = codebook_factory()
+
+    decoded_intensities = codebook.decode_per_round_max(intensities)
+    assert np.array_equal(decoded_intensities[Features.TARGET].values, ['nan', 'GENE_A'])

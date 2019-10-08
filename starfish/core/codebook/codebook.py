@@ -651,7 +651,16 @@ class Codebook(xr.DataArray):
                 distances=(Features.AXIS, np.empty(0, dtype=np.float64)),
                 passes_threshold=(Features.AXIS, np.empty(0, dtype=bool)))
 
-        max_channels = intensities.argmax(Axes.CH.value)
+        intensities_without_nans = intensities.fillna(0)
+        max_channels = intensities_without_nans.argmax(Axes.CH.value)
+        # this snippet of code finds all the (feature, round) spots that have uniform illumination,
+        # and assigns them to a ch number that's one larger than max possible to ensure that such
+        # spots decode to `NaN`.
+        max_channels_max = intensities_without_nans.reduce(np.amax, Axes.CH.value)
+        max_channels_min = intensities_without_nans.reduce(np.amin, Axes.CH.value)
+        uniform_illumination_mask = (max_channels_max == max_channels_min).values
+
+        max_channels.values[uniform_illumination_mask] = intensities.sizes[Axes.CH.value]
         codes = self.argmax(Axes.CH.value)
 
         # TODO ambrosejcarr, dganguli: explore this quality score further

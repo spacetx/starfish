@@ -39,11 +39,16 @@ class PerRoundMaxChannel(DecodeSpotsAlgorithm):
             codebook: Codebook,
             trace_building_strategy: TraceBuildingStrategies = TraceBuildingStrategies.EXACT_MATCH,
             anchor_round: Optional[int]=1,
-            search_radius: Optional[int]=3):
+            search_radius: Optional[int]=3,
+            search_radius_max: Optional[int] = 5,
+            k_d: Optional[float]=0.33,
+    ):
         self.codebook = codebook
         self.trace_builder: Callable = TRACE_BUILDERS[trace_building_strategy]
         self.anchor_round = anchor_round
         self.search_radius = search_radius
+        self.search_radius_max = search_radius_max
+        self.k_d = k_d
 
     def run(self, spots: SpotFindingResults, *args) -> DecodedIntensityTable:
         """Decode spots by selecting the max-valued channel in each sequencing round
@@ -61,6 +66,8 @@ class PerRoundMaxChannel(DecodeSpotsAlgorithm):
         """
         intensities = self.trace_builder(spot_results=spots,
                                          anchor_round=self.anchor_round,
-                                         search_radius=self.search_radius)
+                                         search_radius=self.search_radius,
+                                         search_radius_max=self.search_radius_max,
+                                         k_d=self.k_d)
         transfer_physical_coords_to_intensity_table(intensity_table=intensities, spots=spots)
         return self.codebook.decode_per_round_max(intensities)

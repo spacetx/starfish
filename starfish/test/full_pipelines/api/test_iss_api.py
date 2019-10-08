@@ -105,7 +105,7 @@ def test_iss_pipeline_cropped_data(tmpdir):
     assert np.array_equal(genes, np.array(['ACTB', 'CD68', 'CTSL2', 'EPCAM',
                                            'ETV4', 'GAPDH', 'GUS', 'HER2', 'RAC1',
                                            'TFRC', 'TP53', 'VEGF']))
-    assert np.array_equal(gene_counts, [20, 1, 5, 2, 1, 11, 1, 3, 2, 1, 1, 2])
+    assert np.array_equal(gene_counts, [19, 1, 5, 2, 1, 11, 1, 3, 2, 1, 1, 2])
 
     masks = iss.masks
 

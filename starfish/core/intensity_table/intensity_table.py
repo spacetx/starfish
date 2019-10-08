@@ -42,29 +42,35 @@ class IntensityTable(xr.DataArray):
 
     Examples
     --------
-    Create an IntensityTable using the ``synthetic_intensities`` method::
+    Create an IntensityTable using the ``SyntheticData`` factory::
 
         >>> from starfish.core.test.factories import SyntheticData
-        >>> sd = SyntheticData(n_ch=3, n_round=4, n_codes=2)
+        >>> sd = SyntheticData(n_ch=3, n_round=4, n_codes=2, n_spots=3)
         >>> codes = sd.codebook()
         >>> sd.intensities(codebook=codes)
-        <xarray.IntensityTable (features: 2, c: 3, h: 4)>
-        array([[[    0.,     0.,     0.,     0.],
-                [    0.,     0.,  8022., 12412.],
-                [11160.,  9546.,     0.,     0.]],
+        <xarray.IntensityTable (features: 3, r: 4, c: 3)>
+        array([[[1., 0., 0.],
+                [0., 1., 0.],
+                [0., 0., 1.],
+                [0., 1., 0.]],
 
-               [[    0.,     0.,     0.,     0.],
-                [    0.,     0., 10506., 10830.],
-                [11172., 12331.,     0.,     0.]]])
+               [[1., 0., 0.],
+                [0., 1., 0.],
+                [0., 0., 1.],
+                [0., 1., 0.]],
+
+               [[1., 0., 0.],
+                [0., 1., 0.],
+                [0., 0., 1.],
+                [0., 1., 0.]]], dtype=float32)
         Coordinates:
-        * features   (features) MultiIndex
-        - z          (features) int64 7 3
-        - y          (features) int64 14 32
-        - x          (features) int64 32 15
-        - r          (features) float64 nan nan
-        * c          (c) int64 0 1 2
-        * h          (h) int64 0 1 2 3
-
+            z         (features) int64 8 6 2
+            y         (features) float64 14.61 41.9 3.935
+            x         (features) float64 11.0 42.42 5.249
+            radius    (features) float64 nan nan nan
+          * features  (features) int64 0 1 2
+          * r         (r) int64 0 1 2 3
+          * c         (c) int64 0 1 2
     """
 
     @staticmethod

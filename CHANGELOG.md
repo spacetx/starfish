@@ -1,3 +1,13 @@
+## [0.1.7] - 2019-10-09
+- ISS refactored with new spot finding path (#1518)
+- Fix bugs in per-round-max-decoder (#1602)
+- Fix dimension ordering on Codebook and IntensityTable (#1600)
+- provanance logging refactor and support for SpotFindingResults (#1517)
+- napari 0.2.0 release (#1599)
+- starfish.display: unpin napari version, add tests, view masks separately (#1570)
+- adding coordinate support to SpotFindingResults (#1516)
+- adding new SpotFindingResults data structure and new packages (#1515)
+
 ## [0.1.6] - 2019-09-18
 - Switch to python multithreading (#1544)
 - Don't waste memory/compute in preserve_float_range (#1545)
@@ -121,6 +131,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.1.7]: https://github.com/spacetx/starfish/releases/tag/0.1.7
 [0.1.6]: https://github.com/spacetx/starfish/releases/tag/0.1.6
 [0.1.5]: https://github.com/spacetx/starfish/releases/tag/0.1.5
 [0.1.4]: https://github.com/spacetx/starfish/releases/tag/0.1.4

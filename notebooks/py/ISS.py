@@ -56,7 +56,10 @@ print(imgs)
 # EPY: START markdown
 ### Visualize Codebook
 #
-#The ISS codebook maps each barcode to a gene.This protocol asserts that genes are encoded with a length 4 quatenary barcode that can be read out from the images. Each round encodes a position in the codeword. The maximum signal in each color channel (columns in the above image) corresponds to a letter in the codeword. The channels, in order, correspond to the letters: 'T', 'G', 'C', 'A'. 
+# The ISS codebook maps each barcode to a gene. This protocol asserts that genes are encoded with
+# a length 4 quatenary barcode that can be read out from the images. Each round encodes a position in the codeword.
+# The maximum signal in each color channel (columns in the above image) corresponds to a letter in the codeword.
+# The channels, in order, correspond to the letters: 'T', 'G', 'C', 'A'.
 # EPY: END markdown
 
 # EPY: START code
@@ -131,12 +134,12 @@ single_plane_filtered = filtered_imgs.sel(sel)
 f, (ax1, ax2) = plt.subplots(ncols=2)
 vmin, vmax = np.percentile(single_plane.xarray.values.data, [5, 99])
 imshow_plane(
-    single_plane, ax=ax1, vmin=vmin, vmax=vmax, 
+    single_plane, ax=ax1, vmin=vmin, vmax=vmax,
     title="Original data\nRound: 0, Channel: 0"
 )
 vmin, vmax = np.percentile(single_plane_filtered.xarray.values.data, [5, 99])
 imshow_plane(
-    single_plane_filtered, ax=ax2, vmin=vmin, vmax=vmax, 
+    single_plane_filtered, ax=ax2, vmin=vmin, vmax=vmax,
     title="Filtered data\nRound: 0, Channel: 0"
 )
 # EPY: END code
@@ -146,7 +149,7 @@ imshow_plane(
 # EPY: END markdown
 
 # EPY: START markdown
-#Images may have shifted between imaging rounds. This needs to be corrected for before decoding, since this shift in the images will corrupt the barcodes, thus hindering decoding accuracy. A simple procedure can correct for this shift. For each imaging round, the max projection across color channels should look like the dots stain. Below, we simply shift all images in each round to match the dots stain by learning the shift that maximizes the cross-correlation between the images and the dots stain. 
+#Images may have shifted between imaging rounds. This needs to be corrected for before decoding, since this shift in the images will corrupt the barcodes, thus hindering decoding accuracy. A simple procedure can correct for this shift. For each imaging round, the max projection across color channels should look like the dots stain. Below, we simply shift all images in each round to match the dots stain by learning the shift that maximizes the cross-correlation between the images and the dots stain.
 # EPY: END markdown
 
 # EPY: START code
@@ -165,11 +168,10 @@ registered_imgs = warp.run(filtered_imgs, transforms_list=transforms_list, in_pl
 # EPY: END markdown
 
 # EPY: START code
-from starfish.spots import DetectSpots
 import warnings
+from starfish.spots import FindSpots, DecodeSpots
 
-# parameters to define the allowable gaussian sizes (parameter space)
-p = DetectSpots.BlobDetector(
+bd = FindSpots.BlobDetector(
     min_sigma=1,
     max_sigma=10,
     num_sigma=30,
@@ -177,28 +179,13 @@ p = DetectSpots.BlobDetector(
     measurement_type='mean',
 )
 
-# blobs = dots; define the spots in the dots image, but then find them again in the stack.
-intensities = p.run(registered_imgs, blobs_image=dots, blobs_axes=(Axes.ROUND, Axes.ZPLANE))
-# EPY: END code
+dots_max_projector = Filter.Reduce((Axes.ROUND, Axes.ZPLANE), func="max", module=Filter.Reduce.FunctionSource.np)
+dots_max = dots_max_projector.run(dots)
+spots = bd.run(image_stack=registered_imgs, reference_image=dots_max)
 
-# EPY: START markdown
-#The resulting "Intensity Table" table is the standardized file format for the output of a spot detector, and is the first output file format in the pipeline that is not an image or set of images
-# EPY: END markdown
+decoder = DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook)
+decoded = decoder.run(spots=spots)
 
-# EPY: START code
-intensities
-# EPY: END code
-
-# EPY: START markdown
-#To decode the resulting intensity table, we simply match intensities to codewards in the codebook. This can be done by, for each round, selecting the color channel with the maximum intensity. This forms a potential quatenary code which serves as the key into a lookup in the codebook as to which gene this code corresponds to. Decoded genes are assigned to the ```target``` field in the decoded intensity table.
-# EPY: END markdown
-
-# EPY: START code
-decoded = experiment.codebook.decode_per_round_max(intensities)
-decoded
-# EPY: END code
-
-# EPY: START code
 # Besides house keeping genes, VIM and HER2 should be most highly expessed, which is consistent here.
 genes, counts = np.unique(decoded.loc[decoded[Features.PASSES_THRESHOLDS]][Features.TARGET], return_counts=True)
 table = pd.Series(counts, index=genes).sort_values(ascending=False)

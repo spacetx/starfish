@@ -13,7 +13,7 @@ from starfish.core.types import Coordinates, DecodedSpots, Features
 def dummy_intensities() -> IntensityTable:
 
     codebook = codebook_array_factory()
-    intensities = factories.synthetic_decoded_intenisty_table(
+    intensities = factories.synthetic_decoded_intensity_table(
         codebook,
         num_z=10,
         height=10,

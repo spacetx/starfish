@@ -5,7 +5,7 @@ import tempfile
 import numpy as np
 
 import starfish
-from starfish import IntensityTable
+from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.spots import AssignTargets
 from starfish.types import Coordinates, Features
 
@@ -90,12 +90,6 @@ def test_iss_pipeline_cropped_data(tmpdir):
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'Warp'
-    assert pipeline_log[2]['method'] == 'BlobDetector'
-
-    intensities = iss.intensities
-
-    # assert that the number of spots detected is 99
-    assert intensities.sizes[Features.AXIS] == 99
 
     # decode
     decoded = iss.decoded
@@ -105,7 +99,9 @@ def test_iss_pipeline_cropped_data(tmpdir):
     assert np.array_equal(genes, np.array(['ACTB', 'CD68', 'CTSL2', 'EPCAM',
                                            'ETV4', 'GAPDH', 'GUS', 'HER2', 'RAC1',
                                            'TFRC', 'TP53', 'VEGF']))
+
     assert np.array_equal(gene_counts, [19, 1, 5, 2, 1, 11, 1, 3, 2, 1, 1, 2])
+    assert decoded.sizes[Features.AXIS] == 99
 
     masks = iss.masks
 
@@ -128,6 +124,7 @@ def test_iss_pipeline_cropped_data(tmpdir):
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'Warp'
     assert pipeline_log[2]['method'] == 'BlobDetector'
+    assert pipeline_log[3]['method'] == 'PerRoundMaxChannel'
 
     # Test serialization / deserialization of IntensityTable log
     with tempfile.NamedTemporaryFile(dir=tmpdir, delete=False) as ntf:
@@ -139,6 +136,7 @@ def test_iss_pipeline_cropped_data(tmpdir):
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'Warp'
     assert pipeline_log[2]['method'] == 'BlobDetector'
+    assert pipeline_log[3]['method'] == 'PerRoundMaxChannel'
 
     # 28 of the spots are assigned to cell 1 (although most spots do not decode!)
     assert np.sum(assigned['cell_id'] == '1') == 28

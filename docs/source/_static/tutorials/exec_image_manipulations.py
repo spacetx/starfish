@@ -48,7 +48,7 @@ print(image)
 # Here, we demonstrate selecting the last 50 pixels of (x, y) for a rounds 2 and 3 using the
 # :py:meth:`ImageStack.sel` method.
 
-from starfish.types import Axes
+from starfish.types import Axes, FunctionSource
 
 cropped_image: starfish.ImageStack = image.sel(
     {Axes.ROUND: (2, 3), Axes.X: (30, 80), Axes.Y: (50, 100)}
@@ -73,7 +73,7 @@ print(cropped_image)
 #
 from starfish.image import Filter
 
-max_projector = Filter.Reduce((Axes.CH,), func="max", module=Filter.Reduce.FunctionSource.np)
+max_projector = Filter.Reduce((Axes.CH,), func="max", module=FunctionSource.np)
 projected_image: starfish.ImageStack = max_projector.run(image)
 
 ###################################################################################################

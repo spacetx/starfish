@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 import pprint
 
 from starfish import data, FieldOfView
-from starfish.types import Features, Axes
+from starfish.types import Axes, Features, FunctionSource
 from starfish.util.plot import imshow_plane
 # EPY: END code
 
@@ -91,9 +91,9 @@ imshow_plane(single_plane, title="Round: 0, Channel: 0")
 from starfish.image import Filter
 
 rcz_max_projector = Filter.Reduce(
-    (Axes.ROUND, Axes.CH, Axes.ZPLANE,), func="max", module=Filter.Reduce.FunctionSource.np)
+    (Axes.ROUND, Axes.CH, Axes.ZPLANE,), func="max", module=FunctionSource.np)
 per_round_max_projector = Filter.Reduce(
-    (Axes.CH, Axes.ZPLANE,), func="max", module=Filter.Reduce.FunctionSource.np)
+    (Axes.CH, Axes.ZPLANE,), func="max", module=FunctionSource.np)
 
 dots = fov.get_image("dots")
 dots_single_plane = rcz_max_projector.run(dots)

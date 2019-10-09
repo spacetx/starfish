@@ -5,6 +5,7 @@ from starfish.core.types import (  # noqa: F401
     Coordinates,
     CORE_DEPENDENCIES,
     Features,
+    FunctionSource,
     LOG,
     OverlapStrategy,
     PHYSICAL_COORDINATE_DIMENSION,

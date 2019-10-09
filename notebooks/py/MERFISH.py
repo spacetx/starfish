@@ -29,7 +29,7 @@ from showit import image as show_image
 
 from starfish import display
 from starfish import data, FieldOfView
-from starfish.types import Features, Axes
+from starfish.types import Axes, Features, FunctionSource
 
 from starfish.util.plot import (
     imshow_plane, intensity_histogram, overlay_spot_calls
@@ -224,7 +224,7 @@ from scipy.stats import scoreatpercentile
 import warnings
 
 all_max_projector = Filter.Reduce(
-    (Axes.ROUND, Axes.CH, Axes.ZPLANE,), func="max", module=Filter.Reduce.FunctionSource.np)
+    (Axes.ROUND, Axes.CH, Axes.ZPLANE,), func="max", module=FunctionSource.np)
 
 f, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
 

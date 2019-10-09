@@ -8,7 +8,7 @@ from starfish import ImageStack
 from starfish.core.image.Filter.reduce import Reduce
 from starfish.core.imagestack.test.factories import imagestack_with_coords_factory
 from starfish.core.imagestack.test.imagestack_test_utils import verify_physical_coordinates
-from starfish.types import Axes, PhysicalCoordinateTypes
+from starfish.types import Axes, FunctionSource, PhysicalCoordinateTypes
 
 
 X_COORDS = 1, 2
@@ -100,7 +100,7 @@ def make_expected_image_stack(func):
         (
             make_expected_image_stack('norm'),
             'linalg.norm',
-            Reduce.FunctionSource.scipy,
+            FunctionSource.scipy,
             {'ord': 2},
         ),
     ]

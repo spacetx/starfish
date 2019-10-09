@@ -39,7 +39,7 @@ def iss_pipeline(fov, codebook):
     )
 
     # detect spots using laplacian of gaussians approach
-    dots_max_projector = Filter.Reduce((Axes.ROUND, Axes.ZPLANE), func="max", module=Filter.Reduce.FunctionSource.np)
+    dots_max_projector = Filter.Reduce((Axes.ROUND, Axes.ZPLANE), func="max", module=FunctionSource.np)
     dots_max = dots_max_projector.run(fov.get_image('dots'))
     # locate spots in a reference image
     spots = bd.run(reference_image=dots_max, image_stack=filtered)

@@ -179,7 +179,7 @@ bd = FindSpots.BlobDetector(
     measurement_type='mean',
 )
 
-dots_max_projector = Filter.Reduce((Axes.ROUND, Axes.ZPLANE), func="max", module=Filter.Reduce.FunctionSource.np)
+dots_max_projector = Filter.Reduce((Axes.ROUND, Axes.ZPLANE), func="max", module=FunctionSource.np)
 dots_max = dots_max_projector.run(dots)
 spots = bd.run(image_stack=registered_imgs, reference_image=dots_max)
 

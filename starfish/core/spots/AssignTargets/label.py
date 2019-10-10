@@ -32,7 +32,7 @@ class Label(AssignTargetsAlgorithm):
 
         decoded_intensities[Features.CELL_ID] = cell_ids
 
-        for mask in masks:
+        for _, mask in masks:
             y_min, y_max = float(mask.y.min()), float(mask.y.max())
             x_min, x_max = float(mask.x.min()), float(mask.x.max())
 

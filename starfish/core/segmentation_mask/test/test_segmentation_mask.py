@@ -70,8 +70,8 @@ def test_from_label_image():
     physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
                       Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12]}
 
-    masks = SegmentationMaskCollection.from_label_image(label_image,
-                                                        physical_ticks)
+    masks = list(SegmentationMaskCollection.from_label_image(
+        label_image, physical_ticks).masks())
 
     assert len(masks) == 2
 
@@ -134,7 +134,7 @@ def test_save_load():
     try:
         masks.save(path)
         masks2 = SegmentationMaskCollection.from_disk(path)
-        for m, m2 in zip(masks, masks2):
+        for m, m2 in zip(masks.masks(), masks2.masks()):
             assert np.array_equal(m, m2)
     finally:
         os.remove(path)

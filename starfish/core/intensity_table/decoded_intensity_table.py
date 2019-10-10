@@ -57,6 +57,8 @@ class DecodedIntensityTable(IntensityTable):
 
         """
 
+    __slots__ = ()
+
     @classmethod
     def from_intensity_table(
             cls,

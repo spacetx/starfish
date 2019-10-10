@@ -27,6 +27,8 @@ class ExpressionMatrix(xr.DataArray):
         load an ExpressionMatrix from netCDF
     """
 
+    __slots__ = ()
+
     def save(self, filename: str) -> None:
         """Save an ExpressionMatrix as a Netcdf File
 

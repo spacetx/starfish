@@ -1,6 +1,7 @@
 import numpy as np
 
 from starfish import data
+from starfish.core.image import Filter
 from starfish.core.image._registration.ApplyTransform.warp import Warp
 from starfish.core.image._registration.LearnTransform.translation import Translation
 from starfish.core.types import Axes
@@ -35,7 +36,7 @@ def test_calculate_translation_transforms_and_apply():
     reference_stack = exp.fov().get_image('dots')
     translation = Translation(reference_stack=reference_stack, axes=Axes.ROUND)
     # Calculate max_proj accrss
-    mp = stack.max_proj(Axes.CH, Axes.ZPLANE)
+    mp = Filter.Reduce((Axes.CH, Axes.ZPLANE)).run(stack)
     transform_list = translation.run(mp)
     apply_transform = Warp()
     warped_stack = apply_transform.run(stack=stack, transforms_list=transform_list)

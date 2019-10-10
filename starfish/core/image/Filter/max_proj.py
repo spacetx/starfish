@@ -1,8 +1,10 @@
 import warnings
-from typing import Iterable, Optional, Union
+from typing import Iterable, MutableMapping, Optional, Sequence, Union
+
+import numpy as np
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import Axes
+from starfish.core.types import Axes, Coordinates, Number
 from ._base import FilterAlgorithm
 
 
@@ -15,7 +17,7 @@ class MaxProject(FilterAlgorithm):
 
     Parameters
     ----------
-    dims : Axes
+    dims : Iterable[Union[Axes, str]]
         one or more Axes to project over
 
     See Also
@@ -25,21 +27,18 @@ class MaxProject(FilterAlgorithm):
     """
 
     def __init__(self, dims: Iterable[Union[Axes, str]]) -> None:
-
         warnings.warn(
             "Filter.MaxProject is being deprecated in favor of Filter.Reduce(func='max')",
             DeprecationWarning,
         )
-        self.dims = dims
+        self.dims = set(Axes(dim) for dim in dims)
 
     _DEFAULT_TESTING_PARAMETERS = {"dims": 'r'}
 
     def run(
             self,
             stack: ImageStack,
-            in_place: bool = False,
             verbose: bool = False,
-            n_processes: Optional[int] = None,
             *args,
     ) -> Optional[ImageStack]:
         """Perform filtering of an image stack
@@ -58,8 +57,22 @@ class MaxProject(FilterAlgorithm):
         Returns
         -------
         ImageStack :
-            If in-place is False, return the results of filter as a new stack. Otherwise return the
-            original stack.
+            The max projection of an image across one or more axis.
 
         """
-        return stack.max_proj(*tuple(Axes(dim) for dim in self.dims))
+        max_projection = stack.xarray.max([dim.value for dim in self.dims])
+        max_projection = max_projection.expand_dims(tuple(dim.value for dim in self.dims))
+        max_projection = max_projection.transpose(*stack.xarray.dims)
+        physical_coords: MutableMapping[Coordinates, Sequence[Number]] = {}
+        for axis, coord in (
+                (Axes.X, Coordinates.X),
+                (Axes.Y, Coordinates.Y),
+                (Axes.ZPLANE, Coordinates.Z)):
+            if axis in self.dims:
+                # this axis was projected out of existence.
+                assert coord.value not in max_projection.coords
+                physical_coords[coord] = [np.average(stack.xarray.coords[coord.value])]
+            else:
+                physical_coords[coord] = max_projection.coords[coord.value]
+        max_proj_stack = ImageStack.from_numpy(max_projection.values, coordinates=physical_coords)
+        return max_proj_stack

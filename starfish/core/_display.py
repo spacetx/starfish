@@ -235,7 +235,7 @@ def display(
 
     if stack is not None:
         if project_axes is not None:
-            stack = stack.max_proj(*project_axes)
+            stack = stack.reduce(project_axes, func="max")
 
         viewer.add_image(stack.xarray.values,
                          rgb=False,

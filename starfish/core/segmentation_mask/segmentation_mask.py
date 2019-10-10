@@ -19,7 +19,8 @@ import xarray as xr
 from skimage.measure import regionprops
 
 from starfish.core.types import Axes, Coordinates
-from .util import _get_axes_names
+from .expand import fill_from_mask
+from .util import _get_axes_names, AXES_ORDER
 
 
 def _validate_segmentation_mask(arr: xr.DataArray):
@@ -148,7 +149,7 @@ class SegmentationMaskCollection:
             self,
             shape: Optional[Tuple[int, ...]] = None,
             *,
-            ordering: Sequence[Axes] = (Axes.ZPLANE, Axes.Y, Axes.X)
+            ordering: Sequence[Axes] = AXES_ORDER,
     ):
         """Create a label image from the contained masks.
 
@@ -177,15 +178,7 @@ class SegmentationMaskCollection:
         label_image = np.zeros(shape, dtype=np.uint16)
 
         for i, mask in iter(self):
-            mask = mask.transpose(*[o.value for o in ordering if o in mask.coords])
-            coords = mask.values.nonzero()
-            j = 0
-            for o in ordering:
-                if o in mask.coords:
-                    coords[j][:] += mask.coords[o].values[0]
-                    j += 1
-            # align axes and insert into image
-            label_image[coords] = i + 1
+            fill_from_mask(mask, i + 1, label_image, ordering)
 
         return label_image
 

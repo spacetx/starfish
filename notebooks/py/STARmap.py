@@ -55,8 +55,7 @@ stack = experiment['fov_000'].get_image('primary')
 # EPY: END code
 
 # EPY: START code
-ch_r_max_projector = starfish.image.Filter.Reduce((Axes.CH, Axes.ROUND), func="max")
-ch_r_max_projection = ch_r_max_projector.run(stack)
+ch_r_max_projection = stack.reduce({Axes.CH, Axes.ROUND}, func="max")
 
 f = plt.figure(dpi=150)
 imshow_plane(ch_r_max_projection, sel={Axes.ZPLANE: 15})
@@ -95,8 +94,7 @@ print(experiment.codebook)
 # EPY: END markdown
 
 # EPY: START code
-ch_z_max_projector = starfish.image.Filter.Reduce((Axes.CH, Axes.ZPLANE), func="max")
-projection = ch_r_max_projector.run(stack)
+projection = stack.reduce({Axes.CH, Axes.ZPLANE}, func="max")
 reference_image = projection.sel({Axes.ROUND: 0})
 
 ltt = starfish.image.LearnTransform.Translation(
@@ -132,7 +130,7 @@ stack = warp.run(
 # EPY: END markdown
 
 # EPY: START code
-post_projection = ch_z_max_projector.run(stack)
+post_projection = stack.reduce({Axes.CH, Axes.ZPLANE}, func="max")
 # EPY: END code
 
 # EPY: START code

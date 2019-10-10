@@ -68,8 +68,7 @@ imgs_ghp_laplace = filter_laplace.run(imgs_ghp, in_place=False)
 # EPY: END markdown
 
 # EPY: START code
-z_max_projector = Filter.Reduce((Axes.ZPLANE,))
-mp = z_max_projector.run(imgs_ghp_laplace)
+mp = imgs_ghp_laplace.reduce({Axes.ZPLANE}, func="max")
 # EPY: END code
 
 # EPY: START markdown
@@ -77,7 +76,7 @@ mp = z_max_projector.run(imgs_ghp_laplace)
 # EPY: END markdown
 
 # EPY: START code
-single_plane = imgs.max_proj(Axes.ZPLANE).xarray.sel({Axes.CH:0}).squeeze()
+single_plane = imgs.reduce({Axes.ZPLANE}, func="max").xarray.sel({Axes.CH:0}).squeeze()
 single_plane_filtered = mp.xarray.sel({Axes.CH: 0}).squeeze()
 
 plt.figure(figsize=(10,10))

@@ -90,13 +90,8 @@ imshow_plane(single_plane, title="Round: 0, Channel: 0")
 # EPY: START code
 from starfish.image import Filter
 
-rcz_max_projector = Filter.Reduce(
-    (Axes.ROUND, Axes.CH, Axes.ZPLANE,), func="max", module=FunctionSource.np)
-per_round_max_projector = Filter.Reduce(
-    (Axes.CH, Axes.ZPLANE,), func="max", module=FunctionSource.np)
-
 dots = fov.get_image("dots")
-dots_single_plane = rcz_max_projector.run(dots)
+dots_single_plane = dots.reduce({Axes.ROUND, Axes.CH, Axes.ZPLANE}, func="max")
 imshow_plane(dots_single_plane, title="Anchor channel, all RNA molecules")
 # EPY: END code
 
@@ -106,7 +101,7 @@ imshow_plane(dots_single_plane, title="Anchor channel, all RNA molecules")
 
 # EPY: START code
 nuclei = fov.get_image("nuclei")
-nuclei_single_plane = rcz_max_projector.run(nuclei)
+nuclei_single_plane = nuclei.reduce({Axes.ROUND, Axes.CH, Axes.ZPLANE}, func="max")
 imshow_plane(nuclei_single_plane, title="Nuclei (DAPI) channel")
 # EPY: END code
 
@@ -117,8 +112,6 @@ imshow_plane(nuclei_single_plane, title="Nuclei (DAPI) channel")
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image import Filter
-
 # filter raw data
 masking_radius = 15
 filt = Filter.WhiteTophat(masking_radius, is_volume=False)
@@ -156,7 +149,7 @@ imshow_plane(
 from starfish.image import ApplyTransform, LearnTransform
 
 learn_translation = LearnTransform.Translation(reference_stack=dots, axes=Axes.ROUND, upsampling=1000)
-transforms_list = learn_translation.run(per_round_max_projector.run(imgs))
+transforms_list = learn_translation.run(imgs.reduce({Axes.CH, Axes.ZPLANE}, func="max"))
 warp = ApplyTransform.Warp()
 registered_imgs = warp.run(filtered_imgs, transforms_list=transforms_list, in_place=False, verbose=True)
 # EPY: END code
@@ -179,8 +172,7 @@ bd = FindSpots.BlobDetector(
     measurement_type='mean',
 )
 
-dots_max_projector = Filter.Reduce((Axes.ROUND, Axes.ZPLANE), func="max", module=FunctionSource.np)
-dots_max = dots_max_projector.run(dots)
+dots_max = dots.reduce((Axes.ROUND, Axes.ZPLANE), func="max", module=FunctionSource.np)
 spots = bd.run(image_stack=registered_imgs, reference_image=dots_max)
 
 decoder = DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook)
@@ -205,10 +197,10 @@ dapi_thresh = .18  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
 min_dist = 57
 
-registered_mp = per_round_max_projector.run(registered_imgs).xarray.squeeze()
+registered_mp = registered_imgs.reduce({Axes.CH, Axes.ZPLANE}, func="max").xarray.squeeze()
 stain = np.mean(registered_mp, axis=0)
 stain = stain/stain.max()
-nuclei = rcz_max_projector.run(nuclei)
+nuclei = nuclei.reduce({Axes.ROUND, Axes.CH, Axes.ZPLANE}, func="max")
 
 
 seg = Segment.Watershed(
@@ -249,9 +241,9 @@ GENE1 = 'HER2'
 GENE2 = 'VIM'
 
 rgb = np.zeros(registered_imgs.tile_shape + (3,))
-nuclei_numpy = rcz_max_projector.run(nuclei)._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+nuclei_numpy = nuclei.reduce({Axes.ROUND, Axes.CH, Axes.ZPLANE}, func="max")._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 rgb[:,:,0] = nuclei_numpy
-dots_numpy = rcz_max_projector.run(dots)._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+dots_numpy = dots.reduce({Axes.ROUND, Axes.CH, Axes.ZPLANE}, func="max")._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 rgb[:,:,1] = dots_numpy
 do = rgb2gray(rgb)
 do = do/(do.max())

@@ -223,9 +223,6 @@ plt.title(f'r = {r}');
 from scipy.stats import scoreatpercentile
 import warnings
 
-all_max_projector = Filter.Reduce(
-    (Axes.ROUND, Axes.CH, Axes.ZPLANE,), func="max", module=FunctionSource.np)
-
 f, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
 
 with warnings.catch_warnings():
@@ -236,7 +233,7 @@ with warnings.catch_warnings():
     show_image(np.squeeze(prop_results.decoded_image)*(mask > 2), cmap='nipy_spectral', ax=ax1)
     ax1.axes.set_axis_off()
 
-    mp_numpy = all_max_projector.run(filtered_imgs)._squeezed_numpy(
+    mp_numpy = filtered_imgs.reduce({Axes.ROUND, Axes.CH, Axes.ZPLANE}, func="max")._squeezed_numpy(
         Axes.ROUND, Axes.CH, Axes.ZPLANE)
     clim = scoreatpercentile(mp_numpy, [0.5, 99.5])
     show_image(mp_numpy, clim=clim, ax=ax2)

@@ -73,8 +73,7 @@ print(cropped_image)
 #
 from starfish.image import Filter
 
-max_projector = Filter.Reduce((Axes.CH,), func="max", module=FunctionSource.np)
-projected_image: starfish.ImageStack = max_projector.run(image)
+projected_image: starfish.ImageStack = image.reduce({Axes.CH}, func="max")
 
 ###################################################################################################
 # To demonstrate the effect, the below figure displays each channel of round :code:`1` in the

@@ -108,9 +108,8 @@ we'll collapse all the spots across channels in each round, mimicing a "dots" im
 
     In[11]: from starfish.image import Filter
     In[12]: from starfish.types import FunctionSource
-    In[13]: max_projector = Filter.Reduce((Axes.CH,), func="max", module=FunctionSource.np)
-    In[14]: max_projector.run(image)
-    Out[14]: <starfish.ImageStack (r: 4, c: 1, z: 1, y: 1000, x: 1000)>
+    In[13]: image.reduce({Axes.CH}, func="max")
+    Out[13]: <starfish.ImageStack (r: 4, c: 1, z: 1, y: 1000, x: 1000)>
 
 Visualizing Data
 ----------------
@@ -125,10 +124,10 @@ to enable the :code:`qt` environment in IPython:
 
 .. code-block:: python
 
-    In[15]: ipython = get_ipython()
-    In[16]: ipython.magic("gui qt5")
-    In[17]: starfish.display(image)
-    Out[17]: <napari.components._viewer.model.Viewer at 0x15f7b44e0>
+    In[14]: ipython = get_ipython()
+    In[15]: ipython.magic("gui qt5")
+    In[16]: starfish.display(image)
+    Out[16]: <napari.components._viewer.model.Viewer at 0x15f7b44e0>
 
 Typing the above code should display an image viewer that looks something like this:,
 

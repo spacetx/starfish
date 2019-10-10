@@ -24,8 +24,7 @@ def process_fov(field_num: int, experiment_str: str):
 
     fov = experiment[fov_str]
     imgs = fov.get_image(starfish.FieldOfView.PRIMARY_IMAGES)
-    max_projector = starfish.image.Filter.Reduce((Axes.CH, Axes.ZPLANE))
-    dots = max_projector.run(imgs)
+    dots = imgs.reduce({Axes.CH, Axes.ZPLANE}, func="max")
 
     # filter
     filt = starfish.image.Filter.WhiteTophat(masking_radius=15, is_volume=False)

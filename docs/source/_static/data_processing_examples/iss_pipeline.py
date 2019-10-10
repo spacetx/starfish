@@ -19,9 +19,8 @@ def iss_pipeline(fov, codebook):
     # register the raw image
     learn_translation = LearnTransform.Translation(reference_stack=fov.get_image('dots'),
                                                    axes=Axes.ROUND, upsampling=100)
-    max_projector = Filter.Reduce(
-        (Axes.CH, Axes.ZPLANE), func="max", module=FunctionSource.np)
-    transforms_list = learn_translation.run(max_projector.run(primary_image))
+    transforms_list = learn_translation.run(
+        primary_image.reduce({Axes.CH, Axes.ZPLANE}, func="max"))
     warp = ApplyTransform.Warp()
     registered = warp.run(primary_image, transforms_list=transforms_list,  in_place=False, verbose=True)
 
@@ -39,8 +38,7 @@ def iss_pipeline(fov, codebook):
     )
 
     # detect spots using laplacian of gaussians approach
-    dots_max_projector = Filter.Reduce((Axes.ROUND, Axes.ZPLANE), func="max", module=FunctionSource.np)
-    dots_max = dots_max_projector.run(fov.get_image('dots'))
+    dots_max = fov.get_image('dots').reduce((Axes.ROUND, Axes.ZPLANE), func="max", module=FunctionSource.np)
     # locate spots in a reference image
     spots = bd.run(reference_image=dots_max, image_stack=filtered)
 

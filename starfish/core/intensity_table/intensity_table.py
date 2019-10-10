@@ -73,6 +73,8 @@ class IntensityTable(xr.DataArray):
           * c         (c) int64 0 1 2
     """
 
+    __slots__ = ()
+
     @staticmethod
     def _build_xarray_coords(
             spot_attributes: SpotAttributes,

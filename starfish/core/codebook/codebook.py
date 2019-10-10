@@ -61,6 +61,8 @@ class Codebook(xr.DataArray):
 
     """
 
+    __slots__ = ()
+
     @property
     def code_length(self) -> int:
         """return the length of codes in this codebook"""

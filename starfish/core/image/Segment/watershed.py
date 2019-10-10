@@ -76,7 +76,7 @@ class Watershed(SegmentAlgorithm):
         """
 
         # create a 'stain' for segmentation
-        mp = primary_images.max_proj(Axes.CH, Axes.ZPLANE)
+        mp = primary_images.reduce({Axes.CH, Axes.ZPLANE}, func="max")
         mp_numpy = mp._squeezed_numpy(Axes.CH, Axes.ZPLANE)
         stain = np.mean(mp_numpy, axis=0)
         stain = stain / stain.max()
@@ -86,7 +86,7 @@ class Watershed(SegmentAlgorithm):
         disk_size_markers = None
         disk_size_mask = None
 
-        nuclei_mp = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+        nuclei_mp = nuclei.reduce({Axes.ROUND, Axes.CH, Axes.ZPLANE}, func="max")
         nuclei__mp_numpy = nuclei_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
         self._segmentation_instance = _WatershedSegmenter(nuclei__mp_numpy, stain)
         label_image = self._segmentation_instance.segment(

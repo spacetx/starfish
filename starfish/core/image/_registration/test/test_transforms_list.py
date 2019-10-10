@@ -3,6 +3,7 @@ import tempfile
 import numpy as np
 
 from starfish import data
+from starfish.core.image import Filter
 from starfish.core.image._registration.LearnTransform.translation import Translation
 from starfish.core.image._registration.transforms_list import TransformsList
 from starfish.core.types import Axes, TransformType
@@ -17,7 +18,7 @@ def test_export_import_transforms_object():
     reference_stack = exp.fov().get_image('dots')
     translation = Translation(reference_stack=reference_stack, axes=Axes.ROUND)
     # Calculate max_proj accrss CH/Z
-    stack = stack.max_proj(Axes.CH, Axes.ZPLANE)
+    stack = Filter.Reduce((Axes.CH, Axes.ZPLANE)).run(stack)
     transform_list = translation.run(stack)
     _, filename = tempfile.mkstemp()
     # save to tempfile and import

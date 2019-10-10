@@ -5,6 +5,7 @@ from starfish.core.types import Axes, Coordinates
 
 AXES = [a.value for a in Axes if a not in (Axes.ROUND, Axes.CH)]
 COORDS = [c.value for c in Coordinates]
+AXES_ORDER = Axes.ZPLANE, Axes.Y, Axes.X
 
 
 def _get_axes_names(ndim: int) -> Tuple[List[str], List[str]]:

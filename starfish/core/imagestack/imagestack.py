@@ -11,6 +11,7 @@ from typing import (
     Any,
     Callable,
     Hashable,
+    Iterable,
     Iterator,
     List,
     Mapping,
@@ -50,6 +51,7 @@ from starfish.core.types import (
     Clip,
     Coordinates,
     CoordinateValue,
+    FunctionSource,
     Number,
     STARFISH_EXTRAS_KEY
 )
@@ -1175,3 +1177,50 @@ class ImageStack:
     def _squeezed_numpy(self, *dims: Axes):
         """return this ImageStack's data as a squeezed numpy array"""
         return self.xarray.squeeze(tuple(dim.value for dim in dims)).values
+
+    def reduce(
+            self,
+            dims: Iterable[Union[Axes, str]],
+            func: str,
+            module: FunctionSource = FunctionSource.np,
+            clip_method: Clip = Clip.CLIP,
+            *args,
+            **kwargs) -> "ImageStack":
+        """
+        Reduces the dimensionality of the ImageStack and returns a new ImageStack with the result.
+        This is a shortcut for :py:class:`starfish.image.Filter.Reduce`.
+
+        See Also
+        --------
+        starfish.image.Filter.Reduce
+        """
+        from starfish.core.image import Filter
+
+        reducer = Filter.Reduce(dims, func, module, clip_method, **kwargs)
+        return reducer.run(self, *args)
+
+    def map(
+            self,
+            func: str,
+            module: FunctionSource = FunctionSource.np,
+            in_place: bool = False,
+            group_by: Optional[Set[Union[Axes, str]]] = None,
+            clip_method: Clip = Clip.CLIP,
+            *args,
+            **kwargs) -> Optional["ImageStack"]:
+        """
+        Maps the contents of the ImageStack to produce another image.  This can be done in-place or
+        can produce a new ImageStack.  This is a shortcut for
+        :py:class:`starfish.image.Filter.Map`.
+
+        See Also
+        --------
+        starfish.image.Filter.Map
+        """
+        from starfish.core.image import Filter
+
+        mapper = Filter.Map(
+            func, *args,
+            module=module, in_place=in_place, group_by=group_by, clip_method=clip_method,
+            **kwargs)
+        return mapper.run(self, *args)

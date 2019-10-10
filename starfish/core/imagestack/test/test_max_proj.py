@@ -14,7 +14,7 @@ def test_max_projection_preserves_dtype():
     array = np.ones((2, 2, 2), dtype=original_dtype)
     image = ImageStack.from_numpy(array.reshape((1, 1, 2, 2, 2)))
 
-    max_projection = image.max_proj(Axes.CH, Axes.ROUND, Axes.ZPLANE)
+    max_projection = image.reduce((Axes.CH, Axes.ROUND, Axes.ZPLANE), "max")
     assert max_projection.xarray.dtype == original_dtype
 
 
@@ -26,7 +26,7 @@ Z_COORDS = 1, 3
 def test_max_projection_preserves_coordinates():
     e = data.ISS(use_test_data=True)
     nuclei = e.fov().get_image('nuclei')
-    nuclei_proj = nuclei.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+    nuclei_proj = nuclei.reduce((Axes.CH, Axes.ROUND, Axes.ZPLANE), "max")
     # Since this data already has only 1 round, 1 ch, 1 zplane
     # let's just assert that the max_proj operation didn't change anything
     assert nuclei.xarray.equals(nuclei_proj.xarray)
@@ -44,6 +44,6 @@ def test_max_projection_preserves_coordinates():
 
     stack = imagestack_with_coords_factory(stack_shape, physical_coords)
 
-    stack_proj = stack.max_proj(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+    stack_proj = stack.reduce((Axes.CH, Axes.ROUND, Axes.ZPLANE), "max")
     expected_z = np.average(Z_COORDS)
     verify_physical_coordinates(stack_proj, X_COORDS, Y_COORDS, expected_z)

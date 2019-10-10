@@ -2,7 +2,6 @@ from typing import (
     cast,
     Iterable,
     MutableMapping,
-    Optional,
     Sequence,
     Union
 )
@@ -97,7 +96,7 @@ class Reduce(FilterAlgorithm):
             self,
             stack: ImageStack,
             *args,
-    ) -> Optional[ImageStack]:
+    ) -> ImageStack:
         """Performs the dimension reduction with the specifed function
 
         Parameters
@@ -108,8 +107,7 @@ class Reduce(FilterAlgorithm):
         Returns
         -------
         ImageStack :
-            If in-place is False, return the results of filter as a new stack. Otherwise return the
-            original stack.
+            Return the results of filter as a new stack.
 
         """
 

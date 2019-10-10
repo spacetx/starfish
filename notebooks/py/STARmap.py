@@ -26,7 +26,7 @@ import numpy as np
 import starfish
 from starfish import IntensityTable
 import starfish.data
-from starfish.types import Axes
+from starfish.types import Axes, TraceBuildingStrategies
 from starfish.util.plot import (
     diagnose_registration, imshow_plane, intensity_histogram
 )
@@ -97,7 +97,7 @@ print(experiment.codebook)
 # EPY: START code
 ch_z_max_projector = starfish.image.Filter.Reduce((Axes.CH, Axes.ZPLANE), func="max")
 projection = ch_r_max_projector.run(stack)
-reference_image = projection.sel({Axes.ROUND: 1})
+reference_image = projection.sel({Axes.ROUND: 0})
 
 ltt = starfish.image.LearnTransform.Translation(
     reference_stack=reference_image,
@@ -213,16 +213,14 @@ f = plot_scaling_result(stack, scaled)
 # EPY: END markdown
 
 # EPY: START code
-lsbd = starfish.spots.DetectSpots.LocalSearchBlobDetector(
+bd = starfish.spots.FindSpots.BlobDetector(
     min_sigma=1,
     max_sigma=8,
     num_sigma=10,
     threshold=np.percentile(np.ravel(stack.xarray.values), 95),
-    exclude_border=2,
-    anchor_round=0,
-    search_radius=10,
-)
-intensities = lsbd.run(scaled, n_processes=8)
+    exclude_border=2)
+
+spots = bd.run(scaled)
 # EPY: END code
 
 # EPY: START markdown
@@ -234,7 +232,16 @@ intensities = lsbd.run(scaled, n_processes=8)
 # EPY: END markdown
 
 # EPY: START code
-decoded = experiment.codebook.decode_per_round_max(IntensityTable(intensities.fillna(0)))
+decoder = starfish.spots.DecodeSpots.PerRoundMaxChannel(
+    codebook=experiment.codebook,
+    anchor_round=0,
+    search_radius=10,
+    trace_building_strategy=TraceBuildingStrategies.NEAREST_NEIGHBOR)
+
+decoded = decoder.run(spots=spots)
+# EPY: END code
+
+# EPY: START code
 decode_mask = decoded['target'] != 'nan'
 
 # %gui qt

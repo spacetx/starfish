@@ -6,8 +6,14 @@ import pandas as pd
 import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import SpotAttributes, SpotFindingResults
-from starfish.types import Axes, Features, Number
+from starfish.core.types import (
+    Axes,
+    Features,
+    Number,
+    PerImageSliceSpotResults,
+    SpotAttributes,
+    SpotFindingResults
+)
 
 
 def measure_intensities_at_spot_locations_in_image(
@@ -59,7 +65,7 @@ def measure_intensities_at_spot_locations_in_image(
 
 def measure_intensities_at_spot_locations_across_imagestack(
         data_image: ImageStack,
-        reference_spots: SpotAttributes,
+        reference_spots: PerImageSliceSpotResults,
         measurement_function: Callable[[Union[np.ndarray, xr.DataArray]], Number],
         radius_is_gyration: bool = False) -> SpotFindingResults:
     """given spots found from a reference image, find those spots across a data_image
@@ -68,7 +74,7 @@ def measure_intensities_at_spot_locations_across_imagestack(
     ----------
     data_image : ImageStack
         ImageStack containing multiple volumes for which spots' intensities must be calculated
-    reference_spots : SpotAttributes
+    reference_spots : PerImageSliceSpotResults
         Spots found in a reference image
     measurement_function : Callable[[Sequence], Number])
         Function to apply over the spot volumes to identify the intensity (e.g. max, mean, ...)
@@ -94,20 +100,21 @@ def measure_intensities_at_spot_locations_across_imagestack(
     indices = product(ch_labels, round_labels)
     for c, r in indices:
         tile_indices = {Axes.ROUND: r, Axes.CH: c}
-        if reference_spots.data.empty:
+        if reference_spots.spot_attrs.data.empty:
             # if no spots found don't measure
             spot_results[tile_indices] = reference_spots
         else:
             image, _ = data_image.get_slice({Axes.CH: c, Axes.ROUND: r})
             blob_intensities: pd.Series = measure_intensities_at_spot_locations_in_image(
                 image,
-                reference_spots,
+                reference_spots.spot_attrs,
                 measurement_function,
                 radius_is_gyration=radius_is_gyration
             )
             # copy reference spot positions and attributes
-            tile_spots = SpotAttributes(reference_spots.data.copy())
+            tile_spots = SpotAttributes(reference_spots.spot_attrs.data.copy())
             # fill in intensities
             tile_spots.data[Features.INTENSITY] = blob_intensities
-            spot_results[tile_indices] = tile_spots
+            spot_results[tile_indices] = PerImageSliceSpotResults(
+                spot_attrs=tile_spots, extras=None)
     return spot_results

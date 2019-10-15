@@ -1,4 +1,5 @@
-from typing import Hashable, List, Mapping, MutableMapping, Optional, Tuple
+from dataclasses import dataclass
+from typing import Any, Hashable, List, Mapping, MutableMapping, Optional, Tuple
 
 import xarray as xr
 
@@ -9,6 +10,16 @@ from starfish.core.util.logging import Log
 AXES_ORDER = (Axes.ROUND, Axes.CH)
 
 
+@dataclass
+class PerImageSliceSpotResults:
+    """
+    Named tuple that gets returned in every spot finding's image_to_spots method, spot_attrs are the
+    SpotAttributes and extras is any extra information collected from the spot finding process.
+    """
+    spot_attrs: SpotAttributes
+    extras: Optional[Mapping[str, Any]]
+
+
 class SpotFindingResults:
     """
     Wrapper class that describes the results from a spot finding method. The results
@@ -17,19 +28,27 @@ class SpotFindingResults:
     """
 
     def __init__(
-            self, imagestack_coords, log: Log, spot_attributes_list: Optional[List[Tuple]] = None):
+            self,
+            imagestack_coords,
+            log: Log,
+            spot_attributes_list: Optional[List[Tuple]] = None,
+    ):
         """
         Construct a SpotFindingResults instance
 
         Parameters
         -----------
+        imagestack_coords : xr.CoordinateArray
+            The physical coordinate ranges of the ImageStack spots were found in
+        log : Log
+            The provenance log information from the ImageStack spots were found in.
         spot_attributes_list : Optional[List[Tuple]]
             If spots were found using ImageStack.transform() the result is a list of
-            tuples ((r, channel), SpotAttributes). Instantiating SpotFindingResults with
+            tuples ((r, channel), PerImageSpotResults). Instantiating SpotFindingResults with
             this list will convert the information to a dictionary.
         """
         spot_attributes_list = spot_attributes_list or []
-        self._results: MutableMapping[Tuple, SpotAttributes] = {
+        self._results: MutableMapping[Tuple, PerImageSliceSpotResults] = {
             tuple(indices[i] for i in AXES_ORDER): spots
             for spots, indices in spot_attributes_list
         }
@@ -39,7 +58,7 @@ class SpotFindingResults:
             Axes.ZPLANE.value: imagestack_coords[Coordinates.Z.value]}
         self._log: Log = log
 
-    def __setitem__(self, indices: Mapping[Axes, int], spots: SpotAttributes):
+    def __setitem__(self, indices: Mapping[Axes, int], value: PerImageSliceSpotResults):
         """
         Add the round, ch indices and corresponding SpotAttributes to the results dict.
 
@@ -51,9 +70,9 @@ class SpotFindingResults:
             Describes spots found on this tile.
         """
         round_ch_index = tuple(indices[i] for i in AXES_ORDER)
-        self._results[round_ch_index] = spots
+        self._results[round_ch_index] = value
 
-    def __getitem__(self, indices: Mapping[Axes, int]) -> SpotAttributes:
+    def __getitem__(self, indices: Mapping[Axes, int]) -> PerImageSliceSpotResults:
         """
         Returns the spots found in a given round and ch.
 
@@ -107,8 +126,8 @@ class SpotFindingResults:
         Return the total number of unique spots represented in the SpotFindingResults.
         """
         total = 0
-        for spot_attrs in self.values():
-            total += spot_attrs.data.spot_id.size
+        for spot_info in self.values():
+            total += spot_info.spot_attrs.data.spot_id.size
         return total
 
     @property

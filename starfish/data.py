@@ -46,8 +46,11 @@ def allen_smFISH(use_test_data: bool = False) -> Experiment:
     -------
     Experiment
     """
+    if use_test_data:
+        return Experiment.from_json(
+            "https://d2nhj9g34unfro.cloudfront.net/20181005/allen_smFISH/experiment.json")
     return Experiment.from_json(
-        "https://d2nhj9g34unfro.cloudfront.net/20181005/allen_smFISH/experiment.json")
+        "https://d26bikfyahveg8.cloudfront.net/smFISH/mouse/formatted_with_DAPI/experiment.json")
 
 
 def DARTFISH(use_test_data: bool = False) -> Experiment:

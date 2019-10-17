@@ -138,3 +138,9 @@ def test_save_load():
             assert np.array_equal(m, m2)
     finally:
         os.remove(path)
+
+    # ensure that the regionprops are equal
+    for ix in range(len(masks)):
+        original_props = masks.mask_regionprops(ix)
+        recalculated_props = masks.mask_regionprops(ix)
+        assert original_props == recalculated_props

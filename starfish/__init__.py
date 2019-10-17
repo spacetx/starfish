@@ -13,6 +13,7 @@ from .core import (
 # display images and spots
 from .core._display import display
 # top-level objects
+from .core.binary_mask import BinaryMaskCollection
 from .core.codebook.codebook import Codebook
 from .core.experiment.experiment import Experiment, FieldOfView
 from .core.expression_matrix.expression_matrix import ExpressionMatrix

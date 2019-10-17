@@ -23,7 +23,7 @@ setuptools.setup(
     },
     entry_points={
         'console_scripts': [
-            "starfish=starfish:starfish",
+            "starfish=starfish.core.starfish:starfish",
         ]
     },
     include_package_data=True,

@@ -69,6 +69,10 @@ class SpotFindingResults:
         round_ch_index = tuple(indices[i] for i in AXES_ORDER)
         return self._results[round_ch_index]
 
+    def __delitem__(self, indices: Mapping[Axes, int]) -> None:
+        round_ch_index = tuple(indices[i] for i in AXES_ORDER)
+        del self._results[round_ch_index]
+
     def items(self):
         """
         Return iterator for Spot finding results

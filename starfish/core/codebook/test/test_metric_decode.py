@@ -111,7 +111,8 @@ def test_unmatched_intensities_and_codebook_table_sizes_throws_value_error():
         {
             Features.CODEWORD: [
                 {Axes.ROUND.value: 0, Axes.CH.value: 2, Features.CODE_VALUE: 1},
-                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1}
+                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
             ],
             Features.TARGET: 'GENE_A'
         },

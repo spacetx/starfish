@@ -248,6 +248,56 @@ class SyntheticData:
         return ImageStack.from_numpy(image)
 
 
+def composite_codebook() -> Tuple[Codebook, ImageStack]:
+    """
+    Produce an Imagestack representing a composite experiment where the first 2 rounds are
+    multiplexed data and the last round is sequential data.
+
+    Returns
+    -------
+    Codebook :
+        codebook containing codes that match the data
+    ImageStack :
+        noiseless ImageStack containing one spot per code in codebook
+    """
+    codebook_data = [
+        {
+            Features.CODEWORD: [
+                {Axes.ROUND.value: 0, Axes.CH.value: 0, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+            ],
+            Features.TARGET: "GENE_A"
+        },
+        {
+            Features.CODEWORD: [
+                {Axes.ROUND.value: 0, Axes.CH.value: 1, Features.CODE_VALUE: 1},
+                {Axes.ROUND.value: 1, Axes.CH.value: 0, Features.CODE_VALUE: 1}
+            ],
+            Features.TARGET: "GENE_B"
+        },
+        {
+            Features.CODEWORD: [
+                {Axes.ROUND.value: 2, Axes.CH.value: 0, Features.CODE_VALUE: 1}
+            ],
+            Features.TARGET: "GENE_C"
+        },
+        {
+            Features.CODEWORD: [
+                {Axes.ROUND.value: 2, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+            ],
+            Features.TARGET: "GENE_D"
+        }
+    ]
+
+    codebook = Codebook.from_code_array(codebook_data)
+    imagestack = create_imagestack_from_codebook(
+        pixel_dimensions=(10, 100, 100),
+        spot_coordinates=((4, 10, 90), (5, 90, 10), (6, 90, 10), (7, 90, 10)),
+        codebook=codebook
+    )
+    return codebook, imagestack
+
+
 def two_spot_one_hot_coded_data_factory() -> Tuple[Codebook, ImageStack, float]:
     """
     Produce a 2-channel 2-round Codebook with two codes and an ImageStack containing one spot from

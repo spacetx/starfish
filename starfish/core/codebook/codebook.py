@@ -1,6 +1,6 @@
 import json
 import uuid
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, TypeVar, Union
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar, Union
 
 import numpy as np
 import pandas as pd
@@ -16,6 +16,7 @@ from starfish.core.codebook._format import (
     MIN_SUPPORTED_VERSION,
 )
 from starfish.core.config import StarfishConfig
+from starfish.core.imagestack import indexing_utils
 from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.spacetx_format.util import CodebookValidator
@@ -182,8 +183,9 @@ class Codebook(xr.DataArray):
 
     @classmethod
     def from_code_array(
-            cls, code_array: List[Dict[Union[str, Any], Any]],
-            n_round: Optional[int] = None, n_channel: Optional[int] = None) -> "Codebook":
+            cls,
+            code_array: List[Dict[Union[str, Any], Any]],
+    ) -> "Codebook":
         """
         Construct a codebook from a python list of SpaceTx-Format codewords.
 
@@ -246,32 +248,18 @@ class Codebook(xr.DataArray):
                 Codebook with shape (targets, channels, imaging_rounds)
 
         """
-
-        # guess the max round and channel if not provided, otherwise check provided values are valid
-        max_round, max_ch = 0, 0
-
+        # get the round and ch label values
+        round_labels, ch_labels = set(), set()
         for code in code_array:
             for entry in code[Features.CODEWORD]:
-                max_round = max(max_round, entry[Axes.ROUND])
-                max_ch = max(max_ch, entry[Axes.CH])
+                round_labels.add(entry[Axes.ROUND])
+                ch_labels.add(entry[Axes.CH])
 
         # set n_channel and n_round if either were not provided
-        n_round = n_round if n_round is not None else max_round + 1
-        n_channel = n_channel if n_channel is not None else max_ch + 1
+        n_round = len(round_labels)
+        n_channel = len(ch_labels)
 
-        # raise errors if provided n_round or n_channel are out of range
-        if max_round + 1 > n_round:
-            raise ValueError(
-                f'code detected that requires an imaging round value ({max_round + 1}) that is '
-                f'greater than provided n_round: {max_round}')
-        if max_ch + 1 > n_channel:
-            raise ValueError(
-                f'code detected that requires a channel value ({max_ch + 1}) that is greater '
-                f'than provided n_channel: {n_channel}')
-
-        # verify codebook structure and fields
         for code in code_array:
-
             if not isinstance(code, dict):
                 raise ValueError(f'codebook must be an array of dictionary codes. Found: {code}.')
 
@@ -287,18 +275,25 @@ class Codebook(xr.DataArray):
 
         # fill the codebook
         data = np.zeros((len(target_names), n_round, n_channel), dtype=np.uint8)
+        codebook = cls(
+            data=data,
+            coords=(
+                pd.Index(target_names, name=Features.TARGET),
+                pd.Index(list(round_labels), name=Axes.ROUND.value),
+                pd.Index(list(ch_labels), name=Axes.CH.value),
+            )
+        )
         for i, code_dict in enumerate(code_array):
             for bit in code_dict[Features.CODEWORD]:
                 ch = int(bit[Axes.CH])
                 r = int(bit[Axes.ROUND])
-                data[i, r, ch] = int(bit[Features.CODE_VALUE])
-        return cls.from_numpy(target_names, n_round, n_channel, data)
+                codebook[i, :, :].loc[{Axes.ROUND.value: r,
+                                       Axes.CH.value: ch}] = int(bit[Features.CODE_VALUE])
+        return codebook
 
     @classmethod
     def open_json(
             cls, json_codebook: str,
-            n_round: Optional[int] = None,
-            n_channel: Optional[int] = None,
     ) -> "Codebook":
         """
         Load a codebook from a SpaceTx Format json file or a url pointing to such a file.
@@ -386,7 +381,19 @@ class Codebook(xr.DataArray):
         version_str = codebook_doc[DocumentKeys.VERSION_KEY]
         cls._verify_version(version_str)
 
-        return cls.from_code_array(codebook_doc[DocumentKeys.MAPPINGS_KEY], n_round, n_channel)
+        return cls.from_code_array(codebook_doc[DocumentKeys.MAPPINGS_KEY])
+
+    def get_partial(self, indexers: Mapping[Axes, Union[int, tuple]]):
+        """
+        Slice the codebook data according to the provided indexing parameters. Used in a composite
+        codebook scneario.
+
+        indexers : Mapping[Axes, Union[int, tuple]]
+            A dictionary of dim:index where index is the value or range to index the dimension
+
+        """
+        selector = indexing_utils.convert_to_selector(indexers)
+        return indexing_utils.index_keep_dimensions(self, indexers=selector)
 
     def to_json(self, filename: str) -> None:
         """
@@ -758,4 +765,4 @@ class Codebook(xr.DataArray):
         codebook = [{Features.CODEWORD: w, Features.TARGET: g}
                     for w, g in zip(codewords, target_names)]
 
-        return cls.from_code_array(codebook, n_round=n_round, n_channel=n_channel)
+        return cls.from_code_array(codebook)

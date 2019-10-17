@@ -84,32 +84,30 @@ def test_from_code_array_throws_key_error_with_missing_channel_round_or_value():
         Codebook.from_code_array(code_array)
 
 
-def test_from_code_array_expands_codebook_when_provided_n_codes_that_exceeds_array_value():
+def test_from_code_array_with_labeled_axis():
     """
-    The codebook factory produces codes with 3 channels and 2 rounds. This test provides numbers
-    larger than that, and the codebook should be expanded to those numbers as a result.
+    Test that the codebook factory produces a codebook with the right number of rounds and
+    channels even if the values are "labeled".
     """
-    code_array: List = codebook_array_factory()
-    codebook: Codebook = Codebook.from_code_array(code_array, n_channel=10, n_round=4)
-    assert codebook.sizes[Axes.CH] == 10
-    assert codebook.sizes[Axes.ROUND] == 4
+    codebook_data = [
+        {
+            Features.CODEWORD: [
+                {Axes.ROUND.value: 10, Axes.CH.value: 0, Features.CODE_VALUE: 1}
+            ],
+            Features.TARGET: "GENE_C"
+        },
+        {
+            Features.CODEWORD: [
+                {Axes.ROUND.value: 11, Axes.CH.value: 1, Features.CODE_VALUE: 1}
+            ],
+            Features.TARGET: "GENE_D"
+        }
+    ]
+
+    codebook: Codebook = Codebook.from_code_array(codebook_data)
+    assert codebook.sizes[Axes.CH] == 2
+    assert codebook.sizes[Axes.ROUND] == 2
     assert codebook.sizes[Features.TARGET] == 2
-
-
-def test_from_code_array_throws_exceptions_when_data_does_not_match_channel_or_round_requests():
-    """
-    The codebook factory produces codes with 3 channels and 2 rounds. This test provides numbers
-    larger than that, and the codebook should be expanded to those numbers as a result.
-    """
-    code_array: List = codebook_array_factory()
-
-    # should throw an exception, as 3 channels are present in the data
-    with pytest.raises(ValueError):
-        Codebook.from_code_array(code_array, n_channel=2, n_round=4)
-
-    # should throw an exception, as 2 rounds are present in the data
-    with pytest.raises(ValueError):
-        Codebook.from_code_array(code_array, n_channel=3, n_round=1)
 
 
 def test_from_code_array_throws_exception_when_data_is_improperly_formatted():

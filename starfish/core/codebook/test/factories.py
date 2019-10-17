@@ -40,7 +40,7 @@ def loaded_codebook():
             codebook = Codebook.from_code_array(simple_codebook_array())
             codebook.to_json(tfn)
 
-        result = Codebook.open_json(tf.name, n_channel=2, n_round=2)
+        result = Codebook.open_json(tf.name)
     finally:
         if tfn is not None:
             os.remove(tfn)

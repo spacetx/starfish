@@ -19,7 +19,7 @@ def convert_to_selector(
 
     """
     return_dict: MutableMapping[Hashable, Union[int, slice]] = {
-        ind.value: slice(None, None) for ind in Axes}
+        ind.value: slice(None, None) for ind in indexers.keys()}
     for key, value in indexers.items():
         if isinstance(value, tuple):
             return_dict[key.value] = slice(value[0], value[1])

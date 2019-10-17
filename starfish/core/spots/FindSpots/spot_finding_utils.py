@@ -99,14 +99,14 @@ def measure_intensities_at_spot_locations_across_imagestack(
             spot_results[tile_indices] = reference_spots
         else:
             image, _ = data_image.get_slice({Axes.CH: c, Axes.ROUND: r})
+            # copy reference spot positions and attributes
+            tile_spots = SpotAttributes(reference_spots.data.copy())
             blob_intensities: pd.Series = measure_intensities_at_spot_locations_in_image(
                 image,
                 reference_spots,
                 measurement_function,
                 radius_is_gyration=radius_is_gyration
             )
-            # copy reference spot positions and attributes
-            tile_spots = SpotAttributes(reference_spots.data.copy())
             # fill in intensities
             tile_spots.data[Features.INTENSITY] = blob_intensities
             spot_results[tile_indices] = tile_spots

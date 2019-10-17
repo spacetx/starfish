@@ -1,7 +1,7 @@
 flake8
 flake8-import-order
 m2r
-mypy
+mypy != 0.740
 numpydoc
 nbencdec >= 0.0.5
 pycodestyle==2.5.0

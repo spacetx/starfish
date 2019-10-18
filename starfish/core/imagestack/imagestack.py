@@ -129,7 +129,6 @@ class ImageStack:
 
         # now that we know the tile data type (kind and size), we can allocate the data array.
         np_array = np.empty(shape=data_shape, dtype=np.float32)
-        np_array.fill(np.nan)
         data = xr.DataArray(
             np_array,
             dims=data_dimensions,

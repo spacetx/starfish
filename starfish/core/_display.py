@@ -6,9 +6,9 @@ from typing import Iterable, List, Optional, Set, Tuple, Union
 import numpy as np
 from packaging.version import parse as parse_version
 
+from starfish.core.binary_mask import BinaryMaskCollection
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.segmentation_mask import SegmentationMaskCollection
 from starfish.core.types import Axes, Features
 
 try:
@@ -120,7 +120,7 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
 def display(
         stack: Optional[ImageStack] = None,
         spots: Optional[IntensityTable] = None,
-        masks: Optional[SegmentationMaskCollection] = None,
+        masks: Optional[BinaryMaskCollection] = None,
         viewer: Optional[Viewer] = None,
         project_axes: Optional[Set[Axes]] = None,
         mask_intensities: float = 0.,
@@ -137,7 +137,7 @@ def display(
         ImageStack to display
     spots : IntensityTable
         IntensityTable containing spot information that was generated from the submitted stack.
-    masks : SegmentationMaskCollection
+    masks : BinaryMaskCollection
         Segmentation instance masks used to annotate the submitted stack.
     viewer : napari.Viewer
         Napari viewer to append the ImageStack and/or spots to. If None, creates a new viewer.

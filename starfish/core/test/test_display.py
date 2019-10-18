@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from starfish import display, SegmentationMaskCollection
+from starfish import BinaryMaskCollection, display
 from starfish.core.test.factories import SyntheticData
 from starfish.types import Coordinates
 
@@ -21,7 +21,7 @@ sd = SyntheticData(
 
 stack = sd.spots()
 spots = sd.intensities()
-masks = SegmentationMaskCollection.from_label_image(
+masks = BinaryMaskCollection.from_label_image(
     np.random.rand(128, 128).astype(np.uint8),
     {Coordinates.Y: np.arange(128), Coordinates.X: np.arange(128)}
 )

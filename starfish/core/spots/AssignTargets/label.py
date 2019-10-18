@@ -1,7 +1,7 @@
 import numpy as np
 
+from starfish.core.binary_mask import BinaryMaskCollection
 from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
-from starfish.core.segmentation_mask import SegmentationMaskCollection
 from starfish.core.types import Features
 from ._base import AssignTargetsAlgorithm
 
@@ -20,7 +20,7 @@ class Label(AssignTargetsAlgorithm):
 
     @staticmethod
     def _assign(
-        masks: SegmentationMaskCollection,
+        masks: BinaryMaskCollection,
         decoded_intensities: DecodedIntensityTable,
         in_place: bool,
     ) -> DecodedIntensityTable:
@@ -52,7 +52,7 @@ class Label(AssignTargetsAlgorithm):
 
     def run(
             self,
-            masks: SegmentationMaskCollection,
+            masks: BinaryMaskCollection,
             decoded_intensity_table: DecodedIntensityTable,
             verbose: bool = False,
             in_place: bool = False,
@@ -61,7 +61,7 @@ class Label(AssignTargetsAlgorithm):
 
         Parameters
         ----------
-        masks : SegmentationMaskCollection
+        masks : BinaryMaskCollection
             binary masks segmenting each cell
         decoded_intensity_table : IntensityTable
             spot information

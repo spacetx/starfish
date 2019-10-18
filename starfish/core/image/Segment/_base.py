@@ -1,8 +1,8 @@
 from abc import abstractmethod
 
+from starfish.core.binary_mask import BinaryMaskCollection
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.pipeline.algorithmbase import AlgorithmBase
-from starfish.core.segmentation_mask import SegmentationMaskCollection
 
 
 class SegmentAlgorithm(metaclass=AlgorithmBase):
@@ -13,6 +13,6 @@ class SegmentAlgorithm(metaclass=AlgorithmBase):
             primary_image_stack: ImageStack,
             nuclei_stack: ImageStack,
             *args
-    ) -> SegmentationMaskCollection:
+    ) -> BinaryMaskCollection:
         """Performs segmentation on the stack provided."""
         raise NotImplementedError()

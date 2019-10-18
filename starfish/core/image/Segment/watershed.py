@@ -7,9 +7,9 @@ from showit import image
 from skimage.feature import peak_local_max
 from skimage.morphology import watershed
 
+from starfish.core.binary_mask import BinaryMaskCollection
 from starfish.core.image.Filter.util import bin_open, bin_thresh
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.segmentation_mask import SegmentationMaskCollection
 from starfish.core.types import Axes, Coordinates, Number
 from ._base import SegmentAlgorithm
 
@@ -56,7 +56,7 @@ class Watershed(SegmentAlgorithm):
             primary_images: ImageStack,
             nuclei: ImageStack,
             *args
-    ) -> SegmentationMaskCollection:
+    ) -> BinaryMaskCollection:
         """Segments nuclei in 2-d using a nuclei ImageStack
 
         Primary images are used to expand the nuclear mask, but only in cases where there are
@@ -71,7 +71,7 @@ class Watershed(SegmentAlgorithm):
 
         Returns
         -------
-        masks : SegmentationMaskCollection
+        masks : BinaryMaskCollection
            binary masks segmenting each cell
         """
 
@@ -98,8 +98,8 @@ class Watershed(SegmentAlgorithm):
         physical_ticks = {coord: nuclei.xarray.coords[coord.value].data
                           for coord in (Coordinates.Y, Coordinates.X)}
 
-        return SegmentationMaskCollection.from_label_image(label_image,
-                                                           physical_ticks)
+        return BinaryMaskCollection.from_label_image(label_image,
+                                                     physical_ticks)
 
     def show(self, figsize: Tuple[int, int]=(10, 10)) -> None:
         if isinstance(self._segmentation_instance, _WatershedSegmenter):

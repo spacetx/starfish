@@ -1,12 +1,13 @@
+import json
 import platform
 from functools import lru_cache
-from json import JSONEncoder
 from typing import List, Mapping
 
 import pkg_resources
 
+# these are import statements and not from xxx import yyy to break a circular dependency.
 import starfish.core
-from starfish.core.types import CORE_DEPENDENCIES, LOG
+import starfish.core.types
 
 
 class Log:
@@ -35,7 +36,14 @@ class Log:
         self._log.append(entry)
 
     def encode(self):
-        return LogEncoder().encode({LOG: self.data})
+        return LogEncoder().encode({starfish.core.types.LOG: self._log})
+
+    @classmethod
+    def decode(cls, encoded_log: str):
+        log = json.loads(encoded_log)
+        log_object = Log()
+        log_object._log = log
+        return log_object
 
     @property
     def data(self):
@@ -45,7 +53,7 @@ class Log:
 @lru_cache(maxsize=1)
 def get_core_dependency_info() -> Mapping[str, str]:
     dependency_info = dict()
-    for dependency in CORE_DEPENDENCIES:
+    for dependency in starfish.core.types.CORE_DEPENDENCIES:
         version = get_dependency_version(dependency)
         dependency_info[dependency] = version
     return dependency_info
@@ -69,7 +77,7 @@ def get_os_info() -> Mapping[str, str]:
             "Python Version": platform.python_version()}
 
 
-class LogEncoder(JSONEncoder):
+class LogEncoder(json.JSONEncoder):
     """
     JSON encodes the List[Dict] pipeline provence log. For simple
     objects use default JSON encoding. For more complex objects
@@ -79,4 +87,4 @@ class LogEncoder(JSONEncoder):
         try:
             return super(LogEncoder, self).default(o)
         except TypeError:
-            return JSONEncoder().encode(repr(o))
+            return json.JSONEncoder().encode(repr(o))

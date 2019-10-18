@@ -6,7 +6,6 @@
 
 
 import abc
-import warnings
 from pathlib import Path
 from typing import Mapping, Optional
 
@@ -30,15 +29,6 @@ class InplaceWriterContract(WriterContract):
             backend_config: Optional[Mapping] = None,
     ) -> str:
         return tile.provider.sha256
-
-
-def enable_inplace_mode():
-    """
-    .. deprecated:: 0.1.4
-        This method is no longer necessary.  Call `write_experiment_json` with
-        `writer_contract=InplaceWriterContract()`.
-    """
-    warnings.warn("`enable_inplace_mode()` is no longer necessary.", DeprecationWarning)
 
 
 class InplaceFetchedTile(FetchedTile):

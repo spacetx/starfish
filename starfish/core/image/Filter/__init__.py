@@ -10,7 +10,6 @@ from .laplace import Laplace
 from .linear_unmixing import LinearUnmixing
 from .map import Map
 from .match_histograms import MatchHistograms
-from .max_proj import MaxProject
 from .mean_high_pass import MeanHighPass
 from .reduce import Reduce
 from .richardson_lucy_deconvolution import DeconvolvePSF

@@ -52,8 +52,8 @@ class FieldOfView:
     The decoding of :py:class:`~slicedimage.TileSet` to
     :py:class:`~starfish.imagestack.imagestack.ImageStack`
     does not happen until the image is accessed. ImageStacks can only be initialized with
-    aligned tilesets, so if thereare multiple you may need to iterate through the groups
-    using :py:func:`~starfish.experiment.experiment.FieldOfView.iterate_image_type`
+    aligned tilesets, so if there are multiple you may need to iterate through the groups
+    using :py:func:`~starfish.experiment.experiment.FieldOfView.get_images`
     and process each one individually.
 
     Be prepared to handle errors when images are accessed.
@@ -99,23 +99,6 @@ class FieldOfView:
     @property
     def image_types(self) -> Set[str]:
         return set(self._images.keys())
-
-    def show_aligned_image_groups(self) -> None:
-        """
-        .. deprecated:: 0.1.4
-            Use `FieldOfView.get_images()` to retrieve all the aligned image groups.
-        """
-        raise DeprecationWarning("This method has been deprecated. Aligned groups are now parsed "
-                                 "as a part of, FieldOfView.get_images() and are determined by the "
-                                 "selected axes provided to the method.")
-
-    def iterate_image_type(self, image_type: str) -> Iterator[ImageStack]:
-        """
-        .. deprecated:: 0.1.4
-            Use `FieldOfView.get_images()` to retrieve all the aligned image groups.
-        """
-        raise DeprecationWarning("This method has been deprecated. Instead use "
-                                 "FieldOfView.get_images(image_type)")
 
     def get_image(self, item: str,
                   aligned_group: Any = _SINGLETON,

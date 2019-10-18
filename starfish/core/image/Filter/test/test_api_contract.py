@@ -22,7 +22,6 @@ import pytest
 
 from starfish import ImageStack
 from starfish.core.image import Filter
-from starfish.core.image.Filter.max_proj import MaxProject
 from starfish.core.image.Filter.reduce import Reduce
 
 
@@ -35,7 +34,6 @@ methods: Mapping[str, Type] = {
     'guassian_high_pass': Filter.GaussianHighPass,
     'guassian_low_pass': Filter.GaussianLowPass,
     'laplace': Filter.Laplace,
-    'max_proj': Filter.MaxProject,
     'mean_high_pass': Filter.MeanHighPass,
     'reduce': Filter.Reduce,
     'deconvolve': Filter.DeconvolvePSF,
@@ -72,7 +70,7 @@ def test_all_methods_adhere_to_contract(filter_class):
 
     # Max Proj and Reduce don't have an in_place, n_processes, verbose option,
     # so we need to skip these tests
-    if filter_class not in [MaxProject, Reduce]:
+    if filter_class not in [Reduce]:
         # return None if in_place = True
         try:
             filtered = instance.run(data, in_place=True)

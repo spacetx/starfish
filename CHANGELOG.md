@@ -1,3 +1,20 @@
+## [0.1.8] - 2019-10-18
+- Logging improvements (#1617)
+- Make regionprops available per mask (#1610)
+- Don't use mypy 0.740 (#1616)
+- changing test code to use new spot finding modules (#1597)
+- refactoring allen smFish with new spot finding (#1593)
+- clean up max projection (#1379)
+- Use masked fill to produce labeled images (#1582)
+- Replace most instances of starfish.image.Filter.Reduce with imagestack.reduce (#1548)
+- implementing starMap spot finding refactor (#1592)
+- Add __slots__ to classes that subclass xr.DataArray (#1607)
+- Convert SegmentationMaskCollection to a dict-like object (#1579)
+- Test case for multiprocessing + imagestack (#1589)
+- Masked fill method (#1581)
+- Add map/reduce methods to ImageStack (#1539)
+- Unify FunctionSource in Map and Reduce (#1540)
+
 ## [0.1.7] - 2019-10-09
 - ISS refactored with new spot finding path (#1518)
 - Fix bugs in per-round-max-decoder (#1602)
@@ -131,6 +148,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.1.8]: https://github.com/spacetx/starfish/releases/tag/0.1.8
 [0.1.7]: https://github.com/spacetx/starfish/releases/tag/0.1.7
 [0.1.6]: https://github.com/spacetx/starfish/releases/tag/0.1.6
 [0.1.5]: https://github.com/spacetx/starfish/releases/tag/0.1.5

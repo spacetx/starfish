@@ -243,6 +243,10 @@ class LocalMaxPeakFinder(DetectSpotsAlgorithm):
             labels=labels
         )
 
+        # this is a workaround for the fix https://github.com/scikit-image/scikit-image/pull/4263
+        if spot_coords.shape[0] == 0:
+            spot_coords = np.empty((0, data_image.ndim), np.int)
+
         # TODO how to get the radius? unlikely that this can be pulled out of
         # self._spot_props, since the last call to peak_local_max can find multiple
         # peaks per label

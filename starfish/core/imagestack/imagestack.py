@@ -375,14 +375,15 @@ class ImageStack:
         self._ensure_data_loaded()
         return self._data
 
-    def sel(self, indexers: Mapping[Axes, Union[int, tuple]]):
+    def sel(self, indexers: Mapping[Axes, Union[int, slice, Sequence]]):
         """Given a dictionary mapping the index name to either a value or a range represented as a
         tuple, return an Imagestack with each dimension indexed accordingly
 
         Parameters
         ----------
-        indexers : Mapping[Axes, Union[int, tuple]]
-            A dictionary of dim:index where index is the value or range to index the dimension
+        indexers : Mapping[Axes, Union[int, Union[int, Sequence]]
+            A dictionary of dim:index where index is the value, values, or range to index the
+            dimension
 
         Examples
         --------
@@ -413,14 +414,15 @@ class ImageStack:
         stack._data = indexing_utils.index_keep_dimensions(self.xarray, selector)
         return stack
 
-    def isel(self, indexers: Mapping[Axes, Union[int, tuple]]):
+    def isel(self, indexers: Mapping[Axes, Union[int, Sequence]]):
         """Given a dictionary mapping the index name to either a value or a range represented as a
         tuple, return an Imagestack with each dimension indexed by position accordingly
 
         Parameters
         ----------
-        indexers : Dict[Axes, (int/tuple)]
-            A dictionary of dim:index where index is the value or range to index the dimension
+        indexers : Dict[Axes, Union[int, Sequence]]
+            A dictionary of dim:index where index is the value, values, or range to index the
+            dimension
 
         Examples
         --------

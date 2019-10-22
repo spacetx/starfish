@@ -90,7 +90,7 @@ class SpotFindingResults:
 
     def items(self):
         """
-        Return iterator for Spot finding results
+        Return iterator for (r,ch) and SpotAttributes in Spot finding results
         """
         return self._results.items()
 

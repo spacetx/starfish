@@ -1,7 +1,7 @@
 import json
 import uuid
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, TypeVar, Union
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar, Union
 
 import numpy as np
 import pandas as pd
@@ -17,11 +17,11 @@ from starfish.core.codebook._format import (
     MIN_SUPPORTED_VERSION,
 )
 from starfish.core.config import StarfishConfig
+from starfish.core.imagestack import indexing_utils
 from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.spacetx_format.util import CodebookValidator
 from starfish.core.types import Axes, Features, Number
-
 
 NormalizedFeaturesArgtype = TypeVar("NormalizedFeaturesArgtype", "Codebook", IntensityTable)
 
@@ -388,6 +388,20 @@ class Codebook(xr.DataArray):
         cls._verify_version(version_str)
 
         return cls.from_code_array(codebook_doc[DocumentKeys.MAPPINGS_KEY], n_round, n_channel)
+
+    def get_partial(self, indexers: Mapping[Axes, Union[int, slice, Sequence]]):
+        """
+        Slice the codebook data according to the provided indexing parameters. Used in a composite
+        codebook scenario.
+
+        Parameters
+        ----------
+        indexers : Mapping[Axes, Union[int, Sequence]]
+            A dictionary of dim:index where index is the value, values or range to index the
+            dimension
+        """
+        selector = indexing_utils.convert_to_selector(indexers)
+        return indexing_utils.index_keep_dimensions(self, indexers=selector)
 
     def to_json(self, filename: Union[str, Path]) -> None:
         """

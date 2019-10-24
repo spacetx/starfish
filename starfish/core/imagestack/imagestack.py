@@ -1146,7 +1146,8 @@ class ImageStack:
         This method is deprecated.  Please ``ImageStack.reduce(axes, func="max")`` to do max
         projection operations.
         """
-        raise DeprecatedAPIError("Please Filter.MaxProject to do max projection operations.")
+        raise DeprecatedAPIError(
+            """Please ImageStack.reduce(axes, func="max") to do max projection operations.""")
 
     def _squeezed_numpy(self, *dims: Axes):
         """return this ImageStack's data as a squeezed numpy array"""

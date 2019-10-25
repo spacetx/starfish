@@ -75,6 +75,17 @@ origin. At this point, it's trivial to create a cell x gene matrix.
 
     tutorials/exec_feature_identification_and_annotation.rst
 
+Processing your data at Scale
+------------------------------
+Once you've developed the optimal starfish processing pipeline for your data this tutorial will walk you through using
+it to process your entire dataset in the cloud.
+
+.. toctree::
+    :maxdepth: 1
+
+    tutorials/processing_with_aws.rst
+
+
 
 Old Content not to be deleted yet.
 ----------------------------------

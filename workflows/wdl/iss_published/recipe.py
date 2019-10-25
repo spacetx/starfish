@@ -2,8 +2,8 @@ import starfish
 from starfish import FieldOfView
 from starfish.image import Filter
 from starfish.image import ApplyTransform, LearnTransform
-from starfish.spots import DetectSpots
-from starfish.types import Axes
+from starfish.spots import DecodeSpots, FindSpots
+from starfish.types import Axes, FunctionSource
 
 
 def process_fov(field_num: int, experiment_str: str):
@@ -40,26 +40,29 @@ def process_fov(field_num: int, experiment_str: str):
 
     print("Applying transform")
     warp = ApplyTransform.Warp()
-    registered_imgs = warp.run(imgs, transforms_list=transforms_list, in_place=True, verbose=True)
+    registered_imgs = warp.run(imgs, transforms_list=transforms_list, verbose=True)
 
     print("Filter WhiteTophat")
     filt = Filter.WhiteTophat(masking_radius=15, is_volume=False)
 
-    filtered_imgs = filt.run(registered_imgs, verbose=True, in_place=True)
+    filtered_imgs = filt.run(registered_imgs, verbose=True)
     filt.run(dots, verbose=True, in_place=True)
     filt.run(nuclei, verbose=True, in_place=True)
 
     print("Detecting")
-    detector = DetectSpots.BlobDetector(
+    detector = FindSpots.BlobDetector(
         min_sigma=1,
         max_sigma=10,
         num_sigma=30,
         threshold=0.01,
         measurement_type='mean',
     )
+    dots_max = dots.reduce((Axes.ROUND, Axes.ZPLANE), func="max", module=FunctionSource.np)
+    spots = detector.run(image_stack=filtered_imgs, reference_image=dots_max)
 
-    intensities = detector.run(filtered_imgs, blobs_image=dots, blobs_axes=(Axes.ROUND, Axes.ZPLANE))
+    print("Decoding")
+    decoder = DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook)
+    decoded = decoder.run(spots=spots)
 
-    decoded = experiment.codebook.decode_per_round_max(intensities)
     df = decoded.to_decoded_dataframe()
     return df

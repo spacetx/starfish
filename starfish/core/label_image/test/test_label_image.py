@@ -110,9 +110,9 @@ def test_save_and_load(tmp_path):
 
     label_image = LabelImage.from_array_and_coords(
         array, pixel_coordinates, physical_coordinates, log)
-    label_image.save(tmp_path / "label_image.netcdf")
+    label_image.to_netcdf(tmp_path / "label_image.netcdf")
 
-    loaded_label_image = LabelImage.from_disk(tmp_path / "label_image.netcdf")
+    loaded_label_image = LabelImage.open_netcdf(tmp_path / "label_image.netcdf")
 
     assert label_image.xarray.equals(loaded_label_image.xarray)
     assert label_image.xarray.attrs == loaded_label_image.xarray.attrs

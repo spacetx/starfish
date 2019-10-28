@@ -131,8 +131,8 @@ class LabelImage:
         return Log.decode(self.label_image.attrs[AttrKeys.LOG])
 
     @classmethod
-    def from_disk(cls, path: Union[str, Path]) -> "LabelImage":
-        """Load a label image from disk.
+    def open_netcdf(cls, path: Union[str, Path]) -> "LabelImage":
+        """Load a label image saved as a netcdf file from disk.
 
         Parameters
         ----------
@@ -161,8 +161,8 @@ class LabelImage:
 
         return cls(label_image)
 
-    def save(self, path: Union[str, Path]):
-        """Save the label image to disk.
+    def to_netcdf(self, path: Union[str, Path]):
+        """Save the label image as a netcdf file.
 
         Parameters
         ----------

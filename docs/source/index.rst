@@ -59,6 +59,7 @@ To see what improvements the developers have planned for starfish, please see th
    api/index
    help_and_reference/index
    usage/index
+   processing_at_scale/index
    contributing/index
    spacetx_consortium/index
 

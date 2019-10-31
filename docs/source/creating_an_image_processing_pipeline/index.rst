@@ -83,3 +83,4 @@ Old Content not to be deleted yet.
 
 .. image:: /_static/design/pipeline-diagram.png
     :alt: pipeline diagram
+

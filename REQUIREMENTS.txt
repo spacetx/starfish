@@ -10,7 +10,7 @@ scikit-image>=0.14.0
 scikit-learn
 scipy
 showit >= 1.1.4
-slicedimage==4.0.5
+slicedimage==4.1.0
 scikit-learn
 sympy
 tqdm

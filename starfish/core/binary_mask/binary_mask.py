@@ -12,6 +12,7 @@ from typing import (
     MutableSequence,
     Optional,
     Sequence,
+    Set,
     Tuple,
     Union,
 )
@@ -21,9 +22,9 @@ import xarray as xr
 from skimage.measure import regionprops
 from skimage.measure._regionprops import _RegionProperties
 
-from starfish.core.types import Axes, Coordinates
+from starfish.core.types import Axes, Coordinates, Number
 from .expand import fill_from_mask
-from .util import _get_axes_names, AXES_ORDER
+from .util import _get_axes_names
 
 
 def _validate_binary_mask(arr: xr.DataArray):
@@ -44,13 +45,14 @@ def _validate_binary_mask(arr: xr.DataArray):
         raise TypeError(f"expected dtype of bool; got {arr.dtype}")
 
     axes, coords = _get_axes_names(arr.ndim)
-    dims = set(axes)
+    dims: Set[str] = set(axis.value for axis in axes)
 
     if dims != set(arr.dims):
         raise TypeError(f"missing dimensions '{dims.difference(arr.dims)}'")
 
-    if dims.union(coords) != set(arr.coords):
-        raise TypeError(f"missing coordinates '{dims.union(coords).difference(arr.coords)}'")
+    dims = dims.union(set(coord.value for coord in coords))
+    if dims != set(arr.coords):
+        raise TypeError(f"missing coordinates '{dims.difference(arr.coords)}'")
 
 
 @dataclass
@@ -130,7 +132,7 @@ class BinaryMaskCollection:
             image = np.zeros(
                 shape=tuple(
                     self.max_shape[axis]
-                    for axis in AXES_ORDER
+                    for axis, _ in zip(*_get_axes_names(3))
                     if self.max_shape[axis] != 0
                 ),
                 dtype=np.uint32,
@@ -139,7 +141,7 @@ class BinaryMaskCollection:
                 mask_data.binary_mask,
                 mask_id + 1,
                 image,
-                [axis for axis in AXES_ORDER if self.max_shape[axis] > 0],
+                [axis for axis, _ in zip(*_get_axes_names(3)) if self.max_shape[axis] != 0],
             )
             mask_data.region_properties = regionprops(image)
         return mask_data.region_properties
@@ -148,7 +150,7 @@ class BinaryMaskCollection:
     def from_label_image(
             cls,
             label_image: np.ndarray,
-            physical_ticks: Dict[Coordinates, Sequence[float]]
+            physical_ticks: Dict[Coordinates, Sequence[Number]]
     ) -> "BinaryMaskCollection":
         """Creates binary masks from a label image.
 
@@ -157,7 +159,7 @@ class BinaryMaskCollection:
         label_image : int array
             Integer array where each integer corresponds to a region.
         physical_ticks : Dict[Coordinates, Sequence[float]]
-            Physical coordinates for each axis.
+            Physical ticks for each axis.
 
         Returns
         -------
@@ -165,6 +167,7 @@ class BinaryMaskCollection:
             Masks generated from the label image.
         """
         props = regionprops(label_image)
+        len_max_label = len(str(len(props) - 1))
 
         dims, _ = _get_axes_names(label_image.ndim)
 
@@ -173,25 +176,21 @@ class BinaryMaskCollection:
 
         # for each region (and its properties):
         for label, prop in enumerate(props):
-            # create pixel coordinate labels from the bounding box
-            # to preserve spatial indexing relative to the original image
-            coords = {d: list(range(prop.bbox[i], prop.bbox[i + len(dims)]))
+            # create pixel ticks from the bounding box to preserve spatial indexing relative to the
+            # original image
+            coords = {d.value: list(range(prop.bbox[i], prop.bbox[i + len(dims)]))
                       for i, d in enumerate(dims)}
 
-            # create physical coordinate labels by taking the overlapping
-            # subset from the full span of labels
+            # create physical ticks by taking the overlapping subset from the full span of labels
             for d, c in physical_ticks.items():
                 axis = d.value[0]
                 i = dims.index(axis)
                 coords[d.value] = (axis, c[prop.bbox[i]:prop.bbox[i + len(dims)]])
 
-            name = str(label + 1)
-            name = name.zfill(len(str(len(props))))  # pad with zeros
-
             mask = xr.DataArray(prop.image,
-                                dims=dims,
+                                dims=[dim.value for dim in dims],
                                 coords=coords,
-                                name=name)
+                                name=f"{label:0{len_max_label}d}")
             masks.append(mask)
 
         return cls(masks, props)
@@ -200,7 +199,7 @@ class BinaryMaskCollection:
             self,
             shape: Optional[Tuple[int, ...]] = None,
             *,
-            ordering: Sequence[Axes] = AXES_ORDER,
+            ordering: Sequence[Axes] = (Axes.ZPLANE, Axes.Y, Axes.X),
     ):
         """Create a label image from the contained masks.
 

@@ -4,14 +4,14 @@ import numpy as np
 import xarray as xr
 
 from starfish.types import Axes
-from .util import _get_axes_names, AXES_ORDER
+from .util import _get_axes_names
 
 
 def fill_from_mask(
         mask: xr.DataArray,
         fill_value: int,
         result_array: np.ndarray,
-        axes_order: Sequence[Union[str, Axes]] = AXES_ORDER,
+        axes_order: Sequence[Union[str, Axes]] = (Axes.ZPLANE, Axes.Y, Axes.X),
 ):
     """Take a binary mask with labeled axes and write `fill_value` to an array `result_array` where
     the binary mask has a True value.  The output array is assumed to have a zero origin.  The input

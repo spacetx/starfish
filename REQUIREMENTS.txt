@@ -1,3 +1,8 @@
+# The following requirement is here because botocore restricts the version of python-dateutil (see
+# https://github.com/boto/botocore/commit/e87e7a745fd972815b235a9ee685232745aa94f9).  Since pip is
+# not a full dependency solver, it has already installed python-dateutil before botocore is
+# installed, and bombs after the fact.
+python-dateutil < 2.8.1
 click
 dataclasses;python_version<"3.7"
 jsonschema
@@ -11,7 +16,6 @@ scikit-learn
 scipy
 showit >= 1.1.4
 slicedimage==4.1.0
-scikit-learn
 sympy
 tqdm
 trackpy

@@ -78,6 +78,9 @@ jobs:
     - name: Simulation Notebook
       if: type = push and (branch = master or branch =~ /-alltest/)
       script: make install-dev notebooks/py/Starfish_simulation.py
+    - name: Graph-based Decoding Notebook
+      if: type = push and (branch = master or branch =~ /-alltest/)
+      script: make install-dev notebooks/py/graph_decoding.py
     - name: ISS Notebook
       if: type = push and (branch = master or branch =~ /-alltest/)
       script: make install-dev notebooks/py/ISS.py

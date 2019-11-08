@@ -1,5 +1,6 @@
 from ._base import DetectSpotsAlgorithm
 from .blob import BlobDetector
+from .local_graph_blob_detector import LocalGraphBlobDetector
 from .local_max_peak_finder import LocalMaxPeakFinder
 from .local_search_blob_detector import LocalSearchBlobDetector
 from .trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder

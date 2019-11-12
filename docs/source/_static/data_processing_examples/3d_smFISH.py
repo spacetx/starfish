@@ -20,7 +20,8 @@ from IPython import get_ipython
 
 import starfish
 import starfish.data
-from starfish import FieldOfView, IntensityTable
+from starfish import FieldOfView, DecodedIntensityTable
+from starfish.types import TraceBuildingStrategies
 
 # equivalent to %gui qt
 ipython = get_ipython()
@@ -57,12 +58,11 @@ clip2 = starfish.image.Filter.Clip(p_min=99, p_max=100, is_volume=True)
 # local intensity maxima, and spots are matched to the gene they represent by looking them up in a
 # codebook that records which (round, channel) matches which gene target.
 
-tlmpf = starfish.spots.DetectSpots.TrackpyLocalMaxPeakFinder(
+tlmpf = starfish.spots.FindSpots.TrackpyLocalMaxPeakFinder(
     spot_diameter=5,  # must be odd integer
     min_mass=0.02,
     max_size=2,  # this is max radius
     separation=7,
-    noise_size=0.65,  # this is not used because preprocess is False
     preprocess=False,
     percentile=10,  # this is irrelevant when min_mass, spot_diameter, and max_size are set properly
     verbose=True,
@@ -100,6 +100,11 @@ def processing_pipeline(
     print("Loading images...")
     images = enumerate(experiment[fov_name].get_images(FieldOfView.PRIMARY_IMAGES))
 
+    decoder = starfish.spots.DecodeSpots.PerRoundMaxChannel(
+        codebook=codebook,
+        trace_building_strategy=TraceBuildingStrategies.SEQUENTIAL
+    )
+
     for image_number, primary_image in images:
         print(f"Filtering image {image_number}...")
         filter_kwargs = dict(
@@ -113,13 +118,12 @@ def processing_pipeline(
         clip2.run(primary_image, **filter_kwargs)
 
         print("Calling spots...")
-        spot_attributes = tlmpf.run(primary_image)
-        all_intensities.append(spot_attributes)
+        spots = tlmpf.run(primary_image)
+        print("Decoding spots...")
+        decoded_intensities = decoder.run(spots)
+        all_intensities.append(decoded_intensities)
 
-    spot_attributes = IntensityTable.concatenate_intensity_tables(all_intensities)
-
-    print("Decoding spots...")
-    decoded = codebook.decode_per_round_max(spot_attributes)
+    decoded = DecodedIntensityTable.concatenate_intensity_tables(all_intensities)
     decoded = decoded[decoded["total_intensity"] > .025]
 
     return primary_image, decoded

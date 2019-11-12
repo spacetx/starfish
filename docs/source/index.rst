@@ -69,8 +69,8 @@ To see what improvements the developers have planned for starfish, please see th
   <h2>Features</h2>
 
 * Filtering: :ref:`API <filtering>`
-* Spot-Finding: :ref:`API <detection>`
-* Decoding: :ref:`API <decoding>`
+* Spot-Finding: :ref:`API <spot_finding>`
+* Decoding: :ref:`API <decode_spots>`
 * Segmenting: :ref:`API <segmentation>`
 
 .. raw:: html

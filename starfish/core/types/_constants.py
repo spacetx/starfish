@@ -111,5 +111,6 @@ class TraceBuildingStrategies(AugmentedEnum):
     currently support spot trace building strategies
     """
     EXACT_MATCH = 'exact_match'
+    GRAPH = 'graph'
     NEAREST_NEIGHBOR = 'nearest_neighbor'
     SEQUENTIAL = 'sequential'

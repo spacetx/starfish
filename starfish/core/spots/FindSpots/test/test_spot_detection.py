@@ -11,6 +11,7 @@ from starfish.core.test.factories import (
 from starfish.types import Axes, FunctionSource
 from .._base import FindSpotsAlgorithm
 from ..blob import BlobDetector
+from ..h_max import HMax
 from ..local_max_peak_finder import LocalMaxPeakFinder
 from ..trackpy_local_max_peak_finder import TrackpyLocalMaxPeakFinder
 
@@ -54,10 +55,17 @@ def simple_local_max_spot_detector() -> LocalMaxPeakFinder:
         threshold=0
     )
 
+
+def simple_h_max_detector() -> HMax:
+    return HMax(
+        h=0.5
+    )
+
 # initialize spot detectors
 gaussian_spot_detector = simple_gaussian_spot_detector()
 trackpy_local_max_spot_detector = simple_trackpy_local_max_spot_detector()
 local_max_spot_detector = simple_local_max_spot_detector()
+h_max_detector = simple_h_max_detector()
 
 # test parameterization
 test_parameters = (
@@ -66,12 +74,15 @@ test_parameters = (
         (ONE_HOT_IMAGESTACK, gaussian_spot_detector),
         (ONE_HOT_IMAGESTACK, trackpy_local_max_spot_detector),
         (ONE_HOT_IMAGESTACK, local_max_spot_detector),
+        (ONE_HOT_IMAGESTACK, h_max_detector),
         (SPARSE_IMAGESTACK, gaussian_spot_detector),
         (SPARSE_IMAGESTACK, trackpy_local_max_spot_detector),
         (SPARSE_IMAGESTACK, local_max_spot_detector),
+        (SPARSE_IMAGESTACK, h_max_detector),
         (BLANK_IMAGESTACK, gaussian_spot_detector),
         (BLANK_IMAGESTACK, trackpy_local_max_spot_detector),
         (BLANK_IMAGESTACK, local_max_spot_detector),
+        (BLANK_IMAGESTACK, h_max_detector),
     ]
 )
 

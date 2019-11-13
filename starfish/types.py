@@ -8,6 +8,7 @@ from starfish.core.types import (  # noqa: F401
     FunctionSource,
     LOG,
     OverlapStrategy,
+    PerImageSliceSpotResults,
     PHYSICAL_COORDINATE_DIMENSION,
     PhysicalCoordinateTypes,
     STARFISH_EXTRAS_KEY,

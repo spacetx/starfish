@@ -1,5 +1,5 @@
 from functools import partial
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Mapping, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,14 @@ from tqdm import tqdm
 from starfish.core.config import StarfishConfig
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.spots.FindSpots import spot_finding_utils
-from starfish.core.types import Axes, Features, Number, SpotAttributes, SpotFindingResults
+from starfish.core.types import (
+    Axes,
+    Features,
+    Number,
+    PerImageSliceSpotResults,
+    SpotAttributes,
+    SpotFindingResults
+)
 from ._base import FindSpotsAlgorithm
 
 
@@ -173,7 +180,8 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
 
         return selected_thr
 
-    def _compute_threshold(self, img: Union[np.ndarray, xr.DataArray]) -> float:
+    def _compute_threshold(self, img: Union[np.ndarray, xr.DataArray]
+                           ) -> Tuple[float, Optional[np.ndarray], Optional[List[int]]]:
         """Finds spots on a number of thresholds then selects and returns the optimal threshold
 
         Parameters
@@ -184,17 +192,18 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
 
         Returns
         -------
-        float :
+        Union[np.ndarray, xr.DataArray] :
             The intensity threshold
         """
         img = np.asarray(img)
         thresholds, spot_counts = self._compute_num_spots_per_threshold(img)
         if len(spot_counts) == 0:
             # this only happens when we never find more spots than `self.min_num_spots_detected`
-            return img.min()
-        return self._select_optimal_threshold(thresholds, spot_counts)
+            return img.min(), None, None
+        return self._select_optimal_threshold(thresholds, spot_counts), thresholds, spot_counts
 
-    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
+    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]
+                       ) -> PerImageSliceSpotResults:
         """measure attributes of spots detected by binarizing the image using the selected threshold
 
         Parameters
@@ -204,16 +213,17 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
 
         Returns
         -------
-        SpotAttributes
-            Attributes for each detected spot
+        PerImageSpotResults :
+            includes a SpotAttributes DataFrame of metadata containing the coordinates, intensity
+            and radius of each spot, as well as any extra information collected during spot finding.
         """
 
-        threshold = self._compute_threshold(data_image)
+        optimal_threshold, thresholds, spot_counts = self._compute_threshold(data_image)
 
         data_image = np.asarray(data_image)
 
         # identify each spot's size by binarizing and calculating regionprops
-        masked_image = data_image[:, :] > threshold
+        masked_image = data_image[:, :] > optimal_threshold
         labels = label(masked_image)[0]
         spot_props = regionprops(np.squeeze(labels))
 
@@ -231,7 +241,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         spot_coords = peak_local_max(
             data_image,
             min_distance=self.min_distance,
-            threshold_abs=threshold,
+            threshold_abs=optimal_threshold,
             exclude_border=False,
             indices=True,
             num_peaks=np.inf,
@@ -249,10 +259,15 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
                Features.SPOT_ID: np.arange(spot_coords.shape[0]),
                Features.INTENSITY: data_image[spot_coords[:, 0],
                                               spot_coords[:, 1],
-                                              spot_coords[:, 2]]
+                                              spot_coords[:, 2]],
                }
+        extras: Mapping[str, Any] = {
+            "threshold": optimal_threshold,
+            "thresholds": thresholds,
+            "spot_counts": spot_counts
+        }
 
-        return SpotAttributes(pd.DataFrame(res))
+        return PerImageSliceSpotResults(spot_attrs=SpotAttributes(pd.DataFrame(res)), extras=extras)
 
     def run(
             self,

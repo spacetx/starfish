@@ -9,7 +9,7 @@ from trackpy import locate
 from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.spots.FindSpots import spot_finding_utils
-from starfish.core.types import Axes, SpotAttributes, SpotFindingResults
+from starfish.core.types import Axes, PerImageSliceSpotResults, SpotAttributes, SpotFindingResults
 from ._base import FindSpotsAlgorithm
 
 
@@ -92,7 +92,8 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
         self.verbose = verbose
         self.radius_is_gyration = radius_is_gyration
 
-    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
+    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]
+                       ) -> PerImageSliceSpotResults:
         """
 
         Parameters
@@ -102,8 +103,9 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
 
         Returns
         -------
-        SpotAttributes :
-            spot attributes table for all detected spots
+        PerImageSpotResults :
+            includes a SpotAttributes DataFrame of metadata containing the coordinates, intensity
+            and radius of each spot, as well as any extra information collected during spot finding.
 
         """
         data_image = np.asarray(data_image)
@@ -140,7 +142,7 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
             attributes.columns = new_colnames
 
         attributes['spot_id'] = np.arange(attributes.shape[0])
-        return SpotAttributes(attributes)
+        return PerImageSliceSpotResults(spot_attrs=SpotAttributes(attributes), extras=None)
 
     def run(
             self,

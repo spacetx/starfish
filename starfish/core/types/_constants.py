@@ -21,7 +21,6 @@ class Coordinates(AugmentedEnum):
 
 
 PHYSICAL_COORDINATE_DIMENSION = "physical_coordinate"
-
 """
 This is the xarray dimension name for the physical coordinates of the tiles.
 """

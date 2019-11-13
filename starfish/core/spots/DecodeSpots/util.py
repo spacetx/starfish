@@ -145,7 +145,7 @@ def _merge_spots_by_round(
     # add channel information to each table and add it to round_data
     round_data: Mapping[int, List] = defaultdict(list)
     for (r, c), df in spot_results.items():
-        df = df.data
+        df = df.spot_attrs.data
         df[Axes.CH.value] = np.full(df.shape[0], c)
         round_data[r].append(df)
 

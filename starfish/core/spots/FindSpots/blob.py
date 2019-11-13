@@ -9,7 +9,8 @@ from skimage.feature import blob_dog, blob_doh, blob_log
 from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.spots.FindSpots import spot_finding_utils
-from starfish.core.types import Axes, Features, Number, SpotAttributes, SpotFindingResults
+from starfish.core.types import Axes, Features, Number, PerImageSliceSpotResults, SpotAttributes,  \
+    SpotFindingResults
 from ._base import FindSpotsAlgorithm
 
 blob_detectors = {
@@ -84,7 +85,8 @@ class BlobDetector(FindSpotsAlgorithm):
         except ValueError:
             raise ValueError("Detector method must be one of {blob_log, blob_dog, blob_doh}")
 
-    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]) -> SpotAttributes:
+    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]
+                       ) -> PerImageSliceSpotResults:
         """
         Find spots using a gaussian blob finding algorithm
 
@@ -95,8 +97,9 @@ class BlobDetector(FindSpotsAlgorithm):
 
         Returns
         -------
-        SpotAttributes :
-            DataFrame of metadata containing the coordinates, intensity and radius of each spot
+        PerImageSpotResults :
+            includes a SpotAttributes DataFrame of metadata containing the coordinates, intensity
+            and radius of each spot, as well as any extra information collected during spot finding.
 
         """
 
@@ -111,7 +114,9 @@ class BlobDetector(FindSpotsAlgorithm):
         )
 
         if fitted_blobs_array.shape[0] == 0:
-            return SpotAttributes.empty(extra_fields=[Features.INTENSITY, Features.SPOT_ID])
+            empty_spot_attrs = SpotAttributes.empty(
+                extra_fields=[Features.INTENSITY, Features.SPOT_ID])
+            return PerImageSliceSpotResults(spot_attrs=empty_spot_attrs, extras=None)
 
         # measure intensities
         z_inds = fitted_blobs_array[:, 0].astype(int)
@@ -133,7 +138,7 @@ class BlobDetector(FindSpotsAlgorithm):
         )
         spots = SpotAttributes(spot_data)
         spots.data[Features.SPOT_ID] = np.arange(spots.data.shape[0])
-        return spots
+        return PerImageSliceSpotResults(spot_attrs=spots, extras=None)
 
     def run(
             self,

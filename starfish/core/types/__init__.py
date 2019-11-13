@@ -17,7 +17,7 @@ from ._constants import (
 from ._decoded_spots import DecodedSpots
 from ._functionsource import FunctionSource
 from ._spot_attributes import SpotAttributes
-from ._spot_finding_results import SpotFindingResults
+from ._spot_finding_results import PerImageSliceSpotResults, SpotFindingResults
 
 Number = Union[int, float]
 CoordinateValue = Union[Number, Tuple[Number, Number]]

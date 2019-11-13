@@ -1,5 +1,6 @@
 import json
 import uuid
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, TypeVar, Union
 
 import numpy as np
@@ -388,13 +389,13 @@ class Codebook(xr.DataArray):
 
         return cls.from_code_array(codebook_doc[DocumentKeys.MAPPINGS_KEY], n_round, n_channel)
 
-    def to_json(self, filename: str) -> None:
+    def to_json(self, filename: Union[str, Path]) -> None:
         """
         Save a codebook to json using SpaceTx Format.
 
         Parameters
         ----------
-        filename : str
+        filename : Union[str, Path]
             The name of the file in which to save the codebook.
 
         """

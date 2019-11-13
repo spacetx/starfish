@@ -1,5 +1,3 @@
-import os
-
 import numpy as np
 
 from starfish.core.morphology.object.label_image.label_image import LabelImage
@@ -94,13 +92,41 @@ def test_save_load(tmp_path):
     binary_mask_collection = BinaryMaskCollection.from_label_image(label_image)
 
     path = tmp_path / "data.tgz"
-    try:
-        binary_mask_collection.to_targz(path)
-        masks2 = BinaryMaskCollection.open_targz(path)
-        for m, m2 in zip(binary_mask_collection.masks(), masks2.masks()):
-            assert np.array_equal(m, m2)
-    finally:
-        os.remove(path)
+    binary_mask_collection.to_targz(path)
+    masks2 = BinaryMaskCollection.open_targz(path)
+    for m, m2 in zip(binary_mask_collection.masks(), masks2.masks()):
+        assert np.array_equal(m, m2)
+
+    # ensure that the regionprops are equal
+    for ix in range(len(binary_mask_collection)):
+        original_props = binary_mask_collection.mask_regionprops(ix)
+        recalculated_props = binary_mask_collection.mask_regionprops(ix)
+        assert original_props == recalculated_props
+
+
+def test_from_empty_label_image(tmp_path):
+    label_image_array = np.zeros((5, 6), dtype=np.int32)
+
+    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
+                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
+
+    label_image = LabelImage.from_array_and_coords(
+        label_image_array,
+        None,
+        physical_ticks,
+        None,
+    )
+
+    binary_mask_collection = BinaryMaskCollection.from_label_image(label_image)
+    masks = list(binary_mask_collection.masks())
+
+    assert len(masks) == 0
+
+    path = tmp_path / "data.tgz"
+    binary_mask_collection.to_targz(path)
+    masks2 = BinaryMaskCollection.open_targz(path)
+    for m, m2 in zip(binary_mask_collection.masks(), masks2.masks()):
+        assert np.array_equal(m, m2)
 
     # ensure that the regionprops are equal
     for ix in range(len(binary_mask_collection)):

@@ -400,20 +400,23 @@ class Codebook(xr.DataArray):
 
         """
         code_array = []
-        for target in self[Features.TARGET]:
+        for target_index in range(self.sizes[Features.TARGET]):
             codeword = []
-            for ch_label in self[Axes.CH.value]:
-                for round_label in self[Axes.ROUND.value]:
-                    if self.loc[target, round_label, ch_label]:
-                        codeword.append(
-                            {
-                                Axes.CH.value: int(ch_label),
-                                Axes.ROUND.value: int(round_label),
-                                Features.CODE_VALUE: float(self.loc[target, round_label, ch_label])
-                            })
+            target_codeword = self[{Features.TARGET: target_index}]
+            nonzero_indices = np.nonzero(target_codeword.values)
+            for round_index, ch_index in zip(*nonzero_indices):
+                codeword.append(
+                    {
+                        Axes.ROUND.value: int(self.coords[Axes.ROUND.value][round_index]),
+                        Axes.CH.value: int(self.coords[Axes.CH.value][ch_index]),
+                        Features.CODE_VALUE: float(target_codeword[round_index, ch_index])
+                    })
+            target_cell: np.ndarray = self.coords[Features.TARGET][target_index].values
+            assert len(target_cell.shape) == 0
+            target_name = str(target_cell)
             code_array.append({
                 Features.CODEWORD: codeword,
-                Features.TARGET: str(target.values)
+                Features.TARGET: target_name,
             })
         codebook_document = {
             DocumentKeys.VERSION_KEY: str(CURRENT_VERSION),

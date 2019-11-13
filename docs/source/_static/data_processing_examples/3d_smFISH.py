@@ -116,7 +116,7 @@ def processing_pipeline(
         bandpass.run(primary_image, **filter_kwargs)
         glp.run(primary_image, **filter_kwargs)
         clip2.run(primary_image, **filter_kwargs)
-
+        
         print("Calling spots...")
         spots = tlmpf.run(primary_image)
         print("Decoding spots...")

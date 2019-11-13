@@ -1,56 +1,52 @@
-from typing import MutableSequence, Sequence, Union
+from typing import MutableSequence, Tuple
 
 import numpy as np
-import xarray as xr
-
-from starfish.types import Axes
-from .util import _get_axes_names
 
 
 def fill_from_mask(
-        mask: xr.DataArray,
+        mask: np.ndarray,
+        offsets: Tuple[int, ...],
         fill_value: int,
         result_array: np.ndarray,
-        axes_order: Sequence[Union[str, Axes]] = (Axes.ZPLANE, Axes.Y, Axes.X),
 ):
-    """Take a binary mask with labeled axes and write `fill_value` to an array `result_array` where
-    the binary mask has a True value.  The output array is assumed to have a zero origin.  The input
-    mask has unspecified axes orders and the axes labels are used to determine the origin.
+    """Take a binary mask and write `fill_value` to an array `result_array` where the binary mask
+    has a True value.  The binary mask can have a different origin than the output array.  The
+    relative offsets between the binary mask's origin an the output array's origin must be provided.
 
     Examples
     --------
     >>> import numpy as np
-    >>> import xarray as xr
-    >>> mask = xr.DataArray([True, True, False], dims='x', coords={'x': [1, 2, 3]})
+    >>> mask = np.array([True, True, False], dtype=np.bool)
     >>> mask
-    <xarray.DataArray (x: 3)>
     array([ True,  True, False])
-    Coordinates:
-      * x        (x) int64 1 2 3
     >>> result_array = np.zeros(shape=(4,), dtype=np.uint32)
-    >>> fill_from_mask(mask, 2, result_array)
+    >>> fill_from_mask(mask, (1,), 2, result_array)
     >>> result_array
-    array([0, 2, 2, 2], dtype=uint32)
+    array([0, 2, 2, 0], dtype=uint32)
     """
-    axes_order = tuple(axis.value if isinstance(axis, Axes) else axis for axis in axes_order)
-    axes, _ = _get_axes_names(mask.ndim)
+    if mask.ndim != result_array.ndim:
+        raise ValueError(
+            f"mask ({mask.ndim}) should have the same number of dimensions as the result array "
+            f"({result_array.ndim})")
+    if mask.ndim != len(offsets):
+        raise ValueError(
+            f"mask ({mask.ndim}) should have the same number of dimensions as the number of "
+            f"offsets ({len(offsets)})")
+
     selector: MutableSequence[slice] = []
-    for axis_number, axis in enumerate(axes_order):
-        coord_values = mask.coords[axis].values
-        selector.append(slice(coord_values[0], coord_values[-1] + 1))
-        if coord_values[0] < 0:
+    for ix, (mask_size, result_size, axis_offset) in enumerate(
+            zip(mask.shape, result_array.shape, offsets)):
+        end_offset = axis_offset + mask_size
+        if axis_offset < 0:
             raise ValueError(
-                f"labels for axis {axis} should range from 0 to "
-                f"{result_array.shape[axis_number] - 1}.  The minimum value found was "
-                f"{coord_values[0]}"
-            )
-        if coord_values[-1] >= result_array.shape[axis_number]:
+                "{ix}th dimension has a negative offset ({axis_offset}), which is not permitted")
+        if end_offset > result_size:
             raise ValueError(
-                f"labels for axis {axis} should range from 0 to "
-                f"{result_array.shape[axis_number] - 1}.  The maximum value found was "
-                f"{coord_values[-1]}"
-            )
+                f"{ix}th dimension of mask does not fit within the result (ends at {end_offset}, "
+                f"result size is {result_size}")
+
+        selector.append(slice(axis_offset, end_offset))
 
     fill_value_array = result_array[selector]
-    fill_value_array[mask.values] = fill_value
+    fill_value_array[mask] = fill_value
     result_array[selector] = fill_value_array

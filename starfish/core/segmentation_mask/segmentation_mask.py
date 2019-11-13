@@ -1,51 +1,49 @@
+from pathlib import Path
 from typing import (
-    Dict,
-    Iterable,
+    Mapping,
     Optional,
     Sequence,
+    Union,
 )
 from warnings import warn
 
-import numpy as np
-import xarray as xr
-from skimage.measure._regionprops import _RegionProperties
-
-from starfish.core.binary_mask import BinaryMaskCollection
-from starfish.core.types import Coordinates
+from starfish.core.binary_mask.binary_mask import BinaryMaskCollection, MaskData
+from starfish.core.label_image import label_image as li
+from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.util.logging import Log
 
 
 class SegmentationMaskCollection(BinaryMaskCollection):
     """Deprecated in favor of BinaryMaskCollection."""
     def __init__(
             self,
-            masks: Iterable[xr.DataArray],
-            props: Optional[Iterable[Optional[_RegionProperties]]] = None,
+            pixel_ticks: Union[Mapping[Axes, Sequence[int]], Mapping[str, Sequence[int]]],
+            physical_ticks: Union[Mapping[Coordinates, Sequence[Number]],
+                                  Mapping[str, Sequence[Number]]],
+            masks: Sequence[MaskData],
+            log: Optional[Log],
     ):
         warn(
             f"{self.__class__.__name__} has been deprecated in favor of "
             f"{BinaryMaskCollection.__name__}",
             DeprecationWarning
         )
-        super().__init__(masks, props)
+        super().__init__(pixel_ticks, physical_ticks, masks, log)
 
     @classmethod
-    def from_label_image(
-            cls,
-            label_image: np.ndarray,
-            physical_ticks: Dict[Coordinates, Sequence[float]]
-    ) -> "BinaryMaskCollection":
+    def from_label_image(cls, label_image: li.LabelImage) -> "BinaryMaskCollection":
         warn(
             f"{cls.__class__.__name__} has been deprecated in favor of "
             f"{BinaryMaskCollection.__name__}",
             DeprecationWarning
         )
-        return BinaryMaskCollection.from_label_image(label_image, physical_ticks)
+        return BinaryMaskCollection.from_label_image(label_image)
 
     @classmethod
-    def from_disk(cls, path: str) -> "BinaryMaskCollection":
+    def open_targz(cls, path: Union[str, Path]) -> "BinaryMaskCollection":
         warn(
             f"{cls.__class__.__name__} has been deprecated in favor of "
             f"{BinaryMaskCollection.__name__}",
             DeprecationWarning
         )
-        return BinaryMaskCollection.from_disk(path)
+        return BinaryMaskCollection.open_targz(path)

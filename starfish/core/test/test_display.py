@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from starfish import BinaryMaskCollection, display
+from starfish import BinaryMaskCollection, display, LabelImage
 from starfish.core.test.factories import SyntheticData
 from starfish.types import Coordinates
 
@@ -21,10 +21,13 @@ sd = SyntheticData(
 
 stack = sd.spots()
 spots = sd.intensities()
-masks = BinaryMaskCollection.from_label_image(
+label_image = LabelImage.from_array_and_coords(
     np.random.rand(128, 128).astype(np.uint8),
-    {Coordinates.Y: np.arange(128), Coordinates.X: np.arange(128)}
+    None,
+    {Coordinates.Y: np.arange(128), Coordinates.X: np.arange(128)},
+    None,
 )
+masks = BinaryMaskCollection.from_label_image(label_image)
 
 
 @pytest.mark.napari

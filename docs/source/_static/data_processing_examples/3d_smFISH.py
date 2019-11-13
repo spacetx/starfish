@@ -120,7 +120,7 @@ def processing_pipeline(
         print("Calling spots...")
         spots = tlmpf.run(primary_image)
         print("Decoding spots...")
-        decoded_intensities = decoder.run(spots)
+        decoded_intensities = decoder.run(spots=spots)
         all_intensities.append(decoded_intensities)
 
     decoded = DecodedIntensityTable.concatenate_intensity_tables(all_intensities)

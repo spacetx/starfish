@@ -121,7 +121,7 @@ slow: fast run-notebooks test-examples docker
 
 docker:
 	docker build -f docker/Dockerfile -t $(DOCKER_IMAGE) .
-	docker run -ti --rm $(DOCKER_IMAGE) --help
+	docker run -ti --rm $(DOCKER_IMAGE) starfish --help
 
 
 help-integration:

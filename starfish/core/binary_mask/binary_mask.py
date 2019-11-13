@@ -1,18 +1,16 @@
-import io
-import itertools
-import tarfile
+import os
+from copy import deepcopy
 from dataclasses import dataclass
+from pathlib import Path
 from typing import (
-    cast,
-    Dict,
+    Any,
     Hashable,
-    Iterable,
     Iterator,
+    Mapping,
     MutableMapping,
     MutableSequence,
     Optional,
     Sequence,
-    Set,
     Tuple,
     Union,
 )
@@ -22,42 +20,17 @@ import xarray as xr
 from skimage.measure import regionprops
 from skimage.measure._regionprops import _RegionProperties
 
+from starfish.core.label_image import LabelImage
 from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.util.logging import Log
 from .expand import fill_from_mask
 from .util import _get_axes_names
 
 
-def _validate_binary_mask(arr: xr.DataArray):
-    """Validate if the given array is a binary mask.
-
-    Parameters
-    ----------
-    arr : xr.DataArray
-        Array to check.
-    """
-    if not isinstance(arr, xr.DataArray):
-        raise TypeError(f"expected DataArray; got {type(arr)}")
-
-    if arr.ndim not in (2, 3):
-        raise TypeError(f"expected 2 or 3 dimensions; got {arr.ndim}")
-
-    if arr.dtype != np.bool:
-        raise TypeError(f"expected dtype of bool; got {arr.dtype}")
-
-    axes, coords = _get_axes_names(arr.ndim)
-    dims: Set[str] = set(axis.value for axis in axes)
-
-    if dims != set(arr.dims):
-        raise TypeError(f"missing dimensions '{dims.difference(arr.dims)}'")
-
-    dims = dims.union(set(coord.value for coord in coords))
-    if dims != set(arr.coords):
-        raise TypeError(f"missing coordinates '{dims.difference(arr.coords)}'")
-
-
 @dataclass
 class MaskData:
-    binary_mask: xr.DataArray
+    binary_mask: np.ndarray
+    offsets: Tuple[int, ...]
     region_properties: Optional[_RegionProperties]
 
 
@@ -66,179 +39,206 @@ class BinaryMaskCollection:
 
     Parameters
     ----------
-    masks : Iterable[xr.DataArray]
-        Binary masks.
-    props : Iterable[_RegionProperties]
-        Properties for each of the regions in the masks.
+    pixel_ticks : Union[Mapping[Axes, Sequence[int]], Mapping[str, Sequence[int]]]
+        A map from the axis to the values for that axis.
+    physical_ticks : Union[Mapping[Coordinates, Sequence[Number]],
+                                 Mapping[str, Sequence[Number]]
+        A map from the physical coordinate type to the values for axis.  For 2D label images,
+        X and Y physical coordinates must be provided.  For 3D label images, Z physical
+        coordinates must also be provided.
+    masks : Sequence[MaskData]
+        A sequence of data for binary masks.
 
     Attributes
     ----------
-    max_shape : Dict[Axes, Optional[int]]
+    max_shape : Mapping[Axes, int]
         Maximum index of contained masks.
     """
     def __init__(
             self,
-            masks: Iterable[xr.DataArray],
-            props: Optional[Iterable[Optional[_RegionProperties]]] = None,
+            pixel_ticks: Union[Mapping[Axes, Sequence[int]], Mapping[str, Sequence[int]]],
+            physical_ticks: Union[Mapping[Coordinates, Sequence[Number]],
+                                  Mapping[str, Sequence[Number]]],
+            masks: Sequence[MaskData],
+            log: Optional[Log],
     ):
-        if props is None:
-            props = itertools.cycle((None,))
-        self._masks: MutableMapping[int, MaskData] = {}
-        self.max_shape: Dict[Axes, int] = {
-            Axes.X: 0,
-            Axes.Y: 0,
-            Axes.ZPLANE: 0
+        self._pixel_ticks: Mapping[Axes, Sequence[int]] = {
+            Axes(axis): axis_data
+            for axis, axis_data in pixel_ticks.items()
         }
+        self._physical_ticks: Mapping[Coordinates, Sequence[Number]] = {
+            Coordinates(coord): coord_data
+            for coord, coord_data in physical_ticks.items()
+        }
+        self._masks: MutableMapping[int, MaskData] = {}
+        self._log: Log = log or Log()
 
-        for ix, (mask, mask_props) in enumerate(zip(masks, props)):
-            _validate_binary_mask(mask)
+        for ix, mask_data in enumerate(masks):
+            if mask_data.binary_mask.ndim not in (2, 3):
+                raise TypeError(f"expected 2 or 3 dimensions; got {mask_data.binary_mask.ndim}")
+            if mask_data.binary_mask.dtype != np.bool:
+                raise ValueError(f"expected dtype of bool; got {mask_data.binary_mask.dtype}")
 
-            self._masks[ix] = MaskData(mask, mask_props)
+            self._masks[ix] = mask_data
 
-            for axis in Axes:
-                if axis.value in mask.coords:
-                    max_val = mask.coords[axis.value].values[-1]
-                    if max_val >= self.max_shape[axis]:
-                        self.max_shape[axis] = max_val + 1
+        if len(self._pixel_ticks) != len(self._physical_ticks):
+            raise ValueError(
+                "pixel_ticks should have the same cardinality as physical_ticks")
+        for axis, coord in zip(*_get_axes_names(len(self._pixel_ticks))):
+            if axis not in self._pixel_ticks:
+                raise ValueError(f"pixel ticks missing {axis.value} data")
+            if coord not in self._physical_ticks:
+                raise ValueError(f"physical coordinate ticks missing {coord.value} data")
+            if len(self._pixel_ticks[axis]) != len(self._physical_ticks[coord]):
+                raise ValueError(
+                    f"pixel ticks for {axis.name} does not have the same cardinality as physical "
+                    f"coordinates ticks for {coord.name}")
 
     def __getitem__(self, index: int) -> xr.DataArray:
-        return self._masks[index].binary_mask
+        return self._format_mask_as_xarray(index)
 
     def __iter__(self) -> Iterator[Tuple[int, xr.DataArray]]:
-        for mask_index, mask_data in self._masks.items():
-            yield mask_index, mask_data.binary_mask
+        for mask_index in self._masks.keys():
+            yield mask_index, self._format_mask_as_xarray(mask_index)
 
     def __len__(self) -> int:
         return len(self._masks)
 
+    def _format_mask_as_xarray(self, index: int) -> xr.DataArray:
+        """Convert a np-based mask into an xarray DataArray."""
+        mask_data = self._masks[index]
+        max_mask_name_len = len(str(len(self._masks) - 1))
+
+        xr_dims: MutableSequence[str] = []
+        xr_coords: MutableMapping[Hashable, Any] = {}
+
+        for ix, (axis, coord) in enumerate(zip(*_get_axes_names(len(self._pixel_ticks)))):
+            xr_dims.append(axis.value)
+            start_offset = mask_data.offsets[ix]
+            end_offset = mask_data.offsets[ix] + mask_data.binary_mask.shape[ix]
+            xr_coords[axis.value] = self._pixel_ticks[axis.value][start_offset:end_offset]
+            xr_coords[coord.value] = (
+                axis.value, self._physical_ticks[coord.value][start_offset:end_offset])
+
+        return xr.DataArray(
+            mask_data.binary_mask,
+            dims=xr_dims,
+            coords=xr_coords,
+            name=f"{index:0{max_mask_name_len}d}"
+        )
+
     def masks(self) -> Iterator[xr.DataArray]:
-        for mask_index, mask_data in self._masks.items():
-            yield mask_data.binary_mask
+        for mask_index in self._masks.keys():
+            yield self._format_mask_as_xarray(mask_index)
 
     def mask_regionprops(self, mask_id: int) -> _RegionProperties:
         """
-        Return the region properties for
+        Return the region properties for a given mask.
+
         Parameters
         ----------
-        mask_id
+        mask_id : int
+            The mask ID for the mask.
 
         Returns
         -------
-
+        _RegionProperties
+            The region properties for that mask.
         """
         mask_data = self._masks[mask_id]
         if mask_data.region_properties is None:
             # recreate the label image (but with just this mask)
             image = np.zeros(
                 shape=tuple(
-                    self.max_shape[axis]
-                    for axis, _ in zip(*_get_axes_names(3))
-                    if self.max_shape[axis] != 0
+                    len(self._pixel_ticks[axis])
+                    for axis, _ in zip(*_get_axes_names(len(self._pixel_ticks)))
                 ),
                 dtype=np.uint32,
             )
             fill_from_mask(
                 mask_data.binary_mask,
+                mask_data.offsets,
                 mask_id + 1,
                 image,
-                [axis for axis, _ in zip(*_get_axes_names(3)) if self.max_shape[axis] != 0],
             )
-            mask_data.region_properties = regionprops(image)
+            mask_data.region_properties = regionprops(image.data)
         return mask_data.region_properties
 
+    @property
+    def max_shape(self) -> Mapping[Axes, int]:
+        return {
+            axis: len(self._pixel_ticks[axis])
+            for ix, (axis, _) in enumerate(zip(*_get_axes_names(len(self._pixel_ticks))))
+        }
+
     @classmethod
-    def from_label_image(
-            cls,
-            label_image: np.ndarray,
-            physical_ticks: Dict[Coordinates, Sequence[Number]]
-    ) -> "BinaryMaskCollection":
+    def from_label_image(cls, label_image: LabelImage) -> "BinaryMaskCollection":
         """Creates binary masks from a label image.
 
         Parameters
         ----------
-        label_image : int array
-            Integer array where each integer corresponds to a region.
-        physical_ticks : Dict[Coordinates, Sequence[float]]
-            Physical ticks for each axis.
+        label_image : LabelImage
+            LabelImage to extract binary masks from.
 
         Returns
         -------
         masks : BinaryMaskCollection
             Masks generated from the label image.
         """
-        props = regionprops(label_image)
-        len_max_label = len(str(len(props) - 1))
+        props = regionprops(label_image.xarray.data)
 
-        dims, _ = _get_axes_names(label_image.ndim)
+        pixel_ticks = {
+            axis.value: label_image.xarray.coords[axis.value]
+            for axis, _ in zip(*_get_axes_names(label_image.xarray.ndim))
+            if axis.value in label_image.xarray.coords
+        }
+        physical_ticks = {
+            coord.value: label_image.xarray.coords[coord.value]
+            for _, coord in zip(*_get_axes_names(label_image.xarray.ndim))
+            if coord.value in label_image.xarray.coords
+        }
+        masks: Sequence[MaskData] = [
+            MaskData(prop.image, prop.bbox[:label_image.xarray.ndim], prop)
+            for prop in props
+        ]
+        log = deepcopy(label_image.log)
 
-        masks: MutableSequence[xr.DataArray] = []
-        coords: Dict[Hashable, Union[list, Tuple[str, Sequence]]]
+        return cls(
+            pixel_ticks,
+            physical_ticks,
+            masks,
+            log,
+        )
 
-        # for each region (and its properties):
-        for label, prop in enumerate(props):
-            # create pixel ticks from the bounding box to preserve spatial indexing relative to the
-            # original image
-            coords = {d.value: list(range(prop.bbox[i], prop.bbox[i + len(dims)]))
-                      for i, d in enumerate(dims)}
+    def to_label_image(self) -> LabelImage:
+        shape = tuple(
+            len(self._pixel_ticks[axis])
+            for axis in (Axes.ZPLANE, Axes.Y, Axes.X)
+            if axis in self._pixel_ticks
+        )
+        label_image_array = np.zeros(shape=shape, dtype=np.uint16)
+        for ix, mask_data in self._masks.items():
+            fill_from_mask(
+                mask_data.binary_mask,
+                mask_data.offsets,
+                ix + 1,
+                label_image_array,
+            )
 
-            # create physical ticks by taking the overlapping subset from the full span of labels
-            for d, c in physical_ticks.items():
-                axis = d.value[0]
-                i = dims.index(axis)
-                coords[d.value] = (axis, c[prop.bbox[i]:prop.bbox[i + len(dims)]])
-
-            mask = xr.DataArray(prop.image,
-                                dims=[dim.value for dim in dims],
-                                coords=coords,
-                                name=f"{label:0{len_max_label}d}")
-            masks.append(mask)
-
-        return cls(masks, props)
-
-    def to_label_image(
-            self,
-            shape: Optional[Tuple[int, ...]] = None,
-            *,
-            ordering: Sequence[Axes] = (Axes.ZPLANE, Axes.Y, Axes.X),
-    ):
-        """Create a label image from the contained masks.
-
-        Parameters
-        ----------
-        shape : Optional[Tuple[int, ...]]
-            Shape of the label image. If ``None``, use maximum index for each axis.
-        ordering : Sequence[Axes]
-            Ordering of the axes. Default is z, y, x.
-
-        Returns
-        -------
-        label_image : np.ndarray
-            uint16 array where each integer corresponds to a label
-        """
-        ordering = [o for o in ordering if self.max_shape[o] > 0]
-
-        max_shape = tuple(self.max_shape[o] for o in ordering)
-
-        if shape is None:
-            shape = max_shape
-        elif np.any(np.less(shape, max_shape)):
-            raise ValueError("shape less than the maximum of the data provided."
-                             "cropping is not supported at this time")
-
-        label_image = np.zeros(shape, dtype=np.uint16)
-
-        for i, mask in iter(self):
-            fill_from_mask(mask, i + 1, label_image, ordering)
-
-        return label_image
+        return LabelImage.from_array_and_coords(
+            label_image_array,
+            self._pixel_ticks,
+            self._physical_ticks,
+            self._log,
+        )
 
     @classmethod
-    def from_disk(cls, path: str) -> "BinaryMaskCollection":
-        """Load the collection from disk.
+    def open_targz(cls, path: Union[str, Path]) -> "BinaryMaskCollection":
+        """Load the collection saved as a .tar.gz file from disk
 
         Parameters
         ----------
-        path : str
+        path : Union[str, Path]
             Path of the tar file to instantiate from.
 
         Returns
@@ -246,28 +246,20 @@ class BinaryMaskCollection:
         masks : BinaryMaskCollection
             Collection of binary masks.
         """
-        masks = []
+        with open(os.fspath(path), "rb") as fh:
+            return _io.BinaryMaskIO.read_versioned_binary_mask(fh)
 
-        with tarfile.open(path) as t:
-            for info in t.getmembers():
-                f = t.extractfile(info.name)
-                mask = xr.open_dataarray(f)
-                masks.append(mask)
-
-        return cls(masks)
-
-    def save(self, path: str):
-        """Save the binary masks to disk.
+    def to_targz(self, path: Union[str, Path]):
+        """Save the binary masks to disk as a .tar.gz file.
 
         Parameters
         ----------
-        path : str
+        path : Union[str, Path]
             Path of the tar file to write to.
         """
-        with tarfile.open(path, 'w:gz') as t:
-            for i, mask in iter(self):
-                data = cast(bytes, mask.to_netcdf())
-                with io.BytesIO(data) as buff:
-                    info = tarfile.TarInfo(name=str(i) + '.nc')
-                    info.size = len(data)
-                    t.addfile(tarinfo=info, fileobj=buff)
+        with open(os.fspath(path), "wb") as fh:
+            _io.BinaryMaskIO.write_versioned_binary_mask(fh, self)
+
+
+# these need to be at the end to avoid recursive imports
+from . import _io  # noqa

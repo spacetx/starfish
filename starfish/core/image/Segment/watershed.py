@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 import scipy.ndimage.measurements as spm
@@ -10,6 +10,7 @@ from skimage.morphology import watershed
 from starfish.core.binary_mask import BinaryMaskCollection
 from starfish.core.image.Filter.util import bin_open, bin_thresh
 from starfish.core.imagestack.imagestack import ImageStack
+from starfish.core.label_image import LabelImage
 from starfish.core.types import Axes, Coordinates, Number
 from ._base import SegmentAlgorithm
 
@@ -89,17 +90,25 @@ class Watershed(SegmentAlgorithm):
         nuclei_mp = nuclei.reduce({Axes.ROUND, Axes.CH, Axes.ZPLANE}, func="max")
         nuclei__mp_numpy = nuclei_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
         self._segmentation_instance = _WatershedSegmenter(nuclei__mp_numpy, stain)
-        label_image = self._segmentation_instance.segment(
+        label_image_array = self._segmentation_instance.segment(
             self.nuclei_threshold, self.input_threshold, size_lim, disk_size_markers,
             disk_size_mask, self.min_distance
         )
 
         # we max-projected and squeezed the Z-plane so label_image.ndim == 2
-        physical_ticks = {coord: nuclei.xarray.coords[coord.value].data
-                          for coord in (Coordinates.Y, Coordinates.X)}
+        physical_ticks: Mapping[Coordinates, Sequence[Number]] = {
+            coord: nuclei.xarray.coords[coord.value].data
+            for coord in (Coordinates.Y, Coordinates.X)
+        }
 
-        return BinaryMaskCollection.from_label_image(label_image,
-                                                     physical_ticks)
+        label_image = LabelImage.from_array_and_coords(
+            label_image_array,
+            None,
+            physical_ticks,
+            None,  # TODO: (ttung) this should really be logged.
+        )
+
+        return BinaryMaskCollection.from_label_image(label_image)
 
     def show(self, figsize: Tuple[int, int]=(10, 10)) -> None:
         if isinstance(self._segmentation_instance, _WatershedSegmenter):

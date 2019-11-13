@@ -20,5 +20,6 @@ from .core.expression_matrix.expression_matrix import ExpressionMatrix
 from .core.imagestack.imagestack import ImageStack
 from .core.intensity_table.decoded_intensity_table import DecodedIntensityTable
 from .core.intensity_table.intensity_table import IntensityTable
+from .core.label_image import LabelImage
 from .core.segmentation_mask import SegmentationMaskCollection
 from .core.util.logging import Log

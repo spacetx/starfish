@@ -102,8 +102,11 @@ def test_int_type_promotion():
     )
     with warnings.catch_warnings(record=True) as warnings_:
         stack._ensure_data_loaded()
-        assert len(warnings_) == 1
-        assert issubclass(warnings_[0].category, DataFormatWarning)
+        for warning in warnings_:
+            if issubclass(warning.category, DataFormatWarning):
+                break
+        else:
+            pytest.fail(f"No {DataFormatWarning.__name__} warning raised.")
     expected = img_as_float32(np.ones(
         (NUM_ROUND,
          NUM_CH,
@@ -125,8 +128,11 @@ def test_uint_type_promotion():
     )
     with warnings.catch_warnings(record=True) as warnings_:
         stack._ensure_data_loaded()
-        assert len(warnings_) == 1
-        assert issubclass(warnings_[0].category, DataFormatWarning)
+        for warning in warnings_:
+            if issubclass(warning.category, DataFormatWarning):
+                break
+        else:
+            pytest.fail(f"No {DataFormatWarning.__name__} warning raised.")
     expected = img_as_float32(np.ones(
         (NUM_ROUND,
          NUM_CH,
@@ -148,8 +154,11 @@ def test_float_type_demotion():
     )
     with warnings.catch_warnings(record=True) as warnings_:
         stack._ensure_data_loaded()
-        assert len(warnings_) == 1
-        assert issubclass(warnings_[0].category, DataFormatWarning)
+        for warning in warnings_:
+            if issubclass(warning.category, DataFormatWarning):
+                break
+        else:
+            pytest.fail(f"No {DataFormatWarning.__name__} warning raised.")
     expected = np.ones(
         (NUM_ROUND,
          NUM_CH,

@@ -248,9 +248,6 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
             footprint=None,
             labels=labels
         )
-        # this is a workaround for the fix https://github.com/scikit-image/scikit-image/pull/4263
-        if spot_coords.shape[0] == 0:
-            spot_coords = np.empty((0, data_image.ndim), np.int)
 
         res = {Axes.X.value: spot_coords[:, 2],
                Axes.Y.value: spot_coords[:, 1],

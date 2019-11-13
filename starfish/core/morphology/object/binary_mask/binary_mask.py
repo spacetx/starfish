@@ -20,11 +20,11 @@ import xarray as xr
 from skimage.measure import regionprops
 from skimage.measure._regionprops import _RegionProperties
 
-from starfish.core.label_image import LabelImage
+from starfish.core.morphology.object.label_image import LabelImage
+from starfish.core.morphology.object.util import _get_axes_names
 from starfish.core.types import Axes, Coordinates, Number
 from starfish.core.util.logging import Log
 from .expand import fill_from_mask
-from .util import _get_axes_names
 
 
 @dataclass

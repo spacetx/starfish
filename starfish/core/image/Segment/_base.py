@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
-from starfish.core.binary_mask import BinaryMaskCollection
 from starfish.core.imagestack.imagestack import ImageStack
+from starfish.core.morphology.object.binary_mask import BinaryMaskCollection
 from starfish.core.pipeline.algorithmbase import AlgorithmBase
 
 

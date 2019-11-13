@@ -75,30 +75,30 @@ def test_from_label_image():
 
     assert len(masks) == 2
 
-    region_1, region_2 = masks
+    region_0, region_1 = masks
 
+    assert region_0.name == '0'
     assert region_1.name == '1'
-    assert region_2.name == '2'
 
-    assert np.array_equal(region_1, np.ones((1, 5), dtype=np.bool))
+    assert np.array_equal(region_0, np.ones((1, 5), dtype=np.bool))
     temp = np.ones((2, 2), dtype=np.bool)
     temp[-1, -1] = False
-    assert np.array_equal(region_2, temp)
+    assert np.array_equal(region_1, temp)
 
-    assert np.array_equal(region_1[Axes.Y.value], [0])
-    assert np.array_equal(region_1[Axes.X.value], [0, 1, 2, 3, 4])
+    assert np.array_equal(region_0[Axes.Y.value], [0])
+    assert np.array_equal(region_0[Axes.X.value], [0, 1, 2, 3, 4])
 
-    assert np.array_equal(region_2[Axes.Y.value], [3, 4])
-    assert np.array_equal(region_2[Axes.X.value], [3, 4])
+    assert np.array_equal(region_1[Axes.Y.value], [3, 4])
+    assert np.array_equal(region_1[Axes.X.value], [3, 4])
 
-    assert np.array_equal(region_1[Coordinates.Y.value],
+    assert np.array_equal(region_0[Coordinates.Y.value],
                           physical_ticks[Coordinates.Y][0:1])
-    assert np.array_equal(region_1[Coordinates.X.value],
+    assert np.array_equal(region_0[Coordinates.X.value],
                           physical_ticks[Coordinates.X][0:5])
 
-    assert np.array_equal(region_2[Coordinates.Y.value],
+    assert np.array_equal(region_1[Coordinates.Y.value],
                           physical_ticks[Coordinates.Y][3:5])
-    assert np.array_equal(region_2[Coordinates.X.value],
+    assert np.array_equal(region_1[Coordinates.X.value],
                           physical_ticks[Coordinates.X][3:5])
 
 

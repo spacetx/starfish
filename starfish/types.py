@@ -1,12 +1,15 @@
 # constants
 from starfish.core.types import (  # noqa: F401
+    ArrayLike,
     Axes,
     Clip,
     Coordinates,
+    CoordinateValue,
     CORE_DEPENDENCIES,
     Features,
     FunctionSource,
     LOG,
+    Number,
     OverlapStrategy,
     PerImageSliceSpotResults,
     PHYSICAL_COORDINATE_DIMENSION,
@@ -15,4 +18,3 @@ from starfish.core.types import (  # noqa: F401
     TraceBuildingStrategies,
     TransformType,
 )
-from starfish.core.types import CoordinateValue, Number  # noqa: F401

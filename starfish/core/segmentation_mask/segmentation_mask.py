@@ -7,8 +7,8 @@ from typing import (
 )
 from warnings import warn
 
-from starfish.core.morphology.object.binary_mask.binary_mask import BinaryMaskCollection, MaskData
-from starfish.core.morphology.object.label_image import label_image as li
+from starfish.core.morphology.binary_mask import BinaryMaskCollection, MaskData
+from starfish.core.morphology.label_image import label_image as li
 from starfish.core.types import Axes, Coordinates, Number
 from starfish.core.util.logging import Log
 

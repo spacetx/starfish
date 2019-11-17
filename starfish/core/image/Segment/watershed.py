@@ -9,8 +9,8 @@ from skimage.morphology import watershed
 
 from starfish.core.image.Filter.util import bin_open, bin_thresh
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.morphology.object.binary_mask import BinaryMaskCollection
-from starfish.core.morphology.object.label_image import LabelImage
+from starfish.core.morphology.binary_mask import BinaryMaskCollection
+from starfish.core.morphology.label_image import LabelImage
 from starfish.core.types import Axes, Coordinates, Number
 from ._base import SegmentAlgorithm
 

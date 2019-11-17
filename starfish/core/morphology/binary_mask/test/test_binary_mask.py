@@ -1,6 +1,6 @@
 import numpy as np
 
-from starfish.core.morphology.object.label_image.label_image import LabelImage
+from starfish.core.morphology.label_image import LabelImage
 from starfish.core.types import Axes, Coordinates
 from ..binary_mask import BinaryMaskCollection
 

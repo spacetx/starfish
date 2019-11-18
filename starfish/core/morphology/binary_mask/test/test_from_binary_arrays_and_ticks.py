@@ -2,23 +2,14 @@ import numpy as np
 import pytest
 
 from starfish.core.types import Axes, Coordinates
+from .factories import binary_arrays_2d, binary_arrays_3d
 from ..binary_mask import BinaryMaskCollection
 
 
 def test_2d():
     """Simple case of BinaryMaskCollection.from_binary_arrays_and_ticks with 2D data.  Pixel ticks
     are inferred."""
-    binary_arrays = [
-        np.zeros((5, 6), dtype=np.bool),
-        np.zeros((5, 6), dtype=np.bool),
-    ]
-    binary_arrays[0][0] = True
-    binary_arrays[1][3:5, 3:6] = True
-    binary_arrays[1][-1, -1] = False
-
-    physical_ticks = {
-        Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-        Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
+    binary_arrays, physical_ticks = binary_arrays_2d()
 
     binary_mask_collection = BinaryMaskCollection.from_binary_arrays_and_ticks(
         binary_arrays,
@@ -57,19 +48,7 @@ def test_2d():
 def test_3d():
     """Simple case of BinaryMaskCollection.from_binary_arrays_and_ticks with 3D data.  Pixel ticks
     are inferred."""
-    binary_arrays = [
-        np.zeros((2, 5, 6), dtype=np.bool),
-        np.zeros((2, 5, 6), dtype=np.bool),
-    ]
-    binary_arrays[0][0, 0] = True
-    binary_arrays[1][:, 3:5, 3:6] = True
-    binary_arrays[1][-1, -1, -1] = False
-
-    physical_ticks = {
-        Coordinates.Z: [0.0, 1.0],
-        Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-        Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]
-    }
+    binary_arrays, physical_ticks = binary_arrays_3d()
 
     binary_mask_collection = BinaryMaskCollection.from_binary_arrays_and_ticks(
         binary_arrays,
@@ -114,9 +93,7 @@ def test_3d():
 def test_no_mask():
     """Simple case of BinaryMaskCollection.from_binary_arrays_and_ticks with no masks.  Pixel ticks
     are inferred."""
-    physical_ticks = {
-        Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6],
-        Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
+    _, physical_ticks = binary_arrays_2d()
 
     binary_mask_collection = BinaryMaskCollection.from_binary_arrays_and_ticks(
         [],
@@ -142,9 +119,7 @@ def test_empty_mask():
     binary_arrays = [
         np.zeros((5, 6), dtype=np.bool),
     ]
-    physical_ticks = {
-        Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6],
-        Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
+    _, physical_ticks = binary_arrays_2d()
 
     binary_mask_collection = BinaryMaskCollection.from_binary_arrays_and_ticks(
         binary_arrays,
@@ -177,9 +152,7 @@ def test_mismatched_binary_array_sizes():
     binary_arrays[1][3:5, 3:6] = True
     binary_arrays[1][-1, -1] = False
 
-    physical_ticks = {
-        Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-        Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
+    _, physical_ticks = binary_arrays_2d()
 
     with pytest.raises(ValueError):
         BinaryMaskCollection.from_binary_arrays_and_ticks(
@@ -201,9 +174,7 @@ def test_mismatched_binary_array_types():
     binary_arrays[1][3:5, 3:6] = True
     binary_arrays[1][-1, -1] = False
 
-    physical_ticks = {
-        Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-        Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
+    _, physical_ticks = binary_arrays_2d()
 
     with pytest.raises(TypeError):
         BinaryMaskCollection.from_binary_arrays_and_ticks(
@@ -217,21 +188,12 @@ def test_mismatched_binary_array_types():
 def test_incorrectly_sized_pixel_ticks():
     """BinaryMaskCollection.from_binary_arrays_and_ticks with 2D data.  Pixel ticks are incorrectly
     sized."""
-    binary_arrays = [
-        np.zeros((5, 6), dtype=np.bool),
-        np.zeros((5, 6), dtype=np.bool),
-    ]
-    binary_arrays[0][0] = True
-    binary_arrays[1][3:5, 3:6] = True
-    binary_arrays[1][-1, -1] = False
+    binary_arrays, physical_ticks = binary_arrays_2d()
 
     pixel_ticks = {
         Axes.Y: [0, 1, 2, 3],
         Axes.X: [0, 1, 2, 3, 4, 5],
     }
-    physical_ticks = {
-        Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-        Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
 
     with pytest.raises(ValueError):
         BinaryMaskCollection.from_binary_arrays_and_ticks(

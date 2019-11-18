@@ -2,22 +2,17 @@ import numpy as np
 import pytest
 
 from starfish.core.types import Axes, Coordinates
+from .factories import label_array_2d, label_array_3d
 from ..binary_mask import BinaryMaskCollection
 
 
 def test_2d():
     """Simple case of BinaryMaskCollection.from_label_array_and_ticks with 2D data.  Pixel ticks are
     inferred."""
-    label_image_array = np.zeros((5, 6), dtype=np.int32)
-    label_image_array[0] = 1
-    label_image_array[3:5, 3:6] = 2
-    label_image_array[-1, -1] = 0
-
-    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
+    label_array, physical_ticks = label_array_2d()
 
     binary_mask_collection = BinaryMaskCollection.from_label_array_and_ticks(
-        label_image_array,
+        label_array,
         None,
         physical_ticks,
         None
@@ -53,19 +48,10 @@ def test_2d():
 def test_3d():
     """Simple case of BinaryMaskCollection.from_label_array_and_ticks with 3D data.  Pixel ticks are
     inferred."""
-    label_image_array = np.zeros((2, 5, 6), dtype=np.int32)
-    label_image_array[0, 0] = 1
-    label_image_array[:, 3:5, 3:6] = 2
-    label_image_array[-1, -1, -1] = 0
-
-    physical_ticks = {
-        Coordinates.Z: [0.0, 1.0],
-        Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-        Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]
-    }
+    label_array, physical_ticks = label_array_3d()
 
     binary_mask_collection = BinaryMaskCollection.from_label_array_and_ticks(
-        label_image_array,
+        label_array,
         None,
         physical_ticks,
         None
@@ -107,19 +93,13 @@ def test_3d():
 def test_from_label_array_provided_pixel_ticks():
     """BinaryMaskCollection.from_label_array_and_ticks with 2D data and some pixel ticks
     provided."""
-    label_image_array = np.zeros((5, 6), dtype=np.int32)
-    label_image_array[0] = 1
-    label_image_array[3:5, 3:6] = 2
-    label_image_array[-1, -1] = 0
-
+    label_array, physical_ticks = label_array_2d()
     pixel_ticks = {
         Axes.X: [2, 3, 4, 5, 6, 7],
     }
-    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
 
     binary_mask_collection = BinaryMaskCollection.from_label_array_and_ticks(
-        label_image_array,
+        label_array,
         pixel_ticks,
         physical_ticks,
         None
@@ -155,68 +135,54 @@ def test_from_label_array_provided_pixel_ticks():
 def test_incorrectly_sized_pixel_ticks():
     """BinaryMaskCollection.from_label_array_and_ticks with 2D data and some pixel ticks provided,
     albeit of the wrong cardinality."""
-    label_image_array = np.zeros((5, 6), dtype=np.int32)
-    label_image_array[0] = 1
-    label_image_array[3:5, 3:6] = 2
-    label_image_array[-1, -1] = 0
-
+    label_array, physical_ticks = label_array_2d()
     pixel_ticks = {
         Axes.X: [2, 3, 4, 5, 6, 7, 8],
     }
-    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
 
     with pytest.raises(ValueError):
         BinaryMaskCollection.from_label_array_and_ticks(
-            label_image_array,
+            label_array,
             pixel_ticks,
             physical_ticks,
             None
         )
 
 
-def test_missing_physical_ticks():
+def test_missing_physical_ticks_2d():
     """BinaryMaskCollection.from_label_array_and_ticks with some physical ticks missing."""
-    label_image_array_2d = np.zeros((5, 6), dtype=np.int32)
-    label_image_array_2d[0] = 1
-    label_image_array_2d[3:5, 3:6] = 2
-    label_image_array_2d[-1, -1] = 0
+    label_array, physical_ticks_all = label_array_2d()
 
-    physical_ticks_2d_all = {
-        Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-        Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]
-    }
-
-    for physical_coordinate_type in physical_ticks_2d_all.keys():
-        physical_ticks_2d = physical_ticks_2d_all.copy()
-        del physical_ticks_2d[physical_coordinate_type]
+    for deleted_physical_ticks in physical_ticks_all.keys():
+        physical_ticks = {
+            coord: physical_ticks
+            for coord, physical_ticks in physical_ticks_all.items()
+            if coord != deleted_physical_ticks
+        }
         with pytest.raises(ValueError):
             BinaryMaskCollection.from_label_array_and_ticks(
-                label_image_array_2d,
+                label_array,
                 None,
-                physical_ticks_2d,
+                physical_ticks,
                 None
             )
 
-    label_image_array_3d = np.zeros((2, 5, 6), dtype=np.int32)
-    label_image_array_3d[0, 0] = 1
-    label_image_array_3d[:, 3:5, 3:6] = 2
-    label_image_array_3d[-1, -1, -1] = 0
 
-    physical_ticks_3d_all = {
-        Coordinates.Z: [0.0, 1.0],
-        Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-        Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]
-    }
+def test_missing_physical_ticks_3d():
+    """BinaryMaskCollection.from_label_array_and_ticks with some physical ticks missing."""
+    label_array, physical_ticks_all = label_array_3d()
 
-    for physical_coordinate_type in physical_ticks_3d_all.keys():
-        physical_ticks_3d = physical_ticks_3d_all.copy()
-        del physical_ticks_3d[physical_coordinate_type]
+    for deleted_physical_ticks in physical_ticks_all.keys():
+        physical_ticks = {
+            coord: physical_ticks
+            for coord, physical_ticks in physical_ticks_all.items()
+            if coord != deleted_physical_ticks
+        }
         with pytest.raises(ValueError):
             BinaryMaskCollection.from_label_array_and_ticks(
-                label_image_array_3d,
+                label_array,
                 None,
-                physical_ticks_3d,
+                physical_ticks,
                 None
             )
 
@@ -224,11 +190,7 @@ def test_missing_physical_ticks():
 def test_incorrectly_sized_physical_ticks():
     """BinaryMaskCollection.from_label_array_and_ticks with some physical ticks incorrectly
     sized."""
-    label_image_array_2d = np.zeros((5, 6), dtype=np.int32)
-    label_image_array_2d[0] = 1
-    label_image_array_2d[3:5, 3:6] = 2
-    label_image_array_2d[-1, -1] = 0
-
+    label_image_array_2d, _ = label_array_2d()
     physical_ticks_2d = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
                          Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12]}
 
@@ -240,11 +202,7 @@ def test_incorrectly_sized_physical_ticks():
             None
         )
 
-    label_image_array_3d = np.zeros((2, 5, 6), dtype=np.int32)
-    label_image_array_3d[0, 0] = 1
-    label_image_array_3d[:, 3:5, 3:6] = 2
-    label_image_array_3d[-1, -1, -1] = 0
-
+    label_image_array_3d, _ = label_array_3d()
     physical_ticks_3d = {
         Coordinates.Z: [0.0, 1.0],
         Coordinates.Y: [1.2, 2.4, 3.6, 4.8],

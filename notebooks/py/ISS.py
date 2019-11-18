@@ -197,12 +197,6 @@ dapi_thresh = .18  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
 min_dist = 57
 
-registered_mp = registered_imgs.reduce({Axes.CH, Axes.ZPLANE}, func="max").xarray.squeeze()
-stain = np.mean(registered_mp, axis=0)
-stain = stain/stain.max()
-nuclei = nuclei.reduce({Axes.ROUND, Axes.CH, Axes.ZPLANE}, func="max")
-
-
 seg = Segment.Watershed(
     nuclei_threshold=dapi_thresh,
     input_threshold=stain_thresh,

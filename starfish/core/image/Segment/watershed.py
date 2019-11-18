@@ -7,11 +7,12 @@ from showit import image
 from skimage.feature import peak_local_max
 from skimage.morphology import watershed
 
+from starfish.core.image.Filter import Reduce
 from starfish.core.image.Filter.util import bin_open, bin_thresh
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
 from starfish.core.morphology.label_image import LabelImage
-from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.types import Axes, Clip, Coordinates, Number
 from ._base import SegmentAlgorithm
 
 
@@ -78,9 +79,11 @@ class Watershed(SegmentAlgorithm):
 
         # create a 'stain' for segmentation
         mp = primary_images.reduce({Axes.CH, Axes.ZPLANE}, func="max")
-        mp_numpy = mp._squeezed_numpy(Axes.CH, Axes.ZPLANE)
-        stain = np.mean(mp_numpy, axis=0)
-        stain = stain / stain.max()
+        mean = Reduce(
+            dims=(Axes.ROUND,),
+            func="mean",
+            clip_method=Clip.SCALE_BY_IMAGE).run(mp)
+        stain = mean._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 
         # TODO make these parameterizable or determine whether they are useful or not
         size_lim = (10, 10000)

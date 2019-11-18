@@ -11,7 +11,6 @@ from starfish.core.image.Filter import Reduce
 from starfish.core.image.Filter.util import bin_open, bin_thresh
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
-from starfish.core.morphology.label_image import LabelImage
 from starfish.core.types import ArrayLike, Axes, Clip, Coordinates, Number
 from ._base import SegmentAlgorithm
 
@@ -104,14 +103,12 @@ class Watershed(SegmentAlgorithm):
             for coord in (Coordinates.Y, Coordinates.X)
         }
 
-        label_image = LabelImage.from_label_array_and_ticks(
+        return BinaryMaskCollection.from_label_array_and_ticks(
             label_image_array,
             None,
             physical_ticks,
             None,  # TODO: (ttung) this should really be logged.
         )
-
-        return BinaryMaskCollection.from_label_image(label_image)
 
     def show(self, figsize: Tuple[int, int]=(10, 10)) -> None:
         if isinstance(self._segmentation_instance, _WatershedSegmenter):

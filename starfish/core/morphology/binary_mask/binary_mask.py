@@ -253,6 +253,211 @@ class BinaryMaskCollection:
             log,
         )
 
+    @classmethod
+    def from_binary_arrays_and_ticks(
+            cls,
+            arrays: Sequence[np.ndarray],
+            pixel_ticks: Optional[Union[
+                Mapping[Axes, ArrayLike[int]],
+                Mapping[str, ArrayLike[int]]]],
+            physical_ticks: Union[
+                Mapping[Coordinates, ArrayLike[Number]],
+                Mapping[str, ArrayLike[Number]]],
+            log: Optional[Log],
+    ) -> "BinaryMaskCollection":
+        """Constructs a BinaryMaskCollection from an array containing the labels, a set of physical
+        coordinates, and an optional log of how this label image came to be.  Masks are cropped to
+        the smallest size that contains the non-zero values, but pixel and physical coordinates
+        ticks are retained.  Masks extracted from BinaryMaskCollections will be cropped.  To extract
+        masks sized to the original label image, use
+        :py:meth:`starfish.BinaryMaskCollection.uncropped_mask`.
+
+
+        Parameters
+        ----------
+        arrays : Sequence[np.ndarray]
+            A set of 2D or 3D binary arrays.  The ordering of the axes must be Y, X for 2D images
+            and ZPLANE, Y, X for 3D images.  The arrays must have identical sizes and match the
+            sizes of pixel_ticks and physical_ticks.
+        pixel_ticks : Optional[Union[Mapping[Axes, ArrayLike[int]],
+                                     Mapping[str, ArrayLike[int]]]]
+            A map from the axis to the values for that axis.  For any axis that exist in the array
+            but not in pixel_ticks, the pixel coordinates are assigned from 0..N-1, where N is
+            the size along that axis.
+        physical_ticks : Union[Mapping[Coordinates, ArrayLike[Number]],
+                               Mapping[str, ArrayLike[Number]]]
+            A map from the physical coordinate type to the values for axis.  For 2D label images,
+            X and Y physical coordinates must be provided.  For 3D label images, Z physical
+            coordinates must also be provided.
+        log : Optional[Log]
+            A log of how this label image came to be.
+
+        Returns
+        -------
+        masks : BinaryMaskCollection
+            Masks generated from the label image.
+        """
+        array_shapes = set(array.shape for array in arrays)
+        array_dtypes = set(array.dtype for array in arrays)
+        if len(array_shapes) > 1:
+            raise ValueError("all masks must be identically sized")
+        for array_dtype in array_dtypes:
+            if array_dtype != np.bool:
+                raise TypeError("arrays must be binary data")
+
+        # normalize the pixel coordinates to Mapping[Axes, ArrayLike[int]]
+        pixel_ticks = _normalize_pixel_ticks(pixel_ticks)
+        # normalize the physical coordinates to Mapping[Coordinates, ArrayLike[Number]]
+        physical_ticks = _normalize_physical_ticks(physical_ticks)
+
+        # If we have 1 or more arrays, verify that the physical coordinate array's size matches the
+        # array's size.  In BinaryMaskCollection's constructor, it is verified that the pixel
+        # tick array's size matches that of the physical coordinate array's size.
+        if len(array_shapes) == 1:
+            array_shape = next(iter(array_shapes))
+
+            # verify that we don't have extra
+            expected_axes, expected_physical_coords = _get_axes_names(len(array_shape))
+            actual_real_coordinates_provided = set(expected_physical_coords)
+            actual_real_coordinates_provided.intersection_update(set(physical_ticks.keys()))
+
+            if len(array_shape) != len(actual_real_coordinates_provided):
+                raise ValueError(
+                    f"physical coordinates provided for {len(actual_real_coordinates_provided)} "
+                    f"axes ({actual_real_coordinates_provided}), but the data has "
+                    f"{len(array_shape)} axes"
+                )
+
+            for ix, (axis, coord) in enumerate(zip(*_get_axes_names(len(array_shape)))):
+                if (coord in physical_ticks
+                        and len(physical_ticks[coord]) != array_shape[ix]):
+                    raise ValueError(
+                        f"The size of the array for physical coordinates for {coord.name} "
+                        f"({len(physical_ticks[coord])} does not match the array's shape "
+                        f"({array_shape[ix]})."
+                    )
+
+        # Add all pixel ticks not present.
+        for axis, coord in zip(*_get_axes_names(3)):
+            if coord in physical_ticks and axis not in pixel_ticks:
+                pixel_ticks[axis] = np.arange(0, len(physical_ticks[coord]))
+
+        masks: MutableSequence[MaskData] = list()
+        for array in arrays:
+            selection_range: Sequence[slice] = BinaryMaskCollection._crop_mask(array)
+
+            masks.append(MaskData(
+                array[selection_range],
+                tuple(selection.start for selection in selection_range),
+                None
+            ))
+
+        log = deepcopy(log)
+
+        return cls(
+            pixel_ticks,
+            physical_ticks,
+            masks,
+            log,
+        )
+
+    @staticmethod
+    def _crop_mask(array: np.ndarray) -> Sequence[slice]:
+        selection_range: MutableSequence[slice] = list()
+
+        # calculate the first and last True pixel across each axis.
+        for axis_num in range(array.ndim):
+            projection_axes = tuple(dim for dim in range(array.ndim) if dim != axis_num)
+            # max project across the projections
+            max_projection = np.amax(array, axis=projection_axes)
+            # get the indices of the non-zero elements.  the [0] is because np.nonzero captures
+            # the indices of each dimension separately, and we want the one and only dimension.
+            non_zero_indices = np.nonzero(max_projection)[0]
+
+            if len(non_zero_indices) == 0:
+                selection_range.append(slice(0, 0))
+            else:
+                selection_range.append(slice(non_zero_indices[0], non_zero_indices[-1] + 1))
+
+        return selection_range
+
+    @classmethod
+    def from_label_array_and_ticks(
+            cls,
+            array: np.ndarray,
+            pixel_ticks: Optional[Union[
+                Mapping[Axes, ArrayLike[int]],
+                Mapping[str, ArrayLike[int]]]],
+            physical_ticks: Union[
+                Mapping[Coordinates, ArrayLike[Number]],
+                Mapping[str, ArrayLike[Number]]],
+            log: Optional[Log],
+    ) -> "BinaryMaskCollection":
+        """Constructs a BinaryMaskCollection from an array containing the labels, a set of physical
+        coordinates, and an optional log of how this label image came to be.  Masks are cropped to
+        the smallest size that contains the non-zero values, but pixel and physical coordinates
+        ticks are retained.  Masks extracted from BinaryMaskCollections will be cropped.  To extract
+        masks sized to the original label image, use
+        :py:meth:`starfish.BinaryMaskCollection.uncropped_mask`.
+
+        Parameters
+        ----------
+        array : np.ndarray
+            A 2D or 3D array containing the labels.  The ordering of the axes must be Y, X for 2D
+            images and ZPLANE, Y, X for 3D images.
+        pixel_ticks : Optional[Union[Mapping[Axes, ArrayLike[int]],
+                                     Mapping[str, ArrayLike[int]]]]
+            A map from the axis to the values for that axis.  For any axis that exist in the array
+            but not in pixel_ticks, the pixel coordinates are assigned from 0..N-1, where N is
+            the size along that axis.
+        physical_ticks : Union[Mapping[Coordinates, ArrayLike[Number]],
+                               Mapping[str, ArrayLike[Number]]]
+            A map from the physical coordinate type to the values for axis.  For 2D label images,
+            X and Y physical coordinates must be provided.  For 3D label images, Z physical
+            coordinates must also be provided.
+        log : Optional[Log]
+            A log of how this label image came to be.
+
+        Returns
+        -------
+        masks : BinaryMaskCollection
+            Masks generated from the label image.
+        """
+        # normalize the pixel coordinates to Mapping[Axes, ArrayLike[int]]
+        pixel_ticks = _normalize_pixel_ticks(pixel_ticks)
+        # normalize the physical coordinates to Mapping[Coordinates, ArrayLike[Number]]
+        physical_ticks = _normalize_physical_ticks(physical_ticks)
+
+        for ix, (axis, coord) in enumerate(zip(*_get_axes_names(array.ndim))):
+            # We verify that the physical coordinate array's size matches the array's size.  In
+            # BinaryMaskCollection's constructor, it is verified that the pixel coordinate array's
+            # size matches that of the physical coordinate array's size.
+            if coord not in physical_ticks:
+                raise ValueError(f"Missing physical coordinates for {coord.name}")
+            if len(physical_ticks[coord]) != array.shape[ix]:
+                raise ValueError(
+                    f"The size of the array for physical coordinates for {coord.name} "
+                    f"({len(physical_ticks[coord])} does not match the array's shape "
+                    f"({array.shape[ix]})."
+                )
+            if axis not in pixel_ticks:
+                pixel_ticks[axis] = np.arange(0, array.shape[ix])
+
+        props = regionprops(array)
+
+        masks: Sequence[MaskData] = [
+            MaskData(prop.image, prop.bbox[:array.ndim], prop)
+            for prop in props
+        ]
+        log = deepcopy(log)
+
+        return cls(
+            pixel_ticks,
+            physical_ticks,
+            masks,
+            log,
+        )
+
     def to_label_image(self) -> LabelImage:
         shape = tuple(
             len(self._pixel_ticks[axis])

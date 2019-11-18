@@ -8,7 +8,7 @@ from packaging.version import parse as parse_version
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
-from starfish.core.morphology.object.binary_mask import BinaryMaskCollection
+from starfish.core.morphology.binary_mask import BinaryMaskCollection
 from starfish.core.types import Axes, Features
 
 try:

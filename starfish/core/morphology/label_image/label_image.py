@@ -5,7 +5,7 @@ import numpy as np
 import xarray as xr
 from semantic_version import Version
 
-from starfish.core.morphology.object.util import _get_axes_names
+from starfish.core.morphology.util import _get_axes_names
 from starfish.core.types import Axes, Coordinates, LOG, Number, STARFISH_EXTRAS_KEY
 from starfish.core.util.logging import Log
 

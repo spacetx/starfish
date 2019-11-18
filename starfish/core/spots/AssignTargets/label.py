@@ -1,7 +1,7 @@
 import numpy as np
 
 from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
-from starfish.core.morphology.object.binary_mask import BinaryMaskCollection
+from starfish.core.morphology.binary_mask import BinaryMaskCollection
 from starfish.core.types import Features
 from ._base import AssignTargetsAlgorithm
 

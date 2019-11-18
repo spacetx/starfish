@@ -104,7 +104,7 @@ class Watershed(SegmentAlgorithm):
             for coord in (Coordinates.Y, Coordinates.X)
         }
 
-        label_image = LabelImage.from_label_array_and_coords(
+        label_image = LabelImage.from_label_array_and_ticks(
             label_image_array,
             None,
             physical_ticks,

@@ -10,7 +10,7 @@ from ..label_image import AttrKeys, CURRENT_VERSION, DOCTYPE_STRING, LabelImage
 
 
 @pytest.mark.parametrize(
-    "array, physical_coordinates, log, expected_error",
+    "array, physical_ticks, log, expected_error",
     [
         # 3D label image
         [
@@ -56,16 +56,16 @@ from ..label_image import AttrKeys, CURRENT_VERSION, DOCTYPE_STRING, LabelImage
 )
 def test_from_array_and_coords(
         array: np.ndarray,
-        physical_coordinates: Mapping[Coordinates, ArrayLike[Number]],
+        physical_ticks: Mapping[Coordinates, ArrayLike[Number]],
         log: Optional[Log],
         expected_error: Optional[Type[Exception]],
 ):
     """Test that we can construct a LabelImage and that some common error conditions are caught."""
     if expected_error is not None:
         with pytest.raises(expected_error):
-            LabelImage.from_label_array_and_coords(array, None, physical_coordinates, log)
+            LabelImage.from_label_array_and_ticks(array, None, physical_ticks, log)
     else:
-        label_image = LabelImage.from_label_array_and_coords(array, None, physical_coordinates, log)
+        label_image = LabelImage.from_label_array_and_ticks(array, None, physical_ticks, log)
         assert isinstance(label_image.log, Log)
         assert label_image.xarray.attrs.get(AttrKeys.DOCTYPE, None) == DOCTYPE_STRING
         assert label_image.xarray.attrs.get(AttrKeys.VERSION, None) == str(CURRENT_VERSION)
@@ -83,7 +83,7 @@ def test_pixel_coordinates():
         Coordinates.Y: [0, 0.2],
         Coordinates.Z: [0, 0.1],
     }
-    label_image = LabelImage.from_label_array_and_coords(
+    label_image = LabelImage.from_label_array_and_ticks(
         array, pixel_coordinates, physical_coordinates, None)
 
     assert np.array_equal(label_image.xarray.coords[Axes.X.value], [2, 3])
@@ -106,7 +106,7 @@ def test_coordinates_key_type():
         Coordinates.Y.value: [0, 0.2],
         Coordinates.Z.value: [0, 0.1],
     }
-    label_image = LabelImage.from_label_array_and_coords(
+    label_image = LabelImage.from_label_array_and_ticks(
         array, pixel_coordinates, physical_coordinates, None)
 
     for axis_str, axis_data in pixel_coordinates.items():
@@ -132,7 +132,7 @@ def test_save_and_load(tmp_path):
     filt = Filter.Reduce((Axes.ROUND,), func="max")
     log.update_log(filt)
 
-    label_image = LabelImage.from_label_array_and_coords(
+    label_image = LabelImage.from_label_array_and_ticks(
         array, pixel_coordinates, physical_coordinates, log)
     label_image.to_netcdf(tmp_path / "label_image.netcdf")
 

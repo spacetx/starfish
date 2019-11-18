@@ -14,7 +14,7 @@ def test_from_label_image():
     physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
                       Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12]}
 
-    label_image = LabelImage.from_label_array_and_coords(
+    label_image = LabelImage.from_label_array_and_ticks(
         label_image_array,
         None,
         physical_ticks,
@@ -61,7 +61,7 @@ def test_to_label_image():
     physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
                       Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 15.5]}
 
-    label_image = LabelImage.from_label_array_and_coords(
+    label_image = LabelImage.from_label_array_and_ticks(
         label_image_array,
         None,
         physical_ticks,
@@ -82,7 +82,7 @@ def test_save_load(tmp_path):
     physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
                       Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12]}
 
-    label_image = LabelImage.from_label_array_and_coords(
+    label_image = LabelImage.from_label_array_and_ticks(
         label_image_array,
         None,
         physical_ticks,
@@ -110,7 +110,7 @@ def test_from_empty_label_image(tmp_path):
     physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
                       Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
 
-    label_image = LabelImage.from_label_array_and_coords(
+    label_image = LabelImage.from_label_array_and_ticks(
         label_image_array,
         None,
         physical_ticks,

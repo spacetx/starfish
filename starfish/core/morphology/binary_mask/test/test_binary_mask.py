@@ -6,13 +6,13 @@ from ..binary_mask import BinaryMaskCollection
 
 
 def test_from_label_image():
-    label_image_array = np.zeros((5, 5), dtype=np.int32)
+    label_image_array = np.zeros((5, 6), dtype=np.int32)
     label_image_array[0] = 1
-    label_image_array[3:5, 3:5] = 2
+    label_image_array[3:5, 3:6] = 2
     label_image_array[-1, -1] = 0
 
     physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12]}
+                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
 
     label_image = LabelImage.from_label_array_and_ticks(
         label_image_array,
@@ -29,37 +29,37 @@ def test_from_label_image():
     assert region_0.name == '0'
     assert region_1.name == '1'
 
-    assert np.array_equal(region_0, np.ones((1, 5), dtype=np.bool))
-    temp = np.ones((2, 2), dtype=np.bool)
+    assert np.array_equal(region_0, np.ones((1, 6), dtype=np.bool))
+    temp = np.ones((2, 3), dtype=np.bool)
     temp[-1, -1] = False
     assert np.array_equal(region_1, temp)
 
     assert np.array_equal(region_0[Axes.Y.value], [0])
-    assert np.array_equal(region_0[Axes.X.value], [0, 1, 2, 3, 4])
+    assert np.array_equal(region_0[Axes.X.value], [0, 1, 2, 3, 4, 5])
 
     assert np.array_equal(region_1[Axes.Y.value], [3, 4])
-    assert np.array_equal(region_1[Axes.X.value], [3, 4])
+    assert np.array_equal(region_1[Axes.X.value], [3, 4, 5])
 
     assert np.array_equal(region_0[Coordinates.Y.value],
                           physical_ticks[Coordinates.Y][0:1])
     assert np.array_equal(region_0[Coordinates.X.value],
-                          physical_ticks[Coordinates.X][0:5])
+                          physical_ticks[Coordinates.X][0:6])
 
     assert np.array_equal(region_1[Coordinates.Y.value],
                           physical_ticks[Coordinates.Y][3:5])
     assert np.array_equal(region_1[Coordinates.X.value],
-                          physical_ticks[Coordinates.X][3:5])
+                          physical_ticks[Coordinates.X][3:6])
 
 
 def test_to_label_image():
     # test via roundtrip
     label_image_array = np.zeros((5, 6), dtype=np.int32)
     label_image_array[0] = 1
-    label_image_array[3:6, 3:6] = 2
+    label_image_array[3:5, 3:6] = 2
     label_image_array[-1, -1] = 0
 
     physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 15.5]}
+                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
 
     label_image = LabelImage.from_label_array_and_ticks(
         label_image_array,
@@ -74,13 +74,13 @@ def test_to_label_image():
 
 
 def test_save_load(tmp_path):
-    label_image_array = np.zeros((5, 5), dtype=np.int32)
+    label_image_array = np.zeros((5, 6), dtype=np.int32)
     label_image_array[0] = 1
-    label_image_array[3:5, 3:5] = 2
+    label_image_array[3:5, 3:6] = 2
     label_image_array[-1, -1] = 0
 
     physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12]}
+                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
 
     label_image = LabelImage.from_label_array_and_ticks(
         label_image_array,

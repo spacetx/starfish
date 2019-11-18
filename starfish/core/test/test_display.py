@@ -21,7 +21,7 @@ sd = SyntheticData(
 
 stack = sd.spots()
 spots = sd.intensities()
-label_image = LabelImage.from_array_and_coords(
+label_image = LabelImage.from_label_array_and_coords(
     np.random.rand(128, 128).astype(np.uint8),
     None,
     {Coordinates.Y: np.arange(128), Coordinates.X: np.arange(128)},

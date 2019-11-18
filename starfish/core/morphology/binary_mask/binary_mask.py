@@ -21,7 +21,11 @@ from skimage.measure import regionprops
 from skimage.measure._regionprops import _RegionProperties
 
 from starfish.core.morphology.label_image import LabelImage
-from starfish.core.morphology.util import _get_axes_names
+from starfish.core.morphology.util import (
+    _get_axes_names,
+    _normalize_physical_ticks,
+    _normalize_pixel_ticks,
+)
 from starfish.core.types import ArrayLike, Axes, Coordinates, Number
 from starfish.core.util.logging import Log
 from .expand import fill_from_mask
@@ -62,14 +66,9 @@ class BinaryMaskCollection:
             masks: Sequence[MaskData],
             log: Optional[Log],
     ):
-        self._pixel_ticks: Mapping[Axes, ArrayLike[int]] = {
-            Axes(axis): axis_data
-            for axis, axis_data in pixel_ticks.items()
-        }
-        self._physical_ticks: Mapping[Coordinates, ArrayLike[Number]] = {
-            Coordinates(coord): coord_data
-            for coord, coord_data in physical_ticks.items()
-        }
+        self._pixel_ticks: Mapping[Axes, ArrayLike[int]] = _normalize_pixel_ticks(pixel_ticks)
+        self._physical_ticks: Mapping[Coordinates, ArrayLike[Number]] = _normalize_physical_ticks(
+            physical_ticks)
         self._masks: MutableMapping[int, MaskData] = {}
         self._log: Log = log or Log()
 
@@ -225,7 +224,7 @@ class BinaryMaskCollection:
                 label_image_array,
             )
 
-        return LabelImage.from_array_and_coords(
+        return LabelImage.from_label_array_and_coords(
             label_image_array,
             self._pixel_ticks,
             self._physical_ticks,

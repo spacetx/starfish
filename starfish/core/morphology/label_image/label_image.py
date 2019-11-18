@@ -5,7 +5,11 @@ import numpy as np
 import xarray as xr
 from semantic_version import Version
 
-from starfish.core.morphology.util import _get_axes_names
+from starfish.core.morphology.util import (
+    _get_axes_names,
+    _normalize_physical_ticks,
+    _normalize_pixel_ticks,
+)
 from starfish.core.types import ArrayLike, Axes, Coordinates, LOG, Number, STARFISH_EXTRAS_KEY
 from starfish.core.util.logging import Log
 
@@ -33,12 +37,12 @@ class LabelImage:
         for axis in (Axes.X, Axes.Y):
             if axis.value not in label_image.coords:
                 raise ValueError(f"label image should have an {axis.value} axis")
-        expected_coordinates: Tuple[Coordinates, ...]
+        expected_physical_coordinates: Tuple[Coordinates, ...]
         if label_image.ndim == 5:
-            expected_coordinates = (Coordinates.X, Coordinates.Y, Coordinates.Z)
+            expected_physical_coordinates = (Coordinates.X, Coordinates.Y, Coordinates.Z)
         else:
-            expected_coordinates = (Coordinates.X, Coordinates.Y)
-        for coord in expected_coordinates:
+            expected_physical_coordinates = (Coordinates.X, Coordinates.Y)
+        for coord in expected_physical_coordinates:
             if coord.value not in label_image.coords:
                 raise ValueError(f"label image should have a {coord.value} coordinates")
 
@@ -49,7 +53,7 @@ class LabelImage:
             self.label_image.attrs[AttrKeys.LOG] = Log().encode()
 
     @classmethod
-    def from_array_and_coords(
+    def from_label_array_and_coords(
             cls,
             array: np.ndarray,
             pixel_coordinates: Optional[Union[
@@ -82,15 +86,9 @@ class LabelImage:
             A log of how this label image came to be.
         """
         # normalize the pixel coordinates to Mapping[Axes, ArrayLike[int]]
-        pixel_coordinates = {
-            axis if isinstance(axis, Axes) else Axes(axis): axis_values
-            for axis, axis_values in (pixel_coordinates or {}).items()
-        }
+        pixel_coordinates = _normalize_pixel_ticks(pixel_coordinates)
         # normalize the physical coordinates to Mapping[Coordinates, ArrayLike[Number]]
-        physical_coordinates = {
-            coord if isinstance(coord, Coordinates) else Coordinates(coord): coord_values
-            for coord, coord_values in physical_coordinates.items()
-        }
+        physical_coordinates = _normalize_physical_ticks(physical_coordinates)
 
         img_axes, img_coords = _get_axes_names(array.ndim)
         xr_axes = [axis.value for axis in img_axes]
@@ -102,11 +100,8 @@ class LabelImage:
         except KeyError as ex:
             raise KeyError(f"missing physical coordinates {ex.args[0]}") from ex
 
-        xr_coords[Axes.X.value] = pixel_coordinates.get(Axes.X, np.arange(0, array.shape[-1]))
-        xr_coords[Axes.Y.value] = pixel_coordinates.get(Axes.Y, np.arange(0, array.shape[-2]))
-        if array.ndim == 3:
-            xr_coords[Axes.ZPLANE.value] = pixel_coordinates.get(
-                Axes.ZPLANE, np.arange(0, array.shape[-3]))
+        for ix, axis in enumerate(img_axes):
+            xr_coords[axis.value] = pixel_coordinates.get(axis, np.arange(0, array.shape[ix]))
 
         dataarray = xr.DataArray(
             array,

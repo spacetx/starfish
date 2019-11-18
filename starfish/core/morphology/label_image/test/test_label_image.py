@@ -63,15 +63,16 @@ def test_from_array_and_coords(
     """Test that we can construct a LabelImage and that some common error conditions are caught."""
     if expected_error is not None:
         with pytest.raises(expected_error):
-            LabelImage.from_array_and_coords(array, None, physical_coordinates, log)
+            LabelImage.from_label_array_and_coords(array, None, physical_coordinates, log)
     else:
-        label_image = LabelImage.from_array_and_coords(array, None, physical_coordinates, log)
+        label_image = LabelImage.from_label_array_and_coords(array, None, physical_coordinates, log)
         assert isinstance(label_image.log, Log)
         assert label_image.xarray.attrs.get(AttrKeys.DOCTYPE, None) == DOCTYPE_STRING
         assert label_image.xarray.attrs.get(AttrKeys.VERSION, None) == str(CURRENT_VERSION)
 
 
 def test_pixel_coordinates():
+    """Test that the code creates missing pixel coordinate values."""
     array = np.zeros((2, 2, 2), dtype=np.int32)
     pixel_coordinates = {
         Axes.X: [2, 3],
@@ -82,13 +83,36 @@ def test_pixel_coordinates():
         Coordinates.Y: [0, 0.2],
         Coordinates.Z: [0, 0.1],
     }
-    label_image = LabelImage.from_array_and_coords(
+    label_image = LabelImage.from_label_array_and_coords(
         array, pixel_coordinates, physical_coordinates, None)
 
     assert np.array_equal(label_image.xarray.coords[Axes.X.value], [2, 3])
     # not provided, should be 0..N-1
     assert np.array_equal(label_image.xarray.coords[Axes.Y.value], [0, 1])
     assert np.array_equal(label_image.xarray.coords[Axes.ZPLANE.value], [0, 1])
+
+
+def test_coordinates_key_type():
+    """Test that the code correctly handles situations where the coordinate keys are provided as
+    strings instead of the enumerated types."""
+    array = np.zeros((2, 2, 2), dtype=np.int32)
+    pixel_coordinates = {
+        Axes.X.value: [2, 3],
+        Axes.Y.value: [0, 1],
+        Axes.ZPLANE.value: [0, 1],
+    }
+    physical_coordinates = {
+        Coordinates.X.value: [0, 0.5],
+        Coordinates.Y.value: [0, 0.2],
+        Coordinates.Z.value: [0, 0.1],
+    }
+    label_image = LabelImage.from_label_array_and_coords(
+        array, pixel_coordinates, physical_coordinates, None)
+
+    for axis_str, axis_data in pixel_coordinates.items():
+        assert np.array_equal(label_image.xarray.coords[axis_str], axis_data)
+    for coord_str, coord_data in physical_coordinates.items():
+        assert np.array_equal(label_image.xarray.coords[coord_str], coord_data)
 
 
 def test_save_and_load(tmp_path):
@@ -108,7 +132,7 @@ def test_save_and_load(tmp_path):
     filt = Filter.Reduce((Axes.ROUND,), func="max")
     log.update_log(filt)
 
-    label_image = LabelImage.from_array_and_coords(
+    label_image = LabelImage.from_label_array_and_coords(
         array, pixel_coordinates, physical_coordinates, log)
     label_image.to_netcdf(tmp_path / "label_image.netcdf")
 

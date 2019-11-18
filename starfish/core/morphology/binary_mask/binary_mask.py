@@ -126,6 +126,47 @@ class BinaryMaskCollection:
             name=f"{index:0{max_mask_name_len}d}"
         )
 
+    def uncropped_mask(self, index: int) -> xr.DataArray:
+        """Convert a np-based mask into an xarray DataArray."""
+        mask_data = self._masks[index]
+        uncropped_shape = tuple(
+            len(self._pixel_ticks[axis])
+            for axis, _ in zip(*_get_axes_names(len(self._pixel_ticks)))
+        )
+
+        if uncropped_shape == mask_data.binary_mask.shape:
+            return self._format_mask_as_xarray(index)
+
+        max_mask_name_len = len(str(len(self._masks) - 1))
+
+        xr_dims: MutableSequence[str] = []
+        xr_coords: MutableMapping[Hashable, Any] = {}
+
+        for ix, (axis, coord) in enumerate(zip(*_get_axes_names(len(self._pixel_ticks)))):
+            xr_dims.append(axis.value)
+            xr_coords[axis.value] = self._pixel_ticks[axis.value]
+            xr_coords[coord.value] = (axis.value, self._physical_ticks[coord.value])
+
+        image = np.zeros(
+            shape=tuple(
+                len(self._pixel_ticks[axis])
+                for axis, _ in zip(*_get_axes_names(len(self._pixel_ticks)))
+            ),
+            dtype=np.bool,
+        )
+        fill_from_mask(
+            mask_data.binary_mask,
+            mask_data.offsets,
+            1,
+            image,
+        )
+        return xr.DataArray(
+            image,
+            dims=xr_dims,
+            coords=xr_coords,
+            name=f"{index:0{max_mask_name_len}d}"
+        )
+
     def masks(self) -> Iterator[xr.DataArray]:
         for mask_index in self._masks.keys():
             yield self._format_mask_as_xarray(mask_index)
@@ -172,7 +213,10 @@ class BinaryMaskCollection:
 
     @classmethod
     def from_label_image(cls, label_image: LabelImage) -> "BinaryMaskCollection":
-        """Creates binary masks from a label image.
+        """Creates binary masks from a label image.  Masks are cropped to the smallest size that
+        contains the non-zero values, but pixel and physical coordinates ticks are retained.  Masks
+        extracted from BinaryMaskCollections will be cropped.  To extract masks sized to the
+        original label image, use :py:meth:`starfish.BinaryMaskCollection.uncropped_mask`.
 
         Parameters
         ----------

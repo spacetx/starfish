@@ -1,7 +1,7 @@
 """
 This module parses and retains the extras metadata attached to TileSet extras.
 """
-from typing import Collection, Mapping, MutableMapping, Sequence, Tuple
+from typing import Collection, Mapping, MutableMapping, Tuple
 
 import numpy as np
 from slicedimage import Tile, TileSet
@@ -9,7 +9,7 @@ from slicedimage import Tile, TileSet
 from starfish.core.imagestack.dataorder import AXES_DATA
 from starfish.core.imagestack.parser import TileCollectionData, TileData, TileKey
 from starfish.core.imagestack.physical_coordinates import _get_physical_coordinates_of_z_plane
-from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.types import ArrayLike, Axes, Coordinates, Number
 
 
 class SlicedImageTile(TileData):
@@ -51,7 +51,7 @@ class SlicedImageTile(TileData):
         return self._numpy_array
 
     @property
-    def coordinates(self) -> Mapping[Coordinates, Sequence[Number]]:
+    def coordinates(self) -> Mapping[Coordinates, ArrayLike[Number]]:
         xrange = self._wrapped_tile.coordinates[Coordinates.X]
         yrange = self._wrapped_tile.coordinates[Coordinates.Y]
         return_coords = {

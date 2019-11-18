@@ -1,11 +1,11 @@
 from collections import OrderedDict
-from typing import Collection, List, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
+from typing import Collection, List, Mapping, MutableSequence, Optional, Tuple, Union
 
 import numpy as np
 from slicedimage import Tile, TileSet
 
 from starfish.core.imagestack.parser import TileCollectionData, TileData, TileKey
-from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.types import ArrayLike, Axes, Coordinates, Number
 
 
 class CropParameters:
@@ -221,8 +221,8 @@ class CropParameters:
         return image[output_y_shape[0]:output_y_shape[1], output_x_shape[0]:output_x_shape[1]]
 
     def crop_coordinates(
-            self, coordinates: Mapping[Coordinates, Sequence[Number]],
-    ) -> Mapping[Coordinates, Sequence[Number]]:
+            self, coordinates: Mapping[Coordinates, ArrayLike[Number]],
+    ) -> Mapping[Coordinates, ArrayLike[Number]]:
         """
         Given a mapping of coordinate to coordinate values, return a mapping of the coordinate to
         cropped coordinate values.
@@ -256,7 +256,7 @@ class CroppedTileData(TileData):
         return self.cropping_parameters.crop_image(self.backing_tile_data.numpy_array)
 
     @property
-    def coordinates(self) -> Mapping[Coordinates, Sequence[Number]]:
+    def coordinates(self) -> Mapping[Coordinates, ArrayLike[Number]]:
         return self.cropping_parameters.crop_coordinates(self.backing_tile_data.coordinates)
 
     @property

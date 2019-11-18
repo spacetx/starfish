@@ -7,9 +7,9 @@ from typing import (
 )
 from warnings import warn
 
-from starfish.core.morphology.binary_mask import BinaryMaskCollection, MaskData
+from starfish.core.morphology.binary_mask.binary_mask import BinaryMaskCollection, MaskData
 from starfish.core.morphology.label_image import label_image as li
-from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.types import ArrayLike, Axes, Coordinates, Number
 from starfish.core.util.logging import Log
 
 
@@ -17,9 +17,9 @@ class SegmentationMaskCollection(BinaryMaskCollection):
     """Deprecated in favor of BinaryMaskCollection."""
     def __init__(
             self,
-            pixel_ticks: Union[Mapping[Axes, Sequence[int]], Mapping[str, Sequence[int]]],
-            physical_ticks: Union[Mapping[Coordinates, Sequence[Number]],
-                                  Mapping[str, Sequence[Number]]],
+            pixel_ticks: Union[Mapping[Axes, ArrayLike[int]], Mapping[str, ArrayLike[int]]],
+            physical_ticks: Union[Mapping[Coordinates, ArrayLike[Number]],
+                                  Mapping[str, ArrayLike[Number]]],
             masks: Sequence[MaskData],
             log: Optional[Log],
     ):

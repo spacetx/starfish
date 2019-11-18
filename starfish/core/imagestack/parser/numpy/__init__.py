@@ -3,26 +3,22 @@ This module encapsulates the logic to parse a numpy array into an ImageStack.
 """
 from itertools import product
 from typing import (
-    Any,
     Collection,
     Mapping,
     MutableMapping,
     MutableSequence,
     Optional,
     Sequence,
-    Tuple,
 )
 
 import numpy as np
-import xarray as xr
 
 from starfish.core.imagestack.parser import TileCollectionData, TileData, TileKey
 from starfish.core.types import (
+    ArrayLike,
     Axes,
     Coordinates,
     Number,
-    PHYSICAL_COORDINATE_DIMENSION,
-    PhysicalCoordinateTypes,
 )
 
 
@@ -34,7 +30,7 @@ class NumpyImageTile(TileData):
     def __init__(
             self,
             data: np.ndarray,
-            coordinates: Mapping[Coordinates, Sequence[Number]],
+            coordinates: Mapping[Coordinates, ArrayLike[Number]],
             selector: Mapping[Axes, int],
     ) -> None:
         self._data = data
@@ -53,7 +49,7 @@ class NumpyImageTile(TileData):
         return self._data
 
     @property
-    def coordinates(self) -> Mapping[Coordinates, Sequence[Number]]:
+    def coordinates(self) -> Mapping[Coordinates, ArrayLike[Number]]:
         return self._coordinates
 
     @property
@@ -70,7 +66,7 @@ class NumpyData(TileCollectionData):
             self,
             data: np.ndarray,
             index_labels: Mapping[Axes, Sequence[int]],
-            coordinates: Optional[Mapping[Coordinates, Sequence[Number]]],
+            coordinates: Optional[Mapping[Coordinates, ArrayLike[Number]]],
     ) -> None:
         self.data = data
         self.index_labels = index_labels
@@ -122,7 +118,7 @@ class NumpyData(TileCollectionData):
         pos_ch = self.index_labels[Axes.CH].index(ch)
         pos_z = self.index_labels[Axes.ZPLANE].index(z)
 
-        coordinates: MutableMapping[Coordinates, Sequence[Number]] = dict()
+        coordinates: MutableMapping[Coordinates, ArrayLike[Number]] = dict()
 
         if self.coordinates is not None:
             coordinates[Coordinates.X] = self.coordinates[Coordinates.X]

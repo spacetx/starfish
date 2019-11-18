@@ -1,15 +1,13 @@
 from typing import (
-    cast,
     Iterable,
     MutableMapping,
-    Sequence,
     Union
 )
 
 import numpy as np
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import Axes, Clip, Coordinates, FunctionSource, Number
+from starfish.core.types import ArrayLike, Axes, Clip, Coordinates, FunctionSource, Number
 from starfish.core.util.dtype import preserve_float_range
 from ._base import FilterAlgorithm
 
@@ -125,7 +123,7 @@ class Reduce(FilterAlgorithm):
             reduced = preserve_float_range(reduced, rescale=True)
 
         # Update the physical coordinates
-        physical_coords: MutableMapping[Coordinates, Sequence[Number]] = {}
+        physical_coords: MutableMapping[Coordinates, ArrayLike[Number]] = {}
         for axis, coord in (
                 (Axes.X, Coordinates.X),
                 (Axes.Y, Coordinates.Y),
@@ -135,7 +133,7 @@ class Reduce(FilterAlgorithm):
                 assert coord.value not in reduced.coords
                 physical_coords[coord] = [np.average(stack._data.coords[coord.value])]
             else:
-                physical_coords[coord] = cast(Sequence[Number], reduced.coords[coord.value])
+                physical_coords[coord] = reduced.coords[coord.value]
         reduced_stack = ImageStack.from_numpy(reduced.values, coordinates=physical_coords)
 
         return reduced_stack

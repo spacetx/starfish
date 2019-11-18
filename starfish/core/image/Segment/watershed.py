@@ -1,4 +1,4 @@
-from typing import Mapping, Optional, Sequence, Tuple
+from typing import Mapping, Optional, Tuple
 
 import numpy as np
 import scipy.ndimage.measurements as spm
@@ -12,7 +12,7 @@ from starfish.core.image.Filter.util import bin_open, bin_thresh
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
 from starfish.core.morphology.label_image import LabelImage
-from starfish.core.types import Axes, Clip, Coordinates, Number
+from starfish.core.types import ArrayLike, Axes, Clip, Coordinates, Number
 from ._base import SegmentAlgorithm
 
 
@@ -99,7 +99,7 @@ class Watershed(SegmentAlgorithm):
         )
 
         # we max-projected and squeezed the Z-plane so label_image.ndim == 2
-        physical_ticks: Mapping[Coordinates, Sequence[Number]] = {
+        physical_ticks: Mapping[Coordinates, ArrayLike[Number]] = {
             coord: nuclei.xarray.coords[coord.value].data
             for coord in (Coordinates.Y, Coordinates.X)
         }

@@ -53,13 +53,13 @@ class LabelImage:
             self.label_image.attrs[AttrKeys.LOG] = Log().encode()
 
     @classmethod
-    def from_label_array_and_coords(
+    def from_label_array_and_ticks(
             cls,
             array: np.ndarray,
-            pixel_coordinates: Optional[Union[
-                                        Mapping[Axes, ArrayLike[int]],
-                                        Mapping[str, ArrayLike[int]]]],
-            physical_coordinates: Union[
+            pixel_ticks: Optional[Union[
+                Mapping[Axes, ArrayLike[int]],
+                Mapping[str, ArrayLike[int]]]],
+            physical_ticks: Union[
                 Mapping[Coordinates, ArrayLike[Number]],
                 Mapping[str, ArrayLike[Number]]],
             log: Optional[Log],
@@ -72,13 +72,13 @@ class LabelImage:
         array : np.ndarray
             A 2D or 3D array containing the labels.  The ordering of the axes must be Y, X for 2D
             images and ZPLANE, Y, X for 3D images.
-        pixel_coordinates : Optional[Union[Mapping[Axes, ArrayLike[int]],
-                                           Mapping[str, ArrayLike[int]]]]
+        pixel_ticks : Optional[Union[Mapping[Axes, ArrayLike[int]],
+                                     Mapping[str, ArrayLike[int]]]]
             A map from the axis to the values for that axis.  For any axis that exist in the array
             but not in pixel_coordinates, the pixel coordinates are assigned from 0..N-1, where N is
             the size along that axis.
-        physical_coordinates : Union[Mapping[Coordinates, ArrayLike[Number]],
-                                     Mapping[str, ArrayLike[Number]]]
+        physical_ticks : Union[Mapping[Coordinates, ArrayLike[Number]],
+                               Mapping[str, ArrayLike[Number]]]
             A map from the physical coordinate type to the values for axis.  For 2D label images,
             X and Y physical coordinates must be provided.  For 3D label images, Z physical
             coordinates must also be provided.
@@ -86,22 +86,22 @@ class LabelImage:
             A log of how this label image came to be.
         """
         # normalize the pixel coordinates to Mapping[Axes, ArrayLike[int]]
-        pixel_coordinates = _normalize_pixel_ticks(pixel_coordinates)
+        pixel_ticks = _normalize_pixel_ticks(pixel_ticks)
         # normalize the physical coordinates to Mapping[Coordinates, ArrayLike[Number]]
-        physical_coordinates = _normalize_physical_ticks(physical_coordinates)
+        physical_ticks = _normalize_physical_ticks(physical_ticks)
 
         img_axes, img_coords = _get_axes_names(array.ndim)
         xr_axes = [axis.value for axis in img_axes]
         try:
             xr_coords: MutableMapping[Hashable, Any] = {
-                coord.value: (axis.value, physical_coordinates[coord])
+                coord.value: (axis.value, physical_ticks[coord])
                 for axis, coord in zip(img_axes, img_coords)
             }
         except KeyError as ex:
             raise KeyError(f"missing physical coordinates {ex.args[0]}") from ex
 
         for ix, axis in enumerate(img_axes):
-            xr_coords[axis.value] = pixel_coordinates.get(axis, np.arange(0, array.shape[ix]))
+            xr_coords[axis.value] = pixel_ticks.get(axis, np.arange(0, array.shape[ix]))
 
         dataarray = xr.DataArray(
             array,

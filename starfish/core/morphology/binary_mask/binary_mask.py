@@ -224,7 +224,7 @@ class BinaryMaskCollection:
                 label_image_array,
             )
 
-        return LabelImage.from_label_array_and_coords(
+        return LabelImage.from_label_array_and_ticks(
             label_image_array,
             self._pixel_ticks,
             self._physical_ticks,

@@ -25,9 +25,9 @@ from ..label_image import AttrKeys, CURRENT_VERSION, DOCTYPE_STRING, LabelImage
         ],
         # 2D label image
         [
-            np.zeros((1, 1), dtype=np.int32),
+            np.zeros((1, 2), dtype=np.int32),
             {
-                Coordinates.X: [0],
+                Coordinates.X: [0, 1],
                 Coordinates.Y: [0],
             },
             None,
@@ -35,9 +35,9 @@ from ..label_image import AttrKeys, CURRENT_VERSION, DOCTYPE_STRING, LabelImage
         ],
         # wrong dtype
         [
-            np.zeros((1, 1), dtype=np.float32),
+            np.zeros((1, 2), dtype=np.float32),
             {
-                Coordinates.X: [0],
+                Coordinates.X: [0, 1],
                 Coordinates.Y: [0],
             },
             None,
@@ -45,9 +45,9 @@ from ..label_image import AttrKeys, CURRENT_VERSION, DOCTYPE_STRING, LabelImage
         ],
         # missing some coordinates
         [
-            np.zeros((1, 1), dtype=np.float32),
+            np.zeros((1, 2), dtype=np.float32),
             {
-                Coordinates.X: [0],
+                Coordinates.X: [0, 1],
             },
             None,
             KeyError,
@@ -73,37 +73,37 @@ def test_from_array_and_coords(
 
 def test_pixel_coordinates():
     """Test that the code creates missing pixel coordinate values."""
-    array = np.zeros((2, 2, 2), dtype=np.int32)
+    array = np.zeros((2, 3, 4), dtype=np.int32)
     pixel_coordinates = {
-        Axes.X: [2, 3],
+        Axes.X: [2, 3, 4, 5],
         Axes.ZPLANE: [0, 1],
     }
     physical_coordinates = {
-        Coordinates.X: [0, 0.5],
-        Coordinates.Y: [0, 0.2],
+        Coordinates.X: [0, 0.5, 1.0, 1.5],
+        Coordinates.Y: [0, 0.2, 0.4],
         Coordinates.Z: [0, 0.1],
     }
     label_image = LabelImage.from_label_array_and_ticks(
         array, pixel_coordinates, physical_coordinates, None)
 
-    assert np.array_equal(label_image.xarray.coords[Axes.X.value], [2, 3])
+    assert np.array_equal(label_image.xarray.coords[Axes.X.value], [2, 3, 4, 5])
     # not provided, should be 0..N-1
-    assert np.array_equal(label_image.xarray.coords[Axes.Y.value], [0, 1])
+    assert np.array_equal(label_image.xarray.coords[Axes.Y.value], [0, 1, 2])
     assert np.array_equal(label_image.xarray.coords[Axes.ZPLANE.value], [0, 1])
 
 
 def test_coordinates_key_type():
     """Test that the code correctly handles situations where the coordinate keys are provided as
     strings instead of the enumerated types."""
-    array = np.zeros((2, 2, 2), dtype=np.int32)
+    array = np.zeros((2, 3, 4), dtype=np.int32)
     pixel_coordinates = {
-        Axes.X.value: [2, 3],
-        Axes.Y.value: [0, 1],
+        Axes.X.value: [2, 3, 4, 5],
+        Axes.Y.value: [0, 1, 2],
         Axes.ZPLANE.value: [0, 1],
     }
     physical_coordinates = {
-        Coordinates.X.value: [0, 0.5],
-        Coordinates.Y.value: [0, 0.2],
+        Coordinates.X.value: [0, 0.5, 1.0, 1.5],
+        Coordinates.Y.value: [0, 0.2, 0.4],
         Coordinates.Z.value: [0, 0.1],
     }
     label_image = LabelImage.from_label_array_and_ticks(
@@ -117,14 +117,14 @@ def test_coordinates_key_type():
 
 def test_save_and_load(tmp_path):
     """Verify that we can save the label image and load it correctly."""
-    array = np.zeros((2, 2, 2), dtype=np.int32)
+    array = np.zeros((2, 3, 4), dtype=np.int32)
     pixel_coordinates = {
-        Axes.X: [2, 3],
+        Axes.X: [2, 3, 4, 5],
         Axes.ZPLANE: [0, 1],
     }
     physical_coordinates = {
-        Coordinates.X: [0, 0.5],
-        Coordinates.Y: [0, 0.2],
+        Coordinates.X: [0, 0.5, 1.0, 1.5],
+        Coordinates.Y: [0, 0.2, 0.4],
         Coordinates.Z: [0, 0.1],
     }
     log = Log()

@@ -51,6 +51,66 @@ def test_from_label_image():
                           physical_ticks[Coordinates.X][3:6])
 
 
+def test_uncropped_mask():
+    """Test that BinaryMaskCollection.uncropped_mask() works correctly.
+    """
+    label_image_array = np.zeros((5, 5), dtype=np.int32)
+    label_image_array[0] = 1
+    label_image_array[3:5, 3:5] = 2
+    label_image_array[-1, -1] = 0
+
+    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
+                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12]}
+
+    label_image = LabelImage.from_label_array_and_ticks(
+        label_image_array,
+        None,
+        physical_ticks,
+        None,
+    )
+
+    mask_collection = BinaryMaskCollection.from_label_image(label_image)
+    assert len(mask_collection) == 2
+
+    region_0 = mask_collection.uncropped_mask(0)
+    assert region_0.shape == label_image_array.shape
+    assert region_0.dtype == np.bool
+    assert np.all(region_0[0] == 1)
+    assert np.all(region_0[1:5] == 0)
+
+    region_1 = mask_collection.uncropped_mask(1)
+    assert region_1.shape == label_image_array.shape
+    assert region_1.dtype == np.bool
+    assert np.all(region_1[0:3, :] == 0)
+    assert np.all(region_1[:, 0:3] == 0)
+    assert np.all(region_1[3:5, 3:5] == [[1, 1],
+                                         [1, 0]])
+
+
+def test_uncropped_mask_no_uncropping():
+    """If the mask doesn't need to be uncropped, it should still work.  This is an optimized code
+    path, so it is separately validated.
+    """
+    label_image_array = np.full((5, 5), fill_value=1, dtype=np.int32)
+
+    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
+                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12]}
+
+    label_image = LabelImage.from_label_array_and_ticks(
+        label_image_array,
+        None,
+        physical_ticks,
+        None,
+    )
+
+    mask_collection = BinaryMaskCollection.from_label_image(label_image)
+    assert len(mask_collection) == 1
+
+    region = mask_collection.uncropped_mask(0)
+    assert region.shape == label_image_array.shape
+    assert np.all(region == 1)
+
+
 def test_to_label_image():
     # test via roundtrip
     label_image_array = np.zeros((5, 6), dtype=np.int32)

@@ -1,8 +1,8 @@
-from typing import Collection, Mapping, Sequence
+from typing import Collection, Mapping
 
 import numpy as np
 
-from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.types import ArrayLike, Axes, Coordinates, Number
 from ._key import TileKey
 
 
@@ -26,7 +26,7 @@ class TileData:
         raise NotImplementedError()
 
     @property
-    def coordinates(self) -> Mapping[Coordinates, Sequence[Number]]:
+    def coordinates(self) -> Mapping[Coordinates, ArrayLike[Number]]:
         raise NotImplementedError()
 
     @property

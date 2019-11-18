@@ -1,12 +1,12 @@
 from pathlib import Path
-from typing import Any, Hashable, Mapping, MutableMapping, Optional, Sequence, Tuple, Union
+from typing import Any, Hashable, Mapping, MutableMapping, Optional, Tuple, Union
 
 import numpy as np
 import xarray as xr
 from semantic_version import Version
 
 from starfish.core.morphology.util import _get_axes_names
-from starfish.core.types import Axes, Coordinates, LOG, Number, STARFISH_EXTRAS_KEY
+from starfish.core.types import ArrayLike, Axes, Coordinates, LOG, Number, STARFISH_EXTRAS_KEY
 from starfish.core.util.logging import Log
 
 
@@ -53,11 +53,11 @@ class LabelImage:
             cls,
             array: np.ndarray,
             pixel_coordinates: Optional[Union[
-                                        Mapping[Axes, Sequence[int]],
-                                        Mapping[str, Sequence[int]]]],
+                                        Mapping[Axes, ArrayLike[int]],
+                                        Mapping[str, ArrayLike[int]]]],
             physical_coordinates: Union[
-                Mapping[Coordinates, Sequence[Number]],
-                Mapping[str, Sequence[Number]]],
+                Mapping[Coordinates, ArrayLike[Number]],
+                Mapping[str, ArrayLike[Number]]],
             log: Optional[Log],
     ) -> "LabelImage":
         """Constructs a LabelImage from an array containing the labels, a set of physical
@@ -68,23 +68,25 @@ class LabelImage:
         array : np.ndarray
             A 2D or 3D array containing the labels.  The ordering of the axes must be Y, X for 2D
             images and ZPLANE, Y, X for 3D images.
-        pixel_coordinates : Optional[Mapping[Union[Axes, str], Sequence[int]]]
+        pixel_coordinates : Optional[Union[Mapping[Axes, ArrayLike[int]],
+                                           Mapping[str, ArrayLike[int]]]]
             A map from the axis to the values for that axis.  For any axis that exist in the array
             but not in pixel_coordinates, the pixel coordinates are assigned from 0..N-1, where N is
             the size along that axis.
-        physical_coordinates : Mapping[Union[Coordinates, str], Sequence[Number]]
+        physical_coordinates : Union[Mapping[Coordinates, ArrayLike[Number]],
+                                     Mapping[str, ArrayLike[Number]]]
             A map from the physical coordinate type to the values for axis.  For 2D label images,
             X and Y physical coordinates must be provided.  For 3D label images, Z physical
             coordinates must also be provided.
         log : Optional[Log]
             A log of how this label image came to be.
         """
-        # normalize the pixel coordinates to Mapping[Axes, Sequence[int]]
+        # normalize the pixel coordinates to Mapping[Axes, ArrayLike[int]]
         pixel_coordinates = {
             axis if isinstance(axis, Axes) else Axes(axis): axis_values
             for axis, axis_values in (pixel_coordinates or {}).items()
         }
-        # normalize the physical coordinates to Mapping[Coordinates, Sequence[Number]]
+        # normalize the physical coordinates to Mapping[Coordinates, ArrayLike[Number]]
         physical_coordinates = {
             coord if isinstance(coord, Coordinates) else Coordinates(coord): coord_values
             for coord, coord_values in physical_coordinates.items()

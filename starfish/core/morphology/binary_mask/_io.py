@@ -4,13 +4,13 @@ import pickle
 import tarfile
 import warnings
 from dataclasses import dataclass
-from typing import BinaryIO, List, Mapping, MutableSequence, Optional, Sequence, Tuple, Type
+from typing import BinaryIO, List, Mapping, MutableSequence, Optional, Tuple, Type
 
 import numpy as np
 from packaging.version import Version
 
 from starfish.core.errors import DataFormatWarning
-from starfish.core.types import Axes, Coordinates, Number, STARFISH_EXTRAS_KEY
+from starfish.core.types import ArrayLike, Axes, Coordinates, Number, STARFISH_EXTRAS_KEY
 from starfish.core.util.logging import Log
 from . import binary_mask as bm
 
@@ -94,8 +94,8 @@ class v0_0(BinaryMaskIO, version_descriptor=Version("0.0")):
     def read_binary_mask(self, tf: tarfile.TarFile) -> bm.BinaryMaskCollection:
         log: Optional[Log] = None
         masks: MutableSequence[bm.MaskData] = []
-        pixel_ticks: Optional[Mapping[Axes, Sequence[int]]] = None
-        physical_ticks: Optional[Mapping[Coordinates, Sequence[Number]]] = None
+        pixel_ticks: Optional[Mapping[Axes, ArrayLike[int]]] = None
+        physical_ticks: Optional[Mapping[Coordinates, ArrayLike[Number]]] = None
 
         while True:
             tarinfo: Optional[tarfile.TarInfo] = tf.next()

@@ -22,7 +22,7 @@ from skimage.measure._regionprops import _RegionProperties
 
 from starfish.core.morphology.label_image import LabelImage
 from starfish.core.morphology.util import _get_axes_names
-from starfish.core.types import Axes, Coordinates, Number
+from starfish.core.types import ArrayLike, Axes, Coordinates, Number
 from starfish.core.util.logging import Log
 from .expand import fill_from_mask
 
@@ -39,10 +39,10 @@ class BinaryMaskCollection:
 
     Parameters
     ----------
-    pixel_ticks : Union[Mapping[Axes, Sequence[int]], Mapping[str, Sequence[int]]]
+    pixel_ticks : Union[Mapping[Axes, ArrayLike[int]], Mapping[str, ArrayLike[int]]]
         A map from the axis to the values for that axis.
-    physical_ticks : Union[Mapping[Coordinates, Sequence[Number]],
-                                 Mapping[str, Sequence[Number]]
+    physical_ticks : Union[Mapping[Coordinates, ArrayLike[Number]],
+                                   Mapping[str, ArrayLike[Number]]
         A map from the physical coordinate type to the values for axis.  For 2D label images,
         X and Y physical coordinates must be provided.  For 3D label images, Z physical
         coordinates must also be provided.
@@ -56,17 +56,17 @@ class BinaryMaskCollection:
     """
     def __init__(
             self,
-            pixel_ticks: Union[Mapping[Axes, Sequence[int]], Mapping[str, Sequence[int]]],
-            physical_ticks: Union[Mapping[Coordinates, Sequence[Number]],
-                                  Mapping[str, Sequence[Number]]],
+            pixel_ticks: Union[Mapping[Axes, ArrayLike[int]], Mapping[str, ArrayLike[int]]],
+            physical_ticks: Union[Mapping[Coordinates, ArrayLike[Number]],
+                                  Mapping[str, ArrayLike[Number]]],
             masks: Sequence[MaskData],
             log: Optional[Log],
     ):
-        self._pixel_ticks: Mapping[Axes, Sequence[int]] = {
+        self._pixel_ticks: Mapping[Axes, ArrayLike[int]] = {
             Axes(axis): axis_data
             for axis, axis_data in pixel_ticks.items()
         }
-        self._physical_ticks: Mapping[Coordinates, Sequence[Number]] = {
+        self._physical_ticks: Mapping[Coordinates, ArrayLike[Number]] = {
             Coordinates(coord): coord_data
             for coord, coord_data in physical_ticks.items()
         }

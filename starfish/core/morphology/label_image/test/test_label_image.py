@@ -1,11 +1,11 @@
-from typing import Mapping, Optional, Sequence, Type
+from typing import Mapping, Optional, Type
 
 import numpy as np
 import pytest
 
 from starfish import Log
 from starfish.image import Filter
-from starfish.types import Axes, Coordinates, Number
+from starfish.types import ArrayLike, Axes, Coordinates, Number
 from ..label_image import AttrKeys, CURRENT_VERSION, DOCTYPE_STRING, LabelImage
 
 
@@ -56,7 +56,7 @@ from ..label_image import AttrKeys, CURRENT_VERSION, DOCTYPE_STRING, LabelImage
 )
 def test_from_array_and_coords(
         array: np.ndarray,
-        physical_coordinates: Mapping[Coordinates, Sequence[Number]],
+        physical_coordinates: Mapping[Coordinates, ArrayLike[Number]],
         log: Optional[Log],
         expected_error: Optional[Type[Exception]],
 ):

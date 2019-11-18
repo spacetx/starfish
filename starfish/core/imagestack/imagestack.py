@@ -47,6 +47,7 @@ from starfish.core.imagestack.parser.crop import CropParameters, CroppedTileColl
 from starfish.core.imagestack.parser.numpy import NumpyData
 from starfish.core.imagestack.parser.tileset import TileSetData
 from starfish.core.types import (
+    ArrayLike,
     Axes,
     Clip,
     Coordinates,
@@ -319,7 +320,7 @@ class ImageStack:
             cls,
             array: np.ndarray,
             index_labels: Optional[Mapping[Axes, Sequence[int]]]=None,
-            coordinates: Optional[Mapping[Coordinates, Sequence[Number]]]=None,
+            coordinates: Optional[Mapping[Coordinates, ArrayLike[Number]]]=None,
     ) -> "ImageStack":
         """Create an ImageStack from a 5d numpy array with shape (n_round, n_ch, n_z, y, x)
 
@@ -330,7 +331,7 @@ class ImageStack:
         index_labels : Optional[Mapping[Axes, Sequence[int]]]
             Mapping from axes (r, ch, z) to their labels.  If this is not provided, then the axes
             will be labeled from 0..(n-1), where n=the size of the axes.
-        coordinates : Optional[Mapping[Coordinates, Sequence[Number]]]
+        coordinates : Optional[Mapping[Coordinates, ArrayLike[Number]]]
             Map from Coordinates to a sequence of coordinate values.  If this is not provided, then
             the ImageStack gets fake coordinates.
 

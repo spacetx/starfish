@@ -2,17 +2,12 @@ import numpy as np
 
 from starfish.core.morphology.label_image import LabelImage
 from starfish.core.types import Axes, Coordinates
+from .factories import binary_mask_collection_2d, label_array_2d
 from ..binary_mask import BinaryMaskCollection
 
 
 def test_from_label_image():
-    label_image_array = np.zeros((5, 6), dtype=np.int32)
-    label_image_array[0] = 1
-    label_image_array[3:5, 3:6] = 2
-    label_image_array[-1, -1] = 0
-
-    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
+    label_image_array, physical_ticks = label_array_2d()
 
     label_image = LabelImage.from_label_array_and_ticks(
         label_image_array,
@@ -54,13 +49,7 @@ def test_from_label_image():
 def test_uncropped_mask():
     """Test that BinaryMaskCollection.uncropped_mask() works correctly.
     """
-    label_image_array = np.zeros((5, 5), dtype=np.int32)
-    label_image_array[0] = 1
-    label_image_array[3:5, 3:5] = 2
-    label_image_array[-1, -1] = 0
-
-    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12]}
+    label_image_array, physical_ticks = label_array_2d()
 
     label_image = LabelImage.from_label_array_and_ticks(
         label_image_array,
@@ -83,18 +72,16 @@ def test_uncropped_mask():
     assert region_1.dtype == np.bool
     assert np.all(region_1[0:3, :] == 0)
     assert np.all(region_1[:, 0:3] == 0)
-    assert np.all(region_1[3:5, 3:5] == [[1, 1],
-                                         [1, 0]])
+    assert np.all(region_1[3:5, 3:6] == [[1, 1, 1],
+                                         [1, 1, 0]])
 
 
 def test_uncropped_mask_no_uncropping():
     """If the mask doesn't need to be uncropped, it should still work.  This is an optimized code
     path, so it is separately validated.
     """
-    label_image_array = np.full((5, 5), fill_value=1, dtype=np.int32)
-
-    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12]}
+    label_image_array, physical_ticks = label_array_2d()
+    label_image_array.fill(1)
 
     label_image = LabelImage.from_label_array_and_ticks(
         label_image_array,
@@ -113,13 +100,7 @@ def test_uncropped_mask_no_uncropping():
 
 def test_to_label_image():
     # test via roundtrip
-    label_image_array = np.zeros((5, 6), dtype=np.int32)
-    label_image_array[0] = 1
-    label_image_array[3:5, 3:6] = 2
-    label_image_array[-1, -1] = 0
-
-    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
+    label_image_array, physical_ticks = label_array_2d()
 
     label_image = LabelImage.from_label_array_and_ticks(
         label_image_array,
@@ -134,22 +115,7 @@ def test_to_label_image():
 
 
 def test_save_load(tmp_path):
-    label_image_array = np.zeros((5, 6), dtype=np.int32)
-    label_image_array[0] = 1
-    label_image_array[3:5, 3:6] = 2
-    label_image_array[-1, -1] = 0
-
-    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
-
-    label_image = LabelImage.from_label_array_and_ticks(
-        label_image_array,
-        None,
-        physical_ticks,
-        None,
-    )
-
-    binary_mask_collection = BinaryMaskCollection.from_label_image(label_image)
+    binary_mask_collection = binary_mask_collection_2d()
 
     path = tmp_path / "data.tgz"
     binary_mask_collection.to_targz(path)
@@ -165,13 +131,11 @@ def test_save_load(tmp_path):
 
 
 def test_from_empty_label_image(tmp_path):
-    label_image_array = np.zeros((5, 6), dtype=np.int32)
-
-    physical_ticks = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
-                      Coordinates.X: [7.2, 8.4, 9.6, 10.8, 12, 13.2]}
+    label_array, physical_ticks = label_array_2d()
+    label_array.fill(0)
 
     label_image = LabelImage.from_label_array_and_ticks(
-        label_image_array,
+        label_array,
         None,
         physical_ticks,
         None,

@@ -1,3 +1,26 @@
+## [0.1.9] - 2019-11-18
+- Create an ArrayLike type (#1649)
+- Verify that binary masks can be generated from empty label images (#1634)
+- Add a morphology package to hold BinaryMaskCollection, LabelImage, and their respective operators (#1631)
+- fixing travis (#1648)
+- Support multiple codewords for the same target (#1646)
+- Update data model for BinaryMaskCollection (#1628)
+- Test for Codebook.to_json / open_json (#1645)
+- Simplify Dockerfile (#1642)
+- Switch to version exclusion for scikit-image workaround (#1629)
+- Clean up binary mask (#1622)
+- adding an extras feild to SpotFindingResults (#1615)
+- deleting Decode and Detect modules in lieu of spot finding refactor (#1598)
+- Fix install issues (#1641)
+- Upgrade to slicedimage 4.1.0 (#1639)
+- Update vocabulary for LabelImage I/O operations. (#1630)
+- Add a label image data type (#1619)
+- Remove deprecated code (#1621)
+- fixing bug with codebook.to_json (#1625)
+- Don't fill a new ImageStack with NaN (#1609)
+- Rename SegmenationMaskCollection to BinaryMaskCollection (#1611)
+- Remove hack to force anonymous memory mapping on osx (#1618)
+
 ## [0.1.8] - 2019-10-18
 - Logging improvements (#1617)
 - Make regionprops available per mask (#1610)
@@ -148,6 +171,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.1.9]: https://github.com/spacetx/starfish/releases/tag/0.1.9
 [0.1.8]: https://github.com/spacetx/starfish/releases/tag/0.1.8
 [0.1.7]: https://github.com/spacetx/starfish/releases/tag/0.1.7
 [0.1.6]: https://github.com/spacetx/starfish/releases/tag/0.1.6

@@ -1,4 +1,5 @@
 import numpy as np
+from skimage.morphology import binary_dilation
 
 from starfish.core.morphology.label_image import LabelImage
 from starfish.core.types import Axes, Coordinates
@@ -157,3 +158,30 @@ def test_from_empty_label_image(tmp_path):
         original_props = binary_mask_collection.mask_regionprops(ix)
         recalculated_props = binary_mask_collection.mask_regionprops(ix)
         assert original_props == recalculated_props
+
+
+def test_apply():
+    input_mask_collection = binary_mask_collection_2d()
+    output_mask_collection = input_mask_collection._apply(binary_dilation)
+
+    assert input_mask_collection._pixel_ticks == output_mask_collection._pixel_ticks
+    assert input_mask_collection._physical_ticks == output_mask_collection._physical_ticks
+    assert input_mask_collection._log == output_mask_collection._log
+    assert len(input_mask_collection) == len(output_mask_collection)
+
+    region_0, region_1 = output_mask_collection.masks()
+
+    assert region_0.name == '0'
+    assert region_1.name == '1'
+
+    temp = np.ones((2, 6), dtype=np.bool)
+    assert np.array_equal(region_0, temp)
+    temp = np.ones((3, 4), dtype=np.bool)
+    temp[0, 0] = 0
+    assert np.array_equal(region_1, temp)
+
+    assert np.array_equal(region_0[Axes.Y.value], [0, 1])
+    assert np.array_equal(region_0[Axes.X.value], [0, 1, 2, 3, 4, 5])
+
+    assert np.array_equal(region_1[Axes.Y.value], [2, 3, 4])
+    assert np.array_equal(region_1[Axes.X.value], [2, 3, 4, 5])

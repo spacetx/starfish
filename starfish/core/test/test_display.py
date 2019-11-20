@@ -22,7 +22,7 @@ sd = SyntheticData(
 stack = sd.spots()
 spots = sd.intensities()
 label_image = LabelImage.from_label_array_and_ticks(
-    np.random.rand(128, 128).astype(np.uint8),
+    np.random.randint(0, 4, size=(128, 128), dtype=np.uint8),
     None,
     {Coordinates.Y: np.arange(128), Coordinates.X: np.arange(128)},
     None,
@@ -43,8 +43,7 @@ def test_display(stack, spots, masks):
         app = QApplication.instance() or QApplication([])
         viewer = napari.Viewer()
         timer = QTimer()
-        timer.setInterval(500)
-        timer.timeout.connect(viewer.window.close)
+        timer.setInterval(1000)
         timer.timeout.connect(app.quit)
         timer.start()
         display(stack, spots, masks, viewer=viewer)

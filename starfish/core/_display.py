@@ -274,7 +274,7 @@ def display(
             )
 
     if masks:
-        viewer.add_labels(masks.to_label_image(),
+        viewer.add_labels(masks.to_label_image().label_image,
                           name="masks")
 
     if new_viewer and not INTERACTIVE:

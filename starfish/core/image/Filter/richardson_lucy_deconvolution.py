@@ -87,14 +87,14 @@ class DeconvolvePSF(FilterAlgorithm):
     # and the results look bad. #548 addresses this problem.
     @staticmethod
     def _richardson_lucy_deconv(
-            image: Union[xr.DataArray, np.ndarray], iterations: int, psf: np.ndarray
-    ) -> np.ndarray:
+            image: xr.DataArray, iterations: int, psf: np.ndarray
+    ) -> xr.DataArray:
         """
         Deconvolves input image with a specified point spread function.
 
         Parameters
         ----------
-        image : Union[xr.DataArray, np.ndarray]
+        image : xr.DataArray
            Input degraded image (can be N dimensional).
         psf : ndarray
            The point spread function.
@@ -104,7 +104,7 @@ class DeconvolvePSF(FilterAlgorithm):
 
         Returns
         -------
-        im_deconv : ndarray
+        im_deconv : xr.DataArray
            The deconvolved image.
 
         """

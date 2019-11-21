@@ -3,14 +3,19 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-import xarray as xr
 from skimage.feature import blob_dog, blob_doh, blob_log
 
 from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.spots.FindSpots import spot_finding_utils
-from starfish.core.types import Axes, Features, Number, PerImageSliceSpotResults, SpotAttributes,  \
-    SpotFindingResults
+from starfish.core.types import (
+    Axes,
+    Features,
+    Number,
+    PerImageSliceSpotResults,
+    SpotAttributes,
+    SpotFindingResults,
+)
 from ._base import FindSpotsAlgorithm
 
 blob_detectors = {
@@ -85,14 +90,15 @@ class BlobDetector(FindSpotsAlgorithm):
         except ValueError:
             raise ValueError("Detector method must be one of {blob_log, blob_dog, blob_doh}")
 
-    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]
-                       ) -> PerImageSliceSpotResults:
+    def image_to_spots(
+            self, data_image: np.ndarray,
+    ) -> PerImageSliceSpotResults:
         """
         Find spots using a gaussian blob finding algorithm
 
         Parameters
         ----------
-        data_image : Union[np.ndarray, xr.DataArray]
+        data_image : np.ndarray
             image containing spots to be detected
 
         Returns
@@ -123,7 +129,7 @@ class BlobDetector(FindSpotsAlgorithm):
         y_inds = fitted_blobs_array[:, 1].astype(int)
         x_inds = fitted_blobs_array[:, 2].astype(int)
         radius = np.round(fitted_blobs_array[:, 3] * np.sqrt(3))
-        data_image = data_image.values if isinstance(data_image, xr.DataArray) else data_image
+        data_image = np.asarray(data_image)
         intensities = data_image[tuple([z_inds, y_inds, x_inds])]
 
         # construct dataframe
@@ -158,7 +164,7 @@ class BlobDetector(FindSpotsAlgorithm):
         ----------
         image_stack : ImageStack
             ImageStack where we find the spots in.
-        reference_image : xr.DataArray
+        reference_image : Optional[ImageStack]
             (Optional) a reference image. If provided, spots will be found in this image, and then
             the locations that correspond to these spots will be measured across each channel.
         n_processes : Optional[int] = None,

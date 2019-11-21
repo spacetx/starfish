@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Optional, Union
+from typing import Optional
 
 import numpy as np
 import xarray as xr
@@ -52,11 +52,12 @@ class ClipPercentileToZero(FilterAlgorithm):
                                    "min_coeff": 1.0, "max_coeff": 1.0}
 
     @staticmethod
-    def _clip_percentile_to_zero(image: Union[xr.DataArray, np.ndarray],
-                                 p_min: int,
-                                 p_max: int,
-                                 min_coeff: float,
-                                 max_coeff: float) -> np.ndarray:
+    def _clip_percentile_to_zero(
+            image: xr.DataArray,
+            p_min: int,
+            p_max: int,
+            min_coeff: float,
+            max_coeff: float) -> xr.DataArray:
         v_min, v_max = np.percentile(image, [p_min, p_max])
         v_min = min_coeff * v_min
         v_max = max_coeff * v_max

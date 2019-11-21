@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Optional, Union
+from typing import Optional
 
 import numpy as np
 import xarray as xr
@@ -62,17 +62,18 @@ class Warp(ApplyTransformAlgorithm):
         return None
 
 
-def warp(image: Union[xr.DataArray, np.ndarray],
-         transformation_object: GeometricTransform,
-         **kwargs
-         ) -> np.ndarray:
+def warp(
+        image: xr.DataArray,
+        transformation_object: GeometricTransform,
+        **kwargs
+) -> xr.DataArray:
     """
     Wrapper around :py:func:`skimage.transform.warp`. Warps an image according to a
     given coordinate transformation.
 
     Parameters
     ----------
-    image : np.ndarray
+    image : xr.DataArray
         The image to be transformed
     transformation_object : :py:class:`~skimage.transform._geometric.GeometricTransform`
         The transformation object to apply.

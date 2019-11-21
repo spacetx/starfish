@@ -1,6 +1,6 @@
 from itertools import product
 from json import loads
-from typing import Dict, Hashable, List, Optional, Sequence, Union
+from typing import Dict, Hashable, List, Optional, Sequence
 
 import numpy as np
 import pandas as pd
@@ -136,7 +136,7 @@ class IntensityTable(xr.DataArray):
     @classmethod
     def from_spot_data(
             cls,
-            intensities: Union[xr.DataArray, np.ndarray],
+            intensities: xr.DataArray,
             spot_attributes: SpotAttributes,
             round_values: Sequence[int],
             ch_values: Sequence[int],
@@ -148,7 +148,7 @@ class IntensityTable(xr.DataArray):
 
         Parameters
         ----------
-        intensities : Union[xr.DataArray, np.ndarray]
+        intensities : xr.DataArray
             Intensity data.
         spot_attributes : SpotAttributes
             Table containing spot metadata. Must contain the values specified in Axes.X,

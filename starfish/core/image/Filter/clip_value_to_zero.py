@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Optional, Union
+from typing import Optional
 
 import numpy as np
 import xarray as xr
@@ -44,9 +44,10 @@ class ClipValueToZero(FilterAlgorithm):
     _DEFAULT_TESTING_PARAMETERS = {"v_min": 0.0, "v_max": None}
 
     @staticmethod
-    def _clip_value_to_zero(image: Union[xr.DataArray, np.ndarray],
-                            v_min: float,
-                            v_max: Optional[Number]) -> np.ndarray:
+    def _clip_value_to_zero(
+            image: xr.DataArray,
+            v_min: float,
+            v_max: Optional[Number]) -> xr.DataArray:
         return image.clip(min=v_min, max=v_max) - np.float32(v_min)
 
     def run(self,

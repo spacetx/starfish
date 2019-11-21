@@ -2,7 +2,6 @@
 from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
-import numpy as np
 import xarray as xr
 from scipy.ndimage import gaussian_laplace
 
@@ -79,9 +78,9 @@ class Laplace(FilterAlgorithm):
 
     @staticmethod
     def _gaussian_laplace(
-        image: Union[xr.DataArray, np.ndarray], sigma: Union[Number, Tuple[Number]],
+        image: xr.DataArray, sigma: Union[Number, Tuple[Number]],
         mode: str = 'reflect', cval: float = 0.0
-    ) -> np.ndarray:
+    ) -> xr.DataArray:
         filtered = gaussian_laplace(
             image, sigma=sigma, mode=mode, cval=cval)
 

@@ -1,7 +1,6 @@
 from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
-import numpy as np
 import xarray as xr
 
 from starfish.core.image.Filter.gaussian_low_pass import GaussianLowPass
@@ -55,10 +54,10 @@ class GaussianHighPass(FilterAlgorithm):
 
     @staticmethod
     def _high_pass(
-            image: Union[xr.DataArray, np.ndarray],
+            image: xr.DataArray,
             sigma: Union[Number, Tuple[Number]],
             rescale: bool = False
-    ) -> Union[xr.DataArray, np.ndarray]:
+    ) -> xr.DataArray:
         """
         Applies a gaussian high pass filter to an image
 
@@ -74,7 +73,7 @@ class GaussianHighPass(FilterAlgorithm):
         Returns
         -------
         np.ndarray :
-            filtered image of the same shape as the input image
+            filtered image of the same type and shape as the input image
         """
 
         blurred = GaussianLowPass._low_pass(image, sigma)

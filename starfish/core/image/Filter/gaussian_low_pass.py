@@ -1,7 +1,6 @@
 from functools import partial
 from typing import Callable, Optional, Tuple, Union
 
-import numpy as np
 import xarray as xr
 from skimage.filters import gaussian
 
@@ -54,16 +53,16 @@ class GaussianLowPass(FilterAlgorithm):
 
     @staticmethod
     def _low_pass(
-            image: Union[xr.DataArray, np.ndarray],
+            image: xr.DataArray,
             sigma: Union[Number, Tuple[Number]],
             rescale: bool = False
-    ) -> np.ndarray:
+    ) -> xr.DataArray:
         """
         Apply a Gaussian blur operation over a multi-dimensional image.
 
         Parameters
         ----------
-        image : Union[xr.DataArray, np.ndarray]
+        image : xr.DataArray
             2-d or 3-d image data
         sigma : Union[Number, Tuple[Number]]
             Standard deviation of the Gaussian kernel that will be applied. If a float, an
@@ -73,7 +72,7 @@ class GaussianLowPass(FilterAlgorithm):
 
         Returns
         -------
-        np.ndarray :
+        xr.DataArray :
             Blurred data in same shape as input image
 
         """

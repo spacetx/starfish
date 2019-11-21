@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Optional, Union
+from typing import Optional
 
 import numpy as np
 import xarray as xr
@@ -46,9 +46,9 @@ class Clip(FilterAlgorithm):
 
     @staticmethod
     def _clip(
-        image: Union[xr.DataArray, np.ndarray], p_min: int, p_max: int,
+        image: xr.DataArray, p_min: int, p_max: int,
         expand_dynamic_range: bool
-    ) -> np.ndarray:
+    ) -> xr.DataArray:
         """Clip values of image"""
         v_min, v_max = np.percentile(image, [p_min, p_max])
 

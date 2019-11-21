@@ -1,9 +1,8 @@
 import warnings
 from functools import partial
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 
 import numpy as np
-import xarray as xr
 from trackpy import locate
 
 from starfish.core.image.Filter.util import determine_axes_to_group_by
@@ -92,8 +91,9 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
         self.verbose = verbose
         self.radius_is_gyration = radius_is_gyration
 
-    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]
-                       ) -> PerImageSliceSpotResults:
+    def image_to_spots(
+            self, data_image: np.ndarray,
+    ) -> PerImageSliceSpotResults:
         """
 
         Parameters
@@ -158,7 +158,7 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
         ----------
         image_stack : ImageStack
             ImageStack where we find the spots in.
-        reference_image : xr.DataArray
+        reference_image : Optional[ImageStack]
             (Optional) a reference image. If provided, spots will be found in this image, and then
             the locations that correspond to these spots will be measured across each channel.
         n_processes : Optional[int] = None,

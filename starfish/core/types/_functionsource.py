@@ -69,3 +69,4 @@ class FunctionSource(Enum):
     np = ("numpy", {'max': 'amax'})
     """Function source for the numpy libraries"""
     scipy = ("scipy",)
+    skimage = ("skimage",)

@@ -172,6 +172,8 @@ help-install:
 #      perform other edits. Important is that each section is
 #      separated by a line beginning with '##'.
 #
+#      Remove changelog entries that do not pertain to end users.
+#
 #  (2) Commit all files and remove any untracked files.
 #      `git status` should show nothing.
 #

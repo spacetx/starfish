@@ -173,7 +173,7 @@ class ImageStack:
         return imagestack
 
     @staticmethod
-    def _validate_data_dtype_and_range(data: Union[np.ndarray, xr.DataArray]) -> None:
+    def _validate_data_dtype_and_range(data: np.ndarray) -> None:
         """verify that data is of dtype float32 and in range [0, 1]"""
         if data.dtype != np.float32:
             raise TypeError(
@@ -806,7 +806,7 @@ class ImageStack:
 
     @staticmethod
     def _in_place_apply(
-            apply_func: Callable[..., Union[xr.DataArray, np.ndarray]],
+            apply_func: Callable[..., xr.DataArray],
             data: np.ndarray,
             *args,
             clip_method: Union[str, Clip],

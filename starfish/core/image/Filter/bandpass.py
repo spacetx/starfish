@@ -1,7 +1,6 @@
 from functools import partial
 from typing import Optional, Union
 
-import numpy as np
 import xarray as xr
 from trackpy import bandpass
 
@@ -64,14 +63,14 @@ class Bandpass(FilterAlgorithm):
 
     @staticmethod
     def _bandpass(
-            image: Union[xr.DataArray, np.ndarray],
+            image: xr.DataArray,
             lshort: Number, llong: int, threshold: Number, truncate: Number
-    ) -> np.ndarray:
+    ) -> xr.DataArray:
         """Apply a bandpass filter to remove noise and background variation
 
         Parameters
         ----------
-        image : Union[xr.DataArray, np.ndarray]
+        image : xr.DataArray
         lshort : float
             filter frequencies below this value
         llong : int
@@ -84,7 +83,7 @@ class Bandpass(FilterAlgorithm):
 
         Returns
         -------
-        np.ndarray :
+        xr.DataArray :
             bandpassed image
 
         """

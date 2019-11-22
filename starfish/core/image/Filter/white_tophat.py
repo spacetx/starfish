@@ -1,6 +1,5 @@
 from typing import Optional, Union
 
-import numpy as np
 import xarray as xr
 from skimage.morphology import ball, disk, white_tophat
 
@@ -51,7 +50,7 @@ class WhiteTophat(FilterAlgorithm):
 
     _DEFAULT_TESTING_PARAMETERS = {"masking_radius": 3}
 
-    def _white_tophat(self, image: Union[xr.DataArray, np.ndarray]) -> np.ndarray:
+    def _white_tophat(self, image: xr.DataArray) -> xr.DataArray:
         if self.is_volume:
             structuring_element = ball(self.masking_radius)
         else:

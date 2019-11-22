@@ -1,9 +1,8 @@
 from functools import partial
-from typing import Any, List, Mapping, Optional, Tuple, Union
+from typing import Any, List, Mapping, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-import xarray as xr
 from scipy.ndimage import label
 from skimage.feature import peak_local_max
 from skimage.measure import regionprops
@@ -180,19 +179,19 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
 
         return selected_thr
 
-    def _compute_threshold(self, img: Union[np.ndarray, xr.DataArray]
-                           ) -> Tuple[float, Optional[np.ndarray], Optional[List[int]]]:
+    def _compute_threshold(
+            self, img: np.ndarray) -> Tuple[float, Optional[np.ndarray], Optional[List[int]]]:
         """Finds spots on a number of thresholds then selects and returns the optimal threshold
 
         Parameters
         ----------
-        img: Union[np.ndarray, xr.DataArray]
+        img: np.ndarray
             data array in which spots should be detected and over which to compute different
             intensity thresholds
 
         Returns
         -------
-        Union[np.ndarray, xr.DataArray] :
+        np.ndarray :
             The intensity threshold
         """
         img = np.asarray(img)
@@ -202,13 +201,14 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
             return img.min(), None, None
         return self._select_optimal_threshold(thresholds, spot_counts), thresholds, spot_counts
 
-    def image_to_spots(self, data_image: Union[np.ndarray, xr.DataArray]
-                       ) -> PerImageSliceSpotResults:
+    def image_to_spots(
+            self, data_image: np.ndarray
+    ) -> PerImageSliceSpotResults:
         """measure attributes of spots detected by binarizing the image using the selected threshold
 
         Parameters
         ----------
-        data_image : Union[np.ndarray, xr.DataArray]
+        data_image : np.ndarray
             image containing spots to be detected
 
         Returns
@@ -285,7 +285,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         ----------
         image_stack : ImageStack
             ImageStack where we find the spots in.
-        reference_image : xr.DataArray
+        reference_image : Optional[ImageStack]
             (Optional) a reference image. If provided, spots will be found in this image, and then
             the locations that correspond to these spots will be measured across each channel.
         n_processes : Optional[int] = None,

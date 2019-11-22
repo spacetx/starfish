@@ -1,9 +1,8 @@
 from itertools import product
-from typing import Callable, Union
+from typing import Callable
 
 import numpy as np
 import pandas as pd
-import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import (
@@ -17,20 +16,20 @@ from starfish.core.types import (
 
 
 def measure_intensities_at_spot_locations_in_image(
-        image: Union[np.ndarray, xr.DataArray],
+        image: np.ndarray,
         spots: SpotAttributes,
-        measurement_function: Callable[[Union[np.ndarray, xr.DataArray]], Number],
+        measurement_function: Callable[[np.ndarray], Number],
         radius_is_gyration: bool = False,
 ) -> pd.Series:
     """measure the intensity of each spot in spots in the corresponding image
 
     Parameters
     ----------
-    image : Union[np.ndarray, xr.DataArray],
+    image : np.ndarray,
         3-d volume in which to measure intensities
     spots : pd.DataFrame
         SpotAttributes table containing coordinates and radii of spots
-    measurement_function : Callable[[Sequence], Number])
+    measurement_function : Callable[[np.ndarray], Number])
         Function to apply over the spot volumes to identify the intensity (e.g. max, mean, ...)
     radius_is_gyration : bool
         if True, indicates that the radius corresponds to radius of gyration, which is a
@@ -66,7 +65,7 @@ def measure_intensities_at_spot_locations_in_image(
 def measure_intensities_at_spot_locations_across_imagestack(
         data_image: ImageStack,
         reference_spots: PerImageSliceSpotResults,
-        measurement_function: Callable[[Union[np.ndarray, xr.DataArray]], Number],
+        measurement_function: Callable[[np.ndarray], Number],
         radius_is_gyration: bool = False) -> SpotFindingResults:
     """given spots found from a reference image, find those spots across a data_image
 
@@ -76,7 +75,7 @@ def measure_intensities_at_spot_locations_across_imagestack(
         ImageStack containing multiple volumes for which spots' intensities must be calculated
     reference_spots : PerImageSliceSpotResults
         Spots found in a reference image
-    measurement_function : Callable[[Sequence], Number])
+    measurement_function : Callable[[np.ndarray], Number])
         Function to apply over the spot volumes to identify the intensity (e.g. max, mean, ...)
     radius_is_gyration : bool
         if True, indicates that the radius corresponds to radius of gyration, which is

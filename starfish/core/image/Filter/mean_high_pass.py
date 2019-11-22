@@ -57,14 +57,14 @@ class MeanHighPass(FilterAlgorithm):
 
     @staticmethod
     def _high_pass(
-        image: Union[xr.DataArray, np.ndarray], size: Number, rescale: bool = False
-    ) -> np.ndarray:
+        image: xr.DataArray, size: Number, rescale: bool = False
+    ) -> xr.DataArray:
         """
         Applies a mean high pass filter to an image
 
         Parameters
         ----------
-        image : Union[xr.DataArray, numpy.ndarray]
+        image : xr.DataArray
             2-d or 3-d image data
         size : Union[Number, Tuple[Number]]
             width of the kernel
@@ -73,7 +73,7 @@ class MeanHighPass(FilterAlgorithm):
 
         Returns
         -------
-        np.ndarray[np.float32]:
+        xr.DataArray:
             Filtered image, same shape as input
         """
 

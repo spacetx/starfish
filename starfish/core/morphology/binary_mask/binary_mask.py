@@ -130,7 +130,10 @@ class BinaryMaskCollection:
         )
 
     def uncropped_mask(self, index: int) -> xr.DataArray:
-        """Convert a np-based mask into an xarray DataArray."""
+        """Some of the binary mask collections builders will crop the binary masks when constructing
+        the collection.  The purpose is to exclude the regions of the image that are entirely False.
+        Use this method to obtain the mask sized according to the pixel and physical shape provided
+        for the entire binary mask collection, use this method."""
         mask_data = self._masks[index]
         uncropped_shape = tuple(
             len(self._pixel_ticks[axis])

@@ -217,6 +217,10 @@ class BinaryMaskCollection:
             for ix, (axis, _) in enumerate(zip(*_get_axes_names(len(self._pixel_ticks))))
         }
 
+    @property
+    def log(self) -> Log:
+        return self._log
+
     @classmethod
     def from_label_image(cls, label_image: LabelImage) -> "BinaryMaskCollection":
         """Creates binary masks from a label image.  Masks are cropped to the smallest size that

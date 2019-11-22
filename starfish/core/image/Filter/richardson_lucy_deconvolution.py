@@ -182,5 +182,6 @@ class DeconvolvePSF(FilterAlgorithm):
             verbose=verbose,
             n_processes=n_processes,
             in_place=in_place,
+            clip_method=self.clip_method,
         )
         return result

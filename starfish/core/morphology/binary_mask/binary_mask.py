@@ -1,9 +1,12 @@
 import os
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 from typing import (
     Any,
+    Callable,
     Hashable,
     Iterator,
     Mapping,
@@ -507,6 +510,71 @@ class BinaryMaskCollection:
         """
         with open(os.fspath(path), "wb") as fh:
             _io.BinaryMaskIO.write_versioned_binary_mask(fh, self)
+
+    def _apply(
+            self,
+            function: Callable[[np.ndarray], np.ndarray],
+            *args,
+            n_processes: Optional[int] = None,
+            **kwargs
+    ) -> "BinaryMaskCollection":
+        """Given a function that takes an ndarray and outputs another, apply that method to all the
+        masks in this collection to form a new collection.  All the masks are uncropped before being
+        passed to the function.
+
+        Parameters
+        ----------
+        function : Callable[[np.ndarray], np.ndarray]
+            A function that should produce a mask array when given a mask array.
+        n_processes : Optional[int]
+            The number of processes to use for apply. If None, uses the output of os.cpu_count()
+            (default = None).
+        """
+        if n_processes is None:
+            n_processes = os.cpu_count()
+
+        applied_func = partial(
+            BinaryMaskCollection._apply_single_mask,
+            function=function,
+            mask_collection=self,
+            args=args,
+            kwargs=kwargs,
+        )
+        selectors = range(len(self._masks))
+
+        with ThreadPoolExecutor(max_workers=n_processes) as tpe:
+            results: Iterator[MaskData] = tpe.map(applied_func, selectors)
+
+        return BinaryMaskCollection(
+            self._pixel_ticks,
+            self._physical_ticks,
+            list(results),
+            self._log,
+        )
+
+    @staticmethod
+    def _apply_single_mask(
+            mask_index: int,
+            mask_collection: "BinaryMaskCollection",
+            args: Sequence,
+            kwargs: Mapping,
+            function: Callable[[np.ndarray], np.ndarray],
+    ) -> MaskData:
+        """Given a mask collection, and an index, retrieve a mask and apply a function to that mask.
+        Return the output along with the offsets of the original mask.  If the original mask is
+        uncropped, then the offsets should all be 0.  If the original mask is not uncropped, it is
+        propagated from the input masks's offsets.
+        """
+        input_mask = mask_collection.uncropped_mask(mask_index)
+        output_mask = function(input_mask.values, *args, **kwargs)  # type: ignore
+
+        selection_range: Sequence[slice] = BinaryMaskCollection._crop_mask(output_mask)
+
+        return MaskData(
+            output_mask[selection_range],
+            tuple(selection.start for selection in selection_range),
+            None
+        )
 
 
 # these need to be at the end to avoid recursive imports

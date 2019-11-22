@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from ..dtype import preserve_float_range
+from ..levels import preserve_float_range
 
 
 def combos(make_xarrays: bool):
@@ -42,7 +42,7 @@ def combos(make_xarrays: bool):
             np.asarray((0.0, 0.0, 0.5, 1.0), dtype=np.float32),
         ),
 
-        # both below zero and above one stuff
+        # both below zero and above one stuff, different dtype
         (
             np.asarray((-1.0, 0.0, 1.0, 2.0), dtype=np.float64),
             np.asarray((0.0, 0.0, 1.0, 1.0), dtype=np.float32),

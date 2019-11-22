@@ -217,7 +217,7 @@ def test_merfish_pipeline_cropped_data():
 
     # verify that the number of spots are correct
     spots_passing_filters = spot_intensities[Features.PASSES_THRESHOLDS].sum()
-    assert spots_passing_filters == 1417
+    assert spots_passing_filters == 1410
 
     # compare to paper results
     bench = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/MERFISH/benchmark_results.csv',
@@ -232,8 +232,8 @@ def test_merfish_pipeline_cropped_data():
 
     # assert that number of high-expression detected genes are correct
     expected_counts = pd.Series(
-        [108, 57, 45, 32, 31],
-        index=('MALAT1', 'SRRM2', 'FASN', 'TLN1', 'IGF2R')
+        [107, 59, 46, 32, 32],
+        index=('MALAT1', 'SRRM2', 'FASN', 'IGF2R', 'TLN1')
     )
     assert np.array_equal(
         expected_counts.values,
@@ -248,4 +248,4 @@ def test_merfish_pipeline_cropped_data():
 
     corrcoef = np.corrcoef(tmp[:, 1], tmp[:, 0])[0, 1]
 
-    assert np.round(corrcoef, 4) == 0.8411
+    assert np.round(corrcoef, 4) == 0.8427

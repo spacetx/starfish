@@ -196,9 +196,8 @@ def display(
     Notes
     -----
     - To use in ipython, use the `%gui qt` magic.
-    - napari axes currently cannot be labeled. Until such a time that they can, this function will
-      order them by Round, Channel, and Z.
-    - Requires at least napari 0.2.0: use `pip install starfish[napari]`
+    - napari axes are labeled with the ImageStack axis names
+    - Requires napari 0.2.6: use `pip install starfish[napari]`
       to install all necessary requirements
     """
     if stack is None and spots is None and masks is None:

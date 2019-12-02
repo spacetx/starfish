@@ -6,6 +6,7 @@ from typing import Iterable, List, Optional, Set, Tuple, Union
 import numpy as np
 from packaging.version import parse as parse_version
 
+from starfish.core.imagestack.dataorder import AXES_DATA, N_AXES
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
@@ -225,15 +226,17 @@ def display(
         from qtpy.QtWidgets import QApplication
         app = QApplication.instance() or QApplication([])
 
-        viewer = Viewer(
-            axis_labels=[
-                Axes.ROUND.value,
-                Axes.CH.value,
-                Axes.ZPLANE.value,
-                Axes.Y.value,
-                Axes.X.value
-            ]
-        )
+        # Get the list of axis labels
+        axis_labels = []
+        for ix in range(N_AXES):
+            for axis_name, axis_data in AXES_DATA.items():
+                if ix == axis_data.order:
+                    axis_labels.append(axis_name.value)
+                    break
+        axis_labels.append(Axes.Y.value)
+        axis_labels.append(Axes.X.value)
+
+        viewer = Viewer(axis_labels=axis_labels)
         new_viewer = True
     elif isinstance(viewer, Viewer):
         new_viewer = False

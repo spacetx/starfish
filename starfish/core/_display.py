@@ -17,7 +17,7 @@ except ImportError:
     Viewer = None
 
 
-NAPARI_VERSION = "0.2.0"  # when changing this, update docs in display
+NAPARI_VERSION = "0.2.6"  # when changing this, update docs in display
 INTERACTIVE = not hasattr(__main__, "__file__")
 
 
@@ -226,7 +226,15 @@ def display(
         from qtpy.QtWidgets import QApplication
         app = QApplication.instance() or QApplication([])
 
-        viewer = Viewer()
+        viewer = Viewer(
+            axis_labels=[
+                Axes.ROUND.value,
+                Axes.CH.value,
+                Axes.ZPLANE.value,
+                Axes.Y.value,
+                Axes.X.value
+            ]
+        )
         new_viewer = True
     elif isinstance(viewer, Viewer):
         new_viewer = False

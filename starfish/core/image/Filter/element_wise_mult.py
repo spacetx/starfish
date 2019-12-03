@@ -4,9 +4,9 @@ from typing import Optional, Union
 import numpy as np
 import xarray as xr
 
-from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import Clip
-from starfish.core.util.levels import preserve_float_range
+from starfish.core.imagestack.imagestack import _reconcile_clip_and_level, ImageStack
+from starfish.core.types import Clip, Levels
+from starfish.core.util.levels import levels
 from ._base import FilterAlgorithm
 
 
@@ -19,22 +19,37 @@ class ElementWiseMultiply(FilterAlgorithm):
     ----------
     mult_mat : xr.DataArray
         the image is element-wise multiplied with this array
-    clip_method : Union[str, Clip]
-        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-        requirements that float data fall in [0, 1].
-        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-        value calculated over the entire ImageStack
+    clip_method : Optional[Union[str, :py:class:`~starfish.types.Clip`]]
+        Deprecated method to control the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].  In all modes, data below 0 are set to 0.
+
+        - Clip.CLIP: data above 1 are set to 1.  This has been replaced with
+          level_method=Levels.CLIP.
+        - Clip.SCALE_BY_IMAGE: when any data in the entire ImageStack is greater than 1, the entire
+          ImageStack is scaled by the maximum value in the ImageStack.  This has been replaced with
+          level_method=Levels.SCALE_SATURATED_BY_IMAGE.
+    level_method : :py:class:`~starfish.types.Levels`
+        Controls the way that data are scaled to retain skimage dtype requirements that float data
+        fall in [0, 1].  In all modes, data below 0 are set to 0.
+
+        - Levels.CLIP (default): data above 1 are set to 1.
+        - Levels.SCALE_SATURATED_BY_IMAGE: when any data in the entire ImageStack is greater
+          than 1, the entire ImageStack is scaled by the maximum value in the ImageStack.
+        - Levels.SCALE_BY_IMAGE: scale the entire ImageStack by the maximum value in the
+          ImageStack.
     """
 
     def __init__(
-        self, mult_array: xr.DataArray, clip_method: Union[str, Clip] = Clip.CLIP
+            self,
+            mult_array: xr.DataArray,
+            clip_method: Optional[Union[str, Clip]] = None,
+            level_method: Optional[Levels] = None,
     ) -> None:
 
         self.mult_array = mult_array
-        if clip_method == Clip.SCALE_BY_CHUNK:
+        self.level_method = _reconcile_clip_and_level(clip_method, level_method)
+        if self.level_method in (Levels.SCALE_BY_CHUNK, Levels.SCALE_SATURATED_BY_CHUNK):
             raise ValueError("`scale_by_chunk` is not a valid clip_method for ElementWiseMultiply")
-        self.clip_method = clip_method
 
     _DEFAULT_TESTING_PARAMETERS = {
         "mult_array": xr.DataArray(
@@ -80,8 +95,14 @@ class ElementWiseMultiply(FilterAlgorithm):
             return stack
 
         stack.xarray.values *= mult_array_aligned
-        if self.clip_method == Clip.CLIP:
-            stack.xarray.values = preserve_float_range(stack.xarray.values, rescale=False)
+        if self.level_method == Levels.CLIP:
+            stack.xarray.values = levels(stack.xarray.values)
+        elif self.level_method == Levels.SCALE_BY_IMAGE:
+            stack.xarray.values = levels(stack.xarray.values, rescale=True)
+        elif self.level_method == Levels.SCALE_SATURATED_BY_IMAGE:
+            stack.xarray.values = levels(stack.xarray.values, rescale_saturated=True)
         else:
-            stack.xarray.values = preserve_float_range(stack.xarray.values, rescale=True)
+            raise ValueError(
+                f"Unknown level method {self.level_method}. See starfish.types.Levels for valid "
+                f"options")
         return None

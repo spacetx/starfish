@@ -4,8 +4,8 @@ from typing import (
     Union
 )
 
-from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import Axes, Clip, FunctionSource
+from starfish.core.imagestack.imagestack import _reconcile_clip_and_level, ImageStack
+from starfish.core.types import Axes, Clip, FunctionSource, Levels
 from ._base import FilterAlgorithm
 
 
@@ -34,15 +34,33 @@ class Map(FilterAlgorithm):
         Axes to split the data along.  For example, splitting a 2D array (axes: X, Y; size: 3, 4)
         by X results in 3 calls to the method, each with arrays of size 4.  (default {Axes.ROUND,
         Axes.CH, Axes.ZPLANE})
-    clip_method : Union[str, Clip]
-        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-        requirements that float data fall in [0, 1].
-        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-        value calculated over the entire ImageStack
-        Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-        value calculated over each slice, where slice shapes are determined by the group_by
-        parameters.
+    clip_method : Optional[Union[str, :py:class:`~starfish.types.Clip`]]
+        Deprecated method to control the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].  In all modes, data below 0 are set to 0.
+
+        - Clip.CLIP: data above 1 are set to 1.  This has been replaced with
+          level_method=Levels.CLIP.
+        - Clip.SCALE_BY_IMAGE: when any data in the entire ImageStack is greater than 1, the entire
+          ImageStack is scaled by the maximum value in the ImageStack.  This has been replaced with
+          level_method=Levels.SCALE_SATURATED_BY_IMAGE.
+        - Clip.SCALE_BY_CHUNK: when any data in any slice is greater than 1, each slice is scaled by
+          the maximum value found in that slice.  The slice shapes are determined by the
+          ``group_by`` parameters.  This has been replaced with
+          level_method=Levels.SCALE_SATURATED_BY_CHUNK.
+    level_method : :py:class:`~starfish.types.Levels`
+        Controls the way that data are scaled to retain skimage dtype requirements that float data
+        fall in [0, 1].  In all modes, data below 0 are set to 0.
+
+        - Levels.CLIP (default): data above 1 are set to 1.
+        - Levels.SCALE_SATURATED_BY_IMAGE: when any data in the entire ImageStack is greater
+          than 1, the entire ImageStack is scaled by the maximum value in the ImageStack.
+        - Levels.SCALE_SATURATED_BY_CHUNK: when any data in any slice is greater than 1, each
+          slice is scaled by the maximum value found in that slice.  The slice shapes are
+          determined by the ``group_by`` parameters.
+        - Levels.SCALE_BY_IMAGE: scale the entire ImageStack by the maximum value in the
+          ImageStack.
+        - Levels.SCALE_BY_CHUNK: scale each slice by the maximum value found in that slice.  The
+          slice shapes are determined by the ``group_by`` parameters.
 
     Examples
     --------
@@ -67,7 +85,8 @@ class Map(FilterAlgorithm):
             module: FunctionSource = FunctionSource.np,
             in_place: bool = False,
             group_by: Optional[Set[Union[Axes, str]]] = None,
-            clip_method: Clip = Clip.CLIP,
+            clip_method: Optional[Clip] = None,
+            level_method: Optional[Levels] = None,
             **func_kwargs,
     ) -> None:
         self.func = module._resolve_method(func)
@@ -75,7 +94,7 @@ class Map(FilterAlgorithm):
         if group_by is None:
             group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
         self.group_by: Set[Axes] = {Axes(axis) for axis in group_by}
-        self.clip_method = clip_method
+        self.level_method = _reconcile_clip_and_level(clip_method, level_method)
         self.func_args = func_args
         self.func_kwargs = func_kwargs
 
@@ -107,5 +126,5 @@ class Map(FilterAlgorithm):
             *self.func_args,
             group_by=self.group_by,
             in_place=self.in_place,
-            clip_method=self.clip_method,
+            level_method=self.level_method,
             **self.func_kwargs)

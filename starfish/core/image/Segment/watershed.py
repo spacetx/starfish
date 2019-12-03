@@ -11,7 +11,7 @@ from starfish.core.image.Filter import Reduce
 from starfish.core.image.Filter.util import bin_open, bin_thresh
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
-from starfish.core.types import ArrayLike, Axes, Clip, Coordinates, Number
+from starfish.core.types import ArrayLike, Axes, Coordinates, Levels, Number
 from ._base import SegmentAlgorithm
 
 
@@ -81,7 +81,7 @@ class Watershed(SegmentAlgorithm):
         mean = Reduce(
             dims=(Axes.ROUND,),
             func="mean",
-            clip_method=Clip.SCALE_BY_IMAGE).run(mp)
+            level_method=Levels.SCALE_BY_IMAGE).run(mp)
         stain = mean._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 
         # TODO make these parameterizable or determine whether they are useful or not

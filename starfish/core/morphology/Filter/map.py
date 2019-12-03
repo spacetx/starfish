@@ -28,17 +28,12 @@ class Map(FilterAlgorithm):
     Examples
     --------
     Applying a binary opening function.
-        >>> from starfish.core.morphology.object.binary_mask.test import factories
+        >>> from starfish.core.morphology.binary_mask.test import factories
         >>> from starfish.morphology import Filter
         >>> from skimage.morphology import disk
         >>> binary_mask_collection = factories.binary_mask_collection_2d()
         >>> opener = Filter.Map("morphology.binary_opening", disk(4))
         >>> opened = opener.run(binary_mask_collection)
-
-    See Also
-    --------
-    starfish.core.types.Axes
-
     """
 
     def __init__(

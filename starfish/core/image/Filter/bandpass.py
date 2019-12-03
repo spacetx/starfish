@@ -4,8 +4,8 @@ from typing import Optional, Union
 import xarray as xr
 from trackpy import bandpass
 
-from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import Clip, Number
+from starfish.core.imagestack.imagestack import _reconcile_clip_and_level, ImageStack
+from starfish.core.types import Clip, Levels, Number
 from ._base import FilterAlgorithm
 from .util import determine_axes_to_group_by
 
@@ -33,20 +33,44 @@ class Bandpass(FilterAlgorithm):
         deviations (default 4)
     is_volume : bool
         If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) planes
-    clip_method : Union[str, Clip]
-        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-        requirements that float data fall in [0, 1].
-        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-        value calculated over the entire ImageStack
-        Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-        value calculated over each slice, where slice shapes are determined by the group_by
-        parameters
+    clip_method : Optional[Union[str, :py:class:`~starfish.types.Clip`]]
+        Deprecated method to control the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].  In all modes, data below 0 are set to 0.
+
+        - Clip.CLIP: data above 1 are set to 1.  This has been replaced with
+          level_method=Levels.CLIP.
+        - Clip.SCALE_BY_IMAGE: when any data in the entire ImageStack is greater than 1, the entire
+          ImageStack is scaled by the maximum value in the ImageStack.  This has been replaced with
+          level_method=Levels.SCALE_SATURATED_BY_IMAGE.
+        - Clip.SCALE_BY_CHUNK: when any data in any slice is greater than 1, each slice is scaled by
+          the maximum value found in that slice.  The slice shapes are determined by the
+          ``group_by`` parameters.  This has been replaced with
+          level_method=Levels.SCALE_SATURATED_BY_CHUNK.
+    level_method : :py:class:`~starfish.types.Levels`
+        Controls the way that data are scaled to retain skimage dtype requirements that float data
+        fall in [0, 1].  In all modes, data below 0 are set to 0.
+
+        - Levels.CLIP (default): data above 1 are set to 1.
+        - Levels.SCALE_SATURATED_BY_IMAGE: when any data in the entire ImageStack is greater
+          than 1, the entire ImageStack is scaled by the maximum value in the ImageStack.
+        - Levels.SCALE_SATURATED_BY_CHUNK: when any data in any slice is greater than 1, each
+          slice is scaled by the maximum value found in that slice.  The slice shapes are
+          determined by the ``group_by`` parameters.
+        - Levels.SCALE_BY_IMAGE: scale the entire ImageStack by the maximum value in the
+          ImageStack.
+        - Levels.SCALE_BY_CHUNK: scale each slice by the maximum value found in that slice.  The
+          slice shapes are determined by the ``group_by`` parameters.
     """
 
     def __init__(
-        self, lshort: Number, llong: int, threshold: Number = 0, truncate: Number = 4,
-        is_volume: bool = False, clip_method: Union[str, Clip] = Clip.CLIP
+            self,
+            lshort: Number,
+            llong: int,
+            threshold: Number = 0,
+            truncate: Number = 4,
+            is_volume: bool = False,
+            clip_method: Optional[Union[str, Clip]] = None,
+            level_method: Optional[Levels] = None
     ) -> None:
         self.lshort = lshort
         self.llong = llong
@@ -57,7 +81,7 @@ class Bandpass(FilterAlgorithm):
         self.threshold = threshold
         self.truncate = truncate
         self.is_volume = is_volume
-        self.clip_method = clip_method
+        self.level_method = _reconcile_clip_and_level(clip_method, level_method)
 
     _DEFAULT_TESTING_PARAMETERS = {"lshort": 1, "llong": 3, "threshold": 0.01}
 
@@ -134,7 +158,7 @@ class Bandpass(FilterAlgorithm):
             group_by=group_by,
             in_place=in_place,
             n_processes=n_processes,
-            clip_method=self.clip_method,
+            level_method=self.level_method,
             verbose=verbose,
         )
         return result

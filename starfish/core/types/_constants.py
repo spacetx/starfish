@@ -100,10 +100,11 @@ class Clip(AugmentedEnum):
 
 class Levels(AugmentedEnum):
     """
-    Contains options that determine how to determine the peak value of the output of a filter.
+    Controls the way that data are scaled to retain skimage dtype requirements that float data fall
+    in [0, 1].  In all modes, data below 0 are set to 0.
     """
     CLIP = "clip"
-    """Clips all values above 1 back to 1."""
+    """Data above 1 are set to 1."""
     SCALE_SATURATED_BY_IMAGE = 'scale_saturated_by_image'
     """If peak intensity of the entire image is saturated (i.e., > 1), rescale the intensity of the
     entire image by the peak intensity.  If peak intensity of the entire image is not saturated

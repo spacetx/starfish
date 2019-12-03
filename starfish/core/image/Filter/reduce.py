@@ -1,14 +1,15 @@
 from typing import (
     Iterable,
     MutableMapping,
+    Optional,
     Union
 )
 
 import numpy as np
 
-from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import ArrayLike, Axes, Clip, Coordinates, FunctionSource, Number
-from starfish.core.util.levels import preserve_float_range
+from starfish.core.imagestack.imagestack import _reconcile_clip_and_level, ImageStack
+from starfish.core.types import ArrayLike, Axes, Clip, Coordinates, FunctionSource, Levels, Number
+from starfish.core.util.levels import levels
 from ._base import FilterAlgorithm
 
 
@@ -39,12 +40,33 @@ class Reduce(FilterAlgorithm):
         Currently, the supported FunctionSources are:
         - ``np``: the top-level package of numpy
         - ``scipy``: the top-level package of scipy
-    clip_method : Clip
-        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-        requirements that float data fall in [0, 1].
-        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-        value calculated over the entire ImageStack
+    clip_method : Optional[Union[str, :py:class:`~starfish.types.Clip`]]
+        Deprecated method to control the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].  In all modes, data below 0 are set to 0.
+
+        - Clip.CLIP: data above 1 are set to 1.  This has been replaced with
+          level_method=Levels.CLIP.
+        - Clip.SCALE_BY_IMAGE: when any data in the entire ImageStack is greater than 1, the entire
+          ImageStack is scaled by the maximum value in the ImageStack.  This has been replaced with
+          level_method=Levels.SCALE_SATURATED_BY_IMAGE.
+        - Clip.SCALE_BY_CHUNK: when any data in any slice is greater than 1, each slice is scaled by
+          the maximum value found in that slice.  The slice shapes are determined by the
+          ``group_by`` parameters.  This has been replaced with
+          level_method=Levels.SCALE_SATURATED_BY_CHUNK.
+    level_method : :py:class:`~starfish.types.Levels`
+        Controls the way that data are scaled to retain skimage dtype requirements that float data
+        fall in [0, 1].  In all modes, data below 0 are set to 0.
+
+        - Levels.CLIP (default): data above 1 are set to 1.
+        - Levels.SCALE_SATURATED_BY_IMAGE: when any data in the entire ImageStack is greater
+          than 1, the entire ImageStack is scaled by the maximum value in the ImageStack.
+        - Levels.SCALE_SATURATED_BY_CHUNK: when any data in any slice is greater than 1, each
+          slice is scaled by the maximum value found in that slice.  The slice shapes are
+          determined by the ``group_by`` parameters.
+        - Levels.SCALE_BY_IMAGE: scale the entire ImageStack by the maximum value in the
+          ImageStack.
+        - Levels.SCALE_BY_CHUNK: scale each slice by the maximum value found in that slice.  The
+          slice shapes are determined by the ``group_by`` parameters.
 
     Examples
     --------
@@ -80,12 +102,13 @@ class Reduce(FilterAlgorithm):
             dims: Iterable[Union[Axes, str]],
             func: str = "max",
             module: FunctionSource = FunctionSource.np,
-            clip_method: Clip = Clip.CLIP,
+            clip_method: Optional[Clip] = None,
+            level_method: Optional[Levels] = None,
             **kwargs
     ) -> None:
         self.dims: Iterable[Axes] = set(Axes(dim) for dim in dims)
         self.func = module._resolve_method(func)
-        self.clip_method = clip_method
+        self.level_method = _reconcile_clip_and_level(clip_method, level_method)
         self.kwargs = kwargs
 
     _DEFAULT_TESTING_PARAMETERS = {"dims": ['r'], "func": 'max'}
@@ -117,10 +140,13 @@ class Reduce(FilterAlgorithm):
         reduced = reduced.expand_dims(tuple(dim.value for dim in self.dims))
         reduced = reduced.transpose(*stack.xarray.dims)
 
-        if self.clip_method == Clip.CLIP:
-            reduced = preserve_float_range(reduced, rescale=False)
-        else:
-            reduced = preserve_float_range(reduced, rescale=True)
+        if self.level_method == Levels.CLIP:
+            reduced = levels(reduced)
+        elif self.level_method in (Levels.SCALE_BY_CHUNK, Levels.SCALE_BY_IMAGE):
+            reduced = levels(reduced, rescale=True)
+        elif self.level_method in (
+                Levels.SCALE_SATURATED_BY_CHUNK, Levels.SCALE_SATURATED_BY_IMAGE):
+            reduced = levels(reduced, rescale_saturated=True)
 
         # Update the physical coordinates
         physical_coords: MutableMapping[Coordinates, ArrayLike[Number]] = {}

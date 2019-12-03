@@ -4,9 +4,9 @@ from typing import Callable, Optional, Tuple, Union
 import xarray as xr
 
 from starfish.core.image.Filter.gaussian_low_pass import GaussianLowPass
-from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import Clip, Number
-from starfish.core.util.levels import preserve_float_range
+from starfish.core.imagestack.imagestack import _reconcile_clip_and_level, ImageStack
+from starfish.core.types import Clip, Levels, Number
+from starfish.core.util.levels import levels
 from ._base import FilterAlgorithm
 from .util import (
     determine_axes_to_group_by,
@@ -30,25 +30,46 @@ class GaussianHighPass(FilterAlgorithm):
     is_volume : bool
         If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
         independently.
-    clip_method : Union[str, Clip]
-        (Default Clip.CLIP) Controls the way that data are scaled to retain skimage dtype
-        requirements that float data fall in [0, 1].
-        Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-        Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-        value calculated over the entire ImageStack
-        Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-        value calculated over each slice, where slice shapes are determined by the group_by
-        parameters
+    clip_method : Optional[Union[str, :py:class:`~starfish.types.Clip`]]
+        Deprecated method to control the way that data are scaled to retain skimage dtype
+        requirements that float data fall in [0, 1].  In all modes, data below 0 are set to 0.
+
+        - Clip.CLIP: data above 1 are set to 1.  This has been replaced with
+          level_method=Levels.CLIP.
+        - Clip.SCALE_BY_IMAGE: when any data in the entire ImageStack is greater than 1, the entire
+          ImageStack is scaled by the maximum value in the ImageStack.  This has been replaced with
+          level_method=Levels.SCALE_SATURATED_BY_IMAGE.
+        - Clip.SCALE_BY_CHUNK: when any data in any slice is greater than 1, each slice is scaled by
+          the maximum value found in that slice.  The slice shapes are determined by the
+          ``group_by`` parameters.  This has been replaced with
+          level_method=Levels.SCALE_SATURATED_BY_CHUNK.
+    level_method : :py:class:`~starfish.types.Levels`
+        Controls the way that data are scaled to retain skimage dtype requirements that float data
+        fall in [0, 1].  In all modes, data below 0 are set to 0.
+
+        - Levels.CLIP (default): data above 1 are set to 1.
+        - Levels.SCALE_SATURATED_BY_IMAGE: when any data in the entire ImageStack is greater
+          than 1, the entire ImageStack is scaled by the maximum value in the ImageStack.
+        - Levels.SCALE_SATURATED_BY_CHUNK: when any data in any slice is greater than 1, each
+          slice is scaled by the maximum value found in that slice.  The slice shapes are
+          determined by the ``group_by`` parameters.
+        - Levels.SCALE_BY_IMAGE: scale the entire ImageStack by the maximum value in the
+          ImageStack.
+        - Levels.SCALE_BY_CHUNK: scale each slice by the maximum value found in that slice.  The
+          slice shapes are determined by the ``group_by`` parameters.
     """
 
     def __init__(
-        self, sigma: Union[Number, Tuple[Number]], is_volume: bool = False,
-        clip_method: Union[str, Clip] = Clip.CLIP
+            self,
+            sigma: Union[Number, Tuple[Number]],
+            is_volume: bool = False,
+            clip_method: Optional[Union[str, Clip]] = None,
+            level_method: Optional[Levels] = None
     ) -> None:
 
         self.sigma = validate_and_broadcast_kernel_size(sigma, is_volume)
         self.is_volume = is_volume
-        self.clip_method = clip_method
+        self.level_method = _reconcile_clip_and_level(clip_method, level_method)
 
     _DEFAULT_TESTING_PARAMETERS = {"sigma": 3}
 
@@ -56,7 +77,6 @@ class GaussianHighPass(FilterAlgorithm):
     def _high_pass(
             image: xr.DataArray,
             sigma: Union[Number, Tuple[Number]],
-            rescale: bool = False
     ) -> xr.DataArray:
         """
         Applies a gaussian high pass filter to an image
@@ -77,8 +97,8 @@ class GaussianHighPass(FilterAlgorithm):
         """
 
         blurred = GaussianLowPass._low_pass(image, sigma)
+        blurred = levels(blurred)  # clip negative values to 0.
         filtered = image - blurred
-        filtered = preserve_float_range(filtered, rescale)
 
         return filtered
 
@@ -116,6 +136,6 @@ class GaussianHighPass(FilterAlgorithm):
         result = stack.apply(
             high_pass,
             group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes,
-            clip_method=self.clip_method
+            level_method=self.level_method
         )
         return result

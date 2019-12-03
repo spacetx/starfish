@@ -53,10 +53,11 @@ from starfish.core.types import (
     Coordinates,
     CoordinateValue,
     FunctionSource,
+    Levels,
     Number,
-    STARFISH_EXTRAS_KEY
+    STARFISH_EXTRAS_KEY,
 )
-from starfish.core.util.levels import preserve_float_range
+from starfish.core.util.levels import levels
 from starfish.core.util.logging import Log
 from .dataorder import AXES_DATA, N_AXES
 
@@ -712,7 +713,8 @@ class ImageStack:
             in_place=False,
             verbose: bool=False,
             n_processes: Optional[int]=None,
-            clip_method: Union[str, Clip]=Clip.CLIP,
+            clip_method: Optional[Union[str, Clip]] = None,
+            level_method: Optional[Levels] = None,
             **kwargs
     ) -> Optional["ImageStack"]:
         """Split the image along a set of axes and apply a function across all the components.  This
@@ -730,9 +732,8 @@ class ImageStack:
             3, 4) by X results in 3 arrays of size 4.  (default {Axes.ROUND, Axes.CH,
             Axes.ZPLANE})`
         in_place : bool
-            If True, function is executed in place and returns None. If n_proc is not 1, the tile or
-            volume will be copied once during execution. If false, a new ImageStack object will be
-            produced. (Default False)
+            If True, function is executed in place and returns None.  If false, a new ImageStack
+            object will be produced. (Default False)
         verbose : bool
             If True, report on the percentage completed (default = False) during processing
         n_processes : Optional[int]
@@ -740,17 +741,33 @@ class ImageStack:
             (default = None).
         kwargs : dict
             Additional arguments to pass to func
-        clip_method : Union[str, :py:class:`~starfish.types.Clip`]
+        clip_method : Optional[Union[str, :py:class:`~starfish.types.Clip`]]
+            Deprecated method to control the way that data are scaled to retain skimage dtype
+            requirements that float data fall in [0, 1].  In all modes, data below 0 are set to 0.
 
-            - Clip.CLIP (default): Controls the way that data are scaled to retain skimage dtype
-              requirements that float data fall in [0, 1].
-            - Clip.CLIP: data above 1 are set to 1, and below 0 are set to 0
-            - Clip.SCALE_BY_IMAGE: data above 1 are scaled by the maximum value, with the maximum
-              value calculated over the entire ImageStack
-            - Clip.SCALE_BY_CHUNK: data above 1 are scaled by the maximum value, with the maximum
-              value calculated over each slice, where slice shapes are determined by the group_by
-              parameters
+            - Clip.CLIP: data above 1 are set to 1.  This has been replaced with
+              level_method=Levels.CLIP.
+            - Clip.SCALE_BY_IMAGE: when any data in the entire ImageStack is greater
+              than 1, the entire ImageStack is scaled by the maximum value in the ImageStack.  This
+              has been replaced with level_method=Levels.SCALE_SATURATED_BY_IMAGE.
+            - Clip.SCALE_BY_CHUNK: when any data in any slice is greater than 1, each
+              slice is scaled by the maximum value found in that slice.  The slice shapes are
+              determined by the ``group_by`` parameters.  This has been replaced with
+              level_method=Levels.SCALE_SATURATED_BY_CHUNK.
+        level_method : :py:class:`~starfish.types.Levels`
+            Controls the way that data are scaled to retain skimage dtype requirements that float
+            data fall in [0, 1].  In all modes, data below 0 are set to 0.
 
+            - Levels.CLIP (default): data above 1 are set to 1.
+            - Levels.SCALE_SATURATED_BY_IMAGE: when any data in the entire ImageStack is greater
+              than 1, the entire ImageStack is scaled by the maximum value in the ImageStack.
+            - Levels.SCALE_SATURATED_BY_CHUNK: when any data in any slice is greater than 1, each
+              slice is scaled by the maximum value found in that slice.  The slice shapes are
+              determined by the ``group_by`` parameters.
+            - Levels.SCALE_BY_IMAGE: scale the entire ImageStack by the maximum value in the
+              ImageStack.
+            - Levels.SCALE_BY_CHUNK: scale each slice by the maximum value found in that slice.  The
+              slice shapes are determined by the ``group_by`` parameters.
 
         Returns
         -------
@@ -768,8 +785,8 @@ class ImageStack:
         if group_by is None:
             group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
 
-        if not isinstance(clip_method, (str, Clip)):
-            raise TypeError("must pass a Clip method. See starfish.types.Clip for valid options")
+        # reconcile clip and level methods.
+        clip_method, level_method = None, _reconcile_clip_and_level(clip_method, level_method)
 
         if not in_place:
             # create a copy of the ImageStack, call apply on that stack with in_place=True
@@ -778,7 +795,7 @@ class ImageStack:
                 func,
                 *args,
                 group_by=group_by, in_place=True, verbose=verbose, n_processes=n_processes,
-                clip_method=clip_method,
+                level_method=level_method,
                 **kwargs
             )
             return image_stack
@@ -787,7 +804,7 @@ class ImageStack:
         # function has been applied and perform per-chunk transformations like clip and
         # scale-by-chunk.  Scaling across an entire ImageStack is performed after all the chunks are
         # returned.
-        bound_func = partial(ImageStack._in_place_apply, func, clip_method=clip_method)
+        bound_func = partial(ImageStack._in_place_apply, func, level_method=level_method)
 
         # execute the processing workflow
         self.transform(
@@ -799,8 +816,10 @@ class ImageStack:
             **kwargs)
 
         # scale based on values of whole image
-        if clip_method == Clip.SCALE_BY_IMAGE:
-            self._data.values = preserve_float_range(self._data.values, rescale=True)
+        if level_method == Levels.SCALE_BY_IMAGE:
+            self._data.values = levels(self._data.values, rescale=True)
+        elif level_method == Levels.SCALE_SATURATED_BY_IMAGE:
+            self._data.values = levels(self._data.values, rescale_saturated=True)
 
         return None
 
@@ -809,14 +828,16 @@ class ImageStack:
             apply_func: Callable[..., xr.DataArray],
             data: np.ndarray,
             *args,
-            clip_method: Union[str, Clip],
+            level_method: Levels,
             **kwargs
     ) -> None:
         result = apply_func(data, *args, **kwargs)
-        if clip_method == Clip.CLIP:
-            data[:] = preserve_float_range(result, rescale=False)
-        elif clip_method == Clip.SCALE_BY_CHUNK:
-            data[:] = preserve_float_range(result, rescale=True)
+        if level_method == Levels.CLIP:
+            data[:] = levels(result)
+        elif level_method == Levels.SCALE_BY_CHUNK:
+            data[:] = levels(result, rescale=True)
+        elif level_method == Levels.SCALE_SATURATED_BY_CHUNK:
+            data[:] = levels(result, rescale_saturated=True)
         else:
             data[:] = result
 
@@ -1161,7 +1182,8 @@ class ImageStack:
             dims: Iterable[Union[Axes, str]],
             func: str,
             module: FunctionSource = FunctionSource.np,
-            clip_method: Clip = Clip.CLIP,
+            clip_method: Optional[Clip] = None,
+            level_method: Optional[Levels] = None,
             *args,
             **kwargs) -> "ImageStack":
         """
@@ -1174,7 +1196,9 @@ class ImageStack:
         """
         from starfish.core.image import Filter
 
-        reducer = Filter.Reduce(dims, func, module, clip_method, **kwargs)
+        level_method = _reconcile_clip_and_level(clip_method, level_method)
+
+        reducer = Filter.Reduce(dims, func, module, level_method=level_method, **kwargs)
         return reducer.run(self, *args)
 
     def map(
@@ -1183,7 +1207,8 @@ class ImageStack:
             module: FunctionSource = FunctionSource.np,
             in_place: bool = False,
             group_by: Optional[Set[Union[Axes, str]]] = None,
-            clip_method: Clip = Clip.CLIP,
+            clip_method: Optional[Clip] = None,
+            level_method: Optional[Levels] = None,
             *args,
             **kwargs) -> Optional["ImageStack"]:
         """
@@ -1197,8 +1222,47 @@ class ImageStack:
         """
         from starfish.core.image import Filter
 
+        level_method = _reconcile_clip_and_level(clip_method, level_method)
+
         mapper = Filter.Map(
             func, *args,
-            module=module, in_place=in_place, group_by=group_by, clip_method=clip_method,
+            module=module, in_place=in_place, group_by=group_by, level_method=level_method,
             **kwargs)
         return mapper.run(self, *args)
+
+
+def _reconcile_clip_and_level(
+        clip_method: Optional[Union[str, Clip]],
+        level_method: Optional[Union[str, Levels]],
+) -> Levels:
+    """Clip is being deprecated, but until it is removed, we need to reconcile clip_method and
+    level_method.  If neither is set, the default is Levels.CLIP.  If both are set, it is an error.
+    If clip_method is set, then we map that to its Levels equivalent.  If level_method is set, we
+    return that.
+
+    This method also manages the translation between a string value to a enum value.
+    """
+    if clip_method is not None:
+        if level_method is not None:
+            raise ValueError("should only set clip_method or level_method, and not both.")
+        warnings.warn(
+            "clip_method is deprecated.  Please use level_method instead.", DeprecationWarning)
+
+        clip_method = Clip(clip_method)
+        if clip_method == Clip.CLIP:
+            return Levels.CLIP
+        elif clip_method == Clip.SCALE_BY_IMAGE:
+            return Levels.SCALE_SATURATED_BY_IMAGE
+        elif clip_method == Clip.SCALE_BY_CHUNK:
+            return Levels.SCALE_SATURATED_BY_CHUNK
+        else:
+            raise ValueError("Unknown clip method.")
+    elif level_method is None:
+        return Levels.CLIP
+
+    try:
+        return Levels(level_method)
+    except ValueError:
+        raise ValueError(
+            f"could not find level method {level_method}. See starfish.types.Levels for valid "
+            f"options")

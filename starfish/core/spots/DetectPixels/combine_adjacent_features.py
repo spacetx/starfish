@@ -212,7 +212,7 @@ class CombineAdjacentFeatures:
 
         # the 0th pixel trace corresponds to background. If present, drop it.
         try:
-            mean_pixel_traces = mean_pixel_traces.drop(0, dim=Features.AXIS)
+            mean_pixel_traces = mean_pixel_traces.drop_sel({Features.AXIS: 0})
         except KeyError:
             pass
 

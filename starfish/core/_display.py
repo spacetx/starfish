@@ -6,6 +6,7 @@ from typing import Iterable, List, Optional, Set, Tuple, Union
 import numpy as np
 from packaging.version import parse as parse_version
 
+from starfish.core.imagestack.dataorder import AXES_DATA, N_AXES
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
@@ -17,7 +18,7 @@ except ImportError:
     Viewer = None
 
 
-NAPARI_VERSION = "0.2.0"  # when changing this, update docs in display
+NAPARI_VERSION = "0.2.6"  # when changing this, update docs in display
 INTERACTIVE = not hasattr(__main__, "__file__")
 
 
@@ -196,9 +197,8 @@ def display(
     Notes
     -----
     - To use in ipython, use the `%gui qt` magic.
-    - napari axes currently cannot be labeled. Until such a time that they can, this function will
-      order them by Round, Channel, and Z.
-    - Requires at least napari 0.2.0: use `pip install starfish[napari]`
+    - napari axes are labeled with the ImageStack axis names
+    - Requires napari 0.2.6: use `pip install starfish[napari]`
       to install all necessary requirements
     """
     if stack is None and spots is None and masks is None:
@@ -226,7 +226,19 @@ def display(
         from qtpy.QtWidgets import QApplication
         app = QApplication.instance() or QApplication([])
 
-        viewer = Viewer()
+        # Get the list of axis labels
+        axis_labels = []
+        for ix in range(N_AXES):
+            for axis_name, axis_data in AXES_DATA.items():
+                if ix == axis_data.order:
+                    axis_labels.append(axis_name.value)
+                    break
+            else:
+                raise Exception(f"No AXES_DATA entry for the {ix}th axis")
+        axis_labels.append(Axes.Y.value)
+        axis_labels.append(Axes.X.value)
+
+        viewer = Viewer(axis_labels=axis_labels)
         new_viewer = True
     elif isinstance(viewer, Viewer):
         new_viewer = False

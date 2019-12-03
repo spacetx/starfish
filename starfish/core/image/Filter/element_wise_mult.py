@@ -6,7 +6,7 @@ import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Clip
-from starfish.core.util.dtype import preserve_float_range
+from starfish.core.util.levels import preserve_float_range
 from ._base import FilterAlgorithm
 
 

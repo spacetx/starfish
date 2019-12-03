@@ -98,6 +98,30 @@ class Clip(AugmentedEnum):
     SCALE_BY_CHUNK = 'scale_by_chunk'
 
 
+class Levels(AugmentedEnum):
+    """
+    Contains options that determine how to determine the peak value of the output of a filter.
+    """
+    CLIP = "clip"
+    """Clips all values above 1 back to 1."""
+    SCALE_SATURATED_BY_IMAGE = 'scale_saturated_by_image'
+    """If peak intensity of the entire image is saturated (i.e., > 1), rescale the intensity of the
+    entire image by the peak intensity.  If peak intensity of the entire image is not saturated
+    (i.e., <= 1), do not rescale.  This is functionally equivalent to Clip.SCALE_BY_IMAGE."""
+    SCALE_SATURATED_BY_CHUNK = 'scale_saturated_by_chunk'
+    """If the peak intensity of an image chunk is saturated (i.e., > 1), rescale the intensity of
+    the chunk by the peak intensity.  If peak intensity of an image chunk is not saturated
+    (i.e., <= 1), do not rescale.  This is functionally equivalent to Clip.SCALE_BY_CHUNK."""
+    SCALE_BY_IMAGE = 'scale_by_image'
+    """Rescale the intensity of the entire image by the peak intensity.  Note that if the peak
+    intensity of the entire image is not saturated, this behaves differently than
+    Clip.SCALE_BY_IMAGE."""
+    SCALE_BY_CHUNK = 'scale_by_chunk'
+    """Rescale the intensity of an image chunk by the peak intensity.  Note that if the peak
+    intensity of an image chunk is not saturated, this behaves differently than
+    Clip.SCALE_BY_IMAGE."""
+
+
 class TransformType(AugmentedEnum):
     """
     currently supported transform types

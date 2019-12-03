@@ -9,6 +9,7 @@ from ._constants import (
     Coordinates,
     CORE_DEPENDENCIES,
     Features,
+    Levels,
     LOG,
     OverlapStrategy,
     PHYSICAL_COORDINATE_DIMENSION,

@@ -56,7 +56,7 @@ from starfish.core.types import (
     Number,
     STARFISH_EXTRAS_KEY
 )
-from starfish.core.util.dtype import preserve_float_range
+from starfish.core.util.levels import preserve_float_range
 from starfish.core.util.logging import Log
 from .dataorder import AXES_DATA, N_AXES
 

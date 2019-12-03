@@ -233,6 +233,8 @@ def display(
                 if ix == axis_data.order:
                     axis_labels.append(axis_name.value)
                     break
+            else:
+                raise Exception(f"No AXES_DATA entry for the {ix}th axis")
         axis_labels.append(Axes.Y.value)
         axis_labels.append(Axes.X.value)
 

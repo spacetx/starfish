@@ -6,27 +6,6 @@ from skimage.morphology import binary_opening, disk
 from starfish.core.types import Axes, Number
 
 
-def bin_thresh(img: np.ndarray, thresh: Number) -> np.ndarray:
-    """
-    Performs binary thresholding of an image
-
-    Parameters
-    ----------
-    img : np.ndarray
-        Image to filter.
-    thresh : int
-        Pixel values >= thresh are set to 1, else 0.
-
-    Returns
-    -------
-    np.ndarray :
-        Binarized image, same shape as input
-
-    """
-    res = img >= thresh
-    return res
-
-
 def bin_open(img: np.ndarray, disk_size: int) -> np.ndarray:
     """
     Performs binary opening of an image

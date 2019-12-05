@@ -5,13 +5,15 @@ import scipy.ndimage.measurements as spm
 from scipy.ndimage import distance_transform_edt
 from showit import image
 from skimage.feature import peak_local_max
-from skimage.morphology import watershed
+from skimage.morphology import disk, watershed
 
 from starfish.core.image.Filter import Reduce
-from starfish.core.image.Filter.util import bin_open, bin_thresh
+from starfish.core.image.Filter.util import bin_open
 from starfish.core.imagestack.imagestack import ImageStack
+from starfish.core.morphology import Filter
+from starfish.core.morphology.Binarize import ThresholdBinarize
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
-from starfish.core.types import ArrayLike, Axes, Coordinates, Levels, Number
+from starfish.core.types import ArrayLike, Axes, Coordinates, FunctionSource, Levels, Number
 from ._base import SegmentAlgorithm
 
 
@@ -89,9 +91,7 @@ class Watershed(SegmentAlgorithm):
         disk_size_markers = None
         disk_size_mask = None
 
-        nuclei_mp = nuclei.reduce({Axes.ROUND, Axes.CH, Axes.ZPLANE}, func="max")
-        nuclei__mp_numpy = nuclei_mp._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
-        self._segmentation_instance = _WatershedSegmenter(nuclei__mp_numpy, stain)
+        self._segmentation_instance = _WatershedSegmenter(nuclei, stain)
         label_image_array = self._segmentation_instance.segment(
             self.nuclei_threshold, self.input_threshold, size_lim, disk_size_markers,
             disk_size_mask, self.min_distance
@@ -118,7 +118,7 @@ class Watershed(SegmentAlgorithm):
 
 
 class _WatershedSegmenter:
-    def __init__(self, nuclei_img: np.ndarray, stain_img: np.ndarray) -> None:
+    def __init__(self, nuclei: ImageStack, stain_img: np.ndarray) -> None:
         """Implements watershed segmentation of cells seeded from a nuclei image
 
         Algorithm is seeded by a nuclei image. Binary segmentation mask is computed from a maximum
@@ -126,12 +126,17 @@ class _WatershedSegmenter:
 
         Parameters
         ----------
-        nuclei_img : np.ndarray[np.float32]
+        nuclei : ImageStack
             nuclei image
         stain_img : np.ndarray[np.float32]
             stain image
         """
-        self.nuclei = nuclei_img / nuclei_img.max()
+        max_project_and_scale = Reduce(
+            {Axes.ROUND, Axes.CH, Axes.ZPLANE},
+            func="max",
+            level_method=Levels.SCALE_BY_IMAGE,
+        )
+        self.nuclei_mp_scaled = max_project_and_scale.run(nuclei)
         self.stain = stain_img / stain_img.max()
 
         self.nuclei_thresholded: Optional[np.ndarray] = None  # dtype: bool
@@ -172,17 +177,18 @@ class _WatershedSegmenter:
             label image with same size and shape as self.nuclei_img
         """
         min_allowed_size, max_allowed_size = size_lim
-        self.nuclei_thresholded = self.filter_nuclei(nuclei_thresh, disk_size_markers)
+        self.binarized_nuclei = self.filter_nuclei(nuclei_thresh, disk_size_markers)
         self.markers, self.num_cells = self.label_nuclei(
-            self.nuclei_thresholded,
+            self.binarized_nuclei,
             min_allowed_size, max_allowed_size, min_dist
         )
         self.mask = self.watershed_mask(stain_thresh, self.markers, disk_size_mask)
         self.segmented = self.watershed(self.markers, self.mask)
         return self.segmented
 
-    def filter_nuclei(self, nuclei_thresh: float, disk_size: Optional[int]) -> np.ndarray:
-        """Threshold the nuclei image at nuclei_thresh.
+    def filter_nuclei(self, nuclei_thresh: float, disk_size: Optional[int]) -> BinaryMaskCollection:
+        """Binarize the nuclei image using a thresholded binarizer and perform morphological binary
+        opening.
 
         Parameters
         ----------
@@ -193,17 +199,25 @@ class _WatershedSegmenter:
 
         Returns
         -------
-        np.ndarray[bool] :
-            thresholded image
+        BinaryMaskCollection :
+            mask collection with one mask, which is
         """
-        nuclei_filt = bin_thresh(self.nuclei, nuclei_thresh)
+        nuclei_binarized = ThresholdBinarize(nuclei_thresh).run(self.nuclei_mp_scaled)
         if disk_size is not None:
-            nuclei_filt = bin_open(nuclei_filt, disk_size)
-        return nuclei_filt
+            disk_img = disk(disk_size)
+            nuclei_binarized = Filter.Map(
+                "morphology.binary_open",
+                disk_img,
+                module=FunctionSource.skimage
+            ).run(nuclei_binarized)
+
+        # should only produce one binary mask.
+        assert len(nuclei_binarized) == 1
+        return nuclei_binarized
 
     def label_nuclei(
         self,
-        nuclei_thresholded: np.ndarray,
+        binarized_nuclei: BinaryMaskCollection,
         min_allowed_size: int,
         max_allowed_size: int,
         min_dist: Optional[Number]=None
@@ -213,8 +227,8 @@ class _WatershedSegmenter:
 
         Parameters
         ----------
-        nuclei_thresholded : np.ndarray
-            thresholded nuclei image
+        binarized_nuclei : BinaryMaskCollection
+            BinaryMaskCollection with a single mask, containing the binarized nuclei image
         min_allowed_size : int
             minimum allowable thresholded nuclei size
         max_allowed_size : int
@@ -226,10 +240,11 @@ class _WatershedSegmenter:
             labeled nuclei, excluding those whose size is outside the area boundaries
 
         """
+        binarized_nuclei_mask = binarized_nuclei.uncropped_mask(0).values.squeeze(axis=0)
 
         # label thresholded nuclei image
         if min_dist is None:
-            markers, num_objs = spm.label(nuclei_thresholded)
+            markers, num_objs = spm.label(binarized_nuclei_mask)
         else:
             markers, num_objs = self._unclump(min_dist)
 
@@ -239,7 +254,7 @@ class _WatershedSegmenter:
 
         # spm.sum sums the values of an array by label. This counts the pixels in each object
         areas = spm.sum(
-            np.ones(nuclei_thresholded.shape),
+            np.ones(binarized_nuclei_mask.shape),
             markers,
             np.array(range(0, num_objs + 1), dtype=np.int32)
         )
@@ -268,7 +283,7 @@ class _WatershedSegmenter:
             minimum distance between watershed basins
 
         """
-        im: np.ndarray = self.nuclei_thresholded
+        im: np.ndarray = self.binarized_nuclei.uncropped_mask(0).values.squeeze(axis=0)
 
         # calculates the distance of every pixel to the nearest background (0) point
         distance: np.ndarray = distance_transform_edt(im)  # dtype: np.float64
@@ -364,7 +379,8 @@ class _WatershedSegmenter:
         plt.figure(figsize=figsize)
 
         plt.subplot(321)
-        image(self.nuclei, ax=plt.gca(), size=20, bar=True)
+        nuclei_numpy = self.nuclei_mp_scaled._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+        image(nuclei_numpy, ax=plt.gca(), size=20, bar=True)
         plt.title('Nuclei')
 
         plt.subplot(322)
@@ -372,7 +388,10 @@ class _WatershedSegmenter:
         plt.title('Stain')
 
         plt.subplot(323)
-        image(self.nuclei_thresholded, bar=False, ax=plt.gca())
+        image(
+            self.binarized_nuclei.uncropped_mask(0).values.squeeze(axis=0),
+            bar=False,
+            ax=plt.gca())
         plt.title('Nuclei Thresholded')
 
         plt.subplot(324)

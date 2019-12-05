@@ -342,6 +342,7 @@ class CombineAdjacentFeatures:
             passes_filter = np.array(passes_area_filter, dtype=np.bool)
 
             spot_attributes = SpotAttributes(pd.DataFrame.from_records(spot_attrs))
+            spot_attributes.data[Features.SPOT_ID] = np.arange(0, len(spot_attributes.data))
             return spot_attributes, passes_filter
 
     def run(

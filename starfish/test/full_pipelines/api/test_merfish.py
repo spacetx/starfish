@@ -215,6 +215,9 @@ def test_merfish_pipeline_cropped_data():
 
     spot_intensities = merfish.initial_spot_intensities
 
+    # check that intensities were giving spot ids using PixelSpotDecoding
+    assert "spot_id" in spot_intensities.coords
+
     # verify that the number of spots are correct
     spots_passing_filters = spot_intensities[Features.PASSES_THRESHOLDS].sum()
     assert spots_passing_filters == 1410

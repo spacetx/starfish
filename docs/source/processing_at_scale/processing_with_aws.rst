@@ -268,7 +268,7 @@ Then from the directory where this file lives run the following command:
 
 ``aws batch submit-job --cli-input-json file://register-process-fov-job.json``
 
-You can check that your jobs had been successfully registered by navigating to the `Job Definitions page <https://console.aws.amazon.com/batch/home?region=us-east-1#/job-definitions>`_.
+You can check that your jobs had been successfully registered by navigating to the `Job Definitions page <https://console.aws.amazon.com/batch/home>`_.
 
 Here's what our's looks like:
 

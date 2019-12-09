@@ -61,7 +61,7 @@ We plan to expand the datasets that are available, improve documentation of this
 and generally improve access to these data.
 
 Ensuring reliability and performance `#1309 <https://github.com/spacetx/starfish/issues/1309>`_
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 There are a number of areas where we seek to improve the reliability and performance of starfish,
 especially for users relying on starfish in production environments. These include improving
 logging and versioning file formats, and improvements to performance and memory use.

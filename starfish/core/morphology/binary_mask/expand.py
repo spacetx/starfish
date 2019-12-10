@@ -33,7 +33,7 @@ def fill_from_mask(
             f"mask ({mask.ndim}) should have the same number of dimensions as the number of "
             f"offsets ({len(offsets)})")
 
-    selector: MutableSequence[slice] = []
+    _selector: MutableSequence[slice] = []
     for ix, (mask_size, result_size, axis_offset) in enumerate(
             zip(mask.shape, result_array.shape, offsets)):
         end_offset = axis_offset + mask_size
@@ -45,7 +45,8 @@ def fill_from_mask(
                 f"{ix}th dimension of mask does not fit within the result (ends at {end_offset}, "
                 f"result size is {result_size}")
 
-        selector.append(slice(axis_offset, end_offset))
+        _selector.append(slice(axis_offset, end_offset))
+    selector: Tuple[slice, ...] = tuple(_selector)
 
     fill_value_array = result_array[selector]
     fill_value_array[mask] = fill_value

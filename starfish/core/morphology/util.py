@@ -1,5 +1,7 @@
 from typing import List, Mapping, MutableMapping, Optional, Tuple, Union
 
+import numpy as np
+
 from starfish.core.types import ArrayLike, Axes, Coordinates, Number
 
 
@@ -58,3 +60,19 @@ def _normalize_physical_ticks(
         Coordinates(coord): coord_data
         for coord, coord_data in physical_ticks.items()
     }
+
+
+def _ticks_equal(
+        left: Mapping,
+        right: Mapping,
+) -> bool:
+    """Given two sets of tick marks, return True if the two contain the same keys, and contain the
+    same data for each key.  This works for both pixel ticks and physical ticks.
+    """
+    if left.keys() != right.keys():
+        return False
+    for key in left.keys():
+        if not np.all(left[key] == right[key]):
+            return False
+
+    return True

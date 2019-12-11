@@ -354,7 +354,7 @@ class BinaryMaskCollection:
 
         masks: MutableSequence[MaskData] = list()
         for array in arrays:
-            selection_range: Sequence[slice] = BinaryMaskCollection._crop_mask(array)
+            selection_range: Tuple[slice, ...] = BinaryMaskCollection._crop_mask(array)
 
             masks.append(MaskData(
                 array[selection_range],
@@ -372,7 +372,7 @@ class BinaryMaskCollection:
         )
 
     @staticmethod
-    def _crop_mask(array: np.ndarray) -> Sequence[slice]:
+    def _crop_mask(array: np.ndarray) -> Tuple[slice, ...]:
         selection_range: MutableSequence[slice] = list()
 
         # calculate the first and last True pixel across each axis.
@@ -389,7 +389,7 @@ class BinaryMaskCollection:
             else:
                 selection_range.append(slice(non_zero_indices[0], non_zero_indices[-1] + 1))
 
-        return selection_range
+        return tuple(selection_range)
 
     @classmethod
     def from_label_array_and_ticks(

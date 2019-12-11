@@ -29,7 +29,7 @@ from showit import image as show_image
 
 from starfish import display
 from starfish import data, FieldOfView
-from starfish.types import Axes, Features, FunctionSource
+from starfish.types import Axes, Features
 
 from starfish.util.plot import (
     imshow_plane, intensity_histogram, overlay_spot_calls

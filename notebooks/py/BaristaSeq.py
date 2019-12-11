@@ -87,7 +87,7 @@ imshow_plane(nissl, sel=plane_selector, ax=ax2, title="nissl image")
 # EPY: START code
 from starfish.image import Filter
 from starfish.types import FunctionSource
-max_projector = Filter.Reduce((Axes.ZPLANE,), func="max", module=FunctionSource.np)
+max_projector = Filter.Reduce((Axes.ZPLANE,), func=FunctionSource.np("max"))
 z_projected_image = max_projector.run(img)
 z_projected_nissl = max_projector.run(nissl)
 

@@ -1,3 +1,4 @@
+import warnings
 from typing import (
     Iterable,
     MutableMapping,
@@ -8,7 +9,16 @@ from typing import (
 import numpy as np
 
 from starfish.core.imagestack.imagestack import _reconcile_clip_and_level, ImageStack
-from starfish.core.types import ArrayLike, Axes, Clip, Coordinates, FunctionSource, Levels, Number
+from starfish.core.types import (
+    ArrayLike,
+    Axes,
+    Clip,
+    Coordinates,
+    FunctionSource,
+    FunctionSourceBundle,
+    Levels,
+    Number,
+)
 from starfish.core.util.levels import levels
 from ._base import FilterAlgorithm
 
@@ -21,11 +31,15 @@ class Reduce(FilterAlgorithm):
     ----------
     dims : Iterable[Union[Axes, str]]
         one or more Axes to reduce over
-    func : str
-        Name of a function in the module specified by the ``module`` parameter to apply across the
-        dimension(s) specified by dims.  The function is resolved by ``getattr(<module>, func)``,
-        except in the cases of predefined aliases.  See :py:class:`FunctionSource` for more
-        information about aliases.
+    func : Union[str, FunctionSourceBundle]
+        Function to apply across the dimension(s) specified by ``dims``.
+
+        If this value is a string, then the ``module`` parameter is consulted to determine which
+        python package is used to find the function.  If ``module`` is not specified, then the
+        default is :py:attr:`FunctionSource.np`.
+
+        If this value is a ``FunctionSourceBundle``, then the python package and module name is
+        obtained from the bundle.
 
         Some common examples for the np FunctionSource:
 
@@ -33,13 +47,15 @@ class Reduce(FilterAlgorithm):
         - max: maximum intensity projection (this is an alias for amax and applies np.amax)
         - mean: take the mean across the dim(s) (applies np.mean)
         - sum: sum across the dim(s) (applies np.sum)
-    module : FunctionSource
+    module : Optional[FunctionSource]
         Python module that serves as the source of the function.  It must be listed as one of the
         members of :py:class:`FunctionSource`.
 
         Currently, the supported FunctionSources are:
         - ``np``: the top-level package of numpy
         - ``scipy``: the top-level package of scipy
+
+        This is being deprecated in favor of specifying the function as a ``FunctionSourceBundle``.
     clip_method : Optional[Union[str, :py:class:`~starfish.types.Clip`]]
         Deprecated method to control the way that data are scaled to retain skimage dtype
         requirements that float data fall in [0, 1].  In all modes, data below 0 are set to 0.
@@ -85,8 +101,7 @@ class Reduce(FilterAlgorithm):
         >>> stack = synthetic_stack()
         >>> reducer = Filter.Reduce(
                 {Axes.ROUND},
-                func="linalg.norm",
-                module=FunctionSource.scipy,
+                func=FunctionSource.scipy("linalg.norm"),
                 ord=2,
             )
         >>> norm = reducer.run(stack)
@@ -100,14 +115,29 @@ class Reduce(FilterAlgorithm):
     def __init__(
         self,
             dims: Iterable[Union[Axes, str]],
-            func: str = "max",
-            module: FunctionSource = FunctionSource.np,
+            func: Union[str, FunctionSourceBundle] = "max",
+            module: Optional[FunctionSource] = None,
             clip_method: Optional[Clip] = None,
             level_method: Optional[Levels] = None,
             **kwargs
     ) -> None:
         self.dims: Iterable[Axes] = set(Axes(dim) for dim in dims)
-        self.func = module._resolve_method(func)
+        if isinstance(func, str):
+            if module is not None:
+                warnings.warn(
+                    f"The module parameter is being deprecated.  Use "
+                    f"`func=FunctionSource.{module.name}{func} instead.",
+                    DeprecationWarning)
+            else:
+                module = FunctionSource.np
+            self.func = module(func)
+        elif isinstance(func, FunctionSourceBundle):
+            if module is not None:
+                raise ValueError(
+                    f"When passing in the function as a `FunctionSourceBundle`, module should not "
+                    f"be set."
+                )
+            self.func = func
         self.level_method = _reconcile_clip_and_level(clip_method, level_method)
         self.kwargs = kwargs
 
@@ -134,7 +164,7 @@ class Reduce(FilterAlgorithm):
 
         # Apply the reducing function
         reduced = stack.xarray.reduce(
-            self.func, dim=[dim.value for dim in self.dims], **self.kwargs)
+            self.func.resolve(), dim=[dim.value for dim in self.dims], **self.kwargs)
 
         # Add the reduced dims back and align with the original stack
         reduced = reduced.expand_dims(tuple(dim.value for dim in self.dims))

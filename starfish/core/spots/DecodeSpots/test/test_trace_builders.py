@@ -58,7 +58,7 @@ def test_spot_detection_with_reference_image_exact_match(
     Each method should detect 2 total spots in the max projected reference image then group them
     into 2 distinct spot traces across the ImageStack. """
 
-    reference_image = data_stack.reduce((Axes.ROUND, Axes.CH), func="max", module=FunctionSource.np)
+    reference_image = data_stack.reduce((Axes.ROUND, Axes.CH), func=FunctionSource.np("max"))
     spots = spot_detector.run(image_stack=data_stack, reference_image=reference_image)
     intensity_table = trace_builders.build_spot_traces_exact_match(spots)
     assert intensity_table.sizes[Features.AXIS] == 2, "wrong number of spots traces detected"
@@ -67,8 +67,7 @@ def test_spot_detection_with_reference_image_exact_match(
         "wrong spot intensities detected"
 
     # verify this execution strategy produces an empty intensitytable when called with a blank image
-    reference_image = EMPTY_IMAGESTACK.reduce((Axes.ROUND, Axes.CH), func="max",
-                                              module=FunctionSource.np)
+    reference_image = EMPTY_IMAGESTACK.reduce((Axes.ROUND, Axes.CH), func=FunctionSource.np("max"))
     spots = spot_detector.run(image_stack=EMPTY_IMAGESTACK, reference_image=reference_image)
     empty_intensity_table = trace_builders.build_spot_traces_exact_match(spots)
     assert empty_intensity_table.sizes[Features.AXIS] == 0
@@ -134,15 +133,14 @@ def test_spot_finding_reference_image_sequential(
     we're testing it anyway.
     """
 
-    reference_image = data_stack.reduce((Axes.ROUND, Axes.CH), func="max", module=FunctionSource.np)
+    reference_image = data_stack.reduce((Axes.ROUND, Axes.CH), func=FunctionSource.np("max"))
     spots = spot_detector.run(image_stack=data_stack, reference_image=reference_image)
     intensity_table = trace_builders.build_traces_sequential(spots)
     expected_num_traces = (2 * data_stack.num_chs * data_stack.num_rounds)
     assert intensity_table.sizes[Features.AXIS] == expected_num_traces, "wrong number of " \
                                                                         "spots traces detected"
 
-    reference_image = EMPTY_IMAGESTACK.reduce((Axes.ROUND, Axes.CH), func="max",
-                                              module=FunctionSource.np)
+    reference_image = EMPTY_IMAGESTACK.reduce((Axes.ROUND, Axes.CH), func=FunctionSource.np("max"))
     spots = spot_detector.run(image_stack=EMPTY_IMAGESTACK, reference_image=reference_image)
     empty_intensity_table = trace_builders.build_traces_sequential(spots)
     assert empty_intensity_table.sizes[Features.AXIS] == 0

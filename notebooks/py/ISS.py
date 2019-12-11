@@ -172,7 +172,7 @@ bd = FindSpots.BlobDetector(
     measurement_type='mean',
 )
 
-dots_max = dots.reduce((Axes.ROUND, Axes.ZPLANE), func="max", module=FunctionSource.np)
+dots_max = dots.reduce((Axes.ROUND, Axes.ZPLANE), func=FunctionSource.np("max"))
 spots = bd.run(image_stack=registered_imgs, reference_image=dots_max)
 
 decoder = DecodeSpots.PerRoundMaxChannel(codebook=experiment.codebook)

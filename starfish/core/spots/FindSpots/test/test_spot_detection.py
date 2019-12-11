@@ -86,7 +86,7 @@ def test_spot_detection_with_reference_image(
     r/ch pair. The final spot results should represent 2 spots for each r/ch totalling
     2*num_rounds*num_ch spots """
 
-    reference_image = data_stack.reduce((Axes.ROUND, Axes.CH), func="max", module=FunctionSource.np)
+    reference_image = data_stack.reduce((Axes.ROUND, Axes.CH), func=FunctionSource.np("max"))
     spots_results = spot_detector.run(image_stack=data_stack, reference_image=reference_image)
     assert spots_results.count_total_spots() == (2 * data_stack.num_chs * data_stack.num_rounds), \
         "wrong number of spots detected"
@@ -124,7 +124,7 @@ def _make_labeled_image() -> ImageStack:
 def test_reference_image_spot_detection_with_image_with_labeled_axes():
     """This testing method uses a reference image to identify spot locations."""
     data_stack = _make_labeled_image()
-    reference_image = data_stack.reduce((Axes.ROUND, Axes.CH), func="max", module=FunctionSource.np)
+    reference_image = data_stack.reduce((Axes.ROUND, Axes.CH), func=FunctionSource.np("max"))
     spot_results = gaussian_spot_detector.run(image_stack=data_stack,
                                               reference_image=reference_image)
     return spot_results

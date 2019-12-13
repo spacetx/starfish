@@ -93,9 +93,9 @@ def binary_mask_collection_2d(
 
 
 def binary_mask_collection_3d(
-        label_array: Optional[np.ndarray],
-        physical_ticks: Optional[Mapping[Coordinates, ArrayLike[Number]]],
-        pixel_ticks: Optional[Mapping[Axes, ArrayLike[int]]]):
+        label_array: Optional[np.ndarray] = None,
+        physical_ticks: Optional[Mapping[Coordinates, ArrayLike[Number]]] = None,
+        pixel_ticks: Optional[Mapping[Axes, ArrayLike[int]]] = None):
     """Convenience method to return a 3D binary mask collection."""
     if label_array is None or physical_ticks is None:
         new_label_array, new_physical_ticks = label_array_3d()

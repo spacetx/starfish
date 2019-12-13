@@ -579,6 +579,61 @@ class BinaryMaskCollection:
             None
         )
 
+    def _reduce(
+            self,
+            function: Callable,
+            initial: Union[np.ndarray, Callable[[Tuple[int, ...]], np.ndarray]],
+            *args,
+            **kwargs
+    ) -> "BinaryMaskCollection":
+        """Given a function that takes two ndarray and outputs another, apply that function to all
+        the masks in this collection to form a new collection.  Each time, the function is called
+        with the result of the previous call to the method and the next uncropped mask.  The first
+        time the function is called, the first argument is provided by ``initial``, which is either
+        an array sized to match the uncropped mask, or a callable that takes a single parameter,
+        which is the shape of the array to be produced.
+
+        Parameters
+        ----------
+        function : Callable[[np.ndarray, np.ndarray], np.ndarray]
+            A function that should produce an accumulated result when given an accumulated result
+            and a mask array.  The shape of the inputs and the outputs should be identical.
+        initial : Union[np.ndarray, Callable[[Tuple[int, ...]], np.ndarray]]
+            An initial array that is the same shape as an uncropped mask, or a callable that accepts
+            the shape of an uncropped mask as its parameter and produces an initial array.
+
+        Examples
+        --------
+        Applying a logical 'AND' across all the masks.
+            >>> import numpy as np
+            >>> from starfish.core.morphology.binary_mask.test import factories
+            >>> binary_mask_collection = factories.binary_mask_collection_2d()
+            >>> anded_mask_collection = binary_mask_collection._reduce(
+                np.logical_and, np.ones(shape=(5, 6), dtype=np.bool))
+
+        Applying a logical 'AND' across all the masks, without hard-coding the size of the array.
+            >>> import numpy as np
+            >>> from starfish.core.morphology.binary_mask.test import factories
+            >>> binary_mask_collection = factories.binary_mask_collection_2d()
+            >>> anded_mask_collection = binary_mask_collection._reduce(
+                np.logical_and, lambda shape: np.ones(shape=shape, dtype=np.bool))
+        """
+        if callable(initial):
+            shape = tuple(len(self._pixel_ticks[axis])
+                          for axis, _ in zip(*_get_axes_names(len(self._pixel_ticks))))
+            result = initial(shape)
+        else:
+            result = initial
+        for ix in range(len(self)):
+            result = function(result, self.uncropped_mask(ix).values, *args, **kwargs)
+
+        return BinaryMaskCollection.from_binary_arrays_and_ticks(
+            [result],
+            self._pixel_ticks,
+            self._physical_ticks,
+            self._log,
+        )
+
 
 # these need to be at the end to avoid recursive imports
 from . import _io  # noqa

@@ -2,6 +2,7 @@
 BinaryMaskCollection."""
 from ._base import FilterAlgorithm
 from .map import Map
+from .reduce import Reduce
 
 # autodoc's automodule directive only captures the modules explicitly listed in __all__.
 all_filters = {

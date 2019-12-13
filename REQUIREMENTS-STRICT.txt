@@ -68,7 +68,7 @@ semantic-version==2.8.3
 Send2Trash==1.5.0
 showit==1.1.4
 six==1.13.0
-slicedimage==4.1.0
+slicedimage==4.1.1
 sympy==1.4
 terminado==0.8.3
 testpath==0.4.4

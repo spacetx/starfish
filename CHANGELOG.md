@@ -1,3 +1,26 @@
+## [0.1.10] - 2019-12-13
+- Bump slicedimage to 4.1.1 (#1697)
+- Make map/reduce APIs more intuitive (#1686)
+- updates roadmap to reflect 2020H1 plans
+- adding aws scaling vignette (#1638)
+- Use thresholded binarize and mask filtering in existing watershed code. (#1671)
+- adding spot ids to pixel results (#1687)
+- Implement Labeling algorithms (#1680)
+- Thresholded binarize conversion algorithm (#1651)
+- Area filter for binary masks (#1673)
+- Fix stain generation in watershed (#1670)
+- Use the new levels module. (#1669)
+- Linear image leveling (#1666)
+- add axis labels to display() (#1682)
+- Clip method for Richardson Lucy (#1668)
+- Filters for mask collections (#1659)
+- Provide an apply method to binary mask collections. (#1655)
+- adding convience method for slicing codebook data (#1626)
+- Fix display tests and code (#1664)
+- Additional builders for BinaryMaskCollection (#1637)
+- Methods for uncropping binary masks. (#1647)
+- Improve coordinate handling code for BinaryMaskCollection and LabelImage (#1632)
+
 ## [0.1.9] - 2019-11-18
 - Create an ArrayLike type (#1649)
 - Verify that binary masks can be generated from empty label images (#1634)
@@ -171,6 +194,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.1.10]: https://github.com/spacetx/starfish/releases/tag/0.1.10
 [0.1.9]: https://github.com/spacetx/starfish/releases/tag/0.1.9
 [0.1.8]: https://github.com/spacetx/starfish/releases/tag/0.1.8
 [0.1.7]: https://github.com/spacetx/starfish/releases/tag/0.1.7

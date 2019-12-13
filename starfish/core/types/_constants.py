@@ -120,7 +120,7 @@ class Levels(AugmentedEnum):
     SCALE_BY_CHUNK = 'scale_by_chunk'
     """Rescale the intensity of an image chunk by the peak intensity.  Note that if the peak
     intensity of an image chunk is not saturated, this behaves differently than
-    Clip.SCALE_BY_IMAGE."""
+    Clip.SCALE_BY_CHUNK."""
 
 
 class TransformType(AugmentedEnum):

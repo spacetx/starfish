@@ -19,6 +19,9 @@ API
    spots/index.rst
 
 .. toctree::
+   morphology/index.rst
+
+.. toctree::
    types/index.rst
 
 .. toctree::
@@ -28,4 +31,4 @@ API
    utils/index.rst
 
 .. toctree::
-  datasets/index.rst
+   datasets/index.rst

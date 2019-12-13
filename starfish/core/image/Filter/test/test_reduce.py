@@ -1,3 +1,4 @@
+import warnings
 from collections import OrderedDict
 
 import numpy as np
@@ -103,6 +104,12 @@ def make_expected_image_stack(func):
             FunctionSource.scipy,
             {'ord': 2},
         ),
+        (
+            make_expected_image_stack('norm'),
+            FunctionSource.scipy('linalg.norm'),
+            None,
+            {'ord': 2},
+        ),
     ]
 )
 def test_image_stack_reduce(expected_result, func, module, kwargs):
@@ -121,6 +128,21 @@ def test_image_stack_reduce(expected_result, func, module, kwargs):
     reduced = red.run(test_stack)
 
     assert np.allclose(reduced.xarray, expected_result.xarray)
+
+
+def test_image_stack_module_deprecated():
+    """Specifying the function as a string and passing in a module should generate a warning."""
+    with warnings.catch_warnings(record=True) as all_warnings:
+        Reduce(dims=[Axes.ROUND], func="max", module=FunctionSource.np)
+
+        assert DeprecationWarning in (warning.category for warning in all_warnings)
+
+
+def test_image_stack_module_with_functionsourcebundle():
+    """Specifying the function as a FunctionSourceBundle and passing in a module should raise an
+    Exception."""
+    with pytest.raises(ValueError):
+        Reduce(dims=[Axes.ROUND], func=FunctionSource.np("max"), module=FunctionSource.np)
 
 
 def test_max_projection_preserves_coordinates():

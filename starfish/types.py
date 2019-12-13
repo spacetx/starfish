@@ -8,6 +8,7 @@ from starfish.core.types import (  # noqa: F401
     CORE_DEPENDENCIES,
     Features,
     FunctionSource,
+    FunctionSourceBundle,
     Levels,
     LOG,
     Number,

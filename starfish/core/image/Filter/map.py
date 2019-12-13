@@ -1,3 +1,4 @@
+import warnings
 from typing import (
     Optional,
     Set,
@@ -5,7 +6,7 @@ from typing import (
 )
 
 from starfish.core.imagestack.imagestack import _reconcile_clip_and_level, ImageStack
-from starfish.core.types import Axes, Clip, FunctionSource, Levels
+from starfish.core.types import Axes, Clip, FunctionSource, FunctionSourceBundle, Levels
 from ._base import FilterAlgorithm
 
 
@@ -16,18 +17,24 @@ class Map(FilterAlgorithm):
 
     Parameters
     ----------
-    func : str
-        Name of a function in the module specified by the ``module`` parameter to apply across the
-        dimension(s) specified by dims.  The function is resolved by ``getattr(<module>, func)``,
-        except in the cases of predefined aliases.  See :py:class:`FunctionSource` for more
-        information about aliases.
-    module : FunctionSource
+    func : Union[str, FunctionSourceBundle]
+        Function to apply across the dimension(s) specified by ``dims``.
+
+        If this value is a string, then the ``module`` parameter is consulted to determine which
+        python package is used to find the function.  If ``module`` is not specified, then the
+        default is :py:attr:`FunctionSource.np`.
+
+        If this value is a ``FunctionSourceBundle``, then the python package and module name is
+        obtained from the bundle.
+    module : Optional[FunctionSource]
         Python module that serves as the source of the function.  It must be listed as one of the
         members of :py:class:`FunctionSource`.
 
         Currently, the supported FunctionSources are:
         - ``np``: the top-level package of numpy
         - ``scipy``: the top-level package of scipy
+
+        This is being deprecated in favor of specifying the function as a ``FunctionSourceBundle``.
     in_place : bool
         Execute the operation in-place.  (default: False)
     group_by : Set[Axes]
@@ -80,16 +87,31 @@ class Map(FilterAlgorithm):
 
     def __init__(
         self,
-            func: str,
+            func: Union[str, FunctionSourceBundle],
             *func_args,
-            module: FunctionSource = FunctionSource.np,
+            module: Optional[FunctionSource] = None,
             in_place: bool = False,
             group_by: Optional[Set[Union[Axes, str]]] = None,
             clip_method: Optional[Clip] = None,
             level_method: Optional[Levels] = None,
             **func_kwargs,
     ) -> None:
-        self.func = module._resolve_method(func)
+        if isinstance(func, str):
+            if module is not None:
+                warnings.warn(
+                    f"The module parameter is being deprecated.  Use "
+                    f"`func=FunctionSource.{module.name}{func} instead.",
+                    DeprecationWarning)
+            else:
+                module = FunctionSource.np
+            self.func = module(func)
+        elif isinstance(func, FunctionSourceBundle):
+            if module is not None:
+                raise ValueError(
+                    f"When passing in the function as a `FunctionSourceBundle`, module should not "
+                    f"be set."
+                )
+            self.func = func
         self.in_place = in_place
         if group_by is None:
             group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
@@ -122,7 +144,7 @@ class Map(FilterAlgorithm):
 
         # Apply the reducing function
         return stack.apply(
-            self.func,
+            self.func.resolve(),
             *self.func_args,
             group_by=self.group_by,
             in_place=self.in_place,

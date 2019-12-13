@@ -57,8 +57,7 @@ def process_fov(field_num: int, experiment_str: str):
         threshold=0.01,
         measurement_type='mean',
     )
-    dots_max_projector = Filter.Reduce((Axes.ROUND, Axes.ZPLANE), func="max",
-                                       module=FunctionSource.np)
+    dots_max_projector = Filter.Reduce((Axes.ROUND, Axes.ZPLANE), func=FunctionSource.np("max"))
     dots_max = dots_max_projector.run(dots)
 
     spots = detector.run(image_stack=filtered_imgs, reference_image=dots_max)

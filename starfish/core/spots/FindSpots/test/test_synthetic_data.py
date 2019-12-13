@@ -27,8 +27,7 @@ def test_round_trip_synthetic_data():
     codebook = sd.codebook()
     intensities = sd.intensities(codebook=codebook)
     spots = sd.spots(intensities=intensities)
-    spots_max_projector = Filter.Reduce((Axes.ROUND, Axes.CH), func="max",
-                                        module=FunctionSource.np)
+    spots_max_projector = Filter.Reduce((Axes.ROUND, Axes.CH), func=FunctionSource.np("max"))
     spots_max = spots_max_projector.run(spots)
 
     gsd = BlobDetector(min_sigma=1, max_sigma=4, num_sigma=5, threshold=0)
@@ -89,8 +88,7 @@ def test_medium_synthetic_stack():
     intensities = intensities[np.where(valid_locations)]
     spots = sd.spots(intensities=intensities)
     gsd = BlobDetector(min_sigma=1, max_sigma=4, num_sigma=5, threshold=1e-4)
-    spots_max_projector = Filter.Reduce((Axes.ROUND, Axes.CH), func="max",
-                                        module=FunctionSource.np)
+    spots_max_projector = Filter.Reduce((Axes.ROUND, Axes.CH), func=FunctionSource.np("max"))
     spots_max = spots_max_projector.run(spots)
     spot_results = gsd.run(image_stack=spots, reference_image=spots_max)
 

@@ -1,4 +1,5 @@
 import importlib
+from dataclasses import dataclass
 from enum import Enum
 from typing import (
     Callable,
@@ -6,6 +7,48 @@ from typing import (
     Mapping,
     Optional,
 )
+
+
+@dataclass
+class FunctionSourceBundle:
+    """The combination of a ``FunctionSource`` and the method we are looking for."""
+    top_level_package: str
+    requested_method: str
+    actual_method: str
+
+    def resolve(self) -> Callable:
+        """Resolve a method.  The method itself might be enclosed in a package, such as
+        subpackage.actual_method.  In that case, we will need to attempt to resolve it in the
+        following sequence:
+
+        1. import top_level_package, then try to resolve subpackage.actual_method recursively
+           through ``getattr`` calls.
+        2. import top_level_package.subpackage, then try to resolve actual_method through
+           ``gettatr`` calls.
+
+        This is done instead of just creating a bunch of FunctionSource for libraries that have
+        a lot of packages that are not implicitly imported by importing the top-level package.
+        """
+        method_splitted = self.actual_method.split(".")
+        splitted = [self.top_level_package]
+        splitted.extend(method_splitted)
+
+        for divider in range(1, len(splitted)):
+            import_section = splitted[:divider]
+            getattr_section = splitted[divider:]
+
+            imported = importlib.import_module(".".join(import_section))
+
+            try:
+                for getattr_name in getattr_section:
+                    imported = getattr(imported, getattr_name)
+                return cast(Callable, imported)
+            except AttributeError:
+                pass
+
+        raise AttributeError(
+            f"Unable to resolve the method {self.requested_method} from package "
+            f"{self.top_level_package}")
 
 
 class FunctionSource(Enum):
@@ -29,42 +72,9 @@ class FunctionSource(Enum):
         self.top_level_package = top_level_package
         self.aliases = aliases or {}
 
-    def _resolve_method(self, method: str) -> Callable:
-        """Resolve a method.  The method itself might be enclosed in a package, such as
-        subpackage.actual_method.  In that case, we will need to attempt to resolve it in the
-        following sequence:
-
-        1. import top_level_package, then try to resolve subpackage.actual_method recursively
-           through ``getattr`` calls.
-        2. import top_level_package.subpackage, then try to resolve actual_method through
-           ``gettatr`` calls.
-
-        This is done instead of just creating a bunch of FunctionSource for libraries that have
-        a lot of packages that are not implicitly imported by importing the top-level package.
-        """
-        # first resolve the aliases.
-        actual_method = self.aliases.get(method, method)
-
-        method_splitted = actual_method.split(".")
-        splitted = [self.top_level_package]
-        splitted.extend(method_splitted)
-
-        for divider in range(1, len(splitted)):
-            import_section = splitted[:divider]
-            getattr_section = splitted[divider:]
-
-            imported = importlib.import_module(".".join(import_section))
-
-            try:
-                for getattr_name in getattr_section:
-                    imported = getattr(imported, getattr_name)
-                return cast(Callable, imported)
-            except AttributeError:
-                pass
-
-        raise AttributeError(
-            f"Unable to resolve the method {actual_method} from package "
-            f"{self.top_level_package}")
+    def __call__(self, method: str) -> FunctionSourceBundle:
+        return FunctionSourceBundle(
+            self.top_level_package, method, self.aliases.get(method, method))
 
     np = ("numpy", {'max': 'amax'})
     """Function source for the numpy libraries"""

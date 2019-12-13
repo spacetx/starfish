@@ -53,6 +53,7 @@ from starfish.core.types import (
     Coordinates,
     CoordinateValue,
     FunctionSource,
+    FunctionSourceBundle,
     Levels,
     Number,
     STARFISH_EXTRAS_KEY,
@@ -1180,8 +1181,8 @@ class ImageStack:
     def reduce(
             self,
             dims: Iterable[Union[Axes, str]],
-            func: str,
-            module: FunctionSource = FunctionSource.np,
+            func: Union[str, FunctionSourceBundle],
+            module: Optional[FunctionSource] = None,
             clip_method: Optional[Clip] = None,
             level_method: Optional[Levels] = None,
             *args,
@@ -1203,8 +1204,8 @@ class ImageStack:
 
     def map(
             self,
-            func: str,
-            module: FunctionSource = FunctionSource.np,
+            func: Union[str, FunctionSourceBundle],
+            module: Optional[FunctionSource] = None,
             in_place: bool = False,
             group_by: Optional[Set[Union[Axes, str]]] = None,
             clip_method: Optional[Clip] = None,

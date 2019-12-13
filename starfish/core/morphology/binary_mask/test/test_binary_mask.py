@@ -185,3 +185,45 @@ def test_apply():
 
     assert np.array_equal(region_1[Axes.Y.value], [2, 3, 4])
     assert np.array_equal(region_1[Axes.X.value], [2, 3, 4, 5])
+
+
+def test_reduce():
+    def make_initial(shape):
+        constant_initial = np.zeros(shape=shape, dtype=np.bool)
+        constant_initial[0, 0] = 1
+        return constant_initial
+
+    input_mask_collection = binary_mask_collection_2d()
+
+    constant_initial = make_initial((5, 6))
+    xored_binary_mask_constant_initial = input_mask_collection._reduce(
+        np.logical_xor, constant_initial)
+    assert len(xored_binary_mask_constant_initial) == 1
+    uncropped_output = xored_binary_mask_constant_initial.uncropped_mask(0)
+    assert np.array_equal(
+        np.asarray(uncropped_output),
+        np.array(
+            [[False, True, True, True, True, True],
+             [False, False, False, False, False, False],
+             [False, False, False, False, False, False],
+             [False, False, False, True, True, True],
+             [False, False, False, True, True, False],
+             ],
+            dtype=np.bool,
+        ))
+
+    xored_binary_mask_programmatic_initial = input_mask_collection._reduce(
+        np.logical_xor, make_initial)
+    assert len(xored_binary_mask_programmatic_initial) == 1
+    uncropped_output = xored_binary_mask_programmatic_initial.uncropped_mask(0)
+    assert np.array_equal(
+        np.asarray(uncropped_output),
+        np.array(
+            [[False, True, True, True, True, True],
+             [False, False, False, False, False, False],
+             [False, False, False, False, False, False],
+             [False, False, False, True, True, True],
+             [False, False, False, True, True, False],
+             ],
+            dtype=np.bool,
+        ))

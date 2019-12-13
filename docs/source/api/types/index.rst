@@ -62,9 +62,17 @@ detected spots.
     :members:
 
 Clip
-_____
+----
 
-.. autoclass:: starfish.core.types.Clip
+Clip is deprecated in favor of :py:class:`~starfish.types.Levels`.
+
+.. autoclass:: starfish.types.Clip
     :members:
     :undoc-members:
 
+Levels
+------
+
+.. autoclass:: starfish.types.Levels
+    :members:
+    :undoc-members:

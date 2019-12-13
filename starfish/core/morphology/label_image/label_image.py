@@ -72,13 +72,12 @@ class LabelImage:
         array : np.ndarray
             A 2D or 3D array containing the labels.  The ordering of the axes must be Y, X for 2D
             images and ZPLANE, Y, X for 3D images.
-        pixel_ticks : Optional[Union[Mapping[Axes, ArrayLike[int]],
-                                     Mapping[str, ArrayLike[int]]]]
+        pixel_ticks : Optional[Union[Mapping[Axes, ArrayLike[int]], Mapping[str, ArrayLike[int]]]]
             A map from the axis to the values for that axis.  For any axis that exist in the array
             but not in pixel_coordinates, the pixel coordinates are assigned from 0..N-1, where N is
             the size along that axis.
-        physical_ticks : Union[Mapping[Coordinates, ArrayLike[Number]],
-                               Mapping[str, ArrayLike[Number]]]
+        physical_ticks : Union[Mapping[Coordinates, ArrayLike[Number]], Mapping[str,
+        ArrayLike[Number]]]
             A map from the physical coordinate type to the values for axis.  For 2D label images,
             X and Y physical coordinates must be provided.  For 3D label images, Z physical
             coordinates must also be provided.

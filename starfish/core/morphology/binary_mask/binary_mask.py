@@ -48,8 +48,7 @@ class BinaryMaskCollection:
     ----------
     pixel_ticks : Union[Mapping[Axes, ArrayLike[int]], Mapping[str, ArrayLike[int]]]
         A map from the axis to the values for that axis.
-    physical_ticks : Union[Mapping[Coordinates, ArrayLike[Number]],
-                                   Mapping[str, ArrayLike[Number]]
+    physical_ticks : Union[Mapping[Coordinates, ArrayLike[Number]], Mapping[str, ArrayLike[Number]]
         A map from the physical coordinate type to the values for axis.  For 2D label images,
         X and Y physical coordinates must be provided.  For 3D label images, Z physical
         coordinates must also be provided.
@@ -280,8 +279,7 @@ class BinaryMaskCollection:
         the smallest size that contains the non-zero values, but pixel and physical coordinates
         ticks are retained.  Masks extracted from BinaryMaskCollections will be cropped.  To extract
         masks sized to the original label image, use
-        :py:meth:`starfish.BinaryMaskCollection.uncropped_mask`.
-
+        :py:meth:`starfish.morphology.BinaryMaskCollection.uncropped_mask`.
 
         Parameters
         ----------
@@ -289,13 +287,12 @@ class BinaryMaskCollection:
             A set of 2D or 3D binary arrays.  The ordering of the axes must be Y, X for 2D images
             and ZPLANE, Y, X for 3D images.  The arrays must have identical sizes and match the
             sizes of pixel_ticks and physical_ticks.
-        pixel_ticks : Optional[Union[Mapping[Axes, ArrayLike[int]],
-                                     Mapping[str, ArrayLike[int]]]]
+        pixel_ticks : Optional[Union[Mapping[Axes, ArrayLike[int]], Mapping[str, ArrayLike[int]]]]
             A map from the axis to the values for that axis.  For any axis that exist in the array
             but not in pixel_ticks, the pixel coordinates are assigned from 0..N-1, where N is
             the size along that axis.
-        physical_ticks : Union[Mapping[Coordinates, ArrayLike[Number]],
-                               Mapping[str, ArrayLike[Number]]]
+        physical_ticks : Union[Mapping[Coordinates, ArrayLike[Number]], Mapping[str,
+        ArrayLike[Number]]]
             A map from the physical coordinate type to the values for axis.  For 2D label images,
             X and Y physical coordinates must be provided.  For 3D label images, Z physical
             coordinates must also be provided.
@@ -408,20 +405,19 @@ class BinaryMaskCollection:
         the smallest size that contains the non-zero values, but pixel and physical coordinates
         ticks are retained.  Masks extracted from BinaryMaskCollections will be cropped.  To extract
         masks sized to the original label image, use
-        :py:meth:`starfish.BinaryMaskCollection.uncropped_mask`.
+        :py:meth:`starfish.morphology.BinaryMaskCollection.uncropped_mask`.
 
         Parameters
         ----------
         array : np.ndarray
             A 2D or 3D array containing the labels.  The ordering of the axes must be Y, X for 2D
             images and ZPLANE, Y, X for 3D images.
-        pixel_ticks : Optional[Union[Mapping[Axes, ArrayLike[int]],
-                                     Mapping[str, ArrayLike[int]]]]
+        pixel_ticks : Optional[Union[Mapping[Axes, ArrayLike[int]], Mapping[str, ArrayLike[int]]]]
             A map from the axis to the values for that axis.  For any axis that exist in the array
             but not in pixel_ticks, the pixel coordinates are assigned from 0..N-1, where N is
             the size along that axis.
-        physical_ticks : Union[Mapping[Coordinates, ArrayLike[Number]],
-                               Mapping[str, ArrayLike[Number]]]
+        physical_ticks : Union[Mapping[Coordinates, ArrayLike[Number]], Mapping[str,
+        ArrayLike[Number]]]
             A map from the physical coordinate type to the values for axis.  For 2D label images,
             X and Y physical coordinates must be provided.  For 3D label images, Z physical
             coordinates must also be provided.

@@ -1,29 +1,8 @@
 from typing import Set, Tuple, Union
 
 import numpy as np
-from skimage.morphology import binary_opening, disk
 
 from starfish.core.types import Axes, Number
-
-
-def bin_open(img: np.ndarray, disk_size: int) -> np.ndarray:
-    """
-    Performs binary opening of an image
-
-    img : np.ndarray
-        Image to filter.
-    masking_radius : int
-        Radius of the disk-shaped structuring element.
-
-    Returns
-    -------
-    np.ndarray :
-        Filtered image, same shape as input
-
-    """
-    selem = disk(disk_size)
-    res = binary_opening(img, selem)
-    return res
 
 
 def gaussian_kernel(shape: Tuple[int, int]=(3, 3), sigma: float=0.5):

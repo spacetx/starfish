@@ -7,7 +7,6 @@ from showit import image
 from skimage.feature import peak_local_max
 from skimage.morphology import disk, watershed
 
-from starfish.core.image.Filter import Reduce
 from starfish.core.image.Filter.util import bin_open
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.morphology import Filter
@@ -77,21 +76,12 @@ class Watershed(SegmentAlgorithm):
         masks : BinaryMaskCollection
            binary masks segmenting each cell
         """
-
-        # create a 'stain' for segmentation
-        mp = primary_images.reduce({Axes.CH, Axes.ZPLANE}, func="max")
-        mean = Reduce(
-            dims=(Axes.ROUND,),
-            func="mean",
-            level_method=Levels.SCALE_BY_IMAGE).run(mp)
-        stain = mean._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
-
         # TODO make these parameterizable or determine whether they are useful or not
         size_lim = (10, 10000)
         disk_size_markers = None
         disk_size_mask = None
 
-        self._segmentation_instance = _WatershedSegmenter(nuclei, stain)
+        self._segmentation_instance = _WatershedSegmenter(primary_images, nuclei)
         label_image_array = self._segmentation_instance.segment(
             self.nuclei_threshold, self.input_threshold, size_lim, disk_size_markers,
             disk_size_mask, self.min_distance
@@ -118,7 +108,7 @@ class Watershed(SegmentAlgorithm):
 
 
 class _WatershedSegmenter:
-    def __init__(self, nuclei: ImageStack, stain_img: np.ndarray) -> None:
+    def __init__(self, primary_images: ImageStack, nuclei: ImageStack) -> None:
         """Implements watershed segmentation of cells seeded from a nuclei image
 
         Algorithm is seeded by a nuclei image. Binary segmentation mask is computed from a maximum
@@ -126,20 +116,24 @@ class _WatershedSegmenter:
 
         Parameters
         ----------
+        primary_images : ImageStack
+            primary hybridization images
         nuclei : ImageStack
             nuclei image
-        stain_img : np.ndarray[np.float32]
-            stain image
         """
-        max_project_and_scale = Reduce(
+        # create a 'stain' for segmentation
+        mp = primary_images.reduce({Axes.CH, Axes.ZPLANE}, func="max")
+        self.stain = mp.reduce({
+            Axes.ROUND},
+            func="mean",
+            level_method=Levels.SCALE_BY_IMAGE)
+
+        self.nuclei_mp_scaled = nuclei.reduce(
             {Axes.ROUND, Axes.CH, Axes.ZPLANE},
             func="max",
             level_method=Levels.SCALE_BY_IMAGE,
         )
-        self.nuclei_mp_scaled = max_project_and_scale.run(nuclei)
-        self.stain = stain_img / stain_img.max()
 
-        self.nuclei_thresholded: Optional[np.ndarray] = None  # dtype: bool
         self.markers = None
         self.num_cells: Optional[int] = None
         self.mask = None
@@ -320,7 +314,7 @@ class _WatershedSegmenter:
             thresholded stain image
 
         """
-        st = self.stain >= stain_thresh
+        st = self.stain._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE) >= stain_thresh
         watershed_mask: np.ndarray = np.logical_or(st, markers > 0)  # dtype bool
         if disk_size is not None:
             watershed_mask = bin_open(watershed_mask, disk_size)
@@ -342,7 +336,7 @@ class _WatershedSegmenter:
         np.ndarray[np.int32] :
             labeled image, each segment has a unique integer value
         """
-        img = 1 - self.stain
+        img = 1 - self.stain._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
 
         res = watershed(image=img,
                         markers=markers,
@@ -384,7 +378,9 @@ class _WatershedSegmenter:
         plt.title('Nuclei')
 
         plt.subplot(322)
-        image(self.stain, ax=plt.gca(), size=20, bar=True)
+        image(
+            self.stain._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE),
+            ax=plt.gca(), size=20, bar=True)
         plt.title('Stain')
 
         plt.subplot(323)

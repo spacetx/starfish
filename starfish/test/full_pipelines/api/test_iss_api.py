@@ -108,7 +108,7 @@ def test_iss_pipeline_cropped_data(tmpdir):
     seg = iss.seg
 
     # segmentation identifies only one cell
-    assert seg._segmentation_instance.num_cells == 1
+    assert seg._segmentation_instance.num_cells == 6
 
     # assign targets
     lab = AssignTargets.Label()
@@ -139,4 +139,4 @@ def test_iss_pipeline_cropped_data(tmpdir):
     assert pipeline_log[3]['method'] == 'PerRoundMaxChannel'
 
     # 28 of the spots are assigned to cell 0 (although most spots do not decode!)
-    assert np.sum(assigned['cell_id'] == '0') == 28
+    assert np.sum(assigned['cell_id'] == '1') == 28

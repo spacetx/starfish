@@ -1,17 +1,16 @@
 from typing import Mapping, Optional, Tuple
 
 import numpy as np
-import scipy.ndimage.measurements as spm
-from scipy.ndimage import distance_transform_edt
 from showit import image
-from skimage.feature import peak_local_max
 from skimage.morphology import disk, watershed
 
-from starfish.core.image.Filter.util import bin_open
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.morphology import Filter
+from starfish.core.morphology import Filter, Merge
 from starfish.core.morphology.Binarize import ThresholdBinarize
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
+from starfish.core.morphology.Filter.areafilter import AreaFilter
+from starfish.core.morphology.Filter.min_distance_label import MinDistanceLabel
+from starfish.core.morphology.Filter.structural_label import StructuralLabel
 from starfish.core.types import ArrayLike, Axes, Coordinates, FunctionSource, Levels, Number
 from ._base import SegmentAlgorithm
 
@@ -82,22 +81,9 @@ class Watershed(SegmentAlgorithm):
         disk_size_mask = None
 
         self._segmentation_instance = _WatershedSegmenter(primary_images, nuclei)
-        label_image_array = self._segmentation_instance.segment(
+        return self._segmentation_instance.segment(
             self.nuclei_threshold, self.input_threshold, size_lim, disk_size_markers,
             disk_size_mask, self.min_distance
-        )
-
-        # we max-projected and squeezed the Z-plane so label_image.ndim == 2
-        physical_ticks: Mapping[Coordinates, ArrayLike[Number]] = {
-            coord: nuclei.xarray.coords[coord.value].data
-            for coord in (Coordinates.Y, Coordinates.X)
-        }
-
-        return BinaryMaskCollection.from_label_array_and_ticks(
-            label_image_array,
-            None,
-            physical_ticks,
-            None,  # TODO: (ttung) this should really be logged.
         )
 
     def show(self, figsize: Tuple[int, int]=(10, 10)) -> None:
@@ -134,10 +120,10 @@ class _WatershedSegmenter:
             level_method=Levels.SCALE_BY_IMAGE,
         )
 
-        self.markers = None
+        self.markers: Optional[BinaryMaskCollection] = None
         self.num_cells: Optional[int] = None
-        self.mask = None
-        self.segmented = None
+        self.mask: Optional[BinaryMaskCollection] = None
+        self.segmented: Optional[BinaryMaskCollection] = None
 
     def segment(
             self,
@@ -146,8 +132,8 @@ class _WatershedSegmenter:
             size_lim: Tuple[int, int],
             disk_size_markers: Optional[int]=None,  # TODO ambrosejcarr what is this doing?
             disk_size_mask: Optional[int]=None,  # TODO ambrosejcarr what is this doing?
-            min_dist: Optional[Number]=None
-    ) -> np.ndarray:
+            min_dist: Optional[int] = None
+    ) -> BinaryMaskCollection:
         """Execute watershed cell segmentation.
 
         Parameters
@@ -167,15 +153,19 @@ class _WatershedSegmenter:
 
         Returns
         -------
-        np.ndarray[int32] :
-            label image with same size and shape as self.nuclei_img
+        BinaryMaskCollection :
+            binary mask collection where each cell is a mask.
         """
         min_allowed_size, max_allowed_size = size_lim
         self.binarized_nuclei = self.filter_nuclei(nuclei_thresh, disk_size_markers)
-        self.markers, self.num_cells = self.label_nuclei(
-            self.binarized_nuclei,
-            min_allowed_size, max_allowed_size, min_dist
-        )
+        # label thresholded nuclei image
+        if min_dist is None:
+            labeled_masks = StructuralLabel().run(self.binarized_nuclei)
+        else:
+            labeled_masks = MinDistanceLabel(min_dist, 1).run(self.binarized_nuclei)
+
+        self.markers = AreaFilter(min_allowed_size, max_allowed_size).run(labeled_masks)
+        self.num_cells = len(self.markers)
         self.mask = self.watershed_mask(stain_thresh, self.markers, disk_size_mask)
         self.segmented = self.watershed(self.markers, self.mask)
         return self.segmented
@@ -209,93 +199,12 @@ class _WatershedSegmenter:
         assert len(nuclei_binarized) == 1
         return nuclei_binarized
 
-    def label_nuclei(
-        self,
-        binarized_nuclei: BinaryMaskCollection,
-        min_allowed_size: int,
-        max_allowed_size: int,
-        min_dist: Optional[Number]=None
-    ) -> Tuple[np.ndarray, int]:
-        """Construct a labeled nuclei image, which will be combined with the point cloud to seed
-        the watershed
-
-        Parameters
-        ----------
-        binarized_nuclei : BinaryMaskCollection
-            BinaryMaskCollection with a single mask, containing the binarized nuclei image
-        min_allowed_size : int
-            minimum allowable thresholded nuclei size
-        max_allowed_size : int
-            maximum allowable nuclei size
-
-        Returns
-        -------
-        np.ndarray :
-            labeled nuclei, excluding those whose size is outside the area boundaries
-
-        """
-        binarized_nuclei_mask = binarized_nuclei.uncropped_mask(0).values.squeeze(axis=0)
-
-        # label thresholded nuclei image
-        if min_dist is None:
-            markers, num_objs = spm.label(binarized_nuclei_mask)
-        else:
-            markers, num_objs = self._unclump(min_dist)
-
-        # TODO dganguli: does it really make sense to assume a square area?
-        min_allowed_area = min_allowed_size ** 2
-        max_allowed_area = max_allowed_size ** 2
-
-        # spm.sum sums the values of an array by label. This counts the pixels in each object
-        areas = spm.sum(
-            np.ones(binarized_nuclei_mask.shape),
-            markers,
-            np.array(range(0, num_objs + 1), dtype=np.int32)
-        )
-
-        # each label value is replaced by its area
-        area_image = areas[markers]
-
-        # areas are used to mask values that are outside the allowable sizes
-        markers[area_image <= min_allowed_area] = 0
-        markers[area_image >= max_allowed_area] = 0
-
-        # re-label the image with sequential integers, accounting for exclusion based on size
-        markers_reduced, num_objs = self.relabel_image(markers)
-
-        return markers_reduced, num_objs
-
-    def _unclump(self, min_dist: Number) -> Tuple[np.ndarray, int]:
-        """
-        Run watershed on the thresholded basin image, restricted to basins at least min_dist apart
-
-        Functionally, this reproduces the thresholded nuclei image with overlapping nuclei merged.
-
-        Parameters
-        ----------
-        min_dist : int
-            minimum distance between watershed basins
-
-        """
-        im: np.ndarray = self.binarized_nuclei.uncropped_mask(0).values.squeeze(axis=0)
-
-        # calculates the distance of every pixel to the nearest background (0) point
-        distance: np.ndarray = distance_transform_edt(im)  # dtype: np.float64
-
-        # boolean array marking local maxima, excluding any maxima within min_dist
-        local_maxi: np.ndarray = peak_local_max(
-            distance, labels=im, indices=False, min_distance=min_dist
-        )
-
-        # label the maxima for watershed
-        markers, num_objs = spm.label(local_maxi)
-
-        # run watershed, using the distances in the thresholded image as basins.
-        # Uses the original image as a mask, preventing any background pixels from being labeled
-        labels_ws: np.ndarray = watershed(-distance, markers, mask=im)
-        return labels_ws, num_objs
-
-    def watershed_mask(self, stain_thresh: Number, markers: np.ndarray, disk_size: Optional[int]):
+    def watershed_mask(
+            self,
+            stain_thresh: Number,
+            markers: BinaryMaskCollection,
+            disk_size: Optional[int],
+    ) -> BinaryMaskCollection:
         """Create a watershed mask that is the union of the spot intensities above stain_thresh and
         a marker image generated from nuclei
 
@@ -303,70 +212,79 @@ class _WatershedSegmenter:
         ----------
         stain_thresh : Number
             threshold to apply to the stain image
-        markers : np.ndarray[bool]
-            markers for the stain_image
+        markers : BinaryMaskCollection
+            markers image generated from nuclei
         disk_size : Optional[int]
             if provided, execute a morphological opening operation over the thresholded stain image
 
         Returns
         -------
-        np.ndarray[bool] :
-            thresholded stain image
-
+        BinaryMaskCollection :
+            watershed mask
         """
-        st = self.stain._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE) >= stain_thresh
-        watershed_mask: np.ndarray = np.logical_or(st, markers > 0)  # dtype bool
+        thresholded_stain = ThresholdBinarize(stain_thresh).run(self.stain)
+        markers_and_stain = Merge.SimpleMerge().run([thresholded_stain, markers])
+        watershed_mask = Filter.Reduce(
+            "logical_or",
+            lambda shape: np.zeros(shape=shape, dtype=np.bool)
+        ).run(markers_and_stain)
         if disk_size is not None:
-            watershed_mask = bin_open(watershed_mask, disk_size)
+            disk_img = disk(disk_size)
+            watershed_mask = Filter.Map(
+                "morphology.binary_open",
+                disk_img,
+                module=FunctionSource.skimage
+            ).run(watershed_mask)
+
         return watershed_mask
 
-    def watershed(self, markers: np.ndarray, watershed_mask: np.ndarray) -> np.ndarray:
+    def watershed(
+            self,
+            markers: BinaryMaskCollection,
+            watershed_mask: BinaryMaskCollection,
+    ) -> BinaryMaskCollection:
         """Run watershed on the thresholded primary_images max projection
 
         Parameters
         ----------
-        markers : np.ndarray[np.int64]
-            an array marking the basins with the values to be assigned in the label matrix.
-            Zero means not a marker.
-        watershed_mask : np.ndarray[bool]
+        markers : BinaryMaskCollection
+            markers image generated from nuclei
+        watershed_mask : BinaryMaskCollection
             Mask array. only points at which mask == True will be labeled in the output.
 
         Returns
         -------
-        np.ndarray[np.int32] :
-            labeled image, each segment has a unique integer value
+        BinaryMaskCollection :
+            binary mask collection where each cell is a mask.
         """
+        assert len(watershed_mask) == 1
+
         img = 1 - self.stain._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+        markers_label_array = markers.to_label_image()
 
-        res = watershed(image=img,
-                        markers=markers,
-                        connectivity=np.ones((3, 3), bool),
-                        mask=watershed_mask
-                        )
+        res = watershed(
+            image=img,
+            markers=markers_label_array.xarray.values.squeeze(axis=0),
+            connectivity=np.ones((3, 3), bool),
+            mask=watershed_mask.uncropped_mask(0).squeeze(axis=0),
+        )
 
-        return res
+        # we max-projected and squeezed the Z-plane so label_image.ndim == 2
+        pixel_ticks: Mapping[Axes, ArrayLike[int]] = {
+            axis: markers._pixel_ticks[axis]
+            for axis in (Axes.Y, Axes.X)
+        }
+        physical_ticks: Mapping[Coordinates, ArrayLike[Number]] = {
+            coord: markers._physical_ticks[coord]
+            for coord in (Coordinates.Y, Coordinates.X)
+        }
 
-    @staticmethod
-    def relabel_image(image: np.ndarray) -> np.ndarray:
-        """given a label image where some objects have been removed, relabel it with sequential integers
-
-        Parameters
-        ----------
-        image : np.ndarray[np.uint32]
-            image whose values identify which object each pixel corresponds to. the values may
-            not be sequential integers.
-
-        Returns
-        -------
-        image : np.ndarray[np.uint32]
-            same as input, but the values are re-labled as sequential integers
-        num_labels : int
-            number of unique objects
-        """
-        output = np.empty_like(image)
-        for i, v in enumerate(np.unique(image)):
-            output[np.where(image == v)] = i
-        return output, i
+        return BinaryMaskCollection.from_label_array_and_ticks(
+            res,
+            pixel_ticks,
+            physical_ticks,
+            None,  # TODO: (ttung) this should really be logged.
+        )
 
     def show(self, figsize=(10, 10)):
         import matplotlib.pyplot as plt
@@ -385,21 +303,36 @@ class _WatershedSegmenter:
 
         plt.subplot(323)
         image(
-            self.binarized_nuclei.uncropped_mask(0).values.squeeze(axis=0),
+            self.binarized_nuclei.uncropped_mask(0).squeeze(Axes.ZPLANE.value).values,
             bar=False,
-            ax=plt.gca())
+            ax=plt.gca(),
+        )
         plt.title('Nuclei Thresholded')
 
         plt.subplot(324)
-        image(self.mask, bar=False, ax=plt.gca())
+        image(
+            self.mask.to_label_image().xarray.squeeze(Axes.ZPLANE.value).values,
+            bar=False,
+            ax=plt.gca(),
+        )
         plt.title('Watershed Mask')
 
         plt.subplot(325)
-        image(self.markers, size=20, cmap=plt.cm.nipy_spectral, ax=plt.gca())
+        image(
+            self.markers.to_label_image().xarray.squeeze(Axes.ZPLANE.value).values,
+            size=20,
+            cmap=plt.cm.nipy_spectral,
+            ax=plt.gca(),
+        )
         plt.title('Found: {} cells'.format(self.num_cells))
 
         plt.subplot(326)
-        image(self.segmented, size=20, cmap=plt.cm.nipy_spectral, ax=plt.gca())
+        image(
+            self.segmented.to_label_image().xarray.values,
+            size=20,
+            cmap=plt.cm.nipy_spectral,
+            ax=plt.gca(),
+        )
         plt.title('Segmented Cells')
 
         return plt.gca()

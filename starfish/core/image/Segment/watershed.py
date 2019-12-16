@@ -1,17 +1,17 @@
-from typing import Mapping, Optional, Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 from showit import image
-from skimage.morphology import disk, watershed
+from skimage.morphology import disk
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.morphology import Filter, Merge
-from starfish.core.morphology.Binarize import ThresholdBinarize
+from starfish.core.morphology.Binarize import ThresholdBinarize, WatershedBinarize
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
 from starfish.core.morphology.Filter.areafilter import AreaFilter
 from starfish.core.morphology.Filter.min_distance_label import MinDistanceLabel
 from starfish.core.morphology.Filter.structural_label import StructuralLabel
-from starfish.core.types import ArrayLike, Axes, Coordinates, FunctionSource, Levels, Number
+from starfish.core.types import Axes, FunctionSource, Levels, Number
 from ._base import SegmentAlgorithm
 
 
@@ -259,31 +259,12 @@ class _WatershedSegmenter:
         """
         assert len(watershed_mask) == 1
 
-        img = 1 - self.stain._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
-        markers_label_array = markers.to_label_image()
+        binarizer = WatershedBinarize(connectivity=np.ones((1, 3, 3), dtype=np.bool))
 
-        res = watershed(
-            image=img,
-            markers=markers_label_array.xarray.values.squeeze(axis=0),
-            connectivity=np.ones((3, 3), bool),
-            mask=watershed_mask.uncropped_mask(0).squeeze(axis=0),
-        )
-
-        # we max-projected and squeezed the Z-plane so label_image.ndim == 2
-        pixel_ticks: Mapping[Axes, ArrayLike[int]] = {
-            axis: markers._pixel_ticks[axis]
-            for axis in (Axes.Y, Axes.X)
-        }
-        physical_ticks: Mapping[Coordinates, ArrayLike[Number]] = {
-            coord: markers._physical_ticks[coord]
-            for coord in (Coordinates.Y, Coordinates.X)
-        }
-
-        return BinaryMaskCollection.from_label_array_and_ticks(
-            res,
-            pixel_ticks,
-            physical_ticks,
-            None,  # TODO: (ttung) this should really be logged.
+        return binarizer.run(
+            self.stain,
+            markers,
+            watershed_mask,
         )
 
     def show(self, figsize=(10, 10)):
@@ -328,7 +309,7 @@ class _WatershedSegmenter:
 
         plt.subplot(326)
         image(
-            self.segmented.to_label_image().xarray.values,
+            self.segmented.to_label_image().xarray.squeeze(Axes.ZPLANE.value).values,
             size=20,
             cmap=plt.cm.nipy_spectral,
             ax=plt.gca(),

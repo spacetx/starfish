@@ -1,6 +1,7 @@
 """Algorithms in this module binarize an ImageStack into a BinaryMaskCollection."""
 from ._base import BinarizeAlgorithm
 from .threshold import ThresholdBinarize
+from .watershed import WatershedBinarize
 
 # autodoc's automodule directive only captures the modules explicitly listed in __all__.
 __all__ = list(set(

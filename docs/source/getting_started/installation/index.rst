@@ -13,6 +13,11 @@ The output should look similar to this:
    % python --version
    Python 3.6.5
 
+While starfish itself has no known issues with python 3.8, scikit-image is not fully compatible with
+python 3.8.  As such, installation of scikit-image, as part of starfish installation, may
+unexpectedly fail.  The workaround is to install numpy first before installing starfish or
+scikit-image.
+
 Using virtual environments
 --------------------------
 

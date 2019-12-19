@@ -10,18 +10,20 @@ labeling.
 
 Watershed segmentation can be used to divide clumped cells by drawing lines between them based on their
 shape. More details on watershed algorithm can be found
-'here <https://scikit-image.org/docs/dev/auto_examples/segmentation/plot_watershed.html>'_.
+`here <https://scikit-image.org/docs/dev/auto_examples/segmentation/plot_watershed.html>`_.
 
 Starfish allows users to implement watershed segmentation into their pipelines in two ways: an easy
 but inflexible way and a custom bespoke way. This tutorial will start with the EZWatershed method and
 then replicate the results of EZWatershed using the bespoke method.
 
 Input requirements:
-registered primary :py:class:'ImageStack'
-registered nuclei :py:class:'ImageStack'
+* registered primary :py:class:`ImageStack`
+
+* registered nuclei :py:class:`ImageStack`
 
 Output:
-labeled cells :py:class:'BinaryMaskCollection'
+* labeled cells :py:class:`BinaryMaskCollection`
+
 """
 
 ###################################################################################################
@@ -32,6 +34,7 @@ import os
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
+from IPython.core.pylabtools import figsize
 from showit import image
 
 from starfish import data, FieldOfView
@@ -70,11 +73,11 @@ warp.run(imgs, transforms_list=transforms_list, in_place=True)
 # EZWatershed segmentation only requires the nuclei imagestack, the primary imagestack, and three
 # parameters to be set:
 #
-# Nuclei_threshold - a float between 0 and 1 to binarize scaled max projected nuclei images
+# Nuclei_threshold: float between 0 and 1 to binarize scaled max projected nuclei images
 #
-# Input_threshold - a float between 0 and 1 to binarize scaled max projected primary images
+# Input_threshold: float between 0 and 1 to binarize scaled max projected primary images
 #
-# Min_distance - a positive int that determines the nearest (in pixels) two nuclei centroids can be
+# Min_distance: positive int that determines the nearest (in pixels) two nuclei centroids can be
 # to be considered separate cells
 
 from starfish.image import Segment
@@ -89,6 +92,13 @@ seg = Segment.Watershed(
     min_distance=min_dist
 )
 masks = seg.run(imgs, nuclei)
+image(
+    masks.to_label_image().xarray.squeeze(Axes.ZPLANE.value).values,
+    size=20,
+    cmap=plt.cm.nipy_spectral,
+    ax=plt.gca(),
+)
+plt.title('Segmented Cells')
 
 ###################################################################################################
 # The images and masks created during the process can also be viewed. The bespoke method tutorial
@@ -159,7 +169,7 @@ markers = Filter.AreaFilter(min_allowed_size, max_allowed_size).run(labeled_mask
 # Check how the dapi threshold binarized the nuclei image on the left and the markers that will
 # seed the watershed
 
-plt.figure(figsize(10,20))
+plt.figure(figsize(10, 20))
 
 plt.subplot(121)
 image(

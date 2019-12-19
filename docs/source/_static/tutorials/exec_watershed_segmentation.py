@@ -17,11 +17,13 @@ but inflexible way and a custom bespoke way. This tutorial will start with the E
 then replicate the results of EZWatershed using the bespoke method.
 
 Input requirements:
-* registered primary :py:class:`ImageStack`
 
-* registered nuclei :py:class:`ImageStack`
+* registered primary images :py:class:`ImageStack`
+
+* registered nuclei images :py:class:`ImageStack`
 
 Output:
+
 * labeled cells :py:class:`BinaryMaskCollection`
 
 """
@@ -31,15 +33,12 @@ Output:
 
 import numpy as np
 import os
-import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
-from IPython.core.pylabtools import figsize
 from showit import image
 
 from starfish import data, FieldOfView
 from starfish.types import Axes, Features, FunctionSource
-from starfish.util.plot import imshow_plane
 from starfish.image import Filter
 from starfish.image import ApplyTransform, LearnTransform
 
@@ -101,8 +100,8 @@ image(
 plt.title('Segmented Cells')
 
 ###################################################################################################
-# The images and masks created during the process can also be viewed. The bespoke method tutorial
-# below describes each image.
+# A simple command can display the important images created during EZWatershed. See BespokeWatershed tutorial
+# to get a breakdown of each image.
 seg.show()
 
 ###################################################################################################
@@ -112,7 +111,9 @@ seg.show()
 # BespokeWatershed allows the user to customize the watershed segmentation workflow. This tutorial
 # will replicate the EZWatershed algorithm. There are two additional parameters to set, which were
 # unchangeable in EZWatershed:
+#
 # Min_allowed_size: minimum size (pixels) of nuclei to be used as markers for watershed
+#
 # Max_allowed_size: maximum size (pixels) of nuclei to be used as markers for watershed
 
 from starfish.morphology import Binarize, Filter, Merge
@@ -128,6 +129,8 @@ max_allowed_size = 10000
 # The first step is to maximum project and scale the primary and nuclei images. The primary images
 # are treated as a stain for the whole cell, which can be segmented. The nuclei image is used to
 # find markers that seed the watershed segmentation of the stain.
+#
+# The projected and scaled images shown below can be useful for choosing thresholds.
 
 mp = imgs.reduce({Axes.CH, Axes.ZPLANE}, func="max")
 stain = mp.reduce(
@@ -139,11 +142,6 @@ nuclei_mp_scaled = nuclei.reduce(
     {Axes.ROUND, Axes.CH, Axes.ZPLANE},
     func="max",
     level_method=Levels.SCALE_BY_IMAGE)
-
-####################################################################################################
-# The projected and scaled images shown below can be useful for choosing thresholds
-
-plt.figure(figsize=(10, 20))
 
 plt.subplot(121)
 nuclei_numpy = nuclei_mp_scaled._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
@@ -160,16 +158,13 @@ plt.title('Stain')
 # Next we binarize and segment the nuclei. MinDistanceLabel segments the nuclei images, using
 # watershed to separate nuclei. Segmented nuclei are then filtered by area. The resulting nuclei
 # will be markers used to seed the watershed of primary images in the next step.
+#
+# Check how the dapi threshold binarized the nuclei image on the left and the markers that will
+# seed the watershed.
 
 binarized_nuclei = Binarize.ThresholdBinarize(dapi_thresh).run(nuclei_mp_scaled)
 labeled_masks = Filter.MinDistanceLabel(min_dist, 1).run(binarized_nuclei)
 markers = Filter.AreaFilter(min_allowed_size, max_allowed_size).run(labeled_masks)
-
-####################################################################################################
-# Check how the dapi threshold binarized the nuclei image on the left and the markers that will
-# seed the watershed
-
-plt.figure(figsize(10, 20))
 
 plt.subplot(121)
 image(
@@ -199,9 +194,6 @@ watershed_mask = Filter.Reduce(
     lambda shape: np.zeros(shape=shape, dtype=np.bool)
 ).run(markers_and_stain)
 
-#####################################################################################################
-# The watershed mask.
-
 image(
     watershed_mask.to_label_image().xarray.squeeze(Axes.ZPLANE.value).values,
     bar=False,
@@ -230,6 +222,9 @@ image(
     ax=plt.gca(),
 )
 plt.title('Segmented Cells')
+
+
+#####################################################################################################
 
 # TODO mattcai clarify and add description of procedure
 # TODO mattcai add links

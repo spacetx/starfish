@@ -60,11 +60,13 @@ extensions = [
 ]
 
 # intersphinx mapping for outside starfish linking
-intersphinx_mapping = {'xarray': ('http://xarray.pydata.org/en/stable', None),
-                       'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-                       'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-                       'trackpy': ('https://soft-matter.github.io/trackpy/v0.3.2/',  None),
-                       'skimage': ('https://scikit-image.org/docs/dev/', None)}
+intersphinx_mapping = {
+    'xarray': ('http://xarray.pydata.org/en/stable', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
+    'trackpy': ('https://soft-matter.github.io/trackpy/v0.3.2/',  None),
+    'skimage': ('https://scikit-image.org/docs/dev/', None),
+    }
 
 # numpydoc settings
 numpydoc_class_members_toctree = False
@@ -101,7 +103,10 @@ pygments_style = 'sphinx'
 
 sphinx_gallery_conf = {
     # path to your examples scripts
-    'examples_dirs': '../../notebooks/py',
+    'examples_dirs': [
+        # '../../notebooks/py',
+        '../../examples',
+        ],
     # path where to save gallery generated examples
     'gallery_dirs': 'gallery',
     # #directory where function granular galleries are stored
@@ -238,17 +243,3 @@ napoleon_use_rtype = True
 
 # See https://stackoverflow.com/a/45565445/56887
 autodoc_mock_imports = ['_tkinter']
-
-sphinx_gallery_conf = {
-    'examples_dirs': [
-        '_static/data_processing_examples',
-        '_static/data_formatting_examples',
-        '_static/tutorials',
-    ],
-    'gallery_dirs': [
-        'usage/data_processing_examples',
-        'usage/data_formatting_examples',
-        'creating_an_image_processing_pipeline/tutorials',
-    ],
-    'filename_pattern': '/exec_',
-}

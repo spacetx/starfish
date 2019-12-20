@@ -192,6 +192,7 @@ Validation
 .. toctree::
      validation/index.rst
 
+.. _data_conversion_examples:
 
 Data Formatting Examples
 ------------------------
@@ -199,12 +200,15 @@ Data Formatting Examples
 This section provides several examples of how to format data into SpaceTx-Format from a variety of
 types of input data shapes and sizes, demonstrating the flexibility of :py:class:`TileFetcher`.
 
-.. toctree::
-     :maxdepth: 2
-     :caption: Data Formatting Examples
-
-.. toctree::
-     data_formatting_examples/index.rst
+* :ref:`Structured Data <format_structured_data>`
+* :ref:`BaristaSeq <format_baristaseq>`
+* :ref:`In Situ Sequencing Breast <format_iss_breast>`
+* :ref:`In Situ Sequencing SpaceTx <format_iss_spacetx>`
+* :ref:`MERFISH U2-OS <format_merfish>`
+* :ref:`osmFISH <format_osmfish>`
+* :ref:`seqFISH <format_seqfish>`
+* :ref:`StarMAP <format_starmap>`
+* :ref:`Imaging Cytof <format_imc>`
 
 Data Processing examples
 ------------------------
@@ -212,9 +216,5 @@ Data Processing examples
 This section provides several examples of how to apply starfish to data from a variety of assay
 types assuming your data is already in spaceTx format.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Vignettes:
-
-.. toctree::
-   data_processing_examples/index.rst
+* :ref:`3D smFISH <smFISH_processing_example>`
+* :ref:`In Situ Sequencing <ISS_processing_example>`

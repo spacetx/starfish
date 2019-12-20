@@ -1,4 +1,6 @@
 """
+.. _iss_processing_example:
+
 ISS Processing Workflow
 =======================
 

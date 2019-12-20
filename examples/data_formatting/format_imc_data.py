@@ -1,4 +1,6 @@
 """
+.. _format_imc:
+
 Format Imaging Cytof Data
 =========================
 

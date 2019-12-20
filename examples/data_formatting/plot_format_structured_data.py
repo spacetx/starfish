@@ -1,4 +1,6 @@
 """
+.. _format_structured_data:
+
 Format Structured Data
 ======================
 

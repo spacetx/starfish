@@ -1,4 +1,6 @@
 """
+.. _format_starmap:
+
 Format STARmap data
 ===================
 

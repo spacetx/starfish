@@ -47,13 +47,26 @@ jobs:
         - make install-dev slow-test
       after_success:
         - bash <(curl -s https://codecov.io/bash)
-    - name: Install Napari & Test napari
-      if: type = push and (branch = master or branch =~ /-alltest/)
+    - name: Install Napari & Test napari (latest)
+      if: type = push and (branch = master or branch =~ /-alltest/ or branch =~ /napari/)
       dist: xenial
       before_install:
         - sudo apt-get install -y libgl1-mesa-glx libqt5x11extras5 xvfb
         - make install-dev
-        - pip install .[napari]
+        - pip install .[napari] pytest-qt
+        - export DISPLAY=:99
+        - Xvfb $DISPLAY -ac -screen 0 1024x768x24 &
+        - sleep 10
+      script:
+        - python -c "import vispy; print(vispy.sys_info())"
+        - make napari-test
+    - name: Install Napari & Test napari (pinned)
+      if: type = push and (branch = master or branch =~ /-alltest/ or branch =~ /napari/)
+      dist: xenial
+      before_install:
+        - sudo apt-get install -y libgl1-mesa-glx libqt5x11extras5 xvfb
+        - pip install -r requirements/REQUIREMENTS-NAPARI-CI.txt
+        - make install-dev
         - export DISPLAY=:99
         - Xvfb $DISPLAY -ac -screen 0 1024x768x24 &
         - sleep 10

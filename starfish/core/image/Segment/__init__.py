@@ -1,4 +1,5 @@
 from ._base import SegmentAlgorithm
+from .illastik_pretrained import IllastikPretrained
 from .watershed import Watershed
 
 # autodoc's automodule directive only captures the modules explicitly listed in __all__.

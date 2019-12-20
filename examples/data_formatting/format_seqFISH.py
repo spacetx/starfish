@@ -1,4 +1,6 @@
 """
+.. _format_seqfish:
+
 Format SeqFISH Data
 ===================
 

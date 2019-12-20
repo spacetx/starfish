@@ -43,6 +43,7 @@ an example codeblock, as follows:
 
     aws s3 cp s3://spacetx.starfish.data.public/browse/formatted/20180926/iss_breast/codebook.json iss/formatted/ \
         --no-sign-request
-   python docs/source/_static/data_processing_examples/iss_pipeline.py
+   python examples/data_processing/iss_pipeline.py
 
-.. literalinclude:: ../../_static/data_processing_examples/iss_pipeline.py
+
+Example: :ref:`In Situ Sequencing <ISS_processing_example>`

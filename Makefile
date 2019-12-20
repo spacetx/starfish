@@ -5,7 +5,7 @@ EDITOR?=vi
 MPLBACKEND?=Agg
 export MPLBACKEND
 
-MODULES=starfish docs/source/_static/data_formatting_examples/format*
+MODULES=starfish examples/data_formatting/format*
 
 DOCKER_IMAGE?=spacetx/starfish
 DOCKER_BUILD?=1
@@ -113,7 +113,7 @@ help-requirements:
 ### INTEGRATION ##############################################
 #
 include notebooks/subdir.mk
-include docs/source/_static/data_processing_examples/subdir.mk
+include examples/pipelines/subdir.mk
 
 test-examples: export TESTING=1
 test-examples: run-examples

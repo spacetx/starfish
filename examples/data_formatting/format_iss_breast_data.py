@@ -1,4 +1,6 @@
 """
+.. _format_iss_breast:
+
 Format In-Situ Sequencing Data
 ==============================
 

@@ -1,4 +1,6 @@
 """
+.. _smFISH_processing_example:
+
 Single Field of View for sequential single-molecule FISH processed in 3d
 ========================================================================
 

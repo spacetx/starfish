@@ -1,20 +1,27 @@
 """
-Cropping
-========
-Starfish offers several options for cropping image data, both out-of-memory on load and in-memory.
-These can be useful for (1) restricting the size of a large image to load on demand and (2) removing
-edge effects after image processing approaches have been applied.
-
-Crop on Load
-------------
-The first opportunity to subset data is during loading. In getting started, we demonstrated that
-data is not loaded until `get_image` is called on a field of view. Here we demonstrate how to
-reduce the :code:`(y, x)` size of the ImageStack that's downloaded. Note that all of the data for
-the complete tiles must still be downloaded, but only the cropped dimensions will be loaded into
-memory.
-
-For this example we'll use a very small test image from an in-situ sequencing experiment.
+Image Manipulations
+===================
 """
+
+
+###################################################################################################
+# .. _tutorial_cropping:
+#
+# Cropping
+# ========
+# Starfish offers several options for cropping image data, both out-of-memory on load and in-memory.
+# These can be useful for (1) restricting the size of a large image to load on demand and (2) removing
+# edge effects after image processing approaches have been applied.
+#
+# Crop on Load
+# ------------
+# The first opportunity to subset data is during loading. In getting started, we demonstrated that
+# data is not loaded until `get_image` is called on a field of view. Here we demonstrate how to
+# reduce the :code:`(y, x)` size of the ImageStack that's downloaded. Note that all of the data for
+# the complete tiles must still be downloaded, but only the cropped dimensions will be loaded into
+# memory.
+#
+# For this example we'll use a very small test image from an in-situ sequencing experiment.
 
 import starfish
 import starfish.data
@@ -56,6 +63,8 @@ cropped_image: starfish.ImageStack = image.sel(
 print(cropped_image)
 
 ###################################################################################################
+# .. _tutorial_projection:
+#
 # Projection
 # ==========
 #

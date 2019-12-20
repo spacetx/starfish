@@ -64,8 +64,7 @@ def format_structured_dataset(
     organize them into the 7D tensor (image_type, fov, round, ch, zplane, y, x).  The remaining
     metadata, namely physical coordinates of the tiles, are provided in a CSV file.
 
-    See the documentation in
-    docs/source/_static/data_formatting_examples/exec_format_structured_data.py
+    See the documentation in :ref:`Format Structured Data <format_structured_data>`
 
     Parameters
     ----------

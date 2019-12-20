@@ -10,7 +10,6 @@ build/
 dist/
 .venv/
 .eggs/
-docs/source/usage/data_formatting_examples/
-docs/source/usage/data_processing_examples/
-docs/source/creating_an_image_processing_pipeline/tutorials/
+docs/source/gallery/
+docs/source/generated/
 .idea/

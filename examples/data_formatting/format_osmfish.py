@@ -1,4 +1,6 @@
 """
+.. _format_osmfish:
+
 Format osmFISH Data
 ===================
 

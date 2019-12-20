@@ -1,20 +1,26 @@
 """
-Removing autofluorescence
-=========================
-
-In addition to the bright spots (signal) that we want to detect, microscopy experiments on tissue
-slices often have a non-zero amount of auto-fluorescence from the cell bodies. This can be mitigated
-by "clearing" strategies whereby tissue lipids and proteins are digested, or computationally by
-estimating and subtracting the background values.
-
-We use the same test image from the previous section to demonstrate how this can work.
-
-Clipping
---------
-The simplest way to remove background is to set a global, (linear) cut-off and clip out the
-background values.
-
+Tissue Corrections
+==================
 """
+
+###################################################################################################
+# .. _tutorial_removing_autoflourescence:
+#
+# Removing autofluorescence
+# =========================
+#
+# In addition to the bright spots (signal) that we want to detect, microscopy experiments on tissue
+# slices often have a non-zero amount of auto-fluorescence from the cell bodies. This can be mitigated
+# by "clearing" strategies whereby tissue lipids and proteins are digested, or computationally by
+# estimating and subtracting the background values.
+#
+# We use the same test image from the previous section to demonstrate how this can work.
+#
+# Clipping
+# --------
+# The simplest way to remove background is to set a global, (linear) cut-off and clip out the
+# background values.
+
 import starfish
 import starfish.data
 from starfish.image import Filter
@@ -48,4 +54,4 @@ ax2.imshow(clip_plot)
 ax2.set_title("clipped")
 
 ###################################################################################################
-# 
+#

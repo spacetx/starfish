@@ -125,7 +125,7 @@ That means implementing methods that return the shape, format, and an open file 
 Here, we implement those methods, and add a cropping method as well, to mimic the way that ISS data
 was processed when it was published.
 
-.. literalinclude:: ../../_static/data_formatting_examples/format_iss_breast_data.py
+.. literalinclude:: ../../../../examples/data_formatting/format_iss_breast_data.py
     :pyobject: IssCroppedBreastTile
 
 This object, combined with a ``TileFetcher``, contains all the information that ``starfish`` needs
@@ -133,10 +133,10 @@ to parse a directory of files and create ``sptx-format`` compliant objects. Here
 are needed. One parses the primary images, and another the auxiliary nuclei images that will be
 used to seed the basin for segmentation.
 
-.. literalinclude:: ../../_static/data_formatting_examples/format_iss_breast_data.py
+.. literalinclude:: ../../../../examples/data_formatting/format_iss_breast_data.py
     :pyobject: ISSCroppedBreastPrimaryTileFetcher
 
-.. literalinclude:: ../../_static/data_formatting_examples/format_iss_breast_data.py
+.. literalinclude:: ../../../../examples/data_formatting/format_iss_breast_data.py
     :pyobject: ISSCroppedBreastAuxTileFetcher
 
 Creating a Build Script
@@ -153,7 +153,7 @@ We create a dictionary to hold each piece of information, and pass that to
 ``write_experiment_json``, a generic tool that accepts the objects we've aggregated above and
 constructs TileSet objects:
 
-.. literalinclude:: ../../_static/data_formatting_examples/format_iss_breast_data.py
+.. literalinclude:: ../../../../examples/data_formatting/format_iss_breast_data.py
     :pyobject: format_data
 
 Finally, we can run the script. We've packaged it up as an example in ``starfish``. It takes as
@@ -163,7 +163,7 @@ formatted data) and the number of fields of view to extract from the raw directo
 .. code-block:: bash
 
     mkdir iss/formatted
-    python3 docs/source/_static/data_formatting_examples/format_iss_breast_data.py \
+    python3 examples/format_iss_breast_data.py \
         iss/raw/ \
         iss/formatted \
         2

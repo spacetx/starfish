@@ -1,4 +1,6 @@
 """
+.. _format_merfish:
+
 Format MERFISH data
 ===================
 

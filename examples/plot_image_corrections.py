@@ -1,23 +1,32 @@
 """
-Illumination Correction
-=======================
+Image Corrections
+=================
 
-The goal of illumination correction is to remove uneven illumination of the image caused by non
-uniform illumination of the field of view, characteristics of the sensor, (like vignetting), or
-orientation of the tissue’s surface with respect to the light source.
-
-The simplest forms of illumination correction are called “prospective correction” and are based on
-background subtraction. This involves taking additional images using the microscopy apparatus to
-help calibrate. These can either be acquired by averaging a series of images captured with no sample
-and no light (dark image), or with no sample and light (bright image).
-
-Starfish can apply this type of background correction by exposing the :py:class:`ElementWiseMult`
-:ref:`Filter <filtering>`. The user is responsible for transforming their calibration images into
-the correct matrix to correct for background, and then :py:class:`ElementWiseMult` can apply a
-transformation to correct any uneven illumination.
-
-The below plot shows a single plane of an in-situ sequencing experiment.
 """
+
+
+###################################################################################################
+# .. _tutorial_illumination_correction:
+#
+# Illumination Correction
+# =======================
+#
+# The goal of illumination correction is to remove uneven illumination of the image caused by non
+# uniform illumination of the field of view, characteristics of the sensor, (like vignetting), or
+# orientation of the tissue’s surface with respect to the light source.
+#
+# The simplest forms of illumination correction are called “prospective correction” and are based on
+# background subtraction. This involves taking additional images using the microscopy apparatus to
+# help calibrate. These can either be acquired by averaging a series of images captured with no sample
+# and no light (dark image), or with no sample and light (bright image).
+#
+# Starfish can apply this type of background correction by exposing the :py:class:`ElementWiseMult`
+# :ref:`Filter <filtering>`. The user is responsible for transforming their calibration images into
+# the correct matrix to correct for background, and then :py:class:`ElementWiseMult` can apply a
+# transformation to correct any uneven illumination.
+#
+# The below plot shows a single plane of an in-situ sequencing experiment.
+
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
@@ -73,6 +82,8 @@ plt.imshow(np.squeeze(corrected_image_2d.xarray))
 plt.show()
 
 ###################################################################################################
+# .. _tutorial_chromatic_aberration:
+#
 # Chromatic Aberration
 # ====================
 #
@@ -96,6 +107,12 @@ plt.show()
 # `wikipedia`_
 #
 # .. _wikipedia: https://en.wikipedia.org/wiki/Chromatic_aberration
+#
+
+pass
+
+###################################################################################################
+# .. _tutorial_deconvolution:
 #
 # Deconvolution of Optical Point Spread Functions
 # ===============================================
@@ -137,6 +154,11 @@ plt.show()
 # `<https://en.wikipedia.org/wiki/Deconvolution#Optics_and_other_imaging>`
 #
 # Starfish
+
+pass
+
+###################################################################################################
+# .. _tutorial_image_registration:
 #
 # Image Registration
 # ==================
@@ -161,6 +183,12 @@ plt.show()
 # contributions that add registration features would be highly desirable.
 #
 # TODO ambrosejcarr examples and links to warp
+#
+
+pass
+
+###################################################################################################
+# .. _tutorial_image_correction_pipeline:
 #
 # Example Image Correction Pipeline
 # =================================

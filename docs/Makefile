@@ -16,9 +16,7 @@ help:
 
 clean:
 	rm -rf $(BUILDDIR)/*
-	rm -rf $(SOURCEDIR)/usage/data_formatting_examples/*
-	rm -rf $(SOURCEDIR)/usage/data_processing_examples/*
-	rm -rf $(SOURCEDIR)/creating_an_image_processing_pipeline/tutorials/*
+	rm -rf $(SOURCEDIR)/gallery/*
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

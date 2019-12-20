@@ -30,10 +30,8 @@ Sometimes it can be useful subset the images by, for example, excluding out-of-f
 cropping out edge effects. For sparse data, it can be useful to project the z-volume into a single
 image, as this produces a much faster processing routine.
 
-.. toctree::
-    :maxdepth: 1
-
-    tutorials/exec_image_manipulations.rst
+* :ref:`Cropping <tutorial_cropping>`
+* :ref:`Projection <tutorial_projection>`
 
 Imaging Corrections
 -------------------
@@ -43,10 +41,11 @@ handling or microfluidices that are involved in capturing the images. These step
 *independent* of the assay. *Starfish* enables the user to design a pipeline that matches their
 imaging system
 
-.. toctree::
-    :maxdepth: 1
-
-    tutorials/exec_image_corrections.rst
+* :ref:`Illumination Correction <tutorial_illumination_correction>`
+* :ref:`Chromatic Aberration <tutorial_chromatic_aberration>`
+* :ref:`Deconvolution <tutorial_deconvolution>`
+* :ref:`Image Registration <tutorial_image_registration>`
+* :ref:`Image Correction Pipeline <tutorial_image_correction_pipeline>`
 
 Tissue/Substrate-specific Corrections
 -------------------------------------
@@ -56,10 +55,7 @@ some level of autofluorescence which causes cellular compartments to have more b
 intracellular regions. This can confound spot finders, which look for local intensity differences.
 These approaches ameliorate these problems.
 
-.. toctree::
-    :maxdepth: 1
-
-    tutorials/exec_tissue_specific_corrections.rst
+* :ref:`Removing Autofluorescence <tutorial_removing_autoflourescence>`
 
 Feature Identification and Assignment
 -------------------------------------
@@ -70,17 +66,7 @@ The dots and nuclei images can be segmented to identify the locations where the 
 in the images. Finally, the two sets of features can be combined to assign each spot to its cell of
 origin. At this point, it's trivial to create a cell x gene matrix.
 
-.. toctree::
-    :maxdepth: 1
-
-    tutorials/exec_feature_identification_and_annotation.rst
-
-
-Old Content not to be deleted yet.
-----------------------------------
-
-.. _document: https://docs.google.com/document/d/1IHIngoMKr-Tnft2xOI3Q-5rL3GSX2E3PnJrpsOX5ZWs/edit?usp=sharing
-
-.. image:: /_static/design/pipeline-diagram.png
-    :alt: pipeline diagram
-
+* :ref:`Spot Finding <tutorial_spot_finding>`
+* :ref:`Spot Decoding <tutorial_spot_decoding>`
+* :ref:`Segmenting Cells <tutorial_segmenting_cells>`
+* :ref:`Assigning Spots to Cells <tutorial_assigning_spots_to_cells>`

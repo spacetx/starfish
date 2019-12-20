@@ -1,4 +1,4 @@
-path := docs/source/_static/data_processing_examples
+path := examples/pipelines
 py_files := $(wildcard $(path)/*.py)
 sh_files := $(wildcard $(path)/*.sh)
 py_run_targets := $(patsubst $(path)/%,%,$(py_files))

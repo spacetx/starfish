@@ -29,7 +29,7 @@ all:	fast
 
 ### UNIT #####################################################
 #
-fast:	diff-requirements lint mypy fast-test docs-html
+fast:	lint mypy fast-test docs-html
 
 lint:   lint-non-init lint-init
 
@@ -79,34 +79,45 @@ help-docs:
 ### REQUIREMENTS #############################################
 #
 check-requirements:
-	if [[ $$(git status --porcelain REQUIREMENTS*) ]]; then \
+	if [[ $$(git status --porcelain REQUIREMENTS* requirements/REQUIREMENTS* starfish/REQUIREMENTS*) ]]; then \
 	    echo "Modifications found in REQUIREMENTS files"; exit 2; \
 	fi
 
+refresh-all-requirements: export TARGETS=starfish/REQUIREMENTS-STRICT.txt requirements/REQUIREMENTS-CI.txt requirements/REQUIREMENTS-NAPARI-CI.txt
+refresh-all-requirements: export SOURCES=REQUIREMENTS.txt requirements/REQUIREMENTS-CI.txt.in requirements/REQUIREMENTS-NAPARI-CI.txt.in
 refresh-all-requirements:
-	@echo -n '' >| REQUIREMENTS-STRICT.txt
+	@for target in $(TARGETS); do \
+		echo -n '' >| $$target; \
+	done
 	@if [ $$(uname -s) == "Darwin" ]; then sleep 1; fi  # this is require because Darwin HFS+ only has second-resolution for timestamps.
-	@touch REQUIREMENTS.txt
-	@$(MAKE) REQUIREMENTS-STRICT.txt
+	@touch $(SOURCES)
+	$(MAKE) $(TARGETS)
 
-REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
+starfish/REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
 	[ ! -e .$<-env ] || exit 1
 	$(call create_venv, .$<-env)
 	.$<-env/bin/pip install -r $@
 	.$<-env/bin/pip install -r $<
 	echo "# You should not edit this file directly.  Instead, you should edit one of the following files ($^) and run make $@" >| $@
 	.$<-env/bin/pip freeze >> $@
-	cp -f $@ starfish/REQUIREMENTS-STRICT.txt
 	rm -rf .$<-env
 
-diff-requirements :
-	diff -q REQUIREMENTS-STRICT.txt starfish/REQUIREMENTS-STRICT.txt
+requirements/REQUIREMENTS-%.txt : requirements/REQUIREMENTS-%.txt.in REQUIREMENTS.txt
+	[ ! -e .$<-env ] || exit 1
+	$(call create_venv, .$<-env)
+	.$<-env/bin/pip install -r $@
+	for src in $^; do \
+		.$<-env/bin/pip install -r $$src; \
+	done
+	echo "# You should not edit this file directly.  Instead, you should edit one of the following files ($<) and run make $@" >| $@
+	.$<-env/bin/pip freeze >> $@
+	rm -rf .$<-env
 
 help-requirements:
 	$(call print_help, refresh_all_requirements, regenerate requirements files)
 	$(call print_help, check_requirements, fail if requirements files have been modified)
 
-.PHONY: refresh_all_requirements starfish/REQUIREMENTS-STRICT.txt
+.PHONY: refresh_all_requirements
 #
 ##############################################################
 
@@ -136,9 +147,8 @@ help-integration:
 ### INSTALL ##################################################
 #
 install-dev:
-	pip install --force-reinstall --upgrade -r REQUIREMENTS-STRICT.txt
+	pip install --force-reinstall --upgrade -r requirements/REQUIREMENTS-CI.txt
 	pip install -e .
-	pip install -r REQUIREMENTS-CI.txt
 	pip freeze
 
 install-src:
@@ -146,8 +156,8 @@ install-src:
 	pip freeze
 
 install-released-notebooks-support:
+	pip install -r requirements/REQUIREMENTS-CI.txt
 	pip install starfish
-	pip install -r REQUIREMENTS-CI.txt
 	pip freeze
 
 help-install:
@@ -258,7 +268,7 @@ release-env: release-env/bin/activate release-env/bin/make_shell
 # private: call virtualenv and pip install
 release-env/bin/activate:
 	$(call create_venv, release-env)
-	release-env/bin/pip install -r REQUIREMENTS-CI.txt
+	release-env/bin/pip install -r requirements/REQUIREMENTS-CI.txt
 	touch release-env/bin/activate
 
 # private: create make_shell for activating the virtualenv below

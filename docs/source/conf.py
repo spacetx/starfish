@@ -66,7 +66,7 @@ intersphinx_mapping = {
     'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
     'trackpy': ('https://soft-matter.github.io/trackpy/v0.3.2/',  None),
     'skimage': ('https://scikit-image.org/docs/dev/', None),
-    }
+}
 
 # numpydoc settings
 numpydoc_class_members_toctree = False
@@ -106,7 +106,7 @@ sphinx_gallery_conf = {
     'examples_dirs': [
         # '../../notebooks/py',
         '../../examples',
-        ],
+    ],
     # path where to save gallery generated examples
     'gallery_dirs': 'gallery',
     # #directory where function granular galleries are stored

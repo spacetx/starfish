@@ -116,7 +116,7 @@ sphinx_gallery_conf = {
     # # this case sphinx_gallery and numpy in a tuple of strings.
     # 'doc_module': ('neuroglia',),
     'download_section_examples': False,
-    # 'default_thumb_file': '_static/max_proj.png',
+    'default_thumb_file': 'source/_static/design/logo-solo.png',
     'min_reported_time': 10,
 
 }

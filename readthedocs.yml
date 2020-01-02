@@ -5,7 +5,6 @@ build:
 python:
     version: 3.6
     install:
-        - requirements: REQUIREMENTS-CI.txt
-        - requirements: REQUIREMENTS-STRICT.txt
+        - requirements: requirements/REQUIREMENTS-CI.txt
         - method: pip
           path: .

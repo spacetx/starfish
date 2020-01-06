@@ -34,23 +34,17 @@ masks = BinaryMaskCollection.from_label_image(label_image)
 @pytest.mark.parametrize('masks', [masks, None], ids=['masks', '     '])
 @pytest.mark.parametrize('spots', [spots, None], ids=['spots', '     '])
 @pytest.mark.parametrize('stack', [stack, None], ids=['stack', '     '])
-def test_display(stack, spots, masks):
-    import napari
-    from qtpy.QtCore import QTimer
-    from qtpy.QtWidgets import QApplication
+def test_display(qtbot, stack, spots, masks):
+    from napari import Viewer
 
-    def run():
-        app = QApplication.instance() or QApplication([])
-        viewer = napari.Viewer()
-        timer = QTimer()
-        timer.setInterval(1000)
-        timer.timeout.connect(app.quit)
-        timer.start()
-        display(stack, spots, masks, viewer=viewer)
-        app.exec_()
+    viewer = Viewer()
+    view = viewer.window.qt_viewer
+    qtbot.addWidget(view)
 
     if stack is None and spots is None and masks is None:
         with pytest.raises(TypeError):
-            run()
+            display(stack, spots, masks, viewer=viewer)
     else:
-        run()
+        display(stack, spots, masks, viewer=viewer)
+
+    view.shutdown()

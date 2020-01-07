@@ -47,8 +47,4 @@ def test_display(qtbot, stack, spots, masks):
     else:
         display(stack, spots, masks, viewer=viewer)
 
-    # TODO: napari 0.2.7 adds view.shutdown, but we're using 0.2.6 for tests until
-    # https://github.com/napari/napari/pull/822 gets released.
-    view.pool.clear()
-    view.canvas.close()
-    view.console.shutdown()
+    view.shutdown()

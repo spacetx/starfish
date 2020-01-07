@@ -9,14 +9,26 @@ from ._base import MergeAlgorithm
 
 
 class SimpleMerge(MergeAlgorithm):
+    """Merge multiple binary mask collections together.  This implementation requires that all
+    the binary mask collections have the same pixel and physical ticks."""
+
     def run(
             self,
             binary_mask_collections: Sequence[BinaryMaskCollection],
             *args,
             **kwargs
     ) -> BinaryMaskCollection:
-        """Merge multiple binary mask collections together.  This implementation requires that all
-        the binary mask collections have the same pixel and physical ticks."""
+        """
+        Parameters
+        ----------
+        binary_mask_collections : Sequence[BinaryMaskCollection]
+            A sequence of binary mask collections with identical pixel and physical ticks.
+
+        Returns
+        -------
+        BinaryMaskCollection
+            A binary mask collection with the input mask collections merged together.
+        """
         pixel_ticks: Optional[Mapping[Axes, ArrayLike[int]]] = None
         physical_ticks: Optional[Mapping[Coordinates, ArrayLike[Number]]] = None
 

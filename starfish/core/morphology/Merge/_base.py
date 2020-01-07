@@ -6,6 +6,7 @@ from starfish.core.pipeline.algorithmbase import AlgorithmBase
 
 
 class MergeAlgorithm(metaclass=AlgorithmBase):
+    """Merge multiple binary mask collections together."""
 
     @abstractmethod
     def run(
@@ -14,5 +15,4 @@ class MergeAlgorithm(metaclass=AlgorithmBase):
             *args,
             **kwargs
     ) -> BinaryMaskCollection:
-        """Merge multiple binary mask collections together."""
         raise NotImplementedError()

@@ -140,3 +140,8 @@ will demonstrate how :py:func:`starfish.display` can be used to visually inspect
 results of spot calling.
 
 Next, see an :ref:`Example end-to-end workflow <example_workflow>` using the starfish API.
+
+Available datasets
+==================
+
+Starfish makes a small number of datasets :ref:`easily accessible<datasets>`.  To load them, import :py:mod:`starfish.data`.

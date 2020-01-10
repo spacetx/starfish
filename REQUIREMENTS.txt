@@ -23,5 +23,5 @@ sympy
 tqdm
 trackpy
 validators
-xarray
+xarray >= 0.14.1
 ipywidgets

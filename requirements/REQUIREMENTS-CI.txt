@@ -14,7 +14,7 @@ Click==7.0
 commonmark==0.9.1
 coverage==5.0
 cycler==0.10.0
-dataclasses==0.7
+dataclasses==0.6
 decorator==4.4.1
 defusedxml==0.6.0
 diskcache==4.1.0

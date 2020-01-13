@@ -19,9 +19,14 @@ class AreaFilter(FilterAlgorithm):
         collection.
     """
 
-    def __init__(self, min_area: Optional[int], max_area: Optional[int]):
+    def __init__(self, *, min_area: Optional[int] = None, max_area: Optional[int] = None):
         self._min_area = min_area
         self._max_area = max_area
+
+        if (self._min_area is not None
+                and self._max_area is not None
+                and self._min_area > self._max_area):
+            raise ValueError(f"min_area ({min_area}) should be smaller than max_area ({max_area})")
 
     def run(
             self,

@@ -180,7 +180,8 @@ class _WatershedSegmenter:
         else:
             labeled_masks = MinDistanceLabel(min_dist, 1).run(self.binarized_nuclei)
 
-        filtered_masks = AreaFilter(min_allowed_size, max_allowed_size).run(labeled_masks)
+        area_filter = AreaFilter(min_area=min_allowed_size, max_area=max_allowed_size)
+        filtered_masks = area_filter.run(labeled_masks)
         self.num_cells = len(filtered_masks)
         self.markers = filtered_masks.to_label_image()
         self.mask = self.watershed_mask(stain_thresh, self.markers, disk_size_mask)

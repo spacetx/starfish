@@ -20,9 +20,11 @@ from typing import (
 
 import numpy as np
 import xarray as xr
+from skimage import io
 from skimage.measure import regionprops
 from skimage.measure._regionprops import _RegionProperties
 
+from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.morphology.label_image import LabelImage
 from starfish.core.morphology.util import (
     _get_axes_names,
@@ -261,6 +263,46 @@ class BinaryMaskCollection:
             masks,
             log,
         )
+
+    @classmethod
+    def from_external_labeled_image(cls, path_to_labeled_image: Union[str, Path],
+                                    original_image: ImageStack):
+        """
+        Construct a BinaryMaskCollection from an external label image. Ex. the output from
+        ilastik object classification
+
+        Parameters
+        ----------
+        path_to_labeled_image : Union[str, Path]
+            Path to an external label image file
+        original_image : ImageStack
+            Dapi image used in external segmentation workflow
+
+        Returns
+        -------
+        BinaryMaskCollection
+        """
+
+        # Load the label image generated from another program
+        label_image = io.imread(path_to_labeled_image)
+
+        # Get the physical ticks from the original dapi image
+        physical_ticks = {Coordinates.Y: original_image.xarray.yc.values,
+                          Coordinates.X: original_image.xarray.xc.values}
+
+        # Get the pixel values from the original dapi image
+        pixel_coords = {Axes.Y: original_image.xarray.y.values,
+                        Axes.X: original_image.xarray.x.values}
+
+        # Create the label image
+        label_im = LabelImage.from_label_array_and_ticks(
+            label_image,
+            pixel_ticks=pixel_coords,
+            physical_ticks=physical_ticks,
+            log=original_image.log
+        )
+        # Create the mask collection
+        return BinaryMaskCollection.from_label_image(label_im)
 
     @classmethod
     def from_binary_arrays_and_ticks(

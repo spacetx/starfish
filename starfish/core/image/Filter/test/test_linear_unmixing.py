@@ -2,7 +2,7 @@ import numpy as np
 
 from starfish import ImageStack
 from starfish.core.image.Filter.linear_unmixing import LinearUnmixing
-from starfish.core.types import Clip
+from starfish.core.types import Levels
 
 def setup_linear_unmixing_test():
     """
@@ -42,7 +42,7 @@ def test_linear_unmixing():
 
     stack, coeff_mat, ref_result = setup_linear_unmixing_test()
 
-    filter_unmix = LinearUnmixing(coeff_mat=coeff_mat, clip_method=Clip.CLIP)
+    filter_unmix = LinearUnmixing(coeff_mat=coeff_mat, level_method=Levels.CLIP)
     stack2 = filter_unmix.run(stack, in_place=False, verbose=False)
 
     assert np.allclose(ref_result, np.asarray(stack2.xarray))

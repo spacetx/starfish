@@ -5,7 +5,7 @@ import starfish
 from starfish import FieldOfView
 from starfish.types import Features, Axes
 from starfish.image import Filter
-from starfish.types import Clip
+from starfish.types import Levels
 from starfish.spots import DetectPixels
 
 
@@ -36,7 +36,7 @@ def process_fov(field_num: int, experiment_str: str):
     high_passed = ghp.run(imgs, verbose=True, in_place=False)
 
     print("Deconvolve")
-    dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2, clip_method=Clip.SCALE_BY_CHUNK)
+    dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2, level_method=Levels.SCALE_SATURATED_BY_CHUNK)
     deconvolved = dpsf.run(high_passed, verbose=True, in_place=False)
 
     print("Guassian Low Pass")

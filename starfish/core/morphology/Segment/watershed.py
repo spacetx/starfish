@@ -7,14 +7,14 @@ from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
 from starfish.core.morphology.util import _get_axes_names
 from starfish.core.types import ArrayLike, Axes, Coordinates, Number
-from ._base import BinarizeAlgorithm
+from ._base import SegmentAlgorithm
 
 
-class WatershedBinarize(BinarizeAlgorithm):
-    """Binarizes an image using a watershed algorithm.  This wraps scikit-image's watershed
+class WatershedSegment(SegmentAlgorithm):
+    """Segments an image using a watershed algorithm.  This wraps scikit-image's watershed
     algorithm.
 
-    The image being binarized must be an ImageStack with num_rounds == 1 and num_chs == 1.
+    The image being segmented must be an ImageStack with num_rounds == 1 and num_chs == 1.
 
     Any parameters besides image, markers, and mask should be set in the constructor and will be
     passed to scikit-image's watershed.
@@ -26,7 +26,7 @@ class WatershedBinarize(BinarizeAlgorithm):
     def __init__(self, **watershed_kwargs):
         self.watershed_kwargs = watershed_kwargs
 
-    def run(
+    def run(  # type: ignore
             self,
             image: ImageStack,
             markers: Optional[BinaryMaskCollection] = None,
@@ -37,19 +37,19 @@ class WatershedBinarize(BinarizeAlgorithm):
         """
         if image.num_rounds != 1:
             raise ValueError(
-                f"{WatershedBinarize.__name__} given an image with more than one round "
+                f"{WatershedSegment.__name__} given an image with more than one round "
                 f"{image.num_rounds}")
         if image.num_chs != 1:
             raise ValueError(
-                f"{WatershedBinarize.__name__} given an image with more than one channel "
+                f"{WatershedSegment.__name__} given an image with more than one channel "
                 f"{image.num_chs}")
         if mask is not None and len(mask) != 1:
             raise ValueError(
-                f"{WatershedBinarize.__name__} given a mask given a mask with more than one "
+                f"{WatershedSegment.__name__} given a mask given a mask with more than one "
                 f"channel {image.num_chs}")
         if len(args) != 0 or len(kwargs) != 0:
             raise ValueError(
-                f"{WatershedBinarize.__name__}'s run method should not have additional arguments.")
+                f"{WatershedSegment.__name__}'s run method should not have additional arguments.")
 
         image_npy = 1 - image._squeezed_numpy(Axes.ROUND, Axes.CH)
         markers_npy = np.asarray(markers.to_label_image().xarray) if markers is not None else None

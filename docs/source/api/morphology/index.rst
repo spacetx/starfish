@@ -3,9 +3,12 @@
 Morphology Transformations
 ==========================
 
-starfish provides a variety of methods to perform transformations on morphological data.  These include :py:class:`~starfish.morphology.Binarize`, which transform image data into morphological data and
-:py:class:`~starfish.morphology.Filter`, which performs filtering operations on morphological data, and
-:py:class:`~starfish.morphology.Merge`, which combines different sets of morphological data.
+starfish provides a variety of methods to perform transformations on morphological data.  These include:
+
+* :py:class:`~starfish.morphology.Binarize`, which transforms image data into morphological data.
+* :py:class:`~starfish.morphology.Filter`, which performs filtering operations on morphological data.
+* :py:class:`~starfish.morphology.Merge`, which combines different sets of morphological data.
+* :py:class:`~starfish.morphology.Segment`, which performs segmentation operations to yield morphological data.
 
 .. _binarize:
 
@@ -47,4 +50,16 @@ Filtering operations can be imported using ``starfish.morphology.Merge``, which 
     from starfish.morphology import Merge
 
 .. automodule:: starfish.morphology.Merge
+   :members:
+
+Segment
+-------
+
+Filtering operations can be imported using ``starfish.morphology.Segment``, which registers all classes that subclass :py:class:`~starfish.morphology.Segment.SegmentAlgorithm`:
+
+.. code-block:: python
+
+    from starfish.morphology import Segment
+
+.. automodule:: starfish.morphology.Segment
    :members:

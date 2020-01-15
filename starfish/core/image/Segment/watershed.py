@@ -6,11 +6,12 @@ from skimage.morphology import disk
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.morphology import Filter, Merge
-from starfish.core.morphology.Binarize import ThresholdBinarize, WatershedBinarize
+from starfish.core.morphology.Binarize import ThresholdBinarize
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
 from starfish.core.morphology.Filter.areafilter import AreaFilter
 from starfish.core.morphology.Filter.min_distance_label import MinDistanceLabel
 from starfish.core.morphology.Filter.structural_label import StructuralLabel
+from starfish.core.morphology.Segment import WatershedSegment
 from starfish.core.types import Axes, FunctionSource, Levels, Number
 from ._base import SegmentAlgorithm
 
@@ -260,7 +261,7 @@ class _WatershedSegmenter:
         """
         assert len(watershed_mask) == 1
 
-        binarizer = WatershedBinarize(connectivity=np.ones((1, 3, 3), dtype=np.bool))
+        binarizer = WatershedSegment(connectivity=np.ones((1, 3, 3), dtype=np.bool))
 
         return binarizer.run(
             self.stain,

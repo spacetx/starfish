@@ -191,19 +191,93 @@ table
 # EPY: END markdown
 
 # EPY: START code
-from starfish.image import Segment
+from starfish.morphology import Binarize, Filter, Merge, Segment
+from starfish.types import Levels
 
 dapi_thresh = .18  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
 min_dist = 57
+min_allowed_size = 10
+max_allowed_size = 10000
 
-seg = Segment.Watershed(
-    nuclei_threshold=dapi_thresh,
-    input_threshold=stain_thresh,
-    min_distance=min_dist
+mp = registered_imgs.reduce({Axes.CH, Axes.ZPLANE}, func="max")
+stain = mp.reduce(
+    {Axes.ROUND},
+    func="mean",
+    level_method=Levels.SCALE_BY_IMAGE)
+
+nuclei_mp_scaled = nuclei.reduce(
+    {Axes.ROUND, Axes.CH, Axes.ZPLANE},
+    func="max",
+    level_method=Levels.SCALE_BY_IMAGE)
+
+binarized_nuclei = Binarize.ThresholdBinarize(dapi_thresh).run(nuclei_mp_scaled)
+labeled_masks = Filter.MinDistanceLabel(min_dist, 1).run(binarized_nuclei)
+watershed_markers = Filter.AreaFilter(min_area=min_allowed_size, max_area=max_allowed_size).run(labeled_masks)
+thresholded_stain = Binarize.ThresholdBinarize(stain_thresh).run(stain)
+markers_and_stain = Merge.SimpleMerge().run([thresholded_stain, watershed_markers])
+watershed_mask = Filter.Reduce(
+    "logical_or",
+    lambda shape: np.zeros(shape=shape, dtype=np.bool)
+).run(markers_and_stain)
+
+segmenter = Segment.WatershedSegment(connectivity=np.ones((1, 3, 3), dtype=np.bool))
+masks = segmenter.run(
+    stain,
+    watershed_markers,
+    watershed_mask,
 )
-masks = seg.run(registered_imgs, nuclei)
-seg.show()
+
+import matplotlib.pyplot as plt
+from showit import image
+
+plt.figure(figsize=(10, 10))
+
+plt.subplot(321)
+nuclei_numpy = nuclei_mp_scaled._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE)
+image(nuclei_numpy, ax=plt.gca(), size=20, bar=True)
+plt.title('Nuclei')
+
+plt.subplot(322)
+image(
+    stain._squeezed_numpy(Axes.ROUND, Axes.CH, Axes.ZPLANE),
+    ax=plt.gca(), size=20, bar=True)
+plt.title('Stain')
+
+plt.subplot(323)
+image(
+    binarized_nuclei.uncropped_mask(0).squeeze(Axes.ZPLANE.value).values,
+    bar=False,
+    ax=plt.gca(),
+)
+plt.title('Nuclei Thresholded')
+
+plt.subplot(324)
+image(
+    watershed_mask.to_label_image().xarray.squeeze(Axes.ZPLANE.value).values,
+    bar=False,
+    ax=plt.gca(),
+)
+plt.title('Watershed Mask')
+
+plt.subplot(325)
+image(
+    watershed_markers.to_label_image().xarray.squeeze(Axes.ZPLANE.value).values,
+    size=20,
+    cmap=plt.cm.nipy_spectral,
+    ax=plt.gca(),
+)
+plt.title('Found: {} cells'.format(len(watershed_markers)))
+
+plt.subplot(326)
+image(
+    masks.to_label_image().xarray.squeeze(Axes.ZPLANE.value).values,
+    size=20,
+    cmap=plt.cm.nipy_spectral,
+    ax=plt.gca(),
+)
+plt.title('Segmented Cells')
+plt
 # EPY: END code
 
 # EPY: START markdown

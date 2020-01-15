@@ -5,6 +5,7 @@
 python-dateutil < 2.8.1
 click
 dataclasses==0.6
+h5py
 jsonschema
 matplotlib
 numpy != 1.13.0

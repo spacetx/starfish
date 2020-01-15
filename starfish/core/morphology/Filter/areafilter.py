@@ -1,3 +1,4 @@
+import warnings
 from typing import MutableSequence, Optional
 
 from starfish.core.morphology.binary_mask import BinaryMaskCollection, MaskData
@@ -19,7 +20,35 @@ class AreaFilter(FilterAlgorithm):
         collection.
     """
 
-    def __init__(self, *, min_area: Optional[int] = None, max_area: Optional[int] = None):
+    def __init__(
+            self,
+            min_area_DEPRECATED: Optional[int] = None,
+            max_area_DEPRECATED: Optional[int] = None,
+            *,
+            min_area: Optional[int] = None,
+            max_area: Optional[int] = None,
+    ):
+        if min_area_DEPRECATED is not None:
+            if min_area is not None:
+                raise ValueError(
+                    "Cannot specify both min_area as a positional argument and a keyword "
+                    "argument.  AreaFilter should be initialized only by "
+                    "`AreaFilter(min_area=xyz)`.")
+            warnings.warn(
+                "min_area should be provided as a keyword argument, i.e., "
+                "`AreaFilter(min_area=xyz)`.")
+            min_area = min_area_DEPRECATED
+        if max_area_DEPRECATED is not None:
+            if max_area is not None:
+                raise ValueError(
+                    "Cannot specify both max_area as a positional argument and a keyword "
+                    "argument.  AreaFilter should be initialized only by "
+                    "`AreaFilter(max_area=xyz)`.")
+            warnings.warn(
+                "max_area should be provided as a keyword argument, i.e., "
+                "`AreaFilter(max_area=xyz)`.")
+            max_area = max_area_DEPRECATED
+
         self._min_area = min_area
         self._max_area = max_area
 

@@ -105,10 +105,8 @@ def test_iss_pipeline_cropped_data(tmpdir):
 
     masks = iss.masks
 
-    seg = iss.seg
-
     # segmentation identifies only one cell
-    assert seg._segmentation_instance.num_cells == 6
+    assert len(iss.watershed_markers) == 6
 
     # assign targets
     lab = AssignTargets.Label()

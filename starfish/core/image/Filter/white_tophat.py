@@ -1,10 +1,10 @@
-from typing import Optional, Union
+from typing import Optional
 
 import xarray as xr
 from skimage.morphology import ball, disk, white_tophat
 
-from starfish.core.imagestack.imagestack import _reconcile_clip_and_level, ImageStack
-from starfish.core.types import Clip, Levels
+from starfish.core.imagestack.imagestack import ImageStack
+from starfish.core.types import Levels
 from ._base import FilterAlgorithm
 from .util import determine_axes_to_group_by
 
@@ -61,12 +61,11 @@ class WhiteTophat(FilterAlgorithm):
             self,
             masking_radius: int,
             is_volume: bool = False,
-            clip_method: Optional[Union[str, Clip]] = None,
-            level_method: Optional[Levels] = None
+            level_method: Levels = Levels.CLIP,
     ) -> None:
         self.masking_radius = masking_radius
         self.is_volume = is_volume
-        self.level_method = _reconcile_clip_and_level(clip_method, level_method)
+        self.level_method = level_method
 
     _DEFAULT_TESTING_PARAMETERS = {"masking_radius": 3}
 

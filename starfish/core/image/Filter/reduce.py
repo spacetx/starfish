@@ -8,11 +8,10 @@ from typing import (
 
 import numpy as np
 
-from starfish.core.imagestack.imagestack import _reconcile_clip_and_level, ImageStack
+from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import (
     ArrayLike,
     Axes,
-    Clip,
     Coordinates,
     FunctionSource,
     FunctionSourceBundle,
@@ -117,8 +116,7 @@ class Reduce(FilterAlgorithm):
             dims: Iterable[Union[Axes, str]],
             func: Union[str, FunctionSourceBundle] = "max",
             module: Optional[FunctionSource] = None,
-            clip_method: Optional[Clip] = None,
-            level_method: Optional[Levels] = None,
+            level_method: Levels = Levels.CLIP,
             **kwargs
     ) -> None:
         self.dims: Iterable[Axes] = set(Axes(dim) for dim in dims)
@@ -138,7 +136,7 @@ class Reduce(FilterAlgorithm):
                     f"be set."
                 )
             self.func = func
-        self.level_method = _reconcile_clip_and_level(clip_method, level_method)
+        self.level_method = level_method
         self.kwargs = kwargs
 
     _DEFAULT_TESTING_PARAMETERS = {"dims": ['r'], "func": 'max'}

@@ -1,12 +1,12 @@
 from functools import partial
-from typing import Optional, Union
+from typing import Optional
 
 import numpy as np
 import xarray as xr
 from scipy.signal import convolve, fftconvolve
 
-from starfish.core.imagestack.imagestack import _reconcile_clip_and_level, ImageStack
-from starfish.core.types import Clip, Levels, Number
+from starfish.core.imagestack.imagestack import ImageStack
+from starfish.core.types import Levels, Number
 from ._base import FilterAlgorithm
 from .util import (
     determine_axes_to_group_by,
@@ -89,8 +89,7 @@ class DeconvolvePSF(FilterAlgorithm):
             num_iter: int,
             sigma: Number,
             is_volume: bool = False,
-            clip_method: Optional[Union[str, Clip]] = None,
-            level_method: Optional[Levels] = None
+            level_method: Levels = Levels.CLIP,
     ) -> None:
 
         self.num_iter = num_iter
@@ -101,7 +100,7 @@ class DeconvolvePSF(FilterAlgorithm):
             sigma=sigma
         )
         self.is_volume = is_volume
-        self.level_method = _reconcile_clip_and_level(clip_method, level_method)
+        self.level_method = level_method
 
     _DEFAULT_TESTING_PARAMETERS = {"num_iter": 2, "sigma": 1}
 

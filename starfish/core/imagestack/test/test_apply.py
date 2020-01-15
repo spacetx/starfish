@@ -4,7 +4,7 @@ import numpy as np
 import xarray as xr
 
 from starfish.core.test.factories import SyntheticData
-from starfish.core.types import Axes, Clip
+from starfish.core.types import Axes, Levels
 from .factories import synthetic_stack
 from ..imagestack import ImageStack
 
@@ -82,21 +82,21 @@ def test_apply_clipping_methods():
 
     # clip_method 0
     # all data are clipped to 1, setting all values to 1 (np.unique(pre_scaled) == [1, 2])
-    res = imagestack.apply(apply_function, clip_method=Clip.CLIP, in_place=False, n_processes=1)
+    res = imagestack.apply(apply_function, level_method=Levels.CLIP, in_place=False, n_processes=1)
     assert np.allclose(res.xarray.values, 1)
 
     # clip_method 1
     # all data are scaled, resulting in values being multiplied by 0.5, replicating the original
     # data
     res = imagestack.apply(
-        apply_function, clip_method=Clip.SCALE_BY_IMAGE, in_place=False, n_processes=1
+        apply_function, level_method=Levels.SCALE_SATURATED_BY_IMAGE, in_place=False, n_processes=1
     )
     assert np.allclose(imagestack.xarray, res.xarray)
     assert isinstance(imagestack.xarray, xr.DataArray)
 
     # clip_method 2
     res = imagestack.apply(
-        apply_function, clip_method=Clip.SCALE_BY_CHUNK, in_place=False, n_processes=1,
+        apply_function, level_method=Levels.SCALE_SATURATED_BY_CHUNK, in_place=False, n_processes=1,
         group_by={Axes.CH, Axes.ROUND},
     )
     # any (round, ch) combination that was all 0.5 should now be all 1.

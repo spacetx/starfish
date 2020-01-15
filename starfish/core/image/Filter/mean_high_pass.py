@@ -5,8 +5,8 @@ import numpy as np
 import xarray as xr
 from scipy.ndimage.filters import uniform_filter
 
-from starfish.core.imagestack.imagestack import _reconcile_clip_and_level, ImageStack
-from starfish.core.types import Clip, Levels, Number
+from starfish.core.imagestack.imagestack import ImageStack
+from starfish.core.types import Levels, Number
 from ._base import FilterAlgorithm
 from .util import (
     determine_axes_to_group_by, validate_and_broadcast_kernel_size
@@ -32,19 +32,6 @@ class MeanHighPass(FilterAlgorithm):
     is_volume : bool
         If True, 3d (z, y, x) volumes will be filtered, otherwise, filter 2d tiles
         independently.
-    clip_method : Optional[Union[str, :py:class:`~starfish.types.Clip`]]
-        Deprecated method to control the way that data are scaled to retain skimage dtype
-        requirements that float data fall in [0, 1].  In all modes, data below 0 are set to 0.
-
-        - Clip.CLIP: data above 1 are set to 1.  This has been replaced with
-          level_method=Levels.CLIP.
-        - Clip.SCALE_BY_IMAGE: when any data in the entire ImageStack is greater than 1, the entire
-          ImageStack is scaled by the maximum value in the ImageStack.  This has been replaced with
-          level_method=Levels.SCALE_SATURATED_BY_IMAGE.
-        - Clip.SCALE_BY_CHUNK: when any data in any slice is greater than 1, each slice is scaled by
-          the maximum value found in that slice.  The slice shapes are determined by the
-          ``group_by`` parameters.  This has been replaced with
-          level_method=Levels.SCALE_SATURATED_BY_CHUNK.
     level_method : :py:class:`~starfish.types.Levels`
         Controls the way that data are scaled to retain skimage dtype requirements that float data
         fall in [0, 1].  In all modes, data below 0 are set to 0.
@@ -65,13 +52,12 @@ class MeanHighPass(FilterAlgorithm):
             self,
             size: Union[Number, Tuple[Number]],
             is_volume: bool = False,
-            clip_method: Optional[Union[str, Clip]] = None,
-            level_method: Optional[Levels] = None
+            level_method: Levels = Levels.CLIP
     ) -> None:
 
         self.size = validate_and_broadcast_kernel_size(size, is_volume)
         self.is_volume = is_volume
-        self.level_method = _reconcile_clip_and_level(clip_method, level_method)
+        self.level_method = level_method
 
     _DEFAULT_TESTING_PARAMETERS = {"size": 1}
 

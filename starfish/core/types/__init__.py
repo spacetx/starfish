@@ -5,7 +5,6 @@ import xarray as xr
 
 from ._constants import (
     Axes,
-    Clip,
     Coordinates,
     CORE_DEPENDENCIES,
     Features,

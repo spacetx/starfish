@@ -2,7 +2,6 @@
 from starfish.core.types import (  # noqa: F401
     ArrayLike,
     Axes,
-    Clip,
     Coordinates,
     CoordinateValue,
     CORE_DEPENDENCIES,

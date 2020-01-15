@@ -49,7 +49,6 @@ from starfish.core.imagestack.parser.tileset import TileSetData
 from starfish.core.types import (
     ArrayLike,
     Axes,
-    Clip,
     Coordinates,
     CoordinateValue,
     FunctionSource,
@@ -714,8 +713,7 @@ class ImageStack:
             in_place=False,
             verbose: bool=False,
             n_processes: Optional[int]=None,
-            clip_method: Optional[Union[str, Clip]] = None,
-            level_method: Optional[Levels] = None,
+            level_method: Levels = Levels.CLIP,
             **kwargs
     ) -> Optional["ImageStack"]:
         """Split the image along a set of axes and apply a function across all the components.  This
@@ -742,19 +740,6 @@ class ImageStack:
             (default = None).
         kwargs : dict
             Additional arguments to pass to func
-        clip_method : Optional[Union[str, :py:class:`~starfish.types.Clip`]]
-            Deprecated method to control the way that data are scaled to retain skimage dtype
-            requirements that float data fall in [0, 1].  In all modes, data below 0 are set to 0.
-
-            - Clip.CLIP: data above 1 are set to 1.  This has been replaced with
-              level_method=Levels.CLIP.
-            - Clip.SCALE_BY_IMAGE: when any data in the entire ImageStack is greater
-              than 1, the entire ImageStack is scaled by the maximum value in the ImageStack.  This
-              has been replaced with level_method=Levels.SCALE_SATURATED_BY_IMAGE.
-            - Clip.SCALE_BY_CHUNK: when any data in any slice is greater than 1, each
-              slice is scaled by the maximum value found in that slice.  The slice shapes are
-              determined by the ``group_by`` parameters.  This has been replaced with
-              level_method=Levels.SCALE_SATURATED_BY_CHUNK.
         level_method : :py:class:`~starfish.types.Levels`
             Controls the way that data are scaled to retain skimage dtype requirements that float
             data fall in [0, 1].  In all modes, data below 0 are set to 0.
@@ -785,9 +770,6 @@ class ImageStack:
         # default grouping is by (x, y) tile
         if group_by is None:
             group_by = {Axes.ROUND, Axes.CH, Axes.ZPLANE}
-
-        # reconcile clip and level methods.
-        clip_method, level_method = None, _reconcile_clip_and_level(clip_method, level_method)
 
         if not in_place:
             # create a copy of the ImageStack, call apply on that stack with in_place=True
@@ -1183,8 +1165,7 @@ class ImageStack:
             dims: Iterable[Union[Axes, str]],
             func: Union[str, FunctionSourceBundle],
             module: Optional[FunctionSource] = None,
-            clip_method: Optional[Clip] = None,
-            level_method: Optional[Levels] = None,
+            level_method: Levels = Levels.CLIP,
             *args,
             **kwargs) -> "ImageStack":
         """
@@ -1197,8 +1178,6 @@ class ImageStack:
         """
         from starfish.core.image import Filter
 
-        level_method = _reconcile_clip_and_level(clip_method, level_method)
-
         reducer = Filter.Reduce(dims, func, module, level_method=level_method, **kwargs)
         return reducer.run(self, *args)
 
@@ -1208,8 +1187,7 @@ class ImageStack:
             module: Optional[FunctionSource] = None,
             in_place: bool = False,
             group_by: Optional[Set[Union[Axes, str]]] = None,
-            clip_method: Optional[Clip] = None,
-            level_method: Optional[Levels] = None,
+            level_method: Levels = Levels.CLIP,
             *args,
             **kwargs) -> Optional["ImageStack"]:
         """
@@ -1223,47 +1201,8 @@ class ImageStack:
         """
         from starfish.core.image import Filter
 
-        level_method = _reconcile_clip_and_level(clip_method, level_method)
-
         mapper = Filter.Map(
             func, *args,
             module=module, in_place=in_place, group_by=group_by, level_method=level_method,
             **kwargs)
         return mapper.run(self, *args)
-
-
-def _reconcile_clip_and_level(
-        clip_method: Optional[Union[str, Clip]],
-        level_method: Optional[Union[str, Levels]],
-) -> Levels:
-    """Clip is being deprecated, but until it is removed, we need to reconcile clip_method and
-    level_method.  If neither is set, the default is Levels.CLIP.  If both are set, it is an error.
-    If clip_method is set, then we map that to its Levels equivalent.  If level_method is set, we
-    return that.
-
-    This method also manages the translation between a string value to a enum value.
-    """
-    if clip_method is not None:
-        if level_method is not None:
-            raise ValueError("should only set clip_method or level_method, and not both.")
-        warnings.warn(
-            "clip_method is deprecated.  Please use level_method instead.", DeprecationWarning)
-
-        clip_method = Clip(clip_method)
-        if clip_method == Clip.CLIP:
-            return Levels.CLIP
-        elif clip_method == Clip.SCALE_BY_IMAGE:
-            return Levels.SCALE_SATURATED_BY_IMAGE
-        elif clip_method == Clip.SCALE_BY_CHUNK:
-            return Levels.SCALE_SATURATED_BY_CHUNK
-        else:
-            raise ValueError("Unknown clip method.")
-    elif level_method is None:
-        return Levels.CLIP
-
-    try:
-        return Levels(level_method)
-    except ValueError:
-        raise ValueError(
-            f"could not find level method {level_method}. See starfish.types.Levels for valid "
-            f"options")

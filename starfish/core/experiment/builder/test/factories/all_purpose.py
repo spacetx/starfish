@@ -4,14 +4,16 @@ from typing import Callable, cast, Collection, Mapping, Sequence, Type, Union
 import numpy as np
 import slicedimage
 
-from starfish.core.experiment.builder import (
+from starfish.core.types import Axes, Coordinates, CoordinateValue
+from ...builder import (
     build_irregular_image,
-    FetchedTile,
     tile_fetcher_factory,
-    TileFetcher,
     TileIdentifier,
 )
-from starfish.core.types import Axes, Coordinates, CoordinateValue
+from ...providers import (
+    FetchedTile,
+    TileFetcher,
+)
 
 
 class LocationAwareFetchedTile(FetchedTile, metaclass=ABCMeta):

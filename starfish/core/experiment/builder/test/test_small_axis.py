@@ -7,7 +7,7 @@ from starfish.core.errors import DataFormatWarning
 from starfish.core.types import Coordinates, CoordinateValue
 from .factories.all_purpose import collection_factory
 from .factories.unique_tiles import UniqueTiles
-from .. import TileIdentifier
+from ..builder import TileIdentifier
 
 
 @pytest.mark.parametrize(

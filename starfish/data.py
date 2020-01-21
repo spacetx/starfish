@@ -53,6 +53,22 @@ def allen_smFISH(use_test_data: bool = False) -> Experiment:
         "https://d26bikfyahveg8.cloudfront.net/smFISH/mouse/formatted_with_DAPI/experiment.json")
 
 
+def MOUSE_V_HUMAN():
+    """
+    Corresponds to sequencing 4 bases of the beta-actin gene in co-cultured mouse and human
+    fibroblasts. These 4 bases only differ in one position, a SNP between species. as such,
+    these data offer ground truth information to validate a cell typing exercise
+
+    `<https://www.ncbi.nlm.nih.gov/pubmed/23852452>`_
+
+    Returns
+    -------
+    Experiment
+    """
+    return Experiment.from_json(
+        "https://d2z4zivcmlmaj1.cloudfront.net/ISS/mouse_vs_human/experiment.json")
+
+
 def DARTFISH(use_test_data: bool = False) -> Experiment:
     """
     Loads an experiment with a single field of view from unpublished data generated with DARTFISH v1

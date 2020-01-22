@@ -1,5 +1,6 @@
-from starfish.core.experiment.builder import build_image, TileFetcher
+from starfish.core.experiment.builder.builder import build_image
 from starfish.core.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
+from starfish.core.experiment.builder.providers import TileFetcher
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes
 

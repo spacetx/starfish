@@ -1,5 +1,5 @@
-from starfish.core.experiment.builder.orderediterator import ordered_iterator
 from starfish.core.types import Axes
+from ..orderediterator import ordered_iterator
 
 
 def test_round_then_ch():

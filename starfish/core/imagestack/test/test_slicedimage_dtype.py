@@ -7,7 +7,7 @@ from skimage import img_as_float32
 from slicedimage import ImageFormat
 
 from starfish.core.errors import DataFormatWarning
-from starfish.core.experiment.builder import FetchedTile, TileFetcher
+from starfish.core.experiment.builder.providers import FetchedTile, TileFetcher
 from starfish.core.types import Axes, Coordinates, CoordinateValue
 from .factories import synthetic_stack
 

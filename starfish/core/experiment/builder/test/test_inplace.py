@@ -7,12 +7,13 @@ import numpy as np
 from skimage.io import imsave
 from slicedimage import ImageFormat
 
-from starfish.core.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
-from starfish.core.experiment.builder.inplace import (
+from starfish.core.types import Axes, Coordinates, CoordinateValue
+from ..builder import write_experiment_json
+from ..inplace import (
     InplaceFetchedTile, InplaceWriterContract,
 )
-from starfish.core.experiment.experiment import Experiment, FieldOfView
-from starfish.core.types import Axes, Coordinates, CoordinateValue
+from ..providers import FetchedTile, TileFetcher
+from ...experiment import Experiment, FieldOfView
 
 
 SHAPE = {Axes.Y: 500, Axes.X: 1390}

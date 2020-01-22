@@ -1,6 +1,6 @@
 from typing import Callable, Collection, Mapping, Optional, Sequence, Tuple, Type
 
-from starfish.core.experiment.builder import TileIdentifier
+from starfish.core.experiment.builder.builder import TileIdentifier
 from starfish.core.experiment.builder.test.factories.all_purpose import (
     collection_factory,
     LocationAwareFetchedTile,

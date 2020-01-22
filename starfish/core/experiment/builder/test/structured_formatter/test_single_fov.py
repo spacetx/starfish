@@ -12,12 +12,12 @@ from starfish.core.imagestack.test.imagestack_test_utils import verify_physical_
 from starfish.core.types import Axes, Coordinates, CoordinateValue
 from .util import (
     render_coordinates_to_rows,
-    UniqueTiles,
     write_coordinates_csv,
     write_tile_data,
 )
 from ..factories import unique_data
-from ... import (
+from ..factories.unique_tiles import UniqueTiles
+from ...builder import (
     tile_fetcher_factory,
     TileFetcher,
     TileIdentifier,

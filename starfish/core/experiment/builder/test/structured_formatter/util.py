@@ -9,7 +9,8 @@ from slicedimage import ImageFormat
 
 from starfish.core.types import Axes, Coordinates, CoordinateValue
 from ..factories import unique_data
-from ... import FetchedTile, TileFetcher, TileIdentifier
+from ...builder import TileFetcher, TileIdentifier
+from ...providers import FetchedTile
 from ...structured_formatter import TILE_COORDINATE_NAMES
 
 

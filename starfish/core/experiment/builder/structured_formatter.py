@@ -21,7 +21,7 @@ import numpy as np
 from slicedimage import ImageFormat, WriterContract
 
 from starfish.core.types import Axes, Coordinates, CoordinateValue, Number
-from . import TileIdentifier, write_irregular_experiment_json
+from .builder import TileIdentifier, write_irregular_experiment_json
 from .inplace import InplaceFetchedTile, InplaceWriterContract
 from .providers import FetchedTile, TileFetcher
 

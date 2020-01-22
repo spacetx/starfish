@@ -6,11 +6,9 @@ from typing import cast, Mapping, Optional, Sequence
 
 from slicedimage import ImageFormat
 
-from starfish.core.experiment.builder import (
-    tile_fetcher_factory,
-    TileFetcher,
-    TileIdentifier,
-)
+from starfish.core.experiment.builder.builder import TileIdentifier
+from starfish.core.experiment.builder.defaultproviders import tile_fetcher_factory
+from starfish.core.experiment.builder.providers import TileFetcher
 from starfish.core.experiment.builder.structured_formatter import format_structured_dataset
 from starfish.core.experiment.builder.test.structured_formatter.util import (
     render_coordinates_to_rows,

@@ -3,7 +3,8 @@ from typing import Mapping, Tuple, Union
 import numpy as np
 from slicedimage import ImageFormat
 
-from starfish.core.experiment.builder import FetchedTile, tile_fetcher_factory
+from starfish.core.experiment.builder.builder import tile_fetcher_factory
+from starfish.core.experiment.builder.providers import FetchedTile
 from starfish.types import Axes, Coordinates, CoordinateValue
 from .factories import synthetic_stack
 from .imagestack_test_utils import verify_physical_coordinates

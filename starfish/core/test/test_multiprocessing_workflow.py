@@ -10,9 +10,9 @@ from starfish.core.experiment.builder.builder import TileIdentifier
 from starfish.core.experiment.builder.defaultproviders import tile_fetcher_factory
 from starfish.core.experiment.builder.providers import TileFetcher
 from starfish.core.experiment.builder.structured_formatter import format_structured_dataset
+from starfish.core.experiment.builder.test.factories.unique_tiles import UniqueTiles
 from starfish.core.experiment.builder.test.structured_formatter.util import (
     render_coordinates_to_rows,
-    UniqueTiles,
     write_coordinates_csv,
     write_tile_data,
 )

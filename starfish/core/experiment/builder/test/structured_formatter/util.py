@@ -4,56 +4,11 @@ import os
 from pathlib import Path
 from typing import Callable, Mapping, MutableMapping, MutableSequence, Optional, Sequence
 
-import numpy as np
 from slicedimage import ImageFormat
 
-from starfish.core.types import Axes, Coordinates, CoordinateValue
-from ..factories import unique_data
+from starfish.core.types import Coordinates, CoordinateValue
 from ...builder import TileFetcher, TileIdentifier
-from ...providers import FetchedTile
 from ...structured_formatter import TILE_COORDINATE_NAMES
-
-
-class UniqueTiles(FetchedTile):
-    """Tiles where the pixel values are unique per fov/round/ch/z."""
-    def __init__(
-            self,
-            # these are the arguments passed in as a result of tile_fetcher_factory's
-            # pass_tile_indices parameter.
-            fov_id: int, round_id: int, ch_id: int, zplane_id: int,
-            # these are the arguments we are passing through tile_fetcher_factory.
-            fovs: Sequence[int], rounds: Sequence[int], chs: Sequence[int], zplanes: Sequence[int],
-            tile_height: int, tile_width: int,
-    ) -> None:
-        super().__init__()
-        self.fov_id = fov_id
-        self.round_id = round_id
-        self.ch_id = ch_id
-        self.zplane_id = zplane_id
-        self.fovs = fovs
-        self.rounds = rounds
-        self.chs = chs
-        self.zplanes = zplanes
-        self.tile_height = tile_height
-        self.tile_width = tile_width
-
-    @property
-    def shape(self) -> Mapping[Axes, int]:
-        return {Axes.Y: self.tile_height, Axes.X: self.tile_width}
-
-    def tile_data(self) -> np.ndarray:
-        """Return the data for a given tile."""
-        return unique_data(
-            self.fov_id,
-            self.rounds.index(self.round_id),
-            self.chs.index(self.ch_id),
-            self.zplanes.index(self.zplane_id),
-            len(self.fovs),
-            len(self.rounds),
-            len(self.chs),
-            len(self.zplanes),
-            self.tile_height,
-            self.tile_width)
 
 
 def write_tile_data(

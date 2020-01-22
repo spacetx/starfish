@@ -9,6 +9,7 @@ from typing import (
     Callable,
     Hashable,
     Iterator,
+    List,
     Mapping,
     MutableMapping,
     MutableSequence,
@@ -20,6 +21,8 @@ from typing import (
 
 import numpy as np
 import xarray as xr
+from read_roi import read_roi_zip
+from skimage import draw
 from skimage import io
 from skimage.measure import regionprops
 from skimage.measure._regionprops import _RegionProperties
@@ -265,6 +268,71 @@ class BinaryMaskCollection:
         )
 
     @classmethod
+    def from_fiji_roi_set(
+            cls, path_to_roi_set_zip: Union[str, Path], original_image: ImageStack
+    ) -> "BinaryMaskCollection":
+        """
+        Construct BinaryMaskCollection from external Fiji ROI set.
+
+        Parameters
+        ----------
+        path_to_roi_set_zip : Union[str, Path]
+            Path to an external fiji roi file
+        original_image : ImageStack
+            Dapi image used in fiji segmentation workflow
+
+        Returns
+        --------
+        BinaryMaskCollection
+
+        Notes
+        -----
+        This method only supports construction of masks from 2D polygons
+        at this time.
+        """
+        roi_set = read_roi_zip(path_to_roi_set_zip)
+
+        # Get the physical ticks from the original dapi image
+        physical_ticks = {Coordinates.Y: original_image.xarray.yc.values,
+                          Coordinates.X: original_image.xarray.xc.values}
+
+        # Get the pixel values from the original dapi image
+        pixel_ticks = {Axes.Y: original_image.xarray.y.values,
+                       Axes.X: original_image.xarray.x.values}
+
+        masks: List[MaskData] = []
+        # for each region (and its properties):
+        for label, roi in enumerate(roi_set.values()):
+            polygon = np.array([roi[Axes.Y.value], roi[Axes.X.value]]).T
+
+            y_min, x_min = np.floor(np.amin(polygon, axis=0)).astype(np.int)
+            y_max, x_max = np.floor(np.amax(polygon, axis=0)).astype(np.int)
+
+            vertex_row_coords, vertex_col_coords = polygon.T
+            vertex_col_coords -= vertex_col_coords.min()
+            vertex_row_coords -= vertex_row_coords.min()
+
+            # draw a mask from the polygon
+            y_size = len(range(y_min, y_max))  # type: ignore
+            x_size = len(range(x_min, x_max))  # type: ignore
+            shape = y_size, x_size
+            mask = np.zeros(shape, dtype=bool)
+            fill_row_coords, fill_col_coords = draw.polygon(
+                vertex_row_coords, vertex_col_coords, shape
+            )
+            mask[fill_row_coords, fill_col_coords] = True
+            offsets = (y_min, x_min)  # type: ignore
+            mask_data = MaskData(binary_mask=mask,
+                                 offsets=offsets,
+                                 region_properties=None)
+            masks.append(mask_data)
+
+        return cls(masks=masks,
+                   pixel_ticks=pixel_ticks,
+                   physical_ticks=physical_ticks,
+                   log=original_image.log)
+
+    @classmethod
     def from_external_labeled_image(cls, path_to_labeled_image: Union[str, Path],
                                     original_image: ImageStack):
         """
@@ -282,7 +350,6 @@ class BinaryMaskCollection:
         -------
         BinaryMaskCollection
         """
-
         # Load the label image generated from another program
         label_image = io.imread(path_to_labeled_image)
 

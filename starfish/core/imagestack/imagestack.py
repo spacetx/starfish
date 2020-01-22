@@ -41,6 +41,7 @@ from tqdm import tqdm
 
 from starfish.core.config import StarfishConfig
 from starfish.core.errors import DataFormatWarning, DeprecatedAPIError
+from starfish.core.experiment.builder.providers import TileFetcher
 from starfish.core.imagestack import indexing_utils
 from starfish.core.imagestack.parser import TileCollectionData, TileKey
 from starfish.core.imagestack.parser.crop import CropParameters, CroppedTileCollectionData
@@ -255,6 +256,66 @@ class ImageStack:
             An ImageStack representing encapsulating the data from the TileSet.
         """
         tile_data: TileCollectionData = TileSetData(tileset)
+        if crop_parameters is not None:
+            tile_data = CroppedTileCollectionData(tile_data, crop_parameters)
+        return ImageStack.from_tile_collection_data(tile_data)
+
+    @classmethod
+    def from_tilefetcher(
+            cls,
+            tilefetcher: TileFetcher,
+            tile_shape: Mapping[Axes, int],
+            fov: int,
+            rounds: Sequence[int],
+            chs: Sequence[int],
+            zplanes: Sequence[int],
+            axes_order: Optional[Sequence[Axes]] = None,
+            crop_parameters: Optional[CropParameters]=None,
+    ) -> "ImageStack":
+        """
+        Parse a :py:class:`TileFetcher` into an ImageStack.
+
+        Parameters
+        ----------
+        tilefetcher : TileFetcher
+            The tilefetcher to parse.
+        tile_shape : Mapping[Axes, int]
+            Mapping from the axis type to the cardinality of that axis.
+        fov : int
+            The fov number to retrieve from the TileFetcher to constitute this ImageStack.
+        rounds : Sequence[int]
+            The rounds to include in this ImageStack.
+        chs : Sequence[int]
+            The channels to include in this ImageStack.
+        zplanes : Sequence[int]
+            The zplanes to include in this ImageStack.
+        axes_order : Optional[Sequence[Axes]]
+            Ordering for which axes vary, in order of the slowest changing axis to the fastest.  For
+            instance, if the order is (ROUND, Z, CH) and each dimension has size 2, then the
+            sequence is:
+
+              (ROUND=0, CH=0, Z=0)
+              (ROUND=0, CH=1, Z=0)
+              (ROUND=0, CH=0, Z=1)
+              (ROUND=0, CH=1, Z=1)
+              (ROUND=1, CH=0, Z=0)
+              (ROUND=1, CH=1, Z=0)
+              (ROUND=1, CH=0, Z=1)
+              (ROUND=1, CH=1, Z=1)
+
+            (default = (Axes.Z, Axes.ROUND, Axes.CH))
+        crop_parameters : Optional[CropParameters]
+            If cropping of the data is desired, it should be specified here.
+
+        Returns
+        -------
+        ImageStack :
+            An ImageStack representing encapsulating the data from the TileFetcher.
+        """
+        from starfish.core.imagestack.parser.tilefetcher import TileFetcherData
+
+        tile_data: TileCollectionData = TileFetcherData(
+            tilefetcher, tile_shape, fov, rounds, chs, zplanes, axes_order)
         if crop_parameters is not None:
             tile_data = CroppedTileCollectionData(tile_data, crop_parameters)
         return ImageStack.from_tile_collection_data(tile_data)

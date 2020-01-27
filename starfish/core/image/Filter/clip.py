@@ -1,3 +1,4 @@
+import warnings
 from functools import partial
 from typing import Optional
 
@@ -5,6 +6,7 @@ import numpy as np
 import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
+from starfish.core.types import Levels
 from ._base import FilterAlgorithm
 from .util import determine_axes_to_group_by
 
@@ -29,32 +31,64 @@ class Clip(FilterAlgorithm):
     is_volume : bool
         If True, 3d (z, y, x) volumes will be filtered. By default, filter 2-d (y, x) tiles
     expand_dynamic_range : bool
-        If True, linearly expand intensity values to fill [0, 1] after clipping. (default False)
+        If True, linearly expand intensity values to fill [0, 1] after clipping.  This has been
+        deprecated in favor of the level_method argument.  If ``expand_dynamic_range`` is True and
+        ``level_method`` is provided, an error is raised.  If ``expand_dynamic_range`` is True and
+        ``level_method`` is not provided, it is interpreted as
+        ``level_method=Levels.SCALE_BY_CHUNK``.  If ``expand_dynamic_range`` is False or not
+        provided and ``level_method`` is provided, ``level_method`` is used.  If neither is
+        provided, it is interpreted as ``level_method=Levels.CLIP``. (default False)
+    level_method : :py:class:`~starfish.types.Levels`
+        Controls the way that data are scaled to retain skimage dtype requirements that float data
+        fall in [0, 1].  In all modes, data below 0 are set to 0.
+
+        - Levels.CLIP (default): data above 1 are set to 1.
+        - Levels.SCALE_SATURATED_BY_IMAGE: when any data in the entire ImageStack is greater
+          than 1, the entire ImageStack is scaled by the maximum value in the ImageStack.
+        - Levels.SCALE_SATURATED_BY_CHUNK: when any data in any slice is greater than 1, each
+          slice is scaled by the maximum value found in that slice.  The slice shapes are
+          determined by the ``group_by`` parameters.
+        - Levels.SCALE_BY_IMAGE: scale the entire ImageStack by the maximum value in the
+          ImageStack.
+        - Levels.SCALE_BY_CHUNK: scale each slice by the maximum value found in that slice.  The
+          slice shapes are determined by the ``group_by`` parameters.
     """
 
     def __init__(
-        self, p_min: int = 0, p_max: int = 100, is_volume: bool = False,
-        expand_dynamic_range: bool = False
+            self, p_min: int = 0, p_max: int = 100, is_volume: bool = False,
+            expand_dynamic_range: Optional[bool] = None,
+            level_method: Optional[Levels] = None,
     ) -> None:
 
         self.p_min = p_min
         self.p_max = p_max
         self.is_volume = is_volume
-        self.expand_dynamic_range = expand_dynamic_range
+        if expand_dynamic_range is not None:
+            if level_method is not None:
+                raise ValueError(
+                    f"Cannot provide both expand_dynamic_range and level_method."
+                )
+            warnings.warn(
+                f"Parameter `expand_dynamic_range` is deprecated.  Please use the level_method "
+                f"instead."
+            )
+            self.level_method = Levels.SCALE_BY_CHUNK
+        else:
+            if level_method is not None:
+                self.level_method = level_method
+            else:
+                self.level_method = Levels.CLIP
 
     _DEFAULT_TESTING_PARAMETERS = {"p_min": 0, "p_max": 100}
 
     @staticmethod
     def _clip(
-        image: xr.DataArray, p_min: int, p_max: int,
-        expand_dynamic_range: bool
+            image: xr.DataArray, p_min: int, p_max: int,
     ) -> xr.DataArray:
         """Clip values of image"""
         v_min, v_max = np.percentile(image, [p_min, p_max])
 
         image = image.clip(min=v_min, max=v_max)
-        if expand_dynamic_range:
-            image /= np.max(image)
 
         return image
 
@@ -88,12 +122,13 @@ class Clip(FilterAlgorithm):
 
         """
         group_by = determine_axes_to_group_by(self.is_volume)
-        clip = partial(
-            self._clip,
-            p_min=self.p_min, p_max=self.p_max, expand_dynamic_range=self.expand_dynamic_range
-        )
+        clip = partial(self._clip, p_min=self.p_min, p_max=self.p_max)
         result = stack.apply(
             clip,
-            group_by=group_by, verbose=verbose, in_place=in_place, n_processes=n_processes
+            group_by=group_by,
+            verbose=verbose,
+            in_place=in_place,
+            n_processes=n_processes,
+            level_method=self.level_method,
         )
         return result

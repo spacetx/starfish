@@ -5,6 +5,7 @@ import numpy as np
 import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
+from starfish.core.types import Levels
 from ._base import FilterAlgorithm
 from .util import determine_axes_to_group_by
 
@@ -34,12 +35,30 @@ class ClipPercentileToZero(FilterAlgorithm):
     is_volume : bool
         If True, 3D (z, y, x) volumes will be filtered. By default, filter 2D
         (y, x) tiles
+    level_method : :py:class:`~starfish.types.Levels`
+        Controls the way that data are scaled to retain skimage dtype requirements that float data
+        fall in [0, 1].  In all modes, data below 0 are set to 0.
+
+        - Levels.CLIP (default): data above 1 are set to 1.
+        - Levels.SCALE_SATURATED_BY_IMAGE: when any data in the entire ImageStack is greater
+          than 1, the entire ImageStack is scaled by the maximum value in the ImageStack.
+        - Levels.SCALE_SATURATED_BY_CHUNK: when any data in any slice is greater than 1, each
+          slice is scaled by the maximum value found in that slice.  The slice shapes are
+          determined by the ``group_by`` parameters.
+        - Levels.SCALE_BY_IMAGE: scale the entire ImageStack by the maximum value in the
+          ImageStack.
+        - Levels.SCALE_BY_CHUNK: scale each slice by the maximum value found in that slice.  The
+          slice shapes are determined by the ``group_by`` parameters.
     """
 
     def __init__(
-        self, p_min: int = 0, p_max: int = 100,
-        min_coeff: float = 1.0, max_coeff: float = 1.0,
-        is_volume: bool = False,
+            self,
+            p_min: int = 0,
+            p_max: int = 100,
+            min_coeff: float = 1.0,
+            max_coeff: float = 1.0,
+            is_volume: bool = False,
+            level_method: Levels = Levels.CLIP,
     ) -> None:
 
         self.p_min = p_min
@@ -47,6 +66,7 @@ class ClipPercentileToZero(FilterAlgorithm):
         self.min_coeff = min_coeff
         self.max_coeff = max_coeff
         self.is_volume = is_volume
+        self.level_method = level_method
 
     _DEFAULT_TESTING_PARAMETERS = {"p_min": 0, "p_max": 100,
                                    "min_coeff": 1.0, "max_coeff": 1.0}
@@ -95,7 +115,10 @@ class ClipPercentileToZero(FilterAlgorithm):
         )
         result = stack.apply(
             clip_percentile_to_zero,
-            group_by=group_by, verbose=verbose,
-            in_place=in_place, n_processes=n_processes
+            group_by=group_by,
+            verbose=verbose,
+            in_place=in_place,
+            n_processes=n_processes,
+            level_method=self.level_method
         )
         return result

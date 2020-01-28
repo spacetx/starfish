@@ -128,8 +128,5 @@ scaled_r = mh_r.run(stack, in_place=False, verbose=False, n_processes=8)
 # * unscaled histograms of the three channels reflect the raw images -- channel 0 has less signal
 # * normalizing with group_by={Axes.CH} has the effect of significantly rescaling  histograms of channel 0 to match histograms of the other channels
 # * normalizing with group_by={Axes.R} does not scale histograms of channel 0 to match histograms of other channels
-# * the histograms are scaled to match across rounds but that is not shown here
 # * normalizing with group_by={Axes.CH, Axes.ROUND} scales histograms from every round and channel to match each other
-# * other rounds not shown here
-#
 plot_intensity_histograms(ref=stack, scaled_cr=scaled_cr, scaled_c=scaled_c, scaled_r=scaled_r, r=0)

@@ -8,7 +8,7 @@ will cover all the steps necessary for going from raw images to a single cell ge
 matrix. If you are wondering what is starfish, check out :ref:`The Introduction
 <introduction>`. If you only have a few minutes to try out starfish, check out a pre-built
 pipeline by following the :ref:`Guide to Getting Started<getting_started>`. If you are ready
-to tinker with some data using starfish then read on!
+to learn how to build your own image processing pipeline using starfish then read on!
 
 The :ref:`data model<data_model>`
 
@@ -25,11 +25,8 @@ enough to omit some pipeline stages or disorder them, but the typical order migh
 following. The links show how and when to use each component of *starfish*, and the final section
 demonstrates putting together a "pipeline recipe" and running it on an experiment.
 
-#TODO ask kevin to tell me if I've got these in the right order
-
 Loading Data
 ------------
-
 
 * :ref:`Formatting your data <data_conversion_examples>`
 * :ref:`Using formatted example data <datasets>`

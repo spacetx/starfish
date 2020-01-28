@@ -3,11 +3,15 @@
 Creating an Image Processing Pipeline
 =====================================
 
-Starfish is a package that exposes methods to detect spots and cells, and to aggregate spot counts
-for various target molecules, creating cell x gene matrices that retains spatial information.
+Welcome to the user guide for building an image processing pipeline using starfish! This tutorial
+will cover all the steps necessary for going from raw images to a single cell gene expression
+matrix. If you are wondering what is starfish, check out :ref:`The Introduction
+<introduction>`. If you only have a few minutes to try out starfish, check out a pre-built
+pipeline by following the :ref:`Guide to Getting Started<getting_started>`. If you are ready
+to tinker with some data using starfish then read on!
 
-These tasks have several steps, and earlier the tutorial goes over a canonical example of an image
-processing pipeline that measures the expression of some target RNA in a breast cancer tissue slice.
+The :ref:`data model<data_model>`
+
 This part of the tutorial goes into more detail about why each of the stages in the example are
 needed, and provides some alternative approaches that can be used to build similar pipelines.
 
@@ -23,18 +27,25 @@ demonstrates putting together a "pipeline recipe" and running it on an experimen
 
 #TODO ask kevin to tell me if I've got these in the right order
 
-Basic Image Manipulations
--------------------------
+Loading Data
+------------
+
+
+* :ref:`Formatting your data <data_conversion_examples>`
+* :ref:`Using formatted example data <datasets>`
+
+Manipulating Images
+-------------------
 
 Sometimes it can be useful subset the images by, for example, excluding out-of-focus images or
 cropping out edge effects. For sparse data, it can be useful to project the z-volume into a single
 image, as this produces a much faster processing routine.
 
 * :ref:`Cropping <tutorial_cropping>`
-* :ref:`Projection <tutorial_projection>`
+* :ref:`Projecting <tutorial_projection>`
 
-Imaging Corrections
--------------------
+Correcting Images
+-----------------
 
 These stages are typically specific to the microscope, camera, filters, chemistry, and any tissue
 handling or microfluidices that are involved in capturing the images. These steps are typically
@@ -47,8 +58,8 @@ imaging system
 * :ref:`Image Registration <tutorial_image_registration>`
 * :ref:`Image Correction Pipeline <tutorial_image_correction_pipeline>`
 
-Tissue/Substrate-specific Corrections
--------------------------------------
+Enhancing Signal & Removing Background Noise
+--------------------------------------------
 
 These stages are usually specific to the sample being analyzed. For example, tissues often have
 some level of autofluorescence which causes cellular compartments to have more background noise than
@@ -56,6 +67,60 @@ intracellular regions. This can confound spot finders, which look for local inte
 These approaches ameliorate these problems.
 
 * :ref:`Removing Autofluorescence <tutorial_removing_autoflourescence>`
+
+Normalizing Intensities
+-----------------------
+
+Most assays are designed such that intensities need to be compared between rounds and/or channels
+in order to decode spots. As a basic example, smFISH spots are labeled by the channel with the
+highest intensity value. But because different channels use different fluorophores, excitation
+sources, etc. the images have different ranges of intensity values. The background
+intensity values in one channel might be as high as the signal intensity values of a
+different channel. Normalizing the intensities corrects for these differences and allows
+comparisons to be made.
+
+Whether to normalize
+^^^^^^^^^^^^^^^^^^^^
+
+The decision of whether to normalize depends on your data, codebook schema, and decoding method
+used in the next step of the pipeline.
+If your images have good SNR with similar range of intensities across channels and you plan to
+use :py:class:`PerRoundMaxChannel`, normalizing may not be necessary.
+If you plan to decode spots with :py:class:`MetricDistance` or :py:class:`PixelSpotDecoder`, you
+*need* to normalize across channels and rounds to get accurate results.
+:ref:`Plotting intensity distributions<tutorial_intensity_histogram>` of the
+:py:class:`ImageStack` can help you determine whether and how to normalize.
+
+How to normalize
+^^^^^^^^^^^^^^^^
+
+How to normalize depends on your data and a key assumption. If you are confident that image
+volumes acquired for every channel and/or every round should have the same distribution of
+intensities (meaning the number of spots and amount of background autofluorescence in every image
+volume is approximately uniform across channels and/or rounds), then their intensity *distributions*
+can be normalized with :py:class:`MatchHistograms`. However in most cases this is not a valid
+assumption and you can use :py:class:`Clip`, :py:class:`ClipPercentileToZero`, and
+:py:class:`ClipValueToZero` to normalize intensity *values*.
+
+Tutorials for normalizing:
+
+* :ref:`Normalizing Intensity Distributions <tutorial_normalizing_intensity_distributions>`
+* :ref:`Normalizing Intensity Values <tutorial_normalizing_intensity_values>`
+
+Finding and Decoding Spots
+--------------------------
+
+Segmenting Cells
+----------------
+
+Assigning Spots to Cells
+------------------------
+
+Assessing Performance Metrics
+-----------------------------
+
+Other Utilities
+---------------
 
 Feature Identification and Assignment
 -------------------------------------
@@ -70,3 +135,4 @@ origin. At this point, it's trivial to create a cell x gene matrix.
 * :ref:`Spot Decoding <tutorial_spot_decoding>`
 * :ref:`Segmenting Cells <tutorial_segmenting_cells>`
 * :ref:`Assigning Spots to Cells <tutorial_assigning_spots_to_cells>`
+

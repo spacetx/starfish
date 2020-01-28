@@ -26,7 +26,7 @@
 
 For a brief survey of the package, you can read the
 :ref:`Introduction <introduction>`. For more comprehensive instructions on how to use starfish,
-see the :ref:`Getting Started <getting started>` section.
+see the :ref:`Getting Started<getting_started>` section.
 
 Starfish's documentation also contains instructions on :ref:`creating image-based transcriptomics
 processing pipelines <creating_an_image_processing_pipeline>`, tutorials on running

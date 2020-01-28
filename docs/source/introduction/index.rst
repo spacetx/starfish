@@ -69,5 +69,5 @@ Legend:
 .. |todo| unicode:: U+1F532 .. Black Square Button
 .. |none| unicode:: U+274C .. Cross Mark
 
-To dive into starfish in more detail, please proceed to the :ref:`getting started <getting started>`
+To dive into starfish in more detail, please proceed to the :ref:`getting started<getting_started>`
 section.

@@ -6,6 +6,7 @@ from .clip_value_to_zero import ClipValueToZero
 from .element_wise_mult import ElementWiseMultiply
 from .gaussian_high_pass import GaussianHighPass
 from .gaussian_low_pass import GaussianLowPass
+from .ilastik_pre_trained_probability import IlastikPretrainedProbability
 from .laplace import Laplace
 from .linear_unmixing import LinearUnmixing
 from .map import Map

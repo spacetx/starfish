@@ -6,7 +6,8 @@ Normalizing Intensity Distributions
 
 It is important to normalize images before comparing intensity values between channels and
 rounds to decode feature traces. This tutorial will teach you when and how to normalize the
-*distributions* of intensities from images in an :py:class:`ImageStack`.
+*distributions* of intensities from images in an :py:class:`ImageStack`. For more
+background on normalizing images in starfish pipelines see :ref:`<section_normalizing_intensities>`.
 
 Normalizing the distributions is done in starfish by matching the histograms of
 :py:class:`ImageStack`\s to a reference histogram. The reference histogram is created by averaging
@@ -19,9 +20,7 @@ distributions the same. For example, it would be incorrect to match histograms o
 However, if you know every channel of every round has a uniform abundance of spots and you want to
 normalize for differences like fluorophore brightness and temporal changes of the microscope,
 then matching histograms is a good choice for normalizing images and does not require setting
-parameters. You can use :ref:`intensity_histogram<tutorial_intensity_histogram>` and
-:ref:`imshow_plane<tutorial_imshow_plane>` to visualize the image intensities before determining
-the best method for normalization.
+parameters.
 
 .. note::
     See the :ref:`Normalizing Intensity Values<tutorial_normalizing_intensity_values>` tutorial for

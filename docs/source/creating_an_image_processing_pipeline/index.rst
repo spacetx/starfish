@@ -25,11 +25,15 @@ enough to omit some pipeline stages or disorder them, but the typical order migh
 following. The links show how and when to use each component of *starfish*, and the final section
 demonstrates putting together a "pipeline recipe" and running it on an experiment.
 
+.. _section_loading_data:
+
 Loading Data
 ------------
 
 * :ref:`Formatting your data <data_conversion_examples>`
 * :ref:`Using formatted example data <datasets>`
+
+.. _section_manipulating_images:
 
 Manipulating Images
 -------------------
@@ -40,6 +44,8 @@ image, as this produces a much faster processing routine.
 
 * :ref:`Cropping <tutorial_cropping>`
 * :ref:`Projecting <tutorial_projection>`
+
+.. _section_correcting_images:
 
 Correcting Images
 -----------------
@@ -55,6 +61,8 @@ imaging system
 * :ref:`Image Registration <tutorial_image_registration>`
 * :ref:`Image Correction Pipeline <tutorial_image_correction_pipeline>`
 
+.. _section_improving_snr:
+
 Enhancing Signal & Removing Background Noise
 --------------------------------------------
 
@@ -65,6 +73,8 @@ These approaches ameliorate these problems.
 
 * :ref:`Removing Autofluorescence <tutorial_removing_autoflourescence>`
 
+.. _section_normalizing_intensities:
+
 Normalizing Intensities
 -----------------------
 
@@ -72,49 +82,75 @@ Most assays are designed such that intensities need to be compared between round
 in order to decode spots. As a basic example, smFISH spots are labeled by the channel with the
 highest intensity value. But because different channels use different fluorophores, excitation
 sources, etc. the images have different ranges of intensity values. The background
-intensity values in one channel might be as high as the signal intensity values of a
-different channel. Normalizing the intensities corrects for these differences and allows
-comparisons to be made.
+intensity values in one channel might be as high as the signal intensity values of another
+channel. Normalizing image intensities corrects for these differences and allows comparisons to be
+made.
 
 Whether to normalize
 ^^^^^^^^^^^^^^^^^^^^
 
-The decision of whether to normalize depends on your data, codebook schema, and decoding method
-used in the next step of the pipeline.
-If your images have good SNR with similar range of intensities across channels and you plan to
-use :py:class:`PerRoundMaxChannel`, normalizing may not be necessary.
-If you plan to decode spots with :py:class:`MetricDistance` or :py:class:`PixelSpotDecoder`, you
-*need* to normalize across channels and rounds to get accurate results.
-:ref:`Plotting intensity distributions<tutorial_intensity_histogram>` of the
-:py:class:`ImageStack` can help you determine whether and how to normalize.
+The decision of whether to normalize depends on your data and decoding method used in the next
+step of the pipeline.
+If your :py:class:`ImageStack` has approximately the same range of intensities across rounds and
+channels then normalizing may have a trivial effect on pixel values. Starfish provides utility
+functions :ref:`imshow_plane<tutorial_imshow_plane>` and
+:ref:`intensity_histogram<tutorial_intensity_histogram>` to visualize images and their intensity
+distributions.
+
+Accurately normalized images is important if you plan to decode features with
+:py:class:`MetricDistance` or :py:class:`PixelSpotDecoder`. These two algorithms use the
+Feature Trace (intensity values across all rounds and channels) to construct a vector whose
+distance from other vectors is used decode the feature. Poorly normalized images with some
+systematic or random variation in intensity will bias the results of decoding.
+
+However if you decode with :py:class:`PerRoundMaxChannel`, which only compares intensities
+between channels of the same round, precise normalization is not necessary. As long the intensity
+values of signal in all three channels are greater than background in all three channels the
+features will be decoded correctly.
 
 How to normalize
 ^^^^^^^^^^^^^^^^
 
-How to normalize depends on your data and a key assumption. If you are confident that image
-volumes acquired for every channel and/or every round should have the same distribution of
-intensities (meaning the number of spots and amount of background autofluorescence in every image
-volume is approximately uniform across channels and/or rounds), then their intensity *distributions*
-can be normalized with :py:class:`MatchHistograms`. However in most cases this is not a valid
-assumption and you can use :py:class:`Clip`, :py:class:`ClipPercentileToZero`, and
-:py:class:`ClipValueToZero` to normalize intensity *values*.
+How to normalize depends on your data and a key assumption. There are two approaches for
+normalizing images in starfish:
 
-Tutorials for normalizing:
+:ref:`Normalizing Intensity Distributions<tutorial_normalizing_intensity_distributions>`
 
-* :ref:`Normalizing Intensity Distributions <tutorial_normalizing_intensity_distributions>`
-* :ref:`Normalizing Intensity Values <tutorial_normalizing_intensity_values>`
+If you know a priori that image volumes acquired for every channel and/or every round should have
+the same distribution of intensities then the intensity *distributions* of image volumes can be
+normalized with :py:class:`MatchHistograms`. Typically this means the number of spots and amount of
+background autofluorescence in every image volume is approximately uniform across channels and/or
+rounds.
+
+:ref:`Normalizing Intensity Values <tutorial_normalizing_intensity_values>`
+
+In most data sets the differences in gene expression leads to too much variation in number of
+spots between channels and rounds. Normalizing intensity distributions would incorrectly skew the
+intensities. Instead you can use :py:class:`Clip`, :py:class:`ClipPercentileToZero`, and
+:py:class:`ClipValueToZero` to normalize intensity *values* by clipping extreme values and
+rescaling.
+
+.. _section_finding_and_decoding:
 
 Finding and Decoding Spots
 --------------------------
 
+.. _section_segmenting_cells:
+
 Segmenting Cells
 ----------------
+
+.. _section_assigning_spots:
 
 Assigning Spots to Cells
 ------------------------
 
+.. _section_assessing_metrics:
+
 Assessing Performance Metrics
 -----------------------------
+
+.. _section_utilities:
 
 Other Utilities
 ---------------

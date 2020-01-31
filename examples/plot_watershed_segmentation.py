@@ -12,7 +12,7 @@ component labeling.
 
 Watershed segmentation can be used to divide connected objects like clumped cells by finding
 watershed lines that separate pixel intensity basins. The classic method for computing pixel
-intensity values from a binary image is apply a distance transform, which labels foreground
+intensity values from a binary image is applying a distance transform, which labels foreground
 pixels furthest from the background with the lowest values and pixels close to the background
 with higher values. The overall effect after watershed is to segment objects into convex shapes,
 which is generally a good approximation for a cell or nucleus. More details about the watershed
@@ -26,7 +26,8 @@ a pre-built watershed segmentation pipeline that uses watershed segmented nuclei
 watershed segmentation on cell stain images.
 
 The pre-built watershed segmentation pipeline will not work for everyone, so this tutorial
-will  begin by showing you how you can
+will first show you how you can define a custom watershed segmentation pipeline. Then this tutorial
+will cover how to run the pre-built segmentation algorithm.
 
 Input requirements:
 * registered primary images :py:class:`ImageStack`

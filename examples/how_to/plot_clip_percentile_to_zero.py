@@ -27,7 +27,7 @@ To see how :py:class:`ClipPercentileToZero` can be used for normalizing images s
 # Load :py:class:`ImageStack` from example BaristaSeq data
 import starfish.data
 import matplotlib.pyplot as plt
-from starfish.types import Axes
+from starfish.types import Axes, Levels
 from starfish import FieldOfView
 from starfish.image import Filter
 from starfish.util.plot import imshow_plane, intensity_histogram
@@ -36,17 +36,7 @@ bs_experiment = starfish.data.BaristaSeq(use_test_data=False)
 stack = bs_experiment.fov().get_image(FieldOfView.PRIMARY_IMAGES)
 
 # Define some useful functions for viewing multiple images and histograms
-def imshow_3channels(stack: starfish.ImageStack, r: int):
-    fig = plt.figure(dpi=150)
-    ax1 = fig.add_subplot(131, title='ch: 0')
-    ax2 = fig.add_subplot(132, title='ch: 1')
-    ax3 = fig.add_subplot(133, title='ch: 2')
-    imshow_plane(stack, sel={Axes.ROUND: r, Axes.CH: 0}, ax=ax1)
-    imshow_plane(stack, sel={Axes.ROUND: r, Axes.CH: 1}, ax=ax2)
-    imshow_plane(stack, sel={Axes.ROUND: r, Axes.CH: 2}, ax=ax3)
-
-
-def plot_intensity_histograms(stack: starfish.ImageStack, r: int):
+def plot_intensity_histograms(stack: starfish.ImageStack, r: int, title: str):
     fig = plt.figure(dpi=150)
     ax1 = fig.add_subplot(131, title='ch: 0')
     ax2 = fig.add_subplot(132, title='ch: 1', sharex=ax1, sharey=ax1)
@@ -55,21 +45,21 @@ def plot_intensity_histograms(stack: starfish.ImageStack, r: int):
     intensity_histogram(stack, sel={Axes.ROUND: r, Axes.CH: 1}, log=True, bins=50, ax=ax2)
     intensity_histogram(stack, sel={Axes.ROUND: r, Axes.CH: 2}, log=True, bins=50, ax=ax3)
     fig.tight_layout()
+    fig.suptitle(title)
 
-# View images and distribution of intensities in round 1
-imshow_3channels(stack=stack, r=1)
-plot_intensity_histograms(stack=stack, r=1)
+# View distribution of intensities in round 1
+plot_intensity_histograms(stack=stack, r=1, title='Distribution before clipping')
 
 # Clip imagestack without setting is_volume to True
-bad_clipper = Filter.ClipPercentileToZero(p_min=90, p_max=99.99, levels=Levels.SCALE_BY_CHUNK)
+bad_clipper = Filter.ClipPercentileToZero(p_min=90, p_max=99.99, level_method=Levels.SCALE_BY_CHUNK)
 bad_stack = bad_clipper.run(stack)
 
-# View distribution
-plot_intensity_histograms(bad_stack, r=1)
+# View distribution if you forget to set is_volume
+plot_intensity_histograms(bad_stack, r=1, title='Distribution after clipping with is_volume=False')
 
 # Clip imagestack without setting is_volume to True
-clipper = Filter.ClipPercentileToZero(p_min=90, p_max=99.99, is_volume=True, levels=Levels.SCALE_BY_CHUNK)
+clipper = Filter.ClipPercentileToZero(p_min=90, p_max=99.99, is_volume=True, level_method=Levels.SCALE_BY_CHUNK)
 clipper.run(stack, in_place=True)
 
 # View distribution
-plot_intensity_histograms(stack, r=1)
+plot_intensity_histograms(stack, r=1, title='Distribution after clipping with is_volume=True')

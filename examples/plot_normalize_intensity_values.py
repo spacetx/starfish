@@ -46,7 +46,7 @@ The first step to normalizing is viewing the histogram of pixel intensities.
 # Load the primary images :py:class:`ImageStack` from example DARTFISH data
 import starfish.data
 import matplotlib.pyplot as plt
-from starfish.types import Axes
+from starfish.types import Axes, Levels
 from starfish import FieldOfView
 from starfish.image import Filter
 from starfish.util.plot import imshow_plane, intensity_histogram
@@ -108,7 +108,7 @@ plot_intensity_histograms(stack=min80_clipped, r=1)
 # To fix that use :py:class:`Filter.ClipPercentileToZero`. Also p_min to 95%. Also, by
 
 # ClipPercentileToZero values below 80% and scale
-cptz_1 = Filter.ClipPercentileToZero(p_min=80, p_max=100, level=)
+cptz_1 = Filter.ClipPercentileToZero(p_min=80, p_max=100, level_method=Levels.SCALE_BY_CHUNK)
 clipped_scaled = cptz_1.run(stack, in_place=False)
 plot_intensity_histograms(stack=clipped_scaled, r=1)
 
@@ -124,7 +124,7 @@ plot_intensity_histograms(stack=clipped_scaled, r=1)
 # 10 pixels out of 1.05 million pixels is the top 99.999 percentile, so p_max = 99.999.
 
 # ClipPercentileToZero values below 80% and above 99.999% and scale
-cptz_2= Filter.ClipPercentileToZero(p_min=80, p_max=99.999, level=)
+cptz_2= Filter.ClipPercentileToZero(p_min=80, p_max=99.999, level_method=Levels.SCALE_BY_CHUNK)
 clipped_both_scaled = cptz_2.run(stack, in_place=False)
 plot_intensity_histograms(stack=clipped_both_scaled, r=1)
 
@@ -134,7 +134,7 @@ plot_intensity_histograms(stack=clipped_both_scaled, r=1)
 # What if p_max was set to 99.99% instead?
 
 # ClipPercentileToZero values below 80% and above 99.99% and scale
-cptz_2= Filter.ClipPercentileToZero(p_min=80, p_max=99.99, level=)
+cptz_2= Filter.ClipPercentileToZero(p_min=80, p_max=99.99, level_method=Levels.SCALE_BY_CHUNK)
 clipped_both_scaled = cptz_2.run(stack, in_place=False)
 plot_intensity_histograms(stack=clipped_both_scaled, r=1)
 

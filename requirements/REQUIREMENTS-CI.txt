@@ -23,6 +23,7 @@ entrypoints==0.3
 execnet==1.7.1
 flake8==3.7.9
 flake8-import-order==0.18.1
+h5py==2.10.0
 idna==2.8
 imageio==2.6.1
 imagesize==1.2.0

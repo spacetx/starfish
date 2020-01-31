@@ -7,8 +7,8 @@ Clipping
 How to use :py:class:`starfish.image.Filter.Clip` to clip high and low intensity values of image
 planes or image volumes in an :py:class:`ImageStack` and rescale intensity values.
 
-:py:class:`Clip` is useful for normalizing images, removing background, and removing high-intensity
-outliers. If you want the values to start from zero after clipping see
+The :py:class:`Clip` class is useful for normalizing images, removing background, and removing
+high-intensity outliers. If you want the values to start from zero after clipping see
 :py:class:`ClipPercentileToZero`. Both :py:class:`AlgorithmFilter'\s use percentiles to set the
 min and max values to clip.
 """

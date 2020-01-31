@@ -15,6 +15,7 @@ defusedxml==0.6.0
 diskcache==4.1.0
 docutils==0.15.2
 entrypoints==0.3
+h5py==2.10.0
 idna==2.8
 imageio==2.6.1
 importlib-metadata==1.4.0

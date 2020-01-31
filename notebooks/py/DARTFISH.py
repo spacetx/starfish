@@ -22,7 +22,7 @@ import os
 
 from starfish import display
 from starfish import data, FieldOfView
-from starfish.types import Features, Axes
+from starfish.types import Axes, Features, Levels
 
 from starfish import IntensityTable
 
@@ -80,7 +80,7 @@ plt.axis('off');
 # EPY: END markdown
 
 # EPY: START code
-sc_filt = Filter.Clip(p_max=100, expand_dynamic_range=True)
+sc_filt = Filter.Clip(p_max=100, level_method=Levels.SCALE_BY_CHUNK)
 norm_imgs = sc_filt.run(imgs)
 # EPY: END code
 

@@ -8,7 +8,7 @@ It is important to normalize images before comparing intensity values between ch
 to decode feature traces. This tutorial will cover how to use py:class:`ClipPercentileToZero` to
 normalize images within an :py:class:`ImageStack`.
 For more background on normalizing images in starfish pipelines see
-:ref:`<section_normalizing_intensities>`.
+:ref:`section_normalizing_intensities`.
 
 When the number of spots is not known to be uniform across :py:class:`Axes` of an
 :py:class:`ImageStack`, you *cannot* use :ref:`MatchHistograms<tutorial_match_histograms>` to
@@ -38,7 +38,7 @@ spots in an image.
 
 .. note::
     :py:class:`ClipValueToZero` and :py:class:`Clip` can also be used in place of
-    :py:class:`ClipPercentileToZero`. See :ref:`<howto_clip_value_to_zero>` and :ref:`<howto_clip>`.
+    :py:class:`ClipPercentileToZero`. See :ref:`howto_clip_value_to_zero` and :ref:`howto_clip`.
 
 The first step to normalizing is viewing the histogram of pixel intensities.
 """
@@ -105,7 +105,8 @@ plot_intensity_histograms(stack=min80_clipped, r=1)
 # Clipping the lowest 80% of pixels basically got the intended effect but because
 # :py:class:`Filter.Clip` was used the distribution does not start at zero.
 #
-# To fix that use :py:class:`Filter.ClipPercentileToZero`. Also p_min to 95%. Also, by
+# To fix that use :py:class:`Filter.ClipPercentileToZero`. Also scale images with
+# :py:class:`Levels.SCALE_BY_CHUNK`, which scales every image plane between [0, 1].
 
 # ClipPercentileToZero values below 80% and scale
 cptz_1 = Filter.ClipPercentileToZero(p_min=80, p_max=100, level_method=Levels.SCALE_BY_CHUNK)

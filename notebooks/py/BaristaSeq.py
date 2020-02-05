@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 #
-# EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "starfish", "language": "python", "name": "starfish"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
+# EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "starfish-CI", "language": "python", "name": "starfish-ci"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.7.5"}}, "nbformat": 4, "nbformat_minor": 2}
 
 # EPY: START code
 # EPY: ESCAPE %matplotlib inline
@@ -27,6 +27,7 @@ import pandas as pd
 import starfish
 import starfish.data
 from starfish.types import Axes
+from starfish import FieldOfView
 from starfish.util.plot import (
     imshow_plane, intensity_histogram, overlay_spot_calls
 )
@@ -41,14 +42,10 @@ matplotlib.rcParams["figure.dpi"] = 150
 # EPY: END markdown
 
 # EPY: START code
-experiment_json = (
-    "https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20190319/baristaseq"
-    "/experiment.json"
-)
-exp = starfish.Experiment.from_json(experiment_json)
+exp = starfish.data.BaristaSeq(use_test_data=False)
 
-nissl = exp['fov_000'].get_image('dots')
-img = exp['fov_000'].get_image('primary')
+nissl = exp.fov().get_image('nuclei')
+img = exp.fov().get_image(FieldOfView.PRIMARY_IMAGES)
 # EPY: END code
 
 # EPY: START markdown
@@ -93,8 +90,8 @@ z_projected_nissl = max_projector.run(nissl)
 
 # show the projected data
 f, (ax1, ax2) = plt.subplots(ncols=2)
-imshow_plane(img, sel=plane_selector, ax=ax1, title="primary image")
-imshow_plane(nissl, sel=plane_selector, ax=ax2, title="nissl image")
+imshow_plane(z_projected_image, sel={Axes.CH: 0, Axes.ROUND: 0}, ax=ax1, title="primary image")
+imshow_plane(z_projected_nissl, sel={Axes.CH: 0, Axes.ROUND: 0}, title="nissl image")
 # EPY: END code
 
 # EPY: START markdown

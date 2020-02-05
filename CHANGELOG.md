@@ -1,3 +1,18 @@
+## [0.2.0] - 2020-01-31
+- Add level_method to the clip filters. (#1758)
+- adding method to use installed ilastik instance (#1740)
+- Create a TileFetcher-based constructor for ImageStack (#1737)
+- adding mouse v human example to starfish.data (#1741)
+- adding method to binary mask collection that imports labeled images from external sources like ilastik (#1731)
+- Remove starfish.types.Clip (#1729)
+- Move watershed segmentation from morphology.Binarize to morphology.Segment (#1720)
+- Link to the available datasets in "loading data" section (#1722)
+- Document workaround for python3.8 (#1705)
+- Wrap skimage's watershed (#1700)
+- Add 3D support to target assignment. (#1699)
+- Pipeline component and implementation for merging BinaryMaskCollections (#1692)
+- Mechanism to reduce multiple masks into one (#1684)
+
 ## [0.1.10] - 2019-12-13
 - Bump slicedimage to 4.1.1 (#1697)
 - Make map/reduce APIs more intuitive (#1686)
@@ -194,6 +209,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.2.0]: https://github.com/spacetx/starfish/releases/tag/0.2.0
 [0.1.10]: https://github.com/spacetx/starfish/releases/tag/0.1.10
 [0.1.9]: https://github.com/spacetx/starfish/releases/tag/0.1.9
 [0.1.8]: https://github.com/spacetx/starfish/releases/tag/0.1.8

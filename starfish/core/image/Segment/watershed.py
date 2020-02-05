@@ -76,7 +76,6 @@ class Watershed(SegmentAlgorithm):
         masks : BinaryMaskCollection
            binary masks segmenting each cell
         """
-        # TODO make these parameterizable or determine whether they are useful or not
         size_lim = (10, 10000)
         disk_size_markers = None
         disk_size_mask = None

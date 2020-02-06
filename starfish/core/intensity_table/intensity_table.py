@@ -286,7 +286,6 @@ class IntensityTable(xr.DataArray):
 
         """
 
-        # TODO nsofroniew: right now there is no jitter on x-y positions of the spots
         z = np.random.randint(0, num_z, size=n_spots)
         y = np.random.uniform(0, height - 1, size=n_spots)
         x = np.random.uniform(0, width - 1, size=n_spots)

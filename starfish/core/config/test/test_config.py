@@ -1,4 +1,5 @@
 import os
+import tempfile
 import warnings
 from json import dump, loads
 
@@ -214,6 +215,33 @@ def test_starfish_warn(tmpdir, monkeypatch):
 def test_starfish_environ(monkeypatch):
     with monkeypatch.context() as mc:
         mc.setenv("STARFISH_CONFIG", "{}")
+        assert not StarfishConfig().strict
+        with environ(VALIDATION_STRICT="true"):
+            assert StarfishConfig().strict
+
+
+def test_starfish_environ_overrides(monkeypatch, tmp_path):
+    """Test that configuration set by specific environment variable overrides the config file or
+    global config."""
+
+    # config is provided by the STARFISH_CONFIG path
+    with monkeypatch.context() as mc:
+        mc.setenv("STARFISH_CONFIG", "{\"validation\": {\"strict\": false}}")
+        assert not StarfishConfig().strict
+        with environ(VALIDATION_STRICT="true"):
+            assert StarfishConfig().strict
+
+    with monkeypatch.context() as mc:
+        mc.setenv("STARFISH_CONFIG", "{\"validation\": {\"strict\": true}}")
+        assert StarfishConfig().strict
+        with environ(VALIDATION_STRICT="false"):
+            assert not StarfishConfig().strict
+
+    with tempfile.NamedTemporaryFile(mode="w+", dir=tmp_path, delete=False) as config_tempfile:
+        config_tempfile.write("{\"validation\": {\"strict\": false}}")
+
+    with monkeypatch.context() as mc:
+        mc.setenv("STARFISH_CONFIG", f"@{config_tempfile.name}")
         assert not StarfishConfig().strict
         with environ(VALIDATION_STRICT="true"):
             assert StarfishConfig().strict

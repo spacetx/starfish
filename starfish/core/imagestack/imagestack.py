@@ -1044,7 +1044,7 @@ class ImageStack:
         return self._data.shape  # type: ignore
 
     @property
-    def shape(self) -> collections.OrderedDict:
+    def shape(self) -> collections.OrderedDict[Union[Axes, str], int]:
         """
         Returns the shape of the space that this image inhabits.  It does not include the
         dimensions of the image itself.  For instance, if this is an X-Y image in a C-H-Y-X space,
@@ -1054,11 +1054,7 @@ class ImageStack:
         -------
         An ordered mapping between index names to the size of the index.
         """
-        # TODO: (ttung) Note that the return type should be ..OrderedDict[Any, str], but python3.6
-        # has a bug where this # breaks horribly.  Can't find a bug id to link to, but see
-        # https://stackoverflow.com/questions/41207128/how-do-i-specify-ordereddict-k-v-types-for-\
-        # mypy-type-annotation
-        result: collections.OrderedDict[Any, Any] = collections.OrderedDict()
+        result: collections.OrderedDict[Union[Axes, str], int] = collections.OrderedDict()
         for name, data in AXES_DATA.items():
             result[name] = self._data.shape[data.order]
         result['y'] = self._data.shape[-2]

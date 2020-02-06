@@ -153,6 +153,13 @@ class DecodedIntensityTable(IntensityTable):
                 "can be called. See starfish.spots.AssignTargets.Label.")
         grouped = self.to_features_dataframe().groupby([Features.CELL_ID, Features.TARGET])
         counts = grouped.count().iloc[:, 0].unstack().fillna(0)
+        # rename unassigned spots
+        counts.rename(index={'nan': 'unassigned'}, inplace=True)
+        # remove and store 'nan' target counts
+        nan_target_counts = np.zeros(counts.shape[0])
+        if 'nan' in counts.columns:
+            nan_target_counts = counts['nan'].values
+            counts.drop(columns='nan', inplace=True)
         if self.has_physical_coords:
             grouped = self.to_features_dataframe().groupby([Features.CELL_ID])[[
                 Axes.X.value, Axes.Y.value, Axes.ZPLANE.value, Coordinates.X.value,
@@ -165,6 +172,7 @@ class DecodedIntensityTable(IntensityTable):
         coordinate_df = min_ + (max_ - min_) / 2
         metadata = {name: (Features.CELLS, data.values) for name, data in coordinate_df.items()}
         metadata[Features.AREA] = (Features.CELLS, np.full(counts.shape[0], fill_value=np.nan))
+        metadata["number_of_undecoded_spots"] = (Features.CELLS, nan_target_counts)
         # add genes to the metadata
         metadata.update({Features.GENES: counts.columns.values})
         metadata.update({Features.CELL_ID: (Features.CELLS, counts.index.values)})

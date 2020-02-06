@@ -1,4 +1,4 @@
-from typing import Collection, Mapping
+from typing import Collection, Mapping, Set
 
 import numpy as np
 
@@ -50,6 +50,11 @@ class TileCollectionData:
     @property
     def tile_shape(self) -> Mapping[Axes, int]:
         """Returns the shape of a tile."""
+        raise NotImplementedError()
+
+    @property
+    def group_by(self) -> Set[Axes]:
+        """Returns the axes to group by when we load the data."""
         raise NotImplementedError()
 
     @property

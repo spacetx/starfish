@@ -5,10 +5,11 @@ from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from functools import partial
 from itertools import product
-from pathlib import Path
+from pathlib import PurePath
 from threading import Lock
 from typing import (
     Any,
+    BinaryIO,
     Callable,
     Hashable,
     Iterable,
@@ -1123,7 +1124,7 @@ class ImageStack:
 
     def export(self,
                filepath: str,
-               tile_opener=None,
+               tile_opener: Optional[Callable[[PurePath, Tile, str], BinaryIO]] = None,
                tile_format: ImageFormat=ImageFormat.NUMPY) -> None:
         """write the image tensor to disk in spaceTx format
 
@@ -1131,7 +1132,10 @@ class ImageStack:
         ----------
         filepath : str
             Path + prefix for the images and primary_images.json written by this function
-        tile_opener : TODO ttung: doc me.
+        tile_opener : Optional[Callable[[PurePath, Tile, str], BinaryIO]]
+            A callable responsible for opening the file that a tile's data is to be written to. The
+            callable should accept three arguments -- the path of the tileset, the tile data, and
+            the expected file extension. If this is not specified, a reasonable default is provided.
         tile_format : ImageFormat
             Format in which each 2D plane should be written.
 
@@ -1183,7 +1187,7 @@ class ImageStack:
             tileset.add_tile(tile)
 
         if tile_opener is None:
-            def tile_opener(tileset_path: Path, tile, ext):
+            def tile_opener(tileset_path: PurePath, tile: Tile, ext: str):
                 base = tileset_path.parent / tileset_path.stem
                 if Axes.ZPLANE in tile.indices:
                     zval = tile.indices[Axes.ZPLANE]

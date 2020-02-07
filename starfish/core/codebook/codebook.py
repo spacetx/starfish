@@ -529,7 +529,7 @@ class Codebook(xr.DataArray):
 
     def decode_metric(
             self, intensities: IntensityTable, max_distance: Number, min_intensity: Number,
-            norm_order: int, metric: str='euclidean'
+            norm_order: int, metric: str='euclidean', return_original_intensities: bool = False
     ) -> DecodedIntensityTable:
         """
         Assigns intensity patterns that have been extracted from an :py:class:`ImageStack` and
@@ -556,6 +556,9 @@ class Codebook(xr.DataArray):
             the scipy.linalg norm to apply to normalize codes and intensities
         metric : str
             the sklearn metric string to pass to NearestNeighbors
+        return_original_intensities: bool
+            If True returns original intensity values in the DecodedIntensityTable instead of
+            normalized ones (default=False)
 
         Notes
         -----
@@ -596,9 +599,10 @@ class Codebook(xr.DataArray):
             dtype=np.bool
         )
 
+        return_intensities = intensities if return_original_intensities else norm_intensities
         # norm_intensities is a DataArray, make it back into an IntensityTable
         return DecodedIntensityTable.from_intensity_table(
-            norm_intensities,
+            return_intensities,
             targets=(Features.AXIS, targets),
             distances=(Features.AXIS, metric_outputs),
             passes_threshold=(Features.AXIS, passes_filters))

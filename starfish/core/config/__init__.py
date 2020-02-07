@@ -135,11 +135,13 @@ class StarfishConfig(object):
         self._slicedimage_update(('caching', 'directory'))
         self._slicedimage_update(('caching', 'size_limit'), int)
 
-        self._strict = self._config_obj.lookup(
-            ("validation", "strict"), self.flag("STARFISH_VALIDATION_STRICT", "false"), remove=True)
+        env_val = self.flag("STARFISH_VALIDATION_STRICT", None)
+        config_val = self._config_obj.lookup(("validation", "strict"), False, remove=True)
+        self._strict = env_val if env_val is not None else config_val
 
-        self._verbose = self._config_obj.lookup(
-            ("verbose",), self.flag("STARFISH_VERBOSE", "true"), remove=True)
+        env_val = self.flag("STARFISH_VERBOSE", None)
+        config_val = self._config_obj.lookup(("verbose",), True, remove=True)
+        self._verbose = env_val if env_val is not None else config_val
 
         if self._config_obj.data:
             warnings.warn(f"unknown configuration: {self._config_obj.data}")

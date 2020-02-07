@@ -38,6 +38,9 @@ class MetricDistance(DecodeSpotsAlgorithm):
     search_radius : Optional[int]
         Only applicable if trace_building_strategy is TraceBuildingStrategies.NEAREST_NEIGHBORS.
         Number of pixels over which to search for spots in other rounds and channels.
+    return_original_intensities: bool
+        If True returns original intensity values in the DecodedIntensityTable instead of
+        normalized ones (default=False)
     """
 
     def __init__(
@@ -50,6 +53,7 @@ class MetricDistance(DecodeSpotsAlgorithm):
         trace_building_strategy: TraceBuildingStrategies = TraceBuildingStrategies.EXACT_MATCH,
         anchor_round: int = 1,
         search_radius: int = 3,
+        return_original_intensities: bool = False
     ) -> None:
         self.codebook = codebook
         self.max_distance = max_distance
@@ -59,6 +63,7 @@ class MetricDistance(DecodeSpotsAlgorithm):
         self.trace_builder = TRACE_BUILDERS[trace_building_strategy]
         self.anchor_round = anchor_round
         self.search_radius = search_radius
+        self.return_original_intensities = return_original_intensities
 
     def run(
         self,
@@ -89,4 +94,5 @@ class MetricDistance(DecodeSpotsAlgorithm):
             min_intensity=self.min_intensity,
             norm_order=self.norm_order,
             metric=self.metric,
+            return_original_intensities=self.return_original_intensities
         )

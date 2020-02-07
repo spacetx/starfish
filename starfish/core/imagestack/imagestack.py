@@ -11,6 +11,7 @@ from typing import (
     Any,
     BinaryIO,
     Callable,
+    Collection,
     Hashable,
     Iterable,
     Iterator,
@@ -92,7 +93,7 @@ class ImageStack:
            the shape of the image tensor by categorical index (channels, imaging rounds, z-layers)
     """
 
-    def __init__(self, data: xr.DataArray, tile_data: Optional[TileCollectionData]=None):
+    def __init__(self, data: xr.DataArray, tile_data: TileCollectionData):
         self._data = data
         self._data_loaded = False
         self._tile_data = tile_data
@@ -215,9 +216,19 @@ class ImageStack:
 
             return tile_dtype
 
-        with ThreadPoolExecutor() as tpe:
-            # gather all the data types of the tiles to ensure that they are compatible.
-            tile_dtypes = set(tpe.map(load_by_selector, all_selectors))
+        if len(self._tile_data.group_by) == 0:
+            with ThreadPoolExecutor() as tpe:
+                # gather all the data types of the tiles to ensure that they are compatible.
+                tile_dtypes = set(tpe.map(load_by_selector, all_selectors))
+        else:
+            tile_dtypes = set()
+            group_by_selectors = list(self._iter_axes(self._tile_data.group_by))
+            non_group_by_selectors = list(self._iter_axes(
+                {Axes.ROUND, Axes.CH, Axes.ZPLANE} - self._tile_data.group_by))
+            for group_by_selector in group_by_selectors:
+                for non_group_by_selector in non_group_by_selectors:
+                    tile_dtypes.add(load_by_selector(
+                        {**group_by_selector, **non_group_by_selector}))
         pbar.close()
 
         tile_dtype_kinds = set(tile_dtype.kind for tile_dtype in tile_dtypes)
@@ -270,7 +281,7 @@ class ImageStack:
             rounds: Sequence[int],
             chs: Sequence[int],
             zplanes: Sequence[int],
-            axes_order: Optional[Sequence[Axes]] = None,
+            group_by: Optional[Collection[Axes]] = None,
             crop_parameters: Optional[CropParameters]=None,
     ) -> "ImageStack":
         """
@@ -290,21 +301,11 @@ class ImageStack:
             The channels to include in this ImageStack.
         zplanes : Sequence[int]
             The zplanes to include in this ImageStack.
-        axes_order : Optional[Sequence[Axes]]
-            Ordering for which axes vary, in order of the slowest changing axis to the fastest.  For
-            instance, if the order is (ROUND, Z, CH) and each dimension has size 2, then the
-            sequence is:
-
-              (ROUND=0, CH=0, Z=0)
-              (ROUND=0, CH=1, Z=0)
-              (ROUND=0, CH=0, Z=1)
-              (ROUND=0, CH=1, Z=1)
-              (ROUND=1, CH=0, Z=0)
-              (ROUND=1, CH=1, Z=0)
-              (ROUND=1, CH=0, Z=1)
-              (ROUND=1, CH=1, Z=1)
-
-            (default = (Axes.Z, Axes.ROUND, Axes.CH))
+        group_by : Optional[Set[Axes]]
+            Axes to load the data by.  If an axis is present in this list, all the data for a given
+            value along that axis will be loaded concurrently.  For example, if group_by is
+            (Axes.ROUND, Axes.CH), then all the data for ROUND=2, CH=1 will be loaded before we
+            progress to ROUND=3, CH=1.
         crop_parameters : Optional[CropParameters]
             If cropping of the data is desired, it should be specified here.
 
@@ -316,7 +317,7 @@ class ImageStack:
         from starfish.core.imagestack.parser.tilefetcher import TileFetcherData
 
         tile_data: TileCollectionData = TileFetcherData(
-            tilefetcher, tile_shape, fov, rounds, chs, zplanes, axes_order)
+            tilefetcher, tile_shape, fov, rounds, chs, zplanes, group_by)
         if crop_parameters is not None:
             tile_data = CroppedTileCollectionData(tile_data, crop_parameters)
         return ImageStack.from_tile_collection_data(tile_data)

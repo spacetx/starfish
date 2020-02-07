@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Collection, List, Mapping, MutableSequence, Optional, Tuple, Union
+from typing import Collection, List, Mapping, MutableSequence, Optional, Set, Tuple, Union
 
 import numpy as np
 from slicedimage import Tile, TileSet
@@ -279,6 +279,11 @@ class CroppedTileCollectionData(TileCollectionData):
 
     def keys(self) -> Collection[TileKey]:
         return self.crop_parameters.filter_tilekeys(self.backing_tile_collection_data.keys())
+
+    @property
+    def group_by(self) -> Set[Axes]:
+        """Returns the axes to group by when we load the data."""
+        return self.backing_tile_collection_data.group_by
 
     @property
     def tile_shape(self) -> Mapping[Axes, int]:

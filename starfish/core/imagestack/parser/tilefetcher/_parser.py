@@ -1,11 +1,10 @@
 """
 This module wraps a TileFetcher to provide the data to instantiate an ImageStack.
 """
-from typing import Collection, Mapping, MutableMapping, Optional, Sequence
+from typing import Collection, Mapping, MutableMapping, Optional, Sequence, Set
 
 import numpy as np
 
-from starfish.core.experiment.builder.orderediterator import join_axes_labels, ordered_iterator
 from starfish.core.experiment.builder.providers import FetchedTile, TileFetcher
 from starfish.core.imagestack.parser import TileCollectionData, TileData, TileKey
 from starfish.core.imagestack.physical_coordinates import _get_physical_coordinates_of_z_plane
@@ -78,7 +77,7 @@ class TileFetcherData(TileCollectionData):
             rounds: Sequence[int],
             chs: Sequence[int],
             zplanes: Sequence[int],
-            axes_order: Optional[Sequence[Axes]] = None,
+            group_by: Optional[Collection[Axes]] = None,
     ) -> None:
         self._tile_fetcher = tile_fetcher
         self._tile_shape = tile_shape
@@ -86,9 +85,7 @@ class TileFetcherData(TileCollectionData):
         self._rounds = rounds
         self._chs = chs
         self._zplanes = zplanes
-        if axes_order is None:
-            axes_order = Axes.ZPLANE, Axes.ROUND, Axes.CH
-        self._axes_order = axes_order
+        self._group_by = set(group_by) if group_by is not None else set()
 
     def __getitem__(self, tilekey: TileKey) -> dict:
         """Returns the extras metadata for a given tile, addressed by its TileKey"""
@@ -96,12 +93,17 @@ class TileFetcherData(TileCollectionData):
 
     def keys(self) -> Collection[TileKey]:
         """Returns a Collection of the TileKey's for all the tiles."""
-        axes_sizes = join_axes_labels(
-            self._axes_order, rounds=self._rounds, chs=self._chs, zplanes=self._zplanes)
         return [
-            TileKey(round=selector[Axes.ROUND], ch=selector[Axes.CH], zplane=selector[Axes.ZPLANE])
-            for selector in ordered_iterator(axes_sizes)
+            TileKey(round=round_label, ch=ch_label, zplane=zplane_label)
+            for round_label in self._rounds
+            for ch_label in self._chs
+            for zplane_label in self._zplanes
         ]
+
+    @property
+    def group_by(self) -> Set[Axes]:
+        """Returns the axes to group by when we load the data."""
+        return self._group_by
 
     @property
     def tile_shape(self) -> Mapping[Axes, int]:

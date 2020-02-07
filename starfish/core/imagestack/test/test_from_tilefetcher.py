@@ -1,6 +1,7 @@
 from typing import Mapping, Union
 
 import numpy as np
+import pytest
 
 from starfish.core.experiment.builder.builder import tile_fetcher_factory
 from starfish.core.experiment.builder.test.factories.unique_tiles import unique_data, UniqueTiles
@@ -18,7 +19,18 @@ class UniqueTilesWithCoordinates(UniqueTiles):
         }
 
 
+@pytest.mark.parametrize(
+    "group_by",
+    [
+        None,
+        set((Axes.ROUND,)),
+        set((Axes.ROUND, Axes.CH)),
+        set((Axes.ROUND, Axes.CH, Axes.ZPLANE)),
+        set((Axes.ZPLANE,)),
+    ]
+)
 def test_from_tilefetcher(
+        group_by,
         rounds=(0, 1, 2, 3),
         chs=(0, 1, 3),
         zplanes=(0, 1),
@@ -42,6 +54,7 @@ def test_from_tilefetcher(
         rounds=rounds,
         chs=chs,
         zplanes=zplanes,
+        group_by=group_by,
     )
 
     assert stack.shape == {

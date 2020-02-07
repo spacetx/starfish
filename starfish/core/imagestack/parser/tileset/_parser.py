@@ -1,7 +1,7 @@
 """
 This module parses and retains the extras metadata attached to TileSet extras.
 """
-from typing import Collection, Mapping, MutableMapping, Tuple
+from typing import Collection, Mapping, MutableMapping, Set, Tuple
 
 import numpy as np
 from slicedimage import Tile, TileSet
@@ -102,6 +102,11 @@ class TileSetData(TileCollectionData):
     def keys(self) -> Collection[TileKey]:
         """Returns a Collection of the TileKey's for all the tiles."""
         return self.tiles.keys()
+
+    @property
+    def group_by(self) -> Set[Axes]:
+        """Returns the axes to group by when we load the data."""
+        return set()
 
     @property
     def tile_shape(self) -> Mapping[Axes, int]:

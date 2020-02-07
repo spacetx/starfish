@@ -9,6 +9,7 @@ from typing import (
     MutableSequence,
     Optional,
     Sequence,
+    Set,
 )
 
 import numpy as np
@@ -99,6 +100,11 @@ class NumpyData(TileCollectionData):
             )
 
         return keys
+
+    @property
+    def group_by(self) -> Set[Axes]:
+        """Returns the axes to group by when we load the data."""
+        return set()
 
     @property
     def tile_shape(self) -> Mapping[Axes, int]:

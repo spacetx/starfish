@@ -103,5 +103,6 @@ stack = ImageStack.from_tilefetcher(
     rounds=range(num_r),
     chs=range(num_c),
     zplanes=range(num_z),
+    group_by=(Axes.ROUND, Axes.CH),
 )
 print(repr(stack))

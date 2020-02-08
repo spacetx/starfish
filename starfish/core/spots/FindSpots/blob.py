@@ -109,14 +109,20 @@ class BlobDetector(FindSpotsAlgorithm):
 
         """
 
+        spot_finding_args = {
+            "min_sigma": self.min_sigma,
+            "max_sigma": self.max_sigma,
+            "threshold": self.threshold,
+            "exclude_border": self.exclude_border,
+            "overlap": self.overlap,
+            "num_sigma": self.num_sigma
+        }
+        if self.detector_method is not blob_doh:
+            spot_finding_args["exclude_border"] = self.exclude_border
+
         fitted_blobs_array: np.ndarray = self.detector_method(
             data_image,
-            min_sigma=self.min_sigma,
-            max_sigma=self.max_sigma,
-            threshold=self.threshold,
-            exclude_border=self.exclude_border,
-            overlap=self.overlap,
-            num_sigma=self.num_sigma
+            **spot_finding_args
         )
 
         if fitted_blobs_array.shape[0] == 0:
@@ -173,12 +179,16 @@ class BlobDetector(FindSpotsAlgorithm):
         spot_finding_method = partial(self.image_to_spots, *args)
         if reference_image:
             data_image = reference_image._squeezed_numpy(*{Axes.ROUND, Axes.CH})
+            if self.detector_method is blob_doh and data_image.ndim > 2:
+                raise ValueError("blob_doh only support 2d images")
             reference_spots = spot_finding_method(data_image)
             results = spot_finding_utils.measure_intensities_at_spot_locations_across_imagestack(
                 data_image=image_stack,
                 reference_spots=reference_spots,
                 measurement_function=self.measurement_function)
         else:
+            if self.detector_method is blob_doh and self.is_volume:
+                raise ValueError("blob_doh only support 2d images")
             spot_attributes_list = image_stack.transform(
                 func=spot_finding_method,
                 group_by=determine_axes_to_group_by(self.is_volume),

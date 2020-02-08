@@ -39,14 +39,6 @@ class ThresholdBinarize(BinarizeAlgorithm):
             ],
             dtype=np.bool)
 
-        # TODO: (ttung) This could theoretically be done with ImageStack.transform, but
-        # ImageStack.transform doesn't provide the selectors to the worker method.  In this case,
-        # we need the selectors to select the correct region of the output array.  The alternative
-        # is for each worker thread to create a new array, and then merge them at the end, but that
-        # effectively doubles our memory consumption.
-        #
-        # For now, we will just do it in-process, because it's not a particularly compute-intensive
-        # task.
         self._binarize(result_array, image.xarray[0, 0])
 
         pixel_ticks: Mapping[Axes, ArrayLike[int]] = {

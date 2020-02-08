@@ -138,3 +138,9 @@ def test_iss_pipeline_cropped_data(tmpdir):
 
     # 28 of the spots are assigned to cell 0 (although most spots do not decode!)
     assert np.sum(assigned['cell_id'] == '1') == 28
+
+    expression_matrix = iss.cg
+    # test that nans were properly removed from the expression matrix
+    assert 'nan' not in expression_matrix.genes.data
+    # test the number of spots that did not decode per cell
+    assert np.array_equal(expression_matrix.number_of_undecoded_spots.data, [13, 1, 0, 36])

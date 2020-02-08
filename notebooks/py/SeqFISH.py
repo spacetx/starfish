@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 import starfish
 import starfish.data
-from starfish.types import Axes, TraceBuildingStrategies
+from starfish.types import Axes, Levels, TraceBuildingStrategies
 # EPY: END code
 
 # EPY: START markdown
@@ -83,7 +83,7 @@ starfish.display(background_corrected)
 # EPY: END markdown
 
 # EPY: START code
-clip = starfish.image.Filter.Clip(p_max=99.9, expand_dynamic_range=True, is_volume=True)
+clip = starfish.image.Filter.Clip(p_max=99.9, is_volume=True, level_method=Levels.SCALE_BY_CHUNK)
 scaled = clip.run(background_corrected, in_place=False)
 # EPY: END code
 

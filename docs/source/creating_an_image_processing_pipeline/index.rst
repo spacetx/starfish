@@ -7,7 +7,7 @@ Welcome to the user guide for building an image processing pipeline using starfi
 will cover all the steps necessary for going from raw images to a single cell gene expression
 matrix. If you are wondering what is starfish, check out :ref:`The Introduction
 <introduction>`. If you only have a few minutes to try out starfish, check out a pre-built
-pipeline by following the :ref:`Guide to Getting Started<getting_started>`. If you are ready
+pipeline by following the :ref:`Guide to Getting Started<getting started>`. If you are ready
 to learn how to build your own image processing pipeline using starfish then read on!
 
 The :ref:`data model<data_model>`
@@ -91,19 +91,20 @@ Whether to normalize
 
 The decision of whether to normalize depends on your data and decoding method used in the next
 step of the pipeline.
-If your :py:class:`ImageStack` has approximately the same range of intensities across rounds and
+If your :py:class:`.ImageStack` has approximately the same
+range of intensities across rounds and
 channels then normalizing may have a trivial effect on pixel values. Starfish provides utility
 functions :ref:`imshow_plane<tutorial_imshow_plane>` and
 :ref:`intensity_histogram<tutorial_intensity_histogram>` to visualize images and their intensity
 distributions.
 
 Accurately normalized images is important if you plan to decode features with
-:py:class:`MetricDistance` or :py:class:`PixelSpotDecoder`. These two algorithms use the
-Feature Trace (intensity values across all rounds and channels) to construct a vector whose
+:py:class:`.MetricDistance` or :py:class:`.PixelSpotDecoder`. These two algorithms use the
+:doc:`Feature Trace</help_and_reference/glossary/glossary>` to construct a vector whose
 distance from other vectors is used decode the feature. Poorly normalized images with some
 systematic or random variation in intensity will bias the results of decoding.
 
-However if you decode with :py:class:`PerRoundMaxChannel`, which only compares intensities
+However if you decode with :py:class:`.PerRoundMaxChannel`, which only compares intensities
 between channels of the same round, precise normalization is not necessary. As long the intensity
 values of signal in all three channels are greater than background in all three channels the
 features will be decoded correctly.
@@ -118,7 +119,7 @@ normalizing images in starfish:
 
 If you know a priori that image volumes acquired for every channel and/or every round should have
 the same distribution of intensities then the intensity *distributions* of image volumes can be
-normalized with :py:class:`MatchHistograms`. Typically this means the number of spots and amount of
+normalized with :py:class:`.MatchHistograms`. Typically this means the number of spots and amount of
 background autofluorescence in every image volume is approximately uniform across channels and/or
 rounds.
 
@@ -126,8 +127,8 @@ rounds.
 
 In most data sets the differences in gene expression leads to too much variation in number of
 spots between channels and rounds. Normalizing intensity distributions would incorrectly skew the
-intensities. Instead you can use :py:class:`Clip`, :py:class:`ClipPercentileToZero`, and
-:py:class:`ClipValueToZero` to normalize intensity *values* by clipping extreme values and
+intensities. Instead you can use :py:class:`.Clip`, :py:class:`.ClipPercentileToZero`, and
+:py:class:`.ClipValueToZero` to normalize intensity *values* by clipping extreme values and
 rescaling.
 
 .. _section_finding_and_decoding:

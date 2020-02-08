@@ -4,17 +4,16 @@
 Matching Histograms
 ===================
 
-How to use :py:class:`starfish.image.Filter.MatchHistograms` to normalize intensity distributions
-across groups of images in an :py:class:`ImageStack`.
+How to use :py:class:`~starfish.image.Filter.MatchHistograms` to normalize intensity distributions
+across groups of images in an :py:class:`~starfish.core.imagestack.imagestack.ImageStack`.
 
-The :py:attr:`group_by` parameter can be
-set as one or more :py:class:`Axes`. Images that share the same :py:class:`Axes` indices in
-:py:attr:`group_by` are grouped together. The intensity distribution of each group is then
-quantile normalized to the mean intensity distribution.
+The ``group_by`` parameter can be set as one or more :py:class:`.Axes`. Images that share the
+same :py:class:`.Axes` indices in ``group_by`` are grouped together. The intensity distribution
+of each group is then quantile normalized to the mean intensity distribution.
 
-Take for example an :py:class:`ImageStack` with size:  (r: 7, c: 4, z: 17, y: 1193, x: 913)
+Take for example an :py:class:`.ImageStack` with shape (r: 7, c: 4, z: 17, y: 1193, x: 913)
 
-.. list-table:: Examples for group_by
+.. list-table:: Examples for ``group_by``
     :widths: 25 15 20 20
     :header-rows: 1
 
@@ -41,7 +40,7 @@ Take for example an :py:class:`ImageStack` with size:  (r: 7, c: 4, z: 17, y: 11
 # How to match histograms across channels
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-# Load :py:class:`ImageStack` from example DARTFISH data
+# Load ImageStack from example DARTFISH data
 import starfish.data
 from starfish import FieldOfView
 from starfish.types import Axes
@@ -58,7 +57,7 @@ scaled_c = mh_c.run(df_stack, in_place=False, verbose=False, n_processes=8)
 # How to match histograms across channels *and* rounds
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-# Use loaded `ImageStack` from example DARTFISH data
+# Use loaded ImageStack from example DARTFISH data
 # Run MatchHistograms with group_by={Axes.CH, Axes.ROUND}
 mh_cr = starfish.image.Filter.MatchHistograms({Axes.CH, Axes.ROUND})
 scaled_cr = mh_cr.run(df_stack, in_place=False, verbose=False, n_processes=8)
@@ -67,7 +66,7 @@ scaled_cr = mh_cr.run(df_stack, in_place=False, verbose=False, n_processes=8)
 # How to match histograms across z-planes
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-# Load :py:class:`ImageStack` from example BaristaSeq data
+# Load ImageStack from example BaristaSeq data
 bs_experiment = starfish.data.BaristaSeq(use_test_data=False)
 bs_stack = bs_experiment.fov().get_image(FieldOfView.PRIMARY_IMAGES)
 print(bs_stack)
@@ -82,12 +81,12 @@ scaled_z = mh_z.run(bs_stack, in_place=False, verbose=False, n_processes=8)
 # To illustrate why matching histograms shouldn't be used to :ref:`normalize intensity
 # distributions<tutorial_normalizing_intensity_distributions>` of images with significantly
 # different number of spots you can see the result of matching histograms across z-planes from
-# the previous example. The intensity histograms for z: 2 and z: 8 are plotted before and after
-# running :py:class:`MatchHistograms`.
+# the previous example. The intensity histograms for ``Axes.ZPLANE: 2`` and ``Axes.ZPLANE: 8``
+# are plotted before and after running :py:class:`~starfish.image.Filter.MatchHistograms`.
 #
-# z: 2 contains no spots or peaks so the histogram is that of Gaussian noise
+# ``Axes.ZPLANE: 2`` contains no spots or peaks so the histogram is that of Gaussian noise
 #
-# z: 8 has many spots and the histogram shows a long tail of high pixel values
+# ``Axes.ZPLANE: 8`` has many spots and the histogram shows a long tail of high pixel values
 
 # Plot intensity distributions of z-planes from z: 2 and z: 8 before and after scaling
 import matplotlib
@@ -110,6 +109,7 @@ f.tight_layout()
 ####################################################################################################
 # As expected, the distributions after scaling are made more similar. The higher values in the
 # Gaussian noise are shifted higher while the long tail representing high spot intensities is
-# reduced. Overall the SNR decreased. This does not mean it is never appropriate to MatchHistograms
-# across Axes.ZPLANE but any use of :py:class:`MatchHistograms` should be done so with caution.
+# reduced. Overall the SNR decreased. This does not mean it is never appropriate to
+# :py:class:`.MatchHistograms` across :py:class:`.Axes.ZPLANE` but any use of
+# :py:class:`.MatchHistograms` should be done so with caution.
 

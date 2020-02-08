@@ -6,14 +6,14 @@ Normalizing Intensity Distributions
 
 It is important to normalize images before comparing intensity values between channels and
 rounds to decode feature traces. This tutorial will teach you when and how to normalize the
-*distributions* of intensities from images in an :py:class:`ImageStack`. For more
-background on normalizing images in starfish pipelines see
-:ref:'section_normalizing_intensities`.
+*distributions* of intensities from images in an
+:py:class:`.ImageStack`. For more background on normalizing images in starfish pipelines see
+:ref:`section_normalizing_intensities`.
 
 Normalizing the distributions is done in starfish by matching the histograms of
-:py:class:`ImageStack`\s to a reference histogram. The reference histogram is created by averaging
-the histograms from each group defined by the :py:attr:`group_by` parameter. These groups also
-determine along which :py:class:`Axes` the intensities will be normalized.
+:py:class:`.ImageStack`\s to a reference histogram. The reference histogram is created by
+averaging the histograms from each group defined by the ``group_by`` parameter. These groups also
+determine along which :py:class:`.Axes` the intensities will be normalized.
 
 Before normalizing, you need to know whether it is appropriate to make the intensity
 distributions the same. For example, it would be incorrect to match histograms of an image with
@@ -28,12 +28,11 @@ parameters.
     when you can't assume distributions should match after normalization.
 
 This tutorial will demonstrate how to normalize intensity distributions on a data set that would
-not typically be appropriate to normalize with :py:class:`MatchHistograms` due to its particular
+not typically be appropriate to normalize with :py:class:`.MatchHistograms` due to its particular
 codebook design. The reason for using this data set here is to emphasize the effect of normalizing.
-
 """
 
-# Load the primary images :py:class:`ImageStack` from example DARTFISH data
+# Load the primary images ImageStack from example DARTFISH data
 import starfish.data
 import matplotlib.pyplot as plt
 from starfish.types import Axes
@@ -95,20 +94,20 @@ def plot_intensity_histograms(
 ####################################################################################################
 # By looking at unscaled images we see channel 0 has considerably less signal than channel 1 and
 # typically we would not want to normalize their intensity distributions with
-# :py:class:`MatchHistograms`.
+# :py:class:`.MatchHistograms`.
 #
 # .. note::
-#     If your :py:class:`ImageStack` has multiple z-planes you must select a z-plane or use
-#     :py:meth:`imagestack.ImageStack.reduce` to use display the image
+#     If your :py:class:`.ImageStack` has multiple z-planes you must select a z-plane or use
+#     :py:meth:`.ImageStack.reduce` to use display the image
 imshow_3channels(stack=stack, r=0)
 
 ####################################################################################################
-# We create and run three :py:class:`MatchHistograms` using different
-# :py:class:`Axes` groups to see the differences in normalizing.
+# We create and run three :py:class:`.MatchHistograms` using different
+# :py:class:`.Axes` groups to see the differences in normalizing.
 #
-# * group_by={Axes.CH, Axes.ROUND} will make intensity histograms of every (x,y,z) volume match
-# * group_by={Axes.CH} will make intensity histograms of every (x,y,z,r) volume match
-# * group_by={Axes.ROUND} will make intensity histograms of every (x,y,z,c) volume match
+# * ``group_by={Axes.CH, Axes.ROUND}`` will make intensity histograms of every (x,y,z) volume match
+# * ``group_by={Axes.CH}`` will make intensity histograms of every (x,y,z,r) volume match
+# * ``group_by={Axes.ROUND}`` will make intensity histograms of every (x,y,z,c) volume match
 #
 
 # MatchHistograms group_by channel and round
@@ -126,7 +125,7 @@ scaled_r = mh_r.run(stack, in_place=False, verbose=False, n_processes=8)
 # Plotting the intensity histograms shows the effect of normalization.
 #
 # * unscaled histograms of the three channels reflect the raw images -- channel 0 has less signal
-# * normalizing with group_by={Axes.CH} has the effect of significantly rescaling  histograms of channel 0 to match histograms of the other channels
-# * normalizing with group_by={Axes.R} does not scale histograms of channel 0 to match histograms of other channels
-# * normalizing with group_by={Axes.CH, Axes.ROUND} scales histograms from every round and channel to match each other
+# * normalizing with ``group_by={Axes.CH}`` has the effect of significantly rescaling histograms of channel 0 to match histograms of the other channels
+# * normalizing with ``group_by={Axes.R}`` does not scale histograms of channel 0 to match histograms of other channels
+# * normalizing with ``group_by={Axes.CH, Axes.ROUND}`` scales histograms from every round and channel to match each other
 plot_intensity_histograms(ref=stack, scaled_cr=scaled_cr, scaled_c=scaled_c, scaled_r=scaled_r, r=0)

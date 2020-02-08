@@ -4,13 +4,14 @@
 Clipping Value To Zero
 ======================
 
-How to use :py:class:`starfish.image.Filter.ClipValueToZero` to clip high and low intensity
-values of image planes or image volumes in an :py:class:`ImageStack`.
+How to use :py:class:`~starfish.image.Filter.ClipValueToZero` to clip high and low intensity
+values of image planes or image volumes in an
+:py:class:`~starfish.core.imagestack.imagestack.ImageStack`.
 
 If you know the raw pixel values you want to use to clip images with instead of using a
-percentile to determine the value you can use :py:class:`ClipValueToZero`. Any pixel values that
-fall outside the interval are clipped to the interval edges and the pixel values are shifted
-such that the minimum value is set to zero.
+percentile to determine the value you can use :py:class:`~starfish.image.Filter.ClipValueToZero`.
+Any pixel values that fall outside the interval are clipped to the interval edges and the pixel
+values are shifted such that the minimum value is set to zero.
 
 This is best used when you have familiarity with your experiment data and have identified some
 consistent pattern. For example, maybe you know the range of intensities and cutoffs that are
@@ -18,7 +19,7 @@ indicative of background and signal in each of the channels and you do not want 
 percentile to pick the correct interval values.
 """
 
-# Load the primary images :py:class:`ImageStack` from example DARTFISH data
+# Load the primary ImageStack from example DARTFISH data
 import starfish.data
 import matplotlib.pyplot as plt
 from starfish.types import Axes, Levels
@@ -44,7 +45,7 @@ def plot_intensity_histograms(stack: starfish.ImageStack, r: int, title: str):
 # View images and distribution of intensities in round 1
 plot_intensity_histograms(stack, r=1, title='Distribution before clipping')
 
-# Clip imagestack without
+# Clip ImageStack without
 clipper = Filter.ClipValueToZero(v_min= 0.00003, v_max= 0.001, level_method=Levels.SCALE_BY_CHUNK)
 clipper.run(stack, in_place=True)
 

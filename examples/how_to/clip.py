@@ -4,16 +4,17 @@
 Clipping
 ========
 
-How to use :py:class:`starfish.image.Filter.Clip` to clip high and low intensity values of image
-planes or image volumes in an :py:class:`ImageStack` and rescale intensity values.
+How to use :py:class:`~starfish.image.Filter.Clip` to clip high and low intensity values of image
+planes or image volumes in an :py:class:`~starfish.core.imagestack.imagestack.ImageStack` and
+rescale intensity values.
 
-:py:class:`Clip` is useful for normalizing images, removing background, and removing high-intensity
-outliers. If you want the values to start from zero after clipping see
-:py:class:`ClipPercentileToZero`. Both :py:class:`AlgorithmFilter`\s use percentiles to set the
-min and max values to clip.
+:py:class:`~starfish.image.Filter.Clip` is useful for normalizing images, removing background,
+and removing high-intensity outliers. If you want the values to start from zero after clipping see
+:py:class:`~starfish.image.Filter.ClipPercentileToZero`. Both :py:class:`FilterAlgorithm`\s use
+percentiles to set the ``p_min`` and ``p_max`` values to clip by.
 """
 
-# Load :py:class:`ImageStack` from example BaristaSeq data
+# Load ImageStack from example BaristaSeq data
 import starfish.data
 import matplotlib.pyplot as plt
 from starfish.types import Axes, Levels
@@ -38,7 +39,7 @@ def plot_intensity_histograms(stack: starfish.ImageStack, r: int):
 # View distribution of intensities in round 0
 plot_intensity_histograms(stack=stack, r=0)
 
-# Clip imagestack with scaling
+# Clip ImageStack with scaling
 clipper = Filter.Clip(p_min=50, p_max=99.9, is_volume=True, level_method=Levels.SCALE_BY_CHUNK)
 clipper.run(stack, in_place=True)
 

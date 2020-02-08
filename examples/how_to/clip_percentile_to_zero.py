@@ -4,27 +4,28 @@
 Clipping Percentile To Zero
 ===========================
 
-How to use :py:class:`starfish.image.Filter.ClipPercentileToZero` to clip high and low intensity
-values of image planes or image volumes in an :py:class:`ImageStack`.
+How to use :py:class:`.ClipPercentileToZero` to clip high and low intensity values of image
+planes or image volumes in an :py:class:`.ImageStack`.
 
-:py:class:`ClipPercentileToZero` is the recommended :py:class:`FilterAlgorithm` for clipping images
-for most users. An interval is defined by pixel values at the p_min and p_max percentiles of
-the distribution. The interval bounds can also be scaled by multiplying with a min_coeff and
-max_coeff. Any pixel values that fall outside the interval are clipped to the interval edges.
-Lastly, the pixel values are shifted such that the minimum value is set to zero. See
-:py:class:`starfish.image.Filter.Clip` if you don't want values to be shifted to zero.
+:py:class:`.ClipPercentileToZero` is the recommended :py:class:`.FilterAlgorithm` for clipping
+images for most users. An interval is defined by pixel values at the ``p_min`` and ``p_max``
+percentiles of the distribution. The interval bounds can also be scaled by multiplying with a
+``min_coeff`` and ``max_coeff``. Any pixel values that fall outside the interval are clipped to
+the interval edges. Lastly, the pixel values are shifted such that the minimum value is set to
+zero. See :py:class:`.Clip` if you don't want values to be shifted to zero.
 
-The minimum percentile (p_min) is useful for removing low-intensity background by setting
-everything below p_min to zero. The maximum percentile (p_max) is useful for eliminating
-high-intensity outliers. If your :py:class:`ImageStack` has greater than one z-plane, it is
-critical to set is_volume to True to get the expected clipping behavior.
+The minimum percentile ``p_min`` is useful for removing low-intensity background by setting
+everything below ``p_min`` to zero. The maximum percentile ``p_max`` is useful for eliminating
+high-intensity outliers. If your :py:class:`.ImageStack` has
+greater than one z-plane, it is critical to set ``is_volume=True`` to get the expected clipping
+behavior.
 
-To see how :py:class:`ClipPercentileToZero` can be used for normalizing images see
+To see how :py:class:`.ClipPercentileToZero` can be used for normalizing images see
 :ref:`tutorial_normalizing_intensity_values`.
 """
 
 
-# Load :py:class:`ImageStack` from example BaristaSeq data
+# Load ImageStack from example BaristaSeq data
 import starfish.data
 import matplotlib.pyplot as plt
 from starfish.types import Axes, Levels

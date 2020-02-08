@@ -4,11 +4,11 @@
 Plotting Intensity Distribution
 ===============================
 
-How to use :py:meth:`starfish.util.plot.intensity_histogram` to plot the intensity distribution of
-any :py:class:`ImageStack`.
+How to use :py:func:`~starfish.util.plot.intensity_histogram` to plot the intensity distribution of
+any :py:class:`.ImageStack`.
 
 The selector parameter can be used to pass a dictionary of dimensions and indices to select a
-subset of the :py:class:`ImageStack` for plotting. Choosing the correct number of bins is
+subset of the :py:class:`.ImageStack` for plotting. Choosing the correct number of ``bins`` is
 important for accurately representing the distribution as a histogram and it may be worth trying
 a couple different bin sizes.
 
@@ -18,7 +18,7 @@ The histogram is useful for examining image data and deciding how to normalize b
 * :ref:`Normalizing Intensity Values <tutorial_normalizing_intensity_values>`
 """
 
-# Load :py:class:`ImageStack` from example DARTFISH data
+# Load ImageStack from example DARTFISH data
 import starfish.data
 from starfish import FieldOfView
 from starfish.types import Axes

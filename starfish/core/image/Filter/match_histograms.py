@@ -21,11 +21,11 @@ class MatchHistograms(FilterAlgorithm):
     chunks.
 
     For example, if group_by={Axes.CH, Axes.ROUND} each (z, y, x) volume will be linearized,
-    the intensities will be sorted, and averaged across {Axes.CH, Axes.ROUND}, equalizing
+    the intensities will be sorted, and averaged across {Axes.CH, Axes.ROUND}, normalizing
     the intensity distribution of each (round, channel) volume.
 
-    Setting group_by={Axes.CH} would carry out the same approach, but the result would _retain_
-    variation across channel.
+    Setting group_by={Axes.CH} would carry out the same approach, but the result would equalize
+    distribution across channels only and would retain variability across rounds.
 
     Parameters
     ----------

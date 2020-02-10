@@ -13,7 +13,7 @@ from ._base import FilterAlgorithm
 class ElementWiseMultiply(FilterAlgorithm):
     """
     Perform element-wise multiplication on the image tensor. This is useful for
-    performing operations such as image normalization or field flatness correction
+    performing operations such as field flatness correction
 
     Parameters
     ----------

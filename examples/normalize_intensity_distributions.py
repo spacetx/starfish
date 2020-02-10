@@ -5,8 +5,8 @@ Normalizing Intensity Distributions
 ===================================
 
 It is important to normalize images before comparing intensity values between channels and
-rounds to decode feature traces. This tutorial will teach you when and how to normalize the
-*distributions* of intensities from images in an
+rounds to decode :term:`feature traces<Feature (Spot, Pixel) Trace>`. This tutorial will teach you
+when and how to normalize the *distributions* of intensities from images in an
 :py:class:`.ImageStack`. For more background on normalizing images in starfish pipelines see
 :ref:`section_normalizing_intensities`.
 

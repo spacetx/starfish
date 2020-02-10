@@ -1,9 +1,9 @@
 Here, we clearly define the relevant terms needed to understand the spaceTx pipeline specification
 
-.. glossary::
-
 Glossary
 ========
+
+.. glossary::
 
     Channel
         An imaging mode that captures a continuous-valued feature from a field of view. Examples of channels include the read-out from a fluorescent dye, such as Cy3, or a the abundance of an isotope captured from a mass spectrometer.
@@ -51,19 +51,19 @@ Glossary
     Image Tile
         A single plane, single channel, single round 2D image. In the manifest, each tile has information about its (X,Y,Z) coordinates in space, and information about which imaging round (R) and/or fluorescence channel (C) it was acquired under.
 
-    Coordinates (Tile):
+    Coordinates (Tile)
         Coordinates refer to the physical location of a Tile with respect to some independent reference.  If a pair of values are provided, it corresponds to the physical coordinates of the edges.  If a single value is provided, it corresponds to the center of the tile.  For x and y, two values are required.  For z, both a single value and a pair of values are valid.
 
-    Axes (Tile):
+    Axes (Tile)
         Each pixel is located along five axes, which are round, channel, z-plane, y, and x.
 
-    Labels (Tile):
+    Labels (Tile)
         Labels are the valid set of values for each axis.
 
-    Index (Tile):
+    Index (Tile)
         An index indicates the label or range of labels for a given axis.  These should be a whole number (non-negative integers) or a python contiguous slice representing a range.
 
-    Selectors (Tile):
+    Selectors (Tile)
         A mapping of axes (round, channel, and z-plane) to their respective index.  These are expressed as a mapping from Axis to index.
 
     Primary Images

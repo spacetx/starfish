@@ -6,9 +6,9 @@ Showing Image of ImageStack Plane
 
 How to use :py:func:`.imshow_plane` to display a single z-plane of an :py:class:`.ImageStack`.
 
-As shown here, the selector parameter can pass a dictionary of dimensions and indices to select a
-subset of the :py:class:`.ImageStack` as long as the subset is an (x,y) plane. The selector can
-be omitted if :py:class:`.ImageStack` is already a single (x,y) plane.
+As shown here, the :term:`selector<Selectors (Tile)>` parameter can pass a dictionary of
+dimensions and indices to select a subset of the :py:class:`.ImageStack` as long as the subset is an
+(x,y) plane. The selector can be omitted if :py:class:`.ImageStack` is already a single (x,y) plane.
 """
 
 # Load ImageStack from example STARmap data

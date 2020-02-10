@@ -5,9 +5,9 @@ Normalizing Intensity Values
 ============================
 
 It is important to normalize images before comparing intensity values between channels and rounds
-to decode feature traces. This tutorial will cover how to use :py:class:`.ClipPercentileToZero` to
-normalize images within an :py:class:`.ImageStack`. For more background on normalizing images in
-starfish pipelines see :ref:`section_normalizing_intensities`.
+to decode :term:`feature traces<Feature (Spot, Pixel) Trace>`. This tutorial will cover how to use
+:py:class:`.ClipPercentileToZero` to normalize images within an :py:class:`.ImageStack`. For more
+background on normalizing images in starfish pipelines see :ref:`section_normalizing_intensities`.
 
 When the number of spots is not known to be uniform across :py:class:`.Axes` of an
 :py:class:`.ImageStack`, you *cannot* use :ref:`MatchHistograms<tutorial_match_histograms>` to

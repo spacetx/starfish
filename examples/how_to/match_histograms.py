@@ -4,12 +4,12 @@
 Matching Histograms
 ===================
 
-How to use :py:class:`~starfish.image.Filter.MatchHistograms` to normalize intensity distributions
-across groups of images in an :py:class:`~starfish.core.imagestack.imagestack.ImageStack`.
+How to use :py:class:`.MatchHistograms` to normalize intensity distributions across groups of
+images in an :py:class:`.ImageStack`.
 
 The ``group_by`` parameter can be set as one or more :py:class:`.Axes`. Images that share the
-same :py:class:`.Axes` indices in ``group_by`` are grouped together. The intensity distribution
-of each group is then quantile normalized to the mean intensity distribution.
+same :py:class:`.Axes` :term:`indices<Index (Tile)>` in ``group_by`` are grouped together. The
+intensity distribution of each group is then quantile normalized to the mean intensity distribution.
 
 Take for example an :py:class:`.ImageStack` with shape (r: 7, c: 4, z: 17, y: 1193, x: 913)
 
@@ -82,7 +82,7 @@ scaled_z = mh_z.run(bs_stack, in_place=False, verbose=False, n_processes=8)
 # distributions<tutorial_normalizing_intensity_distributions>` of images with significantly
 # different number of spots you can see the result of matching histograms across z-planes from
 # the previous example. The intensity histograms for ``Axes.ZPLANE: 2`` and ``Axes.ZPLANE: 8``
-# are plotted before and after running :py:class:`~starfish.image.Filter.MatchHistograms`.
+# are plotted before and after running :py:class:`.MatchHistograms`.
 #
 # ``Axes.ZPLANE: 2`` contains no spots or peaks so the histogram is that of Gaussian noise
 #

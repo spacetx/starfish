@@ -180,8 +180,8 @@ def _linear_alpha_cmap(cmap):
 
 
 def diagnose_registration(
-    imagestack,
-    *sels,
+    imagestack: ImageStack,
+    *sels: Optional[Mapping[Axes, Union[int, tuple]]],
     ax=None,
     title: Optional[str] = None,
     **kwargs,
@@ -196,7 +196,7 @@ def diagnose_registration(
     ----------
     imagestack : ImageStack
         imagestack from which to extract 2-d images for plotting
-    sel : Optional[Mapping[Axes, Union[int, tuple]]]
+    *sels : Optional[Mapping[Axes, Union[int, tuple]]]
         Optional, but only if image_stack is already of shape (1, 1, 1, y, x). Selectors to pass
         ImageStack.sel, Selects the (y, x) planes to be plotted.
     ax :

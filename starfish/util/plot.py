@@ -187,7 +187,24 @@ def diagnose_registration(
     **kwargs,
 ):
     """
-    # TODO docme
+    Overlays 2-d images extracted from ImageStack for the purpose of visualizing alignment of
+    images from different rounds or channels selected with the `sel` parameter. Up to six images
+    can be selected and shown in different colors. The same `Axes.X` and `Axes.Y` indices should
+    be used for every Selector.
+
+    Parameters
+    ----------
+    imagestack : ImageStack
+        imagestack from which to extract 2-d images for plotting
+    sel : Optional[Mapping[Axes, Union[int, tuple]]]
+        Optional, but only if image_stack is already of shape (1, 1, 1, y, x). Selectors to pass
+        ImageStack.sel, Selects the (y, x) planes to be plotted.
+    ax :
+        Axes to plot on. If not passed, defaults to the current axes.
+    title : Optional[str]
+        Title to assign the Axes being plotted on.
+    kwargs :
+        additional keyword arguments to pass to imshow_plane
     """
     if ax is None:
         ax = plt.gca()
@@ -210,4 +227,4 @@ def diagnose_registration(
     alpha_cmap_cycle = itertools.cycle([_linear_alpha_cmap(cm) for cm in cmaps])
 
     for sel, cmap in zip(sels, alpha_cmap_cycle):
-        imshow_plane(imagestack, sel, ax=ax, cmap=cmap)
+        imshow_plane(imagestack, sel, ax=ax, cmap=cmap, **kwargs)

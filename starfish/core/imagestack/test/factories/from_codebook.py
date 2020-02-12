@@ -29,6 +29,6 @@ def create_imagestack_from_codebook(
     for ((z, y, x), f) in zip(spot_coordinates, range(codebook.sizes[Features.TARGET])):
         imagestack_data[:, :, z, y, x] = codebook[f].transpose(Axes.ROUND.value, Axes.CH.value)
 
-    # blur with a small non-isotropic kernel TODO make kernel smaller.
+    # blur with a small non-isotropic kernel
     imagestack_data = gaussian_filter(imagestack_data, sigma=(0, 0, 0.7, 1.5, 1.5))
     return ImageStack.from_numpy(imagestack_data)

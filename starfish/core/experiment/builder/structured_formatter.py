@@ -114,8 +114,6 @@ def format_structured_dataset(
             ExtraPhysicalCoordinatesWarning,
         )
 
-    # TODO: get a reasonable codebook imported...
-
     image_tile_identifiers: Mapping[str, Sequence[TileIdentifier]] = {
         image_type:
             [inferred_tile_result.identifier for inferred_tile_result in inferred_tile_results]

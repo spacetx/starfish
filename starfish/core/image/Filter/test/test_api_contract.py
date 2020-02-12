@@ -53,24 +53,13 @@ def test_all_methods_adhere_to_contract(filter_class):
 
     default_kwargs = filter_class._DEFAULT_TESTING_PARAMETERS
 
-    # TODO ambrosejcarr: all filters should accept boolean is_volume
     instance = filter_class(**default_kwargs)
-
-    # TODO ambrosejcarr: all methods should process 3d data
-    # # stores is_volume, and is_volume is a bool
-    # try:
-    #     volume_param = getattr(instance, 'is_volume')
-    # except AttributeError:
-    #     raise AttributeError(f'{filter_class} should accept and store is_volume.')
-    #
-    # assert isinstance(volume_param, bool), \
-    #     f'{filter_class} is_volume must be a bool, not {type(volume_param)}'
 
     data = generate_default_data()
 
-    # Max Proj and Reduce don't have an in_place, n_processes, verbose option,
+    # Reduce don't have an in_place, n_processes, verbose option,
     # so we need to skip these tests
-    if filter_class not in [Reduce]:
+    if filter_class not in (Reduce,):
         # return None if in_place = True
         try:
             filtered = instance.run(data, in_place=True)

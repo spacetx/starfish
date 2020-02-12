@@ -786,7 +786,9 @@ class Codebook(xr.DataArray):
         if target_names is None:
             # use a reverse-sorted list of integers as codewords
             target_names = [uuid.uuid4() for _ in range(n_codes)]
-        assert n_codes == len(target_names)
+        if n_codes != len(target_names):
+            raise ValueError(
+                f"n_codes ({n_codes} does not match the number of targets ({len(target_names)})")
 
         codebook = [{Features.CODEWORD: w, Features.TARGET: g}
                     for w, g in zip(codewords, target_names)]

@@ -62,25 +62,25 @@ def test_from_code_array_has_three_channels_two_rounds_and_two_codes():
     assert_sizes(codebook)
 
 
-# TODO ambrosejcarr: this should be a ValueError, not a KeyError,
-# and the message should be clearer to the user
 def test_from_code_array_throws_key_error_with_missing_channel_round_or_value():
     """Tests that from_code_array throws errors when it encounters malformed codes"""
     code_array: List = codebook_array_factory()
 
-    # codebook is now missing a channel
+    # codebook is now missing a round
     del code_array[0][Features.CODEWORD][0][Axes.ROUND.value]
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         Codebook.from_code_array(code_array)
 
+    # codebook is now missing a ch
     code_array: List = codebook_array_factory()
     del code_array[0][Features.CODEWORD][0][Axes.CH.value]
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         Codebook.from_code_array(code_array)
 
+    # codebook is now missing a value
     code_array: List = codebook_array_factory()
     del code_array[0][Features.CODEWORD][0][Features.CODE_VALUE]
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         Codebook.from_code_array(code_array)
 
 

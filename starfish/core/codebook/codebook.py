@@ -767,8 +767,6 @@ class Codebook(xr.DataArray):
 
         """
 
-        # TODO ambrosejcarr: clean up this code, generate Codebooks directly using _empty_codebook
-        # construct codes; this can be slow when n_codes is large and n_codes ~= n_possible_codes
         codes: Set = set()
         while len(codes) < n_codes:
             codes.add(tuple([np.random.randint(0, n_channel) for _ in np.arange(n_round)]))

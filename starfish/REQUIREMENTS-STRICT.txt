@@ -58,6 +58,7 @@ pytz==2019.3
 PyWavelets==1.1.1
 PyYAML==5.3
 pyzmq==18.1.1
+read-roi==1.5.2
 regional==1.1.2
 requests==2.22.0
 s3transfer==0.3.2

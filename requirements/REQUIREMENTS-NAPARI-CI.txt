@@ -75,6 +75,7 @@ PyYAML==5.3
 pyzmq==18.1.1
 qtconsole==4.6.0
 QtPy==1.9.0
+read-roi==1.5.2
 regional==1.1.2
 requests==2.22.0
 s3transfer==0.3.2

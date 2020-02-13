@@ -14,7 +14,6 @@ from starfish.core.types import Axes
 from ..intensity_table import IntensityTable
 
 
-# TODO ambrosejcarr: improve the tests here.
 def test_imagestack_to_intensity_table():
     codebook, intensity_table, image = codebook_intensities_image_for_single_synthetic_spot()
     pixel_intensities = IntensityTable.from_image_stack(image)
@@ -31,7 +30,6 @@ def test_imagestack_to_intensity_table_no_noise():
     assert isinstance(pixel_intensities, IntensityTable)
 
 
-# TODO ambrosejcarr: crop is not tested because it should be moved out of this function
 def test_intensity_table_can_be_constructed_from_an_imagestack():
     """
     ImageStack has enough information to create an IntensityTable without additional SpotAttributes.

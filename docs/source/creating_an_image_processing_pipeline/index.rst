@@ -15,15 +15,16 @@ The :ref:`data model<data_model>`
 This part of the tutorial goes into more detail about why each of the stages in the example are
 needed, and provides some alternative approaches that can be used to build similar pipelines.
 
-The core functionalities of starfish pipelines are the detection (and decoding) of spots, and the
-segmentation of cells. Each of the other approaches are designed to address various characteristics
-of the imaging system, or the optical characteristics of the tissue sample being measured, which
-might bias the resulting spot calling, decoding, or cell segmentation decisions. Not all parts of
-image processing are always needed; some are dependent on the specific characteristics of the
-tissues. In addition, not all components are always found in the same order. *Starfish* is flexible
-enough to omit some pipeline stages or disorder them, but the typical order might match the
-following. The links show how and when to use each component of *starfish*, and the final section
-demonstrates putting together a "pipeline recipe" and running it on an experiment.
+The core functionalities of starfish pipelines are the detection (and :term:`decoding<Decoding>`)
+of spots, and the segmentation of cells. Each of the other approaches are designed to address
+various characteristics of the imaging system, or the optical characteristics of the tissue
+sample being measured, which might bias the resulting spot calling, decoding, or cell
+segmentation decisions. Not all parts of image processing are always needed; some are dependent
+on the specific characteristics of the tissues. In addition, not all components are always found
+in the same order. *Starfish* is flexible enough to omit some pipeline stages or disorder them,
+but the typical order might match the following. The links show how and when to use each
+component of *starfish*, and the final section demonstrates putting together a "pipeline recipe"
+and running it on an experiment.
 
 .. _section_loading_data:
 
@@ -78,13 +79,13 @@ These approaches ameliorate these problems.
 Normalizing Intensities
 -----------------------
 
-Most assays are designed such that intensities need to be compared between rounds and/or channels
-in order to decode spots. As a basic example, smFISH spots are labeled by the channel with the
-highest intensity value. But because different channels use different fluorophores, excitation
-sources, etc. the images have different ranges of intensity values. The background
-intensity values in one channel might be as high as the signal intensity values of another
-channel. Normalizing image intensities corrects for these differences and allows comparisons to be
-made.
+Most assays are designed such that intensities need to be compared between :term:`rounds<Imaging
+Round>` and/or :term:`channels<Channel>` in order to :term:`decode<Decoding>` spots. As a basic
+example, smFISH spots are labeled by the channel with the highest intensity value. But because
+different channels use different fluorophores, excitation sources, etc. the images have different
+ranges of intensity values. The background intensity values in one channel might be as high as
+the signal intensity values of another channel. Normalizing image intensities corrects for these
+differences and allows comparisons to be made.
 
 Whether to normalize
 ^^^^^^^^^^^^^^^^^^^^
@@ -100,9 +101,9 @@ distributions.
 
 Accurately normalized images is important if you plan to decode features with
 :py:class:`.MetricDistance` or :py:class:`.PixelSpotDecoder`. These two algorithms use the
-:doc:`Feature Trace</help_and_reference/glossary/glossary>` to construct a vector whose
-distance from other vectors is used decode the feature. Poorly normalized images with some
-systematic or random variation in intensity will bias the results of decoding.
+:term:`feature trace<Feature (Spot, Pixel) Trace>` to construct a vector whose distance from
+other vectors is used decode the feature. Poorly normalized images with some systematic or random
+variation in intensity will bias the results of decoding.
 
 However if you decode with :py:class:`.PerRoundMaxChannel`, which only compares intensities
 between channels of the same round, precise normalization is not necessary. As long the intensity

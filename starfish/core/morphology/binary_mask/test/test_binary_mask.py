@@ -1,6 +1,9 @@
+import os
+
 import numpy as np
 from skimage.morphology import binary_dilation
 
+from starfish import ImageStack
 from starfish.core.morphology.label_image import LabelImage
 from starfish.core.types import Axes, Coordinates
 from .factories import binary_mask_collection_2d, label_array_2d
@@ -45,6 +48,23 @@ def test_from_label_image():
                           physical_ticks[Coordinates.Y][3:5])
     assert np.array_equal(region_1[Coordinates.X.value],
                           physical_ticks[Coordinates.X][3:6])
+
+
+def test_from_fiji_roi_set():
+    # set up empty dapi imagestack of correct size
+    fake_dapi = ImageStack.from_numpy(array=np.zeros(shape=(1, 1, 1, 2048, 2048)))
+    cwd = os.path.dirname(__file__)
+    file_path = os.path.join(cwd, "RoiSet.zip")
+
+    # load test roi_set.zip
+    masks = BinaryMaskCollection.from_fiji_roi_set(file_path, fake_dapi)
+
+    # check data and offsets set correctly
+    assert len(masks) == 4
+    assert masks._masks[0].offsets == (782, 760)
+    assert masks._masks[1].offsets == (234, 680)
+    assert masks._masks[2].offsets == (10, 980)
+    assert masks._masks[3].offsets == (16, 768)
 
 
 def test_uncropped_mask():

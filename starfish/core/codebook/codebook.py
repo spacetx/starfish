@@ -251,6 +251,31 @@ class Codebook(xr.DataArray):
         # guess the max round and channel if not provided, otherwise check provided values are valid
         max_round, max_ch = 0, 0
 
+        # verify codebook structure and fields
+        for code in code_array:
+
+            if not isinstance(code, dict):
+                raise ValueError(f'codebook must be an array of dictionary codes. Found: {code}.')
+
+            # verify all necessary fields are present
+            required_fields = {Features.CODEWORD, Features.TARGET}
+            missing_fields = required_fields.difference(code)
+            if missing_fields:
+                raise ValueError(
+                    f'Each entry of codebook must contain {required_fields}. Missing fields: '
+                    f'{missing_fields}')
+
+            for entry in code[Features.CODEWORD]:
+                if not isinstance(entry, dict):
+                    raise TypeError(f"codeword entries should be dictionaries")
+
+                required_codeword_fields = {Axes.ROUND.value, Axes.CH.value, Features.CODE_VALUE}
+                missing_codeword_fields = required_codeword_fields.difference(entry)
+                if missing_codeword_fields:
+                    raise ValueError(
+                        f"Each codeword entry must contain {required_codeword_fields}. Missing "
+                        f"fields: {missing_codeword_fields}")
+
         for code in code_array:
             for entry in code[Features.CODEWORD]:
                 max_round = max(max_round, entry[Axes.ROUND])
@@ -269,20 +294,6 @@ class Codebook(xr.DataArray):
             raise ValueError(
                 f'code detected that requires a channel value ({max_ch + 1}) that is greater '
                 f'than provided n_channel: {n_channel}')
-
-        # verify codebook structure and fields
-        for code in code_array:
-
-            if not isinstance(code, dict):
-                raise ValueError(f'codebook must be an array of dictionary codes. Found: {code}.')
-
-            # verify all necessary fields are present
-            required_fields = {Features.CODEWORD, Features.TARGET}
-            missing_fields = required_fields.difference(code)
-            if missing_fields:
-                raise ValueError(
-                    f'Each entry of codebook must contain {required_fields}. Missing fields: '
-                    f'{missing_fields}')
 
         target_names = [w[Features.TARGET] for w in code_array]
 
@@ -756,8 +767,6 @@ class Codebook(xr.DataArray):
 
         """
 
-        # TODO ambrosejcarr: clean up this code, generate Codebooks directly using _empty_codebook
-        # construct codes; this can be slow when n_codes is large and n_codes ~= n_possible_codes
         codes: Set = set()
         while len(codes) < n_codes:
             codes.add(tuple([np.random.randint(0, n_channel) for _ in np.arange(n_round)]))
@@ -775,7 +784,9 @@ class Codebook(xr.DataArray):
         if target_names is None:
             # use a reverse-sorted list of integers as codewords
             target_names = [uuid.uuid4() for _ in range(n_codes)]
-        assert n_codes == len(target_names)
+        if n_codes != len(target_names):
+            raise ValueError(
+                f"n_codes ({n_codes} does not match the number of targets ({len(target_names)})")
 
         codebook = [{Features.CODEWORD: w, Features.TARGET: g}
                     for w, g in zip(codewords, target_names)]

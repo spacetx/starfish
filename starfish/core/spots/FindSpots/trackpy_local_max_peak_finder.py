@@ -130,16 +130,12 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
         if attributes.shape[0] == 0:
             attributes['ep'] = []
 
-        # TODO ambrosejcarr: data should always be at least pseudo-3d, this may not be necessary
         # TODO ambrosejcarr: this is where max vs. sum vs. mean would be parametrized.
         # here, total_intensity = sum, intensity = max
-        new_colnames = [
-            'y', 'x', 'total_intensity', 'radius', 'eccentricity', 'intensity', 'raw_mass', 'ep'
+        attributes.columns = [
+            'z', 'y', 'x',
+            'total_intensity', 'radius', 'eccentricity', 'intensity', 'raw_mass', 'ep',
         ]
-        if len(data_image.shape) == 3:
-            attributes.columns = ['z'] + new_colnames
-        else:
-            attributes.columns = new_colnames
 
         attributes['spot_id'] = np.arange(attributes.shape[0])
         return PerImageSliceSpotResults(spot_attrs=SpotAttributes(attributes), extras=None)

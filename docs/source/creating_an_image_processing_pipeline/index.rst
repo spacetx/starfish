@@ -142,6 +142,68 @@ Finding and Decoding Spots
 Segmenting Cells
 ----------------
 
+Unlike single-cell RNA sequencing, image-based transcriptomics methods do not physically separate
+cells before acquiring RNA information. Therefore in order to characterize cells, the RNA must be
+assigned into single cells by partitioning the image volume. Accurate unsupervised cell-segmentation
+is an open problem for all biomedical imaging disciplines ranging from digital pathology to
+neuroscience.
+
+The challenge of segmenting cells depends on the structural complexity of the sample and quality
+of images available. For example a sparse cell mono-layer with a strong cytosol stain would be
+trivial to segment but a dense heterogeneous population of cells in 3D tissue with only a DAPI stain
+can be impossible to segment perfectly. On the experimental side, selecting good cell stains and
+acquiring images with low background will make segmenting a more tractable task.
+
+There are many approaches for segmenting cells from image-based transcriptomics assays. If you do
+not know which method to use, a safe bet is to start with classic thresholding and watershed. On
+the other hand, if you can afford to manually segment...
+
+Thresholding and Watershed
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The traditional method for segmenting cells in fluorescence microscopy images is to threshold the
+image into foreground pixels and background pixels and then label connected foreground as
+individual cells. Common issues that affect thresholding such as background noise can be corrected
+by preprocessing images before thresholding and filtering connected components after. There are
+`many automated image thresholding algorithms <https://imagej.net/Thresholding>`_ but currently
+starfish requires manually selecting a global threshold value in :py:class:`.ThresholdBinarize`.
+
+When overlapping cells are labeled as one connected component, they are typically segmented by
+using a `distance transformation followed by the watershed algorithm <https://www.mathworks
+.com/company/newsletters/articles/the-watershed-transform-strategies-for-image-segmentation
+.html>`_. Watershed is a classic image
+processing algorithm for separating objects in images and can be applied to all types of images.
+Pairing it with a distance transform is particularly useful for segmenting convex shapes like
+cells.
+
+A segmentation pipeline that consists of thresholding, connected component analysis, and watershed
+is the simplest and fastest to implement but its accuracy is highly dependent on image quality.
+The signal-to-noise ratio of the cell stain must be high enough for minimal errors after
+thresholding and binary operations. And the nuclei or cell shapes must be convex to meet the
+assumptions of the watershed algorithm or else it will over-segment. Starfish includes the basic
+functions to build a watershed segmentation pipeline and a predefined :py:class:`.Watershed`
+segmentation class that uses the :term:`primary images<Primary Images>` as the cell stain:
+
+:ref:`Ways to segment by thresholding and watershed in starfish<tutorial_watershed_segmentation>`
+
+Machine Learning Methods
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Ilastik
+
+Manually Defining Cells
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The most accurate but time-consuming approach is to manually segment using a tool like ROI
+manager in FIJI ImageJ.
+Available methods for segmenting cells.
+
+Points to make:
+accuracy is determined by comparison to ground truth, which is just manual assessment.
+the process of image segmentation:
+https://imagej.net/plugins/index.html#segmentation
+
+:ref:`Watershed Segmentation`
 .. _section_assigning_spots:
 
 Assigning Spots to Cells

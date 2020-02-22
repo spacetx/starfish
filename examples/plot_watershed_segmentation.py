@@ -84,15 +84,17 @@ warp.run(imgs, transforms_list=transforms_list, in_place=True)
 # background intensity in intracellular regions than extracellular regions such that the
 # intracellular regions can be labeled foreground by thresholding. This is not always the case
 # since it is usually beneficial to tune the microscope parameters to minimize background and
-# increase the SNR of spots in the acquired primary images. :term:`<Auxiliary Images>` with cell
-# stains would be ideal for this purpose and should be used instead if experimentally feasible.
+# increase the SNR of spots in the acquired primary images. :term:`Auxiliary images<Auxiliary
+# Images>` with cell stains would be ideal for this purpose and should be used instead if
+# experimentally feasible.
 #
-# :term:`<Auxiliary Images>` with nuclear stains (e.g. DAPI) are also required in this algorithm
-# to seed watershed segmentation of the cells. While a distance transformation of the binarized
-# cell stain images could also be used to seed watershed, nuclear stained images are almost
-# always included in an experiment. The advantage of using nuclei is that it will result in a
-# more accurate number of cells since it is not as prone to over-segmentation artifacts as using
-# the distance transform and nuclear stains are usually more robust than cellular stains.
+# :term:`Auxiliary images <Auxiliary Images>` with nuclear stains (e.g. DAPI) are also required in
+# this algorithm to seed watershed segmentation of the cells. While a distance transformation of
+# the binarized cell stain images could also be used to seed watershed, nuclear stained images
+# are almost always included in an experiment. The advantage of using nuclei is that it will
+# result in a more accurate number of cells since it is not as prone to over-segmentation
+# artifacts as using the distance transform and nuclear stains are usually more robust than
+# cellular stains.
 #
 # There are a number of parameters that need to be tuned for optimal segmentation. Generally,
 # the same parameters can be used across an experiment unless there is variation in microscope

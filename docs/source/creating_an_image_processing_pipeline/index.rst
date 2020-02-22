@@ -201,9 +201,8 @@ Available methods for segmenting cells.
 Points to make:
 accuracy is determined by comparison to ground truth, which is just manual assessment.
 the process of image segmentation:
-https://imagej.net/plugins/index.html#segmentation
+`segmentation in imagej <https://imagej.net/plugins/index.html#segmentation>`_
 
-:ref:`Watershed Segmentation`
 .. _section_assigning_spots:
 
 Assigning Spots to Cells

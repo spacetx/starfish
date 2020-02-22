@@ -140,7 +140,7 @@ plt.title('Stain')
 # In order to obtain the seeds to watershed segment cells, the nuclei are labeled first.
 # :py:class:`.ThresholdBinarize` thresholds and :py:class:`.MinDistanceLabel` labels the
 # binarized nuclei by using a distance transform followed by watershed. :py:class:`.AreaFilter`
-# then filters nuclei by area. The :py:param:`min_dist` parameter that limits how close two
+# then filters nuclei by area. The ``min_dist`` parameter that limits how close two
 # peaks in the distance transformed image can be is key to preventing over-segmentation of nuclei
 # with non-circular morphology but may also incorrectly merge two nuclei in close proximity.
 #
@@ -216,7 +216,7 @@ plt.title('Segmented Cells')
 # Running :py:class:`.Watershed` from the :py:mod:`.image` module (not to be confused with
 # :py:class:`.WatershedSegment` from the :py:mod:`.morphology` module) is a convenient method to
 # apply the same segmentation algorithm that was built in the previous section of this tutorial.
-# It sets the :py:param:`min_allowed_size` and :py:param:`max_allowed_size` of the nuclei to 10
+# It sets the ``min_allowed_size`` and ``max_allowed_size`` of the nuclei to 10
 # pixels and 1,000 pixels, respectively, but accepts
 #
 # Here is an example of how to run :py:class:`.Watershed` on the same set of images as the

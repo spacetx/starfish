@@ -145,8 +145,8 @@ Segmenting Cells
 Unlike single-cell RNA sequencing, image-based transcriptomics methods do not physically separate
 cells before acquiring RNA information. Therefore in order to characterize cells, the RNA must be
 assigned into single cells by partitioning the image volume. Accurate unsupervised cell-segmentation
-is an open problem for all biomedical imaging disciplines ranging from digital pathology to
-neuroscience.
+is an `open problem <https://www.kaggle.com/c/data-science-bowl-2018>`_ for all biomedical imaging
+disciplines ranging from digital pathology to neuroscience.
 
 The challenge of segmenting cells depends on the structural complexity of the sample and quality
 of images available. For example a sparse cell mono-layer with a strong cytosol stain would be
@@ -154,9 +154,15 @@ trivial to segment but a dense heterogeneous population of cells in 3D tissue wi
 can be impossible to segment perfectly. On the experimental side, selecting good cell stains and
 acquiring images with low background will make segmenting a more tractable task.
 
-There are many approaches for segmenting cells from image-based transcriptomics assays. If you do
-not know which method to use, a safe bet is to start with classic thresholding and watershed. On
-the other hand, if you can afford to manually segment...
+There are many approaches for segmenting cells from image-based transcriptomics assays. Below are
+a few methods that are implemented or integrated with starfish to output a :py:class:`
+.BinaryMaskCollection`, which represents a collection of labeled objects. If you do not know which
+segmentation method to use, a safe bet is to start with thresholding and watershed. On the other
+hand, if you can afford to manually define ROI masks there is no better way to guarantee accurate
+segmentation.
+
+.. note::
+    The "ground truth" for cell segmentation is manually segmented references.
 
 Thresholding and Watershed
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -171,37 +177,53 @@ starfish requires manually selecting a global threshold value in :py:class:`.Thr
 When overlapping cells are labeled as one connected component, they are typically segmented by
 using a `distance transformation followed by the watershed algorithm <https://www.mathworks
 .com/company/newsletters/articles/the-watershed-transform-strategies-for-image-segmentation
-.html>`_. Watershed is a classic image
-processing algorithm for separating objects in images and can be applied to all types of images.
-Pairing it with a distance transform is particularly useful for segmenting convex shapes like
-cells.
+.html>`_. Watershed is a classic image processing algorithm for separating objects in images and
+can be applied to all types of images. Pairing it with a distance transform is particularly
+useful for segmenting convex shapes like cells.
 
 A segmentation pipeline that consists of thresholding, connected component analysis, and watershed
 is the simplest and fastest to implement but its accuracy is highly dependent on image quality.
 The signal-to-noise ratio of the cell stain must be high enough for minimal errors after
 thresholding and binary operations. And the nuclei or cell shapes must be convex to meet the
-assumptions of the watershed algorithm or else it will over-segment. Starfish includes the basic
+assumptions of the distance transform or else it will over-segment. Starfish includes the basic
 functions to build a watershed segmentation pipeline and a predefined :py:class:`.Watershed`
 segmentation class that uses the :term:`primary images<Primary Images>` as the cell stain:
 
 :ref:`Ways to segment by thresholding and watershed in starfish<tutorial_watershed_segmentation>`
 
-Machine Learning Methods
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-Ilastik
-
 Manually Defining Cells
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The most accurate but time-consuming approach is to manually segment using a tool like ROI
-manager in FIJI ImageJ.
-Available methods for segmenting cells.
+The most accurate but time-consuming approach is to manually segment images using a tool such as
+`ROI manager <https://imagej.net/plugins/roi-manager-tools/index.html>`_ in FIJI (ImageJ). It is a
+straightforward process that starfish supports by allowing ROI set binaries to be imported as a
+:py:class:`.BinaryMaskCollection`. These masks can then be integrated into the pipeline for
+visualization and assigning spots to cells.
 
-Points to make:
-accuracy is determined by comparison to ground truth, which is just manual assessment.
-the process of image segmentation:
-`segmentation in imagej <https://imagej.net/plugins/index.html#segmentation>`_
+:ref:`Loading ImageJ ROI set<tutorial_manual_segmentation>`
+
+Machine-Learning Methods
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Besides the two classic cell segmentation approaches mentioned above, there are machine-learning
+methods that aim to replicate the accuracy of manual cell segmentation while reducing the labor
+required. Machine-learning algorithms for segmentation are continually improving but there is no
+perfect solution for all image types yet. These methods require training data (e.g. stained
+images with manually defined labels) to train a model to predict cell or nuclei locations in test
+data. There are `exceptions that don't require training on your specific data <http://www.cellpose
+.org/>`_ but generally training the model is something to consider when evaluating how much time
+each segmentation approach will require.
+
+Starfish currently has built-in functionality to support `ilastik <https://www.ilastik.org/>`_, a
+segmentation toolkit that leverages machine-learning. Ilastik has a Pixel Classification
+workflow that performs semantic segmentation of the image, returning probability maps for each
+label such as cells and background. To transform the images of pixel probabilities to binary
+masks, you can use the same thresholding and watershed methods in starfish that are used for
+segmenting images of stained cells.
+
+:ref:`Working with ilastik<tutorial_ilastik_segmentation>`
+
+
 
 .. _section_assigning_spots:
 

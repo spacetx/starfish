@@ -40,7 +40,6 @@ Output is a :py:class:`.BinaryMaskCollection`:
 
 # First we need to create our inputs by filtering and registering in situ sequencing (ISS) data.
 
-import os
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -51,8 +50,7 @@ from starfish import data, FieldOfView
 
 matplotlib.rcParams["figure.dpi"] = 150
 
-use_test_data = os.getenv("USE_TEST_DATA") is not None
-experiment = data.ISS(use_test_data=use_test_data)
+experiment = data.ISS()
 fov = experiment.fov()
 
 imgs = fov.get_image(FieldOfView.PRIMARY_IMAGES) # primary images

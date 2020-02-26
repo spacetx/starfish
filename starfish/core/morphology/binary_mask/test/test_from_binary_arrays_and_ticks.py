@@ -44,6 +44,12 @@ def test_2d():
     assert np.array_equal(region_1[Coordinates.X.value],
                           physical_ticks[Coordinates.X][3:6])
 
+    # verify that we can lazy-calculate the regionprops correctly.
+    region_0_props = binary_mask_collection.mask_regionprops(0)
+    region_1_props = binary_mask_collection.mask_regionprops(1)
+    assert region_0_props.area == 6
+    assert region_1_props.area == 5
+
 
 def test_3d():
     """Simple case of BinaryMaskCollection.from_binary_arrays_and_ticks with 3D data.  Pixel ticks
@@ -88,6 +94,12 @@ def test_3d():
                           physical_ticks[Coordinates.Y][3:5])
     assert np.array_equal(region_1[Coordinates.X.value],
                           physical_ticks[Coordinates.X][3:6])
+
+    # verify that we can lazy-calculate the regionprops correctly.
+    region_0_props = binary_mask_collection.mask_regionprops(0)
+    region_1_props = binary_mask_collection.mask_regionprops(1)
+    assert region_0_props.area == 6
+    assert region_1_props.area == 11
 
 
 def test_no_mask():

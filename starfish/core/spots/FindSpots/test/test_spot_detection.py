@@ -45,33 +45,49 @@ def simple_trackpy_local_max_spot_detector() -> TrackpyLocalMaxPeakFinder:
     )
 
 
-def simple_local_max_spot_detector() -> LocalMaxPeakFinder:
+def simple_local_max_spot_detector_3d() -> LocalMaxPeakFinder:
     return LocalMaxPeakFinder(
         min_distance=6,
         stringency=0,
         min_obj_area=0,
         max_obj_area=np.inf,
-        threshold=0
+        threshold=0,
+        is_volume=True,
+    )
+
+
+def simple_local_max_spot_detector_2d() -> LocalMaxPeakFinder:
+    return LocalMaxPeakFinder(
+        min_distance=6,
+        stringency=0,
+        min_obj_area=0,
+        max_obj_area=np.inf,
+        threshold=0,
+        is_volume=False
     )
 
 # initialize spot detectors
 gaussian_spot_detector = simple_gaussian_spot_detector()
 trackpy_local_max_spot_detector = simple_trackpy_local_max_spot_detector()
-local_max_spot_detector = simple_local_max_spot_detector()
+local_max_spot_detector_2d = simple_local_max_spot_detector_2d()
+local_max_spot_detector_3d = simple_local_max_spot_detector_3d()
 
 # test parameterization
 test_parameters = (
-    'data_stack, spot_detector',
+    'data_stack, spot_detector, is_2d',
     [
-        (ONE_HOT_IMAGESTACK, gaussian_spot_detector),
-        (ONE_HOT_IMAGESTACK, trackpy_local_max_spot_detector),
-        (ONE_HOT_IMAGESTACK, local_max_spot_detector),
-        (SPARSE_IMAGESTACK, gaussian_spot_detector),
-        (SPARSE_IMAGESTACK, trackpy_local_max_spot_detector),
-        (SPARSE_IMAGESTACK, local_max_spot_detector),
-        (BLANK_IMAGESTACK, gaussian_spot_detector),
-        (BLANK_IMAGESTACK, trackpy_local_max_spot_detector),
-        (BLANK_IMAGESTACK, local_max_spot_detector),
+        (ONE_HOT_IMAGESTACK, gaussian_spot_detector, False),
+        (ONE_HOT_IMAGESTACK, trackpy_local_max_spot_detector, False),
+        (ONE_HOT_IMAGESTACK, local_max_spot_detector_2d, True),
+        (ONE_HOT_IMAGESTACK, local_max_spot_detector_3d, False),
+        (SPARSE_IMAGESTACK, gaussian_spot_detector, False),
+        (SPARSE_IMAGESTACK, trackpy_local_max_spot_detector, False),
+        (SPARSE_IMAGESTACK, local_max_spot_detector_2d, True),
+        (SPARSE_IMAGESTACK, local_max_spot_detector_3d, False),
+        (BLANK_IMAGESTACK, gaussian_spot_detector, False),
+        (BLANK_IMAGESTACK, trackpy_local_max_spot_detector, False),
+        (BLANK_IMAGESTACK, local_max_spot_detector_2d, True),
+        (BLANK_IMAGESTACK, local_max_spot_detector_3d, False),
     ]
 )
 
@@ -80,15 +96,19 @@ test_parameters = (
 def test_spot_detection_with_reference_image(
         data_stack: ImageStack,
         spot_detector: FindSpotsAlgorithm,
+        is_2d: bool,
 ):
     """This testing method uses a reference image to identify spot locations. Each method should
     find 2 spots in the reference image then measure the intensity of those locations in each
     r/ch pair. The final spot results should represent 2 spots for each r/ch totalling
     2*num_rounds*num_ch spots """
 
+    # 2D spot detection will find spots on 8 zlayers, so it produces 7x as many spots.
+    multiplier = 7 if is_2d else 1
     reference_image = data_stack.reduce((Axes.ROUND, Axes.CH), func=FunctionSource.np("max"))
     spots_results = spot_detector.run(image_stack=data_stack, reference_image=reference_image)
-    assert spots_results.count_total_spots() == (2 * data_stack.num_chs * data_stack.num_rounds), \
+    assert spots_results.count_total_spots() == (
+        2 * data_stack.num_chs * data_stack.num_rounds * multiplier), \
         "wrong number of spots detected"
 
 
@@ -96,6 +116,7 @@ def test_spot_detection_with_reference_image(
 def test_spot_detection_no_reference_image(
         data_stack: ImageStack,
         spot_detector: FindSpotsAlgorithm,
+        is_2d: bool,
 ):
     """
     This testing method does not provide a reference image, and should therefore check for spots
@@ -103,8 +124,10 @@ def test_spot_detection_no_reference_image(
     total number of original spots in the ImageStack.
     """
 
+    # 2D spot detection will find spots on 8 zlayers, so it produces 7x as many spots.
+    multiplier = 7 if is_2d else 1
     spots_results = spot_detector.run(image_stack=data_stack)
-    assert spots_results.count_total_spots() == 4, "wrong number of spots detected"
+    assert spots_results.count_total_spots() == 4 * multiplier, "wrong number of spots detected"
 
     spots = spot_detector.run(image_stack=EMPTY_IMAGESTACK)
     assert spots.count_total_spots() == 0

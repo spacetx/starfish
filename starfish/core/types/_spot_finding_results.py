@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Hashable, List, Mapping, MutableMapping, Optional, Tuple
+from typing import Any, Hashable, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 import xarray as xr
 
@@ -31,7 +31,8 @@ class SpotFindingResults:
             self,
             imagestack_coords,
             log: Log,
-            spot_attributes_list: Optional[List[Tuple]] = None,
+            spot_attributes_list: Optional[
+                Sequence[Tuple[PerImageSliceSpotResults, Mapping[Axes, int]]]] = None,
     ):
         """
         Construct a SpotFindingResults instance
@@ -42,10 +43,12 @@ class SpotFindingResults:
             The physical coordinate ranges of the ImageStack spots were found in
         log : Log
             The provenance log information from the ImageStack spots were found in.
-        spot_attributes_list : Optional[List[Tuple]]
+        spot_attributes_list : Optional[
+        Sequence[Tuple[PerImageSliceSpotResults, Mapping[Axes, int]]]]
             If spots were found using ImageStack.transform() the result is a list of
-            tuples ((r, channel), PerImageSpotResults). Instantiating SpotFindingResults with
-            this list will convert the information to a dictionary.
+            tuples (PerImageSliceSpotResults, indices).  Indices should be a mapping from axes to
+            axis value.  Instantiating SpotFindingResults with this list will convert the
+            information to a dictionary.
         """
         spot_attributes_list = spot_attributes_list or []
         self._results: MutableMapping[Tuple, PerImageSliceSpotResults] = {

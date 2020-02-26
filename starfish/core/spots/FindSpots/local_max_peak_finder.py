@@ -1,8 +1,10 @@
+import collections
 from functools import partial
-from typing import Any, List, Mapping, Optional, Tuple
+from typing import Any, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 from scipy.ndimage import label
 from skimage.feature import peak_local_max
 from skimage.measure import regionprops
@@ -10,6 +12,7 @@ from sympy import Line, Point
 from tqdm import tqdm
 
 from starfish.core.config import StarfishConfig
+from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.spots.FindSpots import spot_finding_utils
 from starfish.core.types import (
@@ -25,7 +28,7 @@ from ._base import FindSpotsAlgorithm
 
 class LocalMaxPeakFinder(FindSpotsAlgorithm):
     """
-    2-dimensional local-max peak finder that wraps skimage.feature.peak_local_max
+    local-max peak finder that wraps skimage.feature.peak_local_max
 
     Parameters
     ----------
@@ -43,8 +46,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         When fewer than this number of spots are detected, spot searching for higher threshold
         values. (default = 3)
     is_volume : bool
-        Not supported. For 3d peak detection please use TrackpyLocalMaxPeakFinder.
-        (default=False)
+        If True, run the algorithm on 3d volumes of the provided stack. (default = True)
     verbose : bool
         If True, report the percentage completed during processing
         (default = False)
@@ -56,8 +58,11 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
 
     def __init__(
         self, min_distance: int, stringency: int, min_obj_area: int, max_obj_area: int,
-        threshold: Optional[Number]=None, measurement_type: str='max',
-        min_num_spots_detected: int=3, is_volume: bool=False, verbose: bool=True
+        threshold: Optional[Number] = None,
+        measurement_type: str = 'max',
+        min_num_spots_detected: int = 3,
+        is_volume: bool = True,
+        verbose: bool = True,
     ) -> None:
 
         self.min_distance = min_distance
@@ -180,7 +185,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         return selected_thr
 
     def _compute_threshold(
-            self, img: np.ndarray) -> Tuple[float, Optional[np.ndarray], Optional[List[int]]]:
+            self, img: xr.DataArray) -> Tuple[float, Optional[np.ndarray], Optional[List[int]]]:
         """Finds spots on a number of thresholds then selects and returns the optimal threshold
 
         Parameters
@@ -202,28 +207,29 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         return self._select_optimal_threshold(thresholds, spot_counts), thresholds, spot_counts
 
     def image_to_spots(
-            self, data_image: np.ndarray
+            self,
+            data_image: xr.DataArray,
     ) -> PerImageSliceSpotResults:
         """measure attributes of spots detected by binarizing the image using the selected threshold
 
         Parameters
         ----------
-        data_image : np.ndarray
+        data_image : xr.DataArray
             image containing spots to be detected
 
         Returns
         -------
-        PerImageSpotResults :
+        PerImageSliceSpotResults :
             includes a SpotAttributes DataFrame of metadata containing the coordinates, intensity
             and radius of each spot, as well as any extra information collected during spot finding.
         """
 
         optimal_threshold, thresholds, spot_counts = self._compute_threshold(data_image)
 
-        data_image = np.asarray(data_image)
+        data_image_np = np.asarray(data_image)
 
         # identify each spot's size by binarizing and calculating regionprops
-        masked_image = data_image[:, :] > optimal_threshold
+        masked_image = data_image_np[:, :] > optimal_threshold
         labels = label(masked_image)[0]
         spot_props = regionprops(np.squeeze(labels))
 
@@ -239,7 +245,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
             print('computing final spots ...')
 
         spot_coords = peak_local_max(
-            data_image,
+            data_image_np,
             min_distance=self.min_distance,
             threshold_abs=optimal_threshold,
             exclude_border=False,
@@ -249,15 +255,27 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
             labels=labels
         )
 
-        res = {Axes.X.value: spot_coords[:, 2],
-               Axes.Y.value: spot_coords[:, 1],
-               Axes.ZPLANE.value: spot_coords[:, 0],
-               Features.SPOT_RADIUS: 1,
-               Features.SPOT_ID: np.arange(spot_coords.shape[0]),
-               Features.INTENSITY: data_image[spot_coords[:, 0],
-                                              spot_coords[:, 1],
-                                              spot_coords[:, 2]],
-               }
+        if data_image.ndim == 3:
+            res = {Axes.X.value: spot_coords[:, 2],
+                   Axes.Y.value: spot_coords[:, 1],
+                   Axes.ZPLANE.value: spot_coords[:, 0],
+                   Features.SPOT_RADIUS: 1,
+                   Features.SPOT_ID: np.arange(spot_coords.shape[0]),
+                   Features.INTENSITY: data_image_np[spot_coords[:, 0],
+                                                     spot_coords[:, 1],
+                                                     spot_coords[:, 2]],
+                   }
+        else:
+            zlabel = int(data_image.coords[Axes.ZPLANE.value])
+            res = {Axes.X.value: spot_coords[:, 1],
+                   Axes.Y.value: spot_coords[:, 0],
+                   Axes.ZPLANE.value: zlabel,
+                   Features.SPOT_RADIUS: 1,
+                   Features.SPOT_ID: np.arange(spot_coords.shape[0]),
+                   Features.INTENSITY: data_image_np[spot_coords[:, 0],
+                                                     spot_coords[:, 1]],
+                   }
+
         extras: Mapping[str, Any] = {
             "threshold": optimal_threshold,
             "thresholds": thresholds,
@@ -293,19 +311,46 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         """
         spot_finding_method = partial(self.image_to_spots, *args, **kwargs)
         if reference_image:
-            data_image = reference_image._squeezed_numpy(*{Axes.ROUND, Axes.CH})
-            reference_spots = spot_finding_method(data_image)
-            results = spot_finding_utils.measure_intensities_at_spot_locations_across_imagestack(
-                data_image=image_stack,
-                reference_spots=reference_spots,
-                measurement_function=self.measurement_function)
-        else:
-            spot_attributes_list = image_stack.transform(
+            shape = reference_image.shape
+            assert shape[Axes.ROUND] == 1
+            assert shape[Axes.CH] == 1
+            spot_attributes_lists = reference_image.transform(
                 func=spot_finding_method,
-                group_by={Axes.ROUND, Axes.CH},
+                group_by=determine_axes_to_group_by(self.is_volume),
                 n_processes=n_processes
             )
+
+            spot_attributes_lists = combine_spot_attributes_by_round_channel(spot_attributes_lists)
+            assert len(spot_attributes_lists) == 1
+            results = spot_finding_utils.measure_intensities_at_spot_locations_across_imagestack(
+                data_image=image_stack,
+                reference_spots=spot_attributes_lists[0][0],
+                measurement_function=self.measurement_function)
+        else:
+            spot_attributes_lists = image_stack.transform(
+                func=spot_finding_method,
+                group_by=determine_axes_to_group_by(self.is_volume),
+                n_processes=n_processes
+            )
+            spot_attributes_lists = combine_spot_attributes_by_round_channel(spot_attributes_lists)
             results = SpotFindingResults(imagestack_coords=image_stack.xarray.coords,
                                          log=image_stack.log,
-                                         spot_attributes_list=spot_attributes_list)
+                                         spot_attributes_list=spot_attributes_lists)
         return results
+
+
+def combine_spot_attributes_by_round_channel(
+        spot_attributes_lists: Sequence[Tuple[PerImageSliceSpotResults, Mapping[Axes, int]]],
+) -> List[Tuple[PerImageSliceSpotResults, Mapping[Axes, int]]]:
+    # first bin by indices
+    bins: MutableMapping[Tuple[int, int], List[SpotAttributes]] = collections.defaultdict(list)
+    for spot_attributes_list, indices in spot_attributes_lists:
+        bins[(indices[Axes.ROUND], indices[Axes.CH])].append(spot_attributes_list.spot_attrs)
+
+    return [
+        (
+            PerImageSliceSpotResults(SpotAttributes.combine(spot_attributes_lists), None),
+            {Axes.ROUND: indices[0], Axes.CH: indices[1]},
+        )
+        for indices, spot_attributes_lists in bins.items()
+    ]

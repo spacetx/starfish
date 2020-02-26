@@ -78,20 +78,24 @@ help-docs:
 
 ### REQUIREMENTS #############################################
 #
-check-requirements:
-	if [[ $$(git status --porcelain REQUIREMENTS* requirements/REQUIREMENTS* starfish/REQUIREMENTS*) ]]; then \
-	    echo "Modifications found in REQUIREMENTS files"; exit 2; \
-	fi
+GENERATED_REQUIREMENT_FILES=starfish/REQUIREMENTS-STRICT.txt requirements/REQUIREMENTS-CI.txt requirements/REQUIREMENTS-NAPARI-CI.txt
+SOURCE_REQUIREMENT_FILES=REQUIREMENTS.txt requirements/REQUIREMENTS-CI.txt.in requirements/REQUIREMENTS-NAPARI-CI.txt.in
 
-refresh-all-requirements: export TARGETS=starfish/REQUIREMENTS-STRICT.txt requirements/REQUIREMENTS-CI.txt requirements/REQUIREMENTS-NAPARI-CI.txt
-refresh-all-requirements: export SOURCES=REQUIREMENTS.txt requirements/REQUIREMENTS-CI.txt.in requirements/REQUIREMENTS-NAPARI-CI.txt.in
-refresh-all-requirements:
-	@for target in $(TARGETS); do \
+# This rule pins the requirements with the minimal set of changes required to satisfy the
+# requirements.  This is typically run when a new requirement is added, and we want to
+# propagate the new requirement to the pin files.
+pin-requirements : $(GENERATED_REQUIREMENT_FILES)
+
+# This rule removes all existing pins and pins all requirements based on the latest set of libraries
+# that satisfy the requirements.  This is typically run periodically to make sure the pins don't
+# become too stale.
+pin-all-requirements:
+	@for target in $(GENERATED_REQUIREMENT_FILES); do \
 		echo -n '' >| $$target; \
 	done
 	@if [ $$(uname -s) == "Darwin" ]; then sleep 1; fi  # this is require because Darwin HFS+ only has second-resolution for timestamps.
-	@touch $(SOURCES)
-	$(MAKE) $(TARGETS)
+	@touch $(SOURCE_REQUIREMENT_FILES)
+	$(MAKE) $(GENERATED_REQUIREMENT_FILES)
 
 starfish/REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
 	[ ! -e .$<-env ] || exit 1
@@ -113,11 +117,17 @@ requirements/REQUIREMENTS-%.txt : requirements/REQUIREMENTS-%.txt.in REQUIREMENT
 	.$<-env/bin/pip freeze >> $@
 	rm -rf .$<-env
 
-help-requirements:
-	$(call print_help, refresh_all_requirements, regenerate requirements files)
-	$(call print_help, check_requirements, fail if requirements files have been modified)
+check-requirements:
+	if [[ $$(git status --porcelain $(GENERATED_REQUIREMENT_FILES)) ]]; then \
+	    echo "Modifications found in REQUIREMENTS files"; exit 2; \
+	fi
 
-.PHONY: refresh_all_requirements
+help-requirements:
+	$(call print_help, pin-requirements, pin requirements with minimal set of changes)
+	$(call print_help, pin-all-requirements, pin requirements with latest packages)
+	$(call print_help, check-requirements, fail if requirements files have been modified)
+
+.PHONY: pin-requirements pin-all-requirements check-requirements
 #
 ##############################################################
 

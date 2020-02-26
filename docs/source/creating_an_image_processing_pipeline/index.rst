@@ -161,15 +161,15 @@ can be impossible to segment perfectly. On the experimental side, selecting good
 acquiring images with low background will make segmenting a more tractable task.
 
 There are many approaches for segmenting cells from image-based transcriptomics assays. Below are
-a few methods that are implemented or integrated with starfish to output a :py:class:`
-.BinaryMaskCollection`, which represents a collection of labeled objects. If you do not know which
-segmentation method to use, a safe bet is to start with thresholding and watershed. On the other
-hand, if you can afford to manually define ROI masks there is no better way to guarantee accurate
-segmentation.
+a few methods that are implemented or integrated with starfish to output a
+:py:class:`.BinaryMaskCollection`, which represents a collection of labeled objects. If you do not
+know which segmentation method to use, a safe bet is to start with thresholding and watershed. On
+the other hand, if you can afford to manually define ROI masks there is no better way to
+guarantee accurate segmentation.
 
 .. note::
     While there is no "ground truth" for cell segmentation the closest approximation is manual
-segmentation by an expert in the tissue of interest.
+    segmentation by an expert in the tissue of interest.
 
 Thresholding and Watershed
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

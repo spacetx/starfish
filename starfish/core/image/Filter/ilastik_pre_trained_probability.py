@@ -20,8 +20,9 @@ class IlastikPretrainedProbability(FilterAlgorithm):
     Parameters
     ----------
     ilastik_executable: Union[Path, str]
-        Path to run_ilastik.sh needed for running ilastik in headless mode. Typically the script is
-        located: "/Applications/{ILASTIK_VERSION}/Contents/ilastik-release/run_ilastik.sh"
+        Path to run_ilastik.sh (Linux and Mac) or ilastik.bat (Windows) needed for running
+        ilastik in headless mode. Typically the script is located: "/Applications/{
+        ILASTIK_VERSION}/Contents/ilastik-release/run_ilastik.sh"
 
     ilastik_project: Union[Path, str]
         path to ilastik project .ilp file
@@ -31,9 +32,9 @@ class IlastikPretrainedProbability(FilterAlgorithm):
     def __init__(self, ilastik_executable: Union[Path, str], ilastik_project: Union[Path, str]):
         ilastik_executable = Path(ilastik_executable)
         if not ilastik_executable.exists():
-            raise EnvironmentError("Can not find run_ilastik.sh. Make sure you've provided the "
-                                   "correct location. If you need to download ilastik please"
-                                   " visit: https://www.ilastik.org/download.html")
+            raise EnvironmentError("Can not find run_ilastik.sh or ilastik.bat. Make sure you've "
+                                   "provided the correct location. If you need to download ilastik "
+                                   "please visit: https://www.ilastik.org/download.html")
         self.ilastik_executable = ilastik_executable
         self.ilastik_project = ilastik_project
 
@@ -46,7 +47,7 @@ class IlastikPretrainedProbability(FilterAlgorithm):
             *args,
     ) -> Optional[ImageStack]:
         """
-        Use a pre trained probability pixel classification model to generate probabilites
+        Use a pre trained probability pixel classification model to generate probabilities
         for a dapi image
 
         Parameters
@@ -94,8 +95,11 @@ class IlastikPretrainedProbability(FilterAlgorithm):
         return self.import_ilastik_probabilities(output_file)
 
     @classmethod
-    def import_ilastik_probabilities(cls, path_to_h5_file: Union[str, Path]
-                                     ) -> ImageStack:
+    def import_ilastik_probabilities(
+            cls,
+            path_to_h5_file: Union[str, Path],
+            dataset_name: str = "exported_data"
+    ) -> ImageStack:
         """
         Import cell probabilities provided by ilastik as an ImageStack.
 
@@ -103,7 +107,8 @@ class IlastikPretrainedProbability(FilterAlgorithm):
         ----------
         path_to_h5_file : Union[str, Path]
             Path to the .h5 file outputted by ilastik
-
+        dataset_name : str
+            Name of dataset in ilastik Export Image Settings
         Returns
         -------
         ImageStack :
@@ -111,7 +116,7 @@ class IlastikPretrainedProbability(FilterAlgorithm):
         """
 
         h5 = h5py.File(path_to_h5_file)
-        probability_images = h5["exported_data"][:]
+        probability_images = h5[dataset_name][:]
         h5.close()
         cell_probabilities, _ = probability_images[:, :, 0], probability_images[:, :, 1]
         label_array = ndi.label(cell_probabilities)[0]

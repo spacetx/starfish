@@ -7,14 +7,27 @@ Loading ImageJ ROI Sets
 .. note::
     Starfish only supports importing 2D ROIs.
 
-The best quality cell segmentation annotations are manually drawn by experts. If you have ROI
-sets exported with ROI manager in ImageJ or FIJI they can be loaded into starfish as a
-:py:class:`.BinaryMaskCollection`. The ROI set for each field of view must be passed with the
-corresponding :py:class:`.ImageStack` to :py:meth:`.from_fiji_roi_set` in order to assign
-accurate ``pixel ticks`` and ``physical ticks`` to the :py:class:`.BinaryMaskCollection`.
+In order to create a cell by gene expression matrix from image-based transcriptomics data, RNA
+spots must be assigned to cells by segmenting an image. The best quality cell segmentation
+annotations are manually drawn by experts. If you have ROI sets exported with `ROI manager
+<https://imagej.net/docs/guide/146-30.html#fig:The-ROI-Manager`_ in ImageJ or FIJI they can be
+loaded into starfish as a :py:class:`.BinaryMaskCollection`. The ROI set for each field of view
+must be passed with the corresponding :py:class:`.ImageStack` to :py:meth:`.from_fiji_roi_set` in
+order to assign accurate ``pixel ticks`` and ``physical ticks`` to the
+:py:class:`.BinaryMaskCollection`.
 
 This tutorial demonstrates how to load an ROI set that was exported form ROI manager as a .zip
 and how to plot the resulting :py:class:`.BinaryMaskCollection`.
+
+Brief segmentation workflow in ImageJ ROI Manager:
+
+* Tools > ROI Manager
+* Click "polygon selection" (third button from left on GUI)
+* Create a polygon, then click the "+" button to finalize it
+* Repeat until segmented
+* Click "more >>>"
+* Click "save"
+* Save the ROISet
 """
 
 import matplotlib

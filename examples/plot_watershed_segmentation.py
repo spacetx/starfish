@@ -31,10 +31,12 @@ classes and methods provided in :py:mod:`.morphology`. Then this tutorial will c
 the predefined segmentation pipeline.
 
 Inputs for this tutorial are :py:class:`.ImageStack`\s:
+
 * registered primary images to mimic a cell stain
 * registered nuclei images to seed the water segmentation of cells
 
 Output is a :py:class:`.BinaryMaskCollection`:
+
 * each binary mask in the collection is a labeled cell
 """
 
@@ -169,7 +171,7 @@ image(
 plt.title('Found: {} cells'.format(len(watershed_markers)))
 
 ####################################################################################################
-# The cell stain image (ie. primary image) is binarized and then the union of the binary cell
+# The cell stain image (i.e. primary image) is binarized and then the union of the binary cell
 # image and binary nuclei image is used to create a mask for watershed. This ensures that the
 # nuclei markers that seed watershed segmentation of cells are all within cells and that no area
 # outside of cells is labeled.
@@ -194,6 +196,8 @@ plt.title('Watershed Mask')
 # which are the nuclei markers. And the boundaries of the basins are the watershed mask.
 
 segmenter = Segment.WatershedSegment(connectivity=np.ones((1, 3, 3), dtype=np.bool))
+
+# masks is BinaryMaskCollection for downstream steps
 masks = segmenter.run(
     stain,
     watershed_markers,
@@ -235,14 +239,9 @@ seg = Segment.Watershed(
     input_threshold=stain_thresh,
     min_distance=min_dist
 )
+
+# masks is BinaryMaskCollection for downstream steps
 masks = seg.run(imgs, nuclei)
-image(
-    masks.to_label_image().xarray.squeeze(Axes.ZPLANE.value).values,
-    size=20,
-    cmap=plt.cm.nipy_spectral,
-    ax=plt.gca(),
-)
-plt.title('Segmented Cells')
 
 # display intermediate images and result
 seg.show()

@@ -31,8 +31,8 @@ and running it on an experiment.
 Loading Data
 ------------
 
-* :ref:`Formatting your data <data_conversion_examples>`
-* :ref:`Using formatted example data <datasets>`
+* Tutorial: :ref:`Formatting your data <data_conversion_examples>`
+* Tutorial: :ref:`Using formatted example data <datasets>`
 
 .. _section_manipulating_images:
 
@@ -43,8 +43,8 @@ Sometimes it can be useful subset the images by, for example, excluding out-of-f
 cropping out edge effects. For sparse data, it can be useful to project the z-volume into a single
 image, as this produces a much faster processing routine.
 
-* :ref:`Cropping <tutorial_cropping>`
-* :ref:`Projecting <tutorial_projection>`
+* Tutorial: :ref:`Cropping <tutorial_cropping>`
+* Tutorial: :ref:`Projecting <tutorial_projection>`
 
 .. _section_correcting_images:
 
@@ -56,11 +56,11 @@ handling or microfluidices that are involved in capturing the images. These step
 *independent* of the assay. *Starfish* enables the user to design a pipeline that matches their
 imaging system
 
-* :ref:`Illumination Correction <tutorial_illumination_correction>`
-* :ref:`Chromatic Aberration <tutorial_chromatic_aberration>`
-* :ref:`Deconvolution <tutorial_deconvolution>`
-* :ref:`Image Registration <tutorial_image_registration>`
-* :ref:`Image Correction Pipeline <tutorial_image_correction_pipeline>`
+* Tutorial: :ref:`Illumination Correction <tutorial_illumination_correction>`
+* Tutorial: :ref:`Chromatic Aberration <tutorial_chromatic_aberration>`
+* Tutorial: :ref:`Deconvolution <tutorial_deconvolution>`
+* Tutorial: :ref:`Image Registration <tutorial_image_registration>`
+* Tutorial: :ref:`Image Correction Pipeline <tutorial_image_correction_pipeline>`
 
 .. _section_improving_snr:
 
@@ -72,7 +72,7 @@ some level of autofluorescence which causes cellular compartments to have more b
 intracellular regions. This can confound spot finders, which look for local intensity differences.
 These approaches ameliorate these problems.
 
-* :ref:`Removing Autofluorescence <tutorial_removing_autoflourescence>`
+* Tutorial: :ref:`Removing Autofluorescence <tutorial_removing_autoflourescence>`
 
 .. _section_normalizing_intensities:
 
@@ -116,7 +116,8 @@ How to normalize
 How to normalize depends on your data and a key assumption. There are two approaches for
 normalizing images in starfish:
 
-:ref:`Normalizing Intensity Distributions<tutorial_normalizing_intensity_distributions>`
+Normalizing Intensity Distributions
+"""""""""""""""""""""""""""""""""""
 
 If you know a priori that image volumes acquired for every channel and/or every round should have
 the same distribution of intensities then the intensity *distributions* of image volumes can be
@@ -124,13 +125,18 @@ normalized with :py:class:`.MatchHistograms`. Typically this means the number of
 background autofluorescence in every image volume is approximately uniform across channels and/or
 rounds.
 
-:ref:`Normalizing Intensity Values <tutorial_normalizing_intensity_values>`
+* Tutorial: :ref:`Normalizing Intensity Distributions<tutorial_normalizing_intensity_distributions>`
+
+Normalizing Intensity Values
+""""""""""""""""""""""""""""
 
 In most data sets the differences in gene expression leads to too much variation in number of
 spots between channels and rounds. Normalizing intensity distributions would incorrectly skew the
 intensities. Instead you can use :py:class:`.Clip`, :py:class:`.ClipPercentileToZero`, and
 :py:class:`.ClipValueToZero` to normalize intensity *values* by clipping extreme values and
 rescaling.
+
+* Tutorial: :ref:`Normalizing Intensity Values <tutorial_normalizing_intensity_values>`
 
 .. _section_finding_and_decoding:
 
@@ -162,7 +168,8 @@ hand, if you can afford to manually define ROI masks there is no better way to g
 segmentation.
 
 .. note::
-    The "ground truth" for cell segmentation is manually segmented references.
+    While there is no "ground truth" for cell segmentation the closest approximation is manual
+segmentation by an expert in the tissue of interest.
 
 Thresholding and Watershed
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -187,20 +194,20 @@ The signal-to-noise ratio of the cell stain must be high enough for minimal erro
 thresholding and binary operations. And the nuclei or cell shapes must be convex to meet the
 assumptions of the distance transform or else it will over-segment. Starfish includes the basic
 functions to build a watershed segmentation pipeline and a predefined :py:class:`.Watershed`
-segmentation class that uses the :term:`primary images<Primary Images>` as the cell stain:
+segmentation class that uses the :term:`primary images<Primary Images>` as the cell stain.
 
-:ref:`Ways to segment by thresholding and watershed in starfish<tutorial_watershed_segmentation>`
+* Tutorial: :ref:`Ways to segment by thresholding and watershed<tutorial_watershed_segmentation>`
 
 Manually Defining Cells
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The most accurate but time-consuming approach is to manually segment images using a tool such as
-`ROI manager <https://imagej.net/plugins/roi-manager-tools/index.html>`_ in FIJI (ImageJ). It is a
-straightforward process that starfish supports by allowing ROI set binaries to be imported as a
+`ROI manager <https://imagej.net/docs/guide/146-30.html#fig:The-ROI-Manager>`_ in FIJI (ImageJ). It
+is a straightforward process that starfish supports by allowing ROI set binaries to be imported as a
 :py:class:`.BinaryMaskCollection`. These masks can then be integrated into the pipeline for
 visualization and assigning spots to cells.
 
-:ref:`Loading ImageJ ROI set<tutorial_manual_segmentation>`
+* Tutorial: :ref:`Loading ImageJ ROI set<tutorial_manual_segmentation>`
 
 Machine-Learning Methods
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -221,9 +228,7 @@ label such as cells and background. To transform the images of pixel probabiliti
 masks, you can use the same thresholding and watershed methods in starfish that are used for
 segmenting images of stained cells.
 
-:ref:`Working with ilastik<tutorial_ilastik_segmentation>`
-
-
+* Tutorial: :ref:`Using ilastik in starfish<tutorial_ilastik_segmentation>`
 
 .. _section_assigning_spots:
 

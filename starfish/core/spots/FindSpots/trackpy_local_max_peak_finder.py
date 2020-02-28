@@ -5,7 +5,6 @@ from typing import Optional, Tuple
 import numpy as np
 from trackpy import locate
 
-from starfish.core.image.Filter.util import determine_axes_to_group_by
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.spots.FindSpots import spot_finding_utils
 from starfish.core.types import Axes, PerImageSliceSpotResults, SpotAttributes, SpotFindingResults
@@ -59,8 +58,6 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
         Set to False to turn off bandpass prepossessing.
     max_iterations : integer
         Max number of loops to refine the center of mass, (default = 10)
-    is_volume : bool
-        if True, run the algorithm on 3d volumes of the provided stack (default = False)
     verbose : bool
         If True, report the percentage completed (default = False) during processing
 
@@ -72,9 +69,16 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
 
     def __init__(
             self, spot_diameter, min_mass, max_size, separation, percentile=0,
-            noise_size: Tuple[int, int, int] = (1, 1, 1), smoothing_size=None, threshold=None,
-            preprocess: bool = False, max_iterations: int = 10, measurement_type: str = 'max',
-            is_volume: bool = False, verbose=False, radius_is_gyration: bool = False) -> None:
+            noise_size: Tuple[int, int, int] = (1, 1, 1),
+            smoothing_size=None,
+            threshold=None,
+            preprocess: bool = False,
+            max_iterations: int = 10,
+            measurement_type: str = 'max',
+            is_volume: Optional[bool] = None,
+            verbose=False,
+            radius_is_gyration: bool = False,
+    ) -> None:
 
         self.diameter = spot_diameter
         self.minmass = min_mass
@@ -87,9 +91,15 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
         self.measurement_function = self._get_measurement_function(measurement_type)
         self.preprocess = preprocess
         self.max_iterations = max_iterations
-        self.is_volume = is_volume
         self.verbose = verbose
         self.radius_is_gyration = radius_is_gyration
+
+        if is_volume is not None:
+            if is_volume:
+                warnings.warn(f"is_volume is a deprecated parameter.")
+            else:
+                raise ValueError(
+                    f"TrackPy with 2D slices is not supported.  is_volume is deprecated.")
 
     def image_to_spots(
             self, data_image: np.ndarray,
@@ -172,7 +182,7 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
         else:
             spot_attributes_list = image_stack.transform(
                 func=spot_finding_method,
-                group_by=determine_axes_to_group_by(self.is_volume),
+                group_by={Axes.ROUND, Axes.CH},
                 n_processes=n_processes
             )
             results = SpotFindingResults(imagestack_coords=image_stack.xarray.coords,

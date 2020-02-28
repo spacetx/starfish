@@ -189,7 +189,7 @@ can be applied to all types of images. Pairing it with a distance transform is p
 useful for segmenting convex shapes like cells.
 
 A segmentation pipeline that consists of thresholding, connected component analysis, and watershed
-is the simplest and fastest to implement but its accuracy is highly dependent on image quality.
+is simple and fast to implement but its accuracy is highly dependent on image quality.
 The signal-to-noise ratio of the cell stain must be high enough for minimal errors after
 thresholding and binary operations. And the nuclei or cell shapes must be convex to meet the
 assumptions of the distance transform or else it will over-segment. Starfish includes the basic

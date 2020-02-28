@@ -168,7 +168,7 @@ the other hand, if you can afford to manually define ROI masks there is no bette
 guarantee accurate segmentation.
 
 .. note::
-    While there is no "ground truth" for cell segmentation the closest approximation is manual
+    While there is no "ground truth" for cell segmentation, the closest approximation is manual
     segmentation by an expert in the tissue of interest.
 
 Thresholding and Watershed

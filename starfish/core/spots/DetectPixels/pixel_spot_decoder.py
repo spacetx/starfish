@@ -3,6 +3,7 @@ from typing import Optional, Tuple
 
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.imagestack.imagestack import ImageStack
+from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
     transfer_physical_coords_to_intensity_table
@@ -50,7 +51,7 @@ class PixelSpotDecoder(DetectPixelsAlgorithm):
             primary_image: ImageStack,
             n_processes: Optional[int] = None,
             *args,
-    ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
+    ) -> Tuple[DecodedIntensityTable, ConnectedComponentDecodingResult]:
         """decode pixels and combine them into spots using connected component labeling
 
         Parameters
@@ -63,7 +64,7 @@ class PixelSpotDecoder(DetectPixelsAlgorithm):
 
         Returns
         -------
-        IntensityTable :
+        DecodedIntensityTable :
             IntensityTable containing decoded spots
         ConnectedComponentDecodingResult :
             Results of connected component labeling

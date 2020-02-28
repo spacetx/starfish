@@ -149,7 +149,7 @@ Segmenting Cells
 ----------------
 
 Unlike single-cell RNA sequencing, image-based transcriptomics methods do not physically separate
-cells before acquiring RNA information. Therefore in order to characterize cells, the RNA must be
+cells before acquiring RNA information. Therefore, in order to characterize cells, the RNA must be
 assigned into single cells by partitioning the image volume. Accurate unsupervised cell-segmentation
 is an `open problem <https://www.kaggle.com/c/data-science-bowl-2018>`_ for all biomedical imaging
 disciplines ranging from digital pathology to neuroscience.
@@ -258,4 +258,3 @@ origin. At this point, it's trivial to create a cell x gene matrix.
 * :ref:`Spot Decoding <tutorial_spot_decoding>`
 * :ref:`Segmenting Cells <tutorial_segmenting_cells>`
 * :ref:`Assigning Spots to Cells <tutorial_assigning_spots_to_cells>`
-

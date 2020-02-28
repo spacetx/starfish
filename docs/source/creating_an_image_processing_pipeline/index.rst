@@ -155,7 +155,7 @@ is an `open problem <https://www.kaggle.com/c/data-science-bowl-2018>`_ for all 
 disciplines ranging from digital pathology to neuroscience.
 
 The challenge of segmenting cells depends on the structural complexity of the sample and quality
-of images available. For example a sparse cell mono-layer with a strong cytosol stain would be
+of images available. For example, a sparse cell mono-layer with a strong cytosol stain would be
 trivial to segment but a dense heterogeneous population of cells in 3D tissue with only a DAPI stain
 can be impossible to segment perfectly. On the experimental side, selecting good cell stains and
 acquiring images with low background will make segmenting a more tractable task.

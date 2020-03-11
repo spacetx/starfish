@@ -10,6 +10,7 @@ from skimage.measure._regionprops import _RegionProperties
 from tqdm import tqdm
 
 from starfish.core.config import StarfishConfig
+from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
 from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Axes, Features, Number, SpotAttributes
 
@@ -348,7 +349,7 @@ class CombineAdjacentFeatures:
     def run(
             self, intensities: IntensityTable,
             n_processes: Optional[int] = None,
-    ) -> Tuple[IntensityTable, ConnectedComponentDecodingResult]:
+    ) -> Tuple[DecodedIntensityTable, ConnectedComponentDecodingResult]:
         """
         Execute the combine_adjacent_features method on an IntensityTable containing pixel
         intensities
@@ -421,7 +422,7 @@ class CombineAdjacentFeatures:
 
         # create the output IntensityTable
         dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
-        intensity_table = IntensityTable(
+        intensity_table = DecodedIntensityTable(
             data=mean_pixel_traces, coords=coords, dims=dims
         )
 

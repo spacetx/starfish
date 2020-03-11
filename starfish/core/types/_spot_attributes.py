@@ -1,5 +1,5 @@
 import json
-from typing import Collection
+from typing import Collection, Sequence
 
 import numpy as np
 import pandas as pd
@@ -33,6 +33,13 @@ class SpotAttributes(ValidatedTable):
         extra_dtypes = list(zip(extra_fields, [np.object] * len(extra_fields)))
         dtype = cls.required_fields + extra_dtypes
         return cls(pd.DataFrame(np.array([], dtype=dtype)))
+
+    @classmethod
+    def combine(cls, spot_attribute_tables: Sequence["SpotAttributes"]) -> "SpotAttributes":
+        return cls(pd.concat([
+            spot_attribute_table.data
+            for spot_attribute_table in spot_attribute_tables
+        ]))
 
     def save_geojson(self, output_file_name: str) -> None:
         """Save to geojson for web visualization

@@ -94,3 +94,6 @@ Glossary
 
     Decoding
         Matching putative barcodes to codewords in a codebook to read out the corresponding target believed to be associated with that barcode.
+
+    Rolony
+        A rolling-circle amplified "colony", or rolony, is an amplicon produced by image-based transcriptomics assays that use circular probes to increase signal.

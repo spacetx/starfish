@@ -281,7 +281,7 @@ class BinaryMaskCollection:
         path_to_roi_set_zip : Union[str, Path]
             Path to an external fiji roi file
         original_image : ImageStack
-            Dapi image used in fiji segmentation workflow
+            image from same FOV used in fiji segmentation workflow
 
         Returns
         --------

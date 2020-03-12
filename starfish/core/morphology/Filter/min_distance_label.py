@@ -21,7 +21,7 @@ class MinDistanceLabel(FilterAlgorithm):
     minimum_distance_xy : int
         The minimum distance between the peaks along the x or y axis. (default: 1)
     minimum_distance_z : int
-        The minimum distance between the peaks along the x or y axis. (default: 1)
+        The minimum distance between the peaks along the z axis. (default: 1)
     exclude_border : bool
         Exclude the borders for consideration for peaks. (default: False)
     """

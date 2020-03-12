@@ -276,8 +276,8 @@ There are many approaches for segmenting cells from image-based transcriptomics 
 a few methods that are implemented or integrated with starfish to output a
 :py:class:`.BinaryMaskCollection`, which represents a collection of labeled objects. If you do not
 know which segmentation method to use, a safe bet is to start with thresholding and watershed. On
-the other hand, if you can afford to manually define ROI masks there is no better way to
-guarantee accurate segmentation.
+the other hand, if you can afford to manually define :term:`ROI <Region of Interest (ROI)>` masks
+there is no better way to guarantee accurate segmentation.
 
 .. note::
     While there is no "ground truth" for cell segmentation the closest approximation is manual
@@ -315,7 +315,8 @@ Manually Defining Cells
 
 The most accurate but time-consuming approach is to manually segment images using a tool such as
 `ROI manager <https://imagej.net/docs/guide/146-30.html#fig:The-ROI-Manager>`_ in FIJI (ImageJ). It
-is a straightforward process that starfish supports by allowing ROI set binaries to be imported as a
+is a straightforward process that starfish supports by importing
+:term:`ROI <Region of Interest (ROI)>` sets stored in ZIP archives to be imported as a
 :py:class:`.BinaryMaskCollection`. These masks can then be integrated into the pipeline for
 visualization and assigning spots to cells.
 

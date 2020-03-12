@@ -10,7 +10,7 @@ Loading ImageJ ROI Sets
 In order to create a cell by gene expression matrix from image-based transcriptomics data, RNA
 spots must be assigned to cells by segmenting an image. The best quality cell segmentation
 annotations are manually drawn by experts. If you have ROI sets exported with `ROI manager
-<https://imagej.net/docs/guide/146-30.html#fig:The-ROI-Manager>`_ in ImageJ or FIJI they can be
+<https://imagej.net/docs/guide/146-30.html#fig:The-ROI-Manager>`_ in ImageJ or FIJI, they can be
 loaded into starfish as a :py:class:`.BinaryMaskCollection`. The ROI set for each field of view
 must be passed with the corresponding :py:class:`.ImageStack` to :py:meth:`.from_fiji_roi_set` in
 order to assign accurate ``pixel ticks`` and ``physical ticks`` to the

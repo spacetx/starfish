@@ -370,4 +370,3 @@ in the images. Finally, the two sets of features can be combined to assign each 
 origin. At this point, it's trivial to create a cell x gene matrix.
 
 * :ref:`Segmenting Cells <tutorial_segmenting_cells>`
-

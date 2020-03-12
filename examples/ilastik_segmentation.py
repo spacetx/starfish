@@ -11,8 +11,9 @@ advent of deep learning models for image segmentation promises a solution that i
 accurate.
 
 Starfish currently has built-in functionality to support `ilastik <https://www.ilastik.org/>`_,
-a segmentation toolkit that leverages machine-learning. Ilastik has a Pixel Classification
-workflow that performs semantic segmentation of the image, returning probability maps for each
+a segmentation toolkit that leverages machine-learning. Ilastik has a `Pixel Classification
+workflow <https://www.ilastik.org/documentation/pixelclassification/pixelclassification/>`_
+that performs semantic segmentation of the image, returning probability maps for each
 label (e.g. cells). To use ilastik in starfish first install ilastik locally and follow the
 Pixel Classification workflow using the GUI to train a classifier, which is saved in an ilastik
 project file.

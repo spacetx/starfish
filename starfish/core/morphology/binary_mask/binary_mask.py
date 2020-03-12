@@ -211,7 +211,9 @@ class BinaryMaskCollection:
                 mask_id + 1,
                 image,
             )
-            mask_data.region_properties = regionprops(image.data)
+            measured_region_props = regionprops(image)
+            assert len(measured_region_props) == 1
+            mask_data.region_properties = measured_region_props[0]
         return mask_data.region_properties
 
     @property

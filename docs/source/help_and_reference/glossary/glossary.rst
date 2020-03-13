@@ -48,6 +48,9 @@ Glossary
         A collection of Image Tiles corresponding to a specific volume or plane of the sample, under which the signal for all channels and all imaging rounds were acquired. All tiles within this FOV are the same size, but the manifest allows for different spatial coordinates for different imaging rounds or channels (to accommodate slight movement between rounds, for example).
         In microscopy, a field of view corresponds to the camera sensor mapped to the sample plane, and many such fields of view are expected to be taken per tissue slice.
 
+    Region of Interest (ROI)
+        Areas of an image identified for a particular purpose, such as to define the boundaries of a cell.
+
     Image Tile
         A single plane, single channel, single round 2D image. In the manifest, each tile has information about its (X,Y,Z) coordinates in space, and information about which imaging round (R) and/or fluorescence channel (C) it was acquired under.
 

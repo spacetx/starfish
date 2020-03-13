@@ -261,13 +261,13 @@ Segmenting Cells
 ----------------
 
 Unlike single-cell RNA sequencing, image-based transcriptomics methods do not physically separate
-cells before acquiring RNA information. Therefore in order to characterize cells, the RNA must be
+cells before acquiring RNA information. Therefore, in order to characterize cells, the RNA must be
 assigned into single cells by partitioning the image volume. Accurate unsupervised cell-segmentation
 is an `open problem <https://www.kaggle.com/c/data-science-bowl-2018>`_ for all biomedical imaging
 disciplines ranging from digital pathology to neuroscience.
 
 The challenge of segmenting cells depends on the structural complexity of the sample and quality
-of images available. For example a sparse cell mono-layer with a strong cytosol stain would be
+of images available. For example, a sparse cell mono-layer with a strong cytosol stain would be
 trivial to segment but a dense heterogeneous population of cells in 3D tissue with only a DAPI stain
 can be impossible to segment perfectly. On the experimental side, selecting good cell stains and
 acquiring images with low background will make segmenting a more tractable task.
@@ -280,7 +280,7 @@ the other hand, if you can afford to manually define :term:`ROI <Region of Inter
 there is no better way to guarantee accurate segmentation.
 
 .. note::
-    While there is no "ground truth" for cell segmentation the closest approximation is manual
+    While there is no "ground truth" for cell segmentation, the closest approximation is manual
     segmentation by an expert in the tissue of interest.
 
 Thresholding and Watershed
@@ -301,7 +301,7 @@ can be applied to all types of images. Pairing it with a distance transform is p
 useful for segmenting convex shapes like cells.
 
 A segmentation pipeline that consists of thresholding, connected component analysis, and watershed
-is the simplest and fastest to implement but its accuracy is highly dependent on image quality.
+is simple and fast to implement but its accuracy is highly dependent on image quality.
 The signal-to-noise ratio of the cell stain must be high enough for minimal errors after
 thresholding and binary operations. And the nuclei or cell shapes must be convex to meet the
 assumptions of the distance transform or else it will over-segment. Starfish includes the basic

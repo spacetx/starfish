@@ -50,6 +50,8 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
     verbose : bool
         If True, report the percentage completed during processing
         (default = False)
+    kwargs :
+        Additional keyword arguments to pass to skimage.feature.peak_local_max
 
     Notes
     -----
@@ -63,6 +65,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         min_num_spots_detected: int = 3,
         is_volume: bool = True,
         verbose: bool = True,
+        **kwargs,
     ) -> None:
 
         self.min_distance = min_distance
@@ -76,6 +79,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
 
         self.is_volume = is_volume
         self.verbose = verbose
+        self.kwargs = kwargs
 
     def _compute_num_spots_per_threshold(self, img: np.ndarray) -> Tuple[np.ndarray, List[int]]:
         """Computes the number of detected spots for each threshold
@@ -209,6 +213,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
     def image_to_spots(
             self,
             data_image: xr.DataArray,
+            **kwargs
     ) -> PerImageSliceSpotResults:
         """measure attributes of spots detected by binarizing the image using the selected threshold
 
@@ -216,6 +221,8 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         ----------
         data_image : xr.DataArray
             image containing spots to be detected
+        kwargs :
+            Additional keyword arguments to pass to skimage.feature.peak_local_max
 
         Returns
         -------
@@ -252,7 +259,8 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
             indices=True,
             num_peaks=np.inf,
             footprint=None,
-            labels=labels
+            labels=labels,
+            **kwargs
         )
 
         if data_image.ndim == 3:
@@ -309,7 +317,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         n_processes : Optional[int] = None,
             Number of processes to devote to spot finding.
         """
-        spot_finding_method = partial(self.image_to_spots, *args, **kwargs)
+        spot_finding_method = partial(self.image_to_spots, **self.kwargs)
         if reference_image:
             shape = reference_image.shape
             assert shape[Axes.ROUND] == 1

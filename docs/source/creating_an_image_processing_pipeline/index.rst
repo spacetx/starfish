@@ -169,8 +169,9 @@ Spot-Based Decoding
 
 The spot-based approach finds spots in each image volume based on the brightness of regions
 relative to their surroundings and then builds a :term:`spot trace<Feature (Spot, Pixel) Trace>`
-using the appropriate ``TraceBuildingStrategies``. The spot traces can then be mapped, or
-*decoded*, to codewords in the codebook using a :py:class:`.DecodeSpotsAlgorithm`.
+using the appropriate :ref:`TraceBuildingStrategies<howto_tracebuildingstrategies>`. The spot
+traces can then be mapped, or *decoded*, to codewords in the codebook using a
+:py:class:`.DecodeSpotsAlgorithm`.
 
 .. list-table::
    :widths: auto
@@ -178,11 +179,14 @@ using the appropriate ``TraceBuildingStrategies``. The spot traces can then be m
 
    * - When to Use
      - How-To
-   * - Images are amenable to spot detection methods
+   * - Images are amenable to spot
+       detection methods
      - :ref:`howto_spotfindingresults`
-   * - Data is from sequential methods like smFISH
+   * - Data is from sequential methods
+       like smFISH
      - :ref:`howto_simplelookupdecoder`
-   * - Spots are sparse and may not be aligned across all rounds
+   * - Spots are sparse and may not be
+       aligned across all rounds
      - :ref:`Use TraceBuildingStrategies.NEAREST_NEIGHBOR <howto_tracebuildingstrategies>`
 
 * Tutorial: :ref:`Spot-Based Decoding with FindSpots and DecodeSpots <tutorial_spot_based_decoding>`
@@ -204,9 +208,11 @@ What Decoding Pipeline Should I Use?
 
 If you are unsure which spot finding and decoding methods are compatible with your data here is a
 handy table that summarizes the three major :term:`codebook <Codebook>` designs and what methods
-can be
-used to decode each of them. If your codebook doesn't fall into any of these categories, *make a
-feature request on github*, we would love to hear about unique codebook designs!
+can be used to decode each of them. If your codebook doesn't fall into any of these categories,
+`make a feature request on github <https://github.com/spacetx/starfish/issues/new/choose>`_, we
+would love to hear about unique codebook designs!
+
+.. _tab-codebook-designs:
 
 +-----------------+---------------------------+-------------------------+--------------------------+
 | Name            | Linearly Multiplexed      | One Hot Exponentially   | Exponentially Multiplexed|

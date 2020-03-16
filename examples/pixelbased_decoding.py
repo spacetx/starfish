@@ -11,22 +11,23 @@ decoded, it decodes every pixel and then connects potential pixels with the same
 :term:`codeword <Codeword>` into spots. The strength of this approach is it works on dense data
 and noisy data where spot finding algorithms have a hard time accurately detecting spots. The
 weakness is that it is prone to false positives by decoding noise that would normally be ignored
-by spot finding algorithms. That is why pixel-based decoding is better suited for error-robust
-assays such as MERFISH where the :term:`codebook <Codebook>` is designed to filter out noise.
+by spot finding algorithms. For this reason, pixel-based decoding is better suited for
+error-robust assays such as MERFISH where the :term:`codebook <Codebook>` is designed to filter
+out noise.
 
 .. image:: /_static/design/decoding_flowchart.png
    :scale: 50 %
    :alt: Decoding Flowchart
    :align: center
 
-Unlike :ref:`tutorial_spot_based_decoding` that has a variety of classes and methods to customize a
-workflow, pixel-based decoding is straight-forward and only requires one class in starfish:
-:py:class:`.PixelSpotDecoder`. The only decoding algorithm option is the same as
-:py:class:`.MetricDistance` but applied to each pixel. That means normalizing images is very
-important for accurate decoding and it needs vector magnitude and distance thresholds. See
+Unlike :ref:`tutorial_spot_based_decoding`, which has a variety of classes and methods to
+customize a workflow, pixel-based decoding is straight-forward and only requires one class in
+starfish: :py:class:`.PixelSpotDecoder`. The only decoding algorithm option is the same as
+:py:class:`.MetricDistance` but applied to each pixel. Normalizing images is very
+important for accurate decoding, as well as vector magnitude and distance thresholds. See
 :ref:`howto_metricdistance` for more details.
 
-After decoding pixels, :py:class:`.PixelSpotDecoder` combines connected  pixels into spots with
+After decoding pixels, :py:class:`.PixelSpotDecoder` combines connected pixels into spots with
 :py:func:`skimage.measure.label` and :py:func:`skimage.measure.regionprops`, which returns spot
 locations and attributes. Spots that don't meet size thresholds ``min_area`` and ``max_area`` are
 marked as not passing thresholds in the :py:class:`.DecodedIntensityTable`. In addition, the results
@@ -55,7 +56,8 @@ ghp.run(imgs, in_place=True)
 dpsf.run(imgs, in_place=True)
 glp.run(imgs, in_place=True)
 
-# scale data with user-defined factors to normalize images
+# scale data with user-defined factors to normalize images. For this data set, the scale factors
+# are stored in experiment.json.
 scale_factors = {
     (t[Axes.ROUND], t[Axes.CH]): t['scale_factor']
     for t in experiment.extras['scale_factors']
@@ -69,12 +71,12 @@ for selector in imgs._iter_axes():
 # Decode with PixelSpotDecoder
 psd = DetectPixels.PixelSpotDecoder(
     codebook=experiment.codebook,
-    metric='euclidean', # distance metric to use for computing distance between a pixel vector and a codeword
-    norm_order=2, # the L_n norm is taken of each pixel vector and codeword before computing the distance. this is n
-    distance_threshold=0.5176, # minimum distance between a pixel vector and a codeword for it to be called as a gene
-    magnitude_threshold=1.77e-5, # discard any pixel vectors below this magnitude
-    min_area=2, # do not call a 'spot' if it's area is below this threshold (measured in pixels)
-    max_area=np.inf, # do not call a 'spot' if it's area is above this threshold (measured in pixels)
+    metric='euclidean',             # distance metric to use for computing distance between a pixel vector and a codeword
+    norm_order=2,                   # the L_n norm is taken of each pixel vector and codeword before computing the distance. this is n
+    distance_threshold=0.5176,      # minimum distance between a pixel vector and a codeword for it to be called as a gene
+    magnitude_threshold=1.77e-5,    # discard any pixel vectors below this magnitude
+    min_area=2,                     # do not call a 'spot' if it's area is below this threshold (measured in pixels)
+    max_area=np.inf,                # do not call a 'spot' if it's area is above this threshold (measured in pixels)
 )
 initial_spot_intensities, prop_results = psd.run(filtered_imgs)
 

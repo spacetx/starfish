@@ -17,7 +17,7 @@ approach and :py:class:`.FindSpotsAlgorithm` you chose is optimized for your dat
 about how spots can be found and decoded in starfish see :ref:`section_finding_and_decoding`.
 
 There are two methods for viewing spots. The first is to access the :py:class:`.SpotAttributes`
-of a selected ImageSlice and add it as points to the napari viewer. The second is to use a
+of a selected :term:`ImageSlice` and add it as points to the napari viewer. The second is to use a
 ``TraceBuilder`` to convert the :py:class:`.SpotFindingResults` to an
 :py:class:`.IntensityTable`, which can then be passed to :py:func:`.display`.
 
@@ -63,7 +63,7 @@ spots = bd.run(image_stack=imgs, reference_image=dots)
 ####################################################################################################
 # The first way to visualize detected spots is to access the :py:class:`.SpotAttributes`. Since
 # spots were found using a reference image, the :py:class:`.SpotAttributes` for every
-# (round, channel) ImageSlice in :py:class:`.SpotFindingResults` is the same and it doesn't matter
+# :term:`ImageSlice` in :py:class:`.SpotFindingResults` is the same and it doesn't matter
 # which ImageSlice is selected to display. If no reference image were passed to
 # :py:meth:`.BlobDetector.run`, then each ImageSlice would contain different
 # :py:class:`.SpotAttributes` and it would be best to display each as a different points layer to
@@ -84,5 +84,7 @@ spots = bd.run(image_stack=imgs, reference_image=dots)
 
 from starfish.core.spots.DecodeSpots.trace_builders import build_spot_traces_exact_match
 intensity_table = build_spot_traces_exact_match(spots)
+
+# uncomment code to view
 #gui qt
 #viewer = display(stack=dots, spots=intensity_table)

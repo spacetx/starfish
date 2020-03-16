@@ -38,7 +38,8 @@ assessing <howto_spotfindingresults>` results is needed to validate the paramete
 running in batch.
 
 .. warning::
-    :py:class:`.TrackpyLocalMaxPeakFinder` does not support ``is_volume = False``
+    :py:class:`.TrackpyLocalMaxPeakFinder` does not support finding spots on
+    independent 2D slices of a volume (i.e., ``is_volume = False``).
 
 """
 
@@ -69,9 +70,8 @@ tlmpf = FindSpots.TrackpyLocalMaxPeakFinder(
     min_mass=0.02,
     max_size=2,  # this is max radius
     separation=7,
-    noise_size=0.65,  # this is not used because preprocess is False
     preprocess=False,
-    percentile=10,  # this is irrelevant when min_mass, spot_diameter, and max_size are set properly
+    percentile=10,  # this has no effect when min_mass, spot_diameter, and max_size are set properly
     verbose=True,
 )
 spots = tlmpf.run(img)

@@ -5,7 +5,8 @@ Decoding Spots with :py:class:`.MetricDistance`
 ===============================================
 
 :py:class:`.MetricDistance` is a general purpose :py:class:`.DecodeSpotsAlgorithm` that can be
-used with any :term:`codebook <Codebook>` design. For exponentially multiplexed assays that are
+used with any :term:`codebook <Codebook>` design. For
+:ref:`exponentially multiplexed <tab-codebook-designs>` assays that are
 *not* one hot, meaning not every round is required to have a channel with signal (e.g. MERFISH),
 :py:class:`.MetricDistance` is the *only* option to decode spots. For other assays,
 :py:class:`.PerRoundMaxChannel` is recommended over :py:class:`.MetricDistance` because it does
@@ -14,7 +15,7 @@ not require optimizing parameter values and has no bias introduced by the :term:
 
 Unlike :py:class:`.PerRoundMaxChannel`, which constructs barcodes and then finds the matching
 :term:`codeword <Codeword>`, :py:class:`.MetricDistance` transforms all :term:`codewords <Codeword>`
-and :term:`spot traces <Feature (Spot, Pixel) Trace>` to a (r x c)-dimensional vectors and then maps
+and :term:`spot traces <Feature (Spot, Pixel) Trace>` to a (r · c)-dimensional vectors and then maps
 spot vectors to the nearest codeword vectors. Therefore, the density of the codebook can affect the
 distance of spots to the nearest codewords.
 

@@ -89,7 +89,7 @@ class Label(AssignTargetsAlgorithm):
         -------
         IntensityTable :
             IntensityTable with added features variable containing cell ids. Points outside of
-            cells will be assigned zero.
+            cells will be assigned `nan`.
 
         """
         return self._assign(masks, decoded_intensity_table, in_place=in_place)

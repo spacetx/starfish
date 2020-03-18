@@ -131,7 +131,3 @@ sending us the output of ``pip freeze``:
 
 Whenever possible, please also include a brief, self-contained code example that demonstrates the
 problem, including a full traceback.
-
-We can also be contacted on the SpaceTx slack in the ``#starfish-users`` channel. If you'd like an
-invitation, please feel free to email us. We can usually respond to bug reports same-day, and
-are very appreciative of the time you take to submit them to us.

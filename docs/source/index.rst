@@ -35,11 +35,10 @@ starfish. Finally, advanced users can examine the :ref:`Data Structures <data st
 :ref:`Help & Reference <help and reference>` sections to learn more details about _starfish_ and its
 object models.
 
-Starfish is moving user support from `the #starfish-users channel on the CZI Science Slack
-<https://join-cziscience-slack.herokuapp.com/>`_ to the `image.sc forum <https://forum.image
-.sc/>`_. We hope this forum will be a continually expanding resource for starfish users. Please
+Starfish user support is hosted on the `image.sc forum <https://forum.image.sc/>`_ where questions
+and discussion will serve as a continually expanding resource for starfish users. Please
 post any help or support requests on `image.sc <https://forum.image.sc/>`_ with the ``starfish``
-tag or `email the starfish team directly <mailto:starfish@chanzuckerberg.com>`_
+tag.
 
 To see the code or report a bug, please visit the `github repository
 <https://github.com/spacetx/starfish>`_.

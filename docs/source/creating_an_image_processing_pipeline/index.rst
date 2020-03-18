@@ -354,28 +354,30 @@ segmenting images of stained cells.
 Assigning Spots to Cells
 ------------------------
 
-After segmenting images to find cell boundaries, RNA spots can be assigned to cells and the
-:py:class:`.DecodedIntensityTable` can be reorganized to create a single cell gene
-:py:class:`.ExpressionMatrix`. These matrices are the data structure most often used by single-cell
-RNAseq analysis packages (e.g. `scanpy <https://icb-scanpy.readthedocs-hosted.com/en/stable/>`_)
-to cluster and classify cell types. Gene expression matrices created from image-based
-transcriptomic methods contain additional information about the cell, such as its location, size,
-and morphology. This data is what links the histological context of single cells to their
-transcriptomes.
+After segmenting images to find cell boundaries, RNA spots in the :py:class:`.DecodedIntensityTable`
+can be assigned to cells and then the table can be reorganized to create a single cell gene
+:py:class:`.ExpressionMatrix`. These matrices are the data structure most often generated and used
+by single-cell RNAseq analysis packages (e.g. `scanpy <https://icb-scanpy.readthedocs-hosted
+.com/en/stable/>`_) to cluster and classify cell types. Compared to single-cell RNAseq, image-based
+transcriptomic methods provide additional information about the cell, such as its location, size,
+and morphology. The :py:class:`.ExpressionMatrix` holds both the 2-Dimensional matrix and cell
+metadata produced by these image-based methods. This data is what links the histological context of
+single cells to their transcriptomes.
 
 In a starfish pipeline, the first step to creating a gene expression matrix is assigning spots,
-aka :term:`features <Feature>`, to cells defined in a :py:class:`.BinaryMaskCollection` of cell
-masks. This is done by using :py:class:`.Label` to label features with the ``cell_id``
-of the cell it belongs to. Currently, :py:class:`.Label` assumes every cell mask created by
+aka :term:`features <Feature>`, to cells defined in a :py:class:`.BinaryMaskCollection` as cell
+masks. This is done by using :py:class:`.Label` to label features with ``cell_id``\s. Currently,
+:py:class:`.Label` assumes every cell mask created by
 :ref:`cell segmentation<section_segmenting_cells>` encompasses a whole cell. RNA spots
 with spatial coordinates that are within a cell mask are assigned to that cell and spots that do
-not fall within any cell mask are not assigned a cell ID. Therefore, the accuracy and
-percent yield of assigned spots is largely dependent on high quality complete cell segmentation.
+not fall within any cell mask are not assigned a ``cell_id``. Therefore, the accuracy and
+percent yield of assigned spots is largely dependent on the quality and completeness of cell
+segmentation.
 
-For data without well segmented cells, such as data with only a DAPI stain, there is potential
-for more sophisticated methods of assigning spots to cells. For example, there are a number of
-segmentation-free approaches to grouping spots into cells that starfish would like to support in
-the `future <https://github.com/spacetx/starfish/issues/1675>`_.
+For data without well segmented cells, such as when no cell stain images are available, there is
+potential for more sophisticated methods to assign spots to cells. For example, there are a
+number of segmentation-free approaches for grouping spots into cells that starfish would like to
+support in the `future <https://github.com/spacetx/starfish/issues/1675>`_.
 
 * Tutorial: :ref:`tutorial_assigning_spots`
 

@@ -100,12 +100,13 @@ mat.to_pandas().iloc[:, 0:12].astype(int)
 ###################################################################################################
 # In addition to the matrix, :py:class:`.ExpressionMatrix` contains cell metadata, (e.g. cell
 # location and cell size) stored as ``Coordinates`` of the matrix. When transforming a
-# :py:class:`.DecodedIntensityTable` to an :py:class:`.ExpressionMatrix`, the only cell metadata
-# ``Coordinates`` are the location, number of undecoded spots, and area. The location is not from
-# the cell masks, but from calculating the central position of spots assigned to each cell. The
-# number of undecoded spots is zero in this example because the undecoded spots were removed after
-# decoding. The area, on the other hand, is always set to zero and needs to be calculated from
-# the :py:class:`.BinaryMaskCollection` as shown below. New metadata fields can also be added.
+# :py:class:`.DecodedIntensityTable` to an :py:class:`.ExpressionMatrix`, the initial cell metadata
+# ``Coordinates`` are the location, number of undecoded spots, and area. The location is not
+# based on the cell masks, but calculated from the central position of spots assigned to each
+# cell. The number of undecoded spots is zero for each cell in this example because the undecoded
+# spots were removed after decoding. The area, on the other hand, is always set to zero and needs
+# to be calculated from the :py:class:`.BinaryMaskCollection` as shown below. New metadata fields
+# can also be added.
 
 # Add area (in pixels) of cell masks to expression matrix metadata
 mat[Features.AREA] = (Features.CELLS, [mask.data.sum() for _, mask in masks])

@@ -11,6 +11,7 @@ DOCKER_IMAGE?=spacetx/starfish
 DOCKER_BUILD?=1
 
 VERSION=$(shell sh -c "git describe --exact --dirty 2> /dev/null")
+PIP_VERSION=20.0.2
 
 define print_help
     @printf "    %-28s   $(2)\n" $(1)
@@ -157,15 +158,18 @@ help-integration:
 ### INSTALL ##################################################
 #
 install-dev:
+	pip install -U pip==$(PIP_VERSION)
 	pip install --force-reinstall --upgrade -r requirements/REQUIREMENTS-CI.txt
 	pip install -e .
 	pip freeze
 
 install-src:
+	pip install -U pip==$(PIP_VERSION)
 	pip install --force-reinstall --upgrade -e .
 	pip freeze
 
 install-released-notebooks-support:
+	pip install -U pip==$(PIP_VERSION)
 	pip install -r requirements/REQUIREMENTS-CI.txt
 	pip install starfish
 	pip freeze
@@ -278,6 +282,7 @@ release-env: release-env/bin/activate release-env/bin/make_shell
 # private: call virtualenv and pip install
 release-env/bin/activate:
 	$(call create_venv, release-env)
+	release-env/bin/pip install -U pip==$(PIP_VERSION)
 	release-env/bin/pip install -r requirements/REQUIREMENTS-CI.txt
 	touch release-env/bin/activate
 

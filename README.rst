@@ -1,6 +1,9 @@
 Starfish
 ========
 
+.. image:: https://img.shields.io/badge/dynamic/json.svg?label=forum&url=https%3A%2F%2Fforum.image.sc%2Ftags%2Fstarfish.json&query=%24.topic_list.tags.0.topic_count&colorB=brightgreen&suffix=%20topics&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAABPklEQVR42m3SyyqFURTA8Y2BER0TDyExZ+aSPIKUlPIITFzKeQWXwhBlQrmFgUzMMFLKZeguBu5y+//17dP3nc5vuPdee6299gohUYYaDGOyyACq4JmQVoFujOMR77hNfOAGM+hBOQqB9TjHD36xhAa04RCuuXeKOvwHVWIKL9jCK2bRiV284QgL8MwEjAneeo9VNOEaBhzALGtoRy02cIcWhE34jj5YxgW+E5Z4iTPkMYpPLCNY3hdOYEfNbKYdmNngZ1jyEzw7h7AIb3fRTQ95OAZ6yQpGYHMMtOTgouktYwxuXsHgWLLl+4x++Kx1FJrjLTagA77bTPvYgw1rRqY56e+w7GNYsqX6JfPwi7aR+Y5SA+BXtKIRfkfJAYgj14tpOF6+I46c4/cAM3UhM3JxyKsxiOIhH0IO6SH/A1Kb1WBeUjbkAAAAAElFTkSuQmCC
+    :target: https://forum.image.sc/tag/starfish
+    :alt: Image.sc forum
 
 .. image:: https://img.shields.io/pypi/v/starfish   
     :target: https://pypi.org/project/starfish/
@@ -85,5 +88,6 @@ We are very interested in contributions! See our contributing.rst_ and documenta
 Contact Starfish
 ----------------
 
+- Forum: ask on the `Image.sc forum <https://forum.image.sc/tag/starfish>`_
 - Slack: `join #starfish-users on the CZI Science Slack <https://join-cziscience-slack.herokuapp.com/>`_
 - Email: `starfish@chanzuckerberg.com <mailto:starfish@chanzuckerberg.com>`_

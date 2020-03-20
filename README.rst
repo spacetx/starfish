@@ -17,10 +17,6 @@ Starfish
     :target: https://spacetx-starfish.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
     
-.. image:: https://join-cziscience-slack.herokuapp.com/badge.svg
-    :target: https://join-cziscience-slack.herokuapp.com/
-    :alt: Join the CZI Science slack
-    
 .. image:: https://travis-ci.com/spacetx/starfish.svg?branch=master
     :target: https://travis-ci.com/spacetx/starfish
     
@@ -89,5 +85,4 @@ Contact Starfish
 ----------------
 
 - Forum: ask on the `Image.sc forum <https://forum.image.sc/tag/starfish>`_
-- Slack: `join #starfish-users on the CZI Science Slack <https://join-cziscience-slack.herokuapp.com/>`_
 - Email: `starfish@chanzuckerberg.com <mailto:starfish@chanzuckerberg.com>`_

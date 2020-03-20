@@ -41,6 +41,9 @@ running in batch.
     :py:class:`.TrackpyLocalMaxPeakFinder` does not support finding spots on
     independent 2D slices of a volume (i.e., ``is_volume = False``).
 
+.. warning::
+    :py:class:`.TrackpyLocalMaxPeakFinder` is not compatible with cropped data sets.
+
 """
 
 from starfish import data

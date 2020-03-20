@@ -54,7 +54,8 @@ Another way to estimate ``threshold`` is :ref`howto_localmaxpeakfinder` and exam
 intensities of the spots.
 
 .. warning::
-    :py:class:`.BlobDetector` is not compatible with cropped data sets
+    :py:class:`.BlobDetector` is not compatible with cropped data sets.
+
 """
 
 # Load in situ sequencing experiment

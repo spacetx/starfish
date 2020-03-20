@@ -22,7 +22,11 @@ that can be detected. The recommended way to set parameters is to take a represe
 :ref:`visually assess <howto_spotfindingresults>` results.
 
 .. warning::
-    :py:class:`.LocalMaxPeakFinder` is not compatible with cropped data sets
+    :py:class:`.LocalMaxPeakFinder` does not support finding spots on independent 2D slices of a
+    volume (i.e., ``is_volume = False``).
+
+.. warning::
+    :py:class:`.LocalMaxPeakFinder` is not compatible with cropped data sets.
 
 """
 

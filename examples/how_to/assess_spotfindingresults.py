@@ -70,9 +70,10 @@ spots = bd.run(image_stack=imgs, reference_image=dots)
 # be compared with the :py:class:`.ImageStack`.
 
 # uncomment code to view
-#%gui qt
-#viewer = display(stack=dots)
-#viewer.add_points(data=spots[{Axes.CH:1, Axes.ROUND:0}].spot_attrs.data[['z', 'y',  'x']].to_numpy(), size=5)
+# %gui qt
+# viewer = display(stack=dots)
+# viewer.add_points(data=spots[{Axes.CH:1, Axes.ROUND:0}].spot_attrs.data[['z', 'y',
+# 'x']].to_numpy(), size=5)
 
 ####################################################################################################
 # The other way to visualize detected spots is to convert the :py:class:`.SpotFindingResults` to
@@ -86,5 +87,5 @@ from starfish.core.spots.DecodeSpots.trace_builders import build_spot_traces_exa
 intensity_table = build_spot_traces_exact_match(spots)
 
 # uncomment code to view
-#gui qt
-#viewer = display(stack=dots, spots=intensity_table)
+# %gui qt
+# viewer = display(stack=dots, spots=intensity_table)

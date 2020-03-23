@@ -143,6 +143,124 @@ rescaling.
 Finding and Decoding Spots
 --------------------------
 
+Finding and decoding bright spots is the unique core functionality of starfish and is necessary in
+every image-based transcriptomics processing pipeline. The inputs are all the images from a
+:term:`FOV <Field of View (FOV)>` along with a :term:`codebook <Codebook>` that describes the
+experimental
+design. The output after decoding is a :term:`DecodedIntensityTable` that contains the
+location, intensity values, and mapped :term:`target <Target>` of every detected
+:term:`feature <Feature>`.
+
+Every assay uses a set of rules that the :term:`codewords <Codeword>` in the codebook
+must follow (e.g. each target has one hot channel in each round). These rules determine which
+decoding methods in starfish should be used. See :ref:`section_which_decoding_approach` to
+learn about different codebook designs and how to decode them.
+
+There are two divergent decoding approaches, spot-based and pixel-based, used in the image-based
+transcriptomics community when it comes to analyzing spots in images:
+
+.. image:: /_static/design/decoding_flowchart.png
+   :scale: 50 %
+   :alt: Decoding Flowchart
+   :align: center
+
+Spot-Based Decoding
+^^^^^^^^^^^^^^^^^^^
+
+The spot-based approach finds spots in each image volume based on the brightness of regions
+relative to their surroundings and then builds a :term:`spot trace<Feature (Spot, Pixel) Trace>`
+using the appropriate :ref:`TraceBuildingStrategies<howto_tracebuildingstrategies>`. The spot
+traces can then be mapped, or *decoded*, to codewords in the codebook using a
+:py:class:`.DecodeSpotsAlgorithm`.
+
+.. list-table::
+   :widths: auto
+   :header-rows: 1
+
+   * - When to Use
+     - How-To
+   * - Images are amenable to spot
+       detection methods
+     - :ref:`howto_spotfindingresults`
+   * - Data is from sequential methods
+       like smFISH
+     - :ref:`howto_simplelookupdecoder`
+   * - Spots are sparse and may not be
+       aligned across all rounds
+     - :ref:`Use TraceBuildingStrategies.NEAREST_NEIGHBOR <howto_tracebuildingstrategies>`
+
+* Tutorial: :ref:`Spot-Based Decoding with FindSpots and DecodeSpots <tutorial_spot_based_decoding>`
+
+Pixel-Based Decoding
+^^^^^^^^^^^^^^^^^^^^
+
+The pixel-based approach first treats every pixel as a :term:`feature <Feature>` and constructs a
+corresponding :term:`pixel trace<Feature (Spot, Pixel) Trace>` that is mapped to codewords.
+Connected component analysis is then used to label connected pixels with the same codeword as an RNA
+spot.
+
+* Tutorial: :ref:`Pixel-Based Decoding with DetectPixels <tutorial_pixel_based_decoding>`
+
+.. _section_which_decoding_approach:
+
+What Decoding Pipeline Should I Use?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are unsure which spot finding and decoding methods are compatible with your data here is a
+handy table that summarizes the three major :term:`codebook <Codebook>` designs and what methods
+can be used to decode each of them. If your codebook doesn't fall into any of these categories,
+`make a feature request on github <https://github.com/spacetx/starfish/issues/new/choose>`_, we
+would love to hear about unique codebook designs!
+
+.. _tab-codebook-designs:
+
++-----------------+---------------------------+-------------------------+--------------------------+
+| Name            | Linearly Multiplexed      | One Hot Exponentially   | Exponentially Multiplexed|
+|                 |                           | Multiplexed             |                          |
++=================+===========================+=========================+==========================+
+| Assays          | - sequential smFISH       | - In Situ Sequencing    | - MERFISH                |
+|                 | - RNAscope                | - seqFISH               | - DARTFISH               |
+|                 | - osmFISH                 | - FISSEQ                | - seqFISH+               |
+|                 |                           | - STARmap               |                          |
+|                 |                           | - BaristaSeq            |                          |
++-----------------+---------------------------+-------------------------+--------------------------+
+| Example 7-round | |linear1|                 | |onehot1|               | |multiplex1|             |
+| Codebook        |                           |                         |                          |
+| Diagrams        | |linear2|                 | |onehot2|               | |multiplex2|             |
++-----------------+---------------------------+-------------------------+--------------------------+
+| Description     | Codewords have only one   | Codewords are one hot   | Each codeword is a       |
+|                 | round and channel with    | in each round           | combination of signals   |
+|                 | signal                    |                         | over multiple rounds     |
++-----------------+---------------------------+-------------------------+--------------------------+
+| Reference Image | No                        | Yes                     | Yes                      |
+| Needed?         |                           |                         |                          |
++-----------------+---------------------------+-------------------------+--------------------------+
+| starfish        | - SimpleLookup            | - Exact_Match or        | - Pixel-based            |
+| Pipeline        | - Sequential +            |   Nearest_Neighbor      | - Exact_Match +          |
+| Options         |   PerRoundMaxChannel      | - PerRoundMaxChannel or |   MetricDistance         |
+|                 |                           |   MetricDistance        | - Nearest_Neighbor +     |
+|                 |                           |                         |   MetricDistance         |
++-----------------+---------------------------+-------------------------+--------------------------+
+
+.. |linear1| image:: /_static/design/linear_codebook_1.png
+   :scale: 10%
+   :align: middle
+.. |linear2| image:: /_static/design/linear_codebook_2.png
+   :scale: 10%
+   :align: middle
+.. |onehot1| image:: /_static/design/onehot_codebook_1.png
+   :scale: 10%
+   :align: middle
+.. |onehot2| image:: /_static/design/onehot_codebook_2.png
+   :scale: 10%
+   :align: middle
+.. |multiplex1| image:: /_static/design/multiplex_codebook_1.png
+   :scale: 10%
+   :align: middle
+.. |multiplex2| image:: /_static/design/multiplex_codebook_2.png
+   :scale: 10%
+   :align: middle
+
 .. _section_segmenting_cells:
 
 Segmenting Cells
@@ -236,6 +354,8 @@ segmenting images of stained cells.
 Assigning Spots to Cells
 ------------------------
 
+* :ref:`Assigning Spots to Cells <tutorial_assigning_spots_to_cells>`
+
 .. _section_assessing_metrics:
 
 Assessing Performance Metrics
@@ -255,7 +375,4 @@ The dots and nuclei images can be segmented to identify the locations where the 
 in the images. Finally, the two sets of features can be combined to assign each spot to its cell of
 origin. At this point, it's trivial to create a cell x gene matrix.
 
-* :ref:`Spot Finding <tutorial_spot_finding>`
-* :ref:`Spot Decoding <tutorial_spot_decoding>`
 * :ref:`Segmenting Cells <tutorial_segmenting_cells>`
-* :ref:`Assigning Spots to Cells <tutorial_assigning_spots_to_cells>`

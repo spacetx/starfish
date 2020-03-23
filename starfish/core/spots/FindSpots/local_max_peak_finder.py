@@ -159,7 +159,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
 
             distances = []
 
-            # create a line whose end points are the threshold and and corresponding gradient value
+            # create a line whose end points are the threshold and the corresponding gradient value
             # for spot_counts corresponding to the threshold
             start_point = Point(thresholds[0], grad[0])
             end_point = Point(thresholds[-1], grad[-1])
@@ -301,7 +301,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
             **kwargs
     ) -> SpotFindingResults:
         """
-        Find spots in the given ImageStack using a gaussian blob finding algorithm.
+        Find spots in the given ImageStack using a local maxima finding algorithm.
         If a reference image is provided the spots will be detected there then measured
         across all rounds and channels in the corresponding ImageStack. If a reference_image
         is not provided spots will be detected _independently_ in each channel. This assumes

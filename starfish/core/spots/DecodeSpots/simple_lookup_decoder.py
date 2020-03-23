@@ -9,7 +9,7 @@ from ._base import DecodeSpotsAlgorithm
 
 class SimpleLookupDecoder(DecodeSpotsAlgorithm):
     """
-    Decode spots by assiging the target value of a spot to the corresponding target value of the
+    Decode spots by assigning the target value of a spot to the corresponding target value of the
     round/ch it was found in. This method only makes sense to use in non mulitplexed sequential
     assays where each r/ch pair only has one target assigned to it.
 

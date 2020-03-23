@@ -158,7 +158,11 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
             *args,
     ) -> SpotFindingResults:
         """
-        Find spots.
+        Find spots in the given ImageStack using a version of the Crocker-Grier algorithm.
+        If a reference image is provided the spots will be detected there then measured
+        across all rounds and channels in the corresponding ImageStack. If a reference_image
+        is not provided spots will be detected _independently_ in each channel. This assumes
+        a non-multiplex imaging experiment, as only one (ch, round) will be measured for each spot.
 
         Parameters
         ----------

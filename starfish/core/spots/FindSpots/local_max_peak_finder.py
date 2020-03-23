@@ -236,14 +236,18 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         data_image_np = np.asarray(data_image)
 
         # identify each spot's size by binarizing and calculating regionprops
-        masked_image = data_image_np[:, :] > optimal_threshold
+        masked_image = data_image_np > optimal_threshold
         labels = label(masked_image)[0]
         spot_props = regionprops(np.squeeze(labels))
 
         # mask spots whose areas are too small or too large
         for spot_prop in spot_props:
             if spot_prop.area < self.min_obj_area or spot_prop.area > self.max_obj_area:
-                masked_image[0, spot_prop.coords[:, 0], spot_prop.coords[:, 1]] = 0
+                if self.is_volume:
+                    masked_image[spot_prop.coords[:, 0], spot_prop.coords[:, 1],
+                                 spot_prop.coords[:, 2]] = 0
+                else:
+                    masked_image[spot_prop.coords[:, 0], spot_prop.coords[:, 1]] = 0
 
         # store re-calculated regionprops and labels based on the area-masked image
         labels = label(masked_image)[0]

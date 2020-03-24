@@ -60,29 +60,3 @@ lmp = FindSpots.LocalMaxPeakFinder(
     is_volume=False
 )
 spots = lmp.run(max_imgs)
-
-
-from starfish.core.spots.DecodeSpots.trace_builders import build_traces_sequential
-table = build_traces_sequential(spots)
-
-# plot spots found
-import matplotlib
-import matplotlib.pyplot as plt
-from starfish.util.plot import imshow_plane
-
-# get x, y coords from intensity table
-def get_cropped_coords(table, x_min, x_max, y_min, y_max):
-    df = table.to_features_dataframe()
-    df = df.loc[df['x'].between(x_min, x_max) & df['y'].between(y_min, y_max)]
-    return df['x'].values-x_min, df['y'].values-y_min, df['radius'].values.astype(int)
-lmp_x, lmp_y, lmp_s = get_cropped_coords(lmp_table, 0, 500, 0, 500)
-
-matplotlib.rcParams["figure.dpi"] = 150
-f, (ax1, ax2, ax3) = plt.subplots(ncols=3)
-
-# Plot cropped region of max z-projected dots image
-imshow_plane(max_imgs, sel={Axes.X: (0, 500), Axes.Y: (0, 500)}, ax=ax1, title='BlobDetector')
-imshow_plane(max_imgs, sel={Axes.X: (0, 500), Axes.Y: (0, 500)}, ax=ax2, title='LocalMaxPeak')
-imshow_plane(max_imgs, sel={Axes.X: (0, 500), Axes.Y: (0, 500)}, ax=ax3, title='Trackpy')
-# Overlay spots found by each FindSpotsAlgorithm
-ax1.scatter(lmp_x, lmp_y, marker='o', facecolors='none', edgecolors='r', s=lmp_s*10)

@@ -25,6 +25,10 @@ that can be detected. The recommended way to set parameters is to take a represe
 :ref:`visually assess <howto_spotfindingresults>` results. Each peak is counted as a spot with
 radius equal to one pixel.
 
+.. note::
+    Running :py:class:`.LocalMaxPeakFinder` on 3-Dimensional images with ``is_volume=True`` can
+    be extremely slow.
+
 .. warning::
     :py:class:`.LocalMaxPeakFinder` is not compatible with cropped data sets.
 

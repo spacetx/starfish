@@ -63,8 +63,7 @@ Data Files and Formats
 Data and Auxiliary Images
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each dataset should be formatted in `SpaceTx
-Format <https://spacetx-starfish.readthedocs.io/en/latest/sptx-format/specification.html>`__.
+Each dataset should be formatted in :ref:`SpaceTx Format <sptx_format>`.
 Briefly, SpaceTx format specifies an index, written in json, that
 specifies metadata about a set of image tiles. It is built
 hierarchically, where each Experiment corresponds to a microscope slide,
@@ -81,8 +80,7 @@ nissl stains, dapi stains, or fiduciary beads, should be stored as
 Auxiliary images that are associated with each field of view.
 
 Constructed Experiment objects can be validated with starfish validate.
-Instructions for carrying out this validation can be found
-`here <https://spacetx-starfish.readthedocs.io/en/latest/usage/validation/>`__.
+Instructions for carrying out this validation can be found :ref:`here <schema>`.
 If any issues arise during this process, please open an issue and let us
 know.
 
@@ -90,19 +88,15 @@ know.
 in cases where images are stored in a local directory structure, and the
 directories or file names contain all information about the fluorescence
 channel, imaging round, z-plane, physical coordinates, and field of view
-for data and auxiliary images. *starfish* provides examples of how
-naming conventions can be used to extract data for
-`MERFISH <https://github.com/spacetx/starfish/blob/master/examples/get_merfish_u20s_data.py#L1>`__,
-`ISS <https://github.com/spacetx/starfish/blob/master/examples/get_iss_breast_data.py#L1>`__,
-or
-`osmFISH <https://github.com/spacetx/starfish/blob/master/examples/format_osmfish.py#L1>`__
-datasets.
+for data and auxiliary images. *starfish* provides
+:ref:`examples <sphx_glr_gallery_data_formatting>` of how naming
+conventions can be used to extract data for a variety of datasets.
 
 Codebook
 ~~~~~~~~
 
 Each dataset should be accompanied by a
-`codebook <https://spacetx-starfish.readthedocs.io/en/latest/sptx-format/index.html#codebook>`__
+`codebook <https://spacetx-starfish.readthedocs.io/en/stable/help_and_reference/spacetx-format/input_formats/SpaceTxFormat/index.html#codebook>`_
 in SpaceTx format with the filename codebook.json. The codebook is also
 stored in JSON, and specifies, for each target mRNA, the expected
 fluorescence value for each round and channel of the experiment. We've

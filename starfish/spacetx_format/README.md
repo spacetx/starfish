@@ -145,6 +145,8 @@ The below example describes a 2-channel, 8-round coded experiment that samples a
 }
 ```
 
+.. _sptx_codebook_format:
+
 ## Codebook
 
 The final part of the spaceTx specification, the codebook describes how intensities detected in the image tensor correspond to the targets of the assay.

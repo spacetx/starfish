@@ -95,8 +95,7 @@ conventions can be used to extract data for a variety of datasets.
 Codebook
 ~~~~~~~~
 
-Each dataset should be accompanied by a
-`codebook <https://spacetx-starfish.readthedocs.io/en/stable/help_and_reference/spacetx-format/input_formats/SpaceTxFormat/index.html#codebook>`_
+Each dataset should be accompanied by a :ref:`codebook <sptx_codebook_format>`
 in SpaceTx format with the filename codebook.json. The codebook is also
 stored in JSON, and specifies, for each target mRNA, the expected
 fluorescence value for each round and channel of the experiment. We've

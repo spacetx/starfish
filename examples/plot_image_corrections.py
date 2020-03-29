@@ -1,7 +1,30 @@
 """
 Image Corrections
 =================
+.. container:: toggle
 
+    .. container:: header
+
+        **Show/Hide Code**
+
+    .. code-block:: xml
+       :linenos:
+
+       import matplotlib.pyplot as plt
+       import numpy as np
+       import xarray as xr
+
+       import starfish
+       import starfish.data
+       from starfish.types import Axes
+
+       experiment = starfish.data.ISS(use_test_data=True)
+       image: starfish.ImageStack = experiment['fov_001'].get_image('primary')
+
+       image_2d = image.sel({Axes.CH: 0, Axes.ROUND: 0, Axes.ZPLANE: 0})
+
+       plt.imshow(np.squeeze(image_2d.xarray.values))
+       plt.show()
 """
 
 
@@ -26,6 +49,12 @@ Image Corrections
 # transformation to correct any uneven illumination.
 #
 # The below plot shows a single plane of an in-situ sequencing experiment.
+#
+# .. container:: toggle
+#
+#    .. container:: header
+#
+#       **Show/Hide Code**
 
 import matplotlib.pyplot as plt
 import numpy as np

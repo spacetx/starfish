@@ -24,7 +24,7 @@ matplotlib.use('agg')
 # -- Project information -----------------------------------------------------
 
 project = 'starfish'
-copyright = '2017-2019, The Chan Zuckerberg Initiative'
+copyright = '2017-2020, The Chan Zuckerberg Initiative'
 author = 'Ambrose J. Carr, Tony Tung, Shannon Axelrod, Brian Long, Jeremy Freeman, Deep Ganguli'
 
 # The short X.Y version
@@ -126,11 +126,11 @@ sphinx_gallery_conf = {
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
-# html_theme = 'bootstrap'
+# html_theme = 'sphinx_rtd_theme'
+html_theme = 'bootstrap'
 
-# import sphinx_bootstrap_theme
-# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+import sphinx_bootstrap_theme
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -144,19 +144,35 @@ html_favicon = '_static/favicon.ico'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+def setup(app):
+    app.add_stylesheet("my-styles.css")
 
-# html_theme_options = {
-#     'source_link_position': "footer",
-#     'bootswatch_theme': "flatly", # https://bootswatch.com/
-#     'navbar_sidebarrel': False,
-#     'bootstrap_version': "3",
-#     'navbar_links': [
-#                      ("Introduction", "introduction/introduction"),
-#                      ("Installation", "installation/installation"),
-#                      ("API", "api/index"),
-#                      ],
+html_theme_options = {
+    'navbar_title': " ",
+    'navbar_site_name': "documentation",
 
-#     }
+    'navbar_links': [
+                     ("introduction", "introduction/index"),
+                     ("installation", "getting_started/installation/index"),
+                     ("user guide", "creating_an_image_processing_pipeline/index"),
+                     ("API", "api/index"),
+                     ("examples", "gallery/index")
+                     ],
+    'navbar_sidebarrel': False,
+    'navbar_pagenav': True,
+    'navbar_pagenav_name': "sections",
+    'globaltoc_depth': -1,
+    'globaltoc_includehidden': "true",
+    'navbar_class': "navbar navbar-inverse",
+    'navbar_fixed_top': "true",
+    'source_link_position': "footer",
+    'bootswatch_theme': "flatly",  # https://bootswatch.com/
+    'bootstrap_version': "3",
+    }
+
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+html_logo = '_static/design/logo-transparent.png'
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -202,7 +218,6 @@ latex_documents = [
     (master_doc, 'Starfish.tex', 'Starfish Documentation',
      'Ambrose J. Carr, Tony Tung, Shannon Axelrod, Brian Long, Jeremy Freeman, Deep Ganguli', 'manual'),
 ]
-
 
 # -- Options for manual page output ------------------------------------------
 

@@ -50,7 +50,7 @@ low intensities that are likely background noise. One way to set ``threshold`` i
 conservatively low value to start with on a representative image and :ref:`visually assess
 <howto_spotfindingresults>` results. If the image has a high SNR the ``threshold`` is trivial but
 if there is high background, then choosing the right ``threshold`` value can become subjective.
-Another way to estimate ``threshold`` is :ref`howto_localmaxpeakfinder` and examining the
+Another way to estimate ``threshold`` is :ref:`howto_localmaxpeakfinder` and examining the
 intensities of the spots.
 
 .. warning::

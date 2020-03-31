@@ -6,12 +6,13 @@
     <div style="clear: both"></div>
     <div class="container-fluid hidden-xs hidden-sm">
       <div class="row">
-
-.. image:: /_static/design/logo.png
-   :height: 120 px
-
-.. raw:: html
-
+        <div class="col-lg-7">
+          <div class="bs-component">
+              <a type="button" class="btn btn-primary" href="getting_started/index.html">quickstart</button></a>
+              <a type="button" class="btn btn-primary" href="https://github.com/spacetx/starfish">github</button></a>
+              <a type="button" class="btn btn-primary" href="https://forum.image.sc/tag/starfish">user support</button></a>
+          </div>
+        </div>
       </div>
     </div>
     <br>

@@ -1,4 +1,4 @@
 Data Formatting
 ===============
 
-Examples of formatting data into SpaceTx format for processing with _starfish_
+Examples of formatting data into SpaceTx format for processing with starfish

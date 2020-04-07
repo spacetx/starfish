@@ -3,20 +3,23 @@
 Installation
 ============
 
-Starfish supports python 3.6 and above. To install the starfish package, first verify that your
-python version is compatible. You can check this by running `python --version`.
+Starfish supports python 3.6 and above (python 3.7 recommended). To install the starfish package,
+first verify that your python version is compatible. You can check this by running `python
+--version`.
 
 The output should look similar to this:
 
 .. code-block:: bash
 
    % python --version
-   Python 3.6.5
+   Python 3.7.5
 
-While starfish itself has no known issues with python 3.8, scikit-image is not fully compatible with
-python 3.8.  As such, installation of scikit-image, as part of starfish installation, may
-unexpectedly fail.  The workaround is to install numpy first before installing starfish or
-scikit-image.
+.. warning::
+    While starfish itself has no known issues with python 3.8, scikit-image is not fully
+    compatible with python 3.8.  As such, installation of scikit-image, as part of starfish
+    installation, may unexpectedly fail.  The workaround is to install numpy first before
+    installing starfish or scikit-image.
+
 
 Using virtual environments
 --------------------------
@@ -35,6 +38,13 @@ You can create a work folder and set up the virtual environment like:
     % python -m venv .venv
     % source .venv/bin/activate
 
+To run starfish using jupyter notebook (recommended) add the virtualenv kernel to jupyter by
+installing from within your activated virtual environment:
+
+.. code-block:: bash
+
+    % python -m ipykernel install --user --name=<venv_name>
+
 Conda_ users can set one up like so:
 
 .. _Conda: https://www.anaconda.com/distribution/
@@ -44,6 +54,7 @@ Conda_ users can set one up like so:
     % conda create -n starfish "python>=3.6"
     % conda activate starfish
 
+
 Installation for users
 ----------------------
 
@@ -52,6 +63,20 @@ Starfish can easily be installed using pip:
 .. code-block:: bash
 
    % pip install starfish
+
+.. note::
+    If using python 3.8, install numpy before starfish.
+
+To use napari for interactive image visualization via `starfish.display()` you must also install
+napari:
+
+.. code-block:: bash
+
+   % pip install napari
+
+.. note::
+    Interactive visualization with napari also requires using Qt (e.g. by running the command
+    `%gui qt` in a jupyter notebook.
 
 Installation for developers
 ---------------------------

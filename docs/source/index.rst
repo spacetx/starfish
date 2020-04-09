@@ -22,29 +22,21 @@
     <div class="col-md-6">
     <br>
 
+*starfish* is a Python library for processing images of microscopy-based spatial transcriptomics.
 
-*starfish* is a Python library for analysis of image-based transcriptomics.
+For a brief overview of starfish and popular assays it is compatible with, you can read the
+:ref:`Introduction <introduction>`. If you want to give it a try, the
+:ref:`quick start tutorial <getting started>` will guide you from installation to running a
+pipeline in under 10 minutes. For more comprehensive instructions on how to use starfish, see the
+user guide on :ref:`creating image-based transcriptomics processing pipelines
+<creating_an_image_processing_pipeline>`, which organizes and contextualizes the tutorials on
+running starfish using the API. Finally, advanced users can examine the
+:ref:`Data Structures <data structures>` and :ref:`Help & Reference <help and reference>`
+sections to learn more details about starfish and its object models.
 
-For a brief survey of the package, you can read the
-:ref:`Introduction <introduction>`. For more comprehensive instructions on how to use starfish,
-see the :ref:`Getting Started <getting started>` section.
-
-Starfish's documentation also contains instructions on :ref:`creating image-based transcriptomics
-processing pipelines <creating_an_image_processing_pipeline>`, tutorials on running
-starfish using the API, and a worked example of contributing code to
-starfish. Finally, advanced users can examine the :ref:`Data Structures <data structures>` and
-:ref:`Help & Reference <help and reference>` sections to learn more details about _starfish_ and its
-object models.
-
-Starfish user support is hosted on the `image.sc forum <https://forum.image.sc/tag/starfish>`_ where
-questions and discussion will serve as a continually expanding resource for starfish users. Please
-post any help or support requests on `image.sc <https://forum.image.sc/tag/starfish>`_ with the
-``starfish`` tag.
-
-To see the code or report a bug, please visit the `github repository
-<https://github.com/spacetx/starfish>`_.
-
-To see what improvements the developers have planned for starfish, please see the :ref:`roadmap`.
+In addition to the library of image processing functions, starfish introduces a standardized data
+format for microscopy-based spatial transcriptomic assays. Examples and tutorials for formatting
+your data into the starfish format can be found in :ref:`starfish data formatting <formatting>`.
 
 .. raw:: html
 

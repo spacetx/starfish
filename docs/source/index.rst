@@ -44,8 +44,6 @@ post any help or support requests on `image.sc <https://forum.image.sc/tag/starf
 To see the code or report a bug, please visit the `github repository
 <https://github.com/spacetx/starfish>`_.
 
-To see what improvements the developers have planned for starfish, please see the :ref:`roadmap`.
-
 .. raw:: html
 
   </div>

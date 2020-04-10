@@ -66,8 +66,8 @@ install napari:
 
     $ pip install napari
 
-Interactive visualization with napari also requires using Qt (e.g. by running the command `%gui
-qt` in a jupyter notebook.)
+Interactive visualization with napari also requires using Qt (e.g. by running the magic command
+`%gui qt` in a jupyter notebook or ipython shell.)
 
 Installing *starfish* on Windows
 --------------------------------

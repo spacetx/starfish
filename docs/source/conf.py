@@ -101,19 +101,30 @@ exclude_patterns = []
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+from sphinx_gallery.sorting import ExplicitOrder
 sphinx_gallery_conf = {
     # path to your examples scripts
     'examples_dirs': [
         # '../../notebooks/py',
         '../../examples',
     ],
+    # set subsection order
+    'subsection_order': ExplicitOrder(['../../examples/quick_start',
+                                       '../../examples',
+                                       '../../examples/data_formatting',
+                                       '../../examples/data_loading',
+                                       '../../examples/how_to',
+                                       '../../examples/pipelines',
+                                       ]),
     # path where to save gallery generated examples
     'gallery_dirs': 'gallery',
-    # #directory where function granular galleries are stored
+    # directory where function granular galleries are stored
     'backreferences_dir': 'generated',
-    #
-    # # Modules for which function level galleries are created.  In
-    # # this case sphinx_gallery and numpy in a tuple of strings.
+    # controlling what output is captured
+    'capture_repr': ('_repr_html_', '__repr__'),
+    'ignore_repr_types':r'str|matplotlib.axes',
+    # Modules for which function level galleries are created.  In
+    # this case sphinx_gallery and numpy in a tuple of strings.
     # 'doc_module': ('neuroglia',),
     'download_section_examples': False,
     'default_thumb_file': f'{dir_}/_static/design/logo-solo.png',

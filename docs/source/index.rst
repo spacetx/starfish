@@ -8,7 +8,7 @@
       <div class="row">
         <div class="col-lg-7">
           <div class="bs-component">
-              <a type="button" class="btn btn-primary" href="getting_started/index.html">quickstart</button></a>
+              <a type="button" class="btn btn-primary" href="gallery/quick_start/plot_quick_start.html">quickstart</button></a>
               <a type="button" class="btn btn-primary" href="https://github.com/spacetx/starfish">github</button></a>
               <a type="button" class="btn btn-primary" href="https://forum.image.sc/tag/starfish">user support</button></a>
           </div>
@@ -26,7 +26,7 @@
 
 For a brief overview of starfish and popular assays it is compatible with, you can read the
 :ref:`Introduction <introduction>`. If you want to give it a try, the
-:ref:`quick start tutorial <getting started>` will guide you from installation to running a
+:ref:`quick start tutorial <quick start>` will guide you from installation to running a
 pipeline in under 10 minutes. For more comprehensive instructions on how to use starfish, see the
 user guide on :ref:`creating image-based transcriptomics processing pipelines
 <creating_an_image_processing_pipeline>`, which organizes and contextualizes the tutorials on

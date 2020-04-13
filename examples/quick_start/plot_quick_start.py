@@ -26,10 +26,7 @@ Open a Jupyter notebook or console with IPython. Make sure you're using the kern
 environment where you installed starfish, and then import the following modules:
 """
 
-import starfish
 from starfish import data
-from starfish import Experiment
-from starfish.types import Axes
 from starfish.image import Filter
 from starfish.image import ApplyTransform, LearnTransform
 from starfish.spots import FindSpots, DecodeSpots
@@ -47,13 +44,13 @@ import seaborn as sns
 ####################################################################################################
 # **Load example dataset**
 #
-# For this tutorial, we use one of the datasets included in the starfish library. It is one FOV
-# from a co-cultured mouse and human fibroblast *in situ* sequencing (ISS) experiment. The dataset
-# contains primary images and auxiliary images. The primary images consist of 4 rounds that
-# sequence 4 bases of the beta-actin (ACTB) gene. The mouse and human ACTB genes differ by one
-# base, allowing mouse and human cells to be labeled. The auxiliary images consist of a "dots"
-# image, which is an image containing all :term:`rolonies<Rolony>` stained in one channel,
-# and a dapi image. This data was published in
+# For this tutorial, we use one of the datasets included in the starfish library. It is one
+# :term:`FOV<Field of View (FOV)>` from a co-cultured mouse and human fibroblast *in situ*
+# sequencing (ISS) experiment. The dataset contains primary images and auxiliary images. The
+# primary images consist of 4 rounds that sequence 4 bases of the beta-actin (ACTB) gene. The
+# mouse and human ACTB genes differ by one base, allowing mouse and human cells to be labeled.
+# The auxiliary images consist of a "dots" image, which is an image containing all
+# :term:`rolonies<Rolony>` stained in one channel, and a dapi image. This data was published in
 # `Ke, et al. <https://www.ncbi.nlm.nih.gov/pubmed/23852452>`_
 
 # Download experiment

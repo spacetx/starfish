@@ -23,7 +23,8 @@ popular formats for single-cell RNAseq analysis packages.
 This tutorial demonstrates how to use decoded MERFISH spots and the
 :ref:`manually segmented <tutorial_manual_segmentation>` cell masks to assign spots to cells and
 create a gene expression matrix. It then provides a couple examples how cell metadata can be
-added to the :py:class:`.ExpressionMatrix`.
+added to the :py:class:`.ExpressionMatrix` and how the matrix can be saved for loading into other
+analysis tools.
 """
 
 # Load MERFISH data
@@ -124,3 +125,21 @@ sns.clustermap(mat.data.T,
             yticklabels=mat.genes.data,
             xticklabels=['cell {}'.format(n + 1) for n in range(25)],
             cmap='magma')
+
+###################################################################################################
+# Finally, the :py:class:`.ExpressionMatrix` can be loaded into other analysis tools such as
+# `scanpy`_ and `Seurat`_ by saving it as an AnnData, Loom, or NetCDF file.
+#
+# .. _scanpy: https://scanpy.readthedocs.io/en/stable/api/index.html#reading
+# .. _Seurat: https://satijalab.org/loomR/loomR_tutorial.html
+#
+# .. code-block:: python
+#
+#   # Save as .netcdf for saving and loading in starfish pipeline
+#   mat.save(filename)
+#
+#   # Save as .h5ad file for loading in scanpy
+#   mat.save_anndata(filename)
+#
+#   # Save as .loom file for loading with loompy or loomR
+#   mat.save_loom(filename)

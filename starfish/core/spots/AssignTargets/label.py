@@ -61,7 +61,8 @@ class Label(AssignTargetsAlgorithm):
                 selectors['z'] = in_bbox.z
             in_mask = mask.sel(**selectors)
             spot_ids = in_bbox[Features.SPOT_ID][in_mask.values]
-            decoded_intensities[Features.CELL_ID].loc[spot_ids] = mask.name
+            decoded_intensities[Features.CELL_ID].loc[
+                decoded_intensities[Features.SPOT_ID].isin(spot_ids)] = mask.name
 
         return decoded_intensities
 

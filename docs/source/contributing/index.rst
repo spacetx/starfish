@@ -15,6 +15,26 @@ A typical starfish run consists of running one or more image processing filter s
 The identified features are then decoded into the genes that they correspond to by mapping the fluorescence channel (and optionally hybridization round) using a codebook.
 Finally, the filtered data are segmented, identifying which cell each feature belongs to.
 
+Installing *starfish* for developers
+------------------------------------
+
+If you are on a mac, make sure you have the `XCode CommandLine Tools`_
+installed.  Check out the code for starfish and set up a `virtual environment`_.
+
+.. _`XCode CommandLine Tools`: https://developer.apple.com/library/archive/technotes/tn2339/_index.html
+.. _`virtual environment`: #using-virtual-environments
+
+.. code-block:: bash
+
+    $ git clone git://github.com/spacetx/starfish.git
+    $ cd starfish
+
+Then install starfish:
+
+.. code-block:: bash
+
+    $ make install-dev
+
 Creating a new algorithm for an existing `pipeline_component`
 -------------------------------------------------------------
 

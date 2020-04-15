@@ -26,21 +26,6 @@ Open a Jupyter notebook or console with IPython. Make sure you're using the kern
 environment where you installed starfish, and then import the following modules:
 """
 
-from starfish import data
-from starfish.image import Filter
-from starfish.image import ApplyTransform, LearnTransform
-from starfish.spots import FindSpots, DecodeSpots
-from starfish.types import Features, Axes
-from starfish.image import Segment
-from starfish.spots import AssignTargets
-from starfish import ExpressionMatrix
-from starfish import ImageStack
-
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sns
-
 ####################################################################################################
 # **Load example dataset**
 #
@@ -52,6 +37,8 @@ import seaborn as sns
 # The auxiliary images consist of a "dots" image, which is an image containing all
 # :term:`rolonies<Rolony>` stained in one channel, and a dapi image. This data was published in
 # `Ke, et al. <https://www.ncbi.nlm.nih.gov/pubmed/23852452>`_
+
+from starfish import data
 
 # Download experiment
 e = data.MOUSE_V_HUMAN()
@@ -79,8 +66,10 @@ imgs
 #
 # .. code-block:: python
 #
+#   from starfish import display
+#
 #   %gui qt
-#   starfish.display(imgs)
+#   display(imgs)
 
 ####################################################################################################
 # **View codebook**
@@ -107,6 +96,11 @@ e.codebook
 # For this data, the transforms are learned from the "dots" auxiliary image and then applied to
 # the primary images.
 
+
+from starfish.image import ApplyTransform, LearnTransform
+from starfish.types import Axes
+
+
 def register(imgs, dots, method = 'translation'):
     mip_imgs = imgs.reduce(dims = [Axes.CH, Axes.ZPLANE], func="max")
     mip_dots = dots.reduce(dims = [Axes.CH, Axes.ZPLANE], func="max")
@@ -123,6 +117,10 @@ def register(imgs, dots, method = 'translation'):
 # Clusters of background, with radius greater than expected rolony radius can be removed with a
 # white tophat filter.
 
+
+from starfish.image import Filter
+
+
 def filter_white_tophat(imgs, dots, masking_radius):
     wth = Filter.WhiteTophat(masking_radius=masking_radius)
     return wth.run(imgs), wth.run(dots)
@@ -134,6 +132,10 @@ def filter_white_tophat(imgs, dots, masking_radius):
 # spots are found in the "dots" image using a laplacian-of-gaussian blob detection algorithm.
 # Then an :ref:`IntensityTable` is constructed by measuring the pixel intensities at the spot
 # locations in each primary image.
+
+
+from starfish.spots import FindSpots
+
 
 def find_spots(imgs, dots):
 
@@ -158,6 +160,10 @@ def find_spots(imgs, dots):
 # which is then matched to a codeword in the codebook. In the case of *in situ sequencing*,
 # the barcode is actually the sequence of the gene.
 
+
+from starfish.spots import DecodeSpots
+
+
 def decode_spots(codebook, spots):
     decoder = DecodeSpots.PerRoundMaxChannel(codebook=codebook)
     return decoder.run(spots=spots)
@@ -171,6 +177,12 @@ def decode_spots(codebook, spots):
 # maximum-intensity projection of primary images, which has autofluorescence inside the cell
 # and very little background outside the cell. There are also :ref:`other cell segmentation
 # methods <section_segmenting_cells>` available in starfish.
+
+
+import numpy as np
+from starfish.image import Segment
+from starfish.types import Axes
+
 
 def segment(registered_imgs, nuclei):
     dapi_thresh = .22  # binary mask for cell (nuclear) locations
@@ -198,10 +210,13 @@ def segment(registered_imgs, nuclei):
 # that the spot is located in. Then the :py:class:`DecodedIntensityTable` of spots is transformed
 # into an expression matrix by counting the number of spots for each gene in each cell.
 
+from starfish.spots import AssignTargets
+
+
 def make_expression_matrix(masks, decoded):
     al = AssignTargets.Label()
-    labeled = al.run(masks, decoded[decoded.target!='nan'])
-    cg = labeled[labeled.cell_id!='nan'].to_expression_matrix()
+    labeled = al.run(masks, decoded[decoded.target != 'nan'])
+    cg = labeled[labeled.cell_id != 'nan'].to_expression_matrix()
     return cg
 
 ####################################################################################################
@@ -244,7 +259,7 @@ spots.count_total_spots()
 #
 # .. code-block:: python
 #
-#   starfish.display(stack=registered_imgs, spots=decoded, masks=masks)
+#   display(stack=registered_imgs, spots=decoded, masks=masks)
 
 ####################################################################################################
 # **View decoded spots as a table**
@@ -258,6 +273,10 @@ print(decoded.to_features_dataframe().head(10))
 # rounds of image acquisition as a way to error check. For example, false positives from the
 # spot finding step are removed if the pixel intensities of the spot across all rounds of images
 # don't match a codeword in the codebook.
+
+import numpy as np
+import pandas as pd
+from starfish.types import Features
 
 genes, counts = np.unique(decoded.loc[decoded[Features.PASSES_THRESHOLDS]][Features.TARGET], return_counts=True)
 table = pd.Series(counts, index=genes).sort_values(ascending=False)
@@ -273,6 +292,9 @@ print(mat.to_pandas())
 #
 # The heatmap makes it very clear that based on gene expression, three cells (cells 1, 3,
 # and 4) are mouse cells and two (cells 2 and 5) are human cells.
+
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 plt.figure(figsize=(30, 10))
 sns.set(font_scale=4)

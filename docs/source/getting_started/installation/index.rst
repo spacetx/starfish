@@ -83,7 +83,7 @@ created with python's ``venv`` module:
     > python -m venv .venv
     > .venv\Scripts\activate.bat
     > pip install starfish
-    > pip install napari
+    > pip install starfish[napari]
 
 .. note::
     Python 3.8 has trouble installing scikit-image v0.15.0 and the ``pip install numpy``

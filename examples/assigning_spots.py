@@ -133,13 +133,11 @@ sns.clustermap(mat.data.T,
 # .. _scanpy: https://scanpy.readthedocs.io/en/stable/api/index.html#reading
 # .. _Seurat: https://satijalab.org/loomR/loomR_tutorial.html
 #
-# .. code-block:: python
-#
-#   # Save as .netcdf for saving and loading in starfish pipeline
-#   mat.save(filename)
-#
-#   # Save as .h5ad file for loading in scanpy
-#   mat.save_anndata(filename)
-#
-#   # Save as .loom file for loading with loompy or loomR
-#   mat.save_loom(filename)
+# Save as .netcdf for saving and loading in starfish pipeline
+mat.save('expression_matrix.nc')
+
+# Save as .h5ad file for loading in scanpy
+mat.save_anndata('expression_matrix.h5ad')
+
+# Save as .loom file for loading with loompy or loomR
+mat.save_loom('expression_matrix.loom')

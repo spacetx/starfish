@@ -8,9 +8,9 @@ class ExpressionMatrix(xr.DataArray):
 
     """Container for expression data extracted from an IntensityTable
 
-    An ExpressionMatrix is a 2-dimensional ``cells`` x ``genes`` tensor whose values are the
+    An ExpressionMatrix is a 2-dimensional ``cells`` x ``genes`` array whose values are the
     number of spots observed for each gene observed by the experiment. In addition to the basic
-    xarray methods, IntensityTable implements:
+    xarray methods, ExpressionMatrix implements:
 
     Methods
     -------

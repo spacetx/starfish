@@ -122,7 +122,7 @@ sphinx_gallery_conf = {
     'backreferences_dir': 'generated',
     # controlling what output is captured
     'capture_repr': ('_repr_html_', '__repr__'),
-    'ignore_repr_types':r'str|matplotlib.axes',
+    'ignore_repr_types': r'str|matplotlib.axes',
     # Modules for which function level galleries are created.  In
     # this case sphinx_gallery and numpy in a tuple of strings.
     # 'doc_module': ('neuroglia',),
@@ -163,11 +163,10 @@ html_theme_options = {
     'navbar_site_name': "documentation",
 
     'navbar_links': [
-                     ("introduction", "introduction/index"),
                      ("installation", "getting_started/installation/index"),
                      ("user guide", "creating_an_image_processing_pipeline/index"),
+                     ("examples", "gallery/index"),
                      ("API", "api/index"),
-                     ("examples", "gallery/index")
                      ],
     'navbar_sidebarrel': False,
     'navbar_pagenav': True,
@@ -269,3 +268,7 @@ napoleon_use_rtype = True
 
 # See https://stackoverflow.com/a/45565445/56887
 autodoc_mock_imports = ['_tkinter']
+
+rst_epilog = """
+.. include:: <s5defs.txt>
+"""

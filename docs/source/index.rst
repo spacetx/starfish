@@ -2,7 +2,7 @@
 
     <style>
     #banner_img {
-        background: url("_static/design/ivana-cajina-asuyh-_ZX54-unsplash.jpg") no-repeat center;
+        background: url("_static/design/ivana-cajina-asuyh-_ZX54-unsplash.png") no-repeat center;
         /*Photo by Ivana Cajina on Unsplash*/
         background-size: cover;
     }

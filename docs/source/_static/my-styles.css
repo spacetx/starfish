@@ -42,3 +42,23 @@ footer {
 .toggle .header.open:after {
     content: " ▼";
 }
+
+/* For landing page banner */
+.jumbotron{
+    position: relative;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    text-align: left;
+    padding-top: 0px;
+    padding-bottom: 20px;
+}
+
+/* Explicit role for interpreted text intended for title on landing page dark background
+ Usage: :white:`text to be styled` in rST. */
+.white {
+    font-family: Lato,Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 39px;
+    font-style: italic;
+    font-weight: 400;
+    color: white;
+}

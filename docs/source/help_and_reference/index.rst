@@ -5,6 +5,7 @@ Help & Reference
 
 .. toctree::
     :maxdepth: 2
+
     request_support/index
     glossary/glossary
     spacetx-format/index

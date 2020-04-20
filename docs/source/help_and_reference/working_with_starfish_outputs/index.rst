@@ -1,7 +1,7 @@
 .. _working_with_starfish_outputs:
 
 Working with Starfish Outputs
-=============================
+-----------------------------
 
 Starfish's output_formats are serialized as :code:`netcdf` or :code:`csv` files. These files are
 easy to work with in both Python_ and R_.

@@ -1,7 +1,7 @@
 Here, we clearly define the relevant terms needed to understand the spaceTx pipeline specification
 
 Glossary
-========
+--------
 
 .. glossary::
 

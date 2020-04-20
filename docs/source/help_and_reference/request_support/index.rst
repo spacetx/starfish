@@ -1,7 +1,7 @@
 .. _request support:
 
 Request Support
-===============
+---------------
 
 Starfish user support is hosted on the `image.sc forum <https://forum.image.sc/tag/starfish>`_ where
 questions and discussion will serve as a continually expanding resource for starfish users. Please

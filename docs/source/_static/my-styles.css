@@ -4,6 +4,15 @@ footer {
 }
 */
 
+div.body {
+  max-width: 100%;
+}
+
+/* ensures that readthedocs banner doesn't cover content */
+.content {
+  padding-bottom: 46px;
+}
+
 /* Make navbar blue */
 .navbar-default {
   background-color: #2c3e50;
@@ -49,16 +58,26 @@ footer {
     margin-top: 0px;
     margin-bottom: 0px;
     text-align: left;
-    padding-top: 0px;
+    padding-top: 20px;
     padding-bottom: 20px;
 }
 
-/* Explicit role for interpreted text intended for title on landing page dark background
- Usage: :white:`text to be styled` in rST. */
-.white {
+/* Landing page header style */
+.jumbotron h1 {
     font-family: Lato,Helvetica Neue,Helvetica,Arial,sans-serif;
     font-size: 39px;
     font-style: italic;
     font-weight: 400;
     color: white;
+    min-height: 220px;
+}
+
+/* fix sphinx-gallery footer with bootstrap theme */
+
+.content .container {
+  width: unset;
+  margin-left: unset;
+  margin-right: unset;
+  padding-left: unset;
+  padding-right: unset;
 }

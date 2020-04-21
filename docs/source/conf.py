@@ -160,21 +160,20 @@ def setup(app):
 
 html_theme_options = {
     'navbar_title': " ",
-    'navbar_site_name': "documentation",
-
+    'navbar_site_name': "More",
     'navbar_links': [
-                     ("installation", "getting_started/installation/index"),
-                     ("user guide", "creating_an_image_processing_pipeline/index"),
-                     ("examples", "gallery/index"),
-                     ("API", "api/index"),
-                     ],
+      ("Installation", "installation/index"),
+      ("User Guide", "user_guide/index"),
+      ("Examples", "gallery/index"),
+      ("API", "api/index"),
+      ],
     'navbar_sidebarrel': False,
-    'navbar_pagenav': True,
+    'navbar_pagenav': False,
     'navbar_pagenav_name': "sections",
     'globaltoc_depth': -1,
     'globaltoc_includehidden': "true",
     'navbar_class': "navbar navbar-inverse",
-    'navbar_fixed_top': "true",
+    'navbar_fixed_top': "false",
     'source_link_position': "footer",
     'bootswatch_theme': "flatly",  # https://bootswatch.com/
     'bootstrap_version': "3",
@@ -193,7 +192,14 @@ html_logo = '_static/design/logo-transparent.png'
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
-
+html_sidebars = {
+    # '**': ['localtoc.html'],
+    'installation/**': ['localtoc.html'],
+    'getting_started/**': ['localtoc.html'],
+    'user_guide/**': ['localtoc.html'],
+    'gallery/**': ['localtoc.html'],
+    'api/**': ['localtoc.html'],
+}
 
 # -- Options for HTMLHelp output ---------------------------------------------
 

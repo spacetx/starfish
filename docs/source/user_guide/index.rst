@@ -1,4 +1,4 @@
-.. _creating_an_image_processing_pipeline:
+.. _user_guide:
 
 Creating an Image Processing Pipeline
 =====================================

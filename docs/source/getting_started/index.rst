@@ -10,7 +10,6 @@ image data, provides instructions on loading and visualizing data, and jumps int
 of constructing and applying an example data processing pipeline.
 
 .. toctree::
-    installation/index
     data_model/index
     formatting_data/index
     formatting_data/advanced
@@ -21,5 +20,5 @@ of constructing and applying an example data processing pipeline.
 #                    statements don't make any sense.
 
 The following section
-:ref:`Creating an Image Processing Pipeline <creating_an_image_processing_pipeline>`
+:ref:`Creating an Image Processing Pipeline <user_guide>`
 goes into each of these sections in more detail.

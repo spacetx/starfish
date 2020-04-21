@@ -88,7 +88,7 @@ e.codebook
 #
 # To keep the quick start tutorial quick, only brief descriptions of each function are included
 # here. In-depth discussion of each component can be found in the :ref:`User Guide
-# <creating_an_image_processing_pipeline>` and :ref:`API` documentation.
+# <user_guide>` and :ref:`API` documentation.
 #
 # *Image Registration:*
 #
@@ -306,6 +306,6 @@ sns.heatmap(mat.data.T,
 ####################################################################################################
 # This is the end of the quick start tutorial! To use starfish on your own data, start with
 # :ref:`Data Formatting<Formatting>` and then follow the :ref:`User
-# Guide<creating_an_image_processing_pipeline>` to create a pipeline tailored to your data. If
+# Guide<user_guide>` to create a pipeline tailored to your data. If
 # you want to try creating pipelines but don't have data yet, :py:mod:`starfish.data` has a
 # number of example datasets you can experiment with.

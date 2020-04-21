@@ -63,7 +63,7 @@ div.body {
 
 /* Explicit role for interpreted text intended for title on landing page dark background
  Usage: :white:`text to be styled` in rST. */
-.white {
+.jumbotron h1 {
     font-family: Lato,Helvetica Neue,Helvetica,Arial,sans-serif;
     font-size: 39px;
     font-style: italic;

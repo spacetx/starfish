@@ -1,5 +1,5 @@
 SpaceTx Format
-==============
+--------------
 
 .. toctree::
    :maxdepth: 1

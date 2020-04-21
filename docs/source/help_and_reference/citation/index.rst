@@ -1,5 +1,5 @@
 Citing Starfish
-===============
+---------------
 
 to cite starfish, please use::
 

@@ -161,13 +161,12 @@ def setup(app):
 html_theme_options = {
     'navbar_title': " ",
     'navbar_site_name': "More",
-
     'navbar_links': [
-                     ("Installation", "installation/index"),
-                     ("User Guide", "user_guide/index"),
-                     ("Examples", "gallery/index"),
-                     ("API", "api/index"),
-                     ],
+      ("Installation", "installation/index"),
+      ("User Guide", "user_guide/index"),
+      ("Examples", "gallery/index"),
+      ("API", "api/index"),
+      ],
     'navbar_sidebarrel': False,
     'navbar_pagenav': False,
     'navbar_pagenav_name': "sections",

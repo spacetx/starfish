@@ -4,6 +4,13 @@ footer {
 }
 */
 
+div.body {
+  max-width: 100%;
+}
+
+.content {
+  padding-bottom: 46px;
+}
 
 /* Make navbar blue */
 .navbar-default {

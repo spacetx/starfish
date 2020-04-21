@@ -195,6 +195,7 @@ html_logo = '_static/design/logo-transparent.png'
 html_sidebars = {
     # '**': ['localtoc.html'],
     'installation/**': ['localtoc.html'],
+    'help_and_reference/**': ['localtoc.html'],
     'getting_started/**': ['localtoc.html'],
     'user_guide/**': ['localtoc.html'],
     'gallery/**': ['localtoc.html'],

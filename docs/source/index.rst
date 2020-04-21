@@ -49,7 +49,7 @@ expression matrix by comparing physical positions of spots and cells.
 If you want to give it a try, the :ref:`quick start tutorial <quick start>` will guide you from
 installation to running a pipeline in under 10 minutes. For more comprehensive instructions on
 how to use starfish, see the user guide on :ref:`creating image-based transcriptomics processing
-pipelines <creating_an_image_processing_pipeline>`, which organizes and contextualizes the
+pipelines <user_guide>`, which organizes and contextualizes the
 tutorials on running starfish using the API. Finally, advanced users can examine the
 :ref:`Data Structures <data structures>` and :ref:`Help & Reference <help and reference>`
 sections to learn more details about starfish and its object models.
@@ -81,13 +81,14 @@ your data into the starfish format can be found in :ref:`starfish data formattin
 .. toctree::
    :maxdepth: 1
 
+   installation/index
+   user_guide/index
+   gallery/index
    getting_started/index
    help_and_reference/index
    usage/index
    processing_at_scale/index
    contributing/index
-   creating_an_image_processing_pipeline/index
-   gallery/index
    api/index
 
 .. raw:: html

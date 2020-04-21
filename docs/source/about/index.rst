@@ -1,3 +1,14 @@
+.. _about:
+
+About
+=====
+
+Starfish is developed and maintained by the Science team at the Chan Zuckerberg Initiative.
+It began as a project to support the SpaceTx consortium.
+SpaceTx is a consortium effort to benchmark image based transcriptomic methods by applying 10 different methods on a common tissue source, standardizing the raw data formats and using standardized analysis pipelines.
+
+.. _citing:
+
 Citing Starfish
 ---------------
 
@@ -19,3 +30,10 @@ Here’s an example of a BibTeX entry::
     url = "http://github.com/spacetx/starfish",
     note = {[Online; accessed <date>]}
     }
+
+.. _license:
+
+License
+-------
+
+.. literalinclude:: ../../../LICENSE

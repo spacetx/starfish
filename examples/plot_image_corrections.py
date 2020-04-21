@@ -186,35 +186,6 @@ pass
 
 pass
 
-###################################################################################################
-# .. _tutorial_image_registration:
-#
-# Image Registration
-# ==================
-#
-# Registration is an important aspect of image correction, particularly for multiplex experiments
-# which attempt to match dots across images and channels. In these experiments, even very small shifts
-# the size of a dot can make it extremely challenging to identify gene that dot present across a set
-# of images.
-#
-# As mentioned above, chromatic aberration is one form of error that spot-calling experiments must
-# contend with. However, registration error can also occur from tissue handling during the experiment,
-# subtle changes in the position of the microscope slide relative to the stage, microfluidics shifting
-# the tissue during fluid exchange across rounds, or changes in tissue morphology in expansion
-# microscopy experiments.
-#
-# Starfish exposes simple fourier-domain translational registration to adjust for *some* of the above
-# registration issues. Starfish also supports the Warp functionality to apply any
-# pre-learned affine transformation, The combination of these approaches covers all of the types of
-# registration faults that starfish's developers have observed thus far while looking at image-based
-# transcriptomics experiments. However, it will be necessary to learn registrations that are more
-# complex than translational shifts using software outside starfish, for the time being. Any
-# contributions that add registration features would be highly desirable.
-#
-# TODO ambrosejcarr examples and links to warp
-#
-
-pass
 
 ###################################################################################################
 # .. _tutorial_image_correction_pipeline:

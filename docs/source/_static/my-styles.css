@@ -70,3 +70,13 @@ div.body {
     font-weight: 400;
     color: white;
 }
+
+/* fix sphinx-gallery footer with bootstrap theme */
+
+.content .container {
+  width: unset;
+  margin-left: unset;
+  margin-right: unset;
+  padding-left: unset;
+  padding-right: unset;
+}

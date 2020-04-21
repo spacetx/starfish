@@ -11,10 +11,7 @@
     <div class="jumbotron jumbotron-fluid" id="banner_img">
     <div class="container-fluid">
 
-:white:`starfish: scalable pipelines for image-based transcriptomics`
-=====================================================================
-
-.. raw:: html
+    <h1>starfish: scalable pipelines for image-based transcriptomics</h1>
 
     <div style="clear: both"></div>
     <div class="container-fluid">

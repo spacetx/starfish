@@ -4,11 +4,10 @@ Help & Reference
 ================
 
 .. toctree::
-    :maxdepth: 2
-
-    request_support/index
-    glossary/glossary
+    data_model/index
     spacetx-format/index
+    validation/index
     working_with_starfish_outputs/index
-    citation/index
-    license/index
+    configuration/index
+    glossary/glossary
+    request_support/index

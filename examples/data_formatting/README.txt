@@ -1,4 +1,7 @@
+.. _data_conversion_examples:
+
 Data Formatting
 ---------------
 
-Examples of formatting data into SpaceTx format for processing with starfish
+This section provides several examples of how to format data into SpaceTx-Format from a variety of
+types of input data shapes and sizes, demonstrating the flexibility of :py:class:`TileFetcher`.

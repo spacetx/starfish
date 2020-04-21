@@ -86,6 +86,7 @@ your data into the starfish format can be found in :ref:`starfish data formattin
    processing_at_scale/index
    contributing/index
    api/index
+   about/index
 
 .. raw:: html
 

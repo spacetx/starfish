@@ -61,7 +61,7 @@ your data into the starfish format can be found in :ref:`starfish data formattin
   <h2>Features</h2>
 
 * Formatting Data: :ref:`Tutorials<sphx_glr_gallery_data_formatting>`
-* Registering Images: :ref:`API<learn_transform>`
+* Registering Images: :ref:`API<learn_transform>` | :ref:`Tutorial<tutorial_image_registration>`
 * Filtering Images: :ref:`API<filtering>` | :ref:`Tutorial<section_correcting_images>`
 * Finding Spots: :ref:`API<spot_finding>` | :ref:`Tutorial<section_finding_and_decoding>`
 * Decoding Spots: :ref:`API<decode_spots>` | :ref:`Tutorial<section_finding_and_decoding>`

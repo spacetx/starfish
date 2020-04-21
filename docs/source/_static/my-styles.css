@@ -62,8 +62,7 @@ div.body {
     padding-bottom: 20px;
 }
 
-/* Explicit role for interpreted text intended for title on landing page dark background
- Usage: :white:`text to be styled` in rST. */
+/* Landing page header style */
 .jumbotron h1 {
     font-family: Lato,Helvetica Neue,Helvetica,Arial,sans-serif;
     font-size: 39px;

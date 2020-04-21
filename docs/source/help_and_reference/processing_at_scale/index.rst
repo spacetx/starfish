@@ -7,7 +7,7 @@ apply it in parallel to your entire experiment. Before we begin make sure you've
 
 Prerequisites
 -------------
-- Download the template files and script needed to set up and run your aws job :download:`here <starfish-aws-templates.zip>`
+- Download the template files and script needed to set up and run your aws job :download:`here </_static/starfish-aws-templates.zip>`
 - Create an aws account with access to the console `Create Account <https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/>`__
 - Create a starfish pipeline for processing a singe field of view from :ref:`ImageStack` to :ref:`DecodedIntensityTable`
 - Convert your dataset to SpaceTX format. :ref:`formatting`
@@ -29,7 +29,7 @@ Open the aws console and navigate to `s3 <https://console.aws.amazon.com/s3/home
 We name ours `aws-processing-example`. Once your bucket is created navigate into it and create a new folder for your spacetx-dataset. We call ours
 `iss-spacetx-formatted`:
 
-.. figure:: images/aws-tutorial-figure1.png
+.. figure:: /_static/images/aws-tutorial-figure1.png
    :align: center
 
 We also create a folder to hold the results from our processing called `iss-spacetx-formatted-results`.
@@ -229,7 +229,7 @@ Here's what ours looks like:
 Name your policy and save it, we named our `spacetx-batch-uploader`. Now navigate back to your new role and attach your s3 uploader policy.
 Our `spacetx-batch` role summery now looks like this:
 
-.. figure:: images/aws-tutorial-figure2.png
+.. figure:: /_static/images/aws-tutorial-figure2.png
    :align: center
 
 Note the ARN of your new role (circled in the image). You'll need it in the next few steps.
@@ -243,7 +243,7 @@ we used the default parameters (our job queue is still called first-run-job-queu
 
 Here's what out Batch Dashboard looks like:
 
-.. figure:: images/aws-tutorial-figure5.png
+.. figure:: /_static/images/aws-tutorial-figure5.png
    :align: center
 
 Alright now it's time to register our batch jobs. From the template files open up the file named `register-process-fov-job.json`. This file describes a batch job that will create an ec2 instance using the docker container `spacetx/process-fov`
@@ -272,7 +272,7 @@ You can check that your jobs had been successfully registered by navigating to t
 
 Here's what our's looks like:
 
-.. figure:: images/aws-tutorial-figure3.png
+.. figure:: /_static/images/aws-tutorial-figure3.png
    :align: center
 
 Now open the file named `register-merge-job.json`. This file describes a batch job that will create an ec2 instance using the docker container `spacetx/merge-batch-job` that merges together all your processed results into
@@ -297,7 +297,7 @@ Then from the directory where this file lives run the following command:
 
 Again, check that your job has been successfully registered from the job console, our two jobs are ready to go!
 
-.. figure:: images/aws-tutorial-figure4.png
+.. figure:: /_static/images/aws-tutorial-figure4.png
    :align: center
 
 
@@ -336,7 +336,7 @@ Now we run our script:
 To monitor the status of both jobs navigate to the `AWS Batch Dashboard <https://console.aws.amazon.com/batch/home>`_. You should see 2
 jobs under PENDING
 
-.. figure:: images/aws-tutorial-figure6.png
+.. figure:: /_static/images/aws-tutorial-figure6.png
    :align: center
 
 From here you should be able to click on the jobs and track their movement through the RUNNABLE -> RUNNING -> SUCCEEDED states.
@@ -344,7 +344,7 @@ NOTE: Batch jobs may take up to 10 minutes to move from PENDING to RUNNABLE. Whe
 that everything worked by navigating to your results bucket. The bucket should include the processed results from
 each field of view as well as the concatenated results called `merged_decoded_fovs.nc`. Here's what our bucket contains:
 
-.. figure:: images/aws-tutorial-figure7.png
+.. figure:: /_static/images/aws-tutorial-figure7.png
    :align: center
 
 And that's it! You have successfully set up and processed your experiment using aws. As long as you keep your job definitions you can rerun the jobs

@@ -83,7 +83,6 @@ your data into the starfish format can be found in :ref:`starfish data formattin
    getting_started/index
    help_and_reference/index
    usage/index
-   processing_at_scale/index
    contributing/index
    api/index
    about/index

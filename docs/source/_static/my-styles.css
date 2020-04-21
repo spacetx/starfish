@@ -1,8 +1,18 @@
-/*
-footer {
-  background-color: red;
+/* Note admonition style*/
+.alert-info {
+    background-color: #6696c1;
+    border-color: #6696c1;
+    color: #2c3e50;
+    font-size: 15px
 }
-*/
+
+/* Warning admonition style*/
+.alert-warning {
+    background-color: #6696c1;
+    border-color: #6696c1;
+    color: #ffffff;
+    ont-size: 15px
+}
 
 div.body {
   max-width: 100%;

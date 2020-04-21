@@ -69,6 +69,7 @@ div.body {
     font-style: italic;
     font-weight: 400;
     color: white;
+    min-height: 220px;
 }
 
 /* fix sphinx-gallery footer with bootstrap theme */

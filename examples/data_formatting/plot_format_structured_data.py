@@ -19,20 +19,34 @@ of the supported tile formats (:py:class:`~slicedimage.ImageFormat`).  For examp
 
 The CSV file must have a header, and must contain the following columns:
 
-====== ======== ====================================================================================
-Column Required Notes
------- -------- ------------------------------------------------------------------------------------
-fov    yes
-round  yes
-ch     yes
-zplane yes
-xc_min yes      This should be the minimum value of the x coordinate of the tile.
-xc_max yes      This should be the maximum value of the x coordinate of the tile.
-yc_min yes      This should be the minimum value of the y coordinate of the tile.
-yc_max yes      This should be the maximum value of the y coordinate of the tile.
-zc_min no       This should be the minimum value of the z coordinate of the tile.
-zc_max no       This should be the maximum value of the z coordinate of the tile.
-====== ======== ====================================================================================
+.. table::
+   :widths: 25 25 50
+   :class: "table-bordered"
+
+   +--------+----------+-------------------------------------------------------------------+
+   | Column | Required | Notes                                                             |
+   +========+==========+===================================================================+
+   | fov    | yes      |                                                                   |
+   +--------+----------+-------------------------------------------------------------------+
+   | round  | yes      |                                                                   |
+   +--------+----------+-------------------------------------------------------------------+
+   | ch     | yes      |                                                                   |
+   +--------+----------+-------------------------------------------------------------------+
+   | zplane | yes      |                                                                   |
+   +--------+----------+-------------------------------------------------------------------+
+   | xc_min | yes      | This should be the minimum value of the x coordinate of the tile. |
+   +--------+----------+-------------------------------------------------------------------+
+   | xc_max | yes      | This should be the maximum value of the x coordinate of the tile. |
+   +--------+----------+-------------------------------------------------------------------+
+   | yc_min | yes      | This should be the minimum value of the y coordinate of the tile. |
+   +--------+----------+-------------------------------------------------------------------+
+   | yc_max | yes      | This should be the maximum value of the y coordinate of the tile. |
+   +--------+----------+-------------------------------------------------------------------+
+   | zc_min | no       | This should be the minimum value of the z coordinate of the tile. |
+   +--------+----------+-------------------------------------------------------------------+
+   | zc_max | no       | This should be the maximum value of the z coordinate of the tile. |
+   +--------+----------+-------------------------------------------------------------------+
+
 """
 
 ###################################################################################################

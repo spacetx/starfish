@@ -1,9 +1,9 @@
 .. _contributing:
 
-Contributing to Starfish
-========================
+Developer Guide
+===============
 
-If you're reading this section, you're probably interested in contributing to Starfish.  Welcome and thanks for your interest in contributing!
+Welcome and thanks for your interest in contributing!
 
 How can I contribute?
 ---------------------

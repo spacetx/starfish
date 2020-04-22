@@ -81,8 +81,8 @@ your data into the starfish format can be found in :ref:`starfish data formattin
    user_guide/index
    gallery/index
    help_and_reference/index
-   contributing/index
    api/index
+   developer_guide/index
    about/index
 
 .. raw:: html

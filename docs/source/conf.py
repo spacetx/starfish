@@ -193,13 +193,14 @@ html_logo = '_static/design/logo-transparent.png'
 #
 # html_sidebars = {}
 html_sidebars = {
-    # '**': ['localtoc.html'],
     'installation/**': ['localtoc.html'],
     'help_and_reference/**': ['localtoc.html'],
     'getting_started/**': ['localtoc.html'],
     'user_guide/**': ['localtoc.html'],
     'gallery/**': ['localtoc.html'],
     'api/**': ['localtoc.html'],
+    'developer_guide/**': ['localtoc.html'],
+    'about/**': ['localtoc.html'],
 }
 
 # -- Options for HTMLHelp output ---------------------------------------------

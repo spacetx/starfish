@@ -74,7 +74,8 @@ class DeconvolvePSF(FilterAlgorithm):
     ----------
     #. `Richardson-Lucy Deconvolution`_
 
-    .. _Richardson-Lucy Deconvolution: https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+    .. _Richardson-Lucy Deconvolution: \
+    https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
 
     Notes
     -----

@@ -57,7 +57,10 @@ extensions = [
     'sphinx_gallery.gen_gallery',
     'sphinx.ext.intersphinx',
     'm2r',
+    'sphinx.ext.autosummary',
 ]
+
+autosummary_generate = True
 
 # intersphinx mapping for outside starfish linking
 intersphinx_mapping = {

@@ -110,10 +110,10 @@ sphinx_gallery_conf = {
     ],
     # set subsection order
     'subsection_order': ExplicitOrder(['../../examples/quick_start',
-                                       '../../examples',
+                                       '../../examples/tutorials',
+                                       '../../examples/how_to',
                                        '../../examples/data_formatting',
                                        '../../examples/data_loading',
-                                       '../../examples/how_to',
                                        '../../examples/pipelines',
                                        ]),
     # path where to save gallery generated examples

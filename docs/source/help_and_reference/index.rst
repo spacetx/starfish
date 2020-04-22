@@ -6,11 +6,14 @@ Help & Reference
 .. toctree::
     :maxdepth: 1
 
-    getting_started/index
     usage/index
     data_model/index
     spacetx-format/index
+    formatting_data/index
+    formatting_data/advanced
     validation/index
+    loading_data/index
+    example_workflow/index
     working_with_starfish_outputs/index
     processing_at_scale/index
     configuration/index

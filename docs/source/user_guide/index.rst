@@ -1,13 +1,14 @@
 .. _user_guide:
 
-Creating an Image Processing Pipeline
-=====================================
+User Guide
+==========
 
 Welcome to the user guide for building an image processing pipeline using starfish! This tutorial
 will cover all the steps necessary for going from raw images to a single cell gene expression
-matrix. If you are wondering what is starfish and only have a few minutes to try it out, check
-out a pre-built pipeline by following the :ref:`quick start tutorial <quick start>`. If you are
-ready to learn how to build your own image processing pipeline using starfish then read on!
+matrix. If you are wondering what is starfish, check out :ref:`The Introduction
+<introduction>`. If you only have a few minutes to try out starfish, check out a pre-built
+pipeline by following the :ref:`Guide to Getting Started<getting started>`. If you are ready
+to learn how to build your own image processing pipeline using starfish then read on!
 
 The :ref:`data model<data_model>`
 
@@ -24,6 +25,9 @@ in the same order. *Starfish* is flexible enough to omit some pipeline stages or
 but the typical order might match the following. The links show how and when to use each
 component of *starfish*, and the final section demonstrates putting together a "pipeline recipe"
 and running it on an experiment.
+
+
+
 
 .. _section_loading_data:
 

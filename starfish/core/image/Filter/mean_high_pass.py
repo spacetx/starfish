@@ -22,8 +22,7 @@ class MeanHighPass(FilterAlgorithm):
     The mean filter is also known as a uniform or box filter. It can also be considered as a fast
     approximation to a GaussianHighPass filter.
 
-    This is a pass through for the scipy.ndimage.filters.uniform_filter:
-    https://docs.scipy.org/doc/scipy-0.19.0/reference/generated/scipy.ndimage.uniform_filter.html
+    This is a pass through for :py:func:`scipy.ndimage.filters.uniform_filter`
 
     Parameters
     ----------

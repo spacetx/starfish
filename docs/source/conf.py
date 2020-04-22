@@ -62,10 +62,10 @@ extensions = [
 # intersphinx mapping for outside starfish linking
 intersphinx_mapping = {
     'xarray': ('http://xarray.pydata.org/en/stable', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-    'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-    'trackpy': ('https://soft-matter.github.io/trackpy/v0.3.2/',  None),
-    'skimage': ('https://scikit-image.org/docs/dev/', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy', None),
+    'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
+    'trackpy': ('https://soft-matter.github.io/trackpy/v0.3.2',  None),
+    'skimage': ('https://scikit-image.org/docs/dev', None),
 }
 
 # numpydoc settings

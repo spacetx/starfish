@@ -20,7 +20,7 @@ class DeconvolvePSF(FilterAlgorithm):
     an isotropic Gaussian, with a user specified standard deviation, sigma.
 
     There are currently several issues with this function.
-    See https://github.com/spacetx/starfish/issues/731
+    See `issue #731 <https://github.com/spacetx/starfish/issues/731>`_
 
     Parameters
     ----------
@@ -72,15 +72,18 @@ class DeconvolvePSF(FilterAlgorithm):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+    #. `Richardson-Lucy Deconvolution`_
+
+    .. _Richardson-Lucy Deconvolution: https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
 
     Notes
     -----
-    This code is based on code from skimage.restoration. We modified it to implement a bugfix
-    wherein zeros in the input image or zeros produced during an intermediate would induce
-    divide by zero -> Nan. These Nans would then propagate throughout the image, invalidating
-    the results. Longer term, we will make a PR to skimage to introduce the fix. There is some
-    existing work linked here: https://github.com/scikit-image/scikit-image/issues/2551
+    This code is based on code from :py:func:`skimage.restoration.richardson_lucy`. We modified it
+    to implement a bugfix wherein zeros in the input image or zeros produced during an
+    intermediate would induce divide by zero -> Nan. These Nans would then propagate throughout
+    the image, invalidating the results. Longer term, we will make a PR to skimage to introduce
+    the fix. There is some existing work linked here:
+    `issue #2551 <https://github.com/scikit-image/scikit-image/issues/2551>`_
 
     """
 

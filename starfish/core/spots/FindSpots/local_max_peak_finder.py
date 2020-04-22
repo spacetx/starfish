@@ -28,7 +28,7 @@ from ._base import FindSpotsAlgorithm
 
 class LocalMaxPeakFinder(FindSpotsAlgorithm):
     """
-    local-max peak finder that wraps skimage.feature.peak_local_max
+    local-max peak finder that wraps :py:func:`skimage.feature.peak_local_max`
 
     Parameters
     ----------
@@ -51,11 +51,11 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         If True, report the percentage completed during processing
         (default = False)
     kwargs :
-        Additional keyword arguments to pass to skimage.feature.peak_local_max
+        Additional keyword arguments to pass to :py:func:`skimage.feature.peak_local_max`
 
     Notes
     -----
-    http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.peak_local_max
+    :py:func:`skimage.feature.peak_local_max`
     """
 
     def __init__(
@@ -222,7 +222,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         data_image : xr.DataArray
             image containing spots to be detected
         kwargs :
-            Additional keyword arguments to pass to skimage.feature.peak_local_max
+            Additional keyword arguments to pass to :py:func:`~skimage.feature.peak_local_max`
 
         Returns
         -------

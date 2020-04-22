@@ -37,7 +37,7 @@ class Watershed(SegmentAlgorithm):
 
     Notes
     -----
-    Watershed: http://scikit-image.org/docs/dev/auto_examples/segmentation/plot_watershed.html
+    See also: :doc:`skimage:auto_examples/segmentation/plot_watershed`
 
     """
 

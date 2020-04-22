@@ -63,7 +63,7 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
 
     Notes
     -----
-    See also trackpy locate: http://soft-matter.github.io/trackpy/dev/generated/trackpy.locate.html
+    See also: :doc:`trackpy:generated/trackpy.locate`
 
     """
 

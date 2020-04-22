@@ -29,7 +29,7 @@ class BlobDetector(FindSpotsAlgorithm):
     """
     Multi-dimensional gaussian spot detector
 
-    This method is a wrapper for skimage.feature.blob_log
+    This method is a wrapper for :py:func:`skimage.feature.blob_log`
 
     Parameters
     ----------
@@ -56,11 +56,12 @@ class BlobDetector(FindSpotsAlgorithm):
         name of the function used to calculate the intensity for each identified spot area
         (default: max)
     detector_method: str ['blob_dog', 'blob_doh', 'blob_log']
-        name of the type of detection method used from skimage.feature (default: blob_log)
+        name of the type of detection method used from :py:mod:`~skimage.feature`
+        (default: blob_log)
 
     Notes
     -----
-    see also: http://scikit-image.org/docs/dev/auto_examples/features_detection/plot_blob.html
+    See also: :doc:`skimage:auto_examples/features_detection/plot_blob`
 
     """
 

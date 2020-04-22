@@ -17,7 +17,7 @@ from starfish.core.types import Axes
 class Warp(ApplyTransformAlgorithm):
     """
     Applies a list of geometric transformations to an ImageStack using
-    :py:func:skimage.transform.warp
+    :py:func:`skimage.transform.warp`
 
     Parameters
     ----------
@@ -25,7 +25,7 @@ class Warp(ApplyTransformAlgorithm):
         Stack to be transformed.
     transforms_list : TransformsList
         The list of skimage transform objects to apply to the ImageStack. See a list of valid
-        transform objects at https://scikit-image.org/docs/dev/api/skimage.transform.html
+        transform objects at :py:func:`~skimage.transform.warp`
     in_place : bool
         if True, process ImageStack in-place and return None, otherwise return a new stack
     verbose : bool

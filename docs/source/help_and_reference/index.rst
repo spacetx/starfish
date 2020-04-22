@@ -6,6 +6,8 @@ Help & Reference
 .. toctree::
     :maxdepth: 1
 
+    getting_started/index
+    usage/index
     data_model/index
     spacetx-format/index
     validation/index

@@ -44,7 +44,7 @@ Image Corrections
 # and no light (dark image), or with no sample and light (bright image).
 #
 # Starfish can apply this type of background correction by exposing the :py:class:`ElementWiseMult`
-# :ref:`Filter <filtering>`. The user is responsible for transforming their calibration images into
+# :py:class:`Filter`. The user is responsible for transforming their calibration images into
 # the correct matrix to correct for background, and then :py:class:`ElementWiseMult` can apply a
 # transformation to correct any uneven illumination.
 #

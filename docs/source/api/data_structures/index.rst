@@ -35,14 +35,16 @@ serialization for use in single-cell analysis environments such as Seurat_ and S
 
 .. _Scanpy: https://scanpy.readthedocs.io/en/latest/
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+
+.. autosummary::
+
+   starfish.core.experiment.experiment.Experiment
+   starfish.core.experiment.experiment.FieldOfView
 
 .. toctree::
+   :hidden:
+
    experiment.rst
-
-.. toctree::
    field_of_view.rst
 
 .. toctree::

@@ -61,11 +61,11 @@ your data into the starfish format can be found in :ref:`starfish data formattin
   <h2>Features</h2>
 
 * Formatting Data: :ref:`Tutorials<sphx_glr_gallery_data_formatting>`
-* Registering Images: :ref:`API<learn_transform>` | :ref:`Tutorial<tutorial_image_registration>`
-* Filtering Images: :ref:`API<filtering>` | :ref:`Tutorial<section_correcting_images>`
+* Registering Images: :class:`API<starfish.image.LearnTransform>` | :ref:`Tutorial<tutorial_image_registration>`
+* Filtering Images: :class:`API<starfish.image.Filter>` | :ref:`Tutorial<section_correcting_images>`
 * Finding Spots: :ref:`API<spot_finding>` | :ref:`Tutorial<section_finding_and_decoding>`
 * Decoding Spots: :ref:`API<decode_spots>` | :ref:`Tutorial<section_finding_and_decoding>`
-* Segmenting Cells: :ref:`API<segmentation>` | :ref:`Tutorial<section_segmenting_cells>`
+* Segmenting Cells: :class:`API<starfish.image.Segment>` | :ref:`Tutorial<section_segmenting_cells>`
 * Assigning Spots: :ref:`API<target_assignment>` | :ref:`Tutorial<tutorial_assigning_spots>`
 
 .. raw:: html

@@ -1,19 +1,30 @@
 .. _API:
 
-API
-===
+API Reference
+=============
+
+.. _image:
+
+Image Manipulation
+------------------
+
+starfish provides a variety of image manipulation methods that aid in the quantification of image-based transcriptomics
+experiments. These include :py:class:`~starfish.image.Filter`, which remove background fluorescence and enhance spots,
+:py:class:`~starfish.image.LearnTransform`, which learn transforms to align images across rounds and channels,
+:py:class:`~starfish.image.ApplyTransform`, which apply learned transforms to images, and finally,
+:py:class:`~starfish.image.Segmentation`, to identify the locations of cells.
+
+
+.. autosummary::
+
+   starfish.image.Filter
+   starfish.image.LearnTransform
+   starfish.image.ApplyTransform
+   starfish.image.Segment
+
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-.. toctree::
-   :hidden:
-
    data_structures/index
-
-.. toctree::
-   image/index.rst
 
 .. toctree::
    spots/index.rst

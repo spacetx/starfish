@@ -22,6 +22,10 @@ experiments. These include :py:class:`~starfish.image.Filter`, which remove back
    starfish.image.ApplyTransform
    starfish.image.Segment
 
+.. toctree::
+   :hidden:
+
+   image/index
 
 .. toctree::
    data_structures/index

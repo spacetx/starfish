@@ -53,7 +53,9 @@ class WhiteTophat(FilterAlgorithm):
 
     Notes
     -----
-    See https://en.wikipedia.org/wiki/Top-hat_transform for more information
+    See `Top-hat transform`_ for more information
+
+    .. _Top-hat transform: https://en.wikipedia.org/wiki/Top-hat_transform
 
     """
 

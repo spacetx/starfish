@@ -21,9 +21,8 @@ class Translation(LearnTransformAlgorithm):
     reference_stack : ImageStack
         The target image used in :py:func:`skimage.feature.register_translation`
     upsampling : int
-        upsampling factor (default=1). See
-        http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.register_translation
-        for an explanation of this parameter. in brief, this parameter determines the resolution of
+        upsampling factor (default=1). See :py:func:`~skimage.registration.phase_cross_correlation`
+        for an explanation of this parameter. In brief, this parameter determines the resolution of
         the registration. A value of 1 represents pixel resolution, a value of 10 is 1/10th of
         a pixel, a value of 300 is 1/300th of a pixel, and so on.
     """

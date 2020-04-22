@@ -45,8 +45,6 @@ Spot Finders can be imported using ``starfish.spots.FindSpots``, which registers
 Decoding Spots
 ---------------
 
-NOTE: Starfish is embarking on a SpotFinding data structures refactor see `Spot Finding Refactor Plan`_
-
 Spot Decoders can be imported using ``starfish.spots.DecodeSpots``, which registers all classes that subclass ``DecodeSpotsAlgorithm``:
 
 .. code-block:: python

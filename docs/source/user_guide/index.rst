@@ -214,33 +214,36 @@ would love to hear about unique codebook designs!
 
 .. _tab-codebook-designs:
 
-+-----------------+---------------------------+-------------------------+--------------------------+
-| Name            | Linearly Multiplexed      | One Hot Exponentially   | Exponentially Multiplexed|
-|                 |                           | Multiplexed             |                          |
-+=================+===========================+=========================+==========================+
-| Assays          | - sequential smFISH       | - In Situ Sequencing    | - MERFISH                |
-|                 | - RNAscope                | - seqFISH               | - DARTFISH               |
-|                 | - osmFISH                 | - FISSEQ                | - seqFISH+               |
-|                 |                           | - STARmap               |                          |
-|                 |                           | - BaristaSeq            |                          |
-+-----------------+---------------------------+-------------------------+--------------------------+
-| Example 7-round | |linear1|                 | |onehot1|               | |multiplex1|             |
-| Codebook        |                           |                         |                          |
-| Diagrams        | |linear2|                 | |onehot2|               | |multiplex2|             |
-+-----------------+---------------------------+-------------------------+--------------------------+
-| Description     | Codewords have only one   | Codewords are one hot   | Each codeword is a       |
-|                 | round and channel with    | in each round           | combination of signals   |
-|                 | signal                    |                         | over multiple rounds     |
-+-----------------+---------------------------+-------------------------+--------------------------+
-| Reference Image | No                        | Yes                     | Yes                      |
-| Needed?         |                           |                         |                          |
-+-----------------+---------------------------+-------------------------+--------------------------+
-| starfish        | - SimpleLookup            | - Exact_Match or        | - Pixel-based            |
-| Pipeline        | - Sequential +            |   Nearest_Neighbor      | - Exact_Match +          |
-| Options         |   PerRoundMaxChannel      | - PerRoundMaxChannel or |   MetricDistance         |
-|                 |                           |   MetricDistance        | - Nearest_Neighbor +     |
-|                 |                           |                         |   MetricDistance         |
-+-----------------+---------------------------+-------------------------+--------------------------+
+.. table::
+   :class: "table-bordered"
+
+   +-----------------+---------------------------+-------------------------+--------------------------+
+   | Name            | Linearly Multiplexed      | One Hot Exponentially   | Exponentially Multiplexed|
+   |                 |                           | Multiplexed             |                          |
+   +=================+===========================+=========================+==========================+
+   | Assays          | - sequential smFISH       | - In Situ Sequencing    | - MERFISH                |
+   |                 | - RNAscope                | - seqFISH               | - DARTFISH               |
+   |                 | - osmFISH                 | - FISSEQ                | - seqFISH+               |
+   |                 |                           | - STARmap               |                          |
+   |                 |                           | - BaristaSeq            |                          |
+   +-----------------+---------------------------+-------------------------+--------------------------+
+   | Example 7-round | |linear1|                 | |onehot1|               | |multiplex1|             |
+   | Codebook        |                           |                         |                          |
+   | Diagrams        | |linear2|                 | |onehot2|               | |multiplex2|             |
+   +-----------------+---------------------------+-------------------------+--------------------------+
+   | Description     | Codewords have only one   | Codewords are one hot   | Each codeword is a       |
+   |                 | round and channel with    | in each round           | combination of signals   |
+   |                 | signal                    |                         | over multiple rounds     |
+   +-----------------+---------------------------+-------------------------+--------------------------+
+   | Reference Image | No                        | Yes                     | Yes                      |
+   | Needed?         |                           |                         |                          |
+   +-----------------+---------------------------+-------------------------+--------------------------+
+   | starfish        | - SimpleLookup            | - Exact_Match or        | - Pixel-based            |
+   | Pipeline        | - Sequential +            |   Nearest_Neighbor      | - Exact_Match +          |
+   | Options         |   PerRoundMaxChannel      | - PerRoundMaxChannel or |   MetricDistance         |
+   |                 |                           |   MetricDistance        | - Nearest_Neighbor +     |
+   |                 |                           |                         |   MetricDistance         |
+   +-----------------+---------------------------+-------------------------+--------------------------+
 
 .. |linear1| image:: /_static/design/linear_codebook_1.png
    :scale: 10%

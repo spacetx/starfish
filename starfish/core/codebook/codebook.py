@@ -568,6 +568,7 @@ class Codebook(xr.DataArray):
         -----
         The available norms for this function can be found at the following link:
         :doc:`numpy:reference/generated/numpy.linalg.norm`
+
         The available metrics for this function can be found at the following link:
         :doc:`scipy:spatial.distance`
 

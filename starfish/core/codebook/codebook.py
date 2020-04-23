@@ -48,17 +48,21 @@ class Codebook(xr.DataArray):
         >>> sd = Codebook.synthetic_one_hot_codebook(n_round=4, n_channel=3, n_codes=2)
         >>> sd.codebook()
         <xarray.Codebook (target: 2, r: 4, c: 3)>
-        array([[[0, 0, 0, 0],
-                [0, 0, 1, 1],
-                [1, 1, 0, 0]],
+        array([[[1, 0, 0],
+                [0, 0, 1],
+                [1, 0, 0],
+                [0, 1, 0]],
 
-               [[1, 0, 0, 0],
-                [0, 0, 1, 0],
-                [0, 1, 0, 1]]], dtype=uint8)
+               [[1, 0, 0],
+                [1, 0, 0],
+                [1, 0, 0],
+                [1, 0, 0]]], dtype=uint8)
         Coordinates:
-          * target     (target) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
-          * c          (c) int64 0 1 2
-          * r          (r) int64 0 1 2 3
+          * target   (target) object 6d7fff11-8905-4421-ab49-4f6d8ecdb4b7 \
+    1f5f7087-0618-49fc-a6a5-82fee14360b3
+          * r        (r) int64 0 1 2 3
+          * c        (c) int64 0 1 2
+
 
     """
 
@@ -88,19 +92,17 @@ class Codebook(xr.DataArray):
         Build an empty 2-round 3-channel codebook::
 
             >>> from starfish import Codebook
-            >>> Codebook.zeros(['ACTA', 'ACTB'], n_round=2, n_channel=3)
-            <xarray.Codebook (target: 2, c: 3, r: 2)>
-            array([[[0, 0],
-                    [0, 0],
-                    [0, 0]],
+            >>> Codebook.zeros(['ACTA', 'ACTB'], n_round=2, n_channel=4)
+            <xarray.Codebook (target: 2, r: 2, c: 4)>
+            array([[[0, 0, 0, 0],
+                    [0, 0, 0, 0]],
 
-                   [[0, 0],
-                    [0, 0],
-                    [0, 0]]], dtype=uint8)
+                   [[0, 0, 0, 0],
+                    [0, 0, 0, 0]]], dtype=uint8)
             Coordinates:
-              * target     (target) object 'ACTA' 'ACTB'
-              * c          (c) int64 0 1 2
-              * r          (r) int64 0 1
+              * target   (target) object 'ACTA' 'ACTB'
+              * r        (r) int64 0 1
+              * c        (c) int64 0 1 2 3
 
         Returns
         -------
@@ -134,28 +136,29 @@ class Codebook(xr.DataArray):
 
         Examples
         --------
-        build a 2-round 3-channel codebook where :code:`ACTA` is specified by intensity in round 0,
-        channel 1, and :code:`ACTB` is coded by fluorescence in rounds 0 and 1, channel 2
+        Build a 3-round 4-channel codebook where :code:`ACTA` is specified by intensity in round 0,
+        channel 1, and :code:`ACTB` is coded by fluorescence in channels 0, 1, and 2 of rounds 0,
+        1, and 2.
         ::
 
             >>> import numpy as np
             >>> from starfish import Codebook
-            >>> data = np.zeros((2, 3, 2), dtype=np.uint8)
+            >>> data = np.zeros((2,3,4), dtype=np.uint8)
             >>> data[0, 0, 1] = 1                 # ACTA
-            >>> data[[1, 1], [2, 2], [0, 1]] = 1  # ACTB
-            >>> Codebook.from_numpy(['ACTA', 'ACTB'], n_channel=3, n_round=2, data=data)
-            <xarray.Codebook (target: 2, c: 3, r: 2)>
-            array([[[0, 1],
-                    [0, 0],
-                    [0, 0]],
+            >>> data[[1, 1, 1], [0, 1, 2], [0, 1, 2]] = 1  # ACTB
+            >>> Codebook.from_numpy(['ACTA', 'ACTB'], n_channel=4, n_round=3, data=data)
+            <xarray.Codebook (target: 2, r: 3, c: 4)>
+            array([[[0, 1, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0]],
 
-                   [[0, 0],
-                    [0, 0],
-                    [1, 1]]], dtype=uint8)
+                   [[1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [0, 0, 1, 0]]], dtype=uint8)
             Coordinates:
-              * target     (target) object 'ACTA' 'ACTB'
-              * c          (c) int64 0 1 2
-              * r          (r) int64 0 1
+              * target   (target) object 'ACTA' 'ACTB'
+              * r        (r) int64 0 1 2
+              * c        (c) int64 0 1 2 3
 
         Returns
         -------
@@ -205,7 +208,7 @@ class Codebook(xr.DataArray):
         Construct a codebook from some array data in python memory
         ::
 
-            >>> from starfish.types import Axes
+            >>> from starfish.types import Axes, Features
             >>> from starfish import Codebook
             >>> codebook = [
             >>>     {
@@ -224,22 +227,16 @@ class Codebook(xr.DataArray):
             >>>     },
             >>> ]
             >>> Codebook.from_code_array(codebook)
-            <xarray.Codebook (target: 2, c: 4, r: 2)>
-            array([[[0, 0],
-                    [0, 0],
-                    [0, 0],
-                    [1, 1]],
+            <xarray.Codebook (target: 2, r: 2, c: 4)>
+            array([[[0, 0, 0, 1],
+                    [0, 0, 0, 1]],
 
-                   [[0, 0],
-                    [0, 1],
-                    [0, 0],
-                    [1, 0]]], dtype=uint8)
+                   [[0, 0, 0, 1],
+                    [0, 1, 0, 0]]], dtype=uint8)
             Coordinates:
-              * target     (target) object 'ACTB_human' 'ACTB_mouse'
-              * c          (c) int64 0 1 2 3
-              * r          (r) int64 0 1
-
-            Codebook.from_json(json_codebook)
+              * target   (target) object 'ACTB_human' 'ACTB_mouse'
+              * r        (r) int64 0 1
+              * c        (c) int64 0 1 2 3
 
             Returns
             -------
@@ -329,7 +326,7 @@ class Codebook(xr.DataArray):
         Create a codebook from in-memory data
         ::
 
-            >>> from starfish.types import Axes
+            >>> from starfish.types import Axes, Features
             >>> from starfish import Codebook
             >>> import tempfile
             >>> import json
@@ -357,20 +354,16 @@ class Codebook(xr.DataArray):
             >>>     json.dump(codebook, f)
             >>> # read codebook from file
             >>> Codebook.open_json(json_codebook)
-           <xarray.Codebook (target: 2, c: 4, r: 2)>
-            array([[[0, 0],
-                    [0, 0],
-                    [0, 0],
-                    [1, 1]],
+            <xarray.Codebook (target: 2, r: 2, c: 4)>
+            array([[[0, 0, 0, 1],
+                    [0, 0, 0, 1]],
 
-                   [[0, 0],
-                    [0, 1],
-                    [0, 0],
-                    [1, 0]]], dtype=uint8)
+                   [[0, 0, 0, 1],
+                    [0, 1, 0, 0]]], dtype=uint8)
             Coordinates:
-              * target     (target) object 'ACTB_human' 'ACTB_mouse'
-              * c          (c) int64 0 1 2 3
-              * r          (r) int64 0 1
+              * target   (target) object 'ACTB_human' 'ACTB_mouse'
+              * r        (r) int64 0 1
+              * c        (c) int64 0 1 2 3
 
         Returns
         -------
@@ -468,7 +461,7 @@ class Codebook(xr.DataArray):
         Notes
         -----
         The available norms for this function can be found at the following link:
-        https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.linalg.norm.html
+        :doc:`numpy:reference/generated/numpy.linalg.norm`
 
         Returns
         -------
@@ -574,9 +567,9 @@ class Codebook(xr.DataArray):
         Notes
         -----
         The available norms for this function can be found at the following link:
-        https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.linalg.norm.html
+        :doc:`numpy:reference/generated/numpy.linalg.norm`
         The available metrics for this function can be found at the following link:
-        https://docs.scipy.org/doc/scipy-0.14.0/reference/spatial.distance.html
+        :doc:`scipy:spatial.distance`
 
         Returns
         -------
@@ -746,19 +739,23 @@ class Codebook(xr.DataArray):
         ::
 
             >>> from starfish import Codebook
-            >>> Codebook.synthetic_one_hot_codebook(n_round=2, n_channel=3, n_codes=2)
-            <xarray.Codebook (target: 2, c: 3, r: 2)>
-            array([[[0, 1],
-                    [0, 0],
-                    [1, 0]],
+            >>> sd = Codebook.synthetic_one_hot_codebook(n_round=4, n_channel=3, n_codes=2)
+            >>> sd.codebook()
+            <xarray.Codebook (target: 2, r: 4, c: 3)>
+            array([[[1, 0, 0],
+                    [0, 0, 1],
+                    [1, 0, 0],
+                    [0, 1, 0]],
 
-                   [[1, 1],
-                    [0, 0],
-                    [0, 0]]], dtype=uint8)
+                   [[1, 0, 0],
+                    [1, 0, 0],
+                    [1, 0, 0],
+                    [1, 0, 0]]], dtype=uint8)
             Coordinates:
-              * target     (target) object b25180dc-8af5-48f1-bff4-b5649683516d ...
-              * c          (c) int64 0 1 2
-              * h          (h) int64 0 1
+              * target   (target) object 6d7fff11-8905-4421-ab49-4f6d8ecdb4b7 \
+        1f5f7087-0618-49fc-a6a5-82fee14360b3
+              * r        (r) int64 0 1 2 3
+              * c        (c) int64 0 1 2
 
         Returns
         -------

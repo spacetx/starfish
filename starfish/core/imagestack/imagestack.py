@@ -285,7 +285,7 @@ class ImageStack:
             crop_parameters: Optional[CropParameters]=None,
     ) -> "ImageStack":
         """
-        Parse a :py:class:`TileFetcher` into an ImageStack.
+        Parse a :py:class:`.TileFetcher` into an ImageStack.
 
         Parameters
         ----------

@@ -83,7 +83,7 @@ a 1000 pixel square from the :code:`(1044, 1390)` pixel :py:class:`.FieldOfView`
     In [8]: image
     Out[8]: <starfish.ImageStack (r: 4, c: 4, z: 1, y: 1000, x: 1000)>
 
-Calling :code:`FieldOfView.get_image` localizes the data and produces an :py:class:`.ImageStack`,
+Calling :py:meth:`.FieldOfView.get_image` localizes the data and produces an :py:class:`.ImageStack`,
 a 5-d tensor and *starfish*'s main in-memory image storage and processing class.
 
 If desired, data can be further sub-selected with the :py:meth:`.ImageStack.sel`,

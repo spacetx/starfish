@@ -1,3 +1,7 @@
+.. _schema:
+
+.. mdinclude:: ../../../../../starfish/spacetx_format/schema/README.md
+
 .. _cli_validate:
 
 Validation
@@ -7,7 +11,7 @@ The `starfish validate` command provides a way to check that a fileset based on 
 :ref:`sptx_format` is valid.
 
 Usage
------
+^^^^^
 
 starfish validate --help will provide instructions on how to use the tool:
 
@@ -15,7 +19,7 @@ starfish validate --help will provide instructions on how to use the tool:
 
 
 Examples
---------
+^^^^^^^^
 
 ::
 

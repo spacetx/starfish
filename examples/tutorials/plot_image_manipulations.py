@@ -15,11 +15,11 @@ Image Manipulations
 #
 # Crop on Load
 # ------------
-# The first opportunity to subset data is during loading. In getting started, we demonstrated that
-# data is not loaded until `get_image` is called on a field of view. Here we demonstrate how to
-# reduce the :code:`(y, x)` size of the ImageStack that's downloaded. Note that all of the data for
-# the complete tiles must still be downloaded, but only the cropped dimensions will be loaded into
-# memory.
+# The first opportunity to subset data is during loading. Data is not loaded until
+# :py:meth:`.get_image` is called on a :py:class:`.FieldOfView`. Here we demonstrate how to
+# reduce the :code:`(y, x)` size of the :py:class:`.ImageStack` that is downloaded. Note that all
+# of the data for the complete tiles must still be downloaded, but only the cropped dimensions
+# will be loaded into memory.
 #
 # For this example we'll use a very small test image from an in-situ sequencing experiment.
 
@@ -32,8 +32,8 @@ field_of_view: starfish.FieldOfView = experiment["fov_001"]
 print(field_of_view)
 
 ###################################################################################################
-# printing the :py:class:`FieldOfView` shows that the test dataset is :code:`(140, 200)`` pixels in
-# :code:`(y, x)` We'll load just the first :code:`(100, 80)` pixels to demonstrate starfish's
+# printing the :py:class:`.FieldOfView` shows that the test dataset is :code:`(140, 200)`` pixels in
+# :code:`(y, x)`. We'll load just the first :code:`(100, 80)` pixels to demonstrate starfish's
 # crop-on-load functionality.
 
 y_slice = slice(0, 100)
@@ -48,12 +48,12 @@ print(image)
 #
 # Selecting Images
 # ----------------
-# Once an image has been loaded into memory as an ImageStack object, it is also possible to
-# crop the image or select a subset of the images associated with the rounds, channels, and z-planes
-# of the experiment.
+# Once an image has been loaded into memory as an :py:class:`.ImageStack` object, it is also
+# possible to crop the :py:class:`.ImageStack` or select a subset of the images associated with the
+# rounds, channels, and z-planes of the experiment.
 #
-# Here, we demonstrate selecting the last 50 pixels of (x, y) for a rounds 2 and 3 using the
-# :py:meth:`ImageStack.sel` method.
+# Here, we demonstrate selecting the last 50 pixels of (x, y) for rounds 2 and 3 using the
+# :py:meth:`.ImageStack.sel` method.
 
 from starfish.types import Axes
 
@@ -68,18 +68,20 @@ print(cropped_image)
 # Projection
 # ==========
 #
-# In addition to selecting specific tiles, starfish can also project along an axis, taking the
-# maximum value one or more dimension(s) of an :py:class:`ImageStack`.
-#
-# A very common approach is to take the maximum projection of the :py:class:`ImageStack` over the
-# z-plane in data that have relatively few spots. So long as the projection is unlikely to produce
+# In addition to selecting specific tiles, starfish can also project along an axis of the
+# :py:class:`.ImageStack`, thereby reducing the size of the dimension to one. For example,
+# projecting along the z-axis using the :code:`max` function will reduce a 3D image volume into a 2D
+# image where the intensity value at each :code:`(y, x)` pixel is equal to the maximum of the
+# voxel intensities at :code:`(y, x)` of the original image volume. This is a common approach for
+# data that has relatively few spots. So long as the projection is unlikely to produce
 # overlapping spots, projecting the data in this way can dramatically reduce processing time, as
-# 2-dimensional algorithms are typically much faster than their 3-d counterparts.
+# 2D algorithms are typically much faster than their 3D counterparts.
 #
-# because the Image that we've downloaded has only one :py:class:`Axes.ZPLANE`, we will instead
-# demonstrate the use of :py:meth:~`starfish.image.Filter.Reduce` by projecting over
-# :py:class:`Axes.CH` to produce an image of all the spots that appear in any channel in each round.
-#
+# Because the example image that we've downloaded has only one :code:`Axes.ZPLANE`,
+# we will instead demonstrate the use of :py:meth:`.reduce` by projecting over
+# :code:`Axes.CH` to produce an image of all the spots that appear in any channel for each
+# round.
+
 from starfish.image import Filter
 
 projected_image: starfish.ImageStack = image.reduce({Axes.CH}, func="max")

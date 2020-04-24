@@ -4,15 +4,14 @@ Loading and Selecting Data
 ==========================
 
 Starfish loads data by referencing the top-level :code:`experiment.json` objects in a SpaceTx-Format
-dataset. The main way to load data is through the `Experiment` constructor. Assuming you've been
-following the tutorial thus far and have downloaded and formatted the data from the previous
-section, you can load the data as follows:
+dataset. The main way to load data on your machine is through the :py:class:`.Experiment`
+constructor as follows:
 
 .. code-block:: python
 
     In [1]: import starfish
 
-    In [2]: experiment = starfish.Experiment.from_json("iss/formatted/experiment.json")
+    In [2]: experiment = starfish.Experiment.from_json("experiment.json")
 
     In [3]: experiment
     Out[3]:
@@ -30,8 +29,7 @@ section, you can load the data as follows:
         dots: <slicedimage.TileSet (r: 1, c: 1, z: 1, x: 1390, y: 1044)>
     }
 
-For those who did *not* follow the tutorial, this and several other datasets are available in
-the :code:`starfish.data` sub-package.
+To load one of the formatted example datasets in the :py:class:`.starfish.data` sub-package:
 
 .. code-block:: python
 
@@ -71,12 +69,12 @@ An individual field of view can be extracted from the experiment as follows:
 
 Simply loading the experiment and grabbing fields of view only reads the *index* into memory,
 Starfish hasn't loaded any files into memory yet (or, if using an aws-localized json file, it
-hasn't downloaded any images yet). Starfish enables the user to very carefully what data makes it
-into the memory space of a machine.
+hasn't downloaded any images yet). Starfish enables the user to very carefully control what data
+makes it into the memory space of a machine.
 
 To load a set of images, the user specifies which image they want (below we take the primary) and
 can optionally specify a set of cropping parameters. To demonstrate how those work, we'll slice out
-a 1000 pixel square from the :code:`(1044, 1390)` pixel :py:class:`FieldOfView`:
+a 1000 pixel square from the :code:`(1044, 1390)` pixel :py:class:`.FieldOfView`:
 
 .. code-block:: python
 
@@ -85,10 +83,10 @@ a 1000 pixel square from the :code:`(1044, 1390)` pixel :py:class:`FieldOfView`:
     In [8]: image
     Out[8]: <starfish.ImageStack (r: 4, c: 4, z: 1, y: 1000, x: 1000)>
 
-Calling :code:`FieldOfView.get_image` localizes the data and produces an :py:class:`ImageStack`,
+Calling :py:meth:`.FieldOfView.get_image` localizes the data and produces an :py:class:`.ImageStack`,
 a 5-d tensor and *starfish*'s main in-memory image storage and processing class.
 
-If desired, data can be further sub-selected with the :py:class:`ImageStack.sel`,
+If desired, data can be further sub-selected with the :py:meth:`.ImageStack.sel`,
 
 .. code-block:: python
 
@@ -96,13 +94,13 @@ If desired, data can be further sub-selected with the :py:class:`ImageStack.sel`
     In [10]: image.sel({Axes.CH: 2, Axes.ROUND: (1, 3)})
     Out[10]: <starfish.ImageStack (r: 3, c: 1, z: 1, y: 1000, x: 1000)>
 
-Note that starfish uses constant classes for indexing so that if the SpaceTx-Format ever changed,
+Note that starfish uses constant classes for indexing so that if the SpaceTx Format ever changed,
 the same indexers could still work in starfish. Above we use the Axes constant to index into the
 rounds and channels.
 
 In addition to selection, we can max-project data, which is a commonly used filter for sparse data
 to collapse :code:`z` depth into a single image tile. Here we already have non-volumetric data, so
-we'll collapse all the spots across channels in each round, mimicing a "dots" image.
+we'll collapse all the spots across channels in each round, mimicking a "dots" image.
 
 .. code-block:: python
 
@@ -112,7 +110,7 @@ we'll collapse all the spots across channels in each round, mimicing a "dots" im
     Out[13]: <starfish.ImageStack (r: 4, c: 1, z: 1, y: 1000, x: 1000)>
 
 Visualizing Data
-----------------
+================
 
 For data visualization, *starfish* relies on the `napari`_ package, which is a fast image viewer
 for in-memory data stored as numpy arrays. Starfish provides a wrapper over napari called
@@ -138,10 +136,3 @@ maximum values on the colormap to visually filter the image by intensity. Later 
 with spot finding
 will demonstrate how :py:func:`starfish.display` can be used to visually inspect and refine the
 results of spot calling.
-
-Next, see an :ref:`Example end-to-end workflow <example_workflow>` using the starfish API.
-
-Available datasets
-==================
-
-Starfish makes a small number of datasets :ref:`easily accessible<datasets>`.  To load them, import :py:mod:`starfish.data`.

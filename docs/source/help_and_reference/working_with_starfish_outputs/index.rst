@@ -62,3 +62,22 @@ R:
     example_decoded_spots_file <- "docs/source/_static/example_data_files/decoded.csv"
     table <- read.csv(file=example_decoded_spots_file, header=TRUE, sep=',', row.names=1)
     head(table)
+
+Output Formats
+^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents:
+
+.. toctree::
+    IntensityTable/index.rst
+
+.. toctree::
+    ExpressionMatrix/index.rst
+
+.. toctree::
+    DecodedSpots/index.rst
+
+.. toctree::
+    SegmentationMask/index.rst

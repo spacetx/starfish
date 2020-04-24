@@ -5,8 +5,8 @@ User Guide
 
 Welcome to the user guide for building an image processing pipeline using starfish! This tutorial
 will cover all the steps necessary for going from raw images to a single cell gene expression
-matrix. If you only have a few minutes to try out starfish, check out the :ref:`Quick Start<quick start>`
-to see a demonstration of how starfish works. If you are ready
+matrix. If you only have a few minutes to try out starfish, check out the
+:ref:`Quick Start<quick start>` to see a demonstration of how starfish works. If you are ready
 to learn how to build your own image processing pipeline using starfish then read on!
 
 This part of the tutorial goes into more detail about why each of the stages in the example are
@@ -23,16 +23,26 @@ but the typical order might match the following. The links show how and when to 
 component of *starfish*, and the final section demonstrates putting together a "pipeline recipe"
 and running it on an experiment.
 
+.. _section_formatting_data:
 
+Formatting Data
+---------------
 
+The first step in a starfish pipeline is formatting the experiment data, which consists of multiple
+images and metadata describing the experiment. Starfish uses the
+:ref:`SpaceTx Format<sptx_format>`, which is a standardized format for image-based spatial
+transcriptomics data. If the data you want to process isn't already in SpaceTx Format, the
+:ref:`help and reference` contains a useful guide for :ref:`formatting` and :ref:`cli_validate`.
+
+We also provide a handful of :ref:`formatted example data <datasets>` from various assays you can
+use without having to go through the hassle of formatting data.
 
 .. _section_loading_data:
 
 Loading Data
 ------------
 
-* Tutorial: :ref:`Formatting your data <data_conversion_examples>`
-* Tutorial: :ref:`Using formatted example data <datasets>`
+* Tutorial: :ref:`loading_data`
 
 .. _section_manipulating_images:
 
@@ -41,7 +51,8 @@ Manipulating Images
 
 Sometimes it can be useful subset the images by, for example, excluding out-of-focus images or
 cropping out edge effects. For sparse data, it can be useful to project the z-volume into a single
-image, as this produces a much faster processing routine.
+image, as this produces a much faster processing routine. Starfish supports the cropping and
+projecting of :py:class:`.ImageStack`\s with the :py:meth:`.sel` and :py:meth:`.reduce` methods.
 
 * Tutorial: :ref:`Cropping <tutorial_cropping>`
 * Tutorial: :ref:`Projecting <tutorial_projection>`

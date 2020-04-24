@@ -6,7 +6,7 @@ SpaceTx Format
    :caption: Contents:
 
 .. toctree::
-   input_formats/index.rst
+    SpaceTxFormat/index.rst
 
 .. toctree::
-   output_formats/index.rst
+    Validation/index.rst

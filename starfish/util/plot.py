@@ -1,13 +1,3 @@
-"""
-
-Plotting Utilities for Documentation and Examples
-=================================================
-
-This module contains a series of utilities for creating two dimensional plots that are useful for
-generating documentation and vignettes. We suggest that users leverage :py:func:`starfish.display`
-for their plotting needs, as the interactive viewer is better able to handle the array of features
-that starfish needs.
-"""
 import itertools
 from typing import Any, cast, Mapping, Optional, Union
 

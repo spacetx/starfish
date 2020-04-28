@@ -8,7 +8,6 @@ API
    :caption: Contents:
 
 .. toctree::
-   :hidden:
 
    data_structures/index
 
@@ -29,6 +28,9 @@ API
 
 .. toctree::
    utils/index.rst
+
+.. toctree::
+   plot_utils/index.rst
 
 .. toctree::
    datasets/index.rst

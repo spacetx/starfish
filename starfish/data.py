@@ -57,9 +57,10 @@ def MOUSE_V_HUMAN():
     """
     Corresponds to sequencing 4 bases of the beta-actin gene in co-cultured mouse and human
     fibroblasts. These 4 bases only differ in one position, a SNP between species. as such,
-    these data offer ground truth information to validate a cell typing exercise
+    these data offer ground truth information to validate a cell typing exercise. The complete
+    dataset is published:
 
-    `<https://www.ncbi.nlm.nih.gov/pubmed/23852452>`_
+    `<https://doi.org/10.1038/nmeth.2563>`_
 
     Returns
     -------

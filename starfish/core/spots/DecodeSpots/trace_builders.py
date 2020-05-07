@@ -55,7 +55,10 @@ def build_traces_sequential(spot_results: SpotFindingResults, **kwargs) -> Inten
 
     """
 
-    all_spots = pd.concat([sa.spot_attrs.data for sa in spot_results.values()], sort=True)
+    all_spots = pd.concat([sa.spot_attrs.data for sa in spot_results.values()],
+                          ignore_index=True, sort=True)
+    # reassign spot_ids to index number so they are unique
+    all_spots['spot_id'] = all_spots.index
 
     intensity_table = IntensityTable.zeros(
         spot_attributes=SpotAttributes(all_spots),

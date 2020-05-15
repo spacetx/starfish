@@ -8,8 +8,10 @@ API
    :caption: Contents:
 
 .. toctree::
-
    data_structures/index
+
+.. toctree::
+   slicedimage/index
 
 .. toctree::
    image/index.rst

@@ -28,21 +28,63 @@ and running it on an experiment.
 Formatting Data
 ---------------
 
-The first step in a starfish pipeline is formatting the experiment data, which consists of multiple
-images and metadata describing the experiment. Starfish uses the
-:ref:`SpaceTx Format<sptx_format>`, which is a standardized format for image-based spatial
-transcriptomics data. If the data you want to process isn't already in SpaceTx Format, the
-:ref:`help and reference` contains a useful guide for :ref:`formatting` and :ref:`cli_validate`.
+In order to load the experiment into a starfish pipeline the data must be in
+:ref:`SpaceTx Format<sptx_format>`, which is a standardized format that utilizes json
+files to organize single-plane tiffs for image-based spatial transcriptomics data. If the data
+you want to process isn't already in SpaceTx Format, there are a few methods to convert
+your data.
 
-We also provide a handful of :ref:`formatted example data <datasets>` from various assays you can
-use without having to go through the hassle of formatting data.
+.. note::
+
+    When converting data to SpaceTx Format is too costly, images can be loaded directly without
+    formatting by :ref:`tilefetcher_loader`. This is a workaround and only recommended if
+    reading and writing all the images is infeasible. The experiment json files like the codebook
+    will still need to be created.
+
+The primary method is to use :py:func:`.format_structured_dataset`, a conversion tool, on
+data that is structured as 2D image tiles (:py:class:`slicedimage.ImageFormat`)(tiff, png, or npy) with specific filenames and a csv
+file containing the physical coordinates of each image tile. This method requires minimal Python
+knowledge. You can manually organize your images, but for large datasets you will want to use a
+scripting language (e.g. Matlab) to move and rename files into the structured data format.
+
+Users who are familiar with Python and starfish also have the option of using
+:py:class:`.TileFetcher` and :py:class:`.FetchedTile`, a set of user-defined interfaces the
+experiment builder uses for obtaining the data corresponding to each tile location. This
+method is compatible with 3D image volumes (tiff or npy) as well as 2D image tiles (tiff, png, or
+npy).
+
+Lastly, there is a 3rd party `spacetx writer`_ which writes SpaceTx-Format experiments using the
+`Bio-Formats`_ converter. Bio-Formats can read a variety of input formats, so might be a
+relatively simple approach for users familiar with those tools.
+
+.. _spacetx writer: https://github.com/spacetx/spacetx-writer
+.. _Bio-Formats: https://www.openmicroscopy.org/bio-formats/
+
+After converting, you can use :ref:`starfish validate<validate>` to ensure that the experiment
+files meet the format specifications before loading.
+
+Your first time applying these generalized tools to convert your data can be time-consuming. If
+you just want to try starfish before investing the time to format your data, you can use one of the
+:ref:`formatted example datasets <datasets>` included in the starfish library.
+
+* Tutorial: :ref:`Formatting structured data<format_structured_data>`
+* Tutorial: :ref:`Formatting with TileFetcher<format_tilefetcher>`
 
 .. _section_loading_data:
 
 Loading Data
 ------------
 
-* Tutorial: :ref:`loading_data`
+Once the data is in :ref:`SpaceTx Format<sptx_format>`, loading the whole experiment into starfish
+is simple. The only options are for selecting which :term:`FOVs <Field of View (FOV)>` and
+subsets to load into memory.
+
+As mentioned in the previous section, it is also possible to
+:ref:`directly load data <tilefetcher_loader>` that has not been formatted, although
+there may be performance implications in doing so. This method is also more complicated
+
+* Tutorial: :ref:`Loading SpaceTx Formatted Data <loading_data>`
+* Tutorial: :ref:`Loading Data Without Formatting <tilefetcher_loader>`
 
 .. _section_manipulating_images:
 

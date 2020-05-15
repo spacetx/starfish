@@ -1,3 +1,4 @@
+"""
 .. _loading_data:
 
 Loading and Selecting Data
@@ -136,3 +137,5 @@ maximum values on the colormap to visually filter the image by intensity. Later 
 with spot finding
 will demonstrate how :py:func:`starfish.display` can be used to visually inspect and refine the
 results of spot calling.
+
+"""

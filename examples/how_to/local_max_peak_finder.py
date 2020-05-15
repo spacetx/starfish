@@ -47,7 +47,7 @@ filter_laplace.run(imgs, in_place=True)
 # z project
 max_imgs = imgs.reduce({Axes.ZPLANE}, func="max")
 
-# run LocalMaxPeakFinder with dots as reference image
+# run LocalMaxPeakFinder on max projected image
 lmp = FindSpots.LocalMaxPeakFinder(
     min_distance=6,
     stringency=0,

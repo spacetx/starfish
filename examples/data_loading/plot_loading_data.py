@@ -4,7 +4,7 @@
 Loading and Selecting Data
 ==========================
 
-Starfish loads data by referencing the top-level :code:`experiment.json` objects in a SpaceTx-Format
+Starfish loads data by referencing the top-level :code:`experiment.json` objects in a SpaceTx Format
 dataset. The main way to load data on your machine is through the :py:class:`.Experiment`
 constructor as follows:
 
@@ -109,33 +109,5 @@ we'll collapse all the spots across channels in each round, mimicking a "dots" i
     In[12]: from starfish.types import FunctionSource
     In[13]: image.reduce({Axes.CH}, func="max")
     Out[13]: <starfish.ImageStack (r: 4, c: 1, z: 1, y: 1000, x: 1000)>
-
-Visualizing Data
-================
-
-For data visualization, *starfish* relies on the `napari`_ package, which is a fast image viewer
-for in-memory data stored as numpy arrays. Starfish provides a wrapper over napari called
-:py:func:`starfish.display`, and maintains a stable version of the package. To use the napari
-viewer you must have followed the installation instructions to install the napari extra, and need
-to enable the :code:`qt` environment in IPython:
-
-.. _napari: https://github.com/napari/napari
-
-.. code-block:: python
-
-    In[14]: ipython = get_ipython()
-    In[15]: ipython.magic("gui qt5")
-    In[16]: starfish.display(image)
-    Out[16]: <napari.components._viewer.model.Viewer at 0x15f7b44e0>
-
-Typing the above code should display an image viewer that looks something like this:,
-
-.. image:: /_static/design/napari-viewer.png
-
-This viewer enables the user to scroll through the rounds and channels and change the minimum and
-maximum values on the colormap to visually filter the image by intensity. Later sections that deal
-with spot finding
-will demonstrate how :py:func:`starfish.display` can be used to visually inspect and refine the
-results of spot calling.
 
 """

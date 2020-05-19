@@ -4,7 +4,9 @@
 Format Structured Data
 ======================
 
-Converting experiment data into SpaceTx format with :py:func:`.format_structured_dataset` is best
+The starfish package contains convenient functions for writing SpaceTx formatted experiments in
+the :py:mod:`starfish.experiment.builder` module. Converting experiment data into SpaceTx format
+with :py:func:`.format_structured_dataset` is best
 for a small number of 2D images or if you have a preferred scripting language that isn't Python.
 Using your tool of choice, prepare your data as a "structured dataset".
 
@@ -22,7 +24,7 @@ be compatible with the rest of the starfish package.
 
 The stem of the tiles' filenames must be
 `<image_type>-f<fov_id>-r<round_label>-c<ch_label>-z<zplane_label>`. The extension should be one
-of the supported tile formats (:py:class:`slicedimage.ImageFormat`) (tiff, png, npy).  For example,
+of the formats supported by :py:class:`slicedimage.ImageFormat` (tiff, png, npy). For example,
 the file `nuclei-f0-r2-c3-z33.tiff` would belong to the nuclei image, fov 0, round 2, channel 3,
 zplane 33.
 
@@ -71,9 +73,9 @@ To illustrate the overall process, we will walk through a dummy example below.
 ###################################################################################################
 # Create some synthetic data to form into a trivial experiment.
 # -------------------------------------------------------------
-# primary and nuclei images were acquired simultaneously with only one channel in primary images:
-# fov0 contains r0-1, ch0, zplane0-2.  All tiles share the same physical coordinates.
-# fov1 contains r0-1, ch0, zplane0-2.  All tiles share the same physical coordinates.
+# This dummy data represents an experiment that acquired primary and nuclei images
+# simultaneously, with one channel for primary FISH spots and one channel for stained nuclei.
+# There are two FOVs , 2 rounds and 3 z-plane. All tiles share the same physical coordinates.
 
 import csv
 import os
@@ -177,20 +179,20 @@ for dir in [primary_dir, nuclei_dir]:
 # Contents of coordinates.csv
 # ---------------------------
 
-# just printing one of the coordinates.csv since they are the same
+# just printing one of the coordinates.csv since they are identical
 with open(os.path.join(primary_dir, "coordinates.csv"), "r") as fh:
     print(fh.read())
 
 ###################################################################################################
 # Convert structured data into SpaceTx Format
 # -------------------------------------------
-# The primary and nuclei directories are converted separately.
+# The primary and nuclei directories must be converted separately.
 
 outputdir = tempfile.TemporaryDirectory()
 primary_out = os.path.join(outputdir.name, "primary")
 nuclei_out = os.path.join(outputdir.name, "nuclei")
-os.mkdir(primary_out)
-os.mkdir(nuclei_out)
+os.makedirs(primary_out, exist_ok=True)
+os.makedirs(nuclei_out, exist_ok=True)
 
 from slicedimage import ImageFormat
 from starfish.core.experiment.builder.structured_formatter import format_structured_dataset
@@ -218,8 +220,8 @@ for dir in [primary_out, nuclei_out]:
         print(file)
 
 ###################################################################################################
-# Modify experiment.json
-# ----------------------
+# Merge outputs by modifying experiment.json
+# ------------------------------------------
 # Each directory contains an experiment.json and a codebook.json. We'll use the ones in primary
 # and the redundant JSONs can be safely deleted. The experiment.json needs to be modified to include
 # the nuclei.json manifest by adding a single line.
@@ -243,6 +245,8 @@ with open(os.path.join(primary_out, "experiment.json"), "r+") as fh:
 # script to do it for you. Be sure the format matches the examples in
 # :ref:`SpaceTx Format<sptx_codebook_format>`.
 
+with open(os.path.join(primary_out, "codebook.json"), "r") as fh:
+    print(fh.read())
 
 ###################################################################################################
 # Load up the experiment
@@ -251,4 +255,3 @@ from starfish import Experiment
 
 exp = Experiment.from_json(os.path.join(primary_out, "experiment.json"))
 print(exp.fovs())
-print(repr(exp.fov().get_image('primary')))

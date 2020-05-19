@@ -32,6 +32,9 @@ API
    utils/index.rst
 
 .. toctree::
+   display/index.rst
+
+.. toctree::
    plot_utils/index.rst
 
 .. toctree::

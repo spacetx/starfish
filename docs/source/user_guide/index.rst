@@ -12,7 +12,7 @@ to learn how to build your own image processing pipeline using starfish then rea
 This part of the tutorial goes into more detail about why each of the stages in the example are
 needed, and provides some alternative approaches that can be used to build similar pipelines.
 
-The core functionalities of starfish pipelines are the detection (and :term:`decoding<Decoding>`)
+The core functions of starfish pipelines are the detection (and :term:`decoding<Decoding>`)
 of spots, and the segmentation of cells. Each of the other approaches are designed to address
 various characteristics of the imaging system, or the optical characteristics of the tissue
 sample being measured, which might bias the resulting spot calling, decoding, or cell
@@ -42,16 +42,16 @@ your data.
     will still need to be created.
 
 The primary method is to use :py:func:`.format_structured_dataset`, a conversion tool, on
-data that is structured as 2D image tiles (:py:class:`slicedimage.ImageFormat`)(tiff, png, or npy) with specific filenames and a csv
+data that is structured as 2D image tiles with specific filenames and a csv
 file containing the physical coordinates of each image tile. This method requires minimal Python
 knowledge. You can manually organize your images, but for large datasets you will want to use a
-scripting language (e.g. Matlab) to move and rename files into the structured data format.
+scripting language (e.g. Matlab) to move and rename files into the structured data format. This
+method is only compatible with 2D image tiles in TIFF, PNG, or NPY format.
 
 Users who are familiar with Python and starfish also have the option of using
 :py:class:`.TileFetcher` and :py:class:`.FetchedTile`, a set of user-defined interfaces the
-experiment builder uses for obtaining the data corresponding to each tile location. This
-method is compatible with 3D image volumes (tiff or npy) as well as 2D image tiles (tiff, png, or
-npy).
+experiment builder uses for obtaining the data corresponding to each tile location. Any data
+format that can be read as a numpy array can be used.
 
 Lastly, there is a 3rd party `spacetx writer`_ which writes SpaceTx-Format experiments using the
 `Bio-Formats`_ converter. Bio-Formats can read a variety of input formats, so might be a
@@ -60,7 +60,7 @@ relatively simple approach for users familiar with those tools.
 .. _spacetx writer: https://github.com/spacetx/spacetx-writer
 .. _Bio-Formats: https://www.openmicroscopy.org/bio-formats/
 
-After converting, you can use :ref:`starfish validate<validate>` to ensure that the experiment
+After converting, you can use :ref:`starfish validate<cli_validate>` to ensure that the experiment
 files meet the format specifications before loading.
 
 Your first time applying these generalized tools to convert your data can be time-consuming. If
@@ -81,7 +81,7 @@ subsets to load into memory.
 
 As mentioned in the previous section, it is also possible to
 :ref:`directly load data <tilefetcher_loader>` that has not been formatted, although
-there may be performance implications in doing so. This method is also more complicated
+there may be performance implications in doing so. This method is also more complicated.
 
 * Tutorial: :ref:`Loading SpaceTx Formatted Data <loading_data>`
 * Tutorial: :ref:`Loading Data Without Formatting <tilefetcher_loader>`

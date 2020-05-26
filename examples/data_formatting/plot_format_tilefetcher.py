@@ -241,6 +241,7 @@ write_experiment_json(
 # script to do it for you. Be sure the format matches the examples in
 # :ref:`SpaceTx Format<sptx_codebook_format>`.
 
+# this is the placeholder codebook.json
 with open(os.path.join(outputdir.name, "codebook.json"), "r") as fh:
     print(fh.read())
 

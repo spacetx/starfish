@@ -195,7 +195,7 @@ os.makedirs(primary_out, exist_ok=True)
 os.makedirs(nuclei_out, exist_ok=True)
 
 from slicedimage import ImageFormat
-from starfish.core.experiment.builder.structured_formatter import format_structured_dataset
+from starfish.experiment.builder import format_structured_dataset
 
 format_structured_dataset(
     primary_dir,
@@ -245,6 +245,7 @@ with open(os.path.join(primary_out, "experiment.json"), "r+") as fh:
 # script to do it for you. Be sure the format matches the examples in
 # :ref:`SpaceTx Format<sptx_codebook_format>`.
 
+# this is the placeholder codebook.json
 with open(os.path.join(primary_out, "codebook.json"), "r") as fh:
     print(fh.read())
 

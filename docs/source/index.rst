@@ -60,7 +60,7 @@ your data into the SpaceTx format can be found in :ref:`section_formatting_data`
   <div class="col-md-5">
   <h2>Features</h2>
 
-* Formatting Data: :ref:`Tutorial<section_formatting_data>`
+* Formatting Data: :ref:`API<experiment_builder>` | :ref:`Tutorial<section_formatting_data>`
 * Registering Images: :ref:`API<learn_transform>` | :ref:`Tutorial<tutorial_image_registration>`
 * Filtering Images: :ref:`API<filtering>` | :ref:`Tutorial<section_correcting_images>`
 * Finding Spots: :ref:`API<spot_finding>` | :ref:`Tutorial<section_finding_and_decoding>`

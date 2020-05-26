@@ -38,15 +38,15 @@ your data.
 
     When converting data to SpaceTx Format is too costly, images can be loaded directly without
     formatting by :ref:`tilefetcher_loader`. This is a workaround and only recommended if
-    reading and writing all the images is infeasible. The experiment json files like the codebook
+    reading and writing all the images is infeasible. The experiment JSON files like the codebook
     will still need to be created.
 
 The primary method is to use :py:func:`.format_structured_dataset`, a conversion tool, on
-data that is structured as 2D image tiles with specific filenames and a csv
+data that is structured as 2D image tiles with specific filenames and a CSV
 file containing the physical coordinates of each image tile. This method requires minimal Python
 knowledge. You can manually organize your images, but for large datasets you will want to use a
-scripting language (e.g. Matlab) to move and rename files into the structured data format. This
-method is only compatible with 2D image tiles in TIFF, PNG, or NPY format.
+script (e.g. Matlab) to move and rename files into the structured data format. The structured
+data must be 2D image tiles in TIFF, PNG, or NPY file format.
 
 Users who are familiar with Python and starfish also have the option of using
 :py:class:`.TileFetcher` and :py:class:`.FetchedTile`, a set of user-defined interfaces the

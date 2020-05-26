@@ -4,7 +4,27 @@
 Format In-Situ Sequencing Data
 ==============================
 
-The following script formats In-Situ Sequencing data in SpaceTx-Format
+The following script formats In-Situ Sequencing data in SpaceTx Format.
+This is a good example of converting a cropped region from single-plane tiffs.
+
+The data consists of multiple fields of view. There are 4 rounds, each with 4 primary image channels
+and 1 DAPI stain. There is a 5th round "DO" that contains the "dots" image with *all* RNA
+labeled and a DAPI image.
+
+input data structure:
+::
+
+    └── parent
+        ├── slideA_1_1st_Cy3.5.TIF
+        ├── slideA_1_1st_Cy3.TIF
+        ├── slideA_1_1st_Cy5.TIF
+        ├── slideA_1_1st_DAPI.TIF
+        ├── slideA_1_1st_FITC.TIF
+        ├── slideA_1_2nd_Cy3.5.TIF
+        ├── slideA_1_2nd_Cy3.TIF
+        ├── ...
+
+The locations of the data files for use with this script can be found in the s3_bucket variable.
 """
 import argparse
 import json

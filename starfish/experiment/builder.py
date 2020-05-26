@@ -1,4 +1,7 @@
-from starfish.core.experiment.builder import inplace  # noqa: F401
+from starfish.core.experiment.builder import (  # noqa: F401
+    inplace,
+)
+from starfish.core.experiment.builder.structured_formatter import format_structured_dataset  # noqa: F401
 from starfish.core.experiment.builder.builder import (   # noqa: F401
     build_image,
     build_irregular_image,

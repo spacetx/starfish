@@ -14,6 +14,9 @@ API
    slicedimage/index
 
 .. toctree::
+   experiment_builder/index
+
+.. toctree::
    image/index.rst
 
 .. toctree::

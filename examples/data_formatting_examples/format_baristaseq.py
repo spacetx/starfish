@@ -5,7 +5,41 @@ Format BaristaSeq
 =================
 
 This script contains TileFetchers and FetchedTile objects to convert data donated by the Zador lab
-to SpaceTx format. The locations of the data files for use with this script can be found in the
+to SpaceTx Format. This is a good basic example of converting single-plane tiffs with multiple
+z-tiles.
+
+The data is from one field of view consisting of primary images and accompanying
+Nissl-stained images. The primary images have 3 rounds, 4 channels, and 17 z-tiles. The Nissl
+images have 1 round, 1 channel, and 17 z-tiles. Image tiles are all single-plane TIFFS with shape
+(800, 1000).
+
+input data structure:
+::
+
+    └── parent
+        ├── nissl
+            ├── T00001C05Z001.tif
+            ├── T00001C05Z002.tif
+            ├── T00001C05Z003.tif
+            ├── ...
+        └── primary
+            ├── r0
+                ├── T00001C01Z001.tif
+                ├── T00001C01Z002.tif
+                ├── T00001C01Z003.tif
+                ├── ...
+            ├── r1
+                ├── alignedT00001C01Z001.tif
+                ├── alignedT00001C01Z002.tif
+                ├── alignedT00001C01Z003.tif
+                ├── ...
+            └── r2
+                ├── alignedT00001C01Z001.tif
+                ├── alignedT00001C01Z002.tif
+                ├── alignedT00001C01Z003.tif
+                ├── ...
+
+The locations of the data files for use with this script can be found in the
 docstring for ``format_data``.
 """
 
@@ -18,8 +52,7 @@ import numpy as np
 from skimage.io import imread
 from slicedimage import ImageFormat
 
-from starfish.experiment.builder import (FetchedTile, TileFetcher,
-                                         write_experiment_json)
+from starfish.experiment.builder import FetchedTile, TileFetcher, write_experiment_json
 from starfish.types import Axes, Coordinates, CoordinateValue
 
 DEFAULT_TILE_SHAPE = {Axes.Y: 1000, Axes.X: 800}

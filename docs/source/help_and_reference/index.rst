@@ -6,7 +6,6 @@ Help & Reference
 .. toctree::
     :maxdepth: 1
 
-    usage/index
     data_model/index
     spacetx-format/index
     available_datasets/index

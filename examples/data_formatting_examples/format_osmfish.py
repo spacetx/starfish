@@ -4,7 +4,37 @@
 Format osmFISH Data
 ===================
 
-The following script formats osmFISH data from primary human visual cortex in SpaceTx-Format.
+The following script formats osmFISH data from primary human visual cortex in SpaceTx Format.
+This is a good example of:
+
+* converting 3D .NPY files
+* multiple fields of view (FOV)
+* not hard coding tile shape (get shape from data)
+* reading metadata from YAML file to
+  * assign physical coordinates to each FOV
+  * get z-tile depth
+  * get files named by target gene
+  * generate the correct *codebook*
+
+The experiment had hundreds of fields of view but this example selects only 3 to convert.
+Each FOV consists of only primary images with 13 rounds and 3 channels. Each NPY is a 3D array (
+z, y, x) representing one gene (channel) in one FOV.
+
+input data structure:
+::
+
+    └── parent
+        ├── Experimental_metadata.yaml
+        ├── Hybridization1_Aldoc_fov_53.npy
+        ├── Hybridization1_Aldoc_fov_75.npy
+        ├── Hybridization1_Aldoc_fov_106.npy
+        ├── Hybridization1_Foxj1_fov_53.npy
+        ├── Hybridization1_Foxj1_fov_75.npy
+        ├── Hybridization1_Foxj1_fov_106.npy
+        ├── ...
+
+The locations of the data files for use with this script can be found in the
+docstring for ``cli``.
 """
 
 import functools
@@ -23,7 +53,7 @@ from starfish.types import Axes, Coordinates, CoordinateValue, Features
 
 
 # We use this to cache images across tiles.  In the case of the osmFISH data set, volumes are saved
-# together in a single file.  To avoid reopening and decoding the TIFF file, we use a single-element
+# together in a single file.  To avoid reopening and decoding the NPY file, we use a single-element
 # cache that maps between file_path and the npy file.
 @functools.lru_cache(maxsize=1)
 def cached_read_fn(file_path) -> np.ndarray:
@@ -87,10 +117,8 @@ class osmFISHTileFetcher(TileFetcher):
 
         Notes
         -----
-        - osmFISH is a non-multiplex method. As such, each target is specified by a
-          (channel, round) tuple. The files do not contain channel information,
-        - The spatial organization of the fields of view are not known to the starfish developers,
-          so they are filled by dummy coordinates
+        - osmFISH is a linearly multiplexed method. As such, each target is specified by a
+          (channel, round) tuple. The files do not contain channel information.
         - This TileFetcher is specifically tailored to the gene panel used for a specific
           experiment. Generalization of this TileFetcher will require reimplementation of the
           `channel_map` method.
@@ -137,7 +165,7 @@ class osmFISHTileFetcher(TileFetcher):
 
     @property
     def fov_map(self) -> Mapping[int, str]:
-        """This example dataset has three channels, which are mapped to sequential integers"""
+        """This example is pared down to only 3 fovs, which are mapped to sequential integers"""
         return {
             0: "53",
             1: "75",

@@ -7,6 +7,43 @@ Format STARmap data
 The raw STARmap data received by SpaceTx is organized as z-stack TIFF files that contain all
 z-sections for each (round, channel) pair. This TileFetcher breaks these up into individual 2-d
 TIFF files, reformats the CSV codebook, and adds the necessary SpaceTx metadata.
+
+This is a good example of converting:
+
+* 3D TIFFS (z, y, x)
+* parsing a codebook.csv and writing the SpaceTx Format codebook.json
+* working with multiple sets of auxiliary images
+
+The data consists of one field of view with 6 rounds of imaging. Each round is stored in a
+multipage TIFF indexed by z. There is also accompanying dapi and nissl-stained images, which are
+converted to auxiliary images in SpaceTx Format.
+
+input data structure:
+::
+
+    └── parent
+        ├── genes.csv
+        ├── reg3d
+            ├── reg_round01.tif
+            ├── reg_round01_ch01.tif
+            ├── reg_round01_ch02.tif
+            ├── reg_round01_ch03.tif
+            ├── reg_round01_ch04.tif
+            ├── reg_round02.tif
+            ├── reg_round02_ch01.tif
+            ├── reg_round02_ch02.tif
+            ├── reg_round02_ch03.tif
+            ├── reg_round02_ch04.tif
+            ├── reg_round03.tif
+            ├── ...
+        └── nissl
+            ├── dapi.tif
+            ├── dapi_maxproj.tif
+            ├── nissl.tif
+            ├── ...
+
+The locations of the data files for use with this script can be found in the
+docstring for ``cli``.
 """
 
 import functools
@@ -261,8 +298,6 @@ def cli(input_dir, output_dir) -> None:
     ----------
     input_dir : str
         directory containing input data. See TileFetcher classes for expected directory structures.
-        Example data can be found at
-        s3://spacetx.starfish.data/browse/raw/20183110/starmap/160gene_20171110_BF2_dark/
     output_dir : str
         directory that 2-d images and SpaceTx metadata will be written to.
     """

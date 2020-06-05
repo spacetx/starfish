@@ -59,7 +59,7 @@ Starfish can easily be installed using pip:
 .. note::
     If using python 3.8, first install numpy using pip before installing starfish.
 
-To use napari for interactive image visualization via :code:`starfish.display()` you must also
+To use napari for interactive image visualization via :py:func:`.display` you must also
 install napari:
 
 .. code-block:: bash

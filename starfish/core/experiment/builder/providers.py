@@ -63,12 +63,12 @@ class FetchedTile:
 class TileFetcher:
     """
     This is the contract for providing the image data for constructing a
-    :class:`slicedimage.Collection`.
+    :py:class:`slicedimage.Collection`.
     """
     def get_tile(
             self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
         """
         Given fov_id, round_label, ch_label, and zplane_label, return an instance of a
-        :class:`.FetchedImage` that can be queried for the image data.
+        :py:class:`.FetchedTile` that can be queried for the image data.
         """
         raise NotImplementedError()

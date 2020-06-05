@@ -4,7 +4,7 @@
 Loading Data through TileFetchers
 =================================
 
-:py:class:~starfish.experiment.builder.providers.TileFetcher`s provide a way for starfish's data
+:py:class:`.TileFetcher`\s provide a way for starfish's data
 formatting tooling to obtain image data and metadata for each tile that make up an image.  It is
 possible to use this interface to directly load data into starfish.  This could have performance
 implications as the TileFetcher's performance could potentially be highly sensitive to the order

@@ -158,10 +158,9 @@ def display(
 
     Examples
     --------
-
     1. Display a stack to evaluate a filtering result. Just pass any ImageStack!
 
-    >>> starfish import display
+    >>> from starfish import display
     >>> display(stack)
 
     2. Display spots of a single-molecule FISH experiment: smFISH will produce IntensityTables where

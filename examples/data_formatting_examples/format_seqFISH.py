@@ -4,7 +4,30 @@
 Format SeqFISH Data
 ===================
 
-The following script formats SeqFISH data in SpaceTx-Format
+The following script formats SeqFISH data in SpaceTx Format.
+This is a good example of:
+
+* converting 4D TIFFS (channel, z, y, x)
+* not hard coding tile shape (get shape from data)
+* parsing a codebook.csv and writing the SpaceTx Format codebook.json
+
+The data consists of one field of view with 5 rounds of imaging. Each round is stored in a
+multipage TIFF indexed by channel and z.
+
+input data structure:
+::
+
+    └── parent
+        ├── gene-barcodes.csv
+        ├── 1.tif
+        ├── 2.tif
+        ├── 3.tif
+        ├── 4.tif
+        ├── 5.tif
+        ├── ...
+
+The locations of the data files for use with this script can be found in the
+docstring for ``cli``.
 """
 import functools
 import os

@@ -94,6 +94,8 @@ hidden in the :py:class:`.DecodeSpotsAlgorithm` but it requires the user to sele
 ``TraceBuildingStrategy``. :ref:`howto_tracebuildingstrategies`. goes further in depth and shows
 how to build traces independent of the decoding step.
 
+.. _spot_decoding_table:
+
 Spot Decoding
 -------------
 

@@ -59,7 +59,7 @@ imgs
 ####################################################################################################
 # **Interactively visualize primary images**
 #
-# Using :py:func:`starfish.display()` you can visualize `ImageStacks` in *napari*. This is a very
+# Using :py:func:`.display` you can visualize `ImageStacks` in *napari*. This is a very
 # handy tool to examine your data and can help you  make pipeline building decisions. If you use
 # the dimension slider to compare channels 1 and 3 of round 1 (zero-based indexing),
 # you can already see which cells express mouse ACTB and which cells express human ACTB.
@@ -305,7 +305,7 @@ sns.heatmap(mat.data.T,
 
 ####################################################################################################
 # This is the end of the quick start tutorial! To use starfish on your own data, start with
-# :ref:`Data Formatting<Formatting>` and then follow the :ref:`User
+# :ref:`Data Formatting<section_formatting_data>` and then follow the :ref:`User
 # Guide<user_guide>` to create a pipeline tailored to your data. If
 # you want to try creating pipelines but don't have data yet, :py:mod:`starfish.data` has a
 # number of example datasets you can experiment with.

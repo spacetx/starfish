@@ -10,7 +10,7 @@ Prerequisites
 - Download the template files and script needed to set up and run your aws job :download:`here </_static/starfish-aws-templates.zip>`
 - Create an aws account with access to the console `Create Account <https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/>`__
 - Create a starfish pipeline for processing a singe field of view from :ref:`ImageStack` to :ref:`DecodedIntensityTable`
-- Convert your dataset to SpaceTX format. :ref:`formatting`
+- Convert your dataset to SpaceTx format. :ref:`section_formatting_data`
 - Make sure you have the awscli installed ``pip install awscli``
 
 For this tutorial we will be working with a 15 field of view `ISS dataset <https://s3.amazonaws.com/spacetx.starfish.data.public/browse/formatted/iss/20190506/experiment.json>`_

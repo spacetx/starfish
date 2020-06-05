@@ -4,7 +4,27 @@
 Format Imaging Cytof Data
 =========================
 
-The following script converts Imaging Cytof Data in SpaceTx-Format
+The following script converts Imaging Cytof Data in SpaceTx Format.
+This is a good example of:
+
+* generating codebook from an ordered list of targets
+* handling filenames based on target name rather than organized by rounds or channels
+* multiple fields of view (FOV)
+
+input data structure:
+::
+
+    └── parent
+        ├── <Fov1_name>
+            └── <Fov1_name>
+                ├── <target_name1>.tiff
+                ├── ...
+        ├── <Fov2_name>
+            └── <Fov2_name>
+                ├── <target_name1>.tiff
+                ├── ...
+
+The locations of the data files for use with this script can be found in ``cli``.
 """
 import json
 import os
@@ -32,7 +52,7 @@ class ImagingMassCytometryTile(FetchedTile):
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
-        # TODO ambrosejcarr: ask about what these coordinates should correspond to.
+        # dummy coordinates
         return {
             Coordinates.X: (0.0, 0.0001),
             Coordinates.Y: (0.0, 0.0001),

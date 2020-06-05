@@ -5,6 +5,28 @@ Format MERFISH data
 ===================
 
 The following script formats MERFISH data acquired from cultured U2-OS cells.
+This is a good example of:
+
+* converting multipage TIFF files that contain every round, channel of a FOV in a single file
+* multiple fields of view (FOV)
+* fetching primary images and auxiliary images from the same file
+* assigning physical coordinates from CSV file
+
+The experiment had 496 of fields of view. Each FOV is stored in one file consisting of primary
+images (8 rounds, 2 channels, 1 z-tile) and one DAPI-stained image. The tile index that maps to
+each round and channel is defined in the :py:class:`.FetchedTile` subclasses.
+
+input data structure:
+::
+
+    └── parent
+        ├── stagePos.csv
+        ├── fov_0.tif
+        ├── fov_1.tif
+        ├── fov_2.tif
+        ├── ...
+
+The locations of the data files for use with this script can be found in the s3_bucket variable.
 """
 import argparse
 import functools

@@ -52,7 +52,7 @@ sections to learn more details about starfish and its object models.
 
 In addition to the library of image processing functions, starfish introduces a standardized data
 format for image-based spatial transcriptomic assays. Examples and tutorials for formatting
-your data into the SpaceTx format can be found in :ref:`data formatting <formatting>`.
+your data into the SpaceTx format can be found in :ref:`section_formatting_data`.
 
 .. raw:: html
 
@@ -60,7 +60,7 @@ your data into the SpaceTx format can be found in :ref:`data formatting <formatt
   <div class="col-md-5">
   <h2>Features</h2>
 
-* Formatting Data: :ref:`Tutorials<formatting>`
+* Formatting Data: :ref:`API<experiment_builder>` | :ref:`Tutorial<section_formatting_data>`
 * Registering Images: :ref:`API<learn_transform>` | :ref:`Tutorial<tutorial_image_registration>`
 * Filtering Images: :ref:`API<filtering>` | :ref:`Tutorial<section_correcting_images>`
 * Finding Spots: :ref:`API<spot_finding>` | :ref:`Tutorial<section_finding_and_decoding>`

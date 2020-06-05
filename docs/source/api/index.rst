@@ -8,8 +8,13 @@ API
    :caption: Contents:
 
 .. toctree::
-
    data_structures/index
+
+.. toctree::
+   slicedimage/index
+
+.. toctree::
+   experiment_builder/index
 
 .. toctree::
    image/index.rst
@@ -28,6 +33,9 @@ API
 
 .. toctree::
    utils/index.rst
+
+.. toctree::
+   display/index.rst
 
 .. toctree::
    plot_utils/index.rst

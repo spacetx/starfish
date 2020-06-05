@@ -176,14 +176,14 @@ def build_image(
         Ordering for which axes vary, in order of the slowest changing axis to the fastest.  For
         instance, if the order is (ROUND, Z, CH) and each dimension has size 2, then the sequence
         is:
-          (ROUND=0, CH=0, Z=0)
-          (ROUND=0, CH=1, Z=0)
-          (ROUND=0, CH=0, Z=1)
-          (ROUND=0, CH=1, Z=1)
-          (ROUND=1, CH=0, Z=0)
-          (ROUND=1, CH=1, Z=0)
-          (ROUND=1, CH=0, Z=1)
-          (ROUND=1, CH=1, Z=1)
+        (ROUND=0, CH=0, Z=0)
+        (ROUND=0, CH=1, Z=0)
+        (ROUND=0, CH=0, Z=1)
+        (ROUND=0, CH=1, Z=1)
+        (ROUND=1, CH=0, Z=0)
+        (ROUND=1, CH=1, Z=0)
+        (ROUND=1, CH=0, Z=1)
+        (ROUND=1, CH=1, Z=1)
         (default = (Axes.Z, Axes.ROUND, Axes.CH))
 
     Returns
@@ -350,14 +350,14 @@ def write_experiment_json(
         Ordering for which dimensions vary, in order of the slowest changing dimension to the
         fastest.  For instance, if the order is (ROUND, Z, CH) and each dimension has size 2, then
         the sequence is:
-          (ROUND=0, CH=0, Z=0)
-          (ROUND=0, CH=1, Z=0)
-          (ROUND=0, CH=0, Z=1)
-          (ROUND=0, CH=1, Z=1)
-          (ROUND=1, CH=0, Z=0)
-          (ROUND=1, CH=1, Z=0)
-          (ROUND=1, CH=0, Z=1)
-          (ROUND=1, CH=1, Z=1)
+        (ROUND=0, CH=0, Z=0)
+        (ROUND=0, CH=1, Z=0)
+        (ROUND=0, CH=0, Z=1)
+        (ROUND=0, CH=1, Z=1)
+        (ROUND=1, CH=0, Z=0)
+        (ROUND=1, CH=1, Z=0)
+        (ROUND=1, CH=0, Z=1)
+        (ROUND=1, CH=1, Z=1)
         (default = (Axes.Z, Axes.ROUND, Axes.CH))
     fov_path_generator : Optional[Callable[[Path, str], Path]]
         Generates the path for a FOV's json file.  If one is not provided, the default generates

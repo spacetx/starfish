@@ -4,7 +4,40 @@
 Format In Situ Sequencing Mouse x Human Experiment
 ==================================================
 
-The following script formats ISS data of co-cultured mouse and human fibroblasts in SpaceTx-Format.
+The following script formats ISS data of co-cultured mouse and human fibroblasts in SpaceTx Format.
+This is a good basic example of converting single-plane tiffs and defining a *codebook*.
+
+The data consists of one field of view. There are 4 rounds, each with 4 primary image channels
+and 1 DAPI stain. There is a 5th round "DO" that contains the "dots" image with *all* RNA
+labeled and a DAPI image.
+
+input data structure:
+::
+
+    └── parent
+        ├── 1
+            ├── c1.TIF
+            ├── c2.TIF
+            ├── c3.TIF
+            ├── c4.TIF
+            ├── c5.TIF
+        ├── 2
+            ├── c1.TIF
+            ├── c2.TIF
+            ├── ...
+        ├── 3
+            ├── c1.TIF
+            ├── c2.TIF
+            ├── ...
+        ├── 4
+            ├── c1.TIF
+            ├── c2.TIF
+            ├── ...
+        └── DO
+            ├── c1.TIF
+            └── c2.TIF
+
+The locations of the data files for use with this script can be found in the url variable.
 """
 import argparse
 import io
@@ -36,7 +69,7 @@ class ISSTile(FetchedTile):
 
     @property
     def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
-        # FIXME: (dganguli) please provide proper coordinates here.
+        # dummy coordinates
         return {
             Coordinates.X: (0.0, 0.0001),
             Coordinates.Y: (0.0, 0.0001),

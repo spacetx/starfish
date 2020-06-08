@@ -1,3 +1,20 @@
+## [0.2.1] - 2020-06-08
+- Bump napari to 0.3.4 (#1889)
+- fix how spot_ids are handled by build_traces_sequential and Label._assign() (#1872)
+- reorganized examples gallery and made clarifications to example pipelines and formatting (#1880)
+- added image registration tutorial (#1874)
+- Add assigning spots to cells docs (#1832)
+- Add a Quick Start tutorial (#1869)
+- Update starfish installation guide for JOSS submission (#1868)
+- Add image segmentation docs (#1821)
+- Changing return value of PixelDecoding to DecodedIntensityTable (#1823)
+- Ensure that LocalMaxPeakFinder works in 3D (#1822)
+- Deprecate is_volume parameter with trackpy (#1820)
+- Fix on-demand calculation of BinaryMaskCollection's regionprops (#1819)
+- Remove workaround for non-3D images (#1808)
+- improve from_code_array validation (#1806)
+- Add group_by for tilefetcher-based ImageStack construction (#1796)
+
 ## [0.2.0] - 2020-01-31
 - Add level_method to the clip filters. (#1758)
 - adding method to use installed ilastik instance (#1740)
@@ -209,6 +226,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.2.1]: https://github.com/spacetx/starfish/releases/tag/0.2.1
 [0.2.0]: https://github.com/spacetx/starfish/releases/tag/0.2.0
 [0.1.10]: https://github.com/spacetx/starfish/releases/tag/0.1.10
 [0.1.9]: https://github.com/spacetx/starfish/releases/tag/0.1.9

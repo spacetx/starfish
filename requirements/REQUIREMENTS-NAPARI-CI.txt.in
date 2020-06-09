@@ -1,2 +1,2 @@
-napari >= 0.2.8
+napari >= 0.3.4
 pytest-qt

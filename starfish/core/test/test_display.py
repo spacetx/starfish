@@ -46,5 +46,3 @@ def test_display(qtbot, stack, spots, masks):
             display(stack, spots, masks, viewer=viewer)
     else:
         display(stack, spots, masks, viewer=viewer)
-
-    view.shutdown()

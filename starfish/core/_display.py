@@ -18,7 +18,7 @@ except ImportError:
     Viewer = None
 
 
-NAPARI_VERSION = "0.2.6"  # when changing this, update docs in display
+NAPARI_VERSION = "0.3.4"  # when changing this, update docs in display
 INTERACTIVE = not hasattr(__main__, "__file__")
 
 
@@ -197,7 +197,7 @@ def display(
     -----
     - To use in ipython, use the `%gui qt` magic.
     - napari axes are labeled with the ImageStack axis names
-    - Requires napari 0.2.6: use `pip install starfish[napari]`
+    - Requires napari 0.3.4: use `pip install starfish[napari]`
       to install all necessary requirements
     """
     if stack is None and spots is None and masks is None:

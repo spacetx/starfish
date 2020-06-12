@@ -67,6 +67,7 @@ your data into the SpaceTx format can be found in :ref:`section_formatting_data`
 * Decoding Spots: :ref:`API<decode_spots>` | :ref:`Tutorial<section_finding_and_decoding>`
 * Segmenting Cells: :ref:`API<segmentation>` | :ref:`Tutorial<section_segmenting_cells>`
 * Assigning Spots: :ref:`API<target_assignment>` | :ref:`Tutorial<tutorial_assigning_spots>`
+* Example Pipelines: :ref:`Gallery<pipeline_examples>`
 
 .. raw:: html
 

@@ -1,8 +1,8 @@
 """
 .. _smFISH_processing_example:
 
-Single Field of View for sequential single-molecule FISH processed in 3d
-========================================================================
+Processing sequential smFISH in 3D
+==================================
 
 This notebook walks through a work flow that analyzes one field of view of a mouse gene panel from
 the Allen Institute for Cell Science, using the starfish package.
@@ -18,16 +18,11 @@ The data consist of 45 images from 1 round, 1 channels, and 33 z-planes. Each im
 """
 
 from typing import Optional, Tuple
-from IPython import get_ipython
 
 import starfish
 import starfish.data
 from starfish import FieldOfView, DecodedIntensityTable
 from starfish.types import TraceBuildingStrategies
-
-# equivalent to %gui qt
-ipython = get_ipython()
-ipython.magic("gui qt5")
 
 
 ###################################################################################################
@@ -139,4 +134,5 @@ experiment = starfish.data.allen_smFISH(use_test_data=True)
 image, intensities = processing_pipeline(experiment, fov_name='fov_001')
 
 # uncomment the below line to visualize the output with the spot calls.
+# %gui qt
 # viewer = starfish.display(image, intensities)

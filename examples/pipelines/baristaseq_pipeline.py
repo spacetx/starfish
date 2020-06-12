@@ -55,7 +55,7 @@ imshow_plane(nissl, sel=plane_selector, ax=ax2, title="nissl image")
 
 ###################################################################################################
 # Register the data
-# ----------------
+# -----------------
 # The first step in BaristaSeq is to do some rough registration. For this data, the rough
 # registration has been done for us by the authors, so it is omitted from this notebook.
 
@@ -63,8 +63,8 @@ imshow_plane(nissl, sel=plane_selector, ax=ax2, title="nissl image")
 # Project into 2D
 # ---------------
 # BaristaSeq is typically processed in 2D. Starfish allows users to reduce data using arbitrary
-# methods via :py:class:`.Reduce`. Here we max project Z for both the nissl images and the
-# primary images.
+# methods via :py:class:`.image.Filter.Reduce`. Here we max project Z for both the nissl images and
+# the primary images.
 
 from starfish.image import Filter
 from starfish.types import FunctionSource

@@ -1,3 +1,5 @@
+.. _pipeline_examples:
+
 Example Pipelines
 -----------------
 

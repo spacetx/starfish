@@ -159,19 +159,16 @@ help-integration:
 ### INSTALL ##################################################
 #
 install-dev:
-	pip install -U pip==$(PIP_VERSION)
-	pip install --force-reinstall --upgrade -r requirements/REQUIREMENTS-CI.txt
+	pip install --force-reinstall --upgrade pip==$(PIP_VERSION) -r requirements/REQUIREMENTS-CI.txt
 	pip install -e .
 	pip freeze
 
 install-src:
-	pip install -U pip==$(PIP_VERSION)
-	pip install --force-reinstall --upgrade -e .
+	pip install --force-reinstall --upgrade pip==$(PIP_VERSION) -e .
 	pip freeze
 
 install-released-notebooks-support:
-	pip install -U pip==$(PIP_VERSION)
-	pip install -r requirements/REQUIREMENTS-CI.txt
+	pip install --upgrade pip==$(PIP_VERSION) -r requirements/REQUIREMENTS-CI.txt
 	pip install starfish
 	pip freeze
 
@@ -283,8 +280,7 @@ release-env: release-env/bin/activate release-env/bin/make_shell
 # private: call virtualenv and pip install
 release-env/bin/activate:
 	$(call create_venv, release-env)
-	release-env/bin/pip install -U pip==$(PIP_VERSION)
-	release-env/bin/pip install -r requirements/REQUIREMENTS-CI.txt
+	release-env/bin/pip install --force-reinstall --upgrade pip==$(PIP_VERSION) -r requirements/REQUIREMENTS-CI.txt
 	touch release-env/bin/activate
 
 # private: create make_shell for activating the virtualenv below

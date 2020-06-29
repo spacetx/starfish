@@ -13,5 +13,6 @@ Help & Reference
     working_with_starfish_outputs/index
     processing_at_scale/index
     configuration/index
-    glossary/glossary
+    glossary/glossarys
+    spacetx_consortium/index
     request_support/index

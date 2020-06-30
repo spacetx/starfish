@@ -107,13 +107,10 @@ Correcting Images
 These stages are typically specific to the microscope, camera, filters, chemistry, and any tissue
 handling or microfluidices that are involved in capturing the images. These steps are typically
 *independent* of the assay. *Starfish* enables the user to design a pipeline that matches their
-imaging system
+imaging system and provides some basic image correction methods.
 
 * Tutorial: :ref:`Illumination Correction <tutorial_illumination_correction>`
-* Tutorial: :ref:`Chromatic Aberration <tutorial_chromatic_aberration>`
-* Tutorial: :ref:`Deconvolution <tutorial_deconvolution>`
 * Tutorial: :ref:`Image Registration <tutorial_image_registration>`
-* Tutorial: :ref:`Image Correction Pipeline <tutorial_image_correction_pipeline>`
 
 .. _section_improving_snr:
 
@@ -436,24 +433,3 @@ number of segmentation-free approaches for grouping spots into cells that starfi
 support in the `future <https://github.com/spacetx/starfish/issues/1675>`_.
 
 * Tutorial: :ref:`tutorial_assigning_spots`
-
-.. _section_assessing_metrics:
-
-Assessing Performance Metrics
------------------------------
-
-.. _section_utilities:
-
-Other Utilities
----------------
-
-Feature Identification and Assignment
--------------------------------------
-
-Once images have been corrected for tissue and optical aberrations, spot finding can be run to
-turn those spots into features that can be counted up. Separately,
-The dots and nuclei images can be segmented to identify the locations where the cells can be found
-in the images. Finally, the two sets of features can be combined to assign each spot to its cell of
-origin. At this point, it's trivial to create a cell x gene matrix.
-
-* :ref:`Segmenting Cells <tutorial_segmenting_cells>`

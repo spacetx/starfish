@@ -42,7 +42,7 @@ assays.
 Documentation
 -------------
 
-For the `quickstart <https://spacetx-starfish.readthedocs.io/en/latest/gallery/quick_start/plot_quick_start.html>`_, `user guide <https://spacetx-starfish.readthedocs.io/en/latest/user_guide/>`_, `examples <https://spacetx-starfish.readthedocs.io/en/latest/gallery/>`_, and `API <https://spacetx-starfish.readthedocs.io/en/latest/api/>`_, see `spacetx-starfish.readthedocs.io <https://spacetx-starfish.readthedocs.io/en/latest/>`_.
+See `spacetx-starfish.readthedocs.io <https://spacetx-starfish.readthedocs.io/en/latest/>`_ for the `quickstart <https://spacetx-starfish.readthedocs.io/en/latest/gallery/quick_start/plot_quick_start.html>`_, `user guide <https://spacetx-starfish.readthedocs.io/en/latest/user_guide/>`_, `examples <https://spacetx-starfish.readthedocs.io/en/latest/gallery/>`_, and `API <https://spacetx-starfish.readthedocs.io/en/latest/api/>`_.
 
 Installation
 ------------

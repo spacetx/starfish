@@ -51,7 +51,7 @@ starfish supports python 3.6 and above (python 3.7 recommended) and can easily b
 
 .. code-block:: bash
 
-    $ pip install starfish
+    $ pip install starfish[napari]
 
 `For more detailed installation instructions, see here <https://spacetx-starfish.readthedocs.io/en/latest/installation/>`_.
 

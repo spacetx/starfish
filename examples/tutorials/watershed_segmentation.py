@@ -220,8 +220,8 @@ plt.title('Segmented Cells')
 # Running :py:class:`.Watershed` from the :py:mod:`.image` module (not to be confused with
 # :py:class:`.WatershedSegment` from the :py:mod:`.morphology` module) is a convenient method to
 # apply the same segmentation algorithm that was built in the previous section of this tutorial.
-# It sets the ``min_allowed_size`` and ``max_allowed_size`` of the nuclei to 10
-# pixels and 1,000 pixels, respectively, but accepts
+# It hardcodes the ``min_allowed_size`` and ``max_allowed_size`` of the nuclei to 10
+# pixels and 1,000 pixels, respectively, but accepts the other user-defined parameters as arguments.
 #
 # Here is an example of how to run :py:class:`.Watershed` on the same set of images as the
 # previous section. The intermediate results are saved as attributes of the

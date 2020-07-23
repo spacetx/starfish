@@ -14,16 +14,20 @@ provides alternatives.
 
 :py:class:`.LocalMaxPeakFinder` finds spots by finding the optimal threshold to binarize image
 into foreground (spots) and background and then using :py:func:`skimage.feature.peak_local_max` to
-find local maxima or peaks in the foreground. Each peak is counted as a spot with radius equal to
-one pixel. Using :py:class:`.LocalMaxPeakFinder` requires knowledge of expected spot sizes since it
-uses ``min_obj_area`` and ``max_obj_area`` to filter foreground connected components before finding
-peaks. ``min_distance`` is also used to to filter out noise by limiting the distance between peaks
+find local maxima or peaks in the foreground. If spots are being detected in the dark areas,
+increase the ``stringency`` value to increase the threshold. Using :py:class:`.LocalMaxPeakFinder`
+requires knowledge of expected foreground sizes since it uses ``min_obj_area`` and
+``max_obj_area`` to filter connected foreground components before finding peaks. On the low end,
+``min_obj_area`` should be set to the area of one spot so that smaller foreground objects are
+removed. On the high end, ``max_obj_area`` can be set to ``np.inf`` and decreased if necessary.
+``min_distance`` is another threshold to filter out noise by limiting the distance between peaks
 that can be detected. The recommended way to set parameters is to take a representative image and
-:ref:`visually assess <howto_spotfindingresults>` results.
+:ref:`visually assess <howto_spotfindingresults>` results. Each peak is counted as a spot with
+radius equal to one pixel.
 
-.. warning::
-    :py:class:`.LocalMaxPeakFinder` does not support finding spots on independent 2D slices of a
-    volume (i.e., ``is_volume = False``).
+.. note::
+    Running :py:class:`.LocalMaxPeakFinder` on 3-Dimensional images with ``is_volume=True`` can
+    be extremely slow.
 
 .. warning::
     :py:class:`.LocalMaxPeakFinder` is not compatible with cropped data sets.
@@ -53,6 +57,6 @@ lmp = FindSpots.LocalMaxPeakFinder(
     stringency=0,
     min_obj_area=6,
     max_obj_area=600,
-    is_volume=True
+    is_volume=False
 )
 spots = lmp.run(max_imgs)

@@ -69,7 +69,8 @@ imgs
 #   from starfish import display
 #
 #   %gui qt
-#   display(imgs)
+#   viewer = display(imgs)
+#   viewer.layers[0].name = "raw stack" # rename the layer
 
 ####################################################################################################
 # **View codebook**
@@ -259,7 +260,7 @@ spots.count_total_spots()
 #
 # .. code-block:: python
 #
-#   display(stack=registered_imgs, spots=decoded, masks=masks)
+#   display(stack=registered_imgs, spots=decoded, masks=masks, viewer=viewer)
 
 ####################################################################################################
 # **View decoded spots as a table**

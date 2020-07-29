@@ -79,6 +79,12 @@ decoded_filtered = decoded[decoded.target != 'nan']
 
 # Load cell mask
 roi_path = os.path.join(os.path.dirname("__file__"), 'RoiSet.zip')
+# Uncomment the following code to download RoiSet.zip
+#import requests, shutil
+#response = requests.get("https://raw.github.com/spacetx/starfish/mcai-segmentation-docs/examples/RoiSet.zip", stream=True)
+#response.raw.decode_content = True
+#with open(roi_path, "wb") as f:
+#    shutil.copyfileobj(response.raw, f)
 masks = BinaryMaskCollection.from_fiji_roi_set(path_to_roi_set_zip=roi_path, original_image=dapi)
 
 # Assign spots to cells by labeling each spot with cell_id

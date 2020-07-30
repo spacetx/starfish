@@ -2,7 +2,7 @@
 .. _RNAScope_processing_example:
 
 Single Field of View for RNAScope HiPlex
-========================================
+=========================================
 
 ACDBio has a 12-gene HiPlex assay that uses 3 rounds of fluorescence imaging with 4 fluorescence RNA
 channels and 1 DAPI-stained nuclei channel. In the example data provided by ACDBio, these 15 images
@@ -12,19 +12,29 @@ data into SpaceTx format, register the images into the same coordinate system, a
 into cell x gene expression matrices using modules contained in starfish.
 
 Feedback from ACDBio:
+
 * Blob detection needs improvement in:
+
   * Low-contrast regions - skip background subtraction and enhance contrast instead
+
   * Clustered regions - use pre-defined spot size to break up clusters and count as single spots
-  * High-intensity saturated regions - use pre-defined spot size and intensity to to resolve
-  saturated regions as single spots
-  * Airy disks - either remove airy disks prior to spot finding or modify spot finding algorithm
-  to account for airy disk pattern
+
+  * High-intensity saturated regions - use pre-defined spot size and intensity to resolve saturated regions as single spots
+
+  * Airy disks - either remove airy disks prior to spot finding or modify spot finding algorithm to account for airy disk pattern
+
 * Image registration could be improved with rotation (low priority)
+
 * Cell Segmentation (watershed)
+
   * sum intensities instead of max
+
   * connect nuclear fragments with morphological operation
+
 * Expression Matrix
+
   * Summary of data like dot size, intensity, etc - this is in the DecodedIntensityTable object
+
   * Further analysis e.g. normalization - not in the scope of starfish
 
 * Show blob results overlaid on raw
@@ -79,8 +89,8 @@ def convert_rgb_to_greyscale(input_dir, output_dir):
             # 601-2 luma transform from PIL
             img.save(os.path.join(abs_output_dir, file), format='tiff')
 
-
-convert_rgb_to_greyscale('original_data', 'RNAScope_grayscale')
+# Uncomment to run
+#convert_rgb_to_greyscale('original_data', 'RNAScope_grayscale')
 
 ###################################################################################################
 # Formatting into SpaceTx Format
@@ -324,7 +334,8 @@ def format_experiment(input_dir, output_dir) -> None:
                    os.path.join(abs_output_dir, 'codebook.json'))
 
 
-format_experiment('/Users/mcai/RNAScope HiPlex/RNAScope_grayscale', 'starfish_format')
+# Uncomment to run
+#format_experiment('/Users/mcai/RNAScope HiPlex/RNAScope_grayscale', 'starfish_format')
 
 ###################################################################################################
 # starfish pipeline
@@ -355,7 +366,7 @@ dapi = experiment["fov_000"].get_image('nuclei') # dapi images conatain nuclei
 # Images need to be registered. Here we use dapi to learn the translation transform of images
 # relative to the first round, and then apply it to imgs.
 
-%matplotlib inline
+#%matplotlib inline
 
 import matplotlib
 from starfish.util.plot import diagnose_registration
@@ -461,13 +472,14 @@ for rnd in bd_spots.round_labels:
 # find errors.
 
 # display found spots for each (round,channel) as a layer in napari
-viewer = display(stack=wth_imgs)
-layer_index = 0
-for rnd in bd_spots.round_labels:
-    for ch in bd_spots.ch_labels:
-        viewer.add_points(data=bd_spots_numpy[layer_index], symbol='ring', face_color='red', size=5,
-                          name=f'r: {rnd}, ch: {ch}', visible=False)
-        layer_index = layer_index + 1
+#viewer = display(stack=wth_imgs)
+#layer_index = 0
+#for rnd in bd_spots.round_labels:
+#    for ch in bd_spots.ch_labels:
+#        viewer.add_points(data=bd_spots_numpy[layer_index], symbol='ring', face_color='red',
+#                size=5,
+#                          name=f'r: {rnd}, ch: {ch}', visible=False)
+#        layer_index = layer_index + 1
 
 ###################################################################################################
 # For readability of this notebook in printed format, here are the SpotFindingResults plotted in
@@ -560,4 +572,4 @@ mat.to_pandas()
 # Save ExpressionMatrix as .h5ad-format AnnData
 # ---------------------------------------------
 
-mat.save_anndata('RNAScope_HiPlex_Example.h5ad')
+#mat.save_anndata('RNAScope_HiPlex_Example.h5ad')

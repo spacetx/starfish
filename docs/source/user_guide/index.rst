@@ -465,4 +465,12 @@ but below we demonstrate how you can analysis a full dataset on AWS.
 Further Reading
 ---------------
 
-Additional resources are available in :ref:`help_and_reference`.
+Additional resources are available in :ref:`help and reference`.
+
+
+
+.. toctree::
+   :maxdepth: 1
+
+   working_with_starfish_outputs/index
+   processing_at_scale/index

@@ -1,4 +1,5 @@
-===================
+.. _processing_at_scale:
+
 Processing With AWS
 ===================
 

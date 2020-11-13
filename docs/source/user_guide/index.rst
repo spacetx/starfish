@@ -470,7 +470,7 @@ Additional resources are available in :ref:`help and reference`.
 
 
 .. toctree::
-   :maxdepth: 1
+   :hidden:
 
    working_with_starfish_outputs/index
    processing_at_scale/index

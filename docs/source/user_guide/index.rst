@@ -7,7 +7,7 @@ Welcome to the user guide for building an image processing pipeline using starfi
 will cover all the steps necessary for going from raw images to a single cell gene expression
 matrix. If you only have a few minutes to try out starfish, check out the
 :ref:`Quick Start<quick start>` to see a demonstration of how starfish works. starfish
-requires a working knowledge of Python and fluorescent image analysis to create an analysis pipeline. 
+requires a working knowledge of Python and fluorescent image analysis to create an analysis pipeline.
 If you are ready to learn how to build your own image processing pipeline using starfish then read on!
 
 This part of the tutorial goes into more detail about why each of the stages in the example are
@@ -434,3 +434,35 @@ number of segmentation-free approaches for grouping spots into cells that starfi
 support in the `future <https://github.com/spacetx/starfish/issues/1675>`_.
 
 * Tutorial: :ref:`tutorial_assigning_spots`
+
+
+.. _section_working_with_starfish_outputs:
+
+Working with starfish outputs
+-----------------------------
+
+Once you've processed your data with starfish, you are ready to load the output
+files into tools like Seurat and ScanPy for further analysis. Starfish lets you
+save expression matrices and segmentation masks in a variety of data formats.
+
+* Tutorial: :ref:`working_with_starfish_outputs`
+
+.. _section_processing_at_scale:
+
+Processing at Scale with AWS
+----------------------------
+
+When you are ready to scale up your analysis to a full experiment or multiple
+experiments, starfish can be deployed on the cloud or an an institutional
+high performance computing cluster for efficient analysis of large datasets.
+Implementation details will vary based on the compute resources at your disposal,
+but below we demonstrate how you can analysis a full dataset on AWS.
+
+* Tutorial: :ref:`processing_at_scale`
+
+.. _section_further_reading:
+
+Further Reading
+---------------
+
+Additional resources are available in :ref:`help_and_reference`.

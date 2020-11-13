@@ -5,11 +5,18 @@ Format Imaging Cytof Data
 =========================
 
 The following script converts Imaging Cytof Data in SpaceTx Format.
+
 This is a good example of:
 
 * generating codebook from an ordered list of targets
 * handling filenames based on target name rather than organized by rounds or channels
 * multiple fields of view (FOV)
+
+.. note::
+
+   This example is provided for illustrative purposes, demonstrating how the
+   :py:class:`.TileFetcher` is used in practice. It will need to be adapted to meet
+   the specific needs of your data.
 
 input data structure:
 ::

@@ -14,6 +14,12 @@ This is a good example of converting:
 * parsing a codebook.csv and writing the SpaceTx Format codebook.json
 * working with multiple sets of auxiliary images
 
+.. note::
+
+   This example is provided for illustrative purposes, demonstrating how the
+   :py:class:`.TileFetcher` is used in practice. It will need to be adapted to meet
+   the specific needs of your data.
+
 The data consists of one field of view with 6 rounds of imaging. Each round is stored in a
 multipage TIFF indexed by z. There is also accompanying dapi and nissl-stained images, which are
 converted to auxiliary images in SpaceTx Format.

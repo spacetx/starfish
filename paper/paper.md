@@ -71,6 +71,8 @@ To enable large scale processing of these data, *starfish* leverages a 5-dimensi
 Furthermore, *starfish* implements comprehensive logging of all data processing steps for provenance tracking, reproducibility, and transparency.
 *starfish* is built on top of popular Python tools like xarray (@xarray) and scikit-image (@scikit-image).
 
+There are a number of other tools which support localization and quantification of spots in fluorescent microscopy images, including ImageJ and CellProfiler, however these tools do not support multiplexed decoding of gene targets necessary for many assays. Other tools which are designed for more specifically to handle the kinds of assays that starfish supports include [dotdotdot](https://github.com/LieberInstitute/dotdotdot) (@dotdotdot),  [pysmFISH](https://github.com/linnarsson-lab/pysmFISH/), and [SMART-Q](https://github.com/shenlab-ucsf/SMART-Q) (forked from an earlier development release of starfish) (@SMART-Q).
+
 To help new users get started and support the broader single cell biology community in learning how to work with these data, *starfish* maintains example datasets and reference implementations ported from published assays, including
 MERFISH (@MERFISH),
 In Situ Sequencing (@ISS),

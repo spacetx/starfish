@@ -12,6 +12,12 @@ This is a good example of:
 * fetching primary images and auxiliary images from the same file
 * assigning physical coordinates from CSV file
 
+.. note::
+
+   This example is provided for illustrative purposes, demonstrating how the
+   :py:class:`.TileFetcher` is used in practice. It will need to be adapted to meet
+   the specific needs of your data.
+
 The experiment had 496 of fields of view. Each FOV is stored in one file consisting of primary
 images (8 rounds, 2 channels, 1 z-tile) and one DAPI-stained image. The tile index that maps to
 each round and channel is defined in the :py:class:`.FetchedTile` subclasses.

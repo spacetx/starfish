@@ -8,6 +8,12 @@ This script contains TileFetchers and FetchedTile objects to convert data donate
 to SpaceTx Format. This is a good basic example of converting single-plane tiffs with multiple
 z-tiles.
 
+.. note::
+
+   This example is provided for illustrative purposes, demonstrating how the
+   :py:class:`.TileFetcher` is used in practice. It will need to be adapted to meet
+   the specific needs of your data.
+
 The data is from one field of view consisting of primary images and accompanying
 Nissl-stained images. The primary images have 3 rounds, 4 channels, and 17 z-tiles. The Nissl
 images have 1 round, 1 channel, and 17 z-tiles. Image tiles are all single-plane TIFFS with shape

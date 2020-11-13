@@ -7,6 +7,12 @@ Format In Situ Sequencing Mouse x Human Experiment
 The following script formats ISS data of co-cultured mouse and human fibroblasts in SpaceTx Format.
 This is a good basic example of converting single-plane tiffs and defining a *codebook*.
 
+.. note::
+
+   This example is provided for illustrative purposes, demonstrating how the
+   :py:class:`.TileFetcher` is used in practice. It will need to be adapted to meet
+   the specific needs of your data.
+   
 The data consists of one field of view. There are 4 rounds, each with 4 primary image channels
 and 1 DAPI stain. There is a 5th round "DO" that contains the "dots" image with *all* RNA
 labeled and a DAPI image.

@@ -4,8 +4,14 @@
 Format In-Situ Sequencing Data
 ==============================
 
-The following script formats In-Situ Sequencing data in SpaceTx Format.
+The following script is an example of formatting In-Situ Sequencing data to SpaceTx Format.
 This is a good example of converting a cropped region from single-plane tiffs.
+
+.. note::
+
+   This example is provided for illustrative purposes, demonstrating how the
+   :py:class:`.TileFetcher` is used in practice. It will need to be adapted to meet
+   the specific needs of your data.
 
 The data consists of multiple fields of view. There are 4 rounds, each with 4 primary image channels
 and 1 DAPI stain. There is a 5th round "DO" that contains the "dots" image with *all* RNA

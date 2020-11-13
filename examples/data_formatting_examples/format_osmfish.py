@@ -16,6 +16,12 @@ This is a good example of:
   * get files named by target gene
   * generate the correct *codebook*
 
+.. note::
+
+   This example is provided for illustrative purposes, demonstrating how the
+   :py:class:`.TileFetcher` is used in practice. It will need to be adapted to meet
+   the specific needs of your data.
+
 The experiment had hundreds of fields of view but this example selects only 3 to convert.
 Each FOV consists of only primary images with 13 rounds and 3 channels. Each NPY is a 3D array (
 z, y, x) representing one gene (channel) in one FOV.

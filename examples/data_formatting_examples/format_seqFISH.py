@@ -11,6 +11,12 @@ This is a good example of:
 * not hard coding tile shape (get shape from data)
 * parsing a codebook.csv and writing the SpaceTx Format codebook.json
 
+.. note::
+
+   This example is provided for illustrative purposes, demonstrating how the
+   :py:class:`.TileFetcher` is used in practice. It will need to be adapted to meet
+   the specific needs of your data.
+
 The data consists of one field of view with 5 rounds of imaging. Each round is stored in a
 multipage TIFF indexed by channel and z.
 

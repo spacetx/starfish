@@ -16,9 +16,10 @@ Prerequisites
 * Python 3.6+ installed (Python 3.7 recommended)
 * Some basic knowledge of scientific computing in Python_
 * :ref:`Starfish library installed <installation>`
-* [seaborn](https://seaborn.pydata.org/) is installed: :code:`pip install seaborn`
+* seaborn_ is installed: :code:`pip install seaborn`
 
 .. _Python: https://docs.scipy.org/doc/numpy/user/quickstart.html
+.. _seaborn: https://seaborn.pydata.org/
 
 Starfish Pipeline
 -----------------

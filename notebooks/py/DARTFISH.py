@@ -161,7 +161,10 @@ spots_df.head()
 
 # EPY: START code
 # load results from authors' pipeline
-cnts_benchmark = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/fov_001/counts.csv')
+# instead of just calling read_csv with the url, we are using python requests to load it to avoid a
+# SSL certificate error on some platforms.
+import io, requests
+cnts_benchmark = pd.read_csv(io.BytesIO(requests.get('https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/fov_001/counts.csv').content))
 cnts_benchmark.head()
 
 # select spots with distance less than a threshold, and count the number of each target gene

@@ -191,8 +191,12 @@ spot_intensities = initial_spot_intensities.loc[initial_spot_intensities[Feature
 # EPY: END markdown
 
 # EPY: START code
-bench = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/MERFISH/benchmark_results.csv',
-                    dtype={'barcode': object})
+# instead of just calling read_csv with the url, we are using python requests to load it to avoid a
+# SSL certificate error on some platforms.
+import io, requests
+bench = pd.read_csv(
+    io.BytesIO(requests.get('https://d2nhj9g34unfro.cloudfront.net/MERFISH/benchmark_results.csv').content),
+    dtype={'barcode': object})
 
 benchmark_counts = bench.groupby('gene')['gene'].count()
 genes, counts = np.unique(spot_intensities[Features.AXIS][Features.TARGET], return_counts=True)

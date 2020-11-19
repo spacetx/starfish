@@ -223,8 +223,13 @@ def test_merfish_pipeline_cropped_data():
     assert spots_passing_filters == 1410
 
     # compare to paper results
-    bench = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/MERFISH/benchmark_results.csv',
-                        dtype={'barcode': object})
+    # instead of just calling read_csv with the url, we are using python requests to load it to
+    # avoid a SSL certificate error on some platforms.
+    import io, requests
+    bench = pd.read_csv(
+        io.BytesIO(requests.get(
+            'https://d2nhj9g34unfro.cloudfront.net/MERFISH/benchmark_results.csv').content),
+        dtype={'barcode': object})
     benchmark_counts = bench.groupby('gene')['gene'].count()
 
     spot_intensities_passing_filters = spot_intensities.where(

@@ -167,8 +167,11 @@ def test_dartfish_pipeline_cropped_data(tmpdir):
 
     # compare to benchmark data -- note that this particular part of the dataset appears completely
     # uncorrelated
-    cnts_benchmark = pd.read_csv(
-        'https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/fov_001/counts.csv')
+    # instead of just calling read_csv with the url, we are using python requests to load it to
+    # avoid a SSL certificate error on some platforms.
+    import io, requests
+    cnts_benchmark = pd.read_csv(io.BytesIO(requests.get(
+        'https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/fov_001/counts.csv').content))
 
     min_dist = 0.6
     cnts_starfish = spots_df[spots_df.distance <= min_dist].groupby('target').count()['area']

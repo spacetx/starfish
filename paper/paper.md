@@ -45,7 +45,7 @@ authors:
 affiliations:
  - name: Chan Zuckerberg Initiative
    index: 1
- - name: Allen Institute
+ - name: Allen Institute for Brain Science
    index: 2
  - name: Chan Zuckerberg Biohub
    index: 3
@@ -115,7 +115,7 @@ Xiao Wang, William Allen, and Karl Deisseroth for their help with the STARmap pi
 Dan Goodwin and Ed Boyden for their help with the ExFISH pipeline and example data,
 Nico Pierson, Sheel Shah, and Long Cai for their help with the seqFISH pipeline and example data,
 and Denis Shapiro for their help with the Imaging Mass Cytometry example data.
-
+Brian Long would like to thank the Allen Institute founder, Paul G. Allen, for his vision, encouragement and support.
 Finally, we would like to thank the Science and Technology teams and the Single Cell Program at the Chan Zuckerberg Initiative for their support of this work.
 
 # References

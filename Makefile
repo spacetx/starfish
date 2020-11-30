@@ -159,12 +159,12 @@ help-integration:
 ### INSTALL ##################################################
 #
 install-dev:
-	pip install --force-reinstall --upgrade pip==$(PIP_VERSION) -r requirements/REQUIREMENTS-CI.txt
+	pip install --upgrade pip==$(PIP_VERSION) -r requirements/REQUIREMENTS-CI.txt
 	pip install -e .
 	pip freeze
 
 install-src:
-	pip install --force-reinstall --upgrade pip==$(PIP_VERSION) -e .
+	pip install --upgrade pip==$(PIP_VERSION) -e .
 	pip freeze
 
 install-released-notebooks-support:

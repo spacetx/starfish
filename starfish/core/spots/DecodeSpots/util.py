@@ -95,6 +95,7 @@ def _build_intensity_table(
         Axes.ZPLANE.value: (Features.AXIS, anchor_df[Axes.ZPLANE]),
         Axes.Y.value: (Features.AXIS, anchor_df[Axes.Y]),
         Axes.X.value: (Features.AXIS, anchor_df[Axes.X]),
+        Features.AXIS: (Features.AXIS, np.arange(len(anchor_df))),
         Axes.ROUND.value: (Axes.ROUND.value, rounds),
         Axes.CH.value: (Axes.CH.value, channels)
     }

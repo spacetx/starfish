@@ -75,7 +75,7 @@ def build_traces_sequential(spot_results: SpotFindingResults, **kwargs) -> Inten
     return intensity_table
 
 
-def build_traces_nearest_neighbors(spot_results: SpotFindingResults, anchor_round: int=1,
+def build_traces_nearest_neighbors(spot_results: SpotFindingResults, anchor_round: int=0,
                                    search_radius: int=3):
     """
     Combine spots found across round and channels of an ImageStack using a nearest neighbors

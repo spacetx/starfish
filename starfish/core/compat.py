@@ -4,6 +4,9 @@ from packaging import version
 if version.parse(skimage.__version__) > version.parse("0.14.2"):
     import skimage.transform
     match_histograms = skimage.transform.match_histograms
+elif version.parse(skimage.__version__) > version.parse("0.17.2"):
+    import skimage.exposure
+    match_histograms = skimage.exposure.match_histograms
 else:
 
     """

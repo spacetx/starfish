@@ -12,7 +12,7 @@ DOCKER_BUILD?=1
 
 VERSION=$(shell sh -c "git describe --exact --dirty 2> /dev/null")
 # if you update this, you will need to update the version pin for the "Install Napari & Test napari (pinned)" test in .travis.yml
-PIP_VERSION=20.0.2
+PIP_VERSION=21.0.1
 
 define print_help
     @printf "    %-28s   $(2)\n" $(1)
@@ -159,7 +159,8 @@ help-integration:
 ### INSTALL ##################################################
 #
 install-dev:
-	pip install --upgrade pip==$(PIP_VERSION) -r requirements/REQUIREMENTS-CI.txt
+	pip install --upgrade pip==$(PIP_VERSION)
+	pip install -r requirements/REQUIREMENTS-CI.txt
 	pip install -e .
 	pip freeze
 
@@ -168,7 +169,8 @@ install-src:
 	pip freeze
 
 install-released-notebooks-support:
-	pip install --upgrade pip==$(PIP_VERSION) -r requirements/REQUIREMENTS-CI.txt
+	pip install --upgrade pip==$(PIP_VERSION)
+	pip install -r requirements/REQUIREMENTS-CI.txt
 	pip install starfish
 	pip freeze
 
@@ -280,7 +282,8 @@ release-env: release-env/bin/activate release-env/bin/make_shell
 # private: call virtualenv and pip install
 release-env/bin/activate:
 	$(call create_venv, release-env)
-	release-env/bin/pip install --force-reinstall --upgrade pip==$(PIP_VERSION) -r requirements/REQUIREMENTS-CI.txt
+	release-env/bin/pip install --force-reinstall --upgrade pip==$(PIP_VERSION)
+	release-env/bin/pip install -r requirements/REQUIREMENTS-CI.txt
 	touch release-env/bin/activate
 
 # private: create make_shell for activating the virtualenv below

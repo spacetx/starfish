@@ -75,7 +75,7 @@ jobs:
       dist: xenial
       before_install:
         - sudo apt-get install -y libgl1-mesa-glx libqt5x11extras5 xvfb
-        - pip install -U pip==20.0.2
+        - pip install -U pip==21.0.1
         - pip install -r requirements/REQUIREMENTS-NAPARI-CI.txt
         - make install-dev
         - export DISPLAY=:99

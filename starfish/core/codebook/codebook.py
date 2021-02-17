@@ -264,7 +264,7 @@ class Codebook(xr.DataArray):
 
             for entry in code[Features.CODEWORD]:
                 if not isinstance(entry, dict):
-                    raise TypeError(f"codeword entries should be dictionaries")
+                    raise TypeError("codeword entries should be dictionaries")
 
                 required_codeword_fields = {Axes.ROUND.value, Axes.CH.value, Features.CODE_VALUE}
                 missing_codeword_fields = required_codeword_fields.difference(entry)
@@ -385,8 +385,8 @@ class Codebook(xr.DataArray):
 
         if isinstance(codebook_doc, list):
             raise ValueError(
-                f"codebook is a list and not an dictionary.  It is highly likely that you are using"
-                f"a codebook formatted for a previous version of starfish.")
+                "codebook is a list and not an dictionary.  It is highly likely that you are using"
+                "a codebook formatted for a previous version of starfish.")
 
         version_str = codebook_doc[DocumentKeys.VERSION_KEY]
         cls._verify_version(version_str)

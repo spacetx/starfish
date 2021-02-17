@@ -122,9 +122,9 @@ class BinaryMaskCollection:
             xr_dims.append(axis.value)
             start_offset = mask_data.offsets[ix]
             end_offset = mask_data.offsets[ix] + mask_data.binary_mask.shape[ix]
-            xr_coords[axis.value] = self._pixel_ticks[axis.value][start_offset:end_offset]
+            xr_coords[axis.value] = self._pixel_ticks[axis][start_offset:end_offset]
             xr_coords[coord.value] = (
-                axis.value, self._physical_ticks[coord.value][start_offset:end_offset])
+                axis.value, self._physical_ticks[coord][start_offset:end_offset])
 
         return xr.DataArray(
             mask_data.binary_mask,
@@ -154,8 +154,8 @@ class BinaryMaskCollection:
 
         for ix, (axis, coord) in enumerate(zip(*_get_axes_names(len(self._pixel_ticks)))):
             xr_dims.append(axis.value)
-            xr_coords[axis.value] = self._pixel_ticks[axis.value]
-            xr_coords[coord.value] = (axis.value, self._physical_ticks[coord.value])
+            xr_coords[axis.value] = self._pixel_ticks[axis]
+            xr_coords[coord.value] = (axis.value, self._physical_ticks[coord])
 
         image = np.zeros(
             shape=tuple(

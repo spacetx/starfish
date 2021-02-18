@@ -102,21 +102,23 @@ pin-all-requirements:
 starfish/REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
 	[ ! -e .$<-env ] || exit 1
 	$(call create_venv, .$<-env)
+	.$<-env/bin/pip install --upgrade pip==$(PIP_VERSION)
 	.$<-env/bin/pip install -r $@
 	.$<-env/bin/pip install -r $<
 	echo "# You should not edit this file directly.  Instead, you should edit one of the following files ($^) and run make $@" >| $@
-	.$<-env/bin/pip freeze >> $@
+	.$<-env/bin/pip freeze --all | grep -v "pip==$(PIP_VERSION)" >> $@
 	rm -rf .$<-env
 
 requirements/REQUIREMENTS-%.txt : requirements/REQUIREMENTS-%.txt.in REQUIREMENTS.txt
 	[ ! -e .$<-env ] || exit 1
 	$(call create_venv, .$<-env)
+	.$<-env/bin/pip install --upgrade pip==$(PIP_VERSION)
 	.$<-env/bin/pip install -r $@
 	for src in $^; do \
 		.$<-env/bin/pip install -r $$src; \
 	done
 	echo "# You should not edit this file directly.  Instead, you should edit one of the following files ($<) and run make $@" >| $@
-	.$<-env/bin/pip freeze >> $@
+	.$<-env/bin/pip freeze --all | grep -v "pip==$(PIP_VERSION)" >> $@
 	rm -rf .$<-env
 
 check-requirements:

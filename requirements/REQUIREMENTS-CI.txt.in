@@ -1,11 +1,11 @@
 # requirements to run CI except for napari
 flake8
 flake8-import-order
-m2r
+m2r2
 mypy != 0.740
 numpydoc
 nbencdec >= 0.0.5
-pycodestyle==2.5.0
+pycodestyle
 pytest>=4.4.0
 pytest-cov>=2.5.1
 pytest-xdist

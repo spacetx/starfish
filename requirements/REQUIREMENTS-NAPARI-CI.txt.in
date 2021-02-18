@@ -1,2 +1,3 @@
 napari >= 0.3.4
+PyQt5==5.14.2
 pytest-qt

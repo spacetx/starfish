@@ -132,8 +132,8 @@ class Reduce(FilterAlgorithm):
         elif isinstance(func, FunctionSourceBundle):
             if module is not None:
                 raise ValueError(
-                    f"When passing in the function as a `FunctionSourceBundle`, module should not "
-                    f"be set."
+                    "When passing in the function as a `FunctionSourceBundle`, module should not "
+                    "be set."
                 )
             self.func = func
         self.level_method = level_method

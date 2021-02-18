@@ -206,7 +206,9 @@ class StarMapTileFetcher(TileFetcher):
         }
 
         with open(os.path.join(self.input_dir, "genes.csv"), "r") as f:
-            codes = [l.strip().split(",") for l in f.readlines()]  # List[(gene, dna_barcode), ...]
+            codes = [
+                line.strip().split(",") for line in f.readlines()
+            ]  # List[(gene, dna_barcode), ...]
 
         def iter_dinucleotides(sequence):
             i = 0

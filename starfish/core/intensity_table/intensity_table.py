@@ -1,6 +1,6 @@
 from itertools import product
 from json import loads
-from typing import Dict, Hashable, List, Optional, Sequence
+from typing import cast, Dict, Hashable, List, Optional, Sequence
 
 import numpy as np
 import pandas as pd
@@ -438,7 +438,10 @@ class IntensityTable(xr.DataArray):
             intensity_tables = IntensityTable._process_overlaps(
                 intensity_tables, overlap_strategy
             )
-        return xr.concat(intensity_tables, dim=Features.AXIS)
+        return cast(
+            IntensityTable,
+            xr.concat(intensity_tables, dim=Features.AXIS)
+        )
 
     def to_features_dataframe(self) -> pd.DataFrame:
         """

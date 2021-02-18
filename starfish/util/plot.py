@@ -1,5 +1,5 @@
 import itertools
-from typing import Any, cast, Mapping, Optional, Union
+from typing import Any, cast, Hashable, Mapping, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -138,7 +138,9 @@ def overlay_spot_calls(
 
         # subset the intensities if needed
         intensity_keys = (Axes.ROUND, Axes.CH, Axes.ZPLANE)
-        intensity_sel = {x.value: sel[x] for x in intensity_keys if x in sel}
+        intensity_sel: Mapping[Hashable, Any] = {
+            x.value: sel[x] for x in intensity_keys if x in sel
+        }
         if intensity_sel:
             intensities = cast(IntensityTable, intensities.sel(intensity_sel))
 

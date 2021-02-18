@@ -2,6 +2,7 @@
 alabaster==0.7.12
 apipkg==1.5
 appnope==0.1.0
+argon2-cffi==20.1.0
 attrs==19.3.0
 Babel==2.8.0
 backcall==0.1.0
@@ -9,6 +10,7 @@ bleach==3.3.0
 boto3==1.12.32
 botocore==1.15.32
 certifi==2019.11.28
+cffi==1.14.5
 chardet==3.0.4
 click==7.1.1
 commonmark==0.9.1
@@ -41,7 +43,7 @@ jupyter-client==6.1.2
 jupyter-core==4.6.3
 keyring==21.2.0
 kiwisolver==1.1.0
-m2r==0.2.1
+m2r2==0.2.7
 MarkupSafe==1.1.1
 matplotlib==3.2.1
 mccabe==0.6.1
@@ -71,6 +73,7 @@ prompt-toolkit==3.0.5
 ptyprocess==0.6.0
 py==1.8.1
 pycodestyle==2.5.0
+pycparser==2.20
 pyflakes==2.1.1
 Pygments==2.6.1
 pyparsing==2.4.6

@@ -56,7 +56,7 @@ extensions = [
     'sphinxcontrib.programoutput',
     'sphinx_gallery.gen_gallery',
     'sphinx.ext.intersphinx',
-    'm2r',
+    'm2r2',
 ]
 
 # intersphinx mapping for outside starfish linking

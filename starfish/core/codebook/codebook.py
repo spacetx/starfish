@@ -264,7 +264,7 @@ class Codebook(xr.DataArray):
 
             for entry in code[Features.CODEWORD]:
                 if not isinstance(entry, dict):
-                    raise TypeError(f"codeword entries should be dictionaries")
+                    raise TypeError("codeword entries should be dictionaries")
 
                 required_codeword_fields = {Axes.ROUND.value, Axes.CH.value, Features.CODE_VALUE}
                 missing_codeword_fields = required_codeword_fields.difference(entry)
@@ -385,8 +385,8 @@ class Codebook(xr.DataArray):
 
         if isinstance(codebook_doc, list):
             raise ValueError(
-                f"codebook is a list and not an dictionary.  It is highly likely that you are using"
-                f"a codebook formatted for a previous version of starfish.")
+                "codebook is a list and not an dictionary.  It is highly likely that you are using"
+                "a codebook formatted for a previous version of starfish.")
 
         version_str = codebook_doc[DocumentKeys.VERSION_KEY]
         cls._verify_version(version_str)
@@ -689,7 +689,9 @@ class Codebook(xr.DataArray):
         max_channels_min = intensities_without_nans.reduce(np.amin, Axes.CH.value)
         uniform_illumination_mask = (max_channels_max == max_channels_min).values
 
-        max_channels.values[uniform_illumination_mask] = intensities.sizes[Axes.CH.value]
+        max_channels.values[uniform_illumination_mask] = (  # type: ignore
+            intensities.sizes[Axes.CH.value]
+        )
         codes = self.argmax(Axes.CH.value)
 
         # TODO ambrosejcarr, dganguli: explore this quality score further
@@ -699,13 +701,15 @@ class Codebook(xr.DataArray):
         round_intensities = intensities.sum(Axes.CH.value)
         distance = 1 - (max_intensities / round_intensities).mean(Axes.ROUND.value)
 
-        a = _view_row_as_element(codes.values.reshape(self.shape[0], -1))
-        b = _view_row_as_element(max_channels.values.reshape(intensities.shape[0], -1))
+        a = _view_row_as_element(codes.values.reshape(self.shape[0], -1))  # type: ignore
+        b = _view_row_as_element(
+            max_channels.values.reshape(intensities.shape[0], -1)  # type: ignore
+        )
 
         targets = np.full(intensities.shape[0], fill_value=np.nan, dtype=object)
 
         # decode the intensities
-        for i in np.arange(codes.shape[0]):
+        for i in np.arange(codes.shape[0]):  # type: ignore
             targets[np.where(a[i] == b)[0]] = codes[Features.TARGET][i]
 
         # a code passes filters if it decodes successfully

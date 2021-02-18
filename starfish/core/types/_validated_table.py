@@ -1,9 +1,11 @@
+from typing import Any
+
 import pandas as pd
 
 
 class ValidatedTable:
 
-    required_fields = NotImplemented
+    required_fields: Any = NotImplemented
 
     """
     This base class defines common methods for the json outputs of the starfish package, each of

@@ -66,11 +66,11 @@ class Clip(FilterAlgorithm):
         if expand_dynamic_range is not None:
             if level_method is not None:
                 raise ValueError(
-                    f"Cannot provide both expand_dynamic_range and level_method."
+                    "Cannot provide both expand_dynamic_range and level_method."
                 )
             warnings.warn(
-                f"Parameter `expand_dynamic_range` is deprecated.  Please use the level_method "
-                f"instead."
+                "Parameter `expand_dynamic_range` is deprecated.  Please use the level_method "
+                "instead."
             )
             self.level_method = Levels.SCALE_BY_CHUNK
         else:

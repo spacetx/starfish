@@ -96,10 +96,10 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
 
         if is_volume is not None:
             if is_volume:
-                warnings.warn(f"is_volume is a deprecated parameter.")
+                warnings.warn("is_volume is a deprecated parameter.")
             else:
                 raise ValueError(
-                    f"TrackPy with 2D slices is not supported.  is_volume is deprecated.")
+                    "TrackPy with 2D slices is not supported.  is_volume is deprecated.")
 
     def image_to_spots(
             self, data_image: np.ndarray,

@@ -168,7 +168,7 @@ class ImageStack:
                     and np.array_equal(
                         first_tile.coordinates[Coordinates.Y], tile.coordinates[Coordinates.Y])
             ):
-                raise ValueError(f"Tiles must be aligned")
+                raise ValueError("Tiles must be aligned")
             if Coordinates.Z in tile.coordinates:
                 assert len(tile.coordinates[Coordinates.Z]) == 1
                 imagestack._data[Coordinates.Z.value].loc[selector[Axes.ZPLANE]] = \
@@ -186,8 +186,8 @@ class ImageStack:
             )
         if np.min(data) < 0 or np.max(data) > 1:
             raise ValueError(
-                f"ImageStack data must be of type float32 and in the range [0, 1]. Please convert "
-                f"data using skimage.img_as_float32 prior to calling set_slice."
+                "ImageStack data must be of type float32 and in the range [0, 1]. Please convert "
+                "data using skimage.img_as_float32 prior to calling set_slice."
             )
 
     def _ensure_data_loaded(self) -> "ImageStack":

@@ -40,12 +40,12 @@ class BinaryMaskIO:
         with tarfile.open(mode="r|gz", fileobj=file_obj) as tf:
             if tf.pax_headers is None:
                 raise ValueError(
-                    f"file does not appear to be a binary mask file (does not have headers)")
+                    "file does not appear to be a binary mask file (does not have headers)")
             if tf.pax_headers.get(AttrKeys.DOCTYPE, None) != DOCTYPE_STRING:
                 raise ValueError(
-                    f"file does not appear to be a binary mask file (missing or incorrect doctype)")
+                    "file does not appear to be a binary mask file (missing or incorrect doctype)")
             if AttrKeys.VERSION not in tf.pax_headers:
-                raise ValueError(f"file missing version data")
+                raise ValueError("file missing version data")
 
             requested_version = Version(tf.pax_headers[AttrKeys.VERSION])
 
@@ -118,7 +118,7 @@ class v0_0(BinaryMaskIO, version_descriptor=Version("0.0")):
             elif tarinfo.name.startswith(v0_0.MASK_PREFIX):
                 mask_on_disk: v0_0.MaskOnDisk = pickle.load(byte_stream)
                 if not isinstance(mask_on_disk, v0_0.MaskOnDisk):
-                    raise TypeError(f"mask does not conform to expected mask structure")
+                    raise TypeError("mask does not conform to expected mask structure")
                 masks.append(bm.MaskData(mask_on_disk.binary_mask, mask_on_disk.offsets, None))
             else:
                 warnings.warn(

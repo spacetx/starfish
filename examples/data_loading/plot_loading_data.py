@@ -68,8 +68,12 @@ fov
 # can optionally specify a set of cropping parameters. To demonstrate how those work, we'll slice
 # out a 100 pixel square from the :code:`(200, 140)` pixel :py:class:`.FieldOfView`:
 
+from starfish import display
+
 image = fov.get_image("primary", x=slice(0, 100), y=slice(0, 100))
 image
+
+display(stack=image)
 
 ###################################################################################################
 # Calling :py:meth:`.FieldOfView.get_image` localizes the data and produces an

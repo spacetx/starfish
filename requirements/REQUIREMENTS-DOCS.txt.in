@@ -1,0 +1,11 @@
+napari >= 0.3.4
+PyQt5==5.14.2
+pytest-qt
+sphinx
+sphinx_autodoc_typehints
+sphinx_bootstrap_theme
+sphinxcontrib-programoutput
+sphinx-gallery
+sphinx_rtd_theme
+m2r2
+seaborn

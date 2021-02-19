@@ -66,13 +66,11 @@ imgs
 # the dimension slider to compare channels 1 and 3 of round 1 (zero-based indexing),
 # you can already see which cells express mouse ACTB and which cells express human ACTB.
 #
-# .. code-block:: python
-#
-#   from starfish import display
-#
-#   %gui qt
-#   viewer = display(imgs)
-#   viewer.layers[0].name = "raw stack" # rename the layer
+from starfish import display
+
+viewer = display(imgs)
+viewer.layers[0].name = "raw stack" # rename the layer
+viewer
 
 ####################################################################################################
 # **View codebook**
@@ -260,9 +258,8 @@ spots.count_total_spots()
 # and segmented cells (:py:class:`.BinaryMaskCollection`) as layers in napari to verify the
 # results.
 #
-# .. code-block:: python
-#
-#   display(stack=registered_imgs, spots=decoded, masks=masks, viewer=viewer)
+
+display(stack=registered_imgs, spots=decoded, masks=masks, viewer=viewer)
 
 ####################################################################################################
 # **View decoded spots as a table**

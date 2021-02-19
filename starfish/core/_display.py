@@ -1,6 +1,8 @@
 import __main__
+import base64
 import warnings
 from collections import OrderedDict
+from io import BytesIO
 from typing import Iterable, List, Optional, Set, Tuple, Union
 
 import numpy as np
@@ -13,9 +15,33 @@ from starfish.core.morphology.binary_mask import BinaryMaskCollection
 from starfish.core.types import Axes, Features
 
 try:
-    from napari import Viewer
+    from napari import Viewer as NapariViewer
+
+    class Viewer(NapariViewer):
+
+        def _get_png(self):
+            from imageio import imsave
+
+            image = self.screenshot(canvas_only=False)
+            with BytesIO() as file_obj:
+                imsave(file_obj, image, format='png')
+                file_obj.seek(0)
+                png = file_obj.read()
+            return png
+
+        def _repr_html_(self):
+
+            png = self._get_png()
+            data = base64.b64encode(png).decode('utf-8')
+
+            return (
+                "<div>"
+                f"<img class='screenshot' src='data:image/png;base64, {data}' />"
+                "</div>"
+            )
+
 except ImportError:
-    Viewer = None
+    Viewer = None  # type: ignore
 
 
 NAPARI_VERSION = "0.3.4"  # when changing this, update docs in display

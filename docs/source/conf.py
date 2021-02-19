@@ -130,6 +130,10 @@ sphinx_gallery_conf = {
     'download_section_examples': False,
     'default_thumb_file': f'{dir_}/_static/design/logo-solo.png',
     'min_reported_time': 10,
+    'first_notebook_cell': ("# This cell is added by sphinx-gallery\n"
+                            "# It can be customized to whatever you like\n"
+                            "%matplotlib inline\n"
+                            "%gui qt"),
 
 }
 

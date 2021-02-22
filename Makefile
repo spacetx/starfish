@@ -80,8 +80,8 @@ help-docs:
 
 ### REQUIREMENTS #############################################
 #
-GENERATED_REQUIREMENT_FILES=starfish/REQUIREMENTS-STRICT.txt requirements/REQUIREMENTS-CI.txt requirements/REQUIREMENTS-NAPARI-CI.txt
-SOURCE_REQUIREMENT_FILES=REQUIREMENTS.txt requirements/REQUIREMENTS-CI.txt.in requirements/REQUIREMENTS-NAPARI-CI.txt.in
+GENERATED_REQUIREMENT_FILES=starfish/REQUIREMENTS-STRICT.txt requirements/REQUIREMENTS-CI.txt requirements/REQUIREMENTS-NAPARI-CI.txt requirements/REQUIREMENTS-DOCS.txt
+SOURCE_REQUIREMENT_FILES=REQUIREMENTS.txt requirements/REQUIREMENTS-CI.txt.in requirements/REQUIREMENTS-NAPARI-CI.txt.in requirements/REQUIREMENTS-DOCS.txt.in
 
 # This rule pins the requirements with the minimal set of changes required to satisfy the
 # requirements.  This is typically run when a new requirement is added, and we want to

@@ -130,6 +130,10 @@ sphinx_gallery_conf = {
     'download_section_examples': False,
     'default_thumb_file': f'{dir_}/_static/design/logo-solo.png',
     'min_reported_time': 10,
+    'first_notebook_cell': ("# This cell is added by sphinx-gallery\n"
+                            "# It can be customized to whatever you like\n"
+                            "%matplotlib inline\n"
+                            "%gui qt"),
 
 }
 
@@ -157,7 +161,7 @@ html_favicon = '_static/favicon.ico'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 def setup(app):
-    app.add_stylesheet("my-styles.css")
+    app.add_css_file("my-styles.css")
 
 html_theme_options = {
     'navbar_title': " ",

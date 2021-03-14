@@ -53,11 +53,7 @@ experiment.codebook
 ###################################################################################################
 # Visualize raw data
 # ------------------
-# A nice way to page through all this data is to use the display command. We have commented this out
-# for now, because it will not render in the docs. Instead, we simply show an image from the first
-# round and color channel.
-
-# display(imgs)
+# We can view an image from the first round and color channel.
 
 from starfish.types import Axes
 from starfish.util.plot import imshow_plane

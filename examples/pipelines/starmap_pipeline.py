@@ -208,6 +208,3 @@ decoder = DecodeSpots.PerRoundMaxChannel(
 decoded = decoder.run(spots=spots)
 
 decode_mask = decoded['target'] != 'nan'
-
-# %gui qt
-# viewer = starfish.display(stack, decoded[decode_mask], radius_multiplier=2, mask_intensities=0.1)

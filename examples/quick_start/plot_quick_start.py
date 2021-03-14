@@ -260,6 +260,10 @@ spots.count_total_spots()
 # and segmented cells (:py:class:`.BinaryMaskCollection`) as layers in napari to verify the
 # results.
 #
+# While the accuracy of the segmentation on the left of the FOV may seem suspicious (is that one cell
+# or two?), exploring the primary images and decoded spots demonstrates that there are two cells: one
+# expressing the human ACTB gene and one expressing the mouse.
+#
 # .. code-block:: python
 #
 #   display(stack=registered_imgs, spots=decoded, masks=masks, viewer=viewer)

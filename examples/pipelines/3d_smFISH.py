@@ -126,13 +126,9 @@ def processing_pipeline(
     return primary_image, decoded
 
 ###################################################################################################
-# Load data, run pipeline, display results
+# Load data & run pipeline
 # ----------------------------------------
 
 experiment = starfish.data.allen_smFISH(use_test_data=True)
 
 image, intensities = processing_pipeline(experiment, fov_name='fov_001')
-
-# uncomment the below line to visualize the output with the spot calls.
-# %gui qt
-# viewer = starfish.display(image, intensities)

@@ -73,6 +73,8 @@ imgs
 #   %gui qt
 #   viewer = display(imgs)
 #   viewer.layers[0].name = "raw stack" # rename the layer
+#
+# .. image:: /_static/images/quickstart-napari-screenshot.png
 
 ####################################################################################################
 # **View codebook**
@@ -267,6 +269,8 @@ spots.count_total_spots()
 # .. code-block:: python
 #
 #   display(stack=registered_imgs, spots=decoded, masks=masks, viewer=viewer)
+#
+# .. image:: /_static/images/quickstart-napari-screenshot-2.png
 
 ####################################################################################################
 # **View decoded spots as a table**

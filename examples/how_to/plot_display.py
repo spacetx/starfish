@@ -87,6 +87,8 @@ console.
 #
 # This adds another layer named :code:`stack [1]` to differentiate it from the original
 # :code:`stack`.
+#
+# .. image:: /_static/images/quickstart-napari-screenshot-3.png
 
 ###################################################################################################
 # Naming your layers with napari commands
@@ -105,6 +107,8 @@ console.
 # >>> import napari
 # >>> viewer.add_image(dots_wth.xarray, name='dots')
 # >>> viewer.add_labels(masks.to_label_image().label_image, name='cells')
+#
+# .. image:: /_static/images/quickstart-napari-screenshot-4.png
 
 ###################################################################################################
 # Directly visualizing :py:class:`.SpotFindingResults`
@@ -130,3 +134,5 @@ console.
 #           viewer.add_points(data=spots_numpy[layer_index], symbol='ring', face_color='red',
 #                             size=5, name=f'r: {rnd}, ch: {ch}', visible=False)
 #           layer_index = layer_index + 1
+#
+# .. image:: /_static/images/quickstart-napari-screenshot-5.png

@@ -1,8 +1,8 @@
-# The following requirement is here because botocore restricts the version of python-dateutil (see
-# https://github.com/boto/botocore/commit/e87e7a745fd972815b235a9ee685232745aa94f9).  Since pip is
-# not a full dependency solver, it has already installed python-dateutil before botocore is
-# installed, and bombs after the fact.
-python-dateutil < 2.8.1
+# The following requirement is here because networkx restricts the version
+# of decorator.  Since pip is not a full dependency solver, it has already
+# installed decorator before networkx is installed, and bombs after the
+# fact.
+decorator < 5.0
 click
 dataclasses==0.6
 h5py

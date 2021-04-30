@@ -69,7 +69,7 @@ mp = imgs_ghp_laplace.reduce({Axes.ZPLANE}, func="max")
 ###################################################################################################
 # We can now visualize our data before and after filtering.
 
-from numpy import np
+import numpy as np
 
 single_plane = imgs.reduce({Axes.ZPLANE}, func="max").xarray.sel({Axes.CH:0}).squeeze()
 single_plane_filtered = mp.xarray.sel({Axes.CH: 0}).squeeze()

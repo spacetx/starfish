@@ -1,3 +1,10 @@
+## [0.2.2] - 2021-04-29
+- Updates requirements
+- Updates to documentation
+- Import match_histograms from skimage.exposure
+- Add necessary coords for IntensityTable when using Nearest Neighbors strategy (#1928)
+- Fix localmaxpeakfinder spot_props filter (#1839)
+
 ## [0.2.1] - 2020-06-08
 - Bump napari to 0.3.4 (#1889)
 - fix how spot_ids are handled by build_traces_sequential and Label._assign() (#1872)
@@ -226,6 +233,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.2.2]: https://github.com/spacetx/starfish/releases/tag/0.2.2
 [0.2.1]: https://github.com/spacetx/starfish/releases/tag/0.2.1
 [0.2.0]: https://github.com/spacetx/starfish/releases/tag/0.2.0
 [0.1.10]: https://github.com/spacetx/starfish/releases/tag/0.1.10

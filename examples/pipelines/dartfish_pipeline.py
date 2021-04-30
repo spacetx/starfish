@@ -97,6 +97,7 @@ filtered_imgs = z_filt.run(norm_imgs)
 # threshold at which we will attempt to decode the pixel vector.
 
 import seaborn as sns
+from starfish import IntensityTable
 
 
 def compute_magnitudes(stack, norm_order=2):
@@ -244,9 +245,6 @@ plt.xlabel('min distance to code')
 plt.vlines(min_dist, ymin=plt.gca().get_ylim()[0], ymax=plt.gca().get_ylim()[1])
 sns.despine(offset=2)
 plt.title('Set minimum distance threshold')
-
-
-from starfish import IntensityTable
 
 distance_threshold = min_dist
 

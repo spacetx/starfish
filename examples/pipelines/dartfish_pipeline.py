@@ -96,6 +96,7 @@ filtered_imgs = z_filt.run(norm_imgs)
 # we look at a distribution of pixel vector barcode magnitudes to determine the minimum magnitude
 # threshold at which we will attempt to decode the pixel vector.
 
+import numpy as np
 import seaborn as sns
 from starfish import IntensityTable
 
@@ -120,7 +121,6 @@ plt.yscale('log')
 ###################################################################################################
 # Next, we decode the data
 
-import numpy as np
 from starfish.spots import DetectPixels
 from starfish.types import Features
 

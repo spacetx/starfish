@@ -1,7 +1,7 @@
 import json
 import platform
 from functools import lru_cache
-from typing import List, Mapping
+from typing import Any, List, Mapping
 
 import pkg_resources
 
@@ -18,6 +18,56 @@ class Log:
         """
         self._log: List[dict] = list()
 
+    def _update_log(self, method_name: str, arguments: Any) -> None:
+        """
+        Adds a new entry to the log list.
+
+        Parameters
+        ----------
+        method_name : str
+            Name of the method triggering this log entry.
+        arguments : Any
+            Information about the arguments to this method call.
+        """
+        if isinstance(arguments, dict):
+            arguments_as_dict = dict()
+            for argument_key, argument_value in arguments.items():
+                if hasattr(argument_value, "log") and callable(argument_value.log):
+                    try:
+                        log = argument_value.log()
+                        if isinstance(log, Log):
+                            arguments_as_dict[argument_key] = log
+                            continue
+                    except Exception:
+                        pass
+
+                arguments_as_dict[argument_key] = argument_value
+            arguments = arguments_as_dict
+        elif isinstance(arguments, list):
+            arguments_as_list = list()
+            for argument_value in arguments:
+                if hasattr(argument_value, "log") and callable(argument_value.log):
+                    try:
+                        log = argument_value.log()
+                        if isinstance(log, Log):
+                            arguments_as_list.append(log)
+                            continue
+                    except Exception:
+                        pass
+
+                arguments_as_list.append(argument_value)
+            arguments = arguments_as_list
+
+        entry = {
+            "method": method_name,
+            "arguments": arguments,
+            "os": get_os_info(),
+            "dependencies": get_core_dependency_info(),
+            "release tag": get_release_tag(),
+            "starfish version": get_dependency_version('starfish')
+        }
+        self._log.append(entry)
+
     def update_log(self, class_instance) -> None:
         """
         Adds a new entry to the log list.
@@ -26,14 +76,7 @@ class Log:
         ----------
         class_instance: The instance of a class being applied to the imagestack
         """
-        entry = {"method": class_instance.__class__.__name__,
-                 "arguments": class_instance.__dict__,
-                 "os": get_os_info(),
-                 "dependencies": get_core_dependency_info(),
-                 "release tag": get_release_tag(),
-                 "starfish version": get_dependency_version('starfish')
-                 }
-        self._log.append(entry)
+        self._update_log(class_instance.__class__.__name__, class_instance.__dict__)
 
     def encode(self):
         return LogEncoder().encode({starfish.core.types.LOG: self._log})

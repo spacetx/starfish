@@ -5,6 +5,7 @@ from typing import Collection, Mapping, MutableMapping, Set, Tuple
 
 import numpy as np
 from slicedimage import Tile, TileSet
+from slicedimage._dimensions import DimensionNames
 
 from starfish.core.imagestack.dataorder import AXES_DATA
 from starfish.core.imagestack.parser import TileCollectionData, TileData, TileKey
@@ -39,11 +40,10 @@ class SlicedImageTile(TileData):
 
     @property
     def tile_shape(self) -> Mapping[Axes, int]:
-        self._load()
-        raw_tile_shape = self._numpy_array.shape
-        assert len(raw_tile_shape) == 2
-        tile_shape = {Axes.Y: raw_tile_shape[0], Axes.X: raw_tile_shape[1]}
-        return tile_shape
+        return {
+            Axes.Y: self._wrapped_tile.tile_shape[DimensionNames.Y],
+            Axes.X: self._wrapped_tile.tile_shape[DimensionNames.X],
+        }
 
     @property
     def numpy_array(self) -> np.ndarray:

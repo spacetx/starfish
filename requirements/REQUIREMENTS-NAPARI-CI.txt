@@ -123,7 +123,7 @@ tqdm==4.60.0
 trackpy==0.5.0
 traitlets==4.3.3
 typing-extensions==3.7.4.3
-urllib3==1.26.4
+urllib3==1.26.5
 validators==0.18.2
 vispy==0.6.6
 wcwidth==0.2.5

@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.feature import register_translation
+from skimage.registration import phase_cross_correlation
 from skimage.transform._geometric import SimilarityTransform
 
 from starfish.core.image._registration.transforms_list import TransformsList
@@ -19,7 +19,7 @@ class Translation(LearnTransformAlgorithm):
     axes : Axes
         The axes {r, ch, zplane} to iterate over
     reference_stack : ImageStack
-        The target image used in :py:func:`skimage.feature.register_translation`
+        The target image used in :py:func:`skimage.registration.phase_cross_correlation`
     upsampling : int
         upsampling factor (default=1). See :py:func:`~skimage.registration.phase_cross_correlation`
         for an explanation of this parameter. In brief, this parameter determines the resolution of
@@ -63,8 +63,8 @@ class Translation(LearnTransformAlgorithm):
                     f"please use the MaxProj filter."
                 )
 
-            shift, error, phasediff = register_translation(src_image=target_image,
-                                                           target_image=reference_image,
+            shift, error, phasediff = phase_cross_correlation(reference_image=target_image,
+                                                           moving_image=reference_image,
                                                            upsample_factor=self.upsampling)
             if verbose:
                 print(f"For {self.axes}: {a}, Shift: {shift}, Error: {error}")

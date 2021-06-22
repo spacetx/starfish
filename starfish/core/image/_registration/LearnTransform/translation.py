@@ -64,8 +64,8 @@ class Translation(LearnTransformAlgorithm):
                 )
 
             shift, error, phasediff = phase_cross_correlation(reference_image=target_image,
-                                                           moving_image=reference_image,
-                                                           upsample_factor=self.upsampling)
+                                                              moving_image=reference_image,
+                                                              upsample_factor=self.upsampling)
             if verbose:
                 print(f"For {self.axes}: {a}, Shift: {shift}, Error: {error}")
             selectors = {self.axes: a}

@@ -56,9 +56,8 @@ class Translation(LearnTransformAlgorithm):
         transforms = TransformsList()
         reference_image = np.squeeze(self.reference_stack.xarray.data)
         for a in stack.axis_labels(self.axes):
-            
-            target_image = np.squeeze(stack.sel({self.axes: a}).xarray.data)3
-            
+
+            target_image = np.squeeze(stack.sel({self.axes: a}).xarray.data)
             if len(target_image.shape) != 2:
                 raise ValueError(
                     f"Only axes: {self.axes.value} can have a length > 1, "
@@ -70,7 +69,7 @@ class Translation(LearnTransformAlgorithm):
                 moving_image=reference_image,
                 upsample_factor=self.upsampling,
             )
-            
+
             if verbose:
                 print(f"For {self.axes}: {a}, Shift: {shift}, Error: {error}")
             selectors = {self.axes: a}

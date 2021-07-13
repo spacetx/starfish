@@ -65,6 +65,10 @@ class BlobDetector(FindSpotsAlgorithm):
 
     """
 
+    # 2021-06-08
+    # Patch to support skimage 0.18.1
+    # Modified input for __init__:
+    # from: exclude_border: Optional[int] = None
     def __init__(
             self,
             min_sigma: Union[Number, Tuple[Number, ...]],
@@ -75,7 +79,7 @@ class BlobDetector(FindSpotsAlgorithm):
             measurement_type='max',
             is_volume: bool = True,
             detector_method: str = 'blob_log',
-            exclude_border: Optional[int] = None,
+            exclude_border: Optional[bool] = False,
     ) -> None:
 
         self.min_sigma = min_sigma

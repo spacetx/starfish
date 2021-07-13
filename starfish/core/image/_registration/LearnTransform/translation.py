@@ -1,6 +1,8 @@
 import numpy as np
-from skimage.feature import register_translation
+#from skimage.feature import register_translation
+from skimage.registration import phase_cross_correlation
 from skimage.transform._geometric import SimilarityTransform
+from xarray.core.dataarray import DataArray
 
 from starfish.core.image._registration.transforms_list import TransformsList
 from starfish.core.imagestack.imagestack import ImageStack
@@ -63,9 +65,21 @@ class Translation(LearnTransformAlgorithm):
                     f"please use the MaxProj filter."
                 )
 
-            shift, error, phasediff = register_translation(src_image=target_image,
-                                                           target_image=reference_image,
-                                                           upsample_factor=self.upsampling)
+            # 2021-06-08
+            # Patch to support skimage 0.18.1
+            # shift, error, phasediff = register_translation(src_image=target_image,
+            #                                                target_image=reference_image,
+            #                                                upsample_factor=self.upsampling)
+
+            # reference_image and target_image are DataArray
+            # Pass their values instead (phase_cross_correlation does not seem to work with DataArray)
+            # starfish code passes arguments to skimage function in inverse order to skimage convention
+            # skimage: phase_cross_correlation(reference, moving, ...)
+            shift, error, phasediff = phase_cross_correlation(
+                target_image.values,
+                reference_image.values,
+                upsample_factor=self.upsampling)
+
             if verbose:
                 print(f"For {self.axes}: {a}, Shift: {shift}, Error: {error}")
             selectors = {self.axes: a}

@@ -161,7 +161,7 @@ help-integration:
 ### INSTALL ##################################################
 #
 install-dev:
-	pip install --upgrade pip==$(PIP_VERSION)
+	python -m pip install --upgrade pip==$(PIP_VERSION)
 	pip install -r requirements/REQUIREMENTS-CI.txt
 	pip install -e .
 	pip freeze

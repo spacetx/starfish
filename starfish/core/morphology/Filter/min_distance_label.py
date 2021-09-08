@@ -54,7 +54,7 @@ class MinDistanceLabel(FilterAlgorithm):
                 self._minimum_distance_xy * 2 + 1,
                 self._minimum_distance_xy * 2 + 1,
             ),
-            dtype=np.bool,
+            dtype=bool,
         )
 
         # boolean array marking local maxima, excluding any maxima within min_dist

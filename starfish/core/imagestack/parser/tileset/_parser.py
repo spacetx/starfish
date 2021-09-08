@@ -1,7 +1,7 @@
 """
 This module parses and retains the extras metadata attached to TileSet extras.
 """
-from typing import Collection, Mapping, MutableMapping, Set, Tuple
+from typing import Collection, Mapping, MutableMapping, Optional, Set, Tuple
 
 import numpy as np
 from slicedimage import Tile, TileSet
@@ -30,7 +30,7 @@ class SlicedImageTile(TileData):
         self._r = r
         self._ch = ch
         self._zplane = zplane
-        self._numpy_array: np.ndarray = None
+        self._numpy_array: Optional[np.ndarray] = None
 
     def _load(self):
         if self._numpy_array is not None:
@@ -40,6 +40,7 @@ class SlicedImageTile(TileData):
     @property
     def tile_shape(self) -> Mapping[Axes, int]:
         self._load()
+        assert self._numpy_array is not None
         raw_tile_shape = self._numpy_array.shape
         assert len(raw_tile_shape) == 2
         tile_shape = {Axes.Y: raw_tile_shape[0], Axes.X: raw_tile_shape[1]}
@@ -48,6 +49,7 @@ class SlicedImageTile(TileData):
     @property
     def numpy_array(self) -> np.ndarray:
         self._load()
+        assert self._numpy_array is not None
         return self._numpy_array
 
     @property
@@ -62,7 +64,7 @@ class SlicedImageTile(TileData):
         if Coordinates.Z in self._wrapped_tile.coordinates:
             zrange = self._wrapped_tile.coordinates[Coordinates.Z]
             zplane_coord = _get_physical_coordinates_of_z_plane(zrange)
-            return_coords[Coordinates.Z] = [zplane_coord]
+            return_coords[Coordinates.Z] = np.array([zplane_coord])
 
         return return_coords
 

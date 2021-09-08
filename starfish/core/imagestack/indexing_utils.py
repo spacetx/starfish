@@ -66,7 +66,7 @@ def convert_coords_to_indices(
 
 def index_keep_dimensions(data: xr.DataArray,
                           indexers: Mapping[Hashable, Union[int, slice, Sequence]],
-                          by_pos: bool=False
+                          by_pos: bool = False
                           ) -> xr.DataArray:
     """Takes an xarray and key to index it. Indexes then adds back in lost dimensions"""
     # store original dims
@@ -119,10 +119,10 @@ def find_nearest(array: xr.DataArray,
     Union[int, Tuple[int, int]]:
         The index or indicies of the entries closest to the given values in the array.
     """
-    array = np.asarray(array)
+    data = array.data
     if isinstance(value, tuple):
-        idx1 = (np.abs(array - value[0])).argmin()
-        idx2 = (np.abs(array - value[1])).argmin()
+        idx1 = (np.abs(data - value[0])).argmin()
+        idx2 = (np.abs(data - value[1])).argmin()
         return idx1, idx2
-    idx = (np.abs(array - value)).argmin()
+    idx = (np.abs(data - value)).argmin()
     return idx

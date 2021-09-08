@@ -1,7 +1,7 @@
 import warnings
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
-from typing import cast, Dict, List, NamedTuple, Optional, Tuple
+from typing import cast, Dict, List, NamedTuple, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -36,7 +36,9 @@ class TargetsMap:
         """
         unique_targets = set(targets) - {'nan'}
         sorted_targets = sorted(unique_targets)
-        self._int_to_target = dict(zip(range(1, np.iinfo(np.int).max), sorted_targets))
+        self._int_to_target: Dict[int, str] = dict(
+            zip(range(1, np.iinfo(int).max), sorted_targets)
+        )
         self._int_to_target[0] = 'nan'
         self._target_to_int = {v: k for (k, v) in self._int_to_target.items()}
 
@@ -72,7 +74,7 @@ class TargetsMap:
         """
         return np.array([self._int_to_target[v] for v in targets])
 
-    def target_as_str(self, integer_target: int) -> np.ndarray:
+    def target_as_str(self, integer_target: int) -> str:
         return self._int_to_target[integer_target]
 
 
@@ -82,8 +84,8 @@ class CombineAdjacentFeatures:
             self,
             min_area: Number,
             max_area: Number,
-            connectivity: int=2,
-            mask_filtered_features: bool=True
+            connectivity: int = 2,
+            mask_filtered_features: bool = True
     ) -> None:
         """Combines pixel-wise adjacent features into single larger features using skimage.measure
 
@@ -111,7 +113,7 @@ class CombineAdjacentFeatures:
     def _intensities_to_decoded_image(
             intensities: IntensityTable,
             target_map: TargetsMap,
-            mask_filtered_features: bool=True
+            mask_filtered_features: bool = True
     ) -> np.ndarray:
         """
         Construct an image where each pixel corresponds to its decoded target, mapped to a unique
@@ -226,7 +228,7 @@ class CombineAdjacentFeatures:
             target_map: TargetsMap,
             min_area: Number,
             max_area: Number,
-    ) -> Tuple[Dict[str, int], int]:
+    ) -> Tuple[Dict[str, Union[Number, str]], int]:
         """
         Calculate starfish SpotAttributes from the RegionProperties of a connected component
         feature.
@@ -247,15 +249,17 @@ class CombineAdjacentFeatures:
 
         Returns
         -------
-        Dict[str, Number] :
-            spot attribute dictionary for this connected component, containing the x, y, z position,
-            target name (str) and feature radius.
+        Dict[str, Union[Number, str]] :
+            spot attribute dictionary for this connected component, containing
+            the x, y, z position, target name (str) and feature radius.
         int :
             1 if spot passes size filters, zero otherwise.
 
         """
         # because of the above skimage issue, we need to support both 2d and 3d properties
         centroid = spot_property.centroid
+
+        spot_attrs: Dict[str, Union[Number, str]]
         if len(centroid) == 3:
             spot_attrs = {
                 'z': int(centroid[0]),
@@ -282,7 +286,7 @@ class CombineAdjacentFeatures:
                 decoded_image[0, bbox[0]:bbox[2], bbox[1]:bbox[3]])
         # get the most repeated nonzero value
         non_zero_target_candidates = target_candidates[target_candidates != 0]
-        target_index = np.argmax(np.bincount(non_zero_target_candidates))
+        target_index = cast(int, np.argmax(np.bincount(non_zero_target_candidates)))
         spot_attrs[Features.TARGET] = target_map.target_as_str(target_index)
         spot_attrs[Features.SPOT_RADIUS] = spot_property.equivalent_diameter / 2
 
@@ -295,7 +299,7 @@ class CombineAdjacentFeatures:
             region_properties: List[_RegionProperties],
             decoded_image: np.ndarray,
             target_map: TargetsMap,
-            n_processes: Optional[int]=None
+            n_processes: Optional[int] = None
     ) -> Tuple[SpotAttributes, np.ndarray]:
         """
 
@@ -336,11 +340,11 @@ class CombineAdjacentFeatures:
             if not results:
                 # no spots found
                 warnings.warn("No spots found, please adjust threshold parameters")
-                return SpotAttributes.empty(extra_fields=['target']), np.array(0, dtype=np.bool)
+                return SpotAttributes.empty(extra_fields=['target']), np.array(0, dtype=bool)
             spot_attrs, passes_area_filter = zip(*results)
 
             # update passes filter
-            passes_filter = np.array(passes_area_filter, dtype=np.bool)
+            passes_filter = np.array(passes_area_filter, dtype=bool)
 
             spot_attributes = SpotAttributes(pd.DataFrame.from_records(spot_attrs))
             spot_attributes.data[Features.SPOT_ID] = np.arange(0, len(spot_attributes.data))

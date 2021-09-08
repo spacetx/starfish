@@ -148,8 +148,8 @@ class DeconvolvePSF(FilterAlgorithm):
         else:
             convolve_method = convolve
 
-        image = image.astype(np.float)
-        psf = psf.astype(np.float)
+        image = image.astype(float)
+        psf = psf.astype(float)
         im_deconv = 0.5 * np.ones(image.shape)
         psf_mirror = psf[::-1, ::-1]
 
@@ -165,7 +165,7 @@ class DeconvolvePSF(FilterAlgorithm):
                 'All-NaN output data detected. Likely cause is that deconvolution has been run for '
                 'too many iterations.')
 
-        return im_deconv
+        return xr.DataArray(im_deconv)
 
     def run(
             self,

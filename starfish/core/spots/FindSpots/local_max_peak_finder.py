@@ -146,7 +146,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
     def _select_optimal_threshold(self, thresholds: np.ndarray, spot_counts: List[int]) -> float:
         # calculate the gradient of the number of spots
         grad = np.gradient(spot_counts)
-        optimal_threshold_index = np.argmin(grad)
+        optimal_threshold_index = int(np.argmin(grad))
 
         # only consider thresholds > than optimal threshold
         thresholds = thresholds[optimal_threshold_index:]
@@ -203,11 +203,11 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         np.ndarray :
             The intensity threshold
         """
-        img = np.asarray(img)
-        thresholds, spot_counts = self._compute_num_spots_per_threshold(img)
+        img_array = img.data
+        thresholds, spot_counts = self._compute_num_spots_per_threshold(img_array)
         if len(spot_counts) == 0:
             # this only happens when we never find more spots than `self.min_num_spots_detected`
-            return img.min(), None, None
+            return img_array.min(), None, None
         return self._select_optimal_threshold(thresholds, spot_counts), thresholds, spot_counts
 
     def image_to_spots(

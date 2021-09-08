@@ -167,11 +167,11 @@ install-dev:
 	pip freeze
 
 install-src:
-	pip install --upgrade pip==$(PIP_VERSION) -e .
+	python -m pip install --upgrade pip==$(PIP_VERSION) -e .
 	pip freeze
 
 install-released-notebooks-support:
-	pip install --upgrade pip==$(PIP_VERSION)
+	python -m pip install --upgrade pip==$(PIP_VERSION)
 	pip install -r requirements/REQUIREMENTS-CI.txt
 	pip install starfish
 	pip freeze

@@ -84,7 +84,7 @@ class MeanHighPass(FilterAlgorithm):
 
         blurred: np.ndarray = uniform_filter(image, size)
 
-        filtered: np.ndarray = image - blurred
+        filtered: xr.DataArray = image - blurred
 
         return filtered
 

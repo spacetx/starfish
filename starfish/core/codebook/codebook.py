@@ -533,7 +533,7 @@ class Codebook(xr.DataArray):
 
     def decode_metric(
             self, intensities: IntensityTable, max_distance: Number, min_intensity: Number,
-            norm_order: int, metric: str='euclidean', return_original_intensities: bool = False
+            norm_order: int, metric: str = 'euclidean', return_original_intensities: bool = False
     ) -> DecodedIntensityTable:
         """
         Assigns intensity patterns that have been extracted from an :py:class:`ImageStack` and
@@ -601,7 +601,7 @@ class Codebook(xr.DataArray):
         passes_filters = np.logical_and(
             norms >= min_intensity,
             metric_outputs <= max_distance,
-            dtype=np.bool
+            dtype=bool
         )
 
         return_intensities = intensities if return_original_intensities else norm_intensities
@@ -666,8 +666,13 @@ class Codebook(xr.DataArray):
 
             """
             nrows, ncols = array.shape
-            dtype = {'names': ['f{}'.format(i) for i in range(ncols)],
-                     'formats': ncols * [array.dtype]}
+            # See: https://numpy.org/doc/stable/user/basics.rec.html#structured-datatype-creation
+            dtype = np.dtype(
+                {
+                    'names': ['f{}'.format(i) for i in range(ncols)],
+                    'formats': ncols * [array.dtype]
+                }
+            )
             return array.view(dtype)
 
         self._validate_decode_intensity_input_matches_codebook_shape(intensities)
@@ -723,7 +728,7 @@ class Codebook(xr.DataArray):
 
     @classmethod
     def synthetic_one_hot_codebook(
-            cls, n_round: int, n_channel: int, n_codes: int, target_names: Optional[Sequence]=None
+            cls, n_round: int, n_channel: int, n_codes: int, target_names: Optional[Sequence] = None
     ) -> "Codebook":
         """Generate codes where one channel is "on" in each imaging round
 

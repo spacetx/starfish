@@ -1,8 +1,7 @@
 from abc import abstractmethod
 
-import numpy as np
-
 from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
+from starfish.core.morphology.binary_mask import BinaryMaskCollection
 from starfish.core.pipeline.algorithmbase import AlgorithmBase
 
 
@@ -15,10 +14,10 @@ class AssignTargetsAlgorithm(metaclass=AlgorithmBase):
     @abstractmethod
     def run(
             self,
-            label_image: np.ndarray,
+            masks: BinaryMaskCollection,
             decoded_intensity_table: DecodedIntensityTable,
-            verbose: bool=False,
-            in_place: bool=False,
+            verbose: bool = False,
+            in_place: bool = False,
     ) -> DecodedIntensityTable:
         """Performs target (e.g. gene) assignment given the spots and the regions."""
         raise NotImplementedError()

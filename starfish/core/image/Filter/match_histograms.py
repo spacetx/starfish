@@ -72,9 +72,9 @@ class MatchHistograms(FilterAlgorithm):
         np.ndarray :
             image, with intensities matched to reference
         """
-        image = np.asarray(image)
+        image_array = image.data
         reference = np.asarray(reference)
-        return match_histograms(image, reference=reference)
+        return match_histograms(image_array, reference=reference)
 
     def run(
             self,

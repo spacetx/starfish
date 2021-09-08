@@ -30,7 +30,7 @@ class SpotAttributes(ValidatedTable):
     @classmethod
     def empty(cls, extra_fields: Collection = tuple()) -> "SpotAttributes":
         """return an empty SpotAttributes object"""
-        extra_dtypes = list(zip(extra_fields, [np.object] * len(extra_fields)))
+        extra_dtypes: list = list(zip(extra_fields, [object] * len(extra_fields)))
         dtype = cls.required_fields + extra_dtypes
         return cls(pd.DataFrame(np.array([], dtype=dtype)))
 

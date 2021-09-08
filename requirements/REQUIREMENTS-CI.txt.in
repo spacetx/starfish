@@ -13,6 +13,7 @@ read_roi
 recommonmark
 requests
 types-pkg_resources
+types-PyYAML
 types-requests
 seaborn
 sphinx

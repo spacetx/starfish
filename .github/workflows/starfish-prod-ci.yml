@@ -17,9 +17,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
       - name: Install Dependencies
         run: |
-          pip install flake8 mypy
+          make install-dev
 
       - name: flake8 linting
         run: |
@@ -153,6 +163,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
       - uses: actions/cache@v2
         with:
           path: ${{ env.pythonLocation }}
@@ -172,6 +187,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
       - uses: actions/cache@v2
         with:
@@ -193,6 +213,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
       - uses: actions/cache@v2
         with:
           path: ${{ env.pythonLocation }}
@@ -212,6 +237,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
       - uses: actions/cache@v2
         with:
@@ -233,6 +263,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
       - uses: actions/cache@v2
         with:
           path: ${{ env.pythonLocation }}
@@ -252,6 +287,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
       - uses: actions/cache@v2
         with:
@@ -273,6 +313,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
       - uses: actions/cache@v2
         with:
           path: ${{ env.pythonLocation }}
@@ -292,6 +337,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
       - uses: actions/cache@v2
         with:
@@ -313,6 +363,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
       - uses: actions/cache@v2
         with:
           path: ${{ env.pythonLocation }}
@@ -332,6 +387,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
       - uses: actions/cache@v2
         with:

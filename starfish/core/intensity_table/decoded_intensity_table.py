@@ -17,22 +17,18 @@ class DecodedIntensityTable(IntensityTable):
     """
     DecodedIntensityTable is a container for spot or pixel features extracted from image data
     that have been decoded. It is the primary output from starfish :py:class:`Decode` methods.
-
     An IntensityTable records the numeric intensity of a set of features in each
     :code:`(round, channel)` tile in which the feature is identified.
     The :py:class:`IntensityTable` has shape
     :code:`(n_feature, n_channel, n_round)`.
-
     Some :py:class:`SpotFinder` methods identify a position and search for Gaussian blobs in a
     small radius, only recording intensities if they are found in a given tile. Other
     :py:class:SpotFinder: approaches find blobs in a max-projection and measure them everywhere.
     As a result, some IntensityTables will be dense, and others will contain :code:`np.nan`
     entries where no feature was detected.
-
     Examples
     --------
     Create an IntensityTable using the ``synthetic_intensities`` method::
-
         >>> from starfish.core.test.factories import SyntheticData
         >>> sd = SyntheticData(n_ch=3, n_round=4, n_codes=2)
         >>> codes = sd.codebook()
@@ -41,7 +37,6 @@ class DecodedIntensityTable(IntensityTable):
         array([[[    0.,     0.,     0.,     0.],
                 [    0.,     0.,  8022., 12412.],
                 [11160.,  9546.,     0.,     0.]],
-
                [[    0.,     0.,     0.,     0.],
                 [    0.,     0., 10506., 10830.],
                 [11172., 12331.,     0.,     0.]]])
@@ -54,7 +49,6 @@ class DecodedIntensityTable(IntensityTable):
         * c          (c) int64 0 1 2
         * h          (h) int64 0 1 2 3
          target     (features) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
-
         """
 
     __slots__ = ()
@@ -65,10 +59,10 @@ class DecodedIntensityTable(IntensityTable):
             intensities: IntensityTable,
             targets: Tuple[str, np.ndarray],
             distances: Optional[Tuple[str, np.ndarray]] = None,
-            passes_threshold: Optional[Tuple[str, np.ndarray]] = None):
+            passes_threshold: Optional[Tuple[str, np.ndarray]] = None,
+            filter_tally: Optional[Tuple[str, np.ndarray]] = None):
         """
         Assign target values to intensities.
-
         Parameters
         ----------
         intensities : IntensityTable
@@ -80,7 +74,9 @@ class DecodedIntensityTable(IntensityTable):
         passes_threshold : Optional[Tuple[str, np.ndarray]]
             Corresponding array of boolean values indicating if each itensity passed
             given thresholds.
-
+        filter_tally: Optional[Tuple[str, np.ndarray]]
+            Corresponding array of integers indicated the number of rounds this 
+            decoded intensity was found in
         Returns
         -------
         DecodedIntensityTable
@@ -92,6 +88,8 @@ class DecodedIntensityTable(IntensityTable):
             intensities[Features.DISTANCE] = distances
         if passes_threshold:
             intensities[Features.PASSES_THRESHOLDS] = passes_threshold
+        if filter_tally:
+            intensities['filter_tally'] = filter_tally
         return intensities
 
     def to_decoded_dataframe(self) -> DecodedSpots:
@@ -108,19 +106,15 @@ class DecodedIntensityTable(IntensityTable):
         """
         Writes a .csv.gz file in columnar format that is readable by MERMAID visualization
         software.
-
         To run MERMAID, follow the installation instructions for that repository and simply
         replace the data.csv.gz file with the output of this function.
-
         Parameters
         ----------
         filename : str
             Name for compressed-gzipped MERMAID data file. Should end in '.csv.gz'.
-
         Notes
         ------
         See also https://github.com/JEFworks/MERmaid
-
         """
         # construct the MERMAID dataframe. As MERMAID adds support for non-categorical variables,
         # additional columns can be added here
@@ -139,9 +133,7 @@ class DecodedIntensityTable(IntensityTable):
     def to_expression_matrix(self) -> ExpressionMatrix:
         """
         Generates a cell x gene count matrix where each cell is annotated with spatial metadata.
-
         Requires that spots in the IntensityTable have been assigned to cells.
-
         Returns
         -------
         ExpressionMatrix :

@@ -20,27 +20,40 @@ from .util import _merge_spots_by_round
 
 class CheckAll(DecodeSpotsAlgorithm):
     """
-    Decode spots by selecting the max-valued channel in each sequencing round.
+    Decode spots by generating all possible combinations of spots to form barcodes given a radius distance that 
+    spots must be from each other in order to form a barcode. Then chooses the best set of nonoverlapping spot
+    combinations by choosing the ones with the least spatial variance of their spot coordinates and are also found
+    to be best for multiple spots in the barcode (see algorithm below). Allows for error correction rounds.
 
-    Note that this assumes that the codebook contains only one "on" channel per sequencing round,
-    a common pattern in experiments that assign one fluorophore to each DNA nucleotide and
-    read DNA sequentially. It is also a characteristic of single-molecule FISH and RNAscope
-    codebooks.
+    (see input parmeters below)
+    1. For each spot in each round, find all neighbors in other rounds that are within the search radius
+	2. For each spot in each round, build all possible full length barcodes based on the channel labels of the spot's 
+	neighbors and itself
+	3. Drop barcodes that don't have a matching target in the codebook
+	4. Choose the "best" barcode of each spot's possible target matching barcodes by calculating the sum of variances 
+	for each of the spatial coordinates of the spots that make up each barcode and choosing the minimum distance barcode 
+	(if there is a tie, they are all dropped as ambiguous). Each spot is assigned a "best" barcode in this way.
+	5. Only keep barcodes/targets that were found as "best" in a certain number of the rounds (determined by filter_rounds
+	parameter)
+	6. If a specific spot is used in more than one of the remaining barcodes, the barcode with the higher spatial variance
+	between it's spots is dropped (ensures each spot is only used once)
+	(End here if number of error_rounds = 0)
+	7. Remove all spots used in decoded targets that passed the previous filtering steps from the original set of spots
+	8. Rerun steps 2-5 for barcodes that use less than the full set of rounds for codebook matching (how many rounds can be
+	dropped determined by error_rounds parameter)
 
     Parameters
     ----------
     codebook : Codebook
         Contains codes to decode IntensityTable
-    trace_building_strategy: TraceBuildingStrategies
-        Defines the strategy for building spot traces to decode across rounds and chs of spot
-        finding results.
-    search_radius : Optional[int]
-        Only applicable if trace_building_strategy is TraceBuildingStrategies.NEAREST_NEIGHBORS.
+    search_radius : Optional[float]
         Number of pixels over which to search for spots in other rounds and channels.
-    anchor_round : Optional[int]
-        Only applicable if trace_building_strategy is TraceBuildingStrategies.NEAREST_NEIGHBORS.
-        The imaging round against which other rounds will be checked for spots in the same
-        approximate pixel location.
+    filterRounds : Optional[int]
+        Number of rounds that a barcode must be identified in to pass filters (higher = more stringent filtering),
+        default = #rounds - 1  or #rounds - error_rounds if error_rounds > 0
+    error_rounds : Optional[int]
+        Maximum hamming distance a barcode can be from it's target in the codebook and still be uniquely identified
+        (i.e. number of error correction rounds in each the experiment)
     """
 
     def __init__(
@@ -48,14 +61,15 @@ class CheckAll(DecodeSpotsAlgorithm):
             codebook: Codebook,
             filter_rounds: Optional[int]=None,
             search_radius: Optional[float]=3,
-            round_omit_num: Optional[int]=0):
+            error_rounds: Optional[int]=0):
         self.codebook = codebook
         self.filterRounds = filter_rounds
         self.searchRadius = search_radius
-        self.roundOmitNum = round_omit_num
+        self.errorRounds = error_rounds
 
-    def run(self, spots: SpotFindingResults, n_processes: int=1, *args) -> DecodedIntensityTable:
-        """Decode spots by selecting the max-valued channel in each sequencing round
+    def run(self, spots: SpotFindingResults, n_processes: Optional[int]=1, *args) -> DecodedIntensityTable:
+        """
+        Decode spots by finding the set of nonoverlapping barcodes that have the minimum spatial variance within each barcode
 
         Parameters
         ----------
@@ -74,7 +88,7 @@ class CheckAll(DecodeSpotsAlgorithm):
 
         # If using an search radius exactly equal to a possible distance between two pixels (ex: 1), some 
         # distances will be calculated as slightly less than their exact distance (either due to rounding or
-        # precision) so search radius needs to be slightly increased to ensure this doesn't happen
+        # precision errors) so search radius needs to be slightly increased to ensure this doesn't happen
         self.searchRadius += 0.001
 
         # Initialize ray for multi_processing
@@ -84,19 +98,19 @@ class CheckAll(DecodeSpotsAlgorithm):
         # the spots found in that round
         spotTables = _merge_spots_by_round(spots)
         
-        # If user did not specify the filterRounds variable (it will have default value -1) change it to either one less
+        # If user did not specify the filterRounds variable (it will have default value None), change it to either one less
         # than the number of rounds if roundOmitNum is 0 or the number of rounds minus the roundOmitNum if roundOmitNum > 0
         if self.filterRounds == None:
             if self.roundOmitNum == 0:
                 self.filterRounds = len(spotTables) - 1
             else:
-                self.filterRounds = len(spotTables) - self.roundOmitNum
+                self.filterRounds = len(spotTables) - self.errorRounds
         
 
         # Create dictionary of neighbors (within the search radius) in other rounds for each spot
         neighborDict = findNeighbors(spotTables, self.searchRadius)
         
-        # Create dictionary with mapping from spot id in spotTables to channel number and one with spot
+        # Create dictionaries with mapping from spot id (row index) in spotTables to channel number and one with spot
         # coordinates for fast access
         channelDict = {}
         spotCoords = {}
@@ -105,16 +119,20 @@ class CheckAll(DecodeSpotsAlgorithm):
             spotCoords[r] = spotTables[r][['z','y','x']].T.to_dict()            
         
         # Set list of round omission numbers to loop through
-        roundOmits = range(self.roundOmitNum+1)
+        roundOmits = range(self.errorRounds+1)
         
-        # Decode for each round omission number 
+        # Decode for each round omission number, store results in allCodes table
         allCodes = pd.DataFrame()
         for currentRoundOmitNum in roundOmits:
+
+        	# Chooses best barcode for all spots in each round sequentially (possible barcode space can become quite large which 
+        	# can increase memory needs so I do it this way so we only need to store all potential barcodes that originate from 
+        	# one round at a time)
             decodedTables = {}
             for r in range(len(spotTables)):
                 roundData = deepcopy(spotTables[r])
                 
-                # Create dictionary of dataframes (based on perRoundSpotTables data) that contains additional columns for each spot
+                # Create dictionary of dataframes (based on spotTables data) that contains additional columns for each spot
                 # containing all the possible barcodes that could be constructed from the neighbors of that spot
                 roundData = buildBarcodes(roundData, neighborDict, currentRoundOmitNum, channelDict, r, numJobs)
                 
@@ -129,7 +147,7 @@ class CheckAll(DecodeSpotsAlgorithm):
                 decodedTables[r] = roundData
 
             # Turn spot table dictionary into single table, filter barcodes by round frequency, add additional information,
-            # and choose between barcodes that use the same spot(s)
+            # and choose between barcodes that have overlapping spots
             finalCodes = cleanup(decodedTables, spotCoords, self.filterRounds)
             
             # If this is not the last round omission number to run, remove spots that have just been found to be in
@@ -176,6 +194,7 @@ class CheckAll(DecodeSpotsAlgorithm):
         intensity_table = transfer_physical_coords_to_intensity_table(intensity_table=intensity_table, spots=spots)
         intensities = intensity_table.transpose('features', 'r', 'c')
 
+        # Validate results are correct shape
         self.codebook._validate_decode_intensity_input_matches_codebook_shape(intensities)
 
         # Create DecodedIntensityTable

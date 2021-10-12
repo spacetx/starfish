@@ -203,7 +203,7 @@ class CheckAll(DecodeSpotsAlgorithm):
             targets=(Features.AXIS, allCodes['best_targets'].astype('U')),
             distances=(Features.AXIS, allCodes["best_distances"]),
             passes_threshold=(Features.AXIS, np.full(len(allCodes), True)),
-            filter_tally=(Features.AXIS, allCodes['rounds_used']))
+            rounds_used=(Features.AXIS, allCodes['rounds_used']))
 
 
         return result

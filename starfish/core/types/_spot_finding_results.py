@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Hashable, Mapping, MutableMapping, Optional, Sequence, Tuple
+from typing import Any, Hashable, Mapping, MutableMapping, Optional, Sequence, Tuple, Dict
 
 import xarray as xr
 
@@ -119,7 +119,7 @@ class SpotFindingResults:
             Location to save all files.
 
         """
-        json_data = {}
+        json_data: Dict[str, Any] = {}
 
         coords = {}
         for key in self.physical_coord_ranges.keys():
@@ -129,7 +129,8 @@ class SpotFindingResults:
         json_data["physical_coord_ranges"] = coords
 
         path = "{}log.arr"
-        json_data["log"] = path.format(output_dir_name)
+        json_data["log"] = {}
+        json_data["log"]["path"] = path.format(output_dir_name)
         with open(path.format(output_dir_name), "w") as f:
             f.write(self.log.encode())
 
@@ -162,7 +163,7 @@ class SpotFindingResults:
         fl = open(json_file)
         data = json.load(fl)
 
-        with open(data["log"]) as f:
+        with open(data["log"]["path"]) as f:
             log = Log.decode(f.read())
 
         rename_axes = {

@@ -75,7 +75,7 @@ class DecodedIntensityTable(IntensityTable):
             Corresponding array of boolean values indicating if each itensity passed
             given thresholds.
         rounds_used: Optional[Tuple[str, np.ndarray]]
-            Corresponding array of integers indicated the number of rounds this 
+            Corresponding array of integers indicated the number of rounds this
             decoded intensity was found in
         Returns
         -------
@@ -88,7 +88,7 @@ class DecodedIntensityTable(IntensityTable):
             intensities[Features.DISTANCE] = distances
         if passes_threshold:
             intensities[Features.PASSES_THRESHOLDS] = passes_threshold
-        if filter_tally:
+        if rounds_used:
             intensities['rounds_used'] = rounds_used
         return intensities
 

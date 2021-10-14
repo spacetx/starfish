@@ -525,11 +525,14 @@ class Codebook(xr.DataArray):
             intensities: IntensityTable,
     ):
         """verify that the shapes of the codebook and intensities match"""
-        ch_match = intensities.sizes[Axes.CH] == self.sizes[Axes.CH]
-        round_match = intensities.sizes[Axes.ROUND] == self.sizes[Axes.ROUND]
+
+        ch_match = intensities.sizes.get(Axes.CH, 0) == self.sizes.get(Axes.CH, 0)
+        round_match = intensities.sizes.get(Axes.ROUND, 0) == self.sizes.get(Axes.ROUND, 0)
         if not (ch_match and round_match):
             raise ValueError(
-                'Codebook and Intensities must have same number of channels and rounds')
+                'Codebook and Intensities must have same number of channels and rounds. '
+                f'IntensityTable shape: {intensities.sizes}, Codebook shape: {self.sizes}'
+            )
 
     def decode_metric(
             self, intensities: IntensityTable, max_distance: Number, min_intensity: Number,

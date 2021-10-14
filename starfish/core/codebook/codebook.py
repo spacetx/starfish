@@ -704,7 +704,7 @@ class Codebook(xr.DataArray):
         # found in the non-maximal channels.
         max_intensities = intensities.max(Axes.CH.value)
         round_intensities = intensities.sum(Axes.CH.value)
-        distance = 1 - (max_intensities / round_intensities).mean(Axes.ROUND.value)
+        distance: IntensityTable = 1 - (max_intensities / round_intensities).mean(Axes.ROUND.value)
 
         a = _view_row_as_element(codes.values.reshape(self.shape[0], -1))  # type: ignore
         b = _view_row_as_element(
@@ -723,7 +723,7 @@ class Codebook(xr.DataArray):
         return DecodedIntensityTable.from_intensity_table(
             intensities,
             targets=(Features.AXIS, targets.astype('U')),
-            distances=(Features.AXIS, distance),
+            distances=(Features.AXIS, distance.data),
             passes_threshold=(Features.AXIS, passes_filters))
 
     @classmethod

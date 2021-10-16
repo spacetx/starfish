@@ -20,9 +20,9 @@ def test_apply():
     assert region_0.name == '0'
     assert region_1.name == '1'
 
-    temp = np.ones((2, 6), dtype=np.bool)
+    temp = np.ones((2, 6), dtype=bool)
     assert np.array_equal(region_0, temp)
-    temp = np.ones((3, 4), dtype=np.bool)
+    temp = np.ones((3, 4), dtype=bool)
     temp[0, 0] = 0
     assert np.array_equal(region_1, temp)
 

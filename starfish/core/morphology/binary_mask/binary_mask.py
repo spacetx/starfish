@@ -720,14 +720,14 @@ class BinaryMaskCollection:
             >>> from starfish.core.morphology.binary_mask.test import factories
             >>> binary_mask_collection = factories.binary_mask_collection_2d()
             >>> anded_mask_collection = binary_mask_collection._reduce(
-                np.logical_and, np.ones(shape=(5, 6), dtype=np.bool))
+                np.logical_and, np.ones(shape=(5, 6), dtype=bool))
 
         Applying a logical 'AND' across all the masks, without hard-coding the size of the array.
             >>> import numpy as np
             >>> from starfish.core.morphology.binary_mask.test import factories
             >>> binary_mask_collection = factories.binary_mask_collection_2d()
             >>> anded_mask_collection = binary_mask_collection._reduce(
-                np.logical_and, lambda shape: np.ones(shape=shape, dtype=np.bool))
+                np.logical_and, lambda shape: np.ones(shape=shape, dtype=bool))
         """
         if callable(initial):
             shape = tuple(len(self._pixel_ticks[axis])

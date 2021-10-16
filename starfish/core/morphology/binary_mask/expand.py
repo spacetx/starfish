@@ -16,7 +16,7 @@ def fill_from_mask(
     Examples
     --------
     >>> import numpy as np
-    >>> mask = np.array([True, True, False], dtype=np.bool)
+    >>> mask = np.array([True, True, False], dtype=bool)
     >>> mask
     array([ True,  True, False])
     >>> result_array = np.zeros(shape=(4,), dtype=np.uint32)

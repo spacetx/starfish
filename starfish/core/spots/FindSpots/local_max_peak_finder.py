@@ -270,8 +270,10 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
             **kwargs
         )
 
+        if spot_coords.any():
         if data_image.ndim == 3:
-            res = {Axes.X.value: spot_coords[:, 2],
+                res = {
+                    Axes.X.value: spot_coords[:, 2],
                    Axes.Y.value: spot_coords[:, 1],
                    Axes.ZPLANE.value: spot_coords[:, 0],
                    Features.SPOT_RADIUS: 1,
@@ -282,7 +284,8 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
                    }
         else:
             zlabel = int(data_image.coords[Axes.ZPLANE.value])
-            res = {Axes.X.value: spot_coords[:, 1],
+                res = {
+                    Axes.X.value: spot_coords[:, 1],
                    Axes.Y.value: spot_coords[:, 0],
                    Axes.ZPLANE.value: zlabel,
                    Features.SPOT_RADIUS: 1,
@@ -290,6 +293,15 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
                    Features.INTENSITY: data_image_np[spot_coords[:, 0],
                                                      spot_coords[:, 1]],
                    }
+        else:
+            res = {
+                Axes.X.value: [],
+                Axes.Y.value: [],
+                Axes.ZPLANE.value: [],
+                Features.SPOT_RADIUS: [],
+                Features.SPOT_ID: [],
+                Features.INTENSITY: []
+            }
 
         extras: Mapping[str, Any] = {
             "threshold": optimal_threshold,

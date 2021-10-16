@@ -61,13 +61,14 @@ class MinDistanceLabel(FilterAlgorithm):
         local_maximum: np.ndarray = peak_local_max(
             distance,
             exclude_border=self._exclude_border,
-            indices=False,
             footprint=footprint,
             labels=np.asarray(mask),
         )
+        local_maximum_mask = np.zeros_like(distance, dtype=bool)
+        local_maximum_mask[tuple(local_maximum.T)] = True
 
         # label the maxima for watershed
-        markers, _ = label(local_maximum)
+        markers, _ = label(local_maximum_mask)
 
         # run watershed, using the distances in the thresholded image as basins.
         # Uses the original image as a mask, preventing any background pixels from being labeled

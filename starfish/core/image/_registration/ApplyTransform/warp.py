@@ -56,9 +56,10 @@ class Warp(ApplyTransformAlgorithm):
                 # combine all axes data to select one tile
                 selector.update(axes)  # type: ignore
                 selected_image, _ = stack.get_slice(selector)
-                warped_image = warp(xr.DataArray(selected_image), transformation_object, **kwargs
-                                    ).astype(np.float32)
-                stack.set_slice(selector, warped_image.data)
+                warped_image = warp(
+                    xr.DataArray(selected_image), transformation_object, **kwargs
+                ).astype(np.float32)
+                stack.set_slice(selector, warped_image)
         return None
 
 
@@ -66,7 +67,7 @@ def warp(
         image: xr.DataArray,
         transformation_object: GeometricTransform,
         **kwargs
-) -> xr.DataArray:
+) -> np.ndarray:
     """
     Wrapper around :py:func:`skimage.transform.warp`. Warps an image according to a
     given coordinate transformation.

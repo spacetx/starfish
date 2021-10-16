@@ -75,7 +75,7 @@ class BlobDetector(FindSpotsAlgorithm):
             measurement_type='max',
             is_volume: bool = True,
             detector_method: str = 'blob_log',
-            exclude_border: Optional[int] = None,
+            exclude_border: Union[Tuple[int], int, bool] = False,
     ) -> None:
 
         self.min_sigma = min_sigma

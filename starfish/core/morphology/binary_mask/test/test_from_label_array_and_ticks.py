@@ -23,8 +23,8 @@ def test_2d():
     assert region_0.name == '0'
     assert region_1.name == '1'
 
-    assert np.array_equal(region_0, np.ones((1, 6), dtype=np.bool))
-    temp = np.ones((2, 3), dtype=np.bool)
+    assert np.array_equal(region_0, np.ones((1, 6), dtype=bool))
+    temp = np.ones((2, 3), dtype=bool)
     temp[-1, -1] = False
     assert np.array_equal(region_1, temp)
 
@@ -62,8 +62,8 @@ def test_3d():
     assert region_0.name == '0'
     assert region_1.name == '1'
 
-    assert np.array_equal(region_0, np.ones((1, 1, 6), dtype=np.bool))
-    temp = np.ones((2, 2, 3), dtype=np.bool)
+    assert np.array_equal(region_0, np.ones((1, 1, 6), dtype=bool))
+    temp = np.ones((2, 2, 3), dtype=bool)
     temp[-1, -1, -1] = False
     assert np.array_equal(region_1, temp)
 
@@ -110,8 +110,8 @@ def test_from_label_array_provided_pixel_ticks():
     assert region_0.name == '0'
     assert region_1.name == '1'
 
-    assert np.array_equal(region_0, np.ones((1, 6), dtype=np.bool))
-    temp = np.ones((2, 3), dtype=np.bool)
+    assert np.array_equal(region_0, np.ones((1, 6), dtype=bool))
+    temp = np.ones((2, 3), dtype=bool)
     temp[-1, -1] = False
     assert np.array_equal(region_1, temp)
 

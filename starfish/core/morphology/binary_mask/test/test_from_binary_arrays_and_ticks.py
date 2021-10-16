@@ -23,8 +23,8 @@ def test_2d():
     assert region_0.name == '0'
     assert region_1.name == '1'
 
-    assert np.array_equal(region_0, np.ones((1, 6), dtype=np.bool))
-    temp = np.ones((2, 3), dtype=np.bool)
+    assert np.array_equal(region_0, np.ones((1, 6), dtype=bool))
+    temp = np.ones((2, 3), dtype=bool)
     temp[-1, -1] = False
     assert np.array_equal(region_1, temp)
 
@@ -68,8 +68,8 @@ def test_3d():
     assert region_0.name == '0'
     assert region_1.name == '1'
 
-    assert np.array_equal(region_0, np.ones((1, 1, 6), dtype=np.bool))
-    temp = np.ones((2, 2, 3), dtype=np.bool)
+    assert np.array_equal(region_0, np.ones((1, 1, 6), dtype=bool))
+    temp = np.ones((2, 2, 3), dtype=bool)
     temp[-1, -1, -1] = False
     assert np.array_equal(region_1, temp)
 
@@ -129,7 +129,7 @@ def test_empty_mask():
     """Simple case of BinaryMaskCollection.from_binary_arrays_and_ticks with no masks.  Pixel ticks
     are inferred."""
     binary_arrays = [
-        np.zeros((5, 6), dtype=np.bool),
+        np.zeros((5, 6), dtype=bool),
     ]
     _, physical_ticks = binary_arrays_2d()
 
@@ -157,8 +157,8 @@ def test_mismatched_binary_array_sizes():
     """Simple case of BinaryMaskCollection.from_binary_arrays_and_ticks with 2D data.  Not all
     arrays are sized identically."""
     binary_arrays = [
-        np.zeros((3, 6), dtype=np.bool),
-        np.zeros((5, 6), dtype=np.bool),
+        np.zeros((3, 6), dtype=bool),
+        np.zeros((5, 6), dtype=bool),
     ]
     binary_arrays[0][0] = True
     binary_arrays[1][3:5, 3:6] = True
@@ -179,8 +179,8 @@ def test_mismatched_binary_array_types():
     """Simple case of BinaryMaskCollection.from_binary_arrays_and_ticks with 2D data.  Not all
     arrays are of the correct type."""
     binary_arrays = [
-        np.zeros((3, 6), dtype=np.bool),
-        np.zeros((3, 6), dtype=np.int),
+        np.zeros((3, 6), dtype=bool),
+        np.zeros((3, 6), dtype=int),
     ]
     binary_arrays[0][0] = True
     binary_arrays[1][3:5, 3:6] = True
@@ -219,8 +219,8 @@ def test_incorrectly_sized_pixel_ticks():
 def test_missing_physical_ticks():
     """BinaryMaskCollection.from_binary_arrays_and_ticks with some physical ticks missing."""
     binary_arrays = [
-        np.zeros((2, 5, 6), dtype=np.bool),
-        np.zeros((2, 5, 6), dtype=np.bool),
+        np.zeros((2, 5, 6), dtype=bool),
+        np.zeros((2, 5, 6), dtype=bool),
     ]
 
     physical_ticks = {
@@ -241,8 +241,8 @@ def test_incorrectly_sized_physical_ticks():
     """BinaryMaskCollection.from_label_array_and_ticks with some physical ticks incorrectly
     sized."""
     binary_2d_arrays = [
-        np.zeros((5, 6), dtype=np.bool),
-        np.zeros((5, 6), dtype=np.bool),
+        np.zeros((5, 6), dtype=bool),
+        np.zeros((5, 6), dtype=bool),
     ]
 
     physical_ticks_2d = {Coordinates.Y: [1.2, 2.4, 3.6, 4.8, 6.0],
@@ -257,8 +257,8 @@ def test_incorrectly_sized_physical_ticks():
         )
 
     binary_3d_arrays = [
-        np.zeros((2, 5, 6), dtype=np.bool),
-        np.zeros((2, 5, 6), dtype=np.bool),
+        np.zeros((2, 5, 6), dtype=bool),
+        np.zeros((2, 5, 6), dtype=bool),
     ]
 
     physical_ticks_3d = {

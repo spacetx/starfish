@@ -22,7 +22,7 @@ $(py_files): %.py :
 	[ -e $*.py.skip ] || $(PYTHON) $*.py
 
 $(py_check_targets): check__%.py :
-	grep -q $*.py .travis.yml
+	grep -q $*.py .github/workflows/starfish-prod-ci.yml
 
 $(ipynb_validate_targets): TEMPFILE := $(shell mktemp)
 $(ipynb_validate_targets): validate__notebooks/%.ipynb :

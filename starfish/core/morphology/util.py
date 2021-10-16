@@ -1,6 +1,7 @@
 from typing import List, Mapping, MutableMapping, Optional, Tuple, Union
 
 import numpy as np
+import xarray as xr
 
 from starfish.core.types import ArrayLike, Axes, Coordinates, Number
 
@@ -42,10 +43,15 @@ def _normalize_pixel_ticks(
     mapping from an axis.  The mapping may also not be present (i.e., None), in which an empty
     dictionary is returned.
     """
-    return {
-        Axes(axis): axis_data
-        for axis, axis_data in (pixel_ticks or {}).items()
-    }
+
+    normalized_pixel_ticks = {}
+    for axis, axis_data in (pixel_ticks or {}).items():
+        if isinstance(axis_data, xr.DataArray):
+            normalized_pixel_ticks[Axes(axis)] = axis_data.data
+        else:
+            normalized_pixel_ticks[Axes(axis)] = axis_data
+
+    return normalized_pixel_ticks
 
 
 def _normalize_physical_ticks(
@@ -56,10 +62,15 @@ def _normalize_physical_ticks(
     """Given physical coordinate ticks in a mapping from a coordinate or a string representing a
     coordinate, return a mapping from a coordinate.
     """
-    return {
-        Coordinates(coord): coord_data
-        for coord, coord_data in physical_ticks.items()
-    }
+
+    normalized_physical_ticks = {}
+    for coord, coord_data in physical_ticks.items():
+        if isinstance(coord_data, xr.DataArray):
+            normalized_physical_ticks[Coordinates(coord)] = coord_data.data
+        else:
+            normalized_physical_ticks[Coordinates(coord)] = coord_data
+
+    return normalized_physical_ticks
 
 
 def _ticks_equal(

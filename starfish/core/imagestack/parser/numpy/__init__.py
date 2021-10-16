@@ -3,6 +3,7 @@ This module encapsulates the logic to parse a numpy array into an ImageStack.
 """
 from itertools import product
 from typing import (
+    cast,
     Collection,
     Mapping,
     MutableMapping,
@@ -130,7 +131,8 @@ class NumpyData(TileCollectionData):
             coordinates[Coordinates.X] = self.coordinates[Coordinates.X]
             coordinates[Coordinates.Y] = self.coordinates[Coordinates.Y]
             if Coordinates.Z in self.coordinates:
-                coordinates[Coordinates.Z] = [self.coordinates[Coordinates.Z][pos_z]]
+                z_coord = cast(Number, self.coordinates[Coordinates.Z][pos_z])
+                coordinates[Coordinates.Z] = [z_coord]
         else:
             # fake coordinates!
             coordinates[Coordinates.X] = np.linspace(0.0, 0.001, self.data.shape[-1])

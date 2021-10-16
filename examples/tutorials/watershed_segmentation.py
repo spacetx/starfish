@@ -180,7 +180,7 @@ thresholded_stain = Binarize.ThresholdBinarize(stain_thresh).run(stain)
 markers_and_stain = Merge.SimpleMerge().run([thresholded_stain, watershed_markers])
 watershed_mask = Filter.Reduce(
     "logical_or",
-    lambda shape: np.zeros(shape=shape, dtype=np.bool)
+    lambda shape: np.zeros(shape=shape, dtype=bool)
 ).run(markers_and_stain)
 
 image(
@@ -195,7 +195,7 @@ plt.title('Watershed Mask')
 # define the topology of the watershed basins. The basins are filled starting from seeds,
 # which are the nuclei markers. And the boundaries of the basins are the watershed mask.
 
-segmenter = Segment.WatershedSegment(connectivity=np.ones((1, 3, 3), dtype=np.bool))
+segmenter = Segment.WatershedSegment(connectivity=np.ones((1, 3, 3), dtype=bool))
 
 # masks is BinaryMaskCollection for downstream steps
 masks = segmenter.run(

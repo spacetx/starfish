@@ -51,7 +51,7 @@ class TileFetcherImageTile(TileData):
                 zplane_coord = _get_physical_coordinates_of_z_plane(zrange)
                 return_coords[Coordinates.Z] = [zplane_coord]
             else:
-                return_coords[Coordinates.Z] = zrange
+                return_coords[Coordinates.Z] = [zrange]
 
         return return_coords
 

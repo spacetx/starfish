@@ -218,10 +218,10 @@ thresholded_stain = Binarize.ThresholdBinarize(stain_thresh).run(stain)
 markers_and_stain = Merge.SimpleMerge().run([thresholded_stain, watershed_markers])
 watershed_mask = Filter.Reduce(
     "logical_or",
-    lambda shape: np.zeros(shape=shape, dtype=np.bool)
+    lambda shape: np.zeros(shape=shape, dtype=bool)
 ).run(markers_and_stain)
 
-segmenter = Segment.WatershedSegment(connectivity=np.ones((1, 3, 3), dtype=np.bool))
+segmenter = Segment.WatershedSegment(connectivity=np.ones((1, 3, 3), dtype=bool))
 masks = segmenter.run(
     stain,
     watershed_markers,

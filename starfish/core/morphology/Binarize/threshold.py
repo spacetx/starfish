@@ -37,7 +37,7 @@ class ThresholdBinarize(BinarizeAlgorithm):
                 image.shape[axis]
                 for axis, _ in zip(*_get_axes_names(3))
             ],
-            dtype=np.bool)
+            dtype=bool)
 
         self._binarize(result_array, image.xarray[0, 0])
 

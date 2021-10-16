@@ -50,7 +50,7 @@ class MatchHistograms(FilterAlgorithm):
         stacked = data.xarray.stack(chunk_key=chunk_key)
         stacked = stacked.stack(sort_key=sort_key)
 
-        sorted_stacked = stacked.groupby("sort_key").apply(np.sort)
+        sorted_stacked = stacked.groupby("sort_key").map(np.sort)
         reference = sorted_stacked.mean("sort_key")
         reference = reference.unstack("chunk_key")
         return reference
@@ -72,9 +72,9 @@ class MatchHistograms(FilterAlgorithm):
         np.ndarray :
             image, with intensities matched to reference
         """
-        image = np.asarray(image)
+        image_array = image.data
         reference = np.asarray(reference)
-        return match_histograms(image, reference=reference)
+        return match_histograms(image_array, reference=reference)
 
     def run(
             self,

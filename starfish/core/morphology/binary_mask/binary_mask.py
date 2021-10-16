@@ -82,7 +82,7 @@ class BinaryMaskCollection:
         for ix, mask_data in enumerate(masks):
             if mask_data.binary_mask.ndim not in (2, 3):
                 raise TypeError(f"expected 2 or 3 dimensions; got {mask_data.binary_mask.ndim}")
-            if mask_data.binary_mask.dtype != np.bool:
+            if mask_data.binary_mask.dtype != bool:
                 raise ValueError(f"expected dtype of bool; got {mask_data.binary_mask.dtype}")
 
             self._masks[ix] = mask_data
@@ -162,7 +162,7 @@ class BinaryMaskCollection:
                 len(self._pixel_ticks[axis])
                 for axis, _ in zip(*_get_axes_names(len(self._pixel_ticks)))
             ),
-            dtype=np.bool,
+            dtype=bool,
         )
         fill_from_mask(
             mask_data.binary_mask,
@@ -307,8 +307,8 @@ class BinaryMaskCollection:
         for label, roi in enumerate(roi_set.values()):
             polygon = np.array([roi[Axes.Y.value], roi[Axes.X.value]]).T
 
-            y_min, x_min = np.floor(np.amin(polygon, axis=0)).astype(np.int)
-            y_max, x_max = np.floor(np.amax(polygon, axis=0)).astype(np.int)
+            y_min, x_min = np.floor(np.amin(polygon, axis=0)).astype(int)
+            y_max, x_max = np.floor(np.amax(polygon, axis=0)).astype(int)
 
             vertex_row_coords, vertex_col_coords = polygon.T
             vertex_col_coords -= vertex_col_coords.min()
@@ -420,7 +420,7 @@ class BinaryMaskCollection:
         if len(array_shapes) > 1:
             raise ValueError("all masks must be identically sized")
         for array_dtype in array_dtypes:
-            if array_dtype != np.bool:
+            if array_dtype != bool:
                 raise TypeError("arrays must be binary data")
 
         # normalize the pixel coordinates to Mapping[Axes, ArrayLike[int]]
@@ -720,14 +720,14 @@ class BinaryMaskCollection:
             >>> from starfish.core.morphology.binary_mask.test import factories
             >>> binary_mask_collection = factories.binary_mask_collection_2d()
             >>> anded_mask_collection = binary_mask_collection._reduce(
-                np.logical_and, np.ones(shape=(5, 6), dtype=np.bool))
+                np.logical_and, np.ones(shape=(5, 6), dtype=bool))
 
         Applying a logical 'AND' across all the masks, without hard-coding the size of the array.
             >>> import numpy as np
             >>> from starfish.core.morphology.binary_mask.test import factories
             >>> binary_mask_collection = factories.binary_mask_collection_2d()
             >>> anded_mask_collection = binary_mask_collection._reduce(
-                np.logical_and, lambda shape: np.ones(shape=shape, dtype=np.bool))
+                np.logical_and, lambda shape: np.ones(shape=shape, dtype=bool))
         """
         if callable(initial):
             shape = tuple(len(self._pixel_ticks[axis])

@@ -40,8 +40,13 @@ class FindSpotsAlgorithm(metaclass=AlgorithmBase):
     """
 
     @abstractmethod
-    def run(self, image_stack: ImageStack,
-            reference_image: Optional[ImageStack] = None, *args) -> SpotFindingResults:
+    def run(
+        self,
+        image_stack: ImageStack,
+        reference_image: Optional[ImageStack] = None,
+        n_processes: Optional[int] = None,
+        *args
+    ) -> SpotFindingResults:
         """Find and measure spots across rounds and channels in the provided ImageStack."""
         raise NotImplementedError()
 

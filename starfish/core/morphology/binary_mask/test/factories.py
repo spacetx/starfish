@@ -24,8 +24,8 @@ def binary_arrays_2d() -> Tuple[Sequence[np.ndarray], Mapping[Coordinates, Array
     """Convenience method to return a set of 2D binary arrays with corresponding physical
     coordinates."""
     binary_arrays = [
-        np.zeros((5, 6), dtype=np.bool),
-        np.zeros((5, 6), dtype=np.bool),
+        np.zeros((5, 6), dtype=bool),
+        np.zeros((5, 6), dtype=bool),
     ]
     binary_arrays[0][0] = True
     binary_arrays[1][3:5, 3:6] = True
@@ -58,8 +58,8 @@ def binary_arrays_3d() -> Tuple[Sequence[np.ndarray], Mapping[Coordinates, Array
     """Convenience method to return a set of 2D binary arrays with corresponding physical
     coordinates."""
     binary_arrays = [
-        np.zeros((2, 5, 6), dtype=np.bool),
-        np.zeros((2, 5, 6), dtype=np.bool),
+        np.zeros((2, 5, 6), dtype=bool),
+        np.zeros((2, 5, 6), dtype=bool),
     ]
     binary_arrays[0][0, 0] = True
     binary_arrays[1][:, 3:5, 3:6] = True

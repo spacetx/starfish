@@ -47,13 +47,19 @@ See `spacetx-starfish.readthedocs.io <https://spacetx-starfish.readthedocs.io/en
 Installation
 ------------
 
-starfish supports python 3.6 and above (python 3.7 recommended) and can easily be installed from Pypi:
+starfish supports python 3.7 and above and can easily be installed from PyPI:
 
 .. code-block:: bash
 
     $ pip install starfish[napari]
 
 `For more detailed installation instructions, see here <https://spacetx-starfish.readthedocs.io/en/latest/installation/>`_.
+
+Python Version Notice
+---------------------
+
+starfish will be dropping support for python 3.6 in the next release due to
+minimum python=3.7 version requirements in upstream dependencies.
 
 Contributing
 ------------

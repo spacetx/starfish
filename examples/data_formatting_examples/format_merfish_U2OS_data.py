@@ -38,7 +38,7 @@ import argparse
 import functools
 import json
 import os
-from typing import IO, Mapping, Union
+from typing import Mapping, Union
 
 import numpy as np
 import pandas as pd
@@ -93,7 +93,7 @@ class MERFISHTile(FetchedTile):
     def coordinates(self) -> Mapping[Union[str, Coordinates], CoordinateValue]:
         return self._coordinates
 
-    def tile_data(self) -> IO:
+    def tile_data(self) -> np.ndarray:
         return cached_read_fn(self.file_path)[self.map[(self.r, self.ch)], :, :]
 
 

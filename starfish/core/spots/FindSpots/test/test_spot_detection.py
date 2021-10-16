@@ -40,8 +40,7 @@ def simple_trackpy_local_max_spot_detector() -> TrackpyLocalMaxPeakFinder:
         min_mass=0.01,
         max_size=10,
         separation=2,
-        radius_is_gyration=True,
-        is_volume=True
+        radius_is_gyration=True
     )
 
 
@@ -50,7 +49,7 @@ def simple_local_max_spot_detector_3d() -> LocalMaxPeakFinder:
         min_distance=6,
         stringency=0,
         min_obj_area=0,
-        max_obj_area=np.inf,
+        max_obj_area=np.iinfo(int).max,
         threshold=0,
         is_volume=True,
     )
@@ -61,10 +60,11 @@ def simple_local_max_spot_detector_2d() -> LocalMaxPeakFinder:
         min_distance=6,
         stringency=0,
         min_obj_area=0,
-        max_obj_area=np.inf,
+        max_obj_area=np.iinfo(int).max,
         threshold=0,
         is_volume=False
     )
+
 
 # initialize spot detectors
 gaussian_spot_detector = simple_gaussian_spot_detector()

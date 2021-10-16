@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.feature import register_translation
+from skimage.registration import phase_cross_correlation
 from skimage.transform._geometric import SimilarityTransform
 
 from starfish.core.image._registration.transforms_list import TransformsList
@@ -19,7 +19,7 @@ class Translation(LearnTransformAlgorithm):
     axes : Axes
         The axes {r, ch, zplane} to iterate over
     reference_stack : ImageStack
-        The target image used in :py:func:`skimage.feature.register_translation`
+        The "moving_image" used in :py:func:`skimage.registration.phase_cross_correlation`
     upsampling : int
         upsampling factor (default=1). See :py:func:`~skimage.registration.phase_cross_correlation`
         for an explanation of this parameter. In brief, this parameter determines the resolution of
@@ -27,13 +27,13 @@ class Translation(LearnTransformAlgorithm):
         a pixel, a value of 300 is 1/300th of a pixel, and so on.
     """
 
-    def __init__(self, reference_stack: ImageStack, axes: Axes, upsampling: int=1):
+    def __init__(self, reference_stack: ImageStack, axes: Axes, upsampling: int = 1):
 
         self.upsampling = upsampling
         self.axes = axes
         self.reference_stack = reference_stack
 
-    def run(self, stack: ImageStack, verbose: bool=False, *args) -> TransformsList:
+    def run(self, stack: ImageStack, verbose: bool = False, *args) -> TransformsList:
         """
         Iterate over the given axes of an ImageStack and learn the translation transform
         based off the reference_stack passed into :py:class:`Translation`'s constructor.
@@ -63,9 +63,12 @@ class Translation(LearnTransformAlgorithm):
                     f"please use the MaxProj filter."
                 )
 
-            shift, error, phasediff = register_translation(src_image=target_image,
-                                                           target_image=reference_image,
-                                                           upsample_factor=self.upsampling)
+            shift, error, phasediff = phase_cross_correlation(
+                reference_image=target_image.data,
+                moving_image=reference_image.data,
+                upsample_factor=self.upsampling
+            )
+
             if verbose:
                 print(f"For {self.axes}: {a}, Shift: {shift}, Error: {error}")
             selectors = {self.axes: a}

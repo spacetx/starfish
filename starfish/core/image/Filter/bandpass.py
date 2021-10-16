@@ -16,7 +16,7 @@ class Bandpass(FilterAlgorithm):
     variations, retaining features of intermediate scale. This implementation relies on
     scipy.ndimage.filters.gaussian_filter.
 
-    This method is a thin wrapper around :doc:`trackpy:generated/trackpy.bandpass`.
+    This method is a thin wrapper around :doc:`trackpy:generated/trackpy.preprocessing.bandpass`.
 
     Parameters
     ----------

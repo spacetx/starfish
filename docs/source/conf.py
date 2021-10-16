@@ -63,8 +63,8 @@ extensions = [
 intersphinx_mapping = {
     'xarray': ('http://xarray.pydata.org/en/stable', None),
     'numpy': ('https://docs.scipy.org/doc/numpy', None),
-    'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
-    'trackpy': ('https://soft-matter.github.io/trackpy/v0.3.2',  None),
+    'scipy': ('http://docs.scipy.org/doc/scipy', None),
+    'trackpy': ('https://soft-matter.github.io/trackpy/v0.5.0',  None),
     'skimage': ('https://scikit-image.org/docs/dev', None),
 }
 
@@ -127,7 +127,7 @@ sphinx_gallery_conf = {
     # Modules for which function level galleries are created.  In
     # this case sphinx_gallery and numpy in a tuple of strings.
     # 'doc_module': ('neuroglia',),
-    'download_section_examples': False,
+    'download_all_examples': False,
     'default_thumb_file': f'{dir_}/_static/design/logo-solo.png',
     'min_reported_time': 10,
 
@@ -157,7 +157,8 @@ html_favicon = '_static/favicon.ico'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 def setup(app):
-    app.add_stylesheet("my-styles.css")
+    app.add_css_file("my-styles.css")
+
 
 html_theme_options = {
     'navbar_title': " ",

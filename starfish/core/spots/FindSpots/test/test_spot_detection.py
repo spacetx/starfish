@@ -40,8 +40,7 @@ def simple_trackpy_local_max_spot_detector() -> TrackpyLocalMaxPeakFinder:
         min_mass=0.01,
         max_size=10,
         separation=2,
-        radius_is_gyration=True,
-        is_volume=True
+        radius_is_gyration=True
     )
 
 

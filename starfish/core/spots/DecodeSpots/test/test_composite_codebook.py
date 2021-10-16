@@ -266,7 +266,7 @@ def test_composite_codebook_decoding():
     # decode
     per_round_decoder = PerRoundMaxChannel(codebook=codebook_multiplexed)
     decoded_multiplexed = per_round_decoder.run(spots=multiplexed_spots)
-    assert np.array_equal(decoded_multiplexed[Features.TARGET].values, ['GENE_B', 'GENE_A'])
+    assert np.array_equal(decoded_multiplexed[Features.TARGET].values, ['GENE_A', 'GENE_B'])
 
     simple_lookup_decoder = SimpleLookupDecoder(codebook=codebook_sequential)
     decoded_sequential = simple_lookup_decoder.run(spots=sequential_spots)
@@ -298,7 +298,7 @@ def test_composite_codebook_decoding_seperate_sized_stacks():
 
     decoded_multiplexed = metric_decoder.run(spots=multiplexed_spots)
 
-    assert np.array_equal(decoded_multiplexed[Features.TARGET].values, ['GENE_B', 'GENE_A'])
+    assert np.array_equal(decoded_multiplexed[Features.TARGET].values, ['GENE_A', 'GENE_B'])
 
     lookup_decoder = SimpleLookupDecoder(codebook=codebook)
     decoded_sequential = lookup_decoder.run(spots=sequential_spots)
@@ -329,7 +329,8 @@ def test_composite_codebook_mixed_round():
     # find spots
     reference_image = multiplexed_stack.reduce((Axes.ROUND, Axes.CH), func="max")
     multiplexed_spots = gaussian_spot_detector.run(
-        image_stack=multiplexed_stack, reference_image=reference_image)
+        image_stack=multiplexed_stack, reference_image=reference_image
+    )
 
     # the easiest way to process the sequential portion is to process the two parts independently
     sequential_spots_part_1 = gaussian_spot_detector.run(image_stack=sequential_stack_part_1)

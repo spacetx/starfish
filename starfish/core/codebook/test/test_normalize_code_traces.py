@@ -69,7 +69,7 @@ def test_normalize_codes(norm_order, expected_size):
 
     # each code should still have only two non-zero values
     assert np.all(
-        normed_codebook.groupby(Features.TARGET).apply(lambda x: np.sum(x != 0)) == 2
+        normed_codebook.groupby(Features.TARGET).map(lambda x: np.sum(x != 0)) == 2
     )
 
     # each non-zero value should be equal to 1 / expected_size of the norm. There are two non-zero
@@ -96,7 +96,7 @@ def test_normalize_intensities(norm_order, expected_size):
 
     # each feature should still have only two non-zero values
     assert np.all(
-        normed_intensities.groupby(Features.AXIS).apply(lambda x: np.sum(x != 0)) == 2
+        normed_intensities.groupby(Features.AXIS).map(lambda x: np.sum(x != 0)) == 2
     )
 
     # each non-zero value should be equal to 1 / expected_size of the norm.

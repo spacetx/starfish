@@ -50,7 +50,7 @@ class MatchHistograms(FilterAlgorithm):
         stacked = data.xarray.stack(chunk_key=chunk_key)
         stacked = stacked.stack(sort_key=sort_key)
 
-        sorted_stacked = stacked.groupby("sort_key").apply(np.sort)
+        sorted_stacked = stacked.groupby("sort_key").map(np.sort)
         reference = sorted_stacked.mean("sort_key")
         reference = reference.unstack("chunk_key")
         return reference

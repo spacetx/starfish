@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import os
 from pathlib import Path
+
 import setuptools
 import versioneer
+
 
 install_requires = [
     line.rstrip() for line in open(Path(__file__).parent / "REQUIREMENTS.txt")
@@ -29,4 +30,5 @@ setuptools.setup(
     include_package_data=True,
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
+    python_requires='>=3.7'
 )

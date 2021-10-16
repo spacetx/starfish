@@ -3,7 +3,7 @@ from typing import Sequence, Tuple, TypeVar, Union
 import numpy as np
 import xarray as xr
 
-from ._constants import (
+from ._constants import (  # noqa: F401
     Axes,
     Coordinates,
     CORE_DEPENDENCIES,
@@ -17,10 +17,10 @@ from ._constants import (
     TraceBuildingStrategies,
     TransformType
 )
-from ._decoded_spots import DecodedSpots
-from ._functionsource import FunctionSource, FunctionSourceBundle
-from ._spot_attributes import SpotAttributes
-from ._spot_finding_results import PerImageSliceSpotResults, SpotFindingResults
+from ._decoded_spots import DecodedSpots  # noqa: F401
+from ._functionsource import FunctionSource, FunctionSourceBundle  # noqa: F401
+from ._spot_attributes import SpotAttributes  # noqa: F401
+from ._spot_finding_results import PerImageSliceSpotResults, SpotFindingResults  # noqa: F401
 
 Number = Union[int, float]
 CoordinateValue = Union[Number, Tuple[Number, Number]]

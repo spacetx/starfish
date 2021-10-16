@@ -71,7 +71,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-latest", "ubuntu-latest"]
-        python-version: ["3.7", "3.8"]
+        python-version: ["3.7", "3.8", "3.9"]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -357,6 +357,31 @@ jobs:
         run: |
           notebooks/py/SeqFISH.py
 
+  starmap-data-processing-example:
+    name: STARmap Notebook Test
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setpu Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+      
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Notebook Tests
+        run: |
+          make notebooks/py/STARmap.py
+
   smfish-data-processing-example:
     name: 3D smFISH Data Processing Example
     needs: starfish-slow
@@ -378,7 +403,7 @@ jobs:
         run: |
           make install-dev
 
-      - name: Run Notebook Tests
+      - name: Run Data Processing Example Test
         run: |
           make 3d_smFISH.py
 
@@ -403,6 +428,6 @@ jobs:
         run: |
           make install-dev
 
-      - name: Run Notebook Tests
+      - name: Run Data Processing Example Test
         run: |
-          make iss_pipeline.py
+          make TESTING=1 iss_pipeline.py

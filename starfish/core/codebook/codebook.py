@@ -573,7 +573,7 @@ class Codebook(xr.DataArray):
         :doc:`numpy:reference/generated/numpy.linalg.norm`
 
         The available metrics for this function can be found at the following link:
-        :doc:`scipy:spatial.distance`
+        :doc:`scipy:reference/spatial.distance`
 
         Returns
         -------

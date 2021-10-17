@@ -255,7 +255,7 @@ jobs:
 
       - name: Run Notebook Tests
         run: |
-          notebooks/py/DARTFISH.py
+          make notebooks/py/DARTFISH.py
 
   simulation-notebook:
     name: Simulation Notebook Test
@@ -355,7 +355,7 @@ jobs:
 
       - name: Run Notebook Tests
         run: |
-          notebooks/py/SeqFISH.py
+          make notebooks/py/SeqFISH.py
 
   starmap-data-processing-example:
     name: STARmap Notebook Test

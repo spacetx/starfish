@@ -213,7 +213,7 @@ def decoder(roundData: pd.DataFrame,
             codebook: Codebook,
             roundOmitNum: int,
             currentRound: int,
-            numJobs: int) -> pd.DataFrane:
+            numJobs: int) -> pd.DataFrame:
 
     '''
     Function that takes spots tables with possible barcodes added and matches each to the codebook

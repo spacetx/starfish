@@ -6,7 +6,7 @@ from ..reduce import Reduce
 
 def test_reduce():
     def make_initial(shape):
-        constant_initial = np.zeros(shape=shape, dtype=np.bool)
+        constant_initial = np.zeros(shape=shape, dtype=bool)
         constant_initial[0, 0] = 1
         return constant_initial
 
@@ -25,5 +25,5 @@ def test_reduce():
              [False, False, False, True, True, True],
              [False, False, False, True, True, False],
              ],
-            dtype=np.bool,
+            dtype=bool,
         ))

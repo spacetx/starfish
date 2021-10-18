@@ -1,0 +1,433 @@
+
+name: starfish-prod-ci
+
+on:
+
+  push:
+    branches: [ master ]
+
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  lint:
+    name: Lint
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: flake8 linting
+        run: |
+          make lint mypy
+
+  starfish-fast:
+    name: Python-${{ matrix.python-version }}-${{ matrix.os }}
+    needs: lint
+    strategy:
+      matrix:
+        os: ["windows-latest", "ubuntu-latest"]
+        python-version: ["3.7", "3.8", "3.9"]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install dependencies
+        run: |
+          make install-dev
+
+      - name: Run tests
+        run: |
+          make fast-test docs-html
+
+  starfish-slow:
+    name: Python-${{ matrix.python-version }}-${{ matrix.os }}
+    needs: starfish-fast
+    strategy:
+      matrix:
+        os: ["windows-latest", "ubuntu-latest"]
+        python-version: ["3.7", "3.8", "3.9"]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install dependencies
+        run: |
+          make install-dev
+
+      - name: Run tests
+        run: |
+          make -j check-notebooks slow-test
+
+  # Disabling napari tests for now since github actions runner has no
+  # display so will need to modify tests to have napari run headless maybe?
+
+  # napari-pinned:
+  #   name: Napari Pinned
+  #   runs-on: "ubuntu-latest"
+  #   steps:
+  #     - uses: actions/checkout@v2
+
+  #     - name: Install dependencies
+  #       run: |
+  #         sudo apt-get install -y libgl1-mesa-glx libqt5x11extras5 xvfb
+  #         pip install -U pip==21.0.1
+  #         pip install -r requirements/REQUIREMENTS-NAPARI-CI.txt
+  #         make install-dev
+  #         pip freeze
+  #         export DISPLAY=:99
+  #         Xvfb $DISPLAY -ac -screen 0 1024x768x24 &
+  #         sleep 10
+
+  #     - name: Run tests
+  #       run: |
+  #         python -c "import vispy; print(vispy.sys_info())"
+  #         make napari-test
+
+  # napari-latest:
+  #   name: Napari Latest
+  #   needs: napari-pinned
+  #   runs-on: "ubuntu-latest"
+  #   steps:
+  #     - uses: actions/checkout@v2
+
+  #     - name: Install dependencies
+  #       run: |
+  #         sudo apt-get install -y libgl1-mesa-glx libqt5x11extras5 xvfb
+  #         make install-dev
+  #         pip install .[napari] pytest-qt
+  #         pip freeze
+  #         export DISPLAY=:99
+  #         Xvfb $DISPLAY -ac -screen 0 1024x768x24 &
+  #         sleep 10
+
+  #     - name: Run tests
+  #       run: |
+  #         python -c "import vispy; print(vispy.sys_info())"
+  #         make napari-test
+
+  docker-smoketest:
+    name: Docker Smoketest
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Docker Image
+        run: |
+          docker build -f docker/Dockerfile -t spacetx/starfish .
+
+      - name: Run Docker Smoketest
+        run: |
+          docker run --rm spacetx/starfish starfish --help
+
+  smfish-notebook:
+    name: smFISH Notebook Test
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Notebook Tests
+        run: |
+          make notebooks/py/smFISH.py
+
+  merfish-notebook:
+    name: MERFISH Notebook Test
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Notebook Tests
+        run: |
+          make notebooks/py/MERFISH.py
+
+  osmfish-notebook:
+    name: osmFISH Notebook Test
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Notebook Tests
+        run: |
+          make notebooks/py/osmFISH.py
+
+  dartfish-notebook:
+    name: DARTFISH Notebook Test
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Notebook Tests
+        run: |
+          make notebooks/py/DARTFISH.py
+
+  simulation-notebook:
+    name: Simulation Notebook Test
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Notebook Tests
+        run: |
+          make notebooks/py/Starfish_simulation.py
+
+  iss-notebook:
+    name: ISS Notebook Test
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Notebook Tests
+        run: |
+          make notebooks/py/ISS.py
+
+  baristaseq-notebook:
+    name: BaristaSeq Notebook Test
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Notebook Tests
+        run: |
+          make notebooks/py/BaristaSeq.py
+
+  seqfish-notebook:
+    name: SeqFISH Notebook Test
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Notebook Tests
+        run: |
+          make notebooks/py/SeqFISH.py
+
+  starmap-data-processing-example:
+    name: STARmap Notebook Test
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setpu Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+      
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Notebook Tests
+        run: |
+          make notebooks/py/STARmap.py
+
+  smfish-data-processing-example:
+    name: 3D smFISH Data Processing Example
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Data Processing Example Test
+        run: |
+          make 3d_smFISH.py
+
+  iss-pipeline-data-processing-example:
+    name: iss_pipeline.py Data Processing Example
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Data Processing Example Test
+        run: |
+          make TESTING=1 iss_pipeline.py

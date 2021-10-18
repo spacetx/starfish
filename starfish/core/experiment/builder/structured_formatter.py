@@ -259,6 +259,7 @@ class InferredTile(InplaceFetchedTile):
 
     def tile_data(self) -> np.ndarray:
         self._ensure_tile_loaded()
+        assert self._tile_data is not None
         return self._tile_data
 
 

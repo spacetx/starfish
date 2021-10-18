@@ -92,10 +92,12 @@ def test_local_search_blob_detector_two_codes():
     intensity_table = build_traces_nearest_neighbors(spot_results=spot_results, anchor_round=1,
                                                      search_radius=1)
 
-    assert intensity_table.shape == (2, 2, 3)
-    assert np.all(intensity_table[0][Axes.X.value] == 45)
-    assert np.all(intensity_table[0][Axes.Y.value] == 40)
-    assert np.all(intensity_table[0][Axes.ZPLANE.value] == 5)
+    # Sort features to ensure test stability
+    sorted_intensity_table = intensity_table.sortby(["x", "y", "z"])
+    assert sorted_intensity_table.shape == (2, 2, 3)
+    assert np.all(sorted_intensity_table[1][Axes.X.value] == 45)
+    assert np.all(sorted_intensity_table[1][Axes.Y.value] == 40)
+    assert np.all(sorted_intensity_table[1][Axes.ZPLANE.value] == 5)
 
 
 def test_local_search_blob_detector_jitter_code():
@@ -160,8 +162,9 @@ def test_local_search_blob_detector_multiple_neighbors():
     intensity_table = build_traces_nearest_neighbors(spot_results=spot_results, anchor_round=0,
                                                      search_radius=4)
 
-    assert intensity_table.shape == (2, 2, 3)
-    f, c, r = np.where(~intensity_table.isnull())
-    assert np.all(intensity_table[Axes.ZPLANE.value] == (5, 5))
-    assert np.all(intensity_table[Axes.Y.value] == (40, 20))
-    assert np.all(intensity_table[Axes.X.value] == (20, 40))
+    # Sort features to ensure test stability
+    sorted_intensity_table = intensity_table.sortby(["x", "y", "z"])
+    assert sorted_intensity_table.shape == (2, 2, 3)
+    assert np.all(sorted_intensity_table[Axes.ZPLANE.value] == (5, 5))
+    assert np.all(sorted_intensity_table[Axes.Y.value] == (40, 20))
+    assert np.all(sorted_intensity_table[Axes.X.value] == (20, 40))

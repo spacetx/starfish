@@ -8,7 +8,7 @@ def test_expand_mask_2d(shape=(15, 15)):
     mask = np.array(
         [[True, False, False],
          [False, True, True]],
-        dtype=np.bool)
+        dtype=bool)
     label_image = np.random.randint(30, np.iinfo(np.uint16).max, size=shape, dtype=np.uint16)
     label_image_clone = np.copy(label_image)
     fill_from_mask(mask, (2, 3), 20, label_image)
@@ -16,7 +16,7 @@ def test_expand_mask_2d(shape=(15, 15)):
     assert label_image.dtype == np.uint16
     assert label_image.shape == shape
 
-    compare_mask = np.ones(shape=shape, dtype=np.bool)
+    compare_mask = np.ones(shape=shape, dtype=bool)
     for y, x in (
             (2, 3),
             (3, 4),
@@ -39,7 +39,7 @@ def test_expand_mask_3d(shape=(15, 15, 15)):
           [False, False, False],
           [True, False, False],
           [False, False, False]]],
-        dtype=np.bool)
+        dtype=bool)
     label_image = np.random.randint(30, np.iinfo(np.uint16).max, size=shape, dtype=np.uint16)
     label_image_clone = np.copy(label_image)
     fill_from_mask(mask, (2, 7, 3), 20, label_image)
@@ -47,7 +47,7 @@ def test_expand_mask_3d(shape=(15, 15, 15)):
     assert label_image.dtype == np.uint16
     assert label_image.shape == shape
 
-    compare_mask = np.ones(shape=shape, dtype=np.bool)
+    compare_mask = np.ones(shape=shape, dtype=bool)
     for z, y, x in (
             (2, 7, 3),
             (2, 7, 5),
@@ -68,7 +68,7 @@ def test_expand_image_too_small(shape=(2, 2)):
     mask = np.array(
         [[True, False, False],
          [False, True, True]],
-        dtype=np.bool)
+        dtype=bool)
     label_image = np.random.randint(30, np.iinfo(np.uint16).max, size=shape, dtype=np.uint16)
     with pytest.raises(ValueError):
         fill_from_mask(mask, (2, 3), 20, label_image)
@@ -78,7 +78,7 @@ def test_expand_image_negative_axis_labels(shape=(15, 15)):
     mask = np.array(
         [[True, False, False],
          [False, True, True]],
-        dtype=np.bool)
+        dtype=bool)
     label_image = np.random.randint(30, np.iinfo(np.uint16).max, size=shape, dtype=np.uint16)
     with pytest.raises(ValueError):
         fill_from_mask(mask, (2, -1), 20, label_image)

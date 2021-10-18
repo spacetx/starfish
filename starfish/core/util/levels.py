@@ -103,11 +103,13 @@ def levels(
         # that is a pretty unlikely scenario, so we assume the max is not going to be exactly 1.0.
         if belowzero or aboveone or rescale:
             data = data.copy()
-            _adjust_image_levels_in_place(data, rescale or (rescale_saturated and aboveone))
+            do_rescale = bool(rescale or (rescale_saturated and aboveone))
+            _adjust_image_levels_in_place(data, do_rescale)
     else:
         # we don't want a copy, so we just do it in place.
         aboveone = np.any(data > 1)
-        _adjust_image_levels_in_place(data, rescale or (rescale_saturated and aboveone))
+        do_rescale = bool(rescale or (rescale_saturated and aboveone))
+        _adjust_image_levels_in_place(data, do_rescale)
 
     if isinstance(array, xr.DataArray):
         if data is not array.values:

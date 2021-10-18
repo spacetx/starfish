@@ -23,7 +23,7 @@ class Watershed(SegmentAlgorithm):
     Algorithm is seeded by nuclei image. Binary segmentation mask is computed from a maximum
     projection of spots across C and R, which is subsequently thresholded.
 
-    This function wraps :py:func:`skimage.morphology.watershed`
+    This function wraps :py:func:`skimage.segmentation.watershed`
 
     Parameters
     ----------
@@ -86,7 +86,7 @@ class Watershed(SegmentAlgorithm):
             disk_size_mask, self.min_distance
         )
 
-    def show(self, figsize: Tuple[int, int]=(10, 10)) -> None:
+    def show(self, figsize: Tuple[int, int] = (10, 10)) -> None:
         if isinstance(self._segmentation_instance, _WatershedSegmenter):
             self._segmentation_instance.show(figsize=figsize)
         else:
@@ -130,8 +130,8 @@ class _WatershedSegmenter:
             nuclei_thresh: Number,
             stain_thresh: Number,
             size_lim: Tuple[int, int],
-            disk_size_markers: Optional[int]=None,  # TODO ambrosejcarr what is this doing?
-            disk_size_mask: Optional[int]=None,  # TODO ambrosejcarr what is this doing?
+            disk_size_markers: Optional[int] = None,  # TODO ambrosejcarr what is this doing?
+            disk_size_mask: Optional[int] = None,  # TODO ambrosejcarr what is this doing?
             min_dist: Optional[int] = None
     ) -> BinaryMaskCollection:
         """Execute watershed cell segmentation.
@@ -227,7 +227,7 @@ class _WatershedSegmenter:
         markers_and_stain = Merge.SimpleMerge().run([thresholded_stain, markers])
         watershed_mask = Filter.Reduce(
             "logical_or",
-            lambda shape: np.zeros(shape=shape, dtype=np.bool)
+            lambda shape: np.zeros(shape=shape, dtype=bool)
         ).run(markers_and_stain)
         if disk_size is not None:
             disk_img = disk(disk_size)
@@ -260,7 +260,7 @@ class _WatershedSegmenter:
         """
         assert len(watershed_mask) == 1
 
-        binarizer = WatershedSegment(connectivity=np.ones((1, 3, 3), dtype=np.bool))
+        binarizer = WatershedSegment(connectivity=np.ones((1, 3, 3), dtype=bool))
 
         return binarizer.run(
             self.stain,

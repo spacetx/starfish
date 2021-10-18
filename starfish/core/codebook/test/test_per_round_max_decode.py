@@ -11,7 +11,7 @@ from starfish.core.types import Axes, Features, SpotAttributes
 from ..codebook import Codebook
 
 
-def intensity_table_factory(data: np.ndarray=np.array([[[0, 3], [4, 0]]])) -> IntensityTable:
+def intensity_table_factory(data: np.ndarray = np.array([[[0, 3], [4, 0]]])) -> IntensityTable:
     """IntensityTable with a single feature that was measured over 2 channels and 2 rounds."""
 
     # generates spot attributes equal in size to the number of passed features.
@@ -56,23 +56,25 @@ def codebook_factory() -> Codebook:
 
 def test_intensity_tables_with_different_numbers_of_codes_or_channels_throw_value_error():
     """
-    The test passes a 3-round and 1-round IntensityTable to a 2-round codebook. Both should
-    raise a ValueError.
+    The test passes a 3-round and 1-round IntensityTable to a 2-round codebook.
+    Both should raise a ValueError.
+    Finally passes a valid 2-round IntensityTable which should not raise an error.
     """
     data = np.array(
         [[[4, 4],
           [3, 0],
-          [1, 2],
-          ]
-         ]
+          [1, 2]]]
     )
     codebook = codebook_factory()
     intensities = intensity_table_factory(data)
-    with pytest.raises(ValueError):
+
+    with pytest.raises(ValueError, match="Codebook and Intensities must have same number"):
         codebook.decode_per_round_max(intensities)
 
-    with pytest.raises(ValueError):
-        codebook.decode_per_round_max(intensities.sel(round=1))
+    with pytest.raises(ValueError, match="Codebook and Intensities must have same number"):
+        codebook.decode_per_round_max(intensities.sel(r=1))
+
+    _ = codebook.decode_per_round_max(intensities.sel(r=slice(0, 1)))
 
 
 def test_example_intensity_decodes_to_gene_a():

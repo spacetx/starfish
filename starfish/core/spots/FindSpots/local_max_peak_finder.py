@@ -118,7 +118,6 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
                 min_distance=self.min_distance,
                 threshold_abs=threshold,
                 exclude_border=False,
-                indices=True,
                 num_peaks=np.inf,
                 footprint=None,
                 labels=None
@@ -146,7 +145,7 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
     def _select_optimal_threshold(self, thresholds: np.ndarray, spot_counts: List[int]) -> float:
         # calculate the gradient of the number of spots
         grad = np.gradient(spot_counts)
-        optimal_threshold_index = np.argmin(grad)
+        optimal_threshold_index = int(np.argmin(grad))
 
         # only consider thresholds > than optimal threshold
         thresholds = thresholds[optimal_threshold_index:]
@@ -203,11 +202,11 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
         np.ndarray :
             The intensity threshold
         """
-        img = np.asarray(img)
-        thresholds, spot_counts = self._compute_num_spots_per_threshold(img)
+        img_array = img.data
+        thresholds, spot_counts = self._compute_num_spots_per_threshold(img_array)
         if len(spot_counts) == 0:
             # this only happens when we never find more spots than `self.min_num_spots_detected`
-            return img.min(), None, None
+            return img_array.min(), None, None
         return self._select_optimal_threshold(thresholds, spot_counts), thresholds, spot_counts
 
     def image_to_spots(
@@ -263,33 +262,44 @@ class LocalMaxPeakFinder(FindSpotsAlgorithm):
             min_distance=self.min_distance,
             threshold_abs=optimal_threshold,
             exclude_border=False,
-            indices=True,
             num_peaks=np.inf,
             footprint=None,
             labels=labels,
             **kwargs
         )
 
-        if data_image.ndim == 3:
-            res = {Axes.X.value: spot_coords[:, 2],
-                   Axes.Y.value: spot_coords[:, 1],
-                   Axes.ZPLANE.value: spot_coords[:, 0],
-                   Features.SPOT_RADIUS: 1,
-                   Features.SPOT_ID: np.arange(spot_coords.shape[0]),
-                   Features.INTENSITY: data_image_np[spot_coords[:, 0],
-                                                     spot_coords[:, 1],
-                                                     spot_coords[:, 2]],
-                   }
+        if spot_coords.any():
+            if data_image.ndim == 3:
+                res = {
+                    Axes.X.value: spot_coords[:, 2],
+                    Axes.Y.value: spot_coords[:, 1],
+                    Axes.ZPLANE.value: spot_coords[:, 0],
+                    Features.SPOT_RADIUS: 1,
+                    Features.SPOT_ID: np.arange(spot_coords.shape[0]),
+                    Features.INTENSITY: data_image_np[spot_coords[:, 0],
+                                                      spot_coords[:, 1],
+                                                      spot_coords[:, 2]],
+                }
+            else:
+                zlabel = int(data_image.coords[Axes.ZPLANE.value])
+                res = {
+                    Axes.X.value: spot_coords[:, 1],
+                    Axes.Y.value: spot_coords[:, 0],
+                    Axes.ZPLANE.value: zlabel,
+                    Features.SPOT_RADIUS: 1,
+                    Features.SPOT_ID: np.arange(spot_coords.shape[0]),
+                    Features.INTENSITY: data_image_np[spot_coords[:, 0],
+                                                      spot_coords[:, 1]],
+                }
         else:
-            zlabel = int(data_image.coords[Axes.ZPLANE.value])
-            res = {Axes.X.value: spot_coords[:, 1],
-                   Axes.Y.value: spot_coords[:, 0],
-                   Axes.ZPLANE.value: zlabel,
-                   Features.SPOT_RADIUS: 1,
-                   Features.SPOT_ID: np.arange(spot_coords.shape[0]),
-                   Features.INTENSITY: data_image_np[spot_coords[:, 0],
-                                                     spot_coords[:, 1]],
-                   }
+            res = {
+                Axes.X.value: [],
+                Axes.Y.value: [],
+                Axes.ZPLANE.value: [],
+                Features.SPOT_RADIUS: [],
+                Features.SPOT_ID: [],
+                Features.INTENSITY: []
+            }
 
         extras: Mapping[str, Any] = {
             "threshold": optimal_threshold,

@@ -1,7 +1,7 @@
 from typing import Mapping, Optional
 
 import numpy as np
-from skimage.morphology import watershed
+from skimage.segmentation import watershed
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
@@ -21,7 +21,7 @@ class WatershedSegment(SegmentAlgorithm):
 
     See Also
     --------
-    skimage.morphology.watershed
+    skimage.segmentation.watershed
     """
     def __init__(self, **watershed_kwargs):
         self.watershed_kwargs = watershed_kwargs

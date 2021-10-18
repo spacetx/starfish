@@ -40,7 +40,7 @@ class Warp(ApplyTransformAlgorithm):
     """
 
     def run(self, stack: ImageStack, transforms_list: TransformsList,
-            in_place: bool=False, verbose: bool=False, *args, **kwargs) -> Optional[ImageStack]:
+            in_place: bool = False, verbose: bool = False, *args, **kwargs) -> Optional[ImageStack]:
         if not in_place:
             # create a copy of the ImageStack, call apply on that stack with in_place=True
             image_stack = deepcopy(stack)
@@ -56,8 +56,9 @@ class Warp(ApplyTransformAlgorithm):
                 # combine all axes data to select one tile
                 selector.update(axes)  # type: ignore
                 selected_image, _ = stack.get_slice(selector)
-                warped_image = warp(selected_image, transformation_object, **kwargs
-                                    ).astype(np.float32)
+                warped_image = warp(
+                    xr.DataArray(selected_image), transformation_object, **kwargs
+                ).astype(np.float32)
                 stack.set_slice(selector, warped_image)
         return None
 
@@ -66,7 +67,7 @@ def warp(
         image: xr.DataArray,
         transformation_object: GeometricTransform,
         **kwargs
-) -> xr.DataArray:
+) -> np.ndarray:
     """
     Wrapper around :py:func:`skimage.transform.warp`. Warps an image according to a
     given coordinate transformation.

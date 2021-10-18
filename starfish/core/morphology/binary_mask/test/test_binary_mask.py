@@ -28,8 +28,8 @@ def test_from_label_image():
     assert region_0.name == '0'
     assert region_1.name == '1'
 
-    assert np.array_equal(region_0, np.ones((1, 6), dtype=np.bool))
-    temp = np.ones((2, 3), dtype=np.bool)
+    assert np.array_equal(region_0, np.ones((1, 6), dtype=bool))
+    temp = np.ones((2, 3), dtype=bool)
     temp[-1, -1] = False
     assert np.array_equal(region_1, temp)
 
@@ -84,13 +84,13 @@ def test_uncropped_mask():
 
     region_0 = mask_collection.uncropped_mask(0)
     assert region_0.shape == label_image_array.shape
-    assert region_0.dtype == np.bool
+    assert region_0.dtype == bool
     assert np.all(region_0[0] == 1)
     assert np.all(region_0[1:5] == 0)
 
     region_1 = mask_collection.uncropped_mask(1)
     assert region_1.shape == label_image_array.shape
-    assert region_1.dtype == np.bool
+    assert region_1.dtype == bool
     assert np.all(region_1[0:3, :] == 0)
     assert np.all(region_1[:, 0:3] == 0)
     assert np.all(region_1[3:5, 3:6] == [[1, 1, 1],
@@ -194,9 +194,9 @@ def test_apply():
     assert region_0.name == '0'
     assert region_1.name == '1'
 
-    temp = np.ones((2, 6), dtype=np.bool)
+    temp = np.ones((2, 6), dtype=bool)
     assert np.array_equal(region_0, temp)
-    temp = np.ones((3, 4), dtype=np.bool)
+    temp = np.ones((3, 4), dtype=bool)
     temp[0, 0] = 0
     assert np.array_equal(region_1, temp)
 
@@ -209,7 +209,7 @@ def test_apply():
 
 def test_reduce():
     def make_initial(shape):
-        constant_initial = np.zeros(shape=shape, dtype=np.bool)
+        constant_initial = np.zeros(shape=shape, dtype=bool)
         constant_initial[0, 0] = 1
         return constant_initial
 
@@ -229,7 +229,7 @@ def test_reduce():
              [False, False, False, True, True, True],
              [False, False, False, True, True, False],
              ],
-            dtype=np.bool,
+            dtype=bool,
         ))
 
     xored_binary_mask_programmatic_initial = input_mask_collection._reduce(
@@ -245,5 +245,5 @@ def test_reduce():
              [False, False, False, True, True, True],
              [False, False, False, True, True, False],
              ],
-            dtype=np.bool,
+            dtype=bool,
         ))

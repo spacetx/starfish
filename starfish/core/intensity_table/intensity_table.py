@@ -1,6 +1,6 @@
 from itertools import product
 from json import loads
-from typing import cast, Dict, Hashable, List, Optional, Sequence
+from typing import cast, Dict, Hashable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -20,6 +20,8 @@ from .overlap import (
     find_overlaps_of_xarrays,
     OVERLAP_STRATEGY_MAP,
 )
+
+CoordinatesType = Dict[Hashable, Union[Tuple[str, np.ndarray], np.ndarray]]
 
 
 class IntensityTable(xr.DataArray):
@@ -80,11 +82,12 @@ class IntensityTable(xr.DataArray):
             spot_attributes: SpotAttributes,
             round_values: Sequence[int],
             channel_values: Sequence[int],
-    ) -> Dict[Hashable, np.ndarray]:
+    ) -> CoordinatesType:
         """build coordinates for intensity-table"""
-        coordinates = {
+        coordinates: CoordinatesType = {
             k: (Features.AXIS, spot_attributes.data[k].values)
-            for k in spot_attributes.data}
+            for k in spot_attributes.data
+        }
         coordinates.update({
             Features.AXIS: np.arange(len(spot_attributes.data)),
             Axes.ROUND.value: np.array(round_values),
@@ -136,7 +139,7 @@ class IntensityTable(xr.DataArray):
     @classmethod
     def from_spot_data(
             cls,
-            intensities: xr.DataArray,
+            intensities: np.ndarray,
             spot_attributes: SpotAttributes,
             round_values: Sequence[int],
             ch_values: Sequence[int],
@@ -148,7 +151,7 @@ class IntensityTable(xr.DataArray):
 
         Parameters
         ----------
-        intensities : xr.DataArray
+        intensities : np.ndarray
             Intensity data.
         spot_attributes : SpotAttributes
             Table containing spot metadata. Must contain the values specified in Axes.X,
@@ -190,11 +193,9 @@ class IntensityTable(xr.DataArray):
             raise TypeError('parameter spot_attributes must be a starfish SpotAttributes object.')
 
         coords = cls._build_xarray_coords(spot_attributes, round_values, ch_values)
-
         dims = (Features.AXIS, Axes.ROUND.value, Axes.CH.value)
 
-        intensities = cls(intensities, coords, dims, *args, **kwargs)
-        return intensities
+        return cls(intensities, coords, dims, *args, **kwargs)
 
     def get_log(self):
         """
@@ -327,7 +328,7 @@ class IntensityTable(xr.DataArray):
     def from_image_stack(
             cls,
             image_stack,
-            crop_x: int=0, crop_y: int=0, crop_z: int=0
+            crop_x: int = 0, crop_y: int = 0, crop_z: int = 0
     ) -> "IntensityTable":
         """Generate an IntensityTable from all the pixels in the ImageStack
 

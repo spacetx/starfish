@@ -1,20 +1,20 @@
-from typing import Mapping, Hashable, Tuple, Any
-import ray
-import pandas as pd
-import numpy as np
 from copy import deepcopy
+from typing import Any, Hashable, Mapping, Tuple
+
+import numpy as np
+import pandas as pd
+import ray
+
 
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
+from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.intensity_table.intensity_table_coordinates import \
     transfer_physical_coords_to_intensity_table
-from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import SpotFindingResults
 from starfish.types import Axes, Features
 from ._base import DecodeSpotsAlgorithm
-
-
-from .check_all_funcs import findNeighbors, buildBarcodes, decoder, distanceFilter, cleanup, \
+from .check_all_funcs import buildBarcodes, cleanup, decoder, distanceFilter, findNeighbors, \
     removeUsedSpots
 from .util import _merge_spots_by_round
 

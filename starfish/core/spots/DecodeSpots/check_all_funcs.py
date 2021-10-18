@@ -1,14 +1,17 @@
-from collections import Counter
-from scipy.spatial import cKDTree
+import warnings
+from collections import Counter, defaultdict
 from copy import deepcopy
-from itertools import product, chain, permutations
-from collections import defaultdict
-import ray
+from itertools import chain, permutations, product
+
+
 import numpy as np
 import pandas as pd
-import warnings
-from starfish.types import Axes
+import ray
+from scipy.spatial import cKDTree
+
 from starfish.core.codebook.codebook import Codebook
+from starfish.types import Axes
+
 warnings.filterwarnings('ignore')
 
 def findNeighbors(spotTables: dict, searchRadius: float) -> dict:

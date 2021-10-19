@@ -61,8 +61,10 @@ class DecodedIntensityTable(IntensityTable):
             distances: Optional[Tuple[str, np.ndarray]] = None,
             passes_threshold: Optional[Tuple[str, np.ndarray]] = None,
             rounds_used: Optional[Tuple[str, np.ndarray]] = None):
+
         """
         Assign target values to intensities.
+
         Parameters
         ----------
         intensities : IntensityTable
@@ -77,6 +79,7 @@ class DecodedIntensityTable(IntensityTable):
         rounds_used: Optional[Tuple[str, np.ndarray]]
             Corresponding array of integers indicated the number of rounds this
             decoded intensity was found in
+
         Returns
         -------
         DecodedIntensityTable

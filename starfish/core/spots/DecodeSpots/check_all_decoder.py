@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import ray
 
-
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
 from starfish.core.intensity_table.intensity_table import IntensityTable
@@ -14,7 +13,7 @@ from starfish.core.intensity_table.intensity_table_coordinates import \
 from starfish.core.types import SpotFindingResults
 from starfish.types import Axes, Features
 from ._base import DecodeSpotsAlgorithm
-from .check_all_funcs import buildBarcodes, cleanup, decoder, distanceFilter, findNeighbors, \
+from .check_all_funcs import buildBarcodes, cleanup, createRefDicts, decoder, distanceFilter, \
     removeUsedSpots
 from .util import _merge_spots_by_round
 
@@ -121,23 +120,15 @@ class CheckAll(DecodeSpotsAlgorithm):
             else:
                 self.filterRounds = len(spotTables) - self.errorRounds
 
-        # Create dictionary of neighbors (within the search radius) in other rounds for each spot
-        neighborDict = findNeighbors(spotTables, self.searchRadius)
-
-        # Create dictionaries with mapping from spot id (row index) in spotTables to channel
-        # number and one with spot coordinates for fast access
-        channelDict = {}
-        spotCoords = {}
-        for r in [*spotTables]:
-            channelDict[r] = spotTables[r]['c'].to_dict()
-            spotCoords[r] = spotTables[r][['z', 'y', 'x']].T.to_dict()
-
         # Set list of round omission numbers to loop through
         roundOmits = range(self.errorRounds + 1)
 
         # Decode for each round omission number, store results in allCodes table
         allCodes = pd.DataFrame()
         for currentRoundOmitNum in roundOmits:
+
+            # Create necessary reference dictionaries
+            neighborDict, channelDict, spotCoords = createRefDicts(spotTables, self.searchRadius)
 
             # Chooses best barcode for all spots in each round sequentially (possible barcode
             # space can become quite large which can increase memory needs so I do it this way so
@@ -170,10 +161,10 @@ class CheckAll(DecodeSpotsAlgorithm):
             finalCodes = cleanup(decodedTables, spotCoords, self.filterRounds)
 
             # If this is not the last round omission number to run, remove spots that have just
-            # been found to be in passing barcodes from neighborDict so they are not used for the
+            # been found to be in passing barcodes from spotTables so they are not used for the
             # next round omission number
             if currentRoundOmitNum != roundOmits[-1]:
-                neighborDict = removeUsedSpots(finalCodes, neighborDict)
+                spotTables = removeUsedSpots(finalCodes, spotTables)
 
             # Append found codes to allCodes table
             allCodes = allCodes.append(finalCodes).reset_index(drop=True)
@@ -186,8 +177,8 @@ class CheckAll(DecodeSpotsAlgorithm):
         rounds = spots.round_labels
 
         # create empty IntensityTable filled with np.nan
-        data = np.full((len(allCodes), len(channels), len(rounds)), fill_value=np.nan)
-        dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
+        data = np.full((len(allCodes), len(rounds), len(channels)), fill_value=np.nan)
+        dims = (Features.AXIS, Axes.ROUND.value, Axes.CH.value)
         centers = allCodes['center']
         coords: Mapping[Hashable, Tuple[str, Any]] = {
             Features.SPOT_RADIUS: (Features.AXIS, np.full(len(allCodes), 1)),
@@ -208,18 +199,17 @@ class CheckAll(DecodeSpotsAlgorithm):
             for ch in allCodes.loc[i, 'best_barcodes']:
                 # If a round is not used, row will be all zeros
                 code.append(np.asarray([0 if j != ch else 1 for j in range(len(channels))]))
-            table_codes.append(np.asarray(code).T)
+            table_codes.append(np.asarray(code))
         int_table.values = np.asarray(table_codes)
         int_table = transfer_physical_coords_to_intensity_table(intensity_table=int_table,
                                                                 spots=spots)
-        intensities = int_table.transpose('features', 'r', 'c')
 
         # Validate results are correct shape
-        self.codebook._validate_decode_intensity_input_matches_codebook_shape(intensities)
+        self.codebook._validate_decode_intensity_input_matches_codebook_shape(int_table)
 
         # Create DecodedIntensityTable
         result = DecodedIntensityTable.from_intensity_table(
-            intensities,
+            int_table,
             targets=(Features.AXIS, allCodes['best_targets'].astype('U')),
             distances=(Features.AXIS, allCodes["best_distances"]),
             passes_threshold=(Features.AXIS, np.full(len(allCodes), True)),

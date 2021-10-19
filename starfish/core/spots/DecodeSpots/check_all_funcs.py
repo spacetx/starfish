@@ -3,7 +3,6 @@ from collections import Counter, defaultdict
 from copy import deepcopy
 from itertools import chain, permutations, product
 
-
 import numpy as np
 import pandas as pd
 import ray
@@ -14,8 +13,42 @@ from starfish.types import Axes
 
 warnings.filterwarnings('ignore')
 
-def findNeighbors(spotTables: dict, searchRadius: float) -> dict:
+def createRefDicts(spotTables: dict, searchRadius: float) -> tuple:
+    '''
+    Creates reference dictionary that have mappings between the each spot's round and ID and their
+    neighbors, channel label, and spatial coordinates.
 
+    Parameters
+    ----------
+        spotTables : dict
+            Dictionary with round labels as keys and pandas dataframes containing spot information
+            for its key round as values (result of _merge_spots_by_round function)
+        searchRadius : float
+            Distance that spots can be from each other and still form a barcode
+
+    Returns
+    -------
+        tuple : First object is the neighbors dictionary, second is the channel dictionary, and the
+                third object is the spatial coordinate dictionary
+    '''
+
+    # Create dictionary of neighbors (within the search radius) in other rounds for each spot
+    neighborDict = findNeighbors(spotTables, searchRadius)
+
+    # Create dictionaries with mapping from spot id (row index) in spotTables to channel
+    # number and one with spot coordinates for fast access
+    channelDict = {}
+    spotCoords = {}
+    for r in [*spotTables]:
+        channelDict[r] = spotTables[r]['c'].to_dict()
+        spotCoords[r] = spotTables[r][['z', 'y', 'x']].T.to_dict()
+        for key in [*spotCoords[r]]:
+            spotCoords[r][key] = tuple([item[1] for item in sorted(spotCoords[r][key].items(),
+                                                                   key=lambda x: x[0])])
+
+    return neighborDict, channelDict, spotCoords
+
+def findNeighbors(spotTables: dict, searchRadius: float) -> dict:
     '''
     Function that takes spatial information from the spot tables from each round and creates a
     dictionary that contains all the neighbors for each spot in other rounds that are within the
@@ -70,7 +103,6 @@ def buildBarcodes(roundData: pd.DataFrame,
                   channelDict: dict,
                   currentRound: int,
                   numJobs: int) -> pd.DataFrame:
-
     '''
     Function that adds to the current rounds spot table all the possible barcodes that could be
     formed using the neighbors of each spot, spots without enough neighbors to form a barcode
@@ -158,7 +190,8 @@ def buildBarcodes(roundData: pd.DataFrame,
             # Creates all possible spot code combinations from neighbors
             codes = list(product(*neighborLists))
             # Only save the ones with the correct number of dropped rounds
-            spotCodes = [code for code in codes if Counter(code)[-1] == roundOmitNum]
+            counters = [Counter(code) for code in codes]  # type: list
+            spotCodes = [code for j, code in enumerate(codes) if counters[j][-1] == roundOmitNum]
             # Create barcodes from spot codes using the mapping from spot ID to channel
             barcodes = []
             for spotCode in spotCodes:
@@ -217,7 +250,6 @@ def decoder(roundData: pd.DataFrame,
             roundOmitNum: int,
             currentRound: int,
             numJobs: int) -> pd.DataFrame:
-
     '''
     Function that takes spots tables with possible barcodes added and matches each to the codebook
     to identify any matches. Matches are added to the spot tables and spots without any matches are
@@ -276,7 +308,6 @@ def decoder(roundData: pd.DataFrame,
                    roundPermutations: list,
                    permutationCodes: dict,
                    rnd: int) -> tuple:
-
         '''
         Subfunction for decoder that allows it to run in parallel chunks using ray
 
@@ -307,77 +338,45 @@ def decoder(roundData: pd.DataFrame,
         allTargets = []
         allDecodedBarcodes = []
         allDecodedSpotCodes = []
-        allRoundOmit = []
         allBarcodes = list(data['barcodes'])
         allSpotCodes = list(data['spot_codes'])
         for i in range(len(allBarcodes)):
             targets = []
             decodedBarcodes = []
             decodedSpotCodes = []
-            roundOmit = []
-            fullBarcodes = allBarcodes[i]
-            fullSpotCodes = allSpotCodes[i]
-
-            for currentRounds in roundPermutations:
-
-                # Set omittedRound to the round being dropped, if no round is dropped omittedRound
-                # becomes -1
-                if 0 in currentRounds:
-                    omittedRound = np.argwhere([not cr for cr in currentRounds])[0][0]
-                else:
-                    omittedRound = -1
-
-                # Only try to decode barcodes for this spot if the current round is not the omitted
-                # round
-                if rnd != omittedRound:
-                    # Modify spot codes and barcodes so that they match the current set of rounds
-                    # being used for decoding
-                    if omittedRound != -1:
-                        spotCodes = [code for code in
-                                     np.asarray([np.asarray(spotCode)[list(currentRounds)]
-                                                 for spotCode in fullSpotCodes]) if -1 not in code]
-                        barcodes = [code for code in
-                                    np.asarray([np.asarray(barcode)[list(currentRounds)]
-                                                for barcode in fullBarcodes]) if -1 not in code]
-                    else:
-                        spotCodes = fullSpotCodes
-                        barcodes = fullBarcodes
-                    # If all barcodes omit a round other than omittedRound, barcodes will be empty
-                    if len(barcodes) > 0:
-                        # Tries to find a match to each possible barcode from the spot
-                        for j, barcode in enumerate(barcodes):
-                            try:
-                                # Try to assign target by using barcode as key in permutationsCodes
-                                # dictionary for current set of rounds. If there is no barcode
-                                # match, it will error and go to the except and if it succeeds it
-                                # will add the data to the other lists for this barcode
-                                targets.append(permutationCodes[currentRounds][tuple(barcode)])
-                                decodedBarcodes.append(barcode)
-                                decodedSpotCodes.append(list(spotCodes[j]))
-                                roundOmit.append(omittedRound)
-                            except Exception:
-                                pass
+            for j, barcode in enumerate(allBarcodes[i]):
+                if barcode[rnd] != -1:
+                    # Try to assign target by using barcode as key in permutationsCodes dictionary
+                    # for current set of rounds. If there is no barcode match, it will error and go
+                    # to the except and if it succeeds it will add the data to the other lists for
+                    # this barcode
+                    try:
+                        targets.append(permutationCodes[tuple(barcode)])
+                        decodedBarcodes.append(barcode)
+                        decodedSpotCodes.append(list(allSpotCodes[i][j]))
+                    except Exception:
+                        pass
             allTargets.append(targets)
             allDecodedBarcodes.append(decodedBarcodes)
             allDecodedSpotCodes.append(decodedSpotCodes)
-            allRoundOmit.append(roundOmit)
 
-        return (allTargets, allDecodedBarcodes, allDecodedSpotCodes, allRoundOmit)
+        return (allTargets, allDecodedBarcodes, allDecodedSpotCodes)
 
     # Create list of logical arrays corresponding to the round sets being used to decode
     roundPermutations = generateRoundPermutations(codebook.sizes[Axes.ROUND], roundOmitNum)
 
-    # Create dictionary where the keys are the different round sets that can be used for decoding
-    # and the values are the modified codebooks corresponding to the rounds used
+    # Create dictionary where the keys are all the possible barocodes (where dropped rounds
+    # are set to -1) for the current roundOmitNum. Provides fast mapping from barcode to
+    # target mRNA and having all the different dropped rounds together eliminates the need
+    # to loop through them.
     permCodeDict = {}
     for currentRounds in roundPermutations:
-        codes = codebook.argmax(Axes.CH.value)
-        currentCodes = codes.sel(r=list(currentRounds))
-        currentCodes.values = np.ascontiguousarray(currentCodes.values)
-        permCodeDict[currentRounds] = dict(zip([tuple(code) for code in currentCodes.data],
-                                               currentCodes['target'].data))
-
-    # Goes through each round in filtered_prsr and tries to decode each spot's barcodes
+        codes = codebook.data.argmax(axis=2)
+        if roundOmitNum > 0:
+            omittedRounds = np.argwhere(~np.asarray(currentRounds))
+            codes[:, omittedRounds] = -1
+        roundDict = dict(zip([tuple(code) for code in codes], codebook['target'].data))
+        permCodeDict.update(roundDict)
 
     # Put data table and permutations codes dictionary in ray storage
     permutationCodesID = ray.put(permCodeDict)
@@ -399,34 +398,12 @@ def decoder(roundData: pd.DataFrame,
     roundData['targets'] = list(chain(*[job[0] for job in rayResults]))
     roundData['decoded_barcodes'] = list(chain(*[job[1] for job in rayResults]))
     roundData['decoded_spot_codes'] = list(chain(*[job[2] for job in rayResults]))
-    roundData['omitted_round'] = list(chain(*[job[3] for job in rayResults]))
 
     # Drop barcodes and spot_codes column (saves memory)
     roundData = roundData.drop(['neighbors', 'spot_codes', 'barcodes'], axis=1)
 
     # Remove rows that have no decoded barcodes
     roundData = roundData[roundData['targets'].astype(bool)].reset_index(drop=True)
-
-    # Add -1 spacer back into partial barcodes/spot codes so we can easily tell which round each
-    # spot ID is from
-    if roundOmitNum > 0:
-        allBarcodes = []
-        allSpotCodes = []
-        dataBarcodes = roundData['decoded_barcodes']
-        dataSpotCodes = roundData['decoded_spot_codes']
-        dataOmittedRounds = roundData['omitted_round']
-        for i in range(len(roundData)):
-            barcodes = [list(code) for code in dataBarcodes[i]]
-            spotCodes = [list(code) for code in dataSpotCodes[i]]
-            omittedRounds = dataOmittedRounds[i]
-            barcodes = [barcodes[j][:omittedRounds[j]] + [-1] + barcodes[j][omittedRounds[j]:]
-                        for j in range(len(barcodes))]
-            spotCodes = [spotCodes[j][:omittedRounds[j]] + [-1] + spotCodes[j][omittedRounds[j]:]
-                         for j in range(len(barcodes))]
-            allBarcodes.append(barcodes)
-            allSpotCodes.append(spotCodes)
-        roundData['decoded_barcodes'] = allBarcodes
-        roundData['decoded_spot_codes'] = allSpotCodes
 
     return roundData
 
@@ -486,15 +463,8 @@ def distanceFilter(roundData: pd.DataFrame,
         for spotCodes in subSpotCodes:
             distances = []
             for s, spotCode in enumerate(spotCodes):
-                coords = []
-                for j, spot in enumerate(spotCode):
-                    if spot != -1:
-                        # Extract spot coordinates from spotCoords
-                        z = spotCoords[j][spot]['z']
-                        y = spotCoords[j][spot]['y']
-                        x = spotCoords[j][spot]['x']
-                        coords.append([z, y, x])
-                coords = np.asarray(coords)
+                coords = np.asarray([spotCoords[j][spot] for j, spot in enumerate(spotCode)
+                                     if spot != -1])
                 # Distance is calculate as the sum of variances of the coordinates along each axis
                 distances.append(sum(np.var(coords, axis=0)))
             allDistances.append(distances)
@@ -541,23 +511,13 @@ def distanceFilter(roundData: pd.DataFrame,
             bestBarcodes.append(barcodes)
             bestTargets.append(targets)
             bestDistances.append(distances)
-        # Otherwise find the minimum, and if there are multiple minimums
+        # Otherwise find the minimum(s)
         else:
-            minDist = 100
-            minCount = 0
-            for d, distance in enumerate(distances):
-                if distance < minDist:
-                    minDist = distance
-                    minCount = 1
-                    minInds = []
-                    minInds.append(d)
-                elif distance == minDist:
-                    minCount += 1
-                    minInds.append(d)
-            bestSpotCodes.append([spotCodes[i] for i in range(len(spotCodes)) if i in minInds])
-            bestBarcodes.append([barcodes[i] for i in range(len(barcodes)) if i in minInds])
-            bestTargets.append([targets[i] for i in range(len(targets)) if i in minInds])
-            bestDistances.append([distances[i] for i in range(len(distances)) if i in minInds])
+            mins = np.argwhere(distances == min(distances))
+            bestSpotCodes.append([spotCodes[m[0]] for m in mins])
+            bestBarcodes.append([barcodes[m[0]] for m in mins])
+            bestTargets.append([targets[m[0]] for m in mins])
+            bestDistances.append([distances[m[0]] for m in mins])
     # Create new columns with minimum distance barcode information
     roundData['best_spot_codes'] = bestSpotCodes
     roundData['best_barcodes'] = bestBarcodes
@@ -565,8 +525,8 @@ def distanceFilter(roundData: pd.DataFrame,
     roundData['best_distances'] = bestDistances
 
     # Drop old columns
-    roundData = roundData.drop(['targets', 'decoded_barcodes', 'decoded_spot_codes',
-                                'omitted_round'], axis=1)
+    roundData = roundData.drop(['targets', 'decoded_barcodes', 'decoded_spot_codes'],
+                               axis=1)
 
     # Only keep barcodes with only one minimum distance
     keep = []
@@ -581,7 +541,6 @@ def distanceFilter(roundData: pd.DataFrame,
 def cleanup(bestPerSpotTables: dict,
             spotCoords: dict,
             filterRounds: int) -> pd.DataFrame:
-
     '''
     Function that combines all "best" codes for each spot in each round into a single table,
     filters them by their frequency (with a user-defined threshold), chooses between overlapping
@@ -655,15 +614,10 @@ def cleanup(bestPerSpotTables: dict,
     centers = []
     roundsUsed = []
     for i in range(len(finalCodes)):
-        coords = []
         spotCode = finalCodes.iloc[i]['best_spot_codes']
-        roundsUsed.append(roundNum - Counter(spotCode)[-1])
-        for r in range(roundNum):
-            if spotCode[r] != -1:
-                z = spotCoords[r][spotCode[r]]['z']
-                y = spotCoords[r][spotCode[r]]['y']
-                x = spotCoords[r][spotCode[r]]['x']
-                coords.append((x, y, z))
+        counter = Counter(spotCode)  # type: Counter
+        roundsUsed.append(roundNum - counter[-1])
+        coords = np.asarray([spotCoords[j][spot] for j, spot in enumerate(spotCode) if spot != -1])
         allCoords.append(coords)
         coords = np.asarray([coord for coord in coords])
         center = np.asarray(coords).mean(axis=0)
@@ -674,43 +628,31 @@ def cleanup(bestPerSpotTables: dict,
 
     return finalCodes
 
-def removeUsedSpots(finalCodes: pd.DataFrame, neighborDict: dict) -> dict:
+def removeUsedSpots(finalCodes: pd.DataFrame, spotTables: dict) -> dict:
     '''
-    Remove spots found to be in barcodes for the current round omission number so they are not used
-    for the next
+    Remove spots found to be in barcodes for the current round omission number from the spotTables
+    so they are not used for the next round omission number
 
     Parameters
     ----------
         finalCodes : pd.DataFrame
             Dataframe containing final set of codes that have passed all filters
 
-        neighborDict : dict
-            Dictionary that contains all the neighbors for each spot in other rounds that are
-            within the search radius
+        spotTables : dict
+            Dictionary of original data tables extracted from SpotFindingResults objects by the
+            _merge_spots_by_round() function
 
     Returns
     -------
-        dict : Modified version of neighborDict with spots that have been used in the current round
+        dict : Modified version of spotTables with spots that have been used in the current round
                omission removed
     '''
 
     # Remove used spots
-    roundNum = len(neighborDict)
-    for r in range(roundNum):
-        usedSpots = list(set([passed[r] for passed in finalCodes['best_spot_codes']
-                              if passed[r] != -1]))
-        for spot in usedSpots:
-            for key in neighborDict[r][spot]:
-                for neighbor in neighborDict[r][spot][key]:
-                    neighborDict[key][neighbor][r] = [i for i in neighborDict[key][neighbor][r]
-                                                      if i != spot]
-            del neighborDict[r][spot]
+    for r in range(len(spotTables)):
+        usedSpots = set([passed[r] for passed in finalCodes['best_spot_codes']
+                         if passed[r] != -1])
+        spotTables[r] = spotTables[r].iloc[[i for i in range(len(spotTables[r])) if i
+                                            not in usedSpots]].reset_index(drop=True)
 
-    # Remove empty lists
-    for r in range(roundNum):
-        for spot in neighborDict[r]:
-            for key in [*neighborDict[r][spot]]:
-                if neighborDict[r][spot][key] == []:
-                    del neighborDict[r][spot][key]
-
-    return neighborDict
+    return spotTables

@@ -33,7 +33,7 @@ class IntensityTable(xr.DataArray):
     An IntensityTable records the numeric intensity of a set of features in each
     :code:`(round, channel)` tile in which the feature is identified.
     The :py:class:`IntensityTable` has shape
-    :code:`(n_feature, n_channel, n_round)`.
+    :code:`(n_feature, n_round, n_channel)`.
 
     Some :py:class:`SpotFinder` methods identify a position and search for
     Gaussian blobs in a small radius, only recording intensities if they are

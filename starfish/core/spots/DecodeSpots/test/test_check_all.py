@@ -1,10 +1,11 @@
-import numpy as np
 import random
+
+import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
 from starfish import ImageStack
-from starfish.core.spots.DecodeSpots.check_all_decoder import CheckAll
 from starfish.core.codebook.codebook import Codebook
+from starfish.core.spots.DecodeSpots.check_all_decoder import CheckAll
 from starfish.core.spots.FindSpots import BlobDetector
 
 def syntheticSeqfish(x, y, z, codebook, nSpots, jitter, error):

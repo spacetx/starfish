@@ -1,12 +1,13 @@
 from dataclasses import dataclass
-from typing import Any, Hashable, Mapping, MutableMapping, Optional, Sequence, Tuple, Dict
+from typing import Any, Dict, Hashable, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 import xarray as xr
+
+import json
 
 from starfish.core.types import Axes, Coordinates, SpotAttributes
 from starfish.core.util.logging import Log
 
-import json
 
 AXES_ORDER = (Axes.ROUND, Axes.CH)
 
@@ -148,7 +149,7 @@ class SpotFindingResults:
     @classmethod
     def load(cls, json_file: str):
         """Load serialized spot finding results.
-        
+
         Parameters:
         -----------
         json_file: str
@@ -182,12 +183,12 @@ class SpotFindingResults:
             one = int(key.split("_")[1])
             index = {AXES_ORDER[0]: zero, AXES_ORDER[1]: one}
             spots = SpotAttributes.load(path)
-            spot_attributes_list.append((PerImageSliceSpotResults(spots, extras=None),index))
+            spot_attributes_list.append((PerImageSliceSpotResults(spots, extras=None), index))
 
         return SpotFindingResults(
-             imagestack_coords = coords,
-             log = log,
-             spot_attributes_list = spot_attributes_list
+            imagestack_coords=coords,
+            log=log,
+            spot_attributes_list=spot_attributes_list
         )
 
     @property

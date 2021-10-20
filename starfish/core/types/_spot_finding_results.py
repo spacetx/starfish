@@ -164,7 +164,8 @@ class SpotFindingResults:
         data = json.load(fl)
 
         with open(data["log"]["path"]) as f:
-            log = Log.decode(f.read())
+            txt = json.load(f)
+            log = Log.decode(str(txt['log']))
 
         rename_axes = {
             'x': Coordinates.X.value,

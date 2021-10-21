@@ -5,8 +5,8 @@ from typing import Any, Dict, Hashable, Mapping, MutableMapping, Optional, Seque
 import xarray as xr
 
 from starfish.core.types import PerImageSliceSpotResults, SpotAttributes, SpotFindingResults
-from starfish.types import Axes, Coordinates, SpotAttributes
 from starfish.core.util.logging import Log
+from starfish.types import Axes, Coordinates, SpotAttributes
 
 AXES_ORDER = (Axes.ROUND, Axes.CH)
 

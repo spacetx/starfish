@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from typing import Any, Dict, Hashable, Mapping, MutableMapping, Optional, Sequence, Tuple
 
-import xarray as xr
-
 import json
 
-from starfish.core.types import Axes, Coordinates, SpotAttributes
+import xarray as xr
+
+from starfish.core.types import PerImageSliceSpotResults, SpotAttributes, SpotFindingResults
+from starfish.types import Axes, Coordinates, SpotAttributes
 from starfish.core.util.logging import Log
 
 

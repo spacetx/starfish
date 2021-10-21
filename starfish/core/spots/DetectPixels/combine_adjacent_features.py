@@ -422,10 +422,13 @@ class CombineAdjacentFeatures:
         # create new indexes for the output IntensityTable
         channel_index = mean_pixel_traces.indexes[Axes.CH]
         round_index = mean_pixel_traces.indexes[Axes.ROUND]
-        coords = IntensityTable._build_xarray_coords(spot_attributes, channel_index, round_index)
+        coords = IntensityTable._build_xarray_coords(
+            spot_attributes=spot_attributes,
+            round_values=round_index,
+            channel_values=channel_index)
 
         # create the output IntensityTable
-        dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
+        dims = (Features.AXIS, Axes.ROUND.value, Axes.CH.value)
         intensity_table = DecodedIntensityTable(
             data=mean_pixel_traces, coords=coords, dims=dims
         )

@@ -1,14 +1,12 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Hashable, Mapping, MutableMapping, Optional, Sequence, Tuple
-
 import json
+from typing import Any, Dict, Hashable, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 import xarray as xr
 
 from starfish.core.types import PerImageSliceSpotResults, SpotAttributes, SpotFindingResults
-from starfish.types import Axes, Coordinates, SpotAttributes
 from starfish.core.util.logging import Log
-
+from starfish.types import Axes, Coordinates, SpotAttributes
 
 AXES_ORDER = (Axes.ROUND, Axes.CH)
 

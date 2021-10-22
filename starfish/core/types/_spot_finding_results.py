@@ -168,8 +168,9 @@ class SpotFindingResults:
         os.chdir(os.path.dirname(json_file))
 
         with open(data["log"]["path"]) as f:
-            txt = json.load(f)
-            log = Log.decode(str(txt['log']))
+            txt = json.load(f)['log']
+            txt = json.dumps(txt)
+            log = Log.decode(txt)
 
         rename_axes = {
             'x': Coordinates.X.value,

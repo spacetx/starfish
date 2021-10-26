@@ -121,6 +121,7 @@ class SpotFindingResults:
         """
         json_data: Dict[str, Any] = {}
 
+        pwd = os.getcwd()
         os.chdir(os.path.dirname(output_dir_name))
         base_name = os.path.basename(output_dir_name)
 
@@ -148,6 +149,8 @@ class SpotFindingResults:
         with open("{}SpotFindingResults.json".format(base_name), "w") as f:
             f.write(save)
 
+        os.chdir(pwd)
+
     @classmethod
     def load(cls, json_file: str):
         """Load serialized spot finding results.
@@ -165,6 +168,8 @@ class SpotFindingResults:
         """
         fl = open(json_file)
         data = json.load(fl)
+        pwd = os.getcwd()
+
         os.chdir(os.path.dirname(json_file))
 
         with open(data["log"]["path"]) as f:
@@ -188,6 +193,8 @@ class SpotFindingResults:
             index = {AXES_ORDER[0]: zero, AXES_ORDER[1]: one}
             spots = SpotAttributes.load(path)
             spot_attributes_list.append((PerImageSliceSpotResults(spots, extras=None), index))
+
+        os.chdir(pwd)
 
         return SpotFindingResults(
             imagestack_coords=coords,

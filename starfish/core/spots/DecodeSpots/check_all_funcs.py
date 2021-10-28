@@ -1,9 +1,11 @@
+import typing
 import warnings
 from collections import Counter, defaultdict
 from copy import deepcopy
 from functools import partial
 from itertools import chain, islice, permutations, product
 from multiprocessing import Pool
+
 
 import numpy as np
 import pandas as pd
@@ -204,7 +206,7 @@ def barcodeBuildFunc(allNeighbors: list,
         # Creates all possible spot code combinations from neighbors
         codes = list(product(*neighborLists))
         # Only save the ones with the correct number of dropped rounds
-        counters = [Counter(code) for code in codes]
+        counters = [Counter(code) for code in codes]  # type: typing.List[Counter]
         spotCodes = [code for j, code in enumerate(codes) if counters[j][0] == roundOmitNum]
         spotCodes = [code for code in spotCodes if code[currentRound] != 0]
         # Create barcodes from spot codes using the mapping from spot ID to channel
@@ -402,17 +404,18 @@ def decoder(roundData: pd.DataFrame,
     # Create dictionary where the keys are the different round sets that can be used for decoding
     # and the values are the modified codebooks corresponding to the rounds used
     permCodeDict = {}
+    targets = codebook['target'].data
     for currentRounds in roundPermutations:
-        codes = codebook.argmax(Axes.CH.value)
+        codes = codebook.data.argmax(axis=2)
         if roundOmitNum > 0:
             omittedRounds = np.argwhere(~np.asarray(currentRounds))
             # Makes entire column that is being omitted -1, which become 0 after 1 is added
             # so they match up with the barcodes made earlier
-            codes.data[:, omittedRounds] = -1
+            codes[:, omittedRounds] = -1
         # Makes codes 1-based which prevents collisions when hashing
-        codes.data += 1
+        codes += 1
         # Barcodes are hashed as before
-        roundDict = dict(zip([hash(tuple(code)) for code in codes.data], codes['target'].data))
+        roundDict = dict(zip([hash(tuple(code)) for code in codes], targets))
         permCodeDict.update(roundDict)
 
     # Calculates index ranges to chunk data by and creates list of chunked data to loop through
@@ -627,7 +630,8 @@ def cleanup(bestPerSpotTables: dict,
     for i in range(len(finalCodes)):
         spotCode = finalCodes.iloc[i]['best_spot_codes']
         barcodes.append([channelDict[j][spot] for j, spot in enumerate(spotCode)])
-        roundsUsed.append(roundNum - Counter(spotCode)[0])
+        counter = Counter(spotCode)  # type: Counter
+        roundsUsed.append(roundNum - counter[0])
         coords = np.asarray([spotCoords[j][spot] for j, spot in enumerate(spotCode) if spot != 0])
         allCoords.append(coords)
         coords = np.asarray([coord for coord in coords])

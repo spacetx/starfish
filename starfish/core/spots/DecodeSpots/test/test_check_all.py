@@ -166,7 +166,3 @@ def testErrorCorrection():
                     matches += 1
 
     assert matches == len(trueTargets)
-
-testExactMatches()
-testJitteredMatches()
-testErrorCorrection()

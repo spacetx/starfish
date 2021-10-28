@@ -1,8 +1,8 @@
 import warnings
 from collections import Counter, defaultdict
 from copy import deepcopy
-from itertools import chain, islice, permutations, product
 from functools import partial
+from itertools import chain, islice, permutations, product
 from multiprocessing import Pool
 
 import numpy as np

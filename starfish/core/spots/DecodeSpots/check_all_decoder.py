@@ -36,14 +36,11 @@ class CheckAll(DecodeSpotsAlgorithm):
     the sum of variances for each of the spatial coordinates of the spots that make up each barcode
     and choosing the minimum distance barcode (if there is a tie, they are all dropped as
     ambiguous). Each spot is assigned a "best" barcode in this way.
-    5. Only keep barcodes/targets that were found as "best" in a certain number of the rounds
-    (determined by filter_rounds parameter)
-    6. If a specific spot is used in more than one of the remaining barcodes, the barcode with the
-    higher spatial variance between it's spots is dropped (ensures each spot is only used once)
+    5. Only keep barcodes/targets that were found as "best" in each of the rounds they have spots in
     (End here if number of error_rounds = 0)
-    7. Remove all spots used in decoded targets that passed the previous filtering steps from the
+    6. Remove all spots used in decoded targets that passed the previous filtering steps from the
     original set of spots
-    8. Rerun steps 2-5 for barcodes that use less than the full set of rounds for codebook
+    7. Rerun steps 2-5 for barcodes that use less than the full set of rounds for codebook
     matching (how many rounds can be dropped determined by error_rounds parameter)
 
     Parameters
@@ -52,9 +49,6 @@ class CheckAll(DecodeSpotsAlgorithm):
         Contains codes to decode IntensityTable
     search_radius : float
         Number of pixels over which to search for spots in other rounds and channels.
-    filterRounds : int
-        Number of rounds that a barcode must be identified in to pass filters (higher = more
-        stringent filtering), default = #rounds - 1  or #rounds - error_rounds if error_rounds > 0
     error_rounds : int
         Maximum hamming distance a barcode can be from it's target in the codebook and still be
         uniquely identified (i.e. number of error correction rounds in each the experiment)
@@ -63,11 +57,9 @@ class CheckAll(DecodeSpotsAlgorithm):
     def __init__(
             self,
             codebook: Codebook,
-            filter_rounds: int=None,
             search_radius: float=3,
             error_rounds: int=0):
         self.codebook = codebook
-        self.filterRounds = filter_rounds
         self.searchRadius = search_radius
         self.errorRounds = error_rounds
 
@@ -111,14 +103,9 @@ class CheckAll(DecodeSpotsAlgorithm):
         # containing information on the spots found in that round
         spotTables = _merge_spots_by_round(spots)
 
-        # If user did not specify the filterRounds variable (it will have default value None),
-        # change it to either one less than the number of rounds if errorRounds is 0 or the
-        # number of rounds minus the errorRounds if errorRounds > 0
-        if self.filterRounds is None:
-            if self.errorRounds == 0:
-                self.filterRounds = len(spotTables) - 1
-            else:
-                self.filterRounds = len(spotTables) - self.errorRounds
+        # Add one to channels labels (prevents collisions between hashes of barcodes later)
+        for r in spots.round_labels:
+            spotTables[r]['c'] += 1
 
         # Set list of round omission numbers to loop through
         roundOmits = range(self.errorRounds + 1)
@@ -158,7 +145,7 @@ class CheckAll(DecodeSpotsAlgorithm):
 
             # Turn spot table dictionary into single table, filter barcodes by round frequency, add
             # additional information, and choose between barcodes that have overlapping spots
-            finalCodes = cleanup(decodedTables, spotCoords, self.filterRounds)
+            finalCodes = cleanup(decodedTables, spotCoords, channelDict, currentRoundOmitNum)
 
             # If this is not the last round omission number to run, remove spots that have just
             # been found to be in passing barcodes from spotTables so they are not used for the

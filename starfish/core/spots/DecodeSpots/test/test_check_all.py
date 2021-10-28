@@ -84,11 +84,11 @@ def testExactMatches():
 
     codebook = seqfishCodebook(5, 3, 20)
 
-    img, trueTargets = syntheticSeqfish(100, 100, 20, codebook, 20, 0, False)
+    img, trueTargets = syntheticSeqfish(100, 100, 20, codebook, 5, 0, False)
 
     bd = BlobDetector(min_sigma=1, max_sigma=4, num_sigma=30, threshold=.1, exclude_border=False)
     spots = bd.run(image_stack=img)
-    assert spots.count_total_spots() == 5 * 20, 'Spot detector did not find all spots'
+    assert spots.count_total_spots() == 5 * 5, 'Spot detector did not find all spots'
 
     decoder = CheckAll(codebook=codebook, search_radius=1, error_rounds=0)
     hits = decoder.run(spots=spots, n_processes=4)
@@ -113,11 +113,11 @@ def testJitteredMatches():
 
     codebook = seqfishCodebook(5, 3, 20)
 
-    img, trueTargets = syntheticSeqfish(100, 100, 20, codebook, 20, 2, False)
+    img, trueTargets = syntheticSeqfish(100, 100, 20, codebook, 5, 2, False)
 
     bd = BlobDetector(min_sigma=1, max_sigma=4, num_sigma=30, threshold=.1, exclude_border=False)
     spots = bd.run(image_stack=img)
-    assert spots.count_total_spots() == 5 * 20, 'Spot detector did not find all spots'
+    assert spots.count_total_spots() == 5 * 5, 'Spot detector did not find all spots'
 
     decoder = CheckAll(codebook=codebook, search_radius=3, error_rounds=0)
     hits = decoder.run(spots=spots, n_processes=4)
@@ -142,11 +142,11 @@ def testErrorCorrection():
 
     codebook = seqfishCodebook(5, 3, 20)
 
-    img, trueTargets = syntheticSeqfish(100, 100, 20, codebook, 20, 0, True)
+    img, trueTargets = syntheticSeqfish(100, 100, 20, codebook, 5, 0, True)
 
     bd = BlobDetector(min_sigma=1, max_sigma=4, num_sigma=30, threshold=.1, exclude_border=False)
     spots = bd.run(image_stack=img)
-    assert spots.count_total_spots() == 4 * 20, 'Spot detector did not find all spots'
+    assert spots.count_total_spots() == 4 * 5, 'Spot detector did not find all spots'
 
     decoder = CheckAll(codebook=codebook, search_radius=1, error_rounds=1)
     hits = decoder.run(spots=spots, n_processes=4)
@@ -166,3 +166,7 @@ def testErrorCorrection():
                     matches += 1
 
     assert matches == len(trueTargets)
+
+testExactMatches()
+testJitteredMatches()
+testErrorCorrection()

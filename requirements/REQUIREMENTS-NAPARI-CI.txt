@@ -15,7 +15,7 @@ charset-normalizer==2.0.4
 click==8.0.1
 cloudpickle==1.6.0
 cycler==0.10.0
-dask==2021.9.0
+dask==2021.10.0
 dataclasses==0.6
 debugpy==1.4.1
 decorator==4.4.2

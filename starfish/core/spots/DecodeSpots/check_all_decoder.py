@@ -16,7 +16,6 @@ from .check_all_funcs import buildBarcodes, cleanup, createRefDicts, decoder, di
     removeUsedSpots
 from .util import _merge_spots_by_round
 
-
 class CheckAll(DecodeSpotsAlgorithm):
     """
     Decode spots by generating all possible combinations of spots to form barcodes given a radius
@@ -35,11 +34,13 @@ class CheckAll(DecodeSpotsAlgorithm):
     the sum of variances for each of the spatial coordinates of the spots that make up each barcode
     and choosing the minimum distance barcode (if there is a tie, they are all dropped as
     ambiguous). Each spot is assigned a "best" barcode in this way.
-    5. Only keep barcodes/targets that were found as "best" in each of the rounds they have spots in
-    (End here if number of error_rounds = 0)
-    6. Remove all spots used in decoded targets that passed the previous filtering steps from the
+    5. Only keep barcodes/targets that were found as "best" using at least 2 of the spots that make
+    each up
+    6. Find maximum independent set (approximation) of the spot combinations so no two barcodes use
+    the same spot
+    7. Remove all spots used in decoded targets that passed the previous filtering steps from the
     original set of spots
-    7. Rerun steps 2-5 for barcodes that use less than the full set of rounds for codebook
+    8. Rerun steps 2-5 for barcodes that use less than the full set of rounds for codebook
     matching (how many rounds can be dropped determined by error_rounds parameter)
 
     Parameters
@@ -120,6 +121,8 @@ class CheckAll(DecodeSpotsAlgorithm):
             decodedTables = {}
             for r in range(len(spotTables)):
                 roundData = deepcopy(spotTables[r])
+                roundData = roundData.drop(['intensity', 'z', 'y', 'x', 'radius', 'c'], axis=1)
+                roundData.index += 1
 
                 # Create dictionary of dataframes (based on spotTables data) that contains
                 # additional columns for each spot containing all the possible barcodes that
@@ -139,18 +142,23 @@ class CheckAll(DecodeSpotsAlgorithm):
                 # Assign to DecodedTables dictionary
                 decodedTables[r] = roundData
 
-            # Turn spot table dictionary into single table, filter barcodes by round frequency, add
-            # additional information, and choose between barcodes that have overlapping spots
-            finalCodes = cleanup(decodedTables, spotCoords, channelDict, currentRoundOmitNum)
+            # Only do the following if barcodes were founds
+            totalSpots = sum([len(decodedTables[table]) for table in decodedTables])
+            if totalSpots:
 
-            # If this is not the last round omission number to run, remove spots that have just
-            # been found to be in passing barcodes from spotTables so they are not used for the
-            # next round omission number
-            if currentRoundOmitNum != roundOmits[-1]:
-                spotTables = removeUsedSpots(finalCodes, spotTables)
+                # Turn spot table dictionary into single table, filter barcodes by round frequency,
+                # add additional information, and choose between barcodes that have overlapping
+                # spots
+                finalCodes = cleanup(decodedTables, spotCoords, channelDict)
 
-            # Append found codes to allCodes table
-            allCodes = allCodes.append(finalCodes).reset_index(drop=True)
+                # If this is not the last round omission number to run, remove spots that have just
+                # been found to be in passing barcodes from spotTables so they are not used for the
+                # next round omission number
+                if currentRoundOmitNum != roundOmits[-1]:
+                    spotTables = removeUsedSpots(finalCodes, spotTables)
+
+                # Append found codes to allCodes table
+                allCodes = allCodes.append(finalCodes).reset_index(drop=True)
 
         # Create and fill in intensity table
         channels = spots.ch_labels

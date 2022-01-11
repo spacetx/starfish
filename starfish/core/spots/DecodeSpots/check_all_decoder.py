@@ -1,4 +1,5 @@
 from copy import deepcopy
+import sys
 from typing import Any, Hashable, Mapping, Tuple
 
 import numpy as np
@@ -59,9 +60,22 @@ class CheckAll(DecodeSpotsAlgorithm):
             codebook: Codebook,
             search_radius: float=3,
             error_rounds: int=0):
+
+        # Error catching for input
+        if len(codebook) == 0:
+            sys.exit('Codebook is empty')
+        if not isinstance(search_radius, int) or isinstance(search_radius, float):
+            sys.exit('search_radius must be a positive number or zero')
+        elif search_radius < 0:
+            sys.exit('search_radius must be a positive number or zero')
+        if not isistance(error_rounds, int):
+            sys.exit('error_rounds must be a positive integer or zero')
+        elif error_rounds < 0:
+            sys.exit('error_rounds must be a positive integer or zero')
+
         self.codebook = codebook
         self.searchRadius = search_radius
-        self.errorRounds = error_rounds
+        self.errorRounds = int(error_rounds)
 
     def run(self,
             spots: SpotFindingResults,
@@ -87,14 +101,25 @@ class CheckAll(DecodeSpotsAlgorithm):
         """
 
         # Rename n_processes (trying to stay consistent between starFISH's _ variables and my
-        # camel case ones)
+        # camel case ones) and check that it is a positive integer
         numJobs = n_processes
+        if not isinstance(numJobs, int):
+            sys.exit('n_processes must be a positive integer')
+        elif numJobs < 1:
+            sys.exit('n_processes must be a positive integer')
 
         # If using an search radius exactly equal to a possible distance between two pixels
         # (ex: 1), some distances will be calculated as slightly less than their exact distance
         # (either due to rounding or precision errors) so search radius needs to be slightly
         # increased to ensure this doesn't happen
         self.searchRadius += 0.001
+
+        # Check that there are spots in the SpotFindingResults object, if there are none exit
+        # program and print error message
+        if not isinstance(spots, SpotFindingResults):
+            sys.exit('spots must be a SpotFindingResults object')
+        elif spots.count_total_spots() == 0:
+            sys.exit('No spots in SpotFindingResults object')
 
         # Create dictionary where keys are round labels and the values are pandas dataframes
         # containing information on the spots found in that round
@@ -167,6 +192,14 @@ class CheckAll(DecodeSpotsAlgorithm):
         # create empty IntensityTable filled with np.nan
         data = np.full((len(allCodes), len(rounds), len(channels)), fill_value=np.nan)
         dims = (Features.AXIS, Axes.ROUND.value, Axes.CH.value)
+
+        # If there are no decoded targets, return empty DecodedIntensityTable
+        if len(allCodes) == 0:
+            int_table = IntensityTable(data=data, dims=dims)
+            intensities = int_table.transpose('features', 'r', 'c')
+            print("No targets found")
+            return DecodedIntensityTable.from_intensity_table(intensities, targets=(Features.AXIS, []))
+
         centers = allCodes['center']
         coords: Mapping[Hashable, Tuple[str, Any]] = {
             Features.SPOT_RADIUS: (Features.AXIS, np.full(len(allCodes), 1)),

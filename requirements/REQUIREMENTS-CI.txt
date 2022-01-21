@@ -33,7 +33,7 @@ imagesize==1.2.0
 importlib-metadata==4.8.1
 iniconfig==1.1.1
 ipykernel==6.3.1
-ipython==7.27.0
+ipython==7.31.1
 ipython-genutils==0.2.0
 ipywidgets==7.6.4
 jedi==0.18.0

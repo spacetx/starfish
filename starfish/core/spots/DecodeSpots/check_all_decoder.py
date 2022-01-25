@@ -218,8 +218,9 @@ class CheckAll(DecodeSpotsAlgorithm):
         for i in range(len(allCodes)):
             code = []
             for ch in allCodes.loc[i, 'best_barcodes']:
-                # If a round is not used, row will be all zeros
-                code.append(np.asarray([0 if j != ch else 1 for j in range(len(channels))]))
+                # If a round is not used, row will be all zeros (subtract one because we added
+                # one earlier)
+                code.append(np.asarray([0 if j != ch - 1 else 1 for j in range(len(channels))]))
             table_codes.append(np.asarray(code))
         int_table.values = np.asarray(table_codes)
         int_table = transfer_physical_coords_to_intensity_table(intensity_table=int_table,

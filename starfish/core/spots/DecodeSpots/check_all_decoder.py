@@ -1,9 +1,11 @@
-from copy import deepcopy
 import sys
+from collections import Counter
+from copy import deepcopy
 from typing import Any, Hashable, Mapping, Tuple
 
 import numpy as np
 import pandas as pd
+import ray
 
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
@@ -13,8 +15,8 @@ from starfish.core.intensity_table.intensity_table_coordinates import \
 from starfish.core.types import SpotFindingResults
 from starfish.types import Axes, Features
 from ._base import DecodeSpotsAlgorithm
-from .check_all_funcs import buildBarcodes, cleanup, createRefDicts, decoder, distanceFilter, \
-    removeUsedSpots
+from .check_all_funcs import buildBarcodes, cleanup, createNeighborDict, createRefDicts, decoder, \
+    distanceFilter, findNeighbors, removeUsedSpots
 from .util import _merge_spots_by_round
 
 class CheckAll(DecodeSpotsAlgorithm):
@@ -59,23 +61,26 @@ class CheckAll(DecodeSpotsAlgorithm):
             self,
             codebook: Codebook,
             search_radius: float=3,
-            error_rounds: int=0):
-
-        # Error catching for input
-        if len(codebook) == 0:
-            sys.exit('Codebook is empty')
-        if not isinstance(search_radius, int) or isinstance(search_radius, float):
-            sys.exit('search_radius must be a positive number or zero')
-        elif search_radius < 0:
-            sys.exit('search_radius must be a positive number or zero')
-        if not isistance(error_rounds, int):
-            sys.exit('error_rounds must be a positive integer or zero')
-        elif error_rounds < 0:
-            sys.exit('error_rounds must be a positive integer or zero')
-
+            error_rounds: int=0,
+            mode='med',
+            physical_coords=False):
         self.codebook = codebook
         self.searchRadius = search_radius
-        self.errorRounds = int(error_rounds)
+        self.errorRounds = error_rounds
+        self.mode = mode
+        self.physicalCoords = physical_coords
+
+        # Error checking for some inputs
+
+        # Check that codebook is the right class and not empty
+        if not isinstance(self.codebook, Codebook) or len(codebook) == 0:
+            sys.exit('codebook is either not a Codebook object or is empty')
+        # Check that error_rounds is either 0 or 1
+        if self.errorRounds not in [0, 1]:
+            exit('error_rounds can only take a value of 0 or 1')
+        # Return error if search radius is greater than 4.5 or negative
+        if self.searchRadius < 0 or self.searchRadius > 4.5:
+            sys.exit('search_radius must be positive w/ max value of 4.5')
 
     def run(self,
             spots: SpotFindingResults,
@@ -101,111 +106,247 @@ class CheckAll(DecodeSpotsAlgorithm):
         """
 
         # Rename n_processes (trying to stay consistent between starFISH's _ variables and my
-        # camel case ones) and check that it is a positive integer
+        # camel case ones)
         numJobs = n_processes
-        if not isinstance(numJobs, int):
-            sys.exit('n_processes must be a positive integer')
-        elif numJobs < 1:
-            sys.exit('n_processes must be a positive integer')
+        # Check that numJobs is a positive integer
+        if numJobs < 0 or not isinstance(numJobs, int):
+            sys.exit('n_process must be a positive integer')
 
-        # If using an search radius exactly equal to a possible distance between two pixels
-        # (ex: 1), some distances will be calculated as slightly less than their exact distance
-        # (either due to rounding or precision errors) so search radius needs to be slightly
-        # increased to ensure this doesn't happen
-        self.searchRadius += 0.001
-
-        # Check that there are spots in the SpotFindingResults object, if there are none exit
-        # program and print error message
-        if not isinstance(spots, SpotFindingResults):
-            sys.exit('spots must be a SpotFindingResults object')
-        elif spots.count_total_spots() == 0:
-            sys.exit('No spots in SpotFindingResults object')
+        # Initialize ray for multi_processing
+        ray.init(num_cpus=numJobs, ignore_reinit_error=True)
 
         # Create dictionary where keys are round labels and the values are pandas dataframes
         # containing information on the spots found in that round
         spotTables = _merge_spots_by_round(spots)
 
-        # Add one to channels labels (prevents collisions between hashes of barcodes later)
+        # Check that enough rounds have spots to make at least one barcode
+        spotsPerRound = [len(spotTables[r]) for r in range(len(spotTables))]
+        counter = Counter(spotsPerRound)
+        if counter[0] > self.errorRounds:
+            exit('Not enough spots to form a barcode')
+
+        if self.physicalCoords:
+            physicalCoords = spots.physical_coord_ranges
+            if len(physicalCoords['z'].data) > 1:
+                zScale = physicalCoords['z'][1].data - physicalCoords['z'][0].data
+            else:
+                zScale = 1
+            yScale = physicalCoords['y'][1].data - physicalCoords['y'][0].data
+            xScale = physicalCoords['x'][1].data - physicalCoords['x'][0].data
+            if xScale <= 0 or yScale <= 0 or zScale <= 0:
+                exit('invalid physical coords')
+
+        # Add one to channels labels (prevents collisions between hashes of barcodes later), adds
+        # unique spot_id column for each spot in each round, and scales the x, y, and z columns to
+        # the phsyical coordinates if specified
         for r in spots.round_labels:
             spotTables[r]['c'] += 1
+            spotTables[r]['spot_id'] = range(1, len(spotTables[r]) + 1)
+            if self.physicalCoords:
+                spotTables[r]['z'] = spotTables[r]['z'] * zScale
+                spotTables[r]['y'] = spotTables[r]['y'] * yScale
+                spotTables[r]['x'] = spotTables[r]['x'] * xScale
+
+        # Choose search radius set based on search_radius parameter and ability for spots to be
+        # neighbors across z slices. Each value in allSearchRadii represents an incremental
+        # increase in neighborhood size
+        set1 = False
+        zs = set()
+        [zs.update(spotTables[r]['z']) for r in range(len(spotTables))]
+        if self.physicalCoords:
+            if zScale < self.searchRadius or len(zs) > 1:
+                set1 = True
+        else:
+            if len(zs) > 1:
+                set1 = True
+        if set1:
+            allSearchRadii = np.array([0, 1.05, 1.5, 1.8, 2.05, 2.3, 2.45, 2.85, 3.05, 3.2,
+                                       3.35, 3.5, 3.65, 3.75, 4.05, 4.15, 4.25, 4.4, 4.5])
+        else:
+            allSearchRadii = np.array([0, 1.05, 1.5, 2.05, 2.3, 2.85, 3.05, 3.2, 3.65, 4.05, 4.15,
+                                       4.25, 4.5])
+
+        maxRadii = allSearchRadii[(allSearchRadii - self.searchRadius) <= 0][-1]
+        radiusSet = allSearchRadii[allSearchRadii <= maxRadii]
+
+        # Calculate neighbors for each radius in the set
+        neighborsByRadius = {}
+        for searchRadius in radiusSet:
+            if self.physicalCoords:
+                searchRadius = round(searchRadius * xScale, 5)
+            neighborsByRadius[searchRadius] = findNeighbors(spotTables, searchRadius, numJobs)
+
+        # Create reference dictionaries for spot channels, coordinates, raw intensities, and
+        # normalized intensities. Each is a dict w/ keys equal to the round labels and each
+        # value is a dict with spot IDs in that round as keys and their corresponding value
+        # (channel label, spatial coords, etc)
+        channelDict, spotCoords, spotIntensities, spotQualDict = createRefDicts(spotTables, numJobs)
+
+        # Add spot quality (normalized spot intensity) tp spotTables
+        for r in range(len(spotTables)):
+            spotTables[r]['spot_quals'] = [spotQualDict[r][spot] for spot in
+                                           spotTables[r]['spot_id']]
 
         # Set list of round omission numbers to loop through
         roundOmits = range(self.errorRounds + 1)
 
+        # Set parameters according to presets
+        if self.mode == 'high':
+            strictnesses = [50, -1]
+            seedNumbers = [len(spotTables) - 1, len(spotTables)]
+            minDist = 3
+            if self.errorRounds == 1:
+                strictnesses.append(1)
+                seedNumbers.append(len(spotTables) - 1)
+        elif self.mode == 'med':
+            strictnesses = [50, -5]
+            seedNumbers = [len(spotTables) - 1, len(spotTables)]
+            minDist = 3
+            if self.errorRounds == 1:
+                strictnesses.append(5)
+                seedNumbers.append(len(spotTables) - 1)
+        elif self.mode == 'low':
+            strictnesses = [50, -100]
+            seedNumbers = [len(spotTables) - 1, len(spotTables) - 1]
+            minDist = 100
+            if self.errorRounds == 1:
+                strictnesses.append(10)
+                seedNumbers.append(len(spotTables) - 1)
+        else:
+            exit('Invalid mode choice ("high", "med", or "low")')
+
         # Decode for each round omission number, store results in allCodes table
         allCodes = pd.DataFrame()
-        for currentRoundOmitNum in roundOmits:
+        for s, strictness in enumerate(strictnesses):
+            seedNumber = seedNumbers[s]
+            for currentRoundOmitNum in roundOmits:
+                for intVal in range(50, -1, -50):
 
-            # Create necessary reference dictionaries
-            neighborDict, channelDict, spotCoords = createRefDicts(spotTables, self.searchRadius)
+                    spotsPerRound = [len(spotTables[r]) for r in range(len(spotTables))]
+                    counter = Counter(spotsPerRound)
+                    condition3 = True if counter[0] > currentRoundOmitNum else False
 
-            # Chooses best barcode for all spots in each round sequentially (possible barcode
-            # space can become quite large which can increase memory needs so I do it this way so
-            # we only need to store all potential barcodes that originate from one round at a
-            # time)
-            decodedTables = {}
-            for r in range(len(spotTables)):
-                roundData = deepcopy(spotTables[r])
-                roundData = roundData.drop(['intensity', 'z', 'y', 'x', 'radius', 'c'], axis=1)
-                roundData.index += 1
+                    if not condition3:
+                        # Subset spots by intensity, start with top 50% then decode again with all
+                        currentTables = {}
+                        for r in range(len(spotTables)):
+                            lowerBound = np.percentile(spotTables[r]['spot_quals'], intVal)
+                            currentTables[r] = spotTables[r][spotTables[r]['spot_quals']
+                                                             >= lowerBound]
 
-                # Create dictionary of dataframes (based on spotTables data) that contains
-                # additional columns for each spot containing all the possible barcodes that
-                # could be constructed from the neighbors of that spot
-                roundData = buildBarcodes(roundData, neighborDict, currentRoundOmitNum,
-                                          channelDict, r, numJobs)
+                    # Decode each radius and remove spots found in each decoding before the next
+                    for sr, searchRadius in enumerate(radiusSet):
+                        if self.physicalCoords:
+                            searchRadius = round(searchRadius * xScale, 5)
 
-                # Match possible barcodes to codebook and add new columns with info about barcodes
-                # that had a codebook match
-                roundData = decoder(roundData, self.codebook, currentRoundOmitNum, r, numJobs)
+                        # Only run partial codes for the final strictness and don't run full
+                        # barcodes for the final strictness. Also don't run if there are not
+                        # enough spots left.
+                        condition1 = (currentRoundOmitNum == 1 and s != len(strictnesses) - 1)
+                        condition2 = (len(roundOmits) > 1 and currentRoundOmitNum == 0
+                                      and s == len(strictnesses) - 1)
 
-                # Choose most likely barcode for each spot in each round by find the possible
-                # decodable barcode with the least spatial variance between the spots that made up
-                # the barcode
-                roundData = distanceFilter(roundData, spotCoords, r, numJobs)
+                        if condition1 or condition2 or condition3:
+                            pass
+                        else:
 
-                # Assign to DecodedTables dictionary
-                decodedTables[r] = roundData
+                            # Creates neighbor dictionary for the current radius and current set of
+                            # spots
+                            neighborDict = createNeighborDict(currentTables, searchRadius,
+                                                              neighborsByRadius)
 
-            # Only do the following if barcodes were founds
-            totalSpots = sum([len(decodedTables[table]) for table in decodedTables])
-            if totalSpots:
+                            # Find best spot combination using each spot in each round as seed
+                            decodedTables = {}
+                            for r in range(len(spotTables)):
 
-                # Turn spot table dictionary into single table, filter barcodes by round frequency,
-                # add additional information, and choose between barcodes that have overlapping
-                # spots
-                finalCodes = cleanup(decodedTables, spotCoords, channelDict)
+                                # roundData will carry the possible barcode info for each spot in
+                                # the current round being examined
+                                roundData = deepcopy(currentTables[r])
+                                roundData = roundData.drop(['intensity', 'z', 'y', 'x', 'radius',
+                                                            'c', 'spot_quals'], axis=1)
 
-                # If this is not the last round omission number to run, remove spots that have just
-                # been found to be in passing barcodes from spotTables so they are not used for the
-                # next round omission number
-                if currentRoundOmitNum != roundOmits[-1]:
-                    spotTables = removeUsedSpots(finalCodes, spotTables)
+                                # From each spot's neighbors, create all possible combinations that
+                                # would form a barocde with the correct number of rounds. Adds
+                                # spot_codes column to roundData
+                                roundData = buildBarcodes(roundData, neighborDict,
+                                                          currentRoundOmitNum, channelDict,
+                                                          strictness, r, numJobs)
 
-                # Append found codes to allCodes table
-                allCodes = allCodes.append(finalCodes).reset_index(drop=True)
+                                # When strictness is positive, distanceFilter is run first on all
+                                # the potential barcodes to choose the one with the minimum score
+                                # (based on spatial variance of the spots and their intensities)
+                                # which are then matched to the codebook. Spots that have more
+                                # possible barcodes to choose between than the current strictness
+                                # number are dropped as ambiguous. If strictness is negative, all
+                                # the possible barcodes are instead first matched to the codebook
+                                # and then the lowest scoring decodable spot combination is chosen
+                                # for each spot. Spots that have more decodable barcodes to choose
+                                # from than the strictness value (absolute value) are dropped.
+                                # Positive strictness method has lower false positive rate but
+                                # finds fewer targets while the negative strictness method has
+                                # higher false positive rates but finds more targets
+                                if strictness > 0:
+
+                                    # Choose most likely combination of spots for each seed spot
+                                    # using their spatial variance and normalized intensity values.
+                                    # Adds distance column to roundData
+                                    roundData = distanceFilter(roundData, spotCoords, spotQualDict,
+                                                               r, currentRoundOmitNum, numJobs)
+
+                                    # Match possible barcodes to codebook. Adds target column to
+                                    # roundData
+                                    roundData = decoder(roundData, self.codebook, channelDict,
+                                                        strictness, currentRoundOmitNum, r, numJobs)
+
+                                else:
+
+                                    # Match possible barcodes to codebook. Adds target column to
+                                    # roundData
+                                    roundData = decoder(roundData, self.codebook, channelDict,
+                                                        strictness, currentRoundOmitNum, r, numJobs)
+
+                                    # Choose most likely combination of spots for each seed spot
+                                    # using their spatial variance and normalized intensity values.
+                                    # Adds distance column to roundData
+                                    roundData = distanceFilter(roundData, spotCoords, spotQualDict,
+                                                               r, currentRoundOmitNum, numJobs)
+
+                                # Assign to DecodedTables dictionary
+                                decodedTables[r] = roundData
+
+                            # Turn spot table dictionary into single table, filter barcodes by
+                            # round frequency, add additional information, and choose between
+                            # barcodes that have overlapping spots
+                            finalCodes = cleanup(decodedTables, spotCoords, channelDict,
+                                                 strictness, currentRoundOmitNum, seedNumber)
+
+                            # Remove spots that have just been found to be in passing barcodes from
+                            # neighborDict so they are not used for the next decoding round and
+                            # filter codes whose distance value is above the minimum
+                            if len(finalCodes) > 0:
+                                finalCodes = finalCodes[finalCodes['distance'] <= minDist]
+                                spotTables = removeUsedSpots(finalCodes, spotTables)
+                                currentTables = removeUsedSpots(finalCodes, currentTables)
+
+                            # Append found codes to allCodes table
+                            allCodes = allCodes.append(finalCodes).reset_index(drop=True)
+
+        # Shutdown ray
+        ray.shutdown()
 
         # Create and fill in intensity table
         channels = spots.ch_labels
         rounds = spots.round_labels
 
         # create empty IntensityTable filled with np.nan
-        data = np.full((len(allCodes), len(rounds), len(channels)), fill_value=np.nan)
-        dims = (Features.AXIS, Axes.ROUND.value, Axes.CH.value)
-
-        # If there are no decoded targets, return empty DecodedIntensityTable
-        if len(allCodes) == 0:
-            int_table = IntensityTable(data=data, dims=dims)
-            intensities = int_table.transpose('features', 'r', 'c')
-            print("No targets found")
-            return DecodedIntensityTable.from_intensity_table(intensities, targets=(Features.AXIS, []))
-
+        data = np.full((len(allCodes), len(channels), len(rounds)), fill_value=np.nan)
+        dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
         centers = allCodes['center']
         coords: Mapping[Hashable, Tuple[str, Any]] = {
             Features.SPOT_RADIUS: (Features.AXIS, np.full(len(allCodes), 1)),
-            Axes.ZPLANE.value: (Features.AXIS, np.asarray([round(c[2]) for c in centers])),
+            Axes.ZPLANE.value: (Features.AXIS, np.asarray([round(c[0]) for c in centers])),
             Axes.Y.value: (Features.AXIS, np.asarray([round(c[1]) for c in centers])),
-            Axes.X.value: (Features.AXIS, np.asarray([round(c[0]) for c in centers])),
+            Axes.X.value: (Features.AXIS, np.asarray([round(c[2]) for c in centers])),
             Features.SPOT_ID: (Features.AXIS, np.arange(len(allCodes))),
             Features.AXIS: (Features.AXIS, np.arange(len(allCodes))),
             Axes.ROUND.value: (Axes.ROUND.value, rounds),
@@ -217,23 +358,24 @@ class CheckAll(DecodeSpotsAlgorithm):
         table_codes = []
         for i in range(len(allCodes)):
             code = []
-            for ch in allCodes.loc[i, 'best_barcodes']:
-                # If a round is not used, row will be all zeros (subtract one because we added
-                # one earlier)
-                code.append(np.asarray([0 if j != ch - 1 else 1 for j in range(len(channels))]))
-            table_codes.append(np.asarray(code))
+            # ints = allCodes.loc[i, 'intensities']
+            for j, ch in enumerate(allCodes.loc[i, 'best_barcodes']):
+                # If a round is not used, row will be all zeros
+                code.append(np.asarray([0 if k != ch - 1 else 1 for k in range(len(channels))]))
+            table_codes.append(np.asarray(code).T)
         int_table.values = np.asarray(table_codes)
         int_table = transfer_physical_coords_to_intensity_table(intensity_table=int_table,
                                                                 spots=spots)
+        intensities = int_table.transpose('features', 'r', 'c')
 
         # Validate results are correct shape
-        self.codebook._validate_decode_intensity_input_matches_codebook_shape(int_table)
+        self.codebook._validate_decode_intensity_input_matches_codebook_shape(intensities)
 
         # Create DecodedIntensityTable
         result = DecodedIntensityTable.from_intensity_table(
-            int_table,
-            targets=(Features.AXIS, allCodes['best_targets'].astype('U')),
-            distances=(Features.AXIS, allCodes["best_distances"]),
+            intensities,
+            targets=(Features.AXIS, allCodes['targets'].astype('U')),
+            distances=(Features.AXIS, allCodes["distance"]),
             passes_threshold=(Features.AXIS, np.full(len(allCodes), True)),
             rounds_used=(Features.AXIS, allCodes['rounds_used']))
 

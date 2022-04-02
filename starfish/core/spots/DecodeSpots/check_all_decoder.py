@@ -22,29 +22,56 @@ from .util import _merge_spots_by_round
 class CheckAll(DecodeSpotsAlgorithm):
     """
     Decode spots by generating all possible combinations of spots to form barcodes given a radius
-    distance that spots must be from each other in order to form a barcode. Then chooses the best
+    distance that spots may be from each other in order to form a barcode. Then chooses the best
     set of nonoverlapping spot combinations by choosing the ones with the least spatial variance
-    of their spot coordinates and are also found to be best for multiple spots in the barcode
-    (see algorithm below). Allows for error correction rounds.
+    of their spot coordinates, highest intensity and are also found to be best for multiple spots
+    in the barcode (see algorithm below). Allows for error correction rounds.
+
+    Two slightly different algorithms are used to balance recoving the full set of visible targets
+    while ensuring accuracy of the decoded targets. They share the same steps but two are switched
+    between the different versions. The following is for one version:
 
     (see input parmeters below)
     1. For each spot in each round, find all neighbors in other rounds that are within the search
     radius
     2. For each spot in each round, build all possible full length barcodes based on the channel
     labels of the spot's neighbors and itself
-    3. Drop barcodes that don't have a matching target in the codebook
-    4. Choose the "best" barcode of each spot's possible target matching barcodes by calculating
-    the sum of variances for each of the spatial coordinates of the spots that make up each barcode
-    and choosing the minimum distance barcode (if there is a tie, they are all dropped as
-    ambiguous). Each spot is assigned a "best" barcode in this way.
-    5. Only keep barcodes/targets that were found as "best" using at least 2 of the spots that make
-    each up
+    3. Choose the "best" barcode of each spot's possible barcodes by calculating a score that is
+    based on minimizing the spatial variance and maximizing the intensities of the spots in the
+    barcode. Each spot is assigned a "best" barcode in this way.
+    4. Drop barcodes that don't have a matching target in the codebook
+    5. Only keep barcodes/targets that were found as "best" using at least x of the spots that make
+    each up (x is determined by parameters)
     6. Find maximum independent set (approximation) of the spot combinations so no two barcodes use
     the same spot
-    7. Remove all spots used in decoded targets that passed the previous filtering steps from the
-    original set of spots
-    8. Rerun steps 2-5 for barcodes that use less than the full set of rounds for codebook
-    matching (how many rounds can be dropped determined by error_rounds parameter)
+
+    The other method is the same except steps 3 and 4 are switched so that the minimum scoring
+    barcode is chosen from the set of possible codes that have a match to the codebook. The first
+    method will return fewer decoded targets but has a lower false positive rate while the other
+    method will find more targets but at the cost of an increased false positive rate.
+
+    Decoding is run in multiple stages with the parameters becoming less strict as it gets into
+    later stages. The high accuracy algorithm is always run first followed by the low accuracy
+    method, each with slightly different parameters based on the choice of "mode" parameter. After
+    each decoding, the spots found to be in decoded barcodes are removed from the original set of
+    spots before they are decoded again with a new set of parameters. In order to simplify the
+    number of parameters to choose from, I have sorted them into three sets of presets determined
+    by the "mode" parameter.
+
+    Decoding is done multiple times at multiple distances (starting from 0) that increase
+    incrementally until they reach the user-specified search radius. This allows high confidence
+    barcodes to be called first and make things easier when later codes are called.
+
+    If error_rounds is set to 1 (currently cannot handle more than 1), after running all decodings
+    for barocdes that exactly match the codebook, another set of decodings will be run to find
+    barcodes that are missing a spot in exactly one round. If the codes in your codebook all have a
+    hamming distance of at least 2 from all other codes, each can still be uniquely indentified
+    using a partial code with a single round dropped. Barcodes decoded with a partial code like this
+    are inherently less accurate and so an extra dimension called "rounds_used" was added to the
+    DecodedIntensityTable output that labels each decoded target with the number of rounds that was
+    used to decode it, allowing you to easily separate these less accurate codes from your high
+    accuracy set.
+
 
     Parameters
     ----------
@@ -55,6 +82,15 @@ class CheckAll(DecodeSpotsAlgorithm):
     error_rounds : int
         Maximum hamming distance a barcode can be from it's target in the codebook and still be
         uniquely identified (i.e. number of error correction rounds in each the experiment)
+    mode : string
+        One of three preset parmaters sets. Choices are: "low", "med", or 'high'. Low accuracy mode
+        will return more decoded targets but at the cost to accuracy while the high accuracy version
+        will find fewer false postives but also fewer targets overall, medium is a balance between
+        the two. Which mode works best will differ for each dataset.
+    physical_coords : bool
+        True or False, should decoding using physical distances from the original imagestack that
+        you performed spot finding on. Should be used when distances between z pixels is much
+        greater than distance between x and y pixels.
     """
 
     def __init__(

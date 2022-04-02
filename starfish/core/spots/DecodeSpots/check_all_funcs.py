@@ -10,7 +10,6 @@ import ray
 from scipy.spatial import cKDTree
 
 from starfish.core.codebook.codebook import Codebook
-from starfish.core.types import SpotFindingResults
 from starfish.types import Axes
 
 warnings.filterwarnings('ignore')
@@ -32,16 +31,14 @@ def findNeighbors(spotTables: dict,
         searchRadius : float
             Distance that spots can be from each other and still form a barcode
 
+        numJobs : int
+            Number of CPU threads to use in parallel
+
     Returns
     -------
         dict: a dictionary with the following structure:
-            {round: {
-                spotID in round: {
-                    neighborRound:
-                        [list of spotIDs in neighborRound within searchRadius of spotID in round]
-                    }
-                }
-            }
+            {(round1, round2): index table showing neighbors between spots in round1 and round2
+             where round1 != round2}
     '''
 
     allNeighborDict = {}
@@ -59,8 +56,26 @@ def createNeighborDict(spotTables: dict,
 
     '''
     Create dictionary of neighbors (within the search radius) in other rounds for each spot.
-    Dictionary has format:
-        neighborDict[roundNum][spotID] = {0 : neighbors in round 0, 1: neighbors in round 1, etc}
+
+    Parameters
+    ----------
+
+        spotTables : dict
+            Dictionary with round labels as keys and pandas dataframes containing spot information
+            for its key round as values (result of _merge_spots_by_round function)
+
+        searchRadius : float
+            Distance that spots can be from each other and still form a barcode
+
+        neighborsByRadius : dict
+            Dictionary of outputs from findNeighbors() where each key is a radius and the value is
+            the findNeighbors dictionary
+
+    Returns
+    -------
+
+        dict: a dictionary with the following structure
+            neighborDict[roundNum][spotID] = {0 : neighbors in round 0, 1: neighbors in round 1,etc}
     '''
 
     # Create empty neighbor dictionary
@@ -100,13 +115,14 @@ def createRefDicts(spotTables: dict, numJobs: int) -> tuple:
             Dictionary with round labels as keys and pandas dataframes containing spot information
             for its key round as values (result of _merge_spots_by_round function)
 
-        searchRadius : float
-            Distance that spots can be from each other and still form a barcode
+        numJobs : int
+            Number of CPU threads to use in parallel
 
     Returns
     -------
-        tuple : First object is the neighbors dictionary, second is the channel dictionary, and the
-                third object is the spatial coordinate dictionary
+        tuple : First object is the channel dictionary, second is the spatial coordinate dictionary,
+                the third object is the raw spot instensity dictionary, and the last object is the
+                normalized spot intensity dictionary
     '''
 
     # Create channel label and spatial coordinate dictionaries
@@ -183,7 +199,7 @@ def decodeSpots(compressed: list, roundNum: int) -> list:
     return decompressed
 
 @ray.remote
-def spotQualityFunc(spots: SpotFindingResults,
+def spotQualityFunc(spots: list,
                     spotCoords: dict,
                     spotIntensities: dict,
                     spotTables: dict,
@@ -192,6 +208,30 @@ def spotQualityFunc(spots: SpotFindingResults,
 
     '''
     Helper function for spotQuality to run in parallel w/ ray
+
+    Parameters
+    ----------
+        spots : list
+            List of spot IDs in the current round to calculate the normalized intensity of
+
+        spotCoords : dict
+            Spot ID to spatial coordinate dictionary
+
+        spotIntensities : dict
+            Spot ID to raw intensity dictionary
+
+        spotTables : dict
+            Dictionary containing spot info tables
+
+        channelDict : dict
+            Spot ID to channel label dictionary
+
+        r : int
+            Current round
+
+    Returns
+    -------
+        list : list of normalized spot intensities of the input spot IDs
     '''
 
     # Find spots in the same neighborhood (same channel and z slice and less than 100 pixels away
@@ -235,6 +275,28 @@ def spotQuality(spotTables: dict,
     Creates dictionary mapping each spot ID to their normalized intensity value. Calculated as the
     spot intensity value divided by the l2 norm of the intensities of all the spots in the same
     neighborhood.
+
+    Parameters
+    ----------
+        spotTables : dict
+            Dictionary containing spot info tables
+
+        spotCoords : dict
+            Spot ID to spatial coordinate dictionary
+
+        spotIntensities : dict
+            Spot ID to raw intensity dictionary
+
+        channelDict : dict
+            Spot ID to channel label dictionary
+
+        numJobs : int
+            Number of CPU threads to use in parallel
+
+    Returns
+    -------
+        dict : dictionary mapping spot ID to it's normalized intensity value
+
     '''
 
     # Place data dictionary into shared memory
@@ -285,21 +347,20 @@ def barcodeBuildFunc(allNeighbors: list,
         channelDict : dict
             Dictionary mapping spot IDs to their channels labels
 
+        currentRound : int
+            The round that the spots being used for reference points are found in
+
         roundOmitNum : int
             Maximum hamming distance a barcode can be from it's target in the codebook and
             still be uniquely identified (i.e. number of error correction rounds in each
             the experiment)
-
-        currentRound : int
-            The round that the spots being used for reference points are found in
 
         roundNum : int
             Total number of round in experiment
 
     Returns
     -------
-        tuple : First element is a list of the possible spot codes while the second element is
-                a list of the possible barcodes
+        list : list of the possible spot codes
     '''
 
     # spotCodes are the ordered spot IDs of the spots making up each barcode while barcodes are
@@ -352,6 +413,10 @@ def buildBarcodes(roundData: pd.DataFrame,
         channelDict : dict
             Dictionary with mappings between spot IDs and their channel labels
 
+        strictness: int
+            Determines the number of possible codes a spot is allowed to have before it is dropped
+            as ambiguous (if it is positive)
+
         currentRound : int
             Current round to build barcodes for (same round that roundData is from)
 
@@ -360,8 +425,9 @@ def buildBarcodes(roundData: pd.DataFrame,
 
     Returns
     -------
-        pd.DataFrame : Copy of roundData with additional columns which list all possible barcodes
-                       that could be made from each spot's neighbors
+        pd.DataFrame : Copy of roundData with an additional column which lists all the possible spot
+                       codes that could be made from each spot's neighbors for those spots that
+                       passed the strictness requirement (if it is positive)
 
     '''
 
@@ -408,16 +474,14 @@ def buildBarcodes(roundData: pd.DataFrame,
     return roundData
 
 @ray.remote
-def decodeFunc(data: pd.DataFrame,
-               permutationCodes: dict,
-               strictness: int) -> tuple:
+def decodeFunc(data: pd.DataFrame, permutationCodes: dict) -> tuple:
     '''
     Subfunction for decoder that allows it to run in parallel chunks using ray
 
     Parameters
     ----------
-        codes : pd.DataFrame
-            Two column with columns called 'barcodes' and 'spot_codes'
+        data : pd.DataFrame
+            DataFrame with columns called 'barcodes' and 'spot_codes'
 
         permutationCodes : dict
             Dictionary containing barcode information for each roundPermutation
@@ -425,8 +489,7 @@ def decodeFunc(data: pd.DataFrame,
     Returns
     -------
         tuple : First element is a list of all decoded targets, second element is a list of all
-                decoded barcodes,third element is a list of all decoded spot codes, and the
-                fourth element is a list of rounds that were omitted for each decoded barcode
+                decoded spot codes
     '''
 
     # Checks if each barcode is in the permutationsCodes dict, if it isn't, there is no match
@@ -471,7 +534,14 @@ def decoder(roundData: pd.DataFrame,
         codebook : Codebook
             starFISH Codebook object containg the barcode information for the experiment
 
-        roundOmitNum : int
+        channelDict : dict
+            Dictionary with mappings between spot IDs and their channel labels
+
+        strictness : int
+            Determines the number of target matching barcodes each spot is allowed before it is
+            dropped as ambiguous (if it is negative)
+
+        currentRoundOmitNum : int
             Number of rounds that can be dropped from each barcode
 
         currentRound : int
@@ -549,7 +619,7 @@ def decoder(roundData: pd.DataFrame,
         chunkedData.append(deepcopy(roundData[ranges[i]:ranges[i + 1]]))
 
     # Run in parallel
-    results = [decodeFunc.remote(chunkedData[i], permutationCodesID, strictness)
+    results = [decodeFunc.remote(chunkedData[i], permutationCodesID)
                for i in range(len(ranges[:-1]))]
     rayResults = ray.get(results)
 
@@ -573,7 +643,8 @@ def decoder(roundData: pd.DataFrame,
 def distanceFunc(subSpotCodes: list,
                  subTargets: list,
                  spotCoords: dict,
-                 spotQualDict: dict) -> tuple:
+                 spotQualDict: dict,
+                 currentRoundOmitNum: int) -> tuple:
     '''
     Subfunction for distanceFilter to allow it to run in parallel using ray
 
@@ -583,13 +654,23 @@ def distanceFunc(subSpotCodes: list,
             Chunk of full list of spot codes for the current round to calculate the spatial
             variance for
 
+        subSpotCodes : list
+            Chunk of full list of targets (0s if strictness is positive) associated with the
+            current set of spots whose spatial variance is being calculated
+
         spotCoords : dict
-            Dictionary containing spatial locations for spots by their IDs in the original
-            spotTables object
+            Spot ID to spatial coordinate dictionary
+
+        spotQualDict : dict
+            Spot ID to normalized intensity value dictionary
+
+        currentRoundOmitNum : int
+            Number of rounds that can be dropped from each barcode
 
     Returns
     -------
-        list: list of spatial variances for the current chunk of spot codes
+        tuple: First object is the min scoring spot code for each spots, the second is the min
+               score for each spot, and the third is the min scoring target for each spot
 
     '''
 
@@ -601,7 +682,8 @@ def distanceFunc(subSpotCodes: list,
     for i, codes in enumerate(subSpotCodes):
         quals = [sum([spotQualDict[r][spot] for r, spot in enumerate(code) if spot != 0])
                  for code in codes]
-        quals = np.asarray([-np.log(1 / (1 + (len(spotCoords) - qual))) for qual in quals])
+        quals = np.asarray([-np.log(1 / (1 + (len(spotCoords) - currentRoundOmitNum - qual)))
+                            for qual in quals])
         subCoords = [[spotCoords[r][spot] for r, spot in enumerate(code) if spot != 0]
                      for code in codes]
         spaVars = [sum(np.var(np.asarray(coords), axis=0)) for coords in subCoords]
@@ -627,8 +709,18 @@ def distanceFilter(roundData: pd.DataFrame,
                    numJobs: int) -> pd.DataFrame:
     '''
     Function that chooses between the best barcode for each spot from the set of decodable barcodes.
-    Does this by choosing the barcode with the least spatial variance among the spots that make it
-    up. If there is a tie, the spot is dropped as ambiguous.
+    Does this by choosing the barcode with the least spatial variance and high intensity spots
+    according to this calculation:
+
+    Score = -log(1 / 1 + (numRounds - qualSum)) + (-log(1 / 1 + spaVar) * constant)
+    Where:
+        numRounds = number of rounds being used for decoding (total - currentRoundOmitNum)
+        qualSum = sum of normalized intensity values for the spots in the code
+        spaVar = spatial variance of spots in code, calculates as the sum of variances of the
+                 values in each spatial dimension
+        constant = a constant that determines the balance between the score being more influenced
+                   by spatial variance or intensity, set to 2 so spatial variance is the biggest
+                   deciding factor but allows ties to be broken by intensity
 
     Parameters
     ----------
@@ -637,10 +729,16 @@ def distanceFilter(roundData: pd.DataFrame,
             round
 
         spotCoords : dict
-            Dictionary containing spatial coordinates of spots in each round indexed by their IDs
+            Spot ID to spatial coordinate dictionary
+
+        spotQualDict : dict
+            Spot ID to normalized intensity value dictionary
 
         currentRound : int
             Current round number to calculate distances for
+
+        currentRoundOmitNum : int
+            Number of rounds that can be dropped from each barcode
 
         numJobs : int
             Number of CPU threads to use in parallel
@@ -680,7 +778,8 @@ def distanceFilter(roundData: pd.DataFrame,
     chunkedTargets = [allTargets[ranges[i]:ranges[i + 1]] for i in range(len(ranges[:-1]))]
 
     # Run in parallel
-    results = [distanceFunc.remote(subSpotCodes, subTargets, spotCoordsID, spotQualDictID)
+    results = [distanceFunc.remote(subSpotCodes, subTargets, spotCoordsID, spotQualDictID,
+                                   currentRoundOmitNum)
                for subSpotCodes, subTargets in zip(chunkedSpotCodes, chunkedTargets)]
     rayResults = ray.get(results)
 
@@ -719,6 +818,15 @@ def cleanup(bestPerSpotTables: dict,
 
         channelDict : dict
             Dictionary with mapping between spot IDs and the channel labels
+
+        strictness : int
+            Parameter that determines how many possible barcodes each spot can have before it is
+            dropped as ambiguous
+
+        currentRoundOmitNum : int
+            Number of rounds that can be dropped from each barcode
+
+        seedNumber : A barcode must be chosen as "best" in this number of rounds to pass filters
 
     Returns
     -------

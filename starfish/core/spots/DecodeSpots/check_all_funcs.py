@@ -148,6 +148,7 @@ def createRefDicts(spotTables: dict, numJobs: int) -> tuple:
     return channelDict, spotCoords, spotIntensities, spotQualDict
 
 def encodeSpots(spotCodes: list) -> list:
+
     '''
     For compressing spot ID codes into single integers. Saves memory. The number of digits in
     each ID is counted and these integer lengths and concatenated into a string in the same
@@ -171,6 +172,7 @@ def encodeSpots(spotCodes: list) -> list:
     return compressed
 
 def decodeSpots(compressed: list, roundNum: int) -> list:
+
     '''
     Reconverts compressed spot codes back into their roundNum length tupes of integers with
     the same order and IDs as their original source. First roundNum values in the compressed
@@ -189,8 +191,8 @@ def decodeSpots(compressed: list, roundNum: int) -> list:
     Returns
     -------
         list: List of recovered spot codes in their original tuple form
-
     '''
+
     strs = [str(intStr) for intStr in compressed]
     idxs, nums = list(zip(*[(map(int, s[:roundNum]), [iter(s[roundNum:])] * roundNum)
                             for s in strs]))
@@ -296,7 +298,6 @@ def spotQuality(spotTables: dict,
     Returns
     -------
         dict : dictionary mapping spot ID to it's normalized intensity value
-
     '''
 
     # Place data dictionary into shared memory
@@ -306,7 +307,7 @@ def spotQuality(spotTables: dict,
     channelDictID = ray.put(channelDict)
 
     # Calculate normalize spot intensities for each spot in each round
-    spotQuals = {}
+    spotQuals = {}  # type: dict
     for r in range(len(spotTables)):
         roundSpots = spotTables[r]['spot_id']
         spotQuals[r] = {}
@@ -335,7 +336,8 @@ def barcodeBuildFunc(allNeighbors: list,
                      channelDict: dict,
                      currentRound: int,
                      roundOmitNum: int,
-                     roundNum: int) -> tuple:
+                     roundNum: int) -> list:
+
     '''
     Subfunction to buildBarcodes that allows it to run in parallel chunks
 
@@ -376,7 +378,7 @@ def barcodeBuildFunc(allNeighbors: list,
         # Creates all possible spot code combinations from neighbors
         codes = list(product(*neighborLists))
         # Only save the ones with the correct number of dropped rounds
-        counters = [Counter(code) for code in codes]
+        counters = [Counter(code) for code in codes]  # type: typing.List[Counter]
         spotCodes = [code for j, code in enumerate(codes) if counters[j][0] == roundOmitNum]
         spotCodes = [code for code in spotCodes if code[currentRound] != 0]
 
@@ -428,7 +430,6 @@ def buildBarcodes(roundData: pd.DataFrame,
         pd.DataFrame : Copy of roundData with an additional column which lists all the possible spot
                        codes that could be made from each spot's neighbors for those spots that
                        passed the strictness requirement (if it is positive)
-
     '''
 
     # Only keep spots that have enough neighbors to form a barcode (determined by the total number
@@ -473,8 +474,35 @@ def buildBarcodes(roundData: pd.DataFrame,
 
     return roundData
 
+def generateRoundPermutations(size: int, roundOmitNum: int) -> list:
+
+    '''
+    Creates list of lists of logicals detailing the rounds to be used for decoding based on the
+    current roundOmitNum
+
+    Parameters
+    ----------
+        size : int
+            Number of rounds in experiment
+
+        roundOmitNum: int
+            Number of rounds that can be dropped from each barcode
+
+    Returns
+    -------
+        list : list of lists of logicals detailing the rounds to be used for decoding based on
+               the current roundOmitNum
+    '''
+
+    if roundOmitNum == 0:
+        return [tuple([True] * size)]
+    else:
+        return sorted(set(list(permutations([*([False] * roundOmitNum),
+                                            *([True] * (size - roundOmitNum))]))))
+
 @ray.remote
 def decodeFunc(data: pd.DataFrame, permutationCodes: dict) -> tuple:
+
     '''
     Subfunction for decoder that allows it to run in parallel chunks using ray
 
@@ -516,10 +544,11 @@ def decodeFunc(data: pd.DataFrame, permutationCodes: dict) -> tuple:
 def decoder(roundData: pd.DataFrame,
             codebook: Codebook,
             channelDict: dict,
-            strictness: str,
+            strictness: int,
             currentRoundOmitNum: int,
             currentRound: int,
             numJobs: int) -> pd.DataFrame:
+
     '''
     Function that takes spots tables with possible barcodes added and matches each to the codebook
     to identify any matches. Matches are added to the spot tables and spots without any matches are
@@ -555,30 +584,6 @@ def decoder(roundData: pd.DataFrame,
         pd.DataFrane : Modified spot table with added columns with information on decodable
                        barcodes
     '''
-
-    def generateRoundPermutations(size: int, roundOmitNum: int) -> list:
-        '''
-        Creates list of lists of logicals detailing the rounds to be used for decoding based on the
-        current roundOmitNum
-
-        Parameters
-        ----------
-            size : int
-                Number of rounds in experiment
-
-            roundOmitNum: int
-                Number of rounds that can be dropped from each barcode
-
-        Returns
-        -------
-            list : list of lists of logicals detailing the rounds to be used for decoding based on
-                   the current roundOmitNum
-        '''
-        if roundOmitNum == 0:
-            return [tuple([True] * size)]
-        else:
-            return sorted(set(list(permutations([*([False] * roundOmitNum),
-                                                *([True] * (size - roundOmitNum))]))))
 
     # Add barcodes column by mapping spotIDs in spot_codes to channel labels using channelDict
     if strictness > 0:
@@ -645,6 +650,7 @@ def distanceFunc(subSpotCodes: list,
                  spotCoords: dict,
                  spotQualDict: dict,
                  currentRoundOmitNum: int) -> tuple:
+
     '''
     Subfunction for distanceFilter to allow it to run in parallel using ray
 
@@ -671,7 +677,6 @@ def distanceFunc(subSpotCodes: list,
     -------
         tuple: First object is the min scoring spot code for each spots, the second is the min
                score for each spot, and the third is the min scoring target for each spot
-
     '''
 
     # Find minimum scoring combination of spots from set of possible combinations
@@ -682,13 +687,13 @@ def distanceFunc(subSpotCodes: list,
     for i, codes in enumerate(subSpotCodes):
         quals = [sum([spotQualDict[r][spot] for r, spot in enumerate(code) if spot != 0])
                  for code in codes]
-        quals = np.asarray([-np.log(1 / (1 + (len(spotCoords) - currentRoundOmitNum - qual)))
-                            for qual in quals])
+        newQuals = np.asarray([-np.log(1 / (1 + (len(spotCoords) - currentRoundOmitNum - qual)))
+                               for qual in quals])
         subCoords = [[spotCoords[r][spot] for r, spot in enumerate(code) if spot != 0]
                      for code in codes]
         spaVars = [sum(np.var(np.asarray(coords), axis=0)) for coords in subCoords]
-        spaVars = np.asarray([-np.log(1 / (1 + spaVar)) for spaVar in spaVars])
-        combined = quals + (spaVars * constant)
+        newSpaVars = np.asarray([-np.log(1 / (1 + spaVar)) for spaVar in spaVars])
+        combined = newQuals + (newSpaVars * constant)
         minInds = np.where(combined == min(combined))[0]
         if len(minInds) == 1:
             bestSpotCodes.append(codes[minInds[0]])
@@ -707,6 +712,7 @@ def distanceFilter(roundData: pd.DataFrame,
                    currentRound: int,
                    currentRoundOmitNum: int,
                    numJobs: int) -> pd.DataFrame:
+
     '''
     Function that chooses between the best barcode for each spot from the set of decodable barcodes.
     Does this by choosing the barcode with the least spatial variance and high intensity spots
@@ -801,6 +807,7 @@ def cleanup(bestPerSpotTables: dict,
             strictness: int,
             currentRoundOmitNum: int,
             seedNumber: int) -> pd.DataFrame:
+
     '''
     Function that combines all "best" codes for each spot in each round into a single table,
     filters them by their frequency (with a user-defined threshold), chooses between overlapping
@@ -831,7 +838,6 @@ def cleanup(bestPerSpotTables: dict,
     Returns
     -------
         pd.DataFrame : Dataframe containing final set of codes that have passed all filters
-
     '''
 
     # Create merged spot results dataframe containing the passing barcodes found in all the rounds
@@ -969,6 +975,7 @@ def cleanup(bestPerSpotTables: dict,
     return finalCodes
 
 def removeUsedSpots(finalCodes: pd.DataFrame, spotTables: dict) -> dict:
+
     '''
     Remove spots found to be in barcodes for the current round omission number from the spotTables
     so they are not used for the next round omission number

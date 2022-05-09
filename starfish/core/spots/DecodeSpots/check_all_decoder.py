@@ -5,7 +5,6 @@ from typing import Any, Hashable, Mapping, Tuple
 
 import numpy as np
 import pandas as pd
-import ray
 
 from starfish.core.codebook.codebook import Codebook
 from starfish.core.intensity_table.decoded_intensity_table import DecodedIntensityTable
@@ -150,9 +149,6 @@ class CheckAll(DecodeSpotsAlgorithm):
         # Check that numJobs is a positive integer
         if numJobs < 0 or not isinstance(numJobs, int):
             sys.exit('n_process must be a positive integer')
-
-        # Initialize ray for multi_processing
-        ray.init(num_cpus=numJobs, ignore_reinit_error=True)
 
         # Create dictionary where keys are round labels and the values are pandas dataframes
         # containing information on the spots found in that round
@@ -379,9 +375,6 @@ class CheckAll(DecodeSpotsAlgorithm):
 
                             # Append found codes to allCodes table
                             allCodes = allCodes.append(finalCodes).reset_index(drop=True)
-
-        # Shutdown ray
-        ray.shutdown()
 
         # Create and fill in intensity table
         channels = spots.ch_labels

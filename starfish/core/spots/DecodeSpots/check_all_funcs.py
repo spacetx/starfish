@@ -1,12 +1,13 @@
 import typing
 import warnings
 from collections import Counter, defaultdict
+from concurrent.futures.process import ProcessPoolExecutor
 from copy import deepcopy
+from functools import partial
 from itertools import chain, islice, permutations, product
 
 import numpy as np
 import pandas as pd
-import ray
 from scipy.spatial import cKDTree
 
 from starfish.core.codebook.codebook import Codebook
@@ -200,7 +201,6 @@ def decodeSpots(compressed: list, roundNum: int) -> list:
                     for j in range(len(idxs))]
     return decompressed
 
-@ray.remote
 def spotQualityFunc(spots: list,
                     spotCoords: dict,
                     spotIntensities: dict,
@@ -209,7 +209,7 @@ def spotQualityFunc(spots: list,
                     r: int) -> list:
 
     '''
-    Helper function for spotQuality to run in parallel w/ ray
+    Helper function for spotQuality to run in parallel
 
     Parameters
     ----------
@@ -300,12 +300,6 @@ def spotQuality(spotTables: dict,
         dict : dictionary mapping spot ID to it's normalized intensity value
     '''
 
-    # Place data dictionary into shared memory
-    spotCoordsID = ray.put(spotCoords)
-    spotIntsID = ray.put(spotIntensities)
-    spotTablesID = ray.put(spotTables)
-    channelDictID = ray.put(channelDict)
-
     # Calculate normalize spot intensities for each spot in each round
     spotQuals = {}  # type: dict
     for r in range(len(spotTables)):
@@ -320,18 +314,18 @@ def spotQuality(spotTables: dict,
         chunkedSpots = [roundSpots[ranges[i]:ranges[i + 1]] for i in range(len(ranges[:-1]))]
 
         # Run in parallel
-        results = [spotQualityFunc.remote(subSpots, spotCoordsID, spotIntsID, spotTablesID,
-                                          channelDictID, r)
-                   for subSpots in chunkedSpots]
-        rayResults = ray.get(results)
+        with ProcessPoolExecutor() as pool:
+            part = partial(spotQualityFunc, spotCoords=spotCoords, spotIntensities=spotIntensities,
+                           spotTables=spotTables, channelDict=channelDict, r=r)
+            poolMap = pool.map(part, [subSpots for subSpots in chunkedSpots])
+            results = [x for x in poolMap]
 
         # Extract results
-        for spot, qual in zip(roundSpots, list(chain(*rayResults))):
+        for spot, qual in zip(roundSpots, list(chain(*results))):
             spotQuals[r][spot] = qual
 
     return spotQuals
 
-@ray.remote
 def barcodeBuildFunc(allNeighbors: list,
                      channelDict: dict,
                      currentRound: int,
@@ -450,9 +444,6 @@ def buildBarcodes(roundData: pd.DataFrame,
     # Find all possible barcodes for the spots in each round by splitting each round's spots into
     # numJob chunks and constructing each chunks barcodes in parallel
 
-    # Save the current round's data table and the channelDict to ray memory
-    channelDictID = ray.put(channelDict)
-
     # Calculates index ranges to chunk data by
     ranges = [0]
     for i in range(1, numJobs + 1):
@@ -461,16 +452,17 @@ def buildBarcodes(roundData: pd.DataFrame,
                         range(len(ranges[:-1]))]
 
     # Run in parallel
-    results = [barcodeBuildFunc.remote(chunkedNeighbors[i], channelDictID, currentRound,
-                                       roundOmitNum, roundNum)
-               for i in range(len(chunkedNeighbors))]
-    rayResults = ray.get(results)
+    with ProcessPoolExecutor() as pool:
+        part = partial(barcodeBuildFunc, channelDict=channelDict, currentRound=currentRound, 
+                       roundOmitNum=roundOmitNum, roundNum=roundNum)
+        poolMap = pool.map(part, [chunkedNeighbors[i] for i in range(len(chunkedNeighbors))])
+        results = [x for x in poolMap]
 
     # Drop unneeded columns (saves memory)
     roundData = roundData.drop(['neighbors', 'spot_id'], axis=1)
 
     # Add possible spot codes to spot table (must chain results from different jobs together)
-    roundData['spot_codes'] = list(chain(*[job for job in rayResults]))
+    roundData['spot_codes'] = list(chain(*[job for job in results]))
 
     return roundData
 
@@ -500,11 +492,10 @@ def generateRoundPermutations(size: int, roundOmitNum: int) -> list:
         return sorted(set(list(permutations([*([False] * roundOmitNum),
                                             *([True] * (size - roundOmitNum))]))))
 
-@ray.remote
 def decodeFunc(data: pd.DataFrame, permutationCodes: dict) -> tuple:
 
     '''
-    Subfunction for decoder that allows it to run in parallel chunks using ray
+    Subfunction for decoder that allows it to run in parallel chunks
 
     Parameters
     ----------
@@ -612,9 +603,6 @@ def decoder(roundData: pd.DataFrame,
         roundDict = dict(zip([hash(tuple(code)) for code in codes.data], codes['target'].data))
         permCodeDict.update(roundDict)
 
-    # Put data table and permutations codes dictionary in ray storage
-    permutationCodesID = ray.put(permCodeDict)
-
     # Calculates index ranges to chunk data by and creates list of chunked data to loop through
     ranges = [0]
     for i in range(1, numJobs + 1):
@@ -624,13 +612,14 @@ def decoder(roundData: pd.DataFrame,
         chunkedData.append(deepcopy(roundData[ranges[i]:ranges[i + 1]]))
 
     # Run in parallel
-    results = [decodeFunc.remote(chunkedData[i], permutationCodesID)
-               for i in range(len(ranges[:-1]))]
-    rayResults = ray.get(results)
+    with ProcessPoolExecutor() as pool:
+        part = partial(decodeFunc, permutationCodes=permCodeDict, strictness=strictness)
+        poolMap = pool.map(part, [chunkedData[i] for i in range(len(chunkedData))])
+        results = [x for x in poolMap]
 
     # Update table
-    roundData['targets'] = list(chain(*[job[0] for job in rayResults]))
-    roundData['spot_codes'] = list(chain(*[job[1] for job in rayResults]))
+    roundData['targets'] = list(chain(*[job[0] for job in results]))
+    roundData['spot_codes'] = list(chain(*[job[1] for job in results]))
 
     roundData = roundData[[len(targets) > 0 for targets in
                            roundData['targets']]].reset_index(drop=True)
@@ -644,7 +633,6 @@ def decoder(roundData: pd.DataFrame,
 
     return roundData
 
-@ray.remote
 def distanceFunc(subSpotCodes: list,
                  subTargets: list,
                  spotCoords: dict,
@@ -652,7 +640,7 @@ def distanceFunc(subSpotCodes: list,
                  currentRoundOmitNum: int) -> tuple:
 
     '''
-    Subfunction for distanceFilter to allow it to run in parallel using ray
+    Subfunction for distanceFilter to allow it to run in parallel
 
     Parameters
     ----------
@@ -771,10 +759,6 @@ def distanceFilter(roundData: pd.DataFrame,
     else:
         allTargets = [[0 for code in codes] for codes in roundData['spot_codes']]
 
-    # Put reference dicts into shared memory
-    spotCoordsID = ray.put(spotCoords)
-    spotQualDictID = ray.put(spotQualDict)
-
     # Find ranges to chunk data by
     ranges = [0]
     for i in range(1, numJobs):
@@ -784,17 +768,17 @@ def distanceFilter(roundData: pd.DataFrame,
     chunkedTargets = [allTargets[ranges[i]:ranges[i + 1]] for i in range(len(ranges[:-1]))]
 
     # Run in parallel
-    results = [distanceFunc.remote(subSpotCodes, subTargets, spotCoordsID, spotQualDictID,
-                                   currentRoundOmitNum)
-               for subSpotCodes, subTargets in zip(chunkedSpotCodes, chunkedTargets)]
-    rayResults = ray.get(results)
+    with ProcessPoolExecutor() as pool:
+        part = partial(distanceFunc, spotCoords=spotCoords, spotQualDict=spotQualDict)
+        poolMap = pool.map(part, [spotsAndTargets for spotsAndTargets in zip(chunkedSpotCodes, chunkedTargets)])
+        results = [x for x in poolMap]
 
     # Add distances to decodedTables as new column and replace spot_codes and targets column with
     # only the min scoring values
-    roundData['spot_codes'] = list(chain(*[job[0] for job in rayResults]))
-    roundData['distance'] = list(chain(*[job[1] for job in rayResults]))
+    roundData['spot_codes'] = list(chain(*[job[0] for job in results]))
+    roundData['distance'] = list(chain(*[job[1] for job in results]))
     if checkTargets:
-        roundData['targets'] = list(chain(*[job[2] for job in rayResults]))
+        roundData['targets'] = list(chain(*[job[2] for job in results]))
 
     # Remove spots who had a tie between possible spot combinations
     roundData = roundData[roundData['spot_codes'] != -1]

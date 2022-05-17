@@ -613,7 +613,7 @@ def decoder(roundData: pd.DataFrame,
 
     # Run in parallel
     with ProcessPoolExecutor() as pool:
-        part = partial(decodeFunc, permutationCodes=permCodeDict, strictness=strictness)
+        part = partial(decodeFunc, permutationCodes=permCodeDict)
         poolMap = pool.map(part, [chunkedData[i] for i in range(len(chunkedData))])
         results = [x for x in poolMap]
 
@@ -633,8 +633,7 @@ def decoder(roundData: pd.DataFrame,
 
     return roundData
 
-def distanceFunc(subSpotCodes: list,
-                 subTargets: list,
+def distanceFunc(spotsAndTargets: list,
                  spotCoords: dict,
                  spotQualDict: dict,
                  currentRoundOmitNum: int) -> tuple:
@@ -666,6 +665,9 @@ def distanceFunc(subSpotCodes: list,
         tuple: First object is the min scoring spot code for each spots, the second is the min
                score for each spot, and the third is the min scoring target for each spot
     '''
+
+    subSpotCodes = spotsAndTargets[0]
+    subTargets = spotsAndTargets[1]
 
     # Find minimum scoring combination of spots from set of possible combinations
     constant = 2
@@ -769,8 +771,10 @@ def distanceFilter(roundData: pd.DataFrame,
 
     # Run in parallel
     with ProcessPoolExecutor() as pool:
-        part = partial(distanceFunc, spotCoords=spotCoords, spotQualDict=spotQualDict)
-        poolMap = pool.map(part, [spotsAndTargets for spotsAndTargets in zip(chunkedSpotCodes, chunkedTargets)])
+        part = partial(distanceFunc, spotCoords=spotCoords, spotQualDict=spotQualDict,
+                       currentRoundOmitNum=currentRoundOmitNum)
+        poolMap = pool.map(part, [spotsAndTargets for spotsAndTargets in zip(chunkedSpotCodes,
+                                                                             chunkedTargets)])
         results = [x for x in poolMap]
 
     # Add distances to decodedTables as new column and replace spot_codes and targets column with

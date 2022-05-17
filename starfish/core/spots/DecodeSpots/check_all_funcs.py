@@ -453,7 +453,7 @@ def buildBarcodes(roundData: pd.DataFrame,
 
     # Run in parallel
     with ProcessPoolExecutor() as pool:
-        part = partial(barcodeBuildFunc, channelDict=channelDict, currentRound=currentRound, 
+        part = partial(barcodeBuildFunc, channelDict=channelDict, currentRound=currentRound,
                        roundOmitNum=roundOmitNum, roundNum=roundNum)
         poolMap = pool.map(part, [chunkedNeighbors[i] for i in range(len(chunkedNeighbors))])
         results = [x for x in poolMap]

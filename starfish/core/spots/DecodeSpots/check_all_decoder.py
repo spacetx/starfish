@@ -191,7 +191,7 @@ class CheckAll(DecodeSpotsAlgorithm):
         for r in range(len(spotTables)):
             zs.update(spotTables[r]['z'])
         if self.physicalCoords:
-            if zScale < self.searchRadius or len(zs) > 1:
+            if zScale < self.searchRadius and len(zs) > 1:
                 set1 = True
         else:
             if len(zs) > 1:
@@ -203,9 +203,9 @@ class CheckAll(DecodeSpotsAlgorithm):
             allSearchRadii = np.array([0, 1.05, 1.5, 2.05, 2.3, 2.85, 3.05, 3.2, 3.65, 4.05, 4.15,
                                        4.25, 4.5])
 
-        maxRadii = allSearchRadii[(allSearchRadii - self.searchRadius) <= 0][-1]
+        maxRadii = allSearchRadii[(allSearchRadii - self.searchRadius) >= 0][0]
         radiusSet = allSearchRadii[allSearchRadii <= maxRadii]
-
+        
         # Calculate neighbors for each radius in the set (done only once and referred back to
         # throughout decodings)
         neighborsByRadius = {}

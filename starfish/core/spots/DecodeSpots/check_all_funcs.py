@@ -309,7 +309,7 @@ def spotQuality(spotTables: dict,
         # Calculates index ranges to chunk data by
         ranges = [0]
         for i in range(1, numJobs):
-            ranges.append(int((len(roundSpots) / numJobs) * i))
+            ranges.append(round((len(roundSpots) / numJobs) * i))
         ranges.append(len(roundSpots))
         chunkedSpots = [roundSpots[ranges[i]:ranges[i + 1]] for i in range(len(ranges[:-1]))]
 
@@ -447,7 +447,7 @@ def buildBarcodes(roundData: pd.DataFrame,
     # Calculates index ranges to chunk data by
     ranges = [0]
     for i in range(1, numJobs + 1):
-        ranges.append(int((len(roundData) / numJobs) * i))
+        ranges.append(round((len(roundData) / numJobs) * i))
     chunkedNeighbors = [list(roundData['neighbors'])[ranges[i]: ranges[i + 1]] for i in
                         range(len(ranges[:-1]))]
 
@@ -606,7 +606,7 @@ def decoder(roundData: pd.DataFrame,
     # Calculates index ranges to chunk data by and creates list of chunked data to loop through
     ranges = [0]
     for i in range(1, numJobs + 1):
-        ranges.append(int((len(roundData) / numJobs) * i))
+        ranges.append(round((len(roundData) / numJobs) * i))
     chunkedData = []
     for i in range(len(ranges[:-1])):
         chunkedData.append(deepcopy(roundData[ranges[i]:ranges[i + 1]]))
@@ -764,7 +764,7 @@ def distanceFilter(roundData: pd.DataFrame,
     # Find ranges to chunk data by
     ranges = [0]
     for i in range(1, numJobs):
-        ranges.append(int((len(roundData) / numJobs) * i))
+        ranges.append(round((len(roundData) / numJobs) * i))
     ranges.append(len(roundData))
     chunkedSpotCodes = [allSpotCodes[ranges[i]:ranges[i + 1]] for i in range(len(ranges[:-1]))]
     chunkedTargets = [allTargets[ranges[i]:ranges[i + 1]] for i in range(len(ranges[:-1]))]

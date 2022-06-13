@@ -205,7 +205,7 @@ class CheckAll(DecodeSpotsAlgorithm):
 
         maxRadii = allSearchRadii[(allSearchRadii - self.searchRadius) >= 0][0]
         radiusSet = allSearchRadii[allSearchRadii <= maxRadii]
-        
+
         # Calculate neighbors for each radius in the set (done only once and referred back to
         # throughout decodings)
         neighborsByRadius = {}

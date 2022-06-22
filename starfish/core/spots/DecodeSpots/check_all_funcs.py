@@ -83,8 +83,11 @@ def createNeighborDict(spotTables: dict,
     neighborDict = {}
     spotIDs = {}
     for r in spotTables:
-        spotIDs[r] = {idd: 0 for idd in spotTables[r]['spot_id']}
-        neighborDict[r] = {i: defaultdict(list, {r: [i]}) for i in spotTables[r]['spot_id']}
+        if len(spotTables[r]) > 0:
+            spotIDs[r] = {idd: 0 for idd in spotTables[r]['spot_id']}
+            neighborDict[r] = {i: defaultdict(list, {r: [i]}) for i in spotTables[r]['spot_id']}
+        else:
+            neighborDict[r] = {}
 
     # Add neighbors in neighborsByRadius[searchRadius] but check to make sure that spot is still
     # available before adding it
@@ -985,10 +988,11 @@ def removeUsedSpots(finalCodes: pd.DataFrame, spotTables: dict) -> dict:
 
     # Remove used spots
     for r in range(len(spotTables)):
-        usedSpots = set([passed[r] for passed in finalCodes['spot_codes']
-                         if passed[r] != 0])
-        spotTables[r] = spotTables[r][~spotTables[r]['spot_id'].isin(usedSpots)]
-        spotTables[r] = spotTables[r].reset_index(drop=True)
-        spotTables[r].index = range(1, len(spotTables[r]) + 1)
+        if len(spotTables[r]) > 0:
+            usedSpots = set([passed[r] for passed in finalCodes['spot_codes']
+                             if passed[r] != 0])
+            spotTables[r] = spotTables[r][~spotTables[r]['spot_id'].isin(usedSpots)]
+            spotTables[r] = spotTables[r].reset_index(drop=True)
+            spotTables[r].index = range(1, len(spotTables[r]) + 1)
 
     return spotTables

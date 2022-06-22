@@ -27,3 +27,4 @@ trackpy
 validators
 xarray >= 0.14.1
 ipywidgets
+sphinx-bootstrap-theme==0.8.1

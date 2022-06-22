@@ -159,6 +159,7 @@ class CheckAll(DecodeSpotsAlgorithm):
         counter = Counter(spotsPerRound)
         if counter[0] > self.errorRounds:
             exit('Not enough spots to form a barcode')
+        print(spotsPerRound)
 
         # If using physical coordinates, extract z and xy scales and check that they are all > 0
         if self.physicalCoords:
@@ -274,9 +275,13 @@ class CheckAll(DecodeSpotsAlgorithm):
                         # Subset spots by intensity, start with top 50% then decode again with all
                         currentTables = {}
                         for r in range(len(spotTables)):
-                            lowerBound = np.percentile(spotTables[r]['spot_quals'], intVal)
-                            currentTables[r] = spotTables[r][spotTables[r]['spot_quals']
-                                                             >= lowerBound]
+
+                            if len(spotTables[r]) > 0:
+                                lowerBound = np.percentile(spotTables[r]['spot_quals'], intVal)
+                                currentTables[r] = spotTables[r][spotTables[r]['spot_quals']
+                                                                 >= lowerBound]
+                            else:
+                                currentTables[r] = pd.DataFrame()
 
                     # Decode each radius and remove spots found in each decoding before the next
                     for sr, searchRadius in enumerate(radiusSet):
@@ -305,59 +310,70 @@ class CheckAll(DecodeSpotsAlgorithm):
                             decodedTables = {}
                             for r in range(len(spotTables)):
 
-                                # roundData will carry the possible barcode info for each spot in
-                                # the current round being examined
-                                roundData = deepcopy(currentTables[r])
+                                if len(spotTables[r]) > 0:
 
-                                # Drop all but the spot_id column
-                                roundData = roundData[['spot_id']]
+                                    # roundData will carry the possible barcode info for each spot
+                                    # in the current round being examined
+                                    roundData = deepcopy(currentTables[r])
 
-                                # From each spot's neighbors, create all possible combinations that
-                                # would form a barocde with the correct number of rounds. Adds
-                                # spot_codes column to roundData
-                                roundData = buildBarcodes(roundData, neighborDict,
-                                                          currentRoundOmitNum, channelDict,
-                                                          strictness, r, numJobs)
+                                    # Drop all but the spot_id column
+                                    roundData = roundData[['spot_id']]
 
-                                # When strictness is positive the filter-first methods is used and
-                                # distanceFilter is run first on all the potential barcodes to
-                                # choose the one with the minimum score (based on spatial variance
-                                # of the spots and their intensities) which are then matched to the
-                                # codebook. Spots that have more possible barcodes to choose between
-                                # than the current strictnessnumber are dropped as ambiguous. If
-                                # strictness is negative, the decode-first method is run where all
-                                # the possible barcodes are instead first matched to the codebook
-                                # and then the lowest scoring decodable spot combination is chosen
-                                # for each spot. Spots that have more decodable barcodes to choose
-                                # from than the strictness value (absolute value) are dropped.
-                                if strictness > 0:
+                                    # From each spot's neighbors, create all possible combinations
+                                    # that would form a barocde with the correct number of rounds.
+                                    # Adds spot_codes column to roundData
 
-                                    # Choose most likely combination of spots for each seed spot
-                                    # using their spatial variance and normalized intensity values.
-                                    # Adds distance column to roundData
-                                    roundData = distanceFilter(roundData, spotCoords, spotQualDict,
-                                                               r, currentRoundOmitNum, numJobs)
+                                    roundData = buildBarcodes(roundData, neighborDict,
+                                                              currentRoundOmitNum, channelDict,
+                                                              strictness, r, numJobs)
 
-                                    # Match possible barcodes to codebook. Adds target column to
-                                    # roundData
-                                    roundData = decoder(roundData, self.codebook, channelDict,
-                                                        strictness, currentRoundOmitNum, r, numJobs)
+                                    # When strictness is positive the filter-first methods is used
+                                    # and distanceFilter is run first on all the potential barcodes
+                                    # to choose the one with the minimum score (based on spatial
+                                    # variance of the spots and their intensities) which are then
+                                    # matched to the codebook. Spots that have more possible
+                                    # barcodes to choose between than the current strictnessnumber
+                                    # are dropped as ambiguous. If strictness is negative, the
+                                    # decode-first method is run where all the possible barcodes
+                                    # are instead first matched to the codebook and then the lowest
+                                    # scoring decodable spot combination is chosen for each spot.
+                                    # Spots that have more decodable barcodes to choose from than
+                                    # the strictness value (absolute value) are dropped.
+                                    if strictness > 0:
+
+                                        # Choose most likely combination of spots for each seed
+                                        # spot using their spatial variance and normalized intensity
+                                        # values. Adds distance column to roundData
+                                        roundData = distanceFilter(roundData, spotCoords,
+                                                                   spotQualDict, r,
+                                                                   currentRoundOmitNum, numJobs)
+
+                                        # Match possible barcodes to codebook. Adds target column
+                                        # to roundData
+                                        roundData = decoder(roundData, self.codebook, channelDict,
+                                                            strictness, currentRoundOmitNum, r,
+                                                            numJobs)
+
+                                    else:
+
+                                        # Match possible barcodes to codebook. Adds target column
+                                        # to roundData
+                                        roundData = decoder(roundData, self.codebook, channelDict,
+                                                            strictness, currentRoundOmitNum, r,
+                                                            numJobs)
+
+                                        # Choose most likely combination of spots for each seed
+                                        # spot using their spatial variance and normalized
+                                        # intensity values. Adds distance column to roundData
+                                        roundData = distanceFilter(roundData, spotCoords,
+                                                                   spotQualDict, r,
+                                                                   currentRoundOmitNum, numJobs)
+
+                                    # Assign to DecodedTables dictionary
+                                    decodedTables[r] = roundData
 
                                 else:
-
-                                    # Match possible barcodes to codebook. Adds target column to
-                                    # roundData
-                                    roundData = decoder(roundData, self.codebook, channelDict,
-                                                        strictness, currentRoundOmitNum, r, numJobs)
-
-                                    # Choose most likely combination of spots for each seed spot
-                                    # using their spatial variance and normalized intensity values.
-                                    # Adds distance column to roundData
-                                    roundData = distanceFilter(roundData, spotCoords, spotQualDict,
-                                                               r, currentRoundOmitNum, numJobs)
-
-                                # Assign to DecodedTables dictionary
-                                decodedTables[r] = roundData
+                                    decodedTables[r] = pd.DataFrame()
 
                             # Turn spot table dictionary into single table, filter barcodes by
                             # the seed number, add additional information, and choose between

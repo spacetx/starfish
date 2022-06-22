@@ -1,7 +1,7 @@
 import random
 
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter
 
 from starfish import ImageStack
 from starfish.core.codebook.codebook import Codebook
@@ -107,7 +107,7 @@ def testExactMatches():
                    test[1][1] + 1 >= true[1][1] >= test[1][1] - 1:
                     matches += 1
 
-    assert matches == len(trueTargets)
+    assert matches == len(trueTargets), 'Incorrect number of targets found'
 
 def testJitteredMatches():
 
@@ -136,7 +136,7 @@ def testJitteredMatches():
                    test[1][1] + 3 >= true[1][1] >= test[1][1] - 3:
                     matches += 1
 
-    assert matches == len(trueTargets)
+    assert matches == len(trueTargets), 'Incorrect number of targets found'
 
 def testErrorCorrection():
 
@@ -144,7 +144,7 @@ def testErrorCorrection():
 
     img, trueTargets = syntheticSeqfish(100, 100, 20, codebook, 5, 0, True)
 
-    bd = BlobDetector(min_sigma=1, max_sigma=4, num_sigma=30, threshold=.1, exclude_border=False)
+    bd = BlobDetector(min_sigma=1, max_sigma=4, num_sigma=10, threshold=.1, exclude_border=False)
     spots = bd.run(image_stack=img)
     assert spots.count_total_spots() == 4 * 5, 'Spot detector did not find all spots'
 
@@ -165,4 +165,4 @@ def testErrorCorrection():
                    test[1][1] + 1 >= true[1][1] >= test[1][1] - 1:
                     matches += 1
 
-    assert matches == len(trueTargets)
+    assert matches == len(trueTargets), 'Incorrect number of targets found'

@@ -44,7 +44,7 @@ iniconfig==1.1.1
 ipykernel==6.15.0
 ipython==8.4.0
 ipython-genutils==0.2.0
-ipywidgets==7.7.0
+ipywidgets==7.7.1
 jedi==0.18.1
 Jinja2==3.1.2
 jmespath==1.0.1
@@ -53,7 +53,7 @@ jsonschema==4.6.0
 jupyter-client==7.3.4
 jupyter-core==4.10.0
 jupyterlab-pygments==0.2.2
-jupyterlab-widgets==1.1.0
+jupyterlab-widgets==1.1.1
 kiwisolver==1.4.3
 locket==1.0.0
 magicgui==0.5.1
@@ -115,7 +115,7 @@ read-roi==1.6.0
 regional==1.1.2
 requests==2.28.0
 s3transfer==0.6.0
-scikit-image==0.19.3
+scikit-image==0.18.3
 scikit-learn==1.1.1
 scipy==1.8.1
 semantic-version==2.10.0
@@ -154,7 +154,7 @@ validators==0.20.0
 vispy==0.10.0
 wcwidth==0.2.5
 webencodings==0.5.1
-widgetsnbextension==3.6.0
+widgetsnbextension==3.6.1
 wrapt==1.14.1
 xarray==2022.3.0
 zipp==3.8.0

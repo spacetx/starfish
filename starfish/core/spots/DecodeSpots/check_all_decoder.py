@@ -64,9 +64,9 @@ class CheckAll(DecodeSpotsAlgorithm):
     confidence barcodes to be called first and make things easier when later codes are called.
 
     If error_rounds is set to 1 (currently cannot handle more than 1), after running all decodings
-    for barocdes that exactly match the codebook, another set of decodings will be run to find
+    for barcodes that exactly match the codebook, another set of decodings will be run to find
     barcodes that are missing a spot in exactly one round. If the codes in the codebook all have a
-    hamming distance of at least 2 from all other codes, each can still be uniquely indentified
+    hamming distance of at least 2 from all other codes, each can still be uniquely identified
     using a partial code with a single round dropped. Barcodes decoded with a partial code like this
     are inherently less accurate and so an extra dimension called "rounds_used" was added to the
     DecodedIntensityTable output that labels each decoded target with the number of rounds that was
@@ -127,20 +127,16 @@ class CheckAll(DecodeSpotsAlgorithm):
         """
         Decode spots by finding the set of nonoverlapping barcodes that have the minimum spatial
         variance within each barcode.
-
         Parameters
         ----------
         spots: SpotFindingResults
             A Dict of tile indices and their corresponding measured spots
-
         n_processes: int
             Number of threads to run decoder in parallel with
-
         Returns
         -------
         DecodedIntensityTable :
             IntensityTable decoded and appended with Features.TARGET values.
-
         """
 
         # Rename n_processes (trying to stay consistent between starFISH's _ variables and my
@@ -159,7 +155,6 @@ class CheckAll(DecodeSpotsAlgorithm):
         counter = Counter(spotsPerRound)
         if counter[0] > self.errorRounds:
             exit('Not enough spots to form a barcode')
-        print(spotsPerRound)
 
         # If using physical coordinates, extract z and xy scales and check that they are all > 0
         if self.physicalCoords:

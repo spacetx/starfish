@@ -1,4 +1,3 @@
-import sys
 from collections import Counter
 from copy import deepcopy
 from typing import Any, Hashable, Mapping, Tuple
@@ -112,13 +111,16 @@ class CheckAll(DecodeSpotsAlgorithm):
 
         # Check that codebook is the right class and not empty
         if not isinstance(self.codebook, Codebook) or len(codebook) == 0:
-            sys.exit('codebook is either not a Codebook object or is empty')
+            raise ValueError(
+                'codebook is either not a Codebook object or is empty')
         # Check that error_rounds is either 0 or 1
         if self.errorRounds not in [0, 1]:
-            exit('error_rounds can only take a value of 0 or 1')
+            raise ValueError(
+                'error_rounds can only take a value of 0 or 1')
         # Return error if search radius is greater than 4.5 or negative
         if self.searchRadius < 0 or self.searchRadius > 4.5:
-            sys.exit('search_radius must be positive w/ max value of 4.5')
+            raise ValueError(
+                'search_radius must be positive w/ max value of 4.5')
 
     def run(self,
             spots: SpotFindingResults,
@@ -144,7 +146,8 @@ class CheckAll(DecodeSpotsAlgorithm):
         numJobs = n_processes
         # Check that numJobs is a positive integer
         if numJobs < 0 or not isinstance(numJobs, int):
-            sys.exit('n_process must be a positive integer')
+            raise ValueError(
+                'n_process must be a positive integer')
 
         # Create dictionary where keys are round labels and the values are pandas dataframes
         # containing information on the spots found in that round
@@ -154,7 +157,8 @@ class CheckAll(DecodeSpotsAlgorithm):
         spotsPerRound = [len(spotTables[r]) for r in range(len(spotTables))]
         counter = Counter(spotsPerRound)
         if counter[0] > self.errorRounds:
-            exit('Not enough spots to form a barcode')
+            raise ValueError(
+                'Not enough spots to form a barcode')
 
         # If using physical coordinates, extract z and xy scales and check that they are all > 0
         if self.physicalCoords:
@@ -166,7 +170,8 @@ class CheckAll(DecodeSpotsAlgorithm):
             yScale = physicalCoords['y'][1].data - physicalCoords['y'][0].data
             xScale = physicalCoords['x'][1].data - physicalCoords['x'][0].data
             if xScale <= 0 or yScale <= 0 or zScale <= 0:
-                exit('invalid physical coords')
+                raise ValueError(
+                    'invalid physical coords')
 
         # Add one to channels labels (prevents collisions between hashes of barcodes later), adds
         # unique spot_id column for each spot in each round, and scales the x, y, and z columns to
@@ -249,7 +254,8 @@ class CheckAll(DecodeSpotsAlgorithm):
                 strictnesses.append(10)
                 seedNumbers.append(len(spotTables) - 1)
         else:
-            exit('Invalid mode choice ("high", "med", or "low")')
+            raise ValueError(
+                'Invalid mode choice ("high", "med", or "low")')
 
         # Decode for each round omission number, intensity cutoff, and then search radius
         allCodes = pd.DataFrame()

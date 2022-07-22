@@ -1,5 +1,4 @@
 import typing
-import warnings
 from collections import Counter, defaultdict
 from concurrent.futures.process import ProcessPoolExecutor
 from copy import deepcopy
@@ -12,8 +11,6 @@ from scipy.spatial import cKDTree
 
 from starfish.core.codebook.codebook import Codebook
 from starfish.types import Axes
-
-warnings.filterwarnings('ignore')
 
 def findNeighbors(spotTables: dict,
                   searchRadius: float,

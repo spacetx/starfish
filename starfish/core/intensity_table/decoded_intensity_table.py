@@ -54,7 +54,6 @@ class DecodedIntensityTable(IntensityTable):
         * c          (c) int64 0 1 2
         * h          (h) int64 0 1 2 3
          target     (features) object 08b1a822-a1b4-4e06-81ea-8a4bd2b004a9 ...
-
         """
 
     __slots__ = ()
@@ -65,7 +64,9 @@ class DecodedIntensityTable(IntensityTable):
             intensities: IntensityTable,
             targets: Tuple[str, np.ndarray],
             distances: Optional[Tuple[str, np.ndarray]] = None,
-            passes_threshold: Optional[Tuple[str, np.ndarray]] = None):
+            passes_threshold: Optional[Tuple[str, np.ndarray]] = None,
+            rounds_used: Optional[Tuple[str, np.ndarray]] = None):
+
         """
         Assign target values to intensities.
 
@@ -80,6 +81,9 @@ class DecodedIntensityTable(IntensityTable):
         passes_threshold : Optional[Tuple[str, np.ndarray]]
             Corresponding array of boolean values indicating if each itensity passed
             given thresholds.
+        rounds_used: Optional[Tuple[str, np.ndarray]]
+            Corresponding array of integers indicated the number of rounds this
+            decoded intensity was found in
 
         Returns
         -------
@@ -92,6 +96,8 @@ class DecodedIntensityTable(IntensityTable):
             intensities[Features.DISTANCE] = distances
         if passes_threshold:
             intensities[Features.PASSES_THRESHOLDS] = passes_threshold
+        if rounds_used:
+            intensities['rounds_used'] = rounds_used
         return intensities
 
     def to_decoded_dataframe(self) -> DecodedSpots:
@@ -120,7 +126,6 @@ class DecodedIntensityTable(IntensityTable):
         Notes
         ------
         See also https://github.com/JEFworks/MERmaid
-
         """
         # construct the MERMAID dataframe. As MERMAID adds support for non-categorical variables,
         # additional columns can be added here

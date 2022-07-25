@@ -1,11 +1,12 @@
+import json
+import os
 from dataclasses import dataclass
-from typing import Any, Hashable, Mapping, MutableMapping, Optional, Sequence, Tuple
+from typing import Any, Dict, Hashable, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 import xarray as xr
 
 from starfish.core.types import Axes, Coordinates, SpotAttributes
 from starfish.core.util.logging import Log
-
 
 AXES_ORDER = (Axes.ROUND, Axes.CH)
 
@@ -108,6 +109,98 @@ class SpotFindingResults:
         Return all SpotAttributes across rounds and chs.
         """
         return self._results.values()
+
+    def save(self, output_dir_name: str) -> None:
+        """Save spot finding results to series of files.
+
+        Parameters
+        ----------
+        output_dir_name: str
+            Location to save all files.
+
+        """
+        json_data: Dict[str, Any] = {}
+
+        pwd = os.getcwd()
+        os.chdir(os.path.dirname(output_dir_name))
+        base_name = os.path.basename(output_dir_name)
+
+        coords = {}
+        for key in self.physical_coord_ranges.keys():
+            path = "{}coords_{}.nc".format(base_name, key)
+            coords[key] = path
+            self.physical_coord_ranges[key].to_netcdf(path)
+        json_data["physical_coord_ranges"] = coords
+
+        path = "{}log.arr"
+        json_data["log"] = {}
+        json_data["log"]["path"] = path.format(base_name)
+        with open(path.format(base_name), "w") as f:
+            f.write(self.log.encode())
+
+        spot_attrs = {}
+        for key in self._results.keys():
+            path = "{}spots_{}_{}.nc".format(base_name, key[0], key[1])
+            spot_attrs["{}_{}".format(key[0], key[1])] = path
+            self._results[key].spot_attrs.save(path)
+        json_data["spot_attrs"] = spot_attrs
+
+        save = json.dumps(json_data)
+        with open("{}SpotFindingResults.json".format(base_name), "w") as f:
+            f.write(save)
+
+        os.chdir(pwd)
+
+    @classmethod
+    def load(cls, json_file: str):
+        """Load serialized spot finding results.
+
+        Parameters:
+        -----------
+        json_file: str
+            json file to read
+
+        Returns:
+        --------
+        SpotFindingResults:
+            Object containing loaded results
+
+        """
+        fl = open(json_file)
+        data = json.load(fl)
+        pwd = os.getcwd()
+
+        os.chdir(os.path.dirname(json_file))
+
+        with open(data["log"]["path"]) as f:
+            txt = json.load(f)['log']
+            txt = json.dumps(txt)
+            log = Log.decode(txt)
+
+        rename_axes = {
+            'x': Coordinates.X.value,
+            'y': Coordinates.Y.value,
+            'z': Coordinates.Z.value
+        }
+        coords = {}
+        for coord, path in data["physical_coord_ranges"].items():
+            coords[rename_axes[coord]] = xr.load_dataarray(path)
+
+        spot_attributes_list = []
+        for key, path in data["spot_attrs"].items():
+            zero = int(key.split("_")[0])
+            one = int(key.split("_")[1])
+            index = {AXES_ORDER[0]: zero, AXES_ORDER[1]: one}
+            spots = SpotAttributes.load(path)
+            spot_attributes_list.append((PerImageSliceSpotResults(spots, extras=None), index))
+
+        os.chdir(pwd)
+
+        return SpotFindingResults(
+            imagestack_coords=coords,
+            log=log,
+            spot_attributes_list=spot_attributes_list
+        )
 
     @property
     def round_labels(self):

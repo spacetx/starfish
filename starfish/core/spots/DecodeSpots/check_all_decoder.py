@@ -400,7 +400,11 @@ class CheckAll(DecodeSpotsAlgorithm):
         # create empty IntensityTable filled with np.nan
         data = np.full((len(allCodes), len(channels), len(rounds)), fill_value=np.nan)
         dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
-        centers = allCodes['center']
+        
+        if len(allCodes) == 0:
+            centers = []
+        else:
+            centers = allCodes['center']
         coords: Mapping[Hashable, Tuple[str, Any]] = {
             Features.SPOT_RADIUS: (Features.AXIS, np.full(len(allCodes), 1)),
             Axes.ZPLANE.value: (Features.AXIS, np.asarray([round(c[0]) for c in centers])),
@@ -413,28 +417,36 @@ class CheckAll(DecodeSpotsAlgorithm):
         }
         int_table = IntensityTable(data=data, dims=dims, coords=coords)
 
-        # Fill in data values
-        table_codes = []
-        for i in range(len(allCodes)):
-            code = []
-            # ints = allCodes.loc[i, 'intensities']
-            for j, ch in enumerate(allCodes.loc[i, 'best_barcodes']):
-                # If a round is not used, row will be all zeros
-                code.append(np.asarray([0 if k != ch - 1 else 1 for k in range(len(channels))]))
-            table_codes.append(np.asarray(code).T)
-        int_table.values = np.asarray(table_codes)
-        int_table = transfer_physical_coords_to_intensity_table(intensity_table=int_table,
-                                                                spots=spots)
+        if len(allCodes) > 0:
+            # Fill in data values
+            table_codes = []
+            for i in range(len(allCodes)):
+                code = []
+                # ints = allCodes.loc[i, 'intensities']
+                for j, ch in enumerate(allCodes.loc[i, 'best_barcodes']):
+                    # If a round is not used, row will be all zeros
+                    code.append(np.asarray([0 if k != ch - 1 else 1 for k in range(len(channels))]))
+                table_codes.append(np.asarray(code).T)
+            int_table.values = np.asarray(table_codes)
+            int_table = transfer_physical_coords_to_intensity_table(intensity_table=int_table,
+                                                                    spots=spots)
 
-        # Validate results are correct shape
-        self.codebook._validate_decode_intensity_input_matches_codebook_shape(int_table)
+            # Validate results are correct shape
+            self.codebook._validate_decode_intensity_input_matches_codebook_shape(int_table)
 
-        # Create DecodedIntensityTable
-        result = DecodedIntensityTable.from_intensity_table(
-            int_table,
-            targets=(Features.AXIS, allCodes['targets'].astype('U')),
-            distances=(Features.AXIS, allCodes["distance"]),
-            passes_threshold=(Features.AXIS, np.full(len(allCodes), True)),
-            rounds_used=(Features.AXIS, allCodes['rounds_used']))
+            # Create DecodedIntensityTable
+            result = DecodedIntensityTable.from_intensity_table(
+                int_table,
+                targets=(Features.AXIS, allCodes['targets'].astype('U')),
+                distances=(Features.AXIS, allCodes["distance"]),
+                passes_threshold=(Features.AXIS, np.full(len(allCodes), True)),
+                rounds_used=(Features.AXIS, allCodes['rounds_used']))
+        else:
+            result = DecodedIntensityTable.from_intensity_table(
+                int_table,
+                targets=(Features.AXIS, []),
+                distances=(Features.AXIS, []),
+                passes_threshold=(Features.AXIS, []),
+                rounds_used=(Features.AXIS, []))
 
         return result

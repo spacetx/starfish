@@ -400,7 +400,7 @@ class CheckAll(DecodeSpotsAlgorithm):
         # create empty IntensityTable filled with np.nan
         data = np.full((len(allCodes), len(channels), len(rounds)), fill_value=np.nan)
         dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
-        
+
         if len(allCodes) == 0:
             centers = []
         else:
@@ -444,9 +444,9 @@ class CheckAll(DecodeSpotsAlgorithm):
         else:
             result = DecodedIntensityTable.from_intensity_table(
                 int_table,
-                targets=(Features.AXIS, []),
-                distances=(Features.AXIS, []),
-                passes_threshold=(Features.AXIS, []),
-                rounds_used=(Features.AXIS, []))
+                targets=(Features.AXIS, np.array([])),
+                distances=(Features.AXIS, np.array([])),
+                passes_threshold=(Features.AXIS, np.array([])),
+                rounds_used=(Features.AXIS, np.array([])))
 
         return result

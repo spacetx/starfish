@@ -417,6 +417,7 @@ class CheckAll(DecodeSpotsAlgorithm):
         }
         int_table = IntensityTable(data=data, dims=dims, coords=coords)
 
+        # If no targets found returns empty DecodedIntensityTable
         if len(allCodes) > 0:
             # Fill in data values
             table_codes = []

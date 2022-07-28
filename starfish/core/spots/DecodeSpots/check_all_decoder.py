@@ -405,6 +405,7 @@ class CheckAll(DecodeSpotsAlgorithm):
             centers = []
         else:
             centers = allCodes['center']
+
         coords: Mapping[Hashable, Tuple[str, Any]] = {
             Features.SPOT_RADIUS: (Features.AXIS, np.full(len(allCodes), 1)),
             Axes.ZPLANE.value: (Features.AXIS, np.asarray([round(c[0]) for c in centers])),

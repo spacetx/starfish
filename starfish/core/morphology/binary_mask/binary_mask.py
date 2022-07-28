@@ -355,13 +355,28 @@ class BinaryMaskCollection:
         # Load the label image generated from another program
         label_image = io.imread(path_to_labeled_image)
 
-        # Get the physical ticks from the original dapi image
-        physical_ticks = {Coordinates.Y: original_image.xarray.yc.values,
-                          Coordinates.X: original_image.xarray.xc.values}
+        # Fixes dimension order. Tiff files saved with skimage.io.imsave and tifffile.imsave will
+        # have different dimension order when read in.
+        if len(label_image.shape) == 3 and label_image.shape[0] > label_image.shape[-1]:
+            label_image = np.transpose(label_image, [2, 0, 1])
 
-        # Get the pixel values from the original dapi image
-        pixel_coords = {Axes.Y: original_image.xarray.y.values,
-                        Axes.X: original_image.xarray.x.values}
+        if len(label_image.shape) == 3:
+            # Get the physical ticks from the original dapi image
+            physical_ticks = {Coordinates.Y: original_image.xarray.yc.values,
+                              Coordinates.X: original_image.xarray.xc.values,
+                              Coordinates.Z: original_image.xarray.zc.values}
+
+            # Get the pixel values from the original dapi image
+            pixel_coords = {Axes.Y: original_image.xarray.y.values,
+                            Axes.X: original_image.xarray.x.values,
+                            Axes.ZPLANE: original_image.xarray.z.values}
+        else:
+            physical_ticks = {Coordinates.Y: original_image.xarray.yc.values,
+                              Coordinates.X: original_image.xarray.xc.values}
+
+            # Get the pixel values from the original dapi image
+            pixel_coords = {Axes.Y: original_image.xarray.y.values,
+                            Axes.X: original_image.xarray.x.values}
 
         # Create the label image
         label_im = LabelImage.from_label_array_and_ticks(

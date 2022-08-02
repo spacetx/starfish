@@ -325,8 +325,8 @@ class CheckAll(DecodeSpotsAlgorithm):
                                     # Adds spot_codes column to roundData
 
                                     roundData = buildBarcodes(roundData, neighborDict,
-                                                              currentRoundOmitNum, channelDict,
-                                                              strictness, r, numJobs)
+                                                              currentRoundOmitNum, strictness, r,
+                                                              numJobs)
 
                                     # When strictness is positive the filter-first methods is used
                                     # and distanceFilter is run first on all the potential barcodes

@@ -416,6 +416,10 @@ def decodeFunc(data: pd.DataFrame) -> tuple:
         allDecodedSpotCodes.append(decodedSpotCodes)
     return (allTargets, allDecodedSpotCodes)
 
+def setGlobalDecoder(permutationCodes):
+    global globPermutationCodes
+    globPermutationCodes = permutationCodes
+
 def decoder(roundData: pd.DataFrame,
             codebook: Codebook,
             channelDict: dict,
@@ -487,12 +491,8 @@ def decoder(roundData: pd.DataFrame,
     for i in range(len(ranges[:-1])):
         chunkedData.append(deepcopy(roundData[ranges[i]:ranges[i + 1]]))
 
-    def set_global(permutationCodes):
-        global globPermutationCodes
-        globPermutationCodes = permutationCodes
-
     # Run in parallel
-    with ProcessPoolExecutor(max_workers=numJobs, initializer=set_global,
+    with ProcessPoolExecutor(max_workers=numJobs, initializer=setGlobalDecoder,
                              initargs=(permCodeDict,)) as pool:
         part = partial(decodeFunc)
         poolMap = pool.map(part, [chunkedData[i] for i in range(len(chunkedData))])
@@ -563,6 +563,12 @@ def distanceFunc(spotsAndTargets: list,
 
     return (bestSpotCodes, bestDistances, bestTargets)
 
+def setGlobalDistance(spotCoords, spotQualDict):
+    global globSpotCoords
+    global globSpotQualDict
+    globSpotCoords = spotCoords
+    globSpotQualDict = spotQualDict
+
 def distanceFilter(roundData: pd.DataFrame,
                    spotCoords: dict,
                    spotQualDict: dict,
@@ -628,14 +634,8 @@ def distanceFilter(roundData: pd.DataFrame,
     chunkedSpotCodes = [allSpotCodes[ranges[i]:ranges[i + 1]] for i in range(len(ranges[:-1]))]
     chunkedTargets = [allTargets[ranges[i]:ranges[i + 1]] for i in range(len(ranges[:-1]))]
 
-    def set_global(spotCoords, spotQualDict):
-        global globSpotCoords
-        global globSpotQualDict
-        globSpotCoords = spotCoords
-        globSpotQualDict = spotQualDict
-
     # Run in parallel
-    with ProcessPoolExecutor(max_workers=numJobs, initializer=set_global,
+    with ProcessPoolExecutor(max_workers=numJobs, initializer=setGlobalDistance,
                              initargs=(spotCoords, spotQualDict)) as pool:
         part = partial(distanceFunc, currentRoundOmitNum=currentRoundOmitNum)
         poolMap = pool.map(part, [spotsAndTargets for spotsAndTargets in zip(chunkedSpotCodes,

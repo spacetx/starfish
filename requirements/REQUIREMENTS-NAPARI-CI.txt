@@ -67,7 +67,7 @@ napari-console==0.0.4
 napari-plugin-engine==0.2.0
 napari-svg==0.1.6
 nbclient==0.6.4
-nbconvert==6.5.0
+nbconvert==6.5.1
 nbformat==5.4.0
 nest-asyncio==1.5.5
 networkx==2.8.4

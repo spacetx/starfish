@@ -1,3 +1,4 @@
+from collections import defaultdict
 from functools import partial
 from typing import Optional, Tuple, Union
 
@@ -23,7 +24,6 @@ blob_detectors = {
     'blob_doh': blob_doh,
     'blob_log': blob_log
 }
-
 
 class BlobDetector(FindSpotsAlgorithm):
     """
@@ -121,6 +121,10 @@ class BlobDetector(FindSpotsAlgorithm):
         if self.detector_method is not blob_doh:
             spot_finding_args["exclude_border"] = self.exclude_border
 
+        # Causes error otherwise
+        if self.detector_method == blob_dog:
+            del spot_finding_args['num_sigma']
+
         fitted_blobs_array: np.ndarray = self.detector_method(
             data_image,
             **spot_finding_args
@@ -132,12 +136,19 @@ class BlobDetector(FindSpotsAlgorithm):
             return PerImageSliceSpotResults(spot_attrs=empty_spot_attrs, extras=None)
 
         # measure intensities
-        z_inds = fitted_blobs_array[:, 0].astype(int)
-        y_inds = fitted_blobs_array[:, 1].astype(int)
-        x_inds = fitted_blobs_array[:, 2].astype(int)
-        radius = np.round(fitted_blobs_array[:, 3] * np.sqrt(3))
         data_image = np.asarray(data_image)
-        intensities = data_image[tuple([z_inds, y_inds, x_inds])]
+        if self.is_volume:
+            z_inds = fitted_blobs_array[:, 0].astype(int)
+            y_inds = fitted_blobs_array[:, 1].astype(int)
+            x_inds = fitted_blobs_array[:, 2].astype(int)
+            radius = np.round(fitted_blobs_array[:, 3] * np.sqrt(3))
+            intensities = data_image[tuple([z_inds, y_inds, x_inds])]
+        else:
+            z_inds = np.asarray([0 for x in range(len(fitted_blobs_array))])
+            y_inds = fitted_blobs_array[:, 0].astype(int)
+            x_inds = fitted_blobs_array[:, 1].astype(int)
+            radius = np.round(fitted_blobs_array[:, 2] * np.sqrt(3))
+            intensities = data_image[tuple([y_inds, x_inds])]
 
         # construct dataframe
         spot_data = pd.DataFrame(
@@ -195,6 +206,28 @@ class BlobDetector(FindSpotsAlgorithm):
                 group_by=determine_axes_to_group_by(self.is_volume),
                 n_processes=n_processes
             )
+
+            # If not a volume, merge spots from the same round/channel but different z slices
+            if not self.is_volume:
+                merged_z_tables = defaultdict(pd.DataFrame)  # type: ignore
+                for i in range(len(spot_attributes_list)):
+                    spot_attributes_list[i][0].spot_attrs.data['z'] = \
+                        spot_attributes_list[i][1]['z']
+                    r = spot_attributes_list[i][1][Axes.ROUND]
+                    ch = spot_attributes_list[i][1][Axes.CH]
+                    merged_z_tables[(r, ch)] = merged_z_tables[(r, ch)].append(
+                        spot_attributes_list[i][0].spot_attrs.data)
+                new = []
+                r_chs = sorted([*merged_z_tables])
+                selectors = list(image_stack._iter_axes({Axes.ROUND, Axes.CH}))
+                for i, (r, ch) in enumerate(r_chs):
+                    merged_z_tables[(r, ch)]['spot_id'] = range(len(merged_z_tables[(r, ch)]))
+                    spot_attrs = SpotAttributes(merged_z_tables[(r, ch)].reset_index(drop=True))
+                    new.append((PerImageSliceSpotResults(spot_attrs=spot_attrs, extras=None),
+                               selectors[i]))
+
+                spot_attributes_list = new
+
             results = SpotFindingResults(imagestack_coords=image_stack.xarray.coords,
                                          log=image_stack.log,
                                          spot_attributes_list=spot_attributes_list)

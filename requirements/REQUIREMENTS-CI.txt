@@ -7,7 +7,7 @@ backcall==0.2.0
 bleach==4.1.0
 boto3==1.18.37
 botocore==1.21.37
-certifi==2021.5.30
+certifi==2022.12.7
 cffi==1.14.6
 charset-normalizer==2.0.4
 click==8.0.1

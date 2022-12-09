@@ -13,7 +13,7 @@ boto3==1.24.14
 botocore==1.27.14
 build==0.8.0
 cachey==0.2.1
-certifi==2022.6.15
+certifi==2022.12.7
 cffi==1.15.0
 charset-normalizer==2.0.12
 click==8.1.3

@@ -14,7 +14,7 @@ click==8.0.1
 colorama==0.4.4
 commonmark==0.9.1
 coverage==5.5
-cryptography==3.4.8
+cryptography==39.0.1
 cycler==0.10.0
 dataclasses==0.6
 debugpy==1.4.1

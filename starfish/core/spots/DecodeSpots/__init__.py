@@ -3,6 +3,7 @@ from .check_all_decoder import CheckAll
 from .metric_decoder import MetricDistance
 from .per_round_max_channel_decoder import PerRoundMaxChannel
 from .simple_lookup_decoder import SimpleLookupDecoder
+from .multi_barcode_decoder import MultiBarcodeDecoder
 
 # autodoc's automodule directive only captures the modules explicitly listed in __all__.
 __all__ = list(set(

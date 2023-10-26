@@ -114,10 +114,11 @@ class MultiBarcodeDecoder(DecodeSpotsAlgorithm):
         # apply threshold and normalize by round
         st.values[st.values < self.raw_intensity_threshold] = 0
         st.values = np.nan_to_num(st/st.sum(axis=2))
-        missing_rounds = st.sum([Axes.ROUND.value,Axes.CH.value]).round() < 3
 
         channels = intensities.sizes[Axes.CH.value]
         rounds = intensities.sizes[Axes.ROUND.value]
+
+        missing_rounds = st.sum([Axes.ROUND.value,Axes.CH.value]).round() < rounds
 
         # generate all possible binary activation patterns
         possibilities = np.unpackbits(np.array([[x] for x in range(0,2**channels)], dtype=np.uint8), axis=1)[:,(8-channels):]

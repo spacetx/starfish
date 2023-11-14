@@ -63,6 +63,7 @@ class MinDistanceLabel(FilterAlgorithm):
             exclude_border=self._exclude_border,
             footprint=footprint,
             labels=np.asarray(mask),
+            min_distance=self._minimum_distance_xy,
         )
         local_maximum_mask = np.zeros_like(distance, dtype=bool)
         local_maximum_mask[tuple(local_maximum.T)] = True

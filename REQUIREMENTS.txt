@@ -22,6 +22,7 @@ scipy
 showit >= 1.1.4
 slicedimage==4.1.1
 sympy ~= 1.5.0
+urllib3 <1.27, >=1.25.4
 tqdm
 trackpy
 validators

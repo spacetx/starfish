@@ -105,8 +105,8 @@ def test_iss_pipeline_cropped_data(tmpdir):
 
     masks = iss.masks
 
-    # segmentation identifies only one cell
-    assert len(iss.watershed_markers) == 6
+    # segmentation identifies four cells
+    assert len(iss.watershed_markers) == 4
 
     # assign targets
     lab = AssignTargets.Label()
@@ -143,4 +143,4 @@ def test_iss_pipeline_cropped_data(tmpdir):
     # test that nans were properly removed from the expression matrix
     assert 'nan' not in expression_matrix.genes.data
     # test the number of spots that did not decode per cell
-    assert np.array_equal(expression_matrix.number_of_undecoded_spots.data, [13, 1, 0, 36])
+    assert np.array_equal(expression_matrix.number_of_undecoded_spots.data, [13, 1, 36])

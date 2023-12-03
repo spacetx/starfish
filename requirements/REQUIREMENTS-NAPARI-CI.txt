@@ -120,7 +120,7 @@ scikit-learn==1.1.1
 scipy==1.8.1
 semantic-version==2.10.0
 Send2Trash==1.8.0
-setuptools==58.1.0
+setuptools==65.5.1
 showit==1.1.4
 six==1.16.0
 slicedimage==4.1.1

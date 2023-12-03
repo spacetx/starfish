@@ -40,7 +40,7 @@ jedi==0.18.0
 jeepney==0.7.1
 Jinja2==3.0.1
 jmespath==0.10.0
-joblib==1.0.1
+joblib==1.2.0
 jsonschema==3.2.0
 jupyter-client==7.0.2
 jupyter-core==4.7.1

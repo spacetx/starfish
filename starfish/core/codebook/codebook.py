@@ -110,7 +110,7 @@ class Codebook(xr.DataArray):
             codebook whose values are all zero
 
         """
-        data = np.zeros((len(code_names), n_round, n_channel), dtype=np.uint8)
+        data = np.zeros((len(code_names), n_round, n_channel), dtype=float)
         return cls.from_numpy(code_names, n_round, n_channel, data)
 
     @classmethod
@@ -295,7 +295,7 @@ class Codebook(xr.DataArray):
         target_names = [w[Features.TARGET] for w in code_array]
 
         # fill the codebook
-        data = np.zeros((len(target_names), n_round, n_channel), dtype=np.uint8)
+        data = np.zeros((len(target_names), n_round, n_channel), dtype=float)
         for i, code_dict in enumerate(code_array):
             for bit in code_dict[Features.CODEWORD]:
                 ch = int(bit[Axes.CH])

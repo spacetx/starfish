@@ -157,6 +157,7 @@ class MultiBarcodeDecoder(DecodeSpotsAlgorithm):
         )
 
         return_intensities = intensities if self.return_original_intensities else norm_intensities
+        return_intensities["binarized"] = ((Features.AXIS, Axes.ROUND.value, Axes.CH.value), binarized)
         # norm_intensities is a DataArray, make it back into an IntensityTable
         return DecodedIntensityTable.from_intensity_table(
             return_intensities,

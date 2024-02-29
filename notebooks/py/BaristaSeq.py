@@ -212,7 +212,7 @@ from skimage.morphology import opening, dilation, disk
 from functools import partial
 
 # calculate the background
-opening = partial(opening, selem=disk(5))
+opening = partial(opening, footprint=disk(5))
 
 background = bleed_corrected.apply(
     opening,

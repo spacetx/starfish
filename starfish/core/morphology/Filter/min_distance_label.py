@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.ndimage import distance_transform_edt, label
 from skimage.feature import peak_local_max
-from skimage.morphology import watershed
+from skimage.segmentation import watershed
 
 from starfish.core.morphology.binary_mask import BinaryMaskCollection
 from ._base import FilterAlgorithm

@@ -18,7 +18,7 @@ except ImportError:
     Viewer = None
 
 
-NAPARI_VERSION = "0.3.4"  # when changing this, update docs in display
+NAPARI_VERSION = "0.4.18"  # when changing this, update docs in display
 INTERACTIVE = not hasattr(__main__, "__file__")
 
 
@@ -154,7 +154,7 @@ def display(
     radius_multiplier : int
         Multiplies the radius of the displayed spots (default 1, no scaling)
     z_multiplier : int
-        Multiplies the radius of the spots in z, to account for anisotropy.
+        Multiplies the radius of the spots in z, to account for anisotropy. Important note, anisotropy of spots is DEPRECATED in napari > 0.4.17 and would be returned at a later version.  
 
     Examples
     --------
@@ -197,7 +197,7 @@ def display(
     -----
     - To use in ipython, use the `%gui qt` magic.
     - napari axes are labeled with the ImageStack axis names
-    - Requires napari 0.3.4: use `pip install starfish[napari]`
+    - Requires napari 0.4.18: use `pip install starfish[napari]`
       to install all necessary requirements
     """
     if stack is None and spots is None and masks is None:
@@ -279,7 +279,7 @@ def display(
                 face_color="red",
                 edge_color="red",
                 symbol="ring",
-                size=sizes * radius_multiplier,
+                size=np.mean(sizes[:,2:4], axis=1) * radius_multiplier,
                 n_dimensional=True,
                 name="spots"
             )

@@ -258,6 +258,7 @@ class CheckAll(DecodeSpotsAlgorithm):
                 'Invalid mode choice ("high", "med", or "low")')
 
         # Decode for each round omission number, intensity cutoff, and then search radius
+        allCodes_list = list()
         allCodes = pd.DataFrame()
         for currentRoundOmitNum in roundOmits:
             for s, strictness in enumerate(strictnesses):
@@ -390,8 +391,11 @@ class CheckAll(DecodeSpotsAlgorithm):
                                 spotTables = removeUsedSpots(finalCodes, spotTables)
                                 currentTables = removeUsedSpots(finalCodes, currentTables)
 
-                            # Append found codes to allCodes table
-                            allCodes = allCodes.append(finalCodes).reset_index(drop=True)
+                            # Append found codes to allCodes list
+                            allCodes_list.append(finalCodes)
+        
+        # Concatenate list of found codes to allCodes table
+        allCodes = pd.concat(allCodes_list, ignore_index=True)
 
         # Create and fill in intensity table
         channels = spots.ch_labels

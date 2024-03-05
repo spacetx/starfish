@@ -687,6 +687,7 @@ def cleanup(bestPerSpotTables: dict,
     '''
 
     # Create merged spot results dataframe containing the passing barcodes found in all the rounds
+    mergedCodes_list = list()
     mergedCodes = pd.DataFrame()
     roundNum = len(bestPerSpotTables)
     for r in range(roundNum):
@@ -698,12 +699,13 @@ def cleanup(bestPerSpotTables: dict,
                 # keys
                 bestPerSpotTables[r]['spot_codes'] = [tuple(spotCode[0]) for spotCode in spotCodes]
                 bestPerSpotTables[r]['targets'] = [target[0] for target in targets]
-            mergedCodes = mergedCodes.append(bestPerSpotTables[r])
-    mergedCodes = mergedCodes.reset_index(drop=True)
+            mergedCodes_list.append(bestPerSpotTables[r])
 
     # If no codes return empty dataframe
-    if len(mergedCodes) == 0:
+    if len(mergedCodes_list) == 0:
         return pd.DataFrame()
+    else:
+        mergedCodes = pd.concat(mergedCodes_list, ignore_index=True)
 
     # Only pass codes that are chosen as best for at least 2 of the spots that make it up
     spotCodes = mergedCodes['spot_codes']

@@ -134,7 +134,9 @@ class TransformsList:
         cls._verify_version(version_str)
         transforms_array = transforms_document[DocumentKeys.TRANSFORMS_LIST]
 
-        transforms_list: List[Tuple[Mapping[Axes, int], TransformType, _GeometricTransform]] = list()
+        transforms_list: List[Tuple[Mapping[Axes, int],
+                                    TransformType,
+                                    _GeometricTransform]] = list()
         for selectors_str, transform_type_str, transforms_matrix in transforms_array:
             selectors = {Axes(k): v for k, v in selectors_str.items()}
             transform_type = TransformType(transform_type_str)

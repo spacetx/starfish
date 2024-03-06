@@ -12,7 +12,7 @@ DOCKER_BUILD?=1
 
 VERSION=$(shell sh -c "git describe --exact --dirty 2> /dev/null")
 # if you update this, you will need to update the version pin for the "Install Napari & Test napari (pinned)" test in .travis.yml
-PIP_VERSION=21.2.4
+PIP_VERSION=24.0
 
 define print_help
     @printf "    %-28s   $(2)\n" $(1)

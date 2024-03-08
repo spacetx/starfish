@@ -746,7 +746,7 @@ class ImageStack:
 
         return tuple(slice_list), axes
 
-    def _iter_axes(self, axes: Set[Axes]=None) -> Iterator[Mapping[Axes, int]]:
+    def _iter_axes(self, axes: Optional[Set[Axes]] = None) -> Iterator[Mapping[Axes, int]]:
         """Iterate over provided axes.
 
         Parameters
@@ -772,10 +772,10 @@ class ImageStack:
             self,
             func: Callable,
             *args,
-            group_by: Set[Axes]=None,
-            in_place=False,
-            verbose: bool=False,
-            n_processes: Optional[int]=None,
+            group_by: Optional[Set[Axes]] = None,
+            in_place = False,
+            verbose: bool = False,
+            n_processes: Optional[int] = None,
             level_method: Levels = Levels.CLIP,
             **kwargs
     ) -> Optional["ImageStack"]:
@@ -891,9 +891,9 @@ class ImageStack:
             self,
             func: Callable,
             *args,
-            group_by: Set[Axes]=None,
-            verbose=False,
-            n_processes: Optional[int]=None,
+            group_by: Optional[Set[Axes]] = None,
+            verbose = False,
+            n_processes: Optional[int] = None,
             **kwargs
     ) -> List[Any]:
         """Split the image along a set of axes, and apply a function across all the components.

@@ -1,3 +1,4 @@
+from typing import Optional
 from starfish.core.experiment.builder.builder import build_image
 from starfish.core.experiment.builder.defaultproviders import OnesTile, tile_fetcher_factory
 from starfish.core.experiment.builder.providers import TileFetcher
@@ -11,7 +12,7 @@ def synthetic_stack(
         num_z: int = 12,
         tile_height: int = 50,
         tile_width: int = 40,
-        tile_fetcher: TileFetcher = None,
+        tile_fetcher: Optional[TileFetcher] = None,
 ) -> ImageStack:
     """generate a synthetic ImageStack
 

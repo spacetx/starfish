@@ -1,5 +1,5 @@
 import json
-from typing import List, Mapping, Tuple
+from typing import Optional, List, Mapping, Tuple
 
 import numpy as np
 from semantic_version import Version
@@ -26,9 +26,9 @@ class TransformsList:
     objects to apply to an Imagestack"""
 
     def __init__(self,
-                 transforms_list: List[Tuple[Mapping[Axes, int],
+                 transforms_list: Optional[List[Tuple[Mapping[Axes, int],
                                              TransformType,
-                                             _GeometricTransform]] = None
+                                             _GeometricTransform]]] = None
                  ):
         """
         Parameters

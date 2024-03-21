@@ -71,7 +71,7 @@ class Codebook(xr.DataArray):
     @property
     def code_length(self) -> int:
         """return the length of codes in this codebook"""
-        return int(np.dot(*self.shape[1:]))
+        return int(np.dot(*self.shape[1:]))  # type: ignore[call-overload]
 
     @classmethod
     def zeros(cls, code_names: Sequence[str], n_round: int, n_channel: int):

@@ -64,7 +64,7 @@ def _max_intensity_table_maintain_dims(
     initial_dimensions = OrderedDict(intensity_table.sizes)
     projected_intensities = intensity_table.max(str_dimensions)
     expanded_intensities = projected_intensities.expand_dims(str_dimensions)
-    return expanded_intensities.transpose(*tuple(initial_dimensions.keys()))
+    return expanded_intensities.transpose(*tuple(initial_dimensions.keys()))  # type: ignore
 
 
 def _mask_low_intensity_spots(

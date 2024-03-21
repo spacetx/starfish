@@ -700,7 +700,7 @@ class BinaryMaskCollection:
         selection_range: Sequence[slice] = BinaryMaskCollection._crop_mask(output_mask)
 
         return MaskData(
-            output_mask[selection_range],
+            output_mask[selection_range],  # type: ignore[index]
             tuple(selection.start for selection in selection_range),
             None
         )

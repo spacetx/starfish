@@ -23,7 +23,7 @@ class Config(object):
 
     __NO_VALUE_PASSED = object()
 
-    def __init__(self, value: Union[str, Dict]=None) -> None:
+    def __init__(self, value: Union[str, Dict]) -> None:
         """
         Parse user arguments, environment variables, and external files to
         generate a nested configuration object.

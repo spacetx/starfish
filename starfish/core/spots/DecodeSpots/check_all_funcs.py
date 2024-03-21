@@ -1,4 +1,4 @@
-import typing
+import typing  # noqa
 from collections import Counter, defaultdict
 from concurrent.futures.process import ProcessPoolExecutor
 from copy import deepcopy
@@ -11,6 +11,7 @@ from scipy.spatial import cKDTree
 
 from starfish.core.codebook.codebook import Codebook
 from starfish.types import Axes
+
 
 def findNeighbors(spotTables: dict,
                   searchRadius: float,
@@ -43,6 +44,7 @@ def findNeighbors(spotTables: dict,
                                                               searchRadius, workers=numJobs)
 
     return allNeighborDict
+
 
 def createNeighborDict(spotTables: dict,
                        searchRadius: float,
@@ -94,6 +96,7 @@ def createNeighborDict(spotTables: dict,
                     pass
     return neighborDict
 
+
 def createRefDicts(spotTables: dict, numJobs: int) -> tuple:
 
     '''
@@ -135,6 +138,7 @@ def createRefDicts(spotTables: dict, numJobs: int) -> tuple:
 
     return channelDict, spotCoords, spotIntensities, spotQualDict
 
+
 def encodeSpots(spotCodes: list) -> list:
 
     '''
@@ -155,6 +159,7 @@ def encodeSpots(spotCodes: list) -> list:
     compressed = [int(''.join(map(str, map(len, intStr))) + ''.join(intStr)) for intStr in strs]
 
     return compressed
+
 
 def decodeSpots(compressed: list, roundNum: int) -> list:
 
@@ -181,6 +186,7 @@ def decodeSpots(compressed: list, roundNum: int) -> list:
     decompressed = [tuple(int(''.join(islice(n, i))) for i, n in zip(idxs[j], nums[j]))
                     for j in range(len(idxs))]
     return decompressed
+
 
 def spotQuality(spotTables: dict,
                 spotIntensities: dict,
@@ -234,6 +240,7 @@ def spotQuality(spotTables: dict,
 
     return spotQuals
 
+
 def barcodeBuildFunc(allNeighbors: list,
                      currentRound: int,
                      roundOmitNum: int,
@@ -278,6 +285,7 @@ def barcodeBuildFunc(allNeighbors: list,
         allSpotCodes.append(encodeSpots(spotCodes))
 
     return allSpotCodes
+
 
 def buildBarcodes(roundData: pd.DataFrame,
                   neighborDict: dict,
@@ -356,6 +364,7 @@ def buildBarcodes(roundData: pd.DataFrame,
 
     return roundData
 
+
 def generateRoundPermutations(size: int, roundOmitNum: int) -> list:
 
     '''
@@ -378,6 +387,7 @@ def generateRoundPermutations(size: int, roundOmitNum: int) -> list:
     else:
         return sorted(set(list(permutations([*([False] * roundOmitNum),
                                             *([True] * (size - roundOmitNum))]))))
+
 
 def decodeFunc(data: pd.DataFrame) -> tuple:
 
@@ -416,9 +426,11 @@ def decodeFunc(data: pd.DataFrame) -> tuple:
         allDecodedSpotCodes.append(decodedSpotCodes)
     return (allTargets, allDecodedSpotCodes)
 
+
 def setGlobalDecoder(permutationCodes):
     global globPermutationCodes
     globPermutationCodes = permutationCodes
+
 
 def decoder(roundData: pd.DataFrame,
             codebook: Codebook,
@@ -514,6 +526,7 @@ def decoder(roundData: pd.DataFrame,
 
     return roundData
 
+
 def distanceFunc(spotsAndTargets: list,
                  currentRoundOmitNum: int) -> tuple:
 
@@ -563,11 +576,13 @@ def distanceFunc(spotsAndTargets: list,
 
     return (bestSpotCodes, bestDistances, bestTargets)
 
+
 def setGlobalDistance(spotCoords, spotQualDict):
     global globSpotCoords
     global globSpotQualDict
     globSpotCoords = spotCoords
     globSpotQualDict = spotQualDict
+
 
 def distanceFilter(roundData: pd.DataFrame,
                    spotCoords: dict,
@@ -654,6 +669,7 @@ def distanceFilter(roundData: pd.DataFrame,
 
     return roundData
 
+
 def cleanup(bestPerSpotTables: dict,
             spotCoords: dict,
             channelDict: dict,
@@ -687,6 +703,7 @@ def cleanup(bestPerSpotTables: dict,
     '''
 
     # Create merged spot results dataframe containing the passing barcodes found in all the rounds
+    mergedCodes_list = list()
     mergedCodes = pd.DataFrame()
     roundNum = len(bestPerSpotTables)
     for r in range(roundNum):
@@ -698,12 +715,13 @@ def cleanup(bestPerSpotTables: dict,
                 # keys
                 bestPerSpotTables[r]['spot_codes'] = [tuple(spotCode[0]) for spotCode in spotCodes]
                 bestPerSpotTables[r]['targets'] = [target[0] for target in targets]
-            mergedCodes = mergedCodes.append(bestPerSpotTables[r])
-    mergedCodes = mergedCodes.reset_index(drop=True)
+            mergedCodes_list.append(bestPerSpotTables[r])
 
     # If no codes return empty dataframe
-    if len(mergedCodes) == 0:
+    if len(mergedCodes_list) == 0:
         return pd.DataFrame()
+    else:
+        mergedCodes = pd.concat(mergedCodes_list, ignore_index=True)
 
     # Only pass codes that are chosen as best for at least 2 of the spots that make it up
     spotCodes = mergedCodes['spot_codes']
@@ -819,6 +837,7 @@ def cleanup(bestPerSpotTables: dict,
     finalCodes['rounds_used'] = roundsUsed
 
     return finalCodes
+
 
 def removeUsedSpots(finalCodes: pd.DataFrame, spotTables: dict) -> dict:
 

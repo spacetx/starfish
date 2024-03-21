@@ -4,7 +4,7 @@ from typing import Optional
 import numpy as np
 import xarray as xr
 from skimage import transform
-from skimage.transform._geometric import GeometricTransform
+from skimage.transform._geometric import _GeometricTransform
 from tqdm import tqdm
 
 from starfish.core.config import StarfishConfig
@@ -65,7 +65,7 @@ class Warp(ApplyTransformAlgorithm):
 
 def warp(
         image: xr.DataArray,
-        transformation_object: GeometricTransform,
+        transformation_object: _GeometricTransform,
         **kwargs
 ) -> np.ndarray:
     """
@@ -76,7 +76,7 @@ def warp(
     ----------
     image : xr.DataArray
         The image to be transformed
-    transformation_object : :py:class:`~skimage.transform._geometric.GeometricTransform`
+    transformation_object : :py:class:`~skimage.transform._geometric._GeometricTransform`
         The transformation object to apply.
 
     Returns

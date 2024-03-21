@@ -321,7 +321,7 @@ class IntensityTable(xr.DataArray):
         assert 0 < data.max() <= 1
 
         intensities = cls.from_spot_data(
-            data, spot_attributes, np.arange(data.shape[1]), np.arange(data.shape[2]))
+            data, spot_attributes, range(data.shape[1]), range(data.shape[2]))
         return intensities
 
     @classmethod

@@ -132,7 +132,7 @@ class osmFISHTileFetcher(TileFetcher):
         import yaml
 
         with open(metadata_yaml, "r") as f:
-            self.osmfish_metadata = yaml.load(f)
+            self.osmfish_metadata = yaml.load(f, Loader=yaml.FullLoader)
         self.num_z = self.osmfish_metadata['ImageProperties']['HybImageSize']['zcount']
         self.input_dir = input_dir
 

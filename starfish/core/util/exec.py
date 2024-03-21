@@ -7,7 +7,7 @@ from starfish.core.util import clock
 
 
 def stages(commands: Sequence[Sequence[Union[str, Callable]]],
-           subdirs: Sequence[str]=None,
+           subdirs: Sequence[str] = '',
 
            keep_data: bool=False) -> str:
     """

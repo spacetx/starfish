@@ -71,7 +71,7 @@ class Codebook(xr.DataArray):
     @property
     def code_length(self) -> int:
         """return the length of codes in this codebook"""
-        return int(np.dot(*self.shape[1:]))
+        return int(np.dot(*self.shape[1:]))  # type: ignore[call-overload]
 
     @classmethod
     def zeros(cls, code_names: Sequence[str], n_round: int, n_channel: int):
@@ -707,7 +707,8 @@ class Codebook(xr.DataArray):
         # found in the non-maximal channels.
         max_intensities = intensities.max(Axes.CH.value)
         round_intensities = intensities.sum(Axes.CH.value)
-        distance: IntensityTable = 1 - (max_intensities / round_intensities).mean(Axes.ROUND.value)
+        distance: IntensityTable = 1 - (max_intensities / round_intensities).mean(
+            Axes.ROUND.value)  # type: ignore
 
         a = _view_row_as_element(codes.values.reshape(self.shape[0], -1))  # type: ignore
         b = _view_row_as_element(

@@ -1,4 +1,6 @@
 # requirements to run CI except for napari
+# constrain the CI requirements to packages already in REQUIREMENTS.txt when using pip-compile
+-c ../REQUIREMENTS.txt
 flake8
 flake8-import-order
 m2r2

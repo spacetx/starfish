@@ -1,3 +1,5 @@
+# constrain the CI requirements to packages already in REQUIREMENTS.txt when using pip-compile
+-c ../REQUIREMENTS.txt
 napari >= 0.3.4
-PyQt5==5.14.2
+PyQt5 >= 5.14.2
 pytest-qt

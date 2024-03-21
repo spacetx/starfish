@@ -1,5 +1,5 @@
 import json
-from typing import Optional, List, Mapping, Tuple
+from typing import List, Mapping, Optional, Tuple
 
 import numpy as np
 from semantic_version import Version

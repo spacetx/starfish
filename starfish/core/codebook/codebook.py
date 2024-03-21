@@ -708,7 +708,7 @@ class Codebook(xr.DataArray):
         max_intensities = intensities.max(Axes.CH.value)
         round_intensities = intensities.sum(Axes.CH.value)
         distance: IntensityTable = 1 - (max_intensities / round_intensities).mean(
-                                   Axes.ROUND.value)  # type: ignore
+            Axes.ROUND.value)  # type: ignore
 
         a = _view_row_as_element(codes.values.reshape(self.shape[0], -1))  # type: ignore
         b = _view_row_as_element(

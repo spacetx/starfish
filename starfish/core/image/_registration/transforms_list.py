@@ -27,8 +27,8 @@ class TransformsList:
 
     def __init__(self,
                  transforms_list: Optional[List[Tuple[Mapping[Axes, int],
-                                             TransformType,
-                                             _GeometricTransform]]] = None
+                                                      TransformType,
+                                                      _GeometricTransform]]] = None
                  ):
         """
         Parameters

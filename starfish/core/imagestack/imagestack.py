@@ -773,7 +773,7 @@ class ImageStack:
             func: Callable,
             *args,
             group_by: Optional[Set[Axes]] = None,
-            in_place = False,
+            in_place=False,
             verbose: bool = False,
             n_processes: Optional[int] = None,
             level_method: Levels = Levels.CLIP,
@@ -892,7 +892,7 @@ class ImageStack:
             func: Callable,
             *args,
             group_by: Optional[Set[Axes]] = None,
-            verbose = False,
+            verbose=False,
             n_processes: Optional[int] = None,
             **kwargs
     ) -> List[Any]:

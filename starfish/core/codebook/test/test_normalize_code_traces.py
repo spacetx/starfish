@@ -23,8 +23,8 @@ def intensity_table_factory() -> IntensityTable:
 
     intensity_table = IntensityTable.from_spot_data(
         intensities, spot_attributes,
-        ch_values = range(intensities.shape[1]),
-        round_values = range(intensities.shape[2]),
+        ch_values=range(intensities.shape[1]),
+        round_values=range(intensities.shape[2]),
     )
     return intensity_table
 

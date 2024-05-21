@@ -91,7 +91,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -277,7 +277,9 @@ napoleon_use_param = True
 napoleon_use_rtype = True
 
 # See https://stackoverflow.com/a/45565445/56887
-autodoc_mock_imports = ['_tkinter']
+# Add xarray due to failed guarded type import with
+# ImportError("cannot import name 'DatetimeLike' from 'xarray.core.types'...)
+autodoc_mock_imports = ['_tkinter', 'xarray']
 
 rst_epilog = """
 .. include:: <s5defs.txt>

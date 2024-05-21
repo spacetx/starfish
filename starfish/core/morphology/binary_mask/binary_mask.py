@@ -284,7 +284,7 @@ class BinaryMaskCollection:
             image from same FOV used in fiji segmentation workflow
 
         Returns
-        --------
+        -------
         BinaryMaskCollection
 
         Notes

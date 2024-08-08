@@ -1,7 +1,11 @@
 # requirements to run CI except for napari
+# constrain the CI requirements to packages already in REQUIREMENTS-STRICT.txt
+-r ../starfish/REQUIREMENTS-STRICT.txt
 flake8
 flake8-import-order
-m2r2
+lxml_html_clean
+# pin m2r2: https://github.com/CrossNox/m2r2/issues/52
+m2r2>=0.3.3
 mypy != 0.740
 numpydoc
 nbencdec >= 0.0.5
@@ -9,13 +13,8 @@ pycodestyle
 pytest>=4.4.0
 pytest-cov>=2.5.1
 pytest-xdist
-read_roi
 recommonmark
 requests
-types-pkg_resources
-types-PyYAML
-types-requests
-seaborn
 sphinx
 sphinx_autodoc_typehints
 sphinx_bootstrap_theme
@@ -23,3 +22,6 @@ sphinxcontrib-programoutput
 sphinx-gallery
 sphinx_rtd_theme
 twine
+types-setuptools
+types-PyYAML
+types-requests

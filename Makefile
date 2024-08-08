@@ -80,8 +80,8 @@ help-docs:
 
 ### REQUIREMENTS #############################################
 #
-GENERATED_REQUIREMENT_FILES=starfish/REQUIREMENTS-STRICT.txt requirements/REQUIREMENTS-CI.txt requirements/REQUIREMENTS-NAPARI-CI.txt
-SOURCE_REQUIREMENT_FILES=REQUIREMENTS.txt requirements/REQUIREMENTS-CI.txt.in requirements/REQUIREMENTS-NAPARI-CI.txt.in
+GENERATED_REQUIREMENT_FILES=starfish/REQUIREMENTS-STRICT.txt requirements/REQUIREMENTS-CI.txt requirements/REQUIREMENTS-NAPARI-CI.txt requirements/REQUIREMENTS-JUPYTER.txt
+SOURCE_REQUIREMENT_FILES=REQUIREMENTS.txt requirements/REQUIREMENTS-CI.txt.in requirements/REQUIREMENTS-NAPARI-CI.txt.in requirements/REQUIREMENTS-JUPYTER.txt.in
 
 # This rule pins the requirements with the minimal set of changes required to satisfy the
 # requirements.  This is typically run when a new requirement is added, and we want to
@@ -103,7 +103,6 @@ starfish/REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
 	[ ! -e .$<-env ] || exit 1
 	$(call create_venv, .$<-env)
 	.$<-env/bin/pip install --upgrade pip==$(PIP_VERSION)
-	.$<-env/bin/pip install -r $@
 	.$<-env/bin/pip install -r $<
 	echo "# You should not edit this file directly.  Instead, you should edit one of the following files ($^) and run make $@" >| $@
 	.$<-env/bin/pip freeze --all | grep -v "pip==$(PIP_VERSION)" >> $@
@@ -113,7 +112,6 @@ requirements/REQUIREMENTS-%.txt : requirements/REQUIREMENTS-%.txt.in REQUIREMENT
 	[ ! -e .$<-env ] || exit 1
 	$(call create_venv, .$<-env)
 	.$<-env/bin/pip install --upgrade pip==$(PIP_VERSION)
-	.$<-env/bin/pip install -r $@
 	for src in $^; do \
 		.$<-env/bin/pip install -r $$src; \
 	done

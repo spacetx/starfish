@@ -1,0 +1,4 @@
+# requirements to run jupyter
+# constrain the requirements to packages already in REQUIREMENTS-STRICT.txt
+-r ../starfish/REQUIREMENTS-STRICT.txt
+jupyter

@@ -230,7 +230,7 @@ class Experiment:
             codebook: Codebook,
             extras: dict,
             *,
-            src_doc: dict=None,
+            src_doc: dict = {},
     ) -> None:
         self._fovs = fovs
         self._codebook = codebook

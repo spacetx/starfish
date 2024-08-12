@@ -1,5 +1,5 @@
 {
-  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/field_of_view/field_of_view.json",
+  "$id": "https://github.com/spacetx/starfish/spacetx_format/schema/field_of_view_0.1.0/field_of_view.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "required": [
@@ -36,7 +36,7 @@
     "shape": {
       "type": "object",
       "description": "The shape of the categorical dimensions (channel, round, z-plane) of the field of view.",
-      "required": "c",
+      "required": ["c", "r"],
       "properties": {
         "r": {
           "description": "Number of imaging rounds.",

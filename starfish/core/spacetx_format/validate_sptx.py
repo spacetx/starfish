@@ -76,8 +76,8 @@ def validate(experiment_json: str, fuzz: bool=False) -> bool:
     return valid
 
 
-def validate_file(file: str, schema: str, fuzz: bool=False,
-                  backend: Backend=None, output: Dict=None) -> bool:
+def validate_file(file: str, schema: str, fuzz: bool = False,
+                  backend: Backend = None, output: Dict = {}) -> bool:
     """validate a spaceTx formatted file with a given schema.
     Accepts local filepaths or files hosted at http links.
 

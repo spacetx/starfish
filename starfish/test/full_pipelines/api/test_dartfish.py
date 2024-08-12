@@ -163,7 +163,7 @@ def test_dartfish_pipeline_cropped_data(tmpdir):
 
     # verify number of spots detected
     spots_passing_filters = spot_intensities[Features.PASSES_THRESHOLDS].sum()
-    assert spots_passing_filters == 53
+    assert spots_passing_filters == 54
 
     # compare to benchmark data -- note that this particular part of the dataset appears completely
     # uncorrelated

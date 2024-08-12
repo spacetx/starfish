@@ -124,7 +124,7 @@ class DecodedIntensityTable(IntensityTable):
             Name for compressed-gzipped MERMAID data file. Should end in '.csv.gz'.
 
         Notes
-        ------
+        -----
         See also https://github.com/JEFworks/MERmaid
         """
         # construct the MERMAID dataframe. As MERMAID adds support for non-categorical variables,

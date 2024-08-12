@@ -228,7 +228,7 @@ class SyntheticData:
 
         image = image * camera_detection_efficiency
 
-        image += np.random.normal(scale=background_electrons, size=image.shape)
+        image += np.random.normal(scale=background_electrons, size=image.shape)  # type: ignore
 
         # mimic analog to digital conversion
         image = (image / graylevel).astype(int).clip(0, 2 ** ad_conversion_bits)

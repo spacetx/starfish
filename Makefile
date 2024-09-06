@@ -12,7 +12,7 @@ DOCKER_BUILD?=1
 
 VERSION=$(shell sh -c "git describe --exact --dirty 2> /dev/null")
 # if you update this, you will need to update the version pin for the "Install Napari & Test napari (pinned)" test in .travis.yml
-PIP_VERSION=24.0
+PIP_VERSION=24.2
 
 define print_help
     @printf "    %-28s   $(2)\n" $(1)
@@ -102,7 +102,7 @@ pin-all-requirements:
 starfish/REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
 	[ ! -e .$<-env ] || exit 1
 	$(call create_venv, .$<-env)
-	.$<-env/bin/pip install --upgrade pip==$(PIP_VERSION)
+	.$<-env/bin/pip install --upgrade --no-cache-dir pip==$(PIP_VERSION) setuptools
 	.$<-env/bin/pip install -r $<
 	echo "# You should not edit this file directly.  Instead, you should edit one of the following files ($^) and run make $@" >| $@
 	.$<-env/bin/pip freeze --all | grep -v "pip==$(PIP_VERSION)" >> $@
@@ -111,7 +111,7 @@ starfish/REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
 requirements/REQUIREMENTS-%.txt : requirements/REQUIREMENTS-%.txt.in REQUIREMENTS.txt
 	[ ! -e .$<-env ] || exit 1
 	$(call create_venv, .$<-env)
-	.$<-env/bin/pip install --upgrade pip==$(PIP_VERSION)
+	.$<-env/bin/pip install --upgrade --no-cache-dir pip==$(PIP_VERSION) setuptools
 	for src in $^; do \
 		.$<-env/bin/pip install -r $$src; \
 	done

@@ -17,10 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/cache@v2
         with:
@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-latest", "ubuntu-latest"]
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.9", "3.10", "3.11"]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -71,7 +71,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-latest", "ubuntu-latest"]
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.9", "3.10", "3.11"]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -164,10 +164,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/cache@v2
         with:
@@ -189,10 +189,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/cache@v2
         with:
@@ -214,10 +214,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/cache@v2
         with:
@@ -239,10 +239,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/cache@v2
         with:
@@ -264,10 +264,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/cache@v2
         with:
@@ -289,10 +289,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/cache@v2
         with:
@@ -314,10 +314,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/cache@v2
         with:
@@ -339,10 +339,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/cache@v2
         with:
@@ -364,10 +364,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setpu Python 3.8
+      - name: Setpu Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
       
       - uses: actions/cache@v2
         with:
@@ -389,10 +389,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/cache@v2
         with:
@@ -414,10 +414,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python 3.8
+      - name: Setup Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/cache@v2
         with:

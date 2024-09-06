@@ -1,6 +1,6 @@
 # requirements to run napari and CI for napari
-# constrain the CI requirements to packages already in REQUIREMENTS-STRICT.txt
--r ../starfish/REQUIREMENTS-STRICT.txt
+# constrain the CI requirements to packages already in REQUIREMENTS.txt
+-r ../REQUIREMENTS.txt
 # napari 0.4.18 made point sizes only isotropic: https://forum.image.sc/t/anisotropic-point-sizes/83388
 napari[all]>0.4.17
 pytest-qt

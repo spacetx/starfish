@@ -6,9 +6,10 @@ flake8-import-order
 lxml_html_clean
 # pin m2r2: https://github.com/CrossNox/m2r2/issues/52
 m2r2>=0.3.3
-mypy != 0.740
+# temporarily limiting mypy as 1.11 introduces errors
+mypy<1.11
 numpydoc
-nbencdec >= 0.0.5
+nbencdec>=0.0.5
 pycodestyle
 pytest>=4.4.0
 pytest-cov>=2.5.1

@@ -30,5 +30,5 @@ setuptools.setup(
     include_package_data=True,
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    python_requires='>=3.8, <3.12'
+    python_requires='>=3.9, <3.12'
 )

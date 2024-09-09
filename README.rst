@@ -47,7 +47,7 @@ See `spacetx-starfish.readthedocs.io <https://spacetx-starfish.readthedocs.io/en
 Installation
 ------------
 
-starfish supports python 3.8-11 and can easily be installed from PyPI:
+starfish supports python 3.9-11 and can easily be installed from PyPI:
 
 .. code-block:: bash
 
@@ -58,8 +58,8 @@ starfish supports python 3.8-11 and can easily be installed from PyPI:
 Python Version Notice
 ---------------------
 
-starfish will be dropping support for python 3.8 in the next release due to
-minimum python=3.9 version requirements in upstream dependencies.
+starfish will be dropping support for python 3.9 in future release when
+upstream dependencies will require a minimum python=3.10 version.
 
 Contributing
 ------------

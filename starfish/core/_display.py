@@ -95,7 +95,7 @@ def _spots_to_markers(intensity_table: IntensityTable) -> Tuple[np.ndarray, np.n
     code_length = n_rounds * n_channels
 
     # create 5-d coordinates for plotting in (x, y, round. channel, z)
-    n_markers = np.product(intensity_table.shape)
+    n_markers = np.prod(intensity_table.shape)
     coords = np.zeros((n_markers, 5), dtype=np.uint16)
 
     # create the coordinates.

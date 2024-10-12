@@ -8,8 +8,8 @@ jsonschema<4.18
 matplotlib<3.8
 # pinning mistune for m2r2 in CI requirements
 mistune==0.8.4
-# numpy 1.25 slightly changes values in three tests causing them to fail
-numpy<1.25
+# numpy 2.0 breaks code and migration requires additional work
+numpy<2
 read_roi
 regional
 # scikit-image is temporarily pinned as newer versions require updating module imports

@@ -3,7 +3,7 @@
 Installation
 ============
 
-Starfish supports python 3.9-11. To install the starfish package,
+Starfish supports python 3.9-3.12. To install the starfish package,
 first verify that your python version is compatible. You can check this by running :code:`python
 --version`.
 

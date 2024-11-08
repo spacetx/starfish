@@ -97,9 +97,9 @@ class BaristaSeqTileFetcher(TileFetcher):
         subdir = "primary"
         round_dir = f"r{hyb}"
         if hyb == 0:
-            filename = f"T{fov_id+1:05}C{ch_label+1:02}Z{zplane_label+1:03}.tif"
+            filename = f"T{fov_id + 1:05}C{ch_label + 1:02}Z{zplane_label + 1:03}.tif"
         else:
-            filename = f"alignedT{fov_id+1:05}C{ch_label+1:02}Z{zplane_label+1:03}.tif"
+            filename = f"alignedT{fov_id + 1:05}C{ch_label + 1:02}Z{zplane_label + 1:03}.tif"
         file_path = os.path.join(self.input_dir, subdir, round_dir, filename)
         return BaristaSeqTile(file_path)
 
@@ -110,7 +110,7 @@ class BaristaSeqNucleiTileFetcher(TileFetcher):
 
     def get_tile(self, fov_id: int, hyb: int, ch_label: int, zplane_label: int) -> FetchedTile:
         subdir = "nissl"
-        filename = f"T00001C05Z{zplane_label+1:03}.tif"
+        filename = f"T00001C05Z{zplane_label + 1:03}.tif"
         file_path = os.path.join(self.input_dir, subdir, filename)
 
         return BaristaSeqTile(file_path)

@@ -146,10 +146,10 @@ crowding in each round.
 """
 
 ####################################################################################################
-# Comparison of :py:class:`.FindSpotsAlgorithm`\s
+# Comparison of :py:class:`.FindSpotsAlgorithm`
 # -----------------------------------------------
 # This tutorial demonstrates usage and characteristics of the three available
-# :py:class:`.FindSpotsAlgorithm`\s on 3-Dimensional STARmap images. Parameters were roughly
+# :py:class:`.FindSpotsAlgorithm` on 3-Dimensional STARmap images. Parameters were roughly
 # tuned, but these results are not reflective of the best possible performance of each
 # :py:class:`.FindSpotsAlgorithm`.
 

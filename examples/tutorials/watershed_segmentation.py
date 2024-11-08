@@ -30,7 +30,7 @@ will first show you how you can replicate the predefined watershed segmentation 
 classes and methods provided in :py:mod:`.morphology`. Then this tutorial will cover how to run
 the predefined segmentation pipeline.
 
-Inputs for this tutorial are :py:class:`.ImageStack`\s:
+Inputs for this tutorial are :py:class:`.ImageStack`:
 
 * registered primary images to mimic a cell stain
 * registered nuclei images to seed the water segmentation of cells

@@ -110,7 +110,7 @@ def xarray(ctx, path):
         print(d)
         stop = time()
         print("=" * 60)
-        print(f"Opened {path} in {stop-start}s.")
+        print(f"Opened {path} in {stop - start}s.")
         names = set(d.coords._names)
         spots = "z y x radius z_min z_max y_min y_max x_min x_max "
         spots += "intensity spot_id features c r xc yc zc"

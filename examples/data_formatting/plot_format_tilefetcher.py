@@ -87,7 +87,7 @@ for dir in [primary_dir, nuclei_dir]:
 # ---------------------------
 # The :py:class:`.FetchedTile` subclass defines the function you need for reading your images and
 # the other properties required by :py:func:`.write_experiment_json` to construct
-# :class:`slicedimage.Tile`\s.
+# :class:`slicedimage.Tile`.
 #
 # You can use any function to read images that returns a numpy array. We recommend using
 # :py:class:`imageio.volread` for 3D images and :py:class:`skimage.io.imread` for 2D images. For
@@ -153,7 +153,7 @@ class RNATile(FetchedTile):
 # Define TileFetcher subclass
 # ---------------------------
 # The :py:class:`.TileFetcher` subclass acts as the interface for :py:func:`.write_experiment_json`
-# to know where to get files to construct :class:`slicedimage.Tile`\s.
+# to know where to get files to construct :class:`slicedimage.Tile`.
 #
 # If you are not using structured data, you will need to extend :py:class:`TileFetcher` to reflect
 # your own file naming and organization schema.

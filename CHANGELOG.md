@@ -280,7 +280,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
-[0.3.1]: https://github.com/spacetx/starfish/releases/tag/0.3.0
+[0.3.1]: https://github.com/spacetx/starfish/releases/tag/0.3.1
 [0.3.0]: https://github.com/spacetx/starfish/releases/tag/0.3.0
 [0.2.2]: https://github.com/spacetx/starfish/releases/tag/0.2.2
 [0.2.1]: https://github.com/spacetx/starfish/releases/tag/0.2.1

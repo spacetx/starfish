@@ -1,4 +1,5 @@
 ## [0.3.1] - 2024-11-12
+- Updating CHANGELOG.md for release 0.3.1
 - Adding support to Python 3.12 (#2027)
 - Numpy 1.26 update to support Python 3.12 (#2025)
 - fixing blob radius calculation in 2d (#2023)

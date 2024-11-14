@@ -14,7 +14,7 @@ class Bandpass(FilterAlgorithm):
     """
     Convolve with a Gaussian to remove short-wavelength noise and subtract out long-wavelength
     variations, retaining features of intermediate scale. This implementation relies on
-    scipy.ndimage.filters.gaussian_filter.
+    scipy.ndimage.gaussian_filter.
 
     This method is a thin wrapper around :doc:`trackpy:generated/trackpy.preprocessing.bandpass`.
 

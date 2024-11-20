@@ -52,7 +52,6 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-    'sphinx_autodoc_typehints',
     'sphinxcontrib.programoutput',
     'sphinx_gallery.gen_gallery',
     'sphinx.ext.intersphinx',
@@ -91,7 +90,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -130,6 +129,8 @@ sphinx_gallery_conf = {
     'download_all_examples': False,
     'default_thumb_file': f'{dir_}/_static/design/logo-solo.png',
     'min_reported_time': 10,
+    # Rerun stale examples even if their MD5 hash shows that the example did not change.
+    'run_stale_examples': True,
 
 }
 
@@ -275,9 +276,6 @@ napoleon_use_admonition_for_references = False
 napoleon_use_ivar = False
 napoleon_use_param = True
 napoleon_use_rtype = True
-
-# See https://stackoverflow.com/a/45565445/56887
-autodoc_mock_imports = ['_tkinter']
 
 rst_epilog = """
 .. include:: <s5defs.txt>

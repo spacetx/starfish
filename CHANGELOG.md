@@ -1,3 +1,50 @@
+## [0.3.1] - 2024-11-12
+- Updating CHANGELOG.md for release 0.3.1
+- Adding support to Python 3.12 (#2027)
+- Numpy 1.26 update to support Python 3.12 (#2025)
+- fixing blob radius calculation in 2d (#2023)
+- Release 0.3.0 (#2021)
+
+## [0.3.0] - 2024-10-05
+- Dropping support for Python 3.8 and setting Python 3.9 as minimum (#2018)
+- Update readthedocs.yml (#2014)
+- Scripts and dependencies updates for Python 3.8 - 3.10 (#2009)
+- Add min_distance parameter to peak_local_max call (#2008)
+- Various Small Fixes/Improvements (#1985)
+- Updated seqFISH Decoding Method: CheckAll Decoder (#1978)
+- Bump dask from 2021.9.0 to 2021.10.0 in /requirements (#1968)
+- Revert "Revert "Fix coords assignment in CombineAdjustFeatures.run (#1965)" (#1966)" (#1967)
+- Revert "Fix coords assignment in CombineAdjustFeatures.run (#1965)" (#1966)
+- Fix coords assignment in CombineAdjustFeatures.run (#1965)
+- Add to_dict and from_dict methods to TransformsList class (#1956)
+- fix notebook tests
+- Fix check-notebooks makefile command; Add python 3.9 to slow-tests
+- Fix Sphinx docs
+- Register pytest markers
+- Remove is_volume param from testing TrackpyLocalMaxPeakFinder invocation
+- Address skimage deprecation of skimage.morphology.watershed
+- Address Xarray pending deprecation for GroupBy.apply
+- Remove usage of deprecated numpy builtin types like np.bool/np.int
+- Add n_processes parameter to FindSpotsAlgorithm.run() abstract method
+- Remove deprecated `indices` param for skimage.feature.peak_local_max
+- Resolve failure when `peak_local_max()` finds no spots
+- Fix failing nearest neighbor trace builder tests
+- Fix composite codebook decoder tests
+- Change default value of BlobDetector exclude_border parameter to False
+- Fix incorrect type annotation and improper `.data()` method call
+- Fix failing morphology utility functions
+- Fix failing LearnTransform Translation class
+- Fix failing Codebook and IntensityTable shape validator
+- Fix failing Codebook.decode_per_round_max() test
+- Update .gitignore file
+- Defer when docker-smoketest github actiosn job is run
+- Bump requirements to clear github actions cache
+- Fix broken github actions Lint job; Fix broken caching
+- Address Mypy type annotation errors
+- Update github actions to use caching; Disable Napari tests for now
+- Use `python -m pip install ...` to perform pip upgrade
+- Replace Travis CI with Github Actions
+
 ## [0.2.2] - 2021-04-29
 - Updates requirements
 - Updates to documentation
@@ -233,6 +280,8 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.3.1]: https://github.com/spacetx/starfish/releases/tag/0.3.1
+[0.3.0]: https://github.com/spacetx/starfish/releases/tag/0.3.0
 [0.2.2]: https://github.com/spacetx/starfish/releases/tag/0.2.2
 [0.2.1]: https://github.com/spacetx/starfish/releases/tag/0.2.1
 [0.2.0]: https://github.com/spacetx/starfish/releases/tag/0.2.0

@@ -1,5 +1,5 @@
 import json
-from typing import List, Mapping, Tuple
+from typing import List, Mapping, Optional, Tuple
 
 import numpy as np
 from semantic_version import Version
@@ -37,7 +37,6 @@ class TransformsList:
             A list of tuples containing axes of an Imagestack and associated
             transform to apply.
         """
-
         self.transforms: List[Tuple[Mapping[Axes, int], TransformType, SimilarityTransform]]
         if transforms_list:
             self.transforms = transforms_list
@@ -133,8 +132,8 @@ class TransformsList:
         version_str = transforms_document[DocumentKeys.VERSION_KEY]
         cls._verify_version(version_str)
         transforms_array = transforms_document[DocumentKeys.TRANSFORMS_LIST]
-
         transforms_list: List[Tuple[Mapping[Axes, int], TransformType, SimilarityTransform]] = list()
+
         for selectors_str, transform_type_str, transforms_matrix in transforms_array:
             selectors = {Axes(k): v for k, v in selectors_str.items()}
             transform_type = TransformType(transform_type_str)

@@ -21,7 +21,7 @@ matches the codebook design and data.
    :align: center
 
 The chosen ``TraceBuilder`` must also be compatible with how the :py:class:`.SpotFindingResults`
-was generated. :py:class:`.FindSpotsAlgorithm`\s can be run with or without a ``reference_image``.
+was generated. :py:class:`.FindSpotsAlgorithm` can be run with or without a ``reference_image``.
 If run with a ``reference_image`` then every :py:class:`.PerImageSliceSpotResults` in
 :py:class:`.SpotFindingResults` will have the same spots for every (round, channel) image volume.
 This is necessary for :py:func:`.build_spot_traces_exact_match` but not recommended for
@@ -88,7 +88,7 @@ spots_from_stack = bd.run(image_stack=imgs)
 ####################################################################################################
 # Typical pipelines will set the ``trace_building_strategy`` as an argument in the
 # :py:class:`.DecodeSpotsAlgorithm` but here the underlying code is exposed to reveal what the
-# different :py:class:`.IntensityTable`\s look like depending on which ``TraceBuilder`` is used.
+# different :py:class:`.IntensityTable` look like depending on which ``TraceBuilder`` is used.
 
 from starfish.core.spots.DecodeSpots.trace_builders import build_spot_traces_exact_match, \
     build_traces_sequential, build_traces_nearest_neighbors

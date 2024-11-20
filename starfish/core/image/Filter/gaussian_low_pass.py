@@ -83,7 +83,7 @@ class GaussianLowPass(FilterAlgorithm):
         """
 
         filtered = gaussian(
-            image, sigma=sigma, output=None, cval=0, preserve_range=True, truncate=4.0
+            image, sigma=sigma, out=None, cval=0, preserve_range=True, truncate=4.0
         )
 
         return filtered

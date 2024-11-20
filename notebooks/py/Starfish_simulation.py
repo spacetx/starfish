@@ -28,7 +28,7 @@ def graham_sloane_codes(n):
 
 # EPY: START code
 from numpy.random import permutation, rand, normal
-from numpy import ones, zeros, concatenate, array, float
+from numpy import ones, zeros, concatenate, array
 from numpy.random import poisson
 from pandas import DataFrame, concat
 from skimage.filters import gaussian

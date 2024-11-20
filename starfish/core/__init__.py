@@ -1,6 +1,7 @@
 import warnings
 
 # generated version number and commit hash
+from . import _version
 from ._version import get_versions
 
 # deal with numpy import warnings due to cython
@@ -15,3 +16,5 @@ version = get_versions()['version']
 is_release_tag = None
 if "+" not in str(version):
     is_release_tag = f"Release: {version}"
+
+__version__ = _version.get_versions()['version']

@@ -100,7 +100,7 @@ console.
 # tweak your layer properties (see `napari`_).
 #
 # However, napari doesn't natively support starfish data structures, so to use napari methods
-# follow the example below. Adding :py:class:`.IntensityTable`\s is pretty complex,
+# follow the example below. Adding :py:class:`.IntensityTable` is pretty complex,
 # so we recommend sticking with :py:func:`.display` for that or using the method in the next
 # section.
 #

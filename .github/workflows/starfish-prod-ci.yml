@@ -15,7 +15,7 @@ jobs:
     name: Lint
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Python 3.9
         uses: actions/setup-python@v2
@@ -45,7 +45,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -75,7 +75,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -102,7 +102,7 @@ jobs:
   #   name: Napari Pinned
   #   runs-on: "ubuntu-latest"
   #   steps:
-  #     - uses: actions/checkout@v2
+  #     - uses: actions/checkout@v4
 
   #     - name: Install dependencies
   #       run: |
@@ -125,7 +125,7 @@ jobs:
   #   needs: napari-pinned
   #   runs-on: "ubuntu-latest"
   #   steps:
-  #     - uses: actions/checkout@v2
+  #     - uses: actions/checkout@v4
 
   #     - name: Install dependencies
   #       run: |
@@ -147,7 +147,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Build Docker Image
         run: |
@@ -162,7 +162,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Python 3.9
         uses: actions/setup-python@v2
@@ -187,7 +187,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Python 3.9
         uses: actions/setup-python@v2
@@ -212,7 +212,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Python 3.9
         uses: actions/setup-python@v2
@@ -237,7 +237,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Python 3.9
         uses: actions/setup-python@v2
@@ -262,7 +262,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Python 3.9
         uses: actions/setup-python@v2
@@ -287,7 +287,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Python 3.9
         uses: actions/setup-python@v2
@@ -312,7 +312,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Python 3.9
         uses: actions/setup-python@v2
@@ -337,7 +337,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Python 3.9
         uses: actions/setup-python@v2
@@ -362,7 +362,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setpu Python 3.9
         uses: actions/setup-python@v2
@@ -387,7 +387,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Python 3.9
         uses: actions/setup-python@v2
@@ -412,7 +412,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Python 3.9
         uses: actions/setup-python@v2

@@ -1,3 +1,10 @@
+## [0.3.1] - 2024-11-12
+- Updating CHANGELOG.md for release 0.3.1
+- Adding support to Python 3.12 (#2027)
+- Numpy 1.26 update to support Python 3.12 (#2025)
+- fixing blob radius calculation in 2d (#2023)
+- Release 0.3.0 (#2021)
+
 ## [0.3.0] - 2024-10-05
 - Dropping support for Python 3.8 and setting Python 3.9 as minimum (#2018)
 - Update readthedocs.yml (#2014)
@@ -273,6 +280,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.3.1]: https://github.com/spacetx/starfish/releases/tag/0.3.1
 [0.3.0]: https://github.com/spacetx/starfish/releases/tag/0.3.0
 [0.2.2]: https://github.com/spacetx/starfish/releases/tag/0.2.2
 [0.2.1]: https://github.com/spacetx/starfish/releases/tag/0.2.1

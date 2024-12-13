@@ -3,7 +3,7 @@ from itertools import product
 from typing import Tuple
 
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter
 from skimage import img_as_float32, img_as_uint
 
 from starfish import Codebook, ImageStack, IntensityTable

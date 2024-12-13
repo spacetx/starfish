@@ -3,7 +3,7 @@ from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
 import xarray as xr
-from scipy.ndimage.filters import uniform_filter
+from scipy.ndimage import uniform_filter
 
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Levels, Number
@@ -22,7 +22,7 @@ class MeanHighPass(FilterAlgorithm):
     The mean filter is also known as a uniform or box filter. It can also be considered as a fast
     approximation to a GaussianHighPass filter.
 
-    This is a pass through for :py:func:`scipy.ndimage.filters.uniform_filter`
+    This is a pass through for :py:func:`scipy.ndimage.uniform_filter`
 
     Parameters
     ----------

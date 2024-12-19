@@ -22,13 +22,7 @@ setuptools.setup(
     extras_require={
         'napari': [f"napari[all]>={napari_version}"],
     },
-    entry_points={
-        'console_scripts': [
-            "starfish=starfish.core.starfish:starfish",
-        ]
-    },
     include_package_data=True,
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    python_requires='>=3.9, <3.13'
 )

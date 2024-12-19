@@ -295,7 +295,7 @@ release-env/bin/make_shell:
 # public: generate the release build
 release-prep: release-check release-ready release-env
 	release-env/bin/python setup.py clean
-	release-env/bin/python setup.py sdist
+	release-env/bin/python -m build
 	release-env/bin/pip install dist/starfish-$(VERSION).tar.gz
 
 ## Sections: 5 - 6

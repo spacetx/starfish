@@ -3,7 +3,7 @@ from typing import List, Mapping, Optional, Tuple
 
 import numpy as np
 from semantic_version import Version
-from skimage.transform._geometric import _GeometricTransform, SimilarityTransform
+from skimage.transform._geometric import SimilarityTransform
 from slicedimage.io import resolve_path_or_url
 
 from starfish.core.config import StarfishConfig
@@ -28,17 +28,17 @@ class TransformsList:
     def __init__(self,
                  transforms_list: Optional[List[Tuple[Mapping[Axes, int],
                                                       TransformType,
-                                                      _GeometricTransform]]] = None
+                                                      SimilarityTransform]]] = None
                  ):
         """
         Parameters
         ----------
-        transforms_list: List[Tuple[Mapping[Axes, int], TransformType, _GeometricTransform]]
+        transforms_list: List[Tuple[Mapping[Axes, int], TransformType, SimilarityTransform]]
             A list of tuples containing axes of an Imagestack and associated
             transform to apply.
         """
 
-        self.transforms: List[Tuple[Mapping[Axes, int], TransformType, _GeometricTransform]]
+        self.transforms: List[Tuple[Mapping[Axes, int], TransformType, SimilarityTransform]]
         if transforms_list:
             self.transforms = transforms_list
         else:
@@ -55,10 +55,10 @@ class TransformsList:
     def append(self,
                selectors: Mapping[Axes, int],
                transform_type: TransformType,
-               transform_object: _GeometricTransform
+               transform_object: SimilarityTransform
                ) -> None:
         """
-        Adds a new GoemetricTransform object to the list
+        Adds a new SimilarityTransform object to the list
 
         Parameters
         ----------
@@ -136,7 +136,7 @@ class TransformsList:
 
         transforms_list: List[Tuple[Mapping[Axes, int],
                                     TransformType,
-                                    _GeometricTransform]] = list()
+                                    SimilarityTransform]] = list()
         for selectors_str, transform_type_str, transforms_matrix in transforms_array:
             selectors = {Axes(k): v for k, v in selectors_str.items()}
             transform_type = TransformType(transform_type_str)

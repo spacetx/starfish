@@ -3,8 +3,8 @@ from typing import Optional, Set
 
 import numpy as np
 import xarray as xr
+from skimage.exposure import match_histograms
 
-from starfish.core.compat import match_histograms
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes
 from starfish.core.util import enum

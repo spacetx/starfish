@@ -128,7 +128,7 @@ class BlobDetector(FindSpotsAlgorithm):
         fitted_blobs_array: np.ndarray = self.detector_method(
             data_image,
             **spot_finding_args
-        )
+        )  # type: ignore  # error: Cannot call function of unknown type  [operator]
 
         if fitted_blobs_array.shape[0] == 0:
             empty_spot_attrs = SpotAttributes.empty(

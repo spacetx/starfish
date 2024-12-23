@@ -12,8 +12,7 @@ mistune==0.8.4
 numpy<2
 read_roi
 regional
-# scikit-image is temporarily pinned as newer versions require updating module imports
-scikit-image==0.21
+scikit-image>0.22
 scikit-learn
 seaborn
 semantic_version

@@ -3,7 +3,7 @@ from typing import Mapping, Union
 
 import numpy as np
 import pytest
-from skimage import img_as_float32
+from skimage.util import img_as_float32
 from slicedimage import ImageFormat
 
 from starfish.core.errors import DataFormatWarning

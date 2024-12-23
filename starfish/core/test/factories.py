@@ -4,7 +4,7 @@ from typing import Tuple
 
 import numpy as np
 from scipy.ndimage import gaussian_filter
-from skimage import img_as_float32, img_as_uint
+from skimage.util import img_as_float32, img_as_uint
 
 from starfish import Codebook, ImageStack, IntensityTable
 from starfish.core.image.Filter.white_tophat import WhiteTophat

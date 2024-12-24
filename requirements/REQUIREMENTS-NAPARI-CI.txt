@@ -45,7 +45,7 @@ iniconfig==2.0.0
 ipykernel==6.29.5
 ipython==8.18.1
 jedi==0.19.1
-Jinja2==3.1.4
+Jinja2==3.1.5
 jmespath==1.0.1
 joblib==1.4.2
 jsonschema==4.17.3

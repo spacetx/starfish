@@ -30,7 +30,7 @@ import numpy as np
 import pandas as pd
 import skimage.io
 import xarray as xr
-from skimage import img_as_float32
+from skimage.util import img_as_float32
 from slicedimage import (
     ImageFormat,
     Reader,

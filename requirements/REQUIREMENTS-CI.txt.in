@@ -17,7 +17,7 @@ pytest-cov>=2.5.1
 pytest-xdist
 recommonmark
 requests
-sphinx
+sphinx>5,<6
 sphinx_autodoc_typehints
 sphinx_bootstrap_theme
 sphinxcontrib-programoutput

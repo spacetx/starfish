@@ -1,3 +1,18 @@
+## [0.3.2] - 2025-02-16
+- Updating CHANGELOG.md for release 0.3.2
+- Bump cryptography from 44.0.0 to 44.0.1 in /requirements (#2051)
+- rolling back to Sphinx v5 as v6-8 introduce issues on ReadTheDocs with navbar logo and sub-menus (#2050)
+- Scikit image update from 0.21 to 0.23+ (#2049)
+- Bump jinja2 from 3.1.4 to 3.1.5 in /requirements (#2048)
+- Missing pypi description fix by adding pyproject.toml (#2047)
+- Bump actions/setup-python from 2 to 5 (#2042)
+- Bump actions/cache from 2 to 4 (#2041)
+- Bump actions/checkout from 2 to 4 (#2040)
+- Create dependabot.yml to auto update Github Action versions (#2039)
+- Bump tornado from 6.4.1 to 6.4.2 in /requirements (#2038)
+- replace scipy.ndimage.filters with scipy.ndimage for scipy v2 (#2035)
+- Bump lxml-html-clean from 0.3.1 to 0.4.0 in /requirements (#2036)
+
 ## [0.3.1] - 2024-11-12
 - Updating CHANGELOG.md for release 0.3.1
 - Adding support to Python 3.12 (#2027)
@@ -280,6 +295,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.3.2]: https://github.com/spacetx/starfish/releases/tag/0.3.2
 [0.3.1]: https://github.com/spacetx/starfish/releases/tag/0.3.1
 [0.3.0]: https://github.com/spacetx/starfish/releases/tag/0.3.0
 [0.2.2]: https://github.com/spacetx/starfish/releases/tag/0.2.2

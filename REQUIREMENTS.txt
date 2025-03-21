@@ -7,8 +7,6 @@ h5py
 jsonschema<4.18
 # matplotlib 3.8 changes colormap module
 matplotlib<3.8
-# pinning mistune for m2r2 in CI requirements
-mistune==0.8.4
 # numpy 2.0 breaks code and migration requires additional work
 numpy<2
 read_roi

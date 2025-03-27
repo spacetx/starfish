@@ -60,7 +60,7 @@ from functools import partial
 # EPY: END markdown
 
 # EPY: START code
-opening = partial(opening, selem=disk(3))
+opening = partial(opening, footprint=disk(3))
 
 background = img.apply(
     opening,
@@ -183,7 +183,7 @@ pixel_decoded_gene_counts = pd.Series(*np.unique(pixel_decoded['target'], return
 decoded_gene_counts = pd.Series(*np.unique(decoded['target'], return_counts=True)[::-1])
 
 # get the genes that are detected by both spot finders
-codetected = pixel_decoded_gene_counts.index.intersection(decoded_gene_counts.index).drop('nan')
+codetected = pixel_decoded_gene_counts.index.intersection(decoded_gene_counts.index).dropna()
 
 # report the correlation
 pearsonr(pixel_decoded_gene_counts[codetected], decoded_gene_counts[codetected])

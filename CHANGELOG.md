@@ -1,3 +1,14 @@
+## [0.3.3] - 2025-03-27
+- Updating CHANGELOG.md for release 0.3.3
+- adding macos to Github Actions tests and dropping python 3.9 (#2057)
+- upgrading python 3.9 to 3.10 in Dockerfile (#2056)
+- updating docs with python 3.10 as minimum (#2056)
+- dropping python 3.9 in pyproject.toml (#2056)
+- updating requirements for py 3.10 as min (#2056)
+- Clear outputs of SeqFISH notebook and bug fix on SeqFISH.py (#2059)
+- removing mistune package from REQUIREMENTS.txt and minor updates to other requirements files (#2054)
+- Bump jinja2 from 3.1.5 to 3.1.6 in /requirements (#2053)
+
 ## [0.3.2] - 2025-02-16
 - Updating CHANGELOG.md for release 0.3.2
 - Bump cryptography from 44.0.0 to 44.0.1 in /requirements (#2051)
@@ -295,6 +306,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.3.3]: https://github.com/spacetx/starfish/releases/tag/0.3.3
 [0.3.2]: https://github.com/spacetx/starfish/releases/tag/0.3.2
 [0.3.1]: https://github.com/spacetx/starfish/releases/tag/0.3.1
 [0.3.0]: https://github.com/spacetx/starfish/releases/tag/0.3.0

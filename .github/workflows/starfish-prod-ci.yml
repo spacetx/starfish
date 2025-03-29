@@ -17,10 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.9
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - uses: actions/cache@v4
         with:
@@ -40,8 +40,8 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        os: ["windows-latest", "ubuntu-latest"]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        python-version: ["3.10", "3.11", "3.12"]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -70,8 +70,8 @@ jobs:
     needs: starfish-fast
     strategy:
       matrix:
-        os: ["windows-latest", "ubuntu-latest"]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        python-version: ["3.10", "3.11", "3.12"]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -164,10 +164,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.9
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - uses: actions/cache@v4
         with:
@@ -189,10 +189,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.9
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - uses: actions/cache@v4
         with:
@@ -214,10 +214,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.9
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - uses: actions/cache@v4
         with:
@@ -239,10 +239,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.9
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - uses: actions/cache@v4
         with:
@@ -264,10 +264,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.9
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - uses: actions/cache@v4
         with:
@@ -289,10 +289,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.9
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - uses: actions/cache@v4
         with:
@@ -314,10 +314,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.9
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - uses: actions/cache@v4
         with:
@@ -339,10 +339,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.9
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - uses: actions/cache@v4
         with:
@@ -364,10 +364,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setpu Python 3.9
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
       
       - uses: actions/cache@v4
         with:
@@ -389,10 +389,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.9
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - uses: actions/cache@v4
         with:
@@ -414,10 +414,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.9
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - uses: actions/cache@v4
         with:

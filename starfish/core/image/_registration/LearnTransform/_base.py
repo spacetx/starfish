@@ -7,6 +7,6 @@ from starfish.core.pipeline.algorithmbase import AlgorithmBase
 class LearnTransformAlgorithm(metaclass=AlgorithmBase):
 
     @abstractmethod
-    def run(self, stack, *args) -> TransformsList:
+    def run(self, stack, **kwargs) -> TransformsList:
         """Learns Transforms for a given stack."""
         raise NotImplementedError()

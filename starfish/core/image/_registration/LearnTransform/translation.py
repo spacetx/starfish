@@ -33,7 +33,7 @@ class Translation(LearnTransformAlgorithm):
         self.axes = axes
         self.reference_stack = reference_stack
 
-    def run(self, stack: ImageStack, verbose: bool = False, *args) -> TransformsList:
+    def run(self, stack: ImageStack, verbose: bool = False, **kwargs) -> TransformsList:
         """
         Iterate over the given axes of an ImageStack and learn the translation transform
         based off the reference_stack passed into :py:class:`Translation`'s constructor.
@@ -45,6 +45,8 @@ class Translation(LearnTransformAlgorithm):
             Stack to calculate the transforms on.
         verbose : bool
             if True, report on transformation progress (default = False)
+        **kwargs
+            Keyword arguments passed to :py:func:`~skimage.registration.phase_cross_correlation`
 
         Returns
         -------
@@ -66,7 +68,8 @@ class Translation(LearnTransformAlgorithm):
             shift, error, phasediff = phase_cross_correlation(
                 reference_image=target_image.data,
                 moving_image=reference_image.data,
-                upsample_factor=self.upsampling
+                upsample_factor=self.upsampling,
+                **kwargs,
             )
 
             if verbose:

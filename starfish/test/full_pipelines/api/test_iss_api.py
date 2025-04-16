@@ -82,8 +82,8 @@ def test_iss_pipeline_cropped_data(tmpdir):
     )
 
     assert np.allclose(
-        expected_registered_values,
-        registered_image.xarray[2, 2, 0, 40:50, 40:50]
+        registered_image.xarray[2, 2, 0, 40:50, 40:50],
+        expected_registered_values
     )
 
     pipeline_log = registered_image.log.data

@@ -98,7 +98,6 @@ class MultiBarcodeDecoder(DecodeSpotsAlgorithm):
                                          search_radius=self.search_radius)
         transfer_physical_coords_to_intensity_table(intensity_table=intensities, spots=spots)
         
-
         self.codebook._validate_decode_intensity_input_matches_codebook_shape(intensities)
 
         # add empty metadata fields and return

@@ -9,6 +9,7 @@ import xarray as xr
 from semantic_version import Version
 from sklearn.neighbors import NearestNeighbors
 from slicedimage.io import resolve_path_or_url
+from sklearn.metrics import pairwise_distances
 
 from starfish.core.codebook._format import (
     CURRENT_VERSION,
@@ -614,6 +615,127 @@ class Codebook(xr.DataArray):
             targets=(Features.AXIS, targets),
             distances=(Features.AXIS, metric_outputs),
             passes_threshold=(Features.AXIS, passes_filters))
+
+    def decode_metric_multi(
+            self,
+            intensities: IntensityTable,
+            max_distance: float,
+            min_intensity: float,
+            norm_order: int,
+            metric: str = 'euclidean'
+    ) -> DecodedIntensityTable:
+        """
+        Erweitertes Decoding: erlaubt mehrere passende Targets pro Pixel (statt nur den nächsten).
+        """
+
+        # Sicherstellen, dass Shapes zusammenpassen
+        self._validate_decode_intensity_input_matches_codebook_shape(intensities)
+
+        # Normieren
+        norm_intensities, norms = self._normalize_features(intensities, norm_order=norm_order)
+        codebook_matrix, target_labels = self.vectorize_codebook()
+        codebook_norms = np.linalg.norm(codebook_matrix, axis=1, ord=norm_order)
+        norm_codebook = codebook_matrix / codebook_norms[:, np.newaxis]
+
+        # Intensitäten zu 2D machen (n_features, r * c)
+        X = norm_intensities.values.reshape(norm_intensities.shape[0], -1)
+
+        # Paarweise Distanzen berechnen
+        distances = pairwise_distances(X, norm_codebook, metric=metric)
+
+        matches = []
+        for i in range(len(norms)):
+            if norms[i] < min_intensity:
+                continue
+            for code_idx, distance in enumerate(distances[i]):
+                if distance <= max_distance:
+                    matches.append({
+                        "intensity": intensities[i],  # original intensity
+                        "target": target_labels[code_idx],
+                        "distance": distance
+                    })
+
+        if not matches:
+            return DecodedIntensityTable.from_intensity_table(
+                intensities[0:0],
+                targets=(Features.AXIS, np.empty(0, dtype='U')),
+                distances=(Features.AXIS, np.empty(0, dtype=np.float64)),
+                passes_threshold=(Features.AXIS, np.empty(0, dtype=bool))
+            )
+
+        # === IntensityTable aus Matches bauen ===
+        all_data = np.array([m["intensity"].values for m in matches])  # shape: (n, r, c)
+
+        coords = {}
+
+        axes_to_check = [Axes.X, Axes.Y]
+
+        for axis in axes_to_check:
+            if axis.value in matches[0]["intensity"].coords:
+                coord_values = []
+                for m in matches:
+                    v = m["intensity"].coords[axis.value].values
+                    coord_values.append(np.array(v).item())
+                coords[axis] = np.array(coord_values)
+
+        # Fallback für z
+        if "z" not in [axis.value for axis in coords.keys()]:
+            coords["z"] = np.zeros(len(matches), dtype=int)
+
+
+
+        # Koordinaten-Dict aufbauen
+        coords_dict = {
+            "features": np.arange(len(matches)),
+            "r": norm_intensities.coords["r"].values,
+            "c": norm_intensities.coords["c"].values,
+        }
+        for axis, values in coords.items():
+            if isinstance(axis, str):
+                coords_dict[axis] = ("features", values)
+            else:
+                coords_dict[axis.value] = ("features", values)
+
+
+        # Neues IntensityTable
+        intensity_data = xr.DataArray(
+            data=all_data,
+            dims=("features", "r", "c"),
+            coords=coords_dict
+        )
+        decoded_intensities = IntensityTable(intensity_data)
+
+        return DecodedIntensityTable.from_intensity_table(
+            decoded_intensities,
+            targets=(Features.AXIS, np.array([m["target"] for m in matches])),
+            distances=(Features.AXIS, np.array([m["distance"] for m in matches])),
+            passes_threshold=(Features.AXIS, np.ones(len(matches), dtype=bool))
+        )
+
+
+    def vectorize_codebook(self) -> Tuple[np.ndarray, List[str]]:
+        """
+        Wandelt das Codebook in eine Matrix um:
+        Zeilen = Targets, Spalten = Kanalwerte über alle Runden und Kanäle
+        """
+        n_targets, n_rounds, n_channels = self.shape
+        vector_length = n_rounds * n_channels
+
+        matrix = np.zeros((n_targets, vector_length), dtype=np.float32)
+        labels = list(self.coords['target'].values)  # ✅ korrekt!
+
+        for target_index in range(n_targets):
+            for r in range(n_rounds):
+                for c in range(n_channels):
+                    v = self.values[target_index, r, c].item()
+                    if v > 0:
+                        flat_index = r * n_channels + c
+                        matrix[target_index, flat_index] = v
+
+        return matrix, labels
+
+
+
 
     def decode_per_round_max(self, intensities: IntensityTable) -> DecodedIntensityTable:
         """

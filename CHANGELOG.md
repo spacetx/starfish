@@ -1,3 +1,13 @@
+## [0.3.3] - 2025-05-09
+- Updating CHANGELOG.md for release 0.3.3
+- add MacOS to Github actions workflow (#2068)
+- Add normalization argument to LearnTransform.Translation with default value None (#2063)
+- updating REQUIREMENTS-JUPYTER.txt to resolve h11 dependency vulnerability (#2066)
+- fix: blob.py 2d intensities shape and pd.concat instead of append (#2064)
+- Clear outputs of SeqFISH notebook and bug fix on SeqFISH.py (#2059)
+- removing mistune package from REQUIREMENTS.txt and minor updates to other requirements files (#2054)
+- Bump jinja2 from 3.1.5 to 3.1.6 in /requirements (#2053)
+
 ## [0.3.2] - 2025-02-16
 - Updating CHANGELOG.md for release 0.3.2
 - Bump cryptography from 44.0.0 to 44.0.1 in /requirements (#2051)
@@ -295,6 +305,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.3.3]: https://github.com/spacetx/starfish/releases/tag/0.3.3
 [0.3.2]: https://github.com/spacetx/starfish/releases/tag/0.3.2
 [0.3.1]: https://github.com/spacetx/starfish/releases/tag/0.3.1
 [0.3.0]: https://github.com/spacetx/starfish/releases/tag/0.3.0

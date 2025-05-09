@@ -107,7 +107,8 @@ from starfish.types import Axes
 def register(imgs, dots, method = 'translation'):
     mip_imgs = imgs.reduce(dims = [Axes.CH, Axes.ZPLANE], func="max")
     mip_dots = dots.reduce(dims = [Axes.CH, Axes.ZPLANE], func="max")
-    learn_translation = LearnTransform.Translation(reference_stack=mip_dots, axes=Axes.ROUND, upsampling=1000)
+    learn_translation = LearnTransform.Translation(reference_stack=mip_dots, axes=Axes.ROUND,
+                                                   upsampling=1000, normalization=None)
     transforms_list = learn_translation.run(mip_imgs)
     warp = ApplyTransform.Warp()
     registered_imgs = warp.run(imgs, transforms_list=transforms_list, in_place=False, verbose=True)

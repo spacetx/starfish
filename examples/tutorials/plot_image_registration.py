@@ -67,7 +67,7 @@ diagnose_registration(projected_imgs, {Axes.ROUND:0}, {Axes.ROUND:1}, {Axes.ROUN
 
 ###################################################################################################
 # Next we learn the translational transform using :py:class:`.LearnTransform.Translation`,
-# which wraps :py:class:`skimage.feature.register_translation` for efficient image translation
+# which wraps :py:func:`~skimage.registration.phase_cross_correlation` for efficient image translation
 # registration by cross-correlation. Running it will find the translational shift of every image
 # along a specified :py:class:`.Axes` of an :py:class:`.ImageStack` relative to the
 # `reference_image`.
@@ -75,10 +75,16 @@ diagnose_registration(projected_imgs, {Axes.ROUND:0}, {Axes.ROUND:1}, {Axes.ROUN
 # .. Note::
 #   There must be more landmarks than random noise. Otherwise the
 #   :py:class:`.LearnTransform.Translation` could align random noise.
+#   Depending on the noise level, there are two different normalization strategies provided by
+#   :py:func:`~skimage.registration.phase_cross_correlation`. The default strategy in
+#   :py:class:`.LearnTransform.Translation` is `normalization=None` which is suitable for high noise
+#   scenarios. The alternative is `normalization="phase"` which might be more suitable to cases where
+#   images have different illumination.
 
 from starfish.image import LearnTransform
 
-learn_translation = LearnTransform.Translation(reference_stack=dots, axes=Axes.ROUND, upsampling=1000)
+learn_translation = LearnTransform.Translation(reference_stack=dots, axes=Axes.ROUND,
+                                               upsampling=1000, normalization=None)
 transforms_list = learn_translation.run(projected_imgs)
 
 ###################################################################################################

@@ -6,7 +6,8 @@ from starfish.core.image._registration.LearnTransform.translation import Transla
 from starfish.core.types import Axes
 
 
-ISS_SHIFTS = [[-23, 6], [-22, 2], [-22, -4], [-15, -4]]
+ISS_SHIFTS = [[-23, 6], [-22, 2], [-22, -3], [-15, -4]]
+ISS_SHIFTS_WITH_PHASE_NORMALIZATION = [[-23, 6], [-22, 2], [-22, -4], [-15, -4]]
 
 
 def test_learn_transforms_throws_error():
@@ -32,5 +33,22 @@ def test_learn_transforms_translation():
     # assert there's a transofrmation object for each round
     assert len(transform_list.transforms) == stack.num_rounds
     for (_, _, transform), shift in zip(transform_list.transforms, ISS_SHIFTS):
+        # assert that each TransformationObject has the correct translation shift
+        assert np.array_equal(transform.translation, shift)
+
+
+def test_learn_transforms_translation_with_phase_normalization():
+    exp = data.ISS(use_test_data=True)
+    stack = exp.fov().get_image('primary')
+    reference_stack = exp.fov().get_image('dots')
+    translation = Translation(reference_stack=reference_stack, axes=Axes.ROUND,
+                              normalization="phase")
+    # Calculate max_proj accrss CH/Z
+    stack = Filter.Reduce((Axes.CH, Axes.ZPLANE)).run(stack)
+    transform_list = translation.run(stack)
+    # assert there's a transofrmation object for each round
+    assert len(transform_list.transforms) == stack.num_rounds
+    for (_, _, transform), shift in zip(transform_list.transforms,
+                                        ISS_SHIFTS_WITH_PHASE_NORMALIZATION):
         # assert that each TransformationObject has the correct translation shift
         assert np.array_equal(transform.translation, shift)

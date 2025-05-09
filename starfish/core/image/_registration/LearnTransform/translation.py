@@ -25,13 +25,21 @@ class Translation(LearnTransformAlgorithm):
         for an explanation of this parameter. In brief, this parameter determines the resolution of
         the registration. A value of 1 represents pixel resolution, a value of 10 is 1/10th of
         a pixel, a value of 300 is 1/300th of a pixel, and so on.
+    normalization : None | "phase"
+        normalization method (default=None). See
+        :py:func:`~skimage.registration.phase_cross_correlation` for an explanation of this
+        parameter.  In brief, this parameter toggles between unnormalized cross-correlation and
+        "phase correlation". Which form of normalization performs better depends on the application.
+        Under noise the unnormalized method might be preferred.
     """
 
-    def __init__(self, reference_stack: ImageStack, axes: Axes, upsampling: int = 1):
+    def __init__(self, reference_stack: ImageStack, axes: Axes, upsampling: int = 1,
+                 normalization=None):
 
         self.upsampling = upsampling
         self.axes = axes
         self.reference_stack = reference_stack
+        self.normalization = normalization
 
     def run(self, stack: ImageStack, verbose: bool = False, *args) -> TransformsList:
         """
@@ -66,7 +74,8 @@ class Translation(LearnTransformAlgorithm):
             shift, error, phasediff = phase_cross_correlation(
                 reference_image=target_image.data,
                 moving_image=reference_image.data,
-                upsample_factor=self.upsampling
+                upsample_factor=self.upsampling,
+                normalization=self.normalization
             )
 
             if verbose:

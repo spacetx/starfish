@@ -5,8 +5,7 @@ docutils<0.20
 h5py
 # jsonschema 4.18.0 made RefResolver deprecated
 jsonschema<4.18
-# matplotlib 3.8 changes colormap module
-matplotlib<3.8
+matplotlib
 # numpy 2.0 breaks code and migration requires additional work
 numpy<2
 read_roi

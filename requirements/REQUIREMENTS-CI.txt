@@ -143,7 +143,7 @@ threadpoolctl==3.6.0
 tifffile==2024.8.30
 tinycss2==1.4.0
 tomli==2.2.1
-tornado==6.4.2
+tornado==6.5.1
 tqdm==4.67.1
 trackpy==0.6.4
 traitlets==5.14.3

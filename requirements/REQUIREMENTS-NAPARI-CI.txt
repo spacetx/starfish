@@ -143,7 +143,7 @@ tifffile==2024.8.30
 tomli==2.2.1
 tomli_w==1.2.0
 toolz==1.0.0
-tornado==6.4.2
+tornado==6.5.1
 tqdm==4.67.1
 trackpy==0.6.4
 traitlets==5.14.3

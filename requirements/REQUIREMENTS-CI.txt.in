@@ -1,6 +1,6 @@
 # requirements to run CI except for napari
 # constrain the CI requirements to packages already in REQUIREMENTS-STRICT.txt
--c ../starfish/REQUIREMENTS-STRICT.txt
+-r ../starfish/REQUIREMENTS-STRICT.txt
 build
 flake8
 flake8-import-order

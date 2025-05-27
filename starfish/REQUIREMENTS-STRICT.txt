@@ -41,7 +41,7 @@ scikit-learn==1.6.1
 scipy==1.13.1
 seaborn==0.13.2
 semantic-version==2.10.0
-setuptools==80.4.0
+setuptools==78.1.1
 showit==1.1.4
 six==1.17.0
 slicedimage==4.1.1

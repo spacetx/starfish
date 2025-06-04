@@ -115,15 +115,13 @@ class MultiBarcodePixelSpotDecoder(DetectPixelsAlgorithm):
     """
     def __init__(
             self, codebook: Codebook, metric: str, distance_threshold: float,
-            magnitude_threshold: int, min_area: int, max_area: int, norm_order: int = 2
+            magnitude_threshold: int, norm_order: int = 2
     ) -> None:
 
         self.codebook = codebook
         self.metric = metric
         self.distance_threshold = distance_threshold
         self.magnitude_threshold = magnitude_threshold
-        self.min_area = min_area
-        self.max_area = max_area
         self.norm_order = norm_order
 
     def run(
@@ -159,14 +157,4 @@ class MultiBarcodePixelSpotDecoder(DetectPixelsAlgorithm):
             norm_order=self.norm_order,
             metric=self.metric
         )
-        # caf = CombineAdjacentFeatures(
-        #     min_area=self.min_area,
-        #     max_area=self.max_area,
-        #     mask_filtered_features=True
-        # )
-        # decoded_spots, image_decoding_results = caf.run(intensities=decoded_intensities,
-        #                                                 n_processes=n_processes)
-
-        # transfer_physical_coords_to_intensity_table(image_stack=primary_image,
-        #                                             intensity_table=decoded_spots)
-        return decoded_intensities, None#decoded_spots, image_decoding_results
+        return decoded_intensities

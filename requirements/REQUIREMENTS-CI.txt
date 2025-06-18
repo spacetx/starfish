@@ -154,7 +154,7 @@ types-setuptools==80.3.0.20250505
 types-urllib3==1.26.25.14
 typing_extensions==4.13.2
 tzdata==2025.2
-urllib3==1.26.20
+urllib3==2.5.0
 validators==0.35.0
 wcwidth==0.2.13
 webencodings==0.5.1

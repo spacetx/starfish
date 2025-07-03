@@ -51,7 +51,7 @@ tifffile==2024.8.30
 tqdm==4.67.1
 trackpy==0.6.4
 tzdata==2025.2
-urllib3==1.26.20
+urllib3==2.5.0
 validators==0.35.0
 xarray==2023.8.0
 zipp==3.21.0

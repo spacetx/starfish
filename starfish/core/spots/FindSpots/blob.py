@@ -148,7 +148,7 @@ class BlobDetector(FindSpotsAlgorithm):
             y_inds = fitted_blobs_array[:, 0].astype(int)
             x_inds = fitted_blobs_array[:, 1].astype(int)
             radius = np.round(fitted_blobs_array[:, 2] * np.sqrt(2))
-            intensities = data_image[tuple([y_inds, x_inds])]
+            intensities = data_image[tuple([z_inds, y_inds, x_inds])]
 
         # construct dataframe
         spot_data = pd.DataFrame(
@@ -215,8 +215,8 @@ class BlobDetector(FindSpotsAlgorithm):
                         spot_attributes_list[i][1]['z']
                     r = spot_attributes_list[i][1][Axes.ROUND]
                     ch = spot_attributes_list[i][1][Axes.CH]
-                    merged_z_tables[(r, ch)] = merged_z_tables[(r, ch)].append(
-                        spot_attributes_list[i][0].spot_attrs.data)
+                    merged_z_tables[(r, ch)] = pd.concat(
+                        [merged_z_tables[(r, ch)], spot_attributes_list[i][0].spot_attrs.data])
                 new = []
                 r_chs = sorted([*merged_z_tables])
                 selectors = list(image_stack._iter_axes({Axes.ROUND, Axes.CH}))

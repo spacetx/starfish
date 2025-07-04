@@ -1,12 +1,14 @@
 # requirements to run CI except for napari
 # constrain the CI requirements to packages already in REQUIREMENTS-STRICT.txt
--r ../starfish/REQUIREMENTS-STRICT.txt
+-c ../starfish/REQUIREMENTS-STRICT.txt
 build
 flake8
 flake8-import-order
 lxml_html_clean
 # pin m2r2: https://github.com/CrossNox/m2r2/issues/52
 m2r2>=0.3.3
+# pinning mistune for m2r2
+mistune==0.8.4
 # temporarily limiting mypy as 1.11 introduces errors
 mypy<1.11
 numpydoc

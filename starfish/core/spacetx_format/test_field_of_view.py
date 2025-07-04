@@ -29,15 +29,15 @@ def test_dartfish_nuclei_example_field_of_view():
 
 def test_channel_must_be_present():
     no_channel = validator.load_json(example)
-    del no_channel['tiles'][0]['indices']['c']
+    del no_channel['shape']['c']
     with pytest.warns(UserWarning):
         assert not validator.validate_object(no_channel)
 
 
 def test_round_must_be_present():
     mangled_round = validator.load_json(example)
-    del mangled_round['tiles'][0]['indices']['r']
-    mangled_round['tiles'][0]['indices']['h'] = 0
+    del mangled_round['shape']['r']
+    mangled_round['shape']['h'] = 0
     with pytest.warns(UserWarning):
         assert not validator.validate_object(mangled_round)
 

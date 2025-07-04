@@ -169,7 +169,7 @@ class StarMapTileFetcher(TileFetcher):
 
     def get_tile(
             self, fov_id: int, round_label: int, ch_label: int, zplane_label: int) -> FetchedTile:
-        basename = f"reg_round0{round_label+ 1}_ch0{ch_label + 1}.tif"  # translate to 3d
+        basename = f"reg_round0{round_label + 1}_ch0{ch_label + 1}.tif"  # translate to 3d
         file_path = os.path.join(self.input_dir, "reg3d", basename)
         return StarMapTile(file_path, zplane_label)
 

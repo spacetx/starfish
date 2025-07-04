@@ -3,8 +3,8 @@ from itertools import product
 from typing import Tuple
 
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter
-from skimage import img_as_float32, img_as_uint
+from scipy.ndimage import gaussian_filter
+from skimage.util import img_as_float32, img_as_uint
 
 from starfish import Codebook, ImageStack, IntensityTable
 from starfish.core.image.Filter.white_tophat import WhiteTophat
@@ -228,7 +228,7 @@ class SyntheticData:
 
         image = image * camera_detection_efficiency
 
-        image += np.random.normal(scale=background_electrons, size=image.shape)
+        image += np.random.normal(scale=background_electrons, size=image.shape)  # type: ignore
 
         # mimic analog to digital conversion
         image = (image / graylevel).astype(int).clip(0, 2 ** ad_conversion_bits)

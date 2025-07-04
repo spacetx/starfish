@@ -3,8 +3,8 @@ from typing import Optional, Set
 
 import numpy as np
 import xarray as xr
+from skimage.exposure import match_histograms
 
-from starfish.core.compat import match_histograms
 from starfish.core.imagestack.imagestack import ImageStack
 from starfish.core.types import Axes
 from starfish.core.util import enum
@@ -50,7 +50,7 @@ class MatchHistograms(FilterAlgorithm):
         stacked = data.xarray.stack(chunk_key=chunk_key)
         stacked = stacked.stack(sort_key=sort_key)
 
-        sorted_stacked = stacked.groupby("sort_key").map(np.sort)
+        sorted_stacked = stacked.groupby("sort_key").map(np.sort)  # type: ignore[arg-type]
         reference = sorted_stacked.mean("sort_key")
         reference = reference.unstack("chunk_key")
         return reference

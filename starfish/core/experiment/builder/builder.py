@@ -209,7 +209,7 @@ def write_irregular_experiment_json(
         tile_fetchers: Mapping[str, TileFetcher],
         postprocess_func: Optional[Callable[[dict], dict]]=None,
         default_shape: Optional[Mapping[Axes, int]]=None,
-        fov_path_generator: Callable[[Path, str], Path] = None,
+        fov_path_generator: Optional[Callable[[Path, str], Path]] = None,
         tile_opener: Optional[Callable[[Path, Tile, str], BinaryIO]] = None,
         writer_contract: Optional[WriterContract] = None,
 ) -> None:

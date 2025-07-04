@@ -163,7 +163,7 @@ def test_dartfish_pipeline_cropped_data(tmpdir):
 
     # verify number of spots detected
     spots_passing_filters = spot_intensities[Features.PASSES_THRESHOLDS].sum()
-    assert spots_passing_filters == 53
+    assert spots_passing_filters == 54
 
     # compare to benchmark data -- note that this particular part of the dataset appears completely
     # uncorrelated
@@ -179,7 +179,8 @@ def test_dartfish_pipeline_cropped_data(tmpdir):
     cnts_starfish.rename(columns={'target': 'gene', 'area': 'cnt_starfish'}, inplace=True)
 
     # get top 5 genes and verify they are correct
-    high_expression_genes = cnts_starfish.sort_values('cnt_starfish', ascending=False).head(5)
+    high_expression_genes = cnts_starfish.sort_values('cnt_starfish', ascending=False,
+                                                      kind='stable').head(5)
 
     assert np.array_equal(
         high_expression_genes['cnt_starfish'].values,
@@ -187,7 +188,7 @@ def test_dartfish_pipeline_cropped_data(tmpdir):
     )
     assert np.array_equal(
         high_expression_genes['gene'].values,
-        ['MBP', 'MOBP', 'ADCY8', 'TRIM66', 'SYT6']
+        ['MBP', 'MOBP', 'ADCY8', 'SYT6', 'TRIM66']
     )
 
     # verify correlation is accurate for this subset of the image

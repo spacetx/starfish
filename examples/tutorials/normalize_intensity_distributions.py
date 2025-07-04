@@ -11,7 +11,7 @@ when and how to normalize the *distributions* of intensities from images in an
 :ref:`section_normalizing_intensities`.
 
 Normalizing the distributions is done in starfish by matching the histograms of
-:py:class:`.ImageStack`\s to a reference histogram. The reference histogram is created by
+:py:class:`.ImageStack` to a reference histogram. The reference histogram is created by
 averaging the histograms from each group defined by the ``group_by`` parameter. These groups also
 determine along which :py:class:`.Axes` the intensities will be normalized.
 

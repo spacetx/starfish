@@ -17,6 +17,7 @@ from .check_all_funcs import buildBarcodes, cleanup, createNeighborDict, createR
     distanceFilter, findNeighbors, removeUsedSpots
 from .util import _merge_spots_by_round
 
+
 class CheckAll(DecodeSpotsAlgorithm):
     """
     Decode spots by generating all possible combinations of neighboring spots to form barcodes
@@ -97,8 +98,8 @@ class CheckAll(DecodeSpotsAlgorithm):
     def __init__(
             self,
             codebook: Codebook,
-            search_radius: float=3,
-            error_rounds: int=0,
+            search_radius: float = 3,
+            error_rounds: int = 0,
             mode='med',
             physical_coords=False):
         self.codebook = codebook
@@ -124,7 +125,7 @@ class CheckAll(DecodeSpotsAlgorithm):
 
     def run(self,
             spots: SpotFindingResults,
-            n_processes: int=1,
+            n_processes: int = 1,
             *args) -> DecodedIntensityTable:
         """
         Decode spots by finding the set of nonoverlapping barcodes that have the minimum spatial
@@ -258,6 +259,7 @@ class CheckAll(DecodeSpotsAlgorithm):
                 'Invalid mode choice ("high", "med", or "low")')
 
         # Decode for each round omission number, intensity cutoff, and then search radius
+        allCodes_list = list()
         allCodes = pd.DataFrame()
         for currentRoundOmitNum in roundOmits:
             for s, strictness in enumerate(strictnesses):
@@ -390,8 +392,11 @@ class CheckAll(DecodeSpotsAlgorithm):
                                 spotTables = removeUsedSpots(finalCodes, spotTables)
                                 currentTables = removeUsedSpots(finalCodes, currentTables)
 
-                            # Append found codes to allCodes table
-                            allCodes = allCodes.append(finalCodes).reset_index(drop=True)
+                            # Append found codes to allCodes list
+                            allCodes_list.append(finalCodes)
+
+        # Concatenate list of found codes to allCodes table
+        allCodes = pd.concat(allCodes_list, ignore_index=True)
 
         # Create and fill in intensity table
         channels = spots.ch_labels

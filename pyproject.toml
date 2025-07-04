@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools >= 66.1.0", "versioneer"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "starfish"
+dynamic = ["version", "dependencies", "optional-dependencies"]
+requires-python = ">= 3.9, <3.13"
+authors = [
+    {name = "Deep Ganguli", email = "dganguli@chanzuckerberg.com"}
+]
+maintainers = [
+  {name = "Lior Shachaf", email = "shachaflior@gmail.com"}
+]
+description = "Pipelines and pipeline components for the analysis of image-based transcriptomics data"
+readme = "README.rst"
+keywords = ["single-cell", "image-based", "transcriptomics"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "starfish/core/_version.py"
+versionfile_build = "starfish/core/_version.py"
+parentdir_prefix = "starfish-"
+tag_prefix = ""
+
+[project.urls]
+Homepage = "https://spacetx-starfish.readthedocs.io/en/latest/"
+Documentation = "https://spacetx-starfish.readthedocs.io/en/latest/"
+Repository = "https://github.com/spacetx/starfish"
+"Bug Tracker" = "https://github.com/spacetx/starfish/issues"
+
+[project.scripts]
+starfish = "starfish.core.starfish:starfish"

@@ -71,8 +71,8 @@ class SpaceTxValidator:
 
     @staticmethod
     def _recurse_through_errors(error_iterator: Iterator[ValidationError],
-                                level: int=0,
-                                filename: str=None) -> None:
+                                level: int = 0,
+                                filename: str = '') -> None:
         """Recurse through ValidationErrors, printing message and schema path
 
         Parameters
@@ -136,7 +136,7 @@ class SpaceTxValidator:
     def validate_object(
             self,
             target_object: Union[dict, list],
-            target_file: str=None,
+            target_file: str = '',
     ) -> bool:
         """validate a loaded json object, returning True if valid, and False otherwise
 
@@ -176,7 +176,7 @@ class SpaceTxValidator:
     def fuzz_object(
             self,
             target_object: Union[dict, list],
-            target_file: str=None,
+            target_file: str = '',
             out: IO=sys.stdout,
     ) -> None:
         """performs mutations on the given object and tests for validity.

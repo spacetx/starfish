@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "schema/field_of_view/tiles/tiles.json",
+  "$id": "https://github.com/spacetx/starfish/spacetx_format/schema/field_of_view_0.0.0/tiles/tiles.json",
   "description": "Specification of a 2-d image tile.",
   "type": "object",
   "required": [

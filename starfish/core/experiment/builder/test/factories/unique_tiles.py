@@ -2,7 +2,7 @@ from abc import ABCMeta
 from typing import Mapping
 
 import numpy as np
-from skimage import img_as_float32
+from skimage.util import img_as_float32
 from slicedimage import ImageFormat
 
 from starfish.core.types import Axes

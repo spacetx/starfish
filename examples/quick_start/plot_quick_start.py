@@ -13,13 +13,11 @@ Approximate time to complete tutorial: 10 minutes
 Prerequisites
 -------------
 
-* Python 3.6+ installed (Python 3.7 recommended)
+* Python 3.9+ installed (Python 3.10 recommended)
 * Some basic knowledge of scientific computing in Python_
 * :ref:`Starfish library installed <installation>`
-* seaborn_ is installed: :code:`pip install seaborn`
 
 .. _Python: https://docs.scipy.org/doc/numpy/user/quickstart.html
-.. _seaborn: https://seaborn.pydata.org/
 
 Starfish Pipeline
 -----------------

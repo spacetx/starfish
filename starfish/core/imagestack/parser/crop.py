@@ -13,11 +13,11 @@ class CropParameters:
     def __init__(
             self,
             *,
-            permitted_rounds: Optional[Collection[int]]=None,
-            permitted_chs: Optional[Collection[int]]=None,
-            permitted_zplanes: Optional[Collection[int]]=None,
-            x_slice: Optional[Union[int, slice]]=None,
-            y_slice: Optional[Union[int, slice]]=None,
+            permitted_rounds: Optional[Collection[int]] = None,
+            permitted_chs: Optional[Collection[int]] = None,
+            permitted_zplanes: Optional[Collection[int]] = None,
+            x_slice: Optional[Union[int, slice]] = None,
+            y_slice: Optional[Union[int, slice]] = None,
     ):
         """
         Parameters
@@ -113,9 +113,9 @@ class CropParameters:
                              y: Optional[Union[int, slice]] = None
                              ) -> List["CropParameters"]:
 
-        """Takes a tileset and any optional selected axes lists compares the physical coordinates on each
-         tile to create aligned coordinate groups (groups of tiles that have the same physical
-         coordinates)
+        """Takes a tileset and any optional selected axes lists compares the physical coordinates
+         on each tile to create aligned coordinate groups (groups of tiles that have the same
+         physical coordinates)
 
         Parameters
         ----------

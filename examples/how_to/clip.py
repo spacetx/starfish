@@ -10,7 +10,7 @@ rescale intensity values.
 
 :py:class:`~starfish.image.Filter.Clip` is useful for normalizing images, removing background,
 and removing high-intensity outliers. If you want the values to start from zero after clipping see
-:py:class:`~starfish.image.Filter.ClipPercentileToZero`. Both :py:class:`FilterAlgorithm`\s use
+:py:class:`~starfish.image.Filter.ClipPercentileToZero`. Both :py:class:`FilterAlgorithm` use
 percentiles to set the ``p_min`` and ``p_max`` values to clip by.
 """
 

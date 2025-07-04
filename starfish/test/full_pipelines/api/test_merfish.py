@@ -236,7 +236,7 @@ def test_merfish_pipeline_cropped_data():
         spot_intensities[Features.PASSES_THRESHOLDS], drop=True
     )
     genes, counts = np.unique(spot_intensities_passing_filters[Features.TARGET], return_counts=True)
-    result_counts = pd.Series(counts, index=genes).sort_values(ascending=False)[:5]
+    result_counts = pd.Series(counts, index=genes).sort_values(ascending=False, kind='stable')[:5]
 
     # assert that number of high-expression detected genes are correct
     expected_counts = pd.Series(

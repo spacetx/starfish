@@ -6,7 +6,7 @@ from starfish.core.image._registration.LearnTransform.translation import Transla
 from starfish.core.types import Axes
 
 
-ISS_SHIFTS = [[-23, 6], [-22, 2], [-22, -3], [-15, -4]]
+ISS_SHIFTS = [[-23, 6], [-22, 2], [-22, -4], [-15, -4]]
 
 
 def test_learn_transforms_throws_error():

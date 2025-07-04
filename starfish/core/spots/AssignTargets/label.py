@@ -42,7 +42,7 @@ class Label(AssignTargetsAlgorithm):
             else:
                 warnings.warn(
                     "AssignTargets will require 3D masks in the future.", DeprecationWarning)
-                z_min, z_max = np.NINF, np.inf
+                z_min, z_max = -np.inf, np.inf
             y_min, y_max = float(mask.y.min()), float(mask.y.max())
             x_min, x_max = float(mask.x.min()), float(mask.x.max())
 

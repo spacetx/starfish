@@ -32,10 +32,6 @@ import starfish
 import starfish.data
 from starfish import FieldOfView, DecodedIntensityTable
 from starfish.types import TraceBuildingStrategies
-
-# equivalent to %gui qt
-ipython = get_ipython()
-ipython.magic("gui qt5")
 # EPY: END code
 
 # EPY: START markdown
@@ -171,5 +167,6 @@ experiment = starfish.data.allen_smFISH(use_test_data=True)
 image, intensities = processing_pipeline(experiment, fov_name='fov_001')
 
 # uncomment the below line to visualize the output with the spot calls.
+# %gui qt
 # viewer = starfish.display(image, intensities)
 # EPY: END code

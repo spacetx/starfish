@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter
 
 from starfish import ImageStack
 from starfish.core.spots.DecodeSpots.trace_builders import build_traces_nearest_neighbors

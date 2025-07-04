@@ -3,7 +3,7 @@
 Installation
 ============
 
-Starfish supports python 3.6 and above (python 3.7 recommended). To install the starfish package,
+Starfish supports python 3.9-3.12. To install the starfish package,
 first verify that your python version is compatible. You can check this by running :code:`python
 --version`.
 
@@ -12,13 +12,13 @@ The output should look similar to this:
 .. code-block:: bash
 
    $ python --version
-   Python 3.7.7
+   Python 3.9.18
 
 .. warning::
-    While starfish itself has no known issues with python 3.8, scikit-image is not fully
-    compatible with python 3.8. As such, installation of scikit-image, as part of starfish
-    installation, may unexpectedly fail. The workaround is to install numpy first before
-    installing starfish or scikit-image.
+    While starfish itself should work on any operating system, some napari dependencies might not be
+    compatible with Apple Silicon or Windows. As such, installation of napari, as part of starfish[napari]
+    installation, may unexpectedly fail. The workaround is to install napari first before
+    installing starfish or updating the dependencies via cloning the project and working in development mode.
 
 
 Using virtual environments
@@ -44,7 +44,7 @@ Conda_ users can set one up like so:
 
 .. code-block:: bash
 
-    $ conda create -n starfish "python=3.7"
+    $ conda create -n starfish "python=3.9"
     $ conda activate starfish
 
 Installing *starfish*
@@ -57,7 +57,7 @@ Starfish can easily be installed using pip:
     $ pip install starfish
 
 .. note::
-    If using python 3.8, first install numpy using pip before installing starfish.
+    If using Windows or Apple Silicon (M1+), first install napari using pip before installing starfish.
 
 To use napari for interactive image visualization via :py:func:`.display` you must also
 install napari:
@@ -72,8 +72,8 @@ Interactive visualization with napari also requires using Qt (e.g. by running th
 Installing *starfish* on Windows
 --------------------------------
 
-Windows users can install starfish in the same way. Again, we recommend using a conda or virtual
-environment with python 3.7. Here is how you would install starfish in a virtual environment
+Windows (cmd.exe) users can install starfish in the same way. Again, we recommend using a conda or virtual
+environment with python 3.9+. Here is how you would install starfish in a virtual environment
 created with python's ``venv`` module:
 
 .. code-block:: bat
@@ -82,12 +82,11 @@ created with python's ``venv`` module:
     > cd starfish
     > python -m venv .venv
     > .venv\Scripts\activate.bat
+    > pip install napari[all]
     > pip install starfish
-    > pip install starfish[napari]
 
 .. note::
-    Python 3.8 has trouble installing scikit-image v0.15.0 and the ``pip install numpy``
-    workaround does not solve this issue on Windows.
+    If you encounter issues, you need to update the dependencies via cloning the project and working in development mode.
 
 Jupyter notebook
 ----------------
@@ -97,7 +96,54 @@ the virtualenv kernel to jupyter by activating your virtual environment and then
 
 .. code-block:: bash
 
+    $ python -m pip install jupyter
     $ python -m ipykernel install --user --name=<venv_name>
 
 Now you should be able to select ``venv_name`` as the kernel in a jupyter notebook to have access
 to the starfish library.
+
+Installing *starfish* in development mode
+-----------------------------------------
+
+If you need to resolve dependency issues with napari and jupyter or want to tinker with the
+starfish package, it is best to work in development mode. 
+If you are on a mac, make sure you have the `XCode CommandLine Tools`_
+installed.
+
+.. _`XCode CommandLine Tools`: https://developer.apple.com/library/archive/technotes/tn2339/_index.html
+
+Check out the code for starfish:
+
+.. code-block:: bash
+
+    $ git clone https://github.com/spacetx/starfish.git
+    $ cd starfish
+
+Set up a `virtual environment`_:
+
+.. _`virtual environment`: #using-virtual-environments
+
+.. code-block:: bash
+
+    $ python -m venv .venv
+    $ source .venv/bin/activate
+
+Install starfish:
+
+.. code-block:: bash
+
+    $ make install-dev
+
+Update dependencies for napari and jupyter:
+
+.. code-block:: bash
+
+    $ make -B requirements/REQUIREMENTS-NAPARI-CI.txt
+    $ make -B requirements/REQUIREMENTS-JUPYTER.txt
+
+Install napari and jupyter:
+
+.. code-block:: bash
+
+    $ pip install -r requirements/REQUIREMENTS-NAPARI-CI.txt
+    $ pip install -r requirements/REQUIREMENTS-JUPYTER.txt

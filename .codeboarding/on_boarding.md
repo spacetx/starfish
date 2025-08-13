@@ -15,12 +15,12 @@ graph LR
     Spot_Analysis_Engine -- "outputs Decoded Spot Data & Intensity Tables to" --> Output_Export_Layer
     Core_Data_Structures -- "provides Data for Visualization to" --> Visualization_Utilities
     Spot_Analysis_Engine -- "provides Decoded Spots for Plotting to" --> Visualization_Utilities
-    click Data_Input_Validation_Layer href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/starfish/Data_Input_Validation_Layer.md" "Details"
-    click Core_Data_Structures href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/starfish/Core_Data_Structures.md" "Details"
-    click Image_Processing_Engine href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/starfish/Image_Processing_Engine.md" "Details"
-    click Spot_Analysis_Engine href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/starfish/Spot_Analysis_Engine.md" "Details"
-    click Output_Export_Layer href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/starfish/Output_Export_Layer.md" "Details"
-    click Visualization_Utilities href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/starfish/Visualization_Utilities.md" "Details"
+    click Data_Input_Validation_Layer href "https://github.com/spacetx/starfish/blob/main/starfish/Data_Input_Validation_Layer.md" "Details"
+    click Core_Data_Structures href "https://github.com/spacetx/starfish/blob/main/starfish/Core_Data_Structures.md" "Details"
+    click Image_Processing_Engine href "https://github.com/spacetx/starfish/blob/main/starfish/Image_Processing_Engine.md" "Details"
+    click Spot_Analysis_Engine href "https://github.com/spacetx/starfish/blob/main/starfish/Spot_Analysis_Engine.md" "Details"
+    click Output_Export_Layer href "https://github.com/spacetx/starfish/blob/main/starfish/Output_Export_Layer.md" "Details"
+    click Visualization_Utilities href "https://github.com/spacetx/starfish/blob/main/starfish/Visualization_Utilities.md" "Details"
 ```
 
 [![CodeBoarding](https://img.shields.io/badge/Generated%20by-CodeBoarding-9cf?style=flat-square)](https://github.com/CodeBoarding/GeneratedOnBoardings)[![Demo](https://img.shields.io/badge/Try%20our-Demo-blue?style=flat-square)](https://www.codeboarding.org/demo)[![Contact](https://img.shields.io/badge/Contact%20us%20-%20contact@codeboarding.org-lightgrey?style=flat-square)](mailto:contact@codeboarding.org)

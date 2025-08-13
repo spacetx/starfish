@@ -1,0 +1,351 @@
+{
+  "description": "DocsGPT operates on a clear client-server architecture, with the User Interface (UI) serving as the primary interaction point. User requests are sent to the Backend Core, which acts as the central orchestrator. The Backend Core handles routing, authentication, and core application logic. For long-running operations like document ingestion, tasks are enqueued to the Asynchronous Task Worker.\n\nWhen a user query requires information retrieval, the Backend Core interacts with the Retrieval Module, which in turn queries the Vector Database / Knowledge Base to fetch relevant document chunks. The retrieved context, along with the user's query, is then forwarded to the LLM Integration Layer. This layer provides a unified interface for various Large Language Models. For complex tasks, the LLM Integration Layer can delegate to the Agentic Reasoning & External Tools component, which leverages external tools and APIs to fulfill the request.\n\nThe Data Ingestion & Storage component is responsible for processing and storing documents, including parsing, chunking, and embedding, before they are stored in the Vector Database / Knowledge Base. Finally, the LLM Integration Layer sends the generated answers back to the Backend Core, which then relays them to the User Interface. This architecture ensures a scalable, modular, and efficient flow of data and operations within the DocsGPT system.",
+  "components": [
+    {
+      "name": "User Interface (UI)",
+      "description": "The interactive frontend for users to engage with DocsGPT, encompassing chat functionalities, document management, and application settings.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "frontend.src.App",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/frontend/src/App.tsx",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "frontend.src.conversation.Conversation",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/frontend/src/conversation/Conversation.tsx",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "frontend.src.upload.Upload",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/frontend/src/upload/Upload.tsx",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "frontend.src.settings.index",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/frontend/src/settings/index.tsx",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "extensions.react_widget.src.components.DocsGPTWidget",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/extensions/react-widget/src/components/DocsGPTWidget.tsx",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Backend Core",
+      "description": "Acts as the central entry point for all frontend requests, routing them to appropriate backend services, and managing core application logic, authentication, and configuration.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "application.app",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/app.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.api.answer.routes",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/api/answer/routes",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.api.user.routes",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/api/user/routes.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.auth",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/auth.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.core.settings",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/core/settings.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Data Ingestion & Storage",
+      "description": "Handles the entire lifecycle of data preparation, including loading, parsing, chunking, and embedding various data sources, and manages the persistent storage and retrieval of raw and processed files.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "application.parser.embedding_pipeline",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/parser/embedding_pipeline.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.parser.chunking",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/parser/chunking.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.parser.file",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/parser/file",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.parser.remote",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/parser/remote",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.storage.storage_creator",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/storage/storage_creator.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.storage.s3",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/storage/s3.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.storage.local",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/storage/local.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Vector Database / Knowledge Base",
+      "description": "Serves as the persistent storage for embedded document chunks, enabling efficient semantic search and acting as the system's primary knowledge repository. Supports multiple backend implementations.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "application.vectorstore.base",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/vectorstore/base.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.vectorstore.faiss",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/vectorstore/faiss.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.vectorstore.mongodb",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/vectorstore/mongodb.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.vectorstore.pgvector",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/vectorstore/pgvector.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.vectorstore.vectorstore_creator",
+          "reference_file": null,
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Retrieval Module",
+      "description": "Focuses on fetching the most relevant document chunks from the Vector Database based on user queries, preparing the contextual information required by the LLM.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "application.retriever.classic_rag",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/retriever/classic_rag.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.retriever.retriever_creator",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/retriever/retriever_creator.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "LLM Integration Layer",
+      "description": "Provides a unified abstraction for interacting with diverse Large Language Models (LLMs), managing model selection, message formatting, and handling streaming or batch responses.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "application.llm.base",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/llm/base.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.llm.llm_creator",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/llm/llm_creator.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.llm.openai",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/llm/openai.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.llm.google_ai",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/llm/google_ai.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.llm.anthropic",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/llm/anthropic.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.llm.handlers",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/llm/handlers",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Agentic Reasoning & External Tools",
+      "description": "Empowers the LLM to execute complex, multi-step tasks by breaking them down into sub-problems and leveraging a suite of external tools and APIs (e.g., web search, TTS) to gather information or perform actions.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "application.agents.base",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/agents/base.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.agents.react_agent",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/agents/react_agent.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.agents.agent_creator",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/agents/agent_creator.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.agents.tools",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/agents/tools",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.tts.elevenlabs",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/tts/elevenlabs.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Asynchronous Task Worker",
+      "description": "Manages and executes long-running or computationally intensive tasks asynchronously (e.g., document ingestion, remote data synchronization, agent webhooks), preventing blocking of the main API.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "application.worker",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/worker.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.celery_init",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/celery_init.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "application.celeryconfig",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/celeryconfig.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    }
+  ],
+  "components_relations": [
+    {
+      "relation": "sends User Requests to",
+      "src_name": "User Interface (UI)",
+      "dst_name": "Backend Core"
+    },
+    {
+      "relation": "sends Generated Responses to",
+      "src_name": "Backend Core",
+      "dst_name": "User Interface (UI)"
+    },
+    {
+      "relation": "enqueues Background Tasks to",
+      "src_name": "Backend Core",
+      "dst_name": "Asynchronous Task Worker"
+    },
+    {
+      "relation": "sends User Queries to",
+      "src_name": "Backend Core",
+      "dst_name": "Retrieval Module"
+    },
+    {
+      "relation": "forwards User Queries & Context to",
+      "src_name": "Backend Core",
+      "dst_name": "LLM Integration Layer"
+    },
+    {
+      "relation": "triggers Document Processing & Storage in",
+      "src_name": "Asynchronous Task Worker",
+      "dst_name": "Data Ingestion & Storage"
+    },
+    {
+      "relation": "stores Embedded Chunks in",
+      "src_name": "Data Ingestion & Storage",
+      "dst_name": "Vector Database / Knowledge Base"
+    },
+    {
+      "relation": "queries for Relevant Documents from",
+      "src_name": "Retrieval Module",
+      "dst_name": "Vector Database / Knowledge Base"
+    },
+    {
+      "relation": "requests Context from",
+      "src_name": "LLM Integration Layer",
+      "dst_name": "Retrieval Module"
+    },
+    {
+      "relation": "delegates Tool Execution to",
+      "src_name": "LLM Integration Layer",
+      "dst_name": "Agentic Reasoning & External Tools"
+    },
+    {
+      "relation": "returns Tool Results to",
+      "src_name": "Agentic Reasoning & External Tools",
+      "dst_name": "LLM Integration Layer"
+    },
+    {
+      "relation": "sends Generated Answers to",
+      "src_name": "LLM Integration Layer",
+      "dst_name": "Backend Core"
+    }
+  ]
+}

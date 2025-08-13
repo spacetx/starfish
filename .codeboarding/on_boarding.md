@@ -1,235 +1,144 @@
 ```mermaid
-
 graph LR
-
-    Experiment_Data_Core["Experiment Data Core"]
-
-    Data_Ingestion_Validation["Data Ingestion & Validation"]
-
-    Image_Processing_Management["Image Processing & Management"]
-
-    Spot_Intensity_Analysis["Spot & Intensity Analysis"]
-
-    Mask_Label_Management["Mask & Label Management"]
-
-    Expression_Matrix_Generation["Expression Matrix Generation"]
-
-    Core_Infrastructure["Core Infrastructure"]
-
-    Data_Ingestion_Validation -- "provides data to" --> Experiment_Data_Core
-
-    Experiment_Data_Core -- "provides experimental data to" --> Image_Processing_Management
-
-    Data_Ingestion_Validation -- "loads and validates codebooks for" --> Spot_Intensity_Analysis
-
-    Image_Processing_Management -- "provides image data to" --> Spot_Intensity_Analysis
-
-    Image_Processing_Management -- "outputs masks to" --> Mask_Label_Management
-
-    Mask_Label_Management -- "provides masks to" --> Spot_Intensity_Analysis
-
-    Spot_Intensity_Analysis -- "provides data to" --> Expression_Matrix_Generation
-
-    click Experiment_Data_Core href "https://github.com/spacetx/starfish/blob/master/.codeboarding//Experiment_Data_Core.md" "Details"
-
-    click Image_Processing_Management href "https://github.com/spacetx/starfish/blob/master/.codeboarding//Image_Processing_Management.md" "Details"
-
-    click Spot_Intensity_Analysis href "https://github.com/spacetx/starfish/blob/master/.codeboarding//Spot_Intensity_Analysis.md" "Details"
-
-    click Mask_Label_Management href "https://github.com/spacetx/starfish/blob/master/.codeboarding//Mask_Label_Management.md" "Details"
-
-    click Expression_Matrix_Generation href "https://github.com/spacetx/starfish/blob/master/.codeboarding//Expression_Matrix_Generation.md" "Details"
-
-    click Core_Infrastructure href "https://github.com/spacetx/starfish/blob/master/.codeboarding//Core_Infrastructure.md" "Details"
-
+    User_Interface_UI_["User Interface (UI)"]
+    Backend_Core["Backend Core"]
+    Data_Ingestion_Storage["Data Ingestion & Storage"]
+    Vector_Database_Knowledge_Base["Vector Database / Knowledge Base"]
+    Retrieval_Module["Retrieval Module"]
+    LLM_Integration_Layer["LLM Integration Layer"]
+    Agentic_Reasoning_External_Tools["Agentic Reasoning & External Tools"]
+    Asynchronous_Task_Worker["Asynchronous Task Worker"]
+    User_Interface_UI_ -- "sends User Requests to" --> Backend_Core
+    Backend_Core -- "sends Generated Responses to" --> User_Interface_UI_
+    Backend_Core -- "enqueues Background Tasks to" --> Asynchronous_Task_Worker
+    Backend_Core -- "sends User Queries to" --> Retrieval_Module
+    Backend_Core -- "forwards User Queries & Context to" --> LLM_Integration_Layer
+    Asynchronous_Task_Worker -- "triggers Document Processing & Storage in" --> Data_Ingestion_Storage
+    Data_Ingestion_Storage -- "stores Embedded Chunks in" --> Vector_Database_Knowledge_Base
+    Retrieval_Module -- "queries for Relevant Documents from" --> Vector_Database_Knowledge_Base
+    LLM_Integration_Layer -- "requests Context from" --> Retrieval_Module
+    LLM_Integration_Layer -- "delegates Tool Execution to" --> Agentic_Reasoning_External_Tools
+    Agentic_Reasoning_External_Tools -- "returns Tool Results to" --> LLM_Integration_Layer
+    LLM_Integration_Layer -- "sends Generated Answers to" --> Backend_Core
+    click User_Interface_UI_ href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/DocsGPT/User_Interface_UI_.md" "Details"
+    click Backend_Core href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/DocsGPT/Backend_Core.md" "Details"
+    click Data_Ingestion_Storage href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/DocsGPT/Data_Ingestion_Storage.md" "Details"
+    click Vector_Database_Knowledge_Base href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/DocsGPT/Vector_Database_Knowledge_Base.md" "Details"
+    click Retrieval_Module href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/DocsGPT/Retrieval_Module.md" "Details"
+    click LLM_Integration_Layer href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/DocsGPT/LLM_Integration_Layer.md" "Details"
+    click Agentic_Reasoning_External_Tools href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/DocsGPT/Agentic_Reasoning_External_Tools.md" "Details"
+    click Asynchronous_Task_Worker href "https://github.com/CodeBoarding/GeneratedOnBoardings/blob/main/DocsGPT/Asynchronous_Task_Worker.md" "Details"
 ```
-
-
 
 [![CodeBoarding](https://img.shields.io/badge/Generated%20by-CodeBoarding-9cf?style=flat-square)](https://github.com/CodeBoarding/GeneratedOnBoardings)[![Demo](https://img.shields.io/badge/Try%20our-Demo-blue?style=flat-square)](https://www.codeboarding.org/demo)[![Contact](https://img.shields.io/badge/Contact%20us%20-%20contact@codeboarding.org-lightgrey?style=flat-square)](mailto:contact@codeboarding.org)
 
-
-
 ## Details
 
+DocsGPT operates on a clear client-server architecture, with the User Interface (UI) serving as the primary interaction point. User requests are sent to the Backend Core, which acts as the central orchestrator. The Backend Core handles routing, authentication, and core application logic. For long-running operations like document ingestion, tasks are enqueued to the Asynchronous Task Worker.
 
+When a user query requires information retrieval, the Backend Core interacts with the Retrieval Module, which in turn queries the Vector Database / Knowledge Base to fetch relevant document chunks. The retrieved context, along with the user's query, is then forwarded to the LLM Integration Layer. This layer provides a unified interface for various Large Language Models. For complex tasks, the LLM Integration Layer can delegate to the Agentic Reasoning & External Tools component, which leverages external tools and APIs to fulfill the request.
 
-High-level architecture overview of the `starfish` project, detailing its main components, their responsibilities, associated source code, and inter-component data flow and relationships.
+The Data Ingestion & Storage component is responsible for processing and storing documents, including parsing, chunking, and embedding, before they are stored in the Vector Database / Knowledge Base. Finally, the LLM Integration Layer sends the generated answers back to the Backend Core, which then relays them to the User Interface. This architecture ensures a scalable, modular, and efficient flow of data and operations within the DocsGPT system.
 
-
-
-### Experiment Data Core [[Expand]](./Experiment_Data_Core.md)
-
-The central data structure representing a spatial transcriptomics experiment. It encapsulates fields of view, image stacks, and associated metadata, serving as the primary container for all experimental data.
-
-
-
+### User Interface (UI) [[Expand]](./User_Interface_UI_.md)
+The interactive frontend for users to engage with DocsGPT, encompassing chat functionalities, document management, and application settings.
 
 
 **Related Classes/Methods**:
 
+- <a href="https://github.com/arc53/DocsGPT/blob/main/frontend/src/App.tsx" target="_blank" rel="noopener noreferrer">`frontend.src.App`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/frontend/src/conversation/Conversation.tsx" target="_blank" rel="noopener noreferrer">`frontend.src.conversation.Conversation`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/frontend/src/upload/Upload.tsx" target="_blank" rel="noopener noreferrer">`frontend.src.upload.Upload`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/frontend/src/settings/index.tsx" target="_blank" rel="noopener noreferrer">`frontend.src.settings.index`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/extensions/react-widget/src/components/DocsGPTWidget.tsx" target="_blank" rel="noopener noreferrer">`extensions.react_widget.src.components.DocsGPTWidget`</a>
 
 
-- <a href="https://github.com/spacetx/starfish/starfish/core/experiment/experiment.py#L212-L453" target="_blank" rel="noopener noreferrer">`starfish.core.experiment.experiment.Experiment` (212:453)</a>
-
-- <a href="https://github.com/spacetx/starfish/starfish/core/experiment/experiment.py#L32-L193" target="_blank" rel="noopener noreferrer">`starfish.core.experiment.experiment.FieldOfView` (32:193)</a>
-
-
-
-
-
-### Data Ingestion & Validation
-
-Responsible for loading various spatial transcriptomics datasets into the Experiment Data Core and validating their structure and content against SpaceTx schemas. It also handles the loading and validation of codebooks.
-
-
-
+### Backend Core [[Expand]](./Backend_Core.md)
+Acts as the central entry point for all frontend requests, routing them to appropriate backend services, and managing core application logic, authentication, and configuration.
 
 
 **Related Classes/Methods**:
 
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/app.py" target="_blank" rel="noopener noreferrer">`application.app`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/api/answer/routes" target="_blank" rel="noopener noreferrer">`application.api.answer.routes`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/api/user/routes.py" target="_blank" rel="noopener noreferrer">`application.api.user.routes`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/auth.py" target="_blank" rel="noopener noreferrer">`application.auth`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/core/settings.py" target="_blank" rel="noopener noreferrer">`application.core.settings`</a>
 
 
-- <a href="https://github.com/spacetx/starfish/starfish/data.py#L3-L26" target="_blank" rel="noopener noreferrer">`starfish.data.MERFISH` (3:26)</a>
-
-- <a href="https://github.com/spacetx/starfish/starfish/data.py#L96-L119" target="_blank" rel="noopener noreferrer">`starfish.data.ISS` (96:119)</a>
-
-- <a href="https://github.com/spacetx/starfish/starfish/core/spacetx_format/util.py#L26-L202" target="_blank" rel="noopener noreferrer">`starfish.core.spacetx_format.util.SpaceTxValidator` (26:202)</a>
-
-- <a href="https://github.com/spacetx/starfish/starfish/core/spacetx_format/validate_sptx.py#L17-L75" target="_blank" rel="noopener noreferrer">`starfish.core.spacetx_format.validate_sptx.validate` (17:75)</a>
-
-- <a href="https://github.com/spacetx/starfish/starfish/core/codebook/codebook.py#L28-L804" target="_blank" rel="noopener noreferrer">`starfish.core.codebook.codebook.Codebook` (28:804)</a>
-
-
-
-
-
-### Image Processing & Management [[Expand]](./Image_Processing_Management.md)
-
-Manages multi-dimensional image data, offering functionalities for loading, slicing, and basic transformations. It also applies various image processing techniques such as filtering, segmentation, and registration to image stacks.
-
-
-
+### Data Ingestion & Storage [[Expand]](./Data_Ingestion_Storage.md)
+Handles the entire lifecycle of data preparation, including loading, parsing, chunking, and embedding various data sources, and manages the persistent storage and retrieval of raw and processed files.
 
 
 **Related Classes/Methods**:
 
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/parser/embedding_pipeline.py" target="_blank" rel="noopener noreferrer">`application.parser.embedding_pipeline`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/parser/chunking.py" target="_blank" rel="noopener noreferrer">`application.parser.chunking`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/parser/file" target="_blank" rel="noopener noreferrer">`application.parser.file`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/parser/remote" target="_blank" rel="noopener noreferrer">`application.parser.remote`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/storage/storage_creator.py" target="_blank" rel="noopener noreferrer">`application.storage.storage_creator`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/storage/s3.py" target="_blank" rel="noopener noreferrer">`application.storage.s3`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/storage/local.py" target="_blank" rel="noopener noreferrer">`application.storage.local`</a>
 
 
-- <a href="https://github.com/spacetx/starfish/starfish/core/imagestack/imagestack.py#L67-L1273" target="_blank" rel="noopener noreferrer">`starfish.core.imagestack.imagestack.ImageStack` (67:1273)</a>
-
-- `starfish.core.imagestack.parser` (0:0)
-
-- `starfish.core.image.Filter` (0:0)
-
-- `starfish.core.image.Segment` (0:0)
-
-- `starfish.core.image._registration` (0:0)
-
-
-
-
-
-### Spot & Intensity Analysis [[Expand]](./Spot_Intensity_Analysis.md)
-
-Contains algorithms for identifying potential spots (e.g., RNA molecules), decoding their intensity profiles using a codebook, detecting spots at the pixel level, and assigning decoded spots to specific biological targets or regions. It also manages the measured intensity values for detected spots.
-
-
-
+### Vector Database / Knowledge Base [[Expand]](./Vector_Database_Knowledge_Base.md)
+Serves as the persistent storage for embedded document chunks, enabling efficient semantic search and acting as the system's primary knowledge repository. Supports multiple backend implementations.
 
 
 **Related Classes/Methods**:
 
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/vectorstore/base.py" target="_blank" rel="noopener noreferrer">`application.vectorstore.base`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/vectorstore/faiss.py" target="_blank" rel="noopener noreferrer">`application.vectorstore.faiss`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/vectorstore/mongodb.py" target="_blank" rel="noopener noreferrer">`application.vectorstore.mongodb`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/vectorstore/pgvector.py" target="_blank" rel="noopener noreferrer">`application.vectorstore.pgvector`</a>
 
 
-- `starfish.core.spots.FindSpots` (0:0)
-
-- `starfish.core.spots.DecodeSpots` (0:0)
-
-- `starfish.core.spots.DetectPixels` (0:0)
-
-- `starfish.core.spots.AssignTargets` (0:0)
-
-- <a href="https://github.com/spacetx/starfish/starfish/core/intensity_table/intensity_table.py#L26-L455" target="_blank" rel="noopener noreferrer">`starfish.core.intensity_table.intensity_table.IntensityTable` (26:455)</a>
-
-- <a href="https://github.com/spacetx/starfish/starfish/core/intensity_table/decoded_intensity_table.py#L15-L190" target="_blank" rel="noopener noreferrer">`starfish.core.intensity_table.decoded_intensity_table.DecodedIntensityTable` (15:190)</a>
-
-
-
-
-
-### Mask & Label Management [[Expand]](./Mask_Label_Management.md)
-
-Manages and processes collections of binary masks, labeled images, and segmentation masks, which represent segmented regions or objects. It includes functionalities for binarization, filtering, merging, and general morphological operations.
-
-
-
+### Retrieval Module [[Expand]](./Retrieval_Module.md)
+Focuses on fetching the most relevant document chunks from the Vector Database based on user queries, preparing the contextual information required by the LLM.
 
 
 **Related Classes/Methods**:
 
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/retriever/classic_rag.py" target="_blank" rel="noopener noreferrer">`application.retriever.classic_rag`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/retriever/retriever_creator.py" target="_blank" rel="noopener noreferrer">`application.retriever.retriever_creator`</a>
 
 
-- <a href="https://github.com/spacetx/starfish/starfish/core/morphology/binary_mask/binary_mask.py#L48-L760" target="_blank" rel="noopener noreferrer">`starfish.core.morphology.binary_mask.binary_mask.BinaryMaskCollection` (48:760)</a>
-
-- <a href="https://github.com/spacetx/starfish/starfish/core/morphology/label_image/label_image.py#L28-L167" target="_blank" rel="noopener noreferrer">`starfish.core.morphology.label_image.label_image.LabelImage` (28:167)</a>
-
-- <a href="https://github.com/spacetx/starfish/starfish/core/segmentation_mask/segmentation_mask.py#L15-L48" target="_blank" rel="noopener noreferrer">`starfish.core.segmentation_mask.segmentation_mask.SegmentationMaskCollection` (15:48)</a>
-
-- `starfish.core.morphology.Binarize` (0:0)
-
-- `starfish.core.morphology.Filter` (0:0)
-
-- `starfish.core.morphology.Merge` (0:0)
-
-- `starfish.core.morphology.Segment` (0:0)
-
-
-
-
-
-### Expression Matrix Generation [[Expand]](./Expression_Matrix_Generation.md)
-
-Creates and manages expression matrices, which quantify gene expression levels within defined regions or cells, serving as the final output for downstream biological analysis.
-
-
-
+### LLM Integration Layer [[Expand]](./LLM_Integration_Layer.md)
+Provides a unified abstraction for interacting with diverse Large Language Models (LLMs), managing model selection, message formatting, and handling streaming or batch responses.
 
 
 **Related Classes/Methods**:
 
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/llm/base.py" target="_blank" rel="noopener noreferrer">`application.llm.base`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/llm/llm_creator.py" target="_blank" rel="noopener noreferrer">`application.llm.llm_creator`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/llm/openai.py" target="_blank" rel="noopener noreferrer">`application.llm.openai`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/llm/google_ai.py" target="_blank" rel="noopener noreferrer">`application.llm.google_ai`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/llm/anthropic.py" target="_blank" rel="noopener noreferrer">`application.llm.anthropic`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/llm/handlers" target="_blank" rel="noopener noreferrer">`application.llm.handlers`</a>
 
 
-- <a href="https://github.com/spacetx/starfish/starfish/core/expression_matrix/expression_matrix.py#L6-L93" target="_blank" rel="noopener noreferrer">`starfish.core.expression_matrix.expression_matrix.ExpressionMatrix` (6:93)</a>
-
-
-
-
-
-### Core Infrastructure [[Expand]](./Core_Infrastructure.md)
-
-Provides foundational utility functions for configuration management, logging, versioning, and defines fundamental data structures and constants used throughout the starfish library, ensuring consistent data representation.
-
-
-
+### Agentic Reasoning & External Tools [[Expand]](./Agentic_Reasoning_External_Tools.md)
+Empowers the LLM to execute complex, multi-step tasks by breaking them down into sub-problems and leveraging a suite of external tools and APIs (e.g., web search, TTS) to gather information or perform actions.
 
 
 **Related Classes/Methods**:
 
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/agents/base.py" target="_blank" rel="noopener noreferrer">`application.agents.base`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/agents/react_agent.py" target="_blank" rel="noopener noreferrer">`application.agents.react_agent`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/agents/agent_creator.py" target="_blank" rel="noopener noreferrer">`application.agents.agent_creator`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/agents/tools" target="_blank" rel="noopener noreferrer">`application.agents.tools`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/tts/elevenlabs.py" target="_blank" rel="noopener noreferrer">`application.tts.elevenlabs`</a>
 
 
-- `starfish.core.config.StarfishConfig` (0:0)
-
-- <a href="https://github.com/spacetx/starfish/starfish/core/starfish.py#L46-L50" target="_blank" rel="noopener noreferrer">`starfish.core.util` (46:50)</a>
-
-- <a href="https://github.com/spacetx/starfish/starfish/core/_version.py#L0-L0" target="_blank" rel="noopener noreferrer">`starfish.core._version` (0:0)</a>
-
-- <a href="https://github.com/spacetx/starfish/starfish/core/starfish.py#L0-L0" target="_blank" rel="noopener noreferrer">`starfish.core.types` (0:0)</a>
+### Asynchronous Task Worker [[Expand]](./Asynchronous_Task_Worker.md)
+Manages and executes long-running or computationally intensive tasks asynchronously (e.g., document ingestion, remote data synchronization, agent webhooks), preventing blocking of the main API.
 
 
+**Related Classes/Methods**:
 
-
-
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/worker.py" target="_blank" rel="noopener noreferrer">`application.worker`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/celery_init.py" target="_blank" rel="noopener noreferrer">`application.celery_init`</a>
+- <a href="https://github.com/arc53/DocsGPT/blob/main/application/celeryconfig.py" target="_blank" rel="noopener noreferrer">`application.celeryconfig`</a>
 
 
 

@@ -1,0 +1,56 @@
+{
+  "description": "This subsystem is responsible for managing and executing long-running or computationally intensive tasks asynchronously, such as document ingestion, remote data synchronization, and agent webhooks. It prevents the main API from blocking, ensuring responsiveness and scalability for the RAG system.",
+  "components": [
+    {
+      "name": "Task Orchestrator",
+      "description": "Defines and encapsulates the actual long-running, computationally intensive tasks essential for the RAG system's operation. These tasks offload heavy processing from the main application thread, ensuring responsiveness.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "application.worker",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/worker.py",
+          "reference_start_line": 1,
+          "reference_end_line": 9999
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Celery Application Initializer",
+      "description": "Responsible for bootstrapping and initializing the Celery application instance. It establishes the connection to the message broker and result backend, effectively setting up the runtime environment for asynchronous tasks.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "application.celery_init",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/celery_init.py",
+          "reference_start_line": 1,
+          "reference_end_line": 9999
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "Celery Configuration Manager",
+      "description": "Centralizes and provides all necessary configuration parameters for the Celery application. It ensures that the asynchronous system operates correctly by defining settings such as broker URLs, backend URLs, and task queues.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "application.celeryconfig",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/celeryconfig.py",
+          "reference_start_line": 1,
+          "reference_end_line": 9999
+        }
+      ],
+      "can_expand": false
+    }
+  ],
+  "components_relations": [
+    {
+      "relation": "registers tasks with",
+      "src_name": "Task Orchestrator",
+      "dst_name": "Celery Application Initializer"
+    },
+    {
+      "relation": "provides configuration to",
+      "src_name": "Celery Configuration Manager",
+      "dst_name": "Celery Application Initializer"
+    }
+  ]
+}

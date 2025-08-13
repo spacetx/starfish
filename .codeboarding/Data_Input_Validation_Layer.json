@@ -1,0 +1,79 @@
+{
+  "description": "This subsystem is the initial entry point for all data processing pipelines within starfish, responsible for loading raw experimental data and metadata and ensuring its conformity to the SpaceTx format. It embodies the \"Extract\" and initial \"Validate\" stages of an ETL pipeline, crucial for maintaining data integrity throughout the scientific analysis workflow.",
+  "components": [
+    {
+      "name": "Experiment Data Model",
+      "description": "Represents the in-memory, structured form of the experimental data and metadata after loading. It serves as the canonical data structure that all subsequent processing components operate on.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.experiment.experiment:Experiment",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/experiment/experiment.py",
+          "reference_start_line": 1,
+          "reference_end_line": 1
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Experiment Builder",
+      "description": "Responsible for parsing raw experimental data (e.g., image files, JSON metadata) from various sources and constructing the Experiment Data Model (Experiment object) in memory. It acts as the primary \"Data Loader/Reader.\"",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.experiment.builder.builder",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/experiment/builder/builder.py",
+          "reference_start_line": 1,
+          "reference_end_line": 1
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "SpaceTx Validator",
+      "description": "Provides the main entry point for validating an Experiment Data Model or its constituent parts against the SpaceTx schema. It ensures data integrity and adherence to the defined format, acting as a \"Validation Tool\" and a gatekeeper for data quality.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.spacetx_format.validate_sptx",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spacetx_format/validate_sptx.py",
+          "reference_start_line": 1,
+          "reference_end_line": 1
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Schema Utilities",
+      "description": "Encapsulates the core logic for SpaceTx schema validation, including loading the SpaceTx JSON schemas, performing structural and data type validation, and enforcing constraints. It supports the SpaceTx Validator.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.spacetx_format.util",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spacetx_format/util.py",
+          "reference_start_line": 1,
+          "reference_end_line": 1
+        }
+      ],
+      "can_expand": true
+    }
+  ],
+  "components_relations": [
+    {
+      "relation": "provides data to",
+      "src_name": "Experiment Builder",
+      "dst_name": "SpaceTx Validator"
+    },
+    {
+      "relation": "creates/populates",
+      "src_name": "Experiment Builder",
+      "dst_name": "Experiment Data Model"
+    },
+    {
+      "relation": "validates",
+      "src_name": "SpaceTx Validator",
+      "dst_name": "Experiment Data Model"
+    },
+    {
+      "relation": "delegates validation to",
+      "src_name": "SpaceTx Validator",
+      "dst_name": "Schema Utilities"
+    }
+  ]
+}

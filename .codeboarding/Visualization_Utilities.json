@@ -1,0 +1,165 @@
+{
+  "description": "This subsystem provides a comprehensive set of tools for generating visual representations of intermediate and final analysis results, crucial for quality control, debugging, and interpretation within the `starfish` project. It adheres to the `Data Processing Library / Scientific Toolkit` patterns by offering modular and specialized visualization capabilities.",
+  "components": [
+    {
+      "name": "starfish.core._display.display",
+      "description": "The primary orchestrator for high-level data visualization. It acts as a facade, coordinating various data preparation steps before rendering complex visual outputs. This component is fundamental as it provides the main entry point for users to visualize processed data.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core._display._mask_low_intensity_spots",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/_display.py",
+          "reference_start_line": 70,
+          "reference_end_line": 83
+        },
+        {
+          "qualified_name": "starfish.core._display._spots_to_markers",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/_display.py",
+          "reference_start_line": 86,
+          "reference_end_line": 118
+        },
+        {
+          "qualified_name": "starfish.core._display._max_intensity_table_maintain_dims",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/_display.py",
+          "reference_start_line": 39,
+          "reference_end_line": 67
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "starfish.util.plot.imshow_plane",
+      "description": "A foundational utility for displaying single image planes. It serves as a low-level building block for more complex plotting functions, providing the basic image rendering capability.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.util.plot.overlay_spot_calls",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/util/plot.py",
+          "reference_start_line": 102,
+          "reference_end_line": 165
+        },
+        {
+          "qualified_name": "starfish.util.plot.diagnose_registration",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/util/plot.py",
+          "reference_start_line": 175,
+          "reference_end_line": 223
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "starfish.util.plot.overlay_spot_calls",
+      "description": "A specialized function for visualizing detected spots by overlaying them onto an image. This component is crucial for interpreting spot detection results.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.util.plot.imshow_plane",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/util/plot.py",
+          "reference_start_line": 15,
+          "reference_end_line": 61
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "starfish.util.plot.diagnose_registration",
+      "description": "Provides visual diagnostics to assess the quality of image registration. This component is vital for quality control in image processing pipelines.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.util.plot.imshow_plane",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/util/plot.py",
+          "reference_start_line": 15,
+          "reference_end_line": 61
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "starfish.core._display._mask_low_intensity_spots",
+      "description": "A utility function for pre-processing spot data by filtering out entries below a certain intensity threshold, ensuring cleaner visualizations.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core._display.display",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/_display.py",
+          "reference_start_line": 121,
+          "reference_end_line": 296
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "starfish.core._display._spots_to_markers",
+      "description": "Responsible for transforming raw spot data into a format suitable for graphical markers, often used in scatter plots or overlays. This is a key data preparation step for visualization.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core._display.display",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/_display.py",
+          "reference_start_line": 121,
+          "reference_end_line": 296
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "starfish.core._display._max_intensity_table_maintain_dims",
+      "description": "Handles the preparation of intensity data tables for display, ensuring that dimensional consistency is maintained across different data views. This is critical for accurate and consistent data representation.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core._display.display",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/_display.py",
+          "reference_start_line": 121,
+          "reference_end_line": 296
+        },
+        {
+          "qualified_name": "starfish.core._display._normalize_axes",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/_display.py",
+          "reference_start_line": 25,
+          "reference_end_line": 36
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "starfish.core._display._normalize_axes",
+      "description": "A utility function that normalizes image axes to ensure consistent display scaling, regardless of the original data dimensions. This ensures visual comparability across different datasets.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core._display._max_intensity_table_maintain_dims",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/_display.py",
+          "reference_start_line": 39,
+          "reference_end_line": 67
+        }
+      ],
+      "can_expand": false
+    }
+  ],
+  "components_relations": [
+    {
+      "relation": "calls",
+      "src_name": "starfish.core._display.display",
+      "dst_name": "starfish.core._display._mask_low_intensity_spots"
+    },
+    {
+      "relation": "calls",
+      "src_name": "starfish.core._display.display",
+      "dst_name": "starfish.core._display._spots_to_markers"
+    },
+    {
+      "relation": "calls",
+      "src_name": "starfish.core._display.display",
+      "dst_name": "starfish.core._display._max_intensity_table_maintain_dims"
+    },
+    {
+      "relation": "calls",
+      "src_name": "starfish.util.plot.overlay_spot_calls",
+      "dst_name": "starfish.util.plot.imshow_plane"
+    },
+    {
+      "relation": "calls",
+      "src_name": "starfish.util.plot.diagnose_registration",
+      "dst_name": "starfish.util.plot.imshow_plane"
+    },
+    {
+      "relation": "calls",
+      "src_name": "starfish.core._display._max_intensity_table_maintain_dims",
+      "dst_name": "starfish.core._display._normalize_axes"
+    }
+  ]
+}

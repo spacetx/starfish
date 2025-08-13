@@ -1,0 +1,120 @@
+{
+  "description": "The `Spot Analysis Engine` subsystem is dedicated to identifying, quantifying, and decoding biological spots within processed image data. It encompasses the entire pipeline from initial spot detection and intensity measurement to genetic decoding and target assignment.",
+  "components": [
+    {
+      "name": "Spot Detection Initializer",
+      "description": "Initiates the spot analysis by detecting preliminary spot candidates from raw image data. This component represents the \"Extract\" phase for initial spot identification, preparing the raw image for further processing.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.spots.FindSpots",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spots/FindSpots/",
+          "reference_start_line": 1,
+          "reference_end_line": 1
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Pixel-Level Spot Refiner",
+      "description": "Refines spot detection at a pixel level, grouping adjacent features and contributing to the detailed attributes of spots. It's part of the \"Transform\" phase, enhancing raw detection data for greater accuracy.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.spots.DetectPixels",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spots/DetectPixels/",
+          "reference_start_line": 1,
+          "reference_end_line": 1
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "Intensity Data Manager",
+      "description": "This is the central data structure of the subsystem. It manages and stores all quantitative intensity data for detected spots across various imaging rounds and channels. It serves as the primary data hub, embodying the \"Data-Centric Architecture\" principle.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.intensity_table.intensity_table",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/intensity_table/intensity_table.py",
+          "reference_start_line": 1,
+          "reference_end_line": 1
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Intensity Overlap Resolver",
+      "description": "A supporting component for the `Intensity Data Manager`, responsible for resolving spatial overlaps between intensity regions, ensuring accurate quantification and preventing data redundancy or misinterpretation.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.intensity_table.overlap",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/intensity_table/overlap.py",
+          "reference_start_line": 1,
+          "reference_end_line": 1
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Spot Decoder",
+      "description": "This component is responsible for the genetic decoding process, assigning genetic identities to spots based on their intensity profiles. This is a crucial \"Transform\" stage, converting raw intensity data into meaningful biological information.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.spots.DecodeSpots",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spots/DecodeSpots/",
+          "reference_start_line": 1,
+          "reference_end_line": 1
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Target Assignment Processor",
+      "description": "This component assigns detected and decoded spots to specific biological targets (e.g., cells, nuclei), providing biological context and completing the analysis by associating spots with higher-level entities. This can be seen as the \"Load\" or contextualization phase.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.spots.AssignTargets.label",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spots/AssignTargets/label.py",
+          "reference_start_line": 1,
+          "reference_end_line": 1
+        }
+      ],
+      "can_expand": false
+    }
+  ],
+  "components_relations": [
+    {
+      "relation": "produces data for",
+      "src_name": "Spot Detection Initializer",
+      "dst_name": "Intensity Data Manager"
+    },
+    {
+      "relation": "refines data in",
+      "src_name": "Pixel-Level Spot Refiner",
+      "dst_name": "Intensity Data Manager"
+    },
+    {
+      "relation": "provides data to",
+      "src_name": "Intensity Data Manager",
+      "dst_name": "Spot Decoder"
+    },
+    {
+      "relation": "provides data to",
+      "src_name": "Intensity Data Manager",
+      "dst_name": "Target Assignment Processor"
+    },
+    {
+      "relation": "relies on",
+      "src_name": "Intensity Data Manager",
+      "dst_name": "Intensity Overlap Resolver"
+    },
+    {
+      "relation": "supports",
+      "src_name": "Intensity Overlap Resolver",
+      "dst_name": "Intensity Data Manager"
+    },
+    {
+      "relation": "updates data in",
+      "src_name": "Spot Decoder",
+      "dst_name": "Intensity Data Manager"
+    }
+  ]
+}

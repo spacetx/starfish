@@ -1,37 +1,25 @@
 {
-  "description": "DocsGPT operates on a clear client-server architecture, with the User Interface (UI) serving as the primary interaction point. User requests are sent to the Backend Core, which acts as the central orchestrator. The Backend Core handles routing, authentication, and core application logic. For long-running operations like document ingestion, tasks are enqueued to the Asynchronous Task Worker.\n\nWhen a user query requires information retrieval, the Backend Core interacts with the Retrieval Module, which in turn queries the Vector Database / Knowledge Base to fetch relevant document chunks. The retrieved context, along with the user's query, is then forwarded to the LLM Integration Layer. This layer provides a unified interface for various Large Language Models. For complex tasks, the LLM Integration Layer can delegate to the Agentic Reasoning & External Tools component, which leverages external tools and APIs to fulfill the request.\n\nThe Data Ingestion & Storage component is responsible for processing and storing documents, including parsing, chunking, and embedding, before they are stored in the Vector Database / Knowledge Base. Finally, the LLM Integration Layer sends the generated answers back to the Backend Core, which then relays them to the User Interface. This architecture ensures a scalable, modular, and efficient flow of data and operations within the DocsGPT system.",
+  "description": "The Starfish project is structured around a robust data processing pipeline for spatial transcriptomics. It begins with a `Data Input & Validation Layer` responsible for ingesting and validating raw experimental data against the SpaceTx format. This validated data is then transformed into `Core Data Structures`, primarily multi-dimensional image stacks and codebooks, which serve as the central in-memory representation. The `Image Processing Engine` operates on these image stacks, applying various algorithms for enhancement and transformation. Concurrently, the `Spot Analysis Engine` identifies, quantifies, and decodes biological spots using both the processed images and the codebook. Finally, the `Output & Export Layer` handles the serialization and persistence of all processed data, while `Visualization Utilities` provide crucial tools for inspecting intermediate and final results. This modular design ensures clear separation of concerns and facilitates a streamlined data flow from raw input to interpretable biological insights.",
   "components": [
     {
-      "name": "User Interface (UI)",
-      "description": "The interactive frontend for users to engage with DocsGPT, encompassing chat functionalities, document management, and application settings.",
+      "name": "Data Input & Validation Layer",
+      "description": "Responsible for loading raw experimental data and metadata, ensuring it conforms to the SpaceTx format. It acts as the initial entry point for all data processing pipelines.",
       "referenced_source_code": [
         {
-          "qualified_name": "frontend.src.App",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/frontend/src/App.tsx",
+          "qualified_name": "starfish/core/experiment/experiment.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/experiment/experiment.py",
           "reference_start_line": 0,
           "reference_end_line": 0
         },
         {
-          "qualified_name": "frontend.src.conversation.Conversation",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/frontend/src/conversation/Conversation.tsx",
+          "qualified_name": "starfish/core/experiment/builder/builder.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/experiment/builder/builder.py",
           "reference_start_line": 0,
           "reference_end_line": 0
         },
         {
-          "qualified_name": "frontend.src.upload.Upload",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/frontend/src/upload/Upload.tsx",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "frontend.src.settings.index",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/frontend/src/settings/index.tsx",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "extensions.react_widget.src.components.DocsGPTWidget",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/extensions/react-widget/src/components/DocsGPTWidget.tsx",
+          "qualified_name": "starfish/core/spacetx_format/validate_sptx.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spacetx_format/validate_sptx.py",
           "reference_start_line": 0,
           "reference_end_line": 0
         }
@@ -39,36 +27,24 @@
       "can_expand": true
     },
     {
-      "name": "Backend Core",
-      "description": "Acts as the central entry point for all frontend requests, routing them to appropriate backend services, and managing core application logic, authentication, and configuration.",
+      "name": "Core Data Structures",
+      "description": "Defines and manages the fundamental in-memory data structures used throughout the Starfish pipeline, primarily multi-dimensional image stacks and codebooks.",
       "referenced_source_code": [
         {
-          "qualified_name": "application.app",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/app.py",
+          "qualified_name": "starfish/core/imagestack/imagestack.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/imagestack/imagestack.py",
           "reference_start_line": 0,
           "reference_end_line": 0
         },
         {
-          "qualified_name": "application.api.answer.routes",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/api/answer/routes",
+          "qualified_name": "starfish/core/imagestack/parser/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/imagestack/parser/",
           "reference_start_line": 0,
           "reference_end_line": 0
         },
         {
-          "qualified_name": "application.api.user.routes",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/api/user/routes.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.auth",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/auth.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.core.settings",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/core/settings.py",
+          "qualified_name": "starfish/core/codebook/codebook.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/codebook/codebook.py",
           "reference_start_line": 0,
           "reference_end_line": 0
         }
@@ -76,48 +52,36 @@
       "can_expand": true
     },
     {
-      "name": "Data Ingestion & Storage",
-      "description": "Handles the entire lifecycle of data preparation, including loading, parsing, chunking, and embedding various data sources, and manages the persistent storage and retrieval of raw and processed files.",
+      "name": "Image Processing Engine",
+      "description": "Applies various algorithms to transform and enhance image data, including filtering, registration, and basic segmentation operations.",
       "referenced_source_code": [
         {
-          "qualified_name": "application.parser.embedding_pipeline",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/parser/embedding_pipeline.py",
+          "qualified_name": "starfish/core/image/Filter/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/image/Filter/",
           "reference_start_line": 0,
           "reference_end_line": 0
         },
         {
-          "qualified_name": "application.parser.chunking",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/parser/chunking.py",
+          "qualified_name": "starfish/core/image/_registration/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/image/_registration/",
           "reference_start_line": 0,
           "reference_end_line": 0
         },
         {
-          "qualified_name": "application.parser.file",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/parser/file",
+          "qualified_name": "starfish/core/image/Segment/watershed.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/image/Segment/watershed.py",
           "reference_start_line": 0,
           "reference_end_line": 0
         },
         {
-          "qualified_name": "application.parser.remote",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/parser/remote",
+          "qualified_name": "starfish/core/morphology/Binarize/threshold.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/morphology/Binarize/threshold.py",
           "reference_start_line": 0,
           "reference_end_line": 0
         },
         {
-          "qualified_name": "application.storage.storage_creator",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/storage/storage_creator.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.storage.s3",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/storage/s3.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.storage.local",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/storage/local.py",
+          "qualified_name": "starfish/core/morphology/label_image/label_image.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/morphology/label_image/label_image.py",
           "reference_start_line": 0,
           "reference_end_line": 0
         }
@@ -125,160 +89,80 @@
       "can_expand": true
     },
     {
-      "name": "Vector Database / Knowledge Base",
-      "description": "Serves as the persistent storage for embedded document chunks, enabling efficient semantic search and acting as the system's primary knowledge repository. Supports multiple backend implementations.",
+      "name": "Spot Analysis Engine",
+      "description": "Dedicated to identifying, quantifying, and decoding biological spots within processed image data. It integrates spot detection, intensity measurement, and genetic decoding.",
       "referenced_source_code": [
         {
-          "qualified_name": "application.vectorstore.base",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/vectorstore/base.py",
+          "qualified_name": "starfish/core/spots/FindSpots/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spots/FindSpots/",
           "reference_start_line": 0,
           "reference_end_line": 0
         },
         {
-          "qualified_name": "application.vectorstore.faiss",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/vectorstore/faiss.py",
+          "qualified_name": "starfish/core/intensity_table/intensity_table.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/intensity_table/intensity_table.py",
           "reference_start_line": 0,
           "reference_end_line": 0
         },
         {
-          "qualified_name": "application.vectorstore.mongodb",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/vectorstore/mongodb.py",
+          "qualified_name": "starfish/core/spots/DecodeSpots/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spots/DecodeSpots/",
           "reference_start_line": 0,
           "reference_end_line": 0
         },
         {
-          "qualified_name": "application.vectorstore.pgvector",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/vectorstore/pgvector.py",
+          "qualified_name": "starfish/core/spots/AssignTargets/label.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spots/AssignTargets/label.py",
           "reference_start_line": 0,
           "reference_end_line": 0
         },
         {
-          "qualified_name": "application.vectorstore.vectorstore_creator",
+          "qualified_name": "starfish/core/spots/DetectPixels/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spots/DetectPixels/",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Output & Export Layer",
+      "description": "Handles the serialization and export of all processed data, including transformed image stacks, decoded spot information, and generated masks, into various persistent formats.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish/core/imagestack/imagestack.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/imagestack/imagestack.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/types/_decoded_spots.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/types/_decoded_spots.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/morphology/binary_mask/_io.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/morphology/binary_mask/_io.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Visualization Utilities",
+      "description": "Provides tools and functions for generating visual representations of intermediate and final analysis results, aiding in quality control, debugging, and interpretation.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish/util/plot/",
           "reference_file": null,
           "reference_start_line": 0,
           "reference_end_line": 0
-        }
-      ],
-      "can_expand": true
-    },
-    {
-      "name": "Retrieval Module",
-      "description": "Focuses on fetching the most relevant document chunks from the Vector Database based on user queries, preparing the contextual information required by the LLM.",
-      "referenced_source_code": [
-        {
-          "qualified_name": "application.retriever.classic_rag",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/retriever/classic_rag.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
         },
         {
-          "qualified_name": "application.retriever.retriever_creator",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/retriever/retriever_creator.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        }
-      ],
-      "can_expand": true
-    },
-    {
-      "name": "LLM Integration Layer",
-      "description": "Provides a unified abstraction for interacting with diverse Large Language Models (LLMs), managing model selection, message formatting, and handling streaming or batch responses.",
-      "referenced_source_code": [
-        {
-          "qualified_name": "application.llm.base",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/llm/base.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.llm.llm_creator",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/llm/llm_creator.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.llm.openai",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/llm/openai.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.llm.google_ai",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/llm/google_ai.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.llm.anthropic",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/llm/anthropic.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.llm.handlers",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/llm/handlers",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        }
-      ],
-      "can_expand": true
-    },
-    {
-      "name": "Agentic Reasoning & External Tools",
-      "description": "Empowers the LLM to execute complex, multi-step tasks by breaking them down into sub-problems and leveraging a suite of external tools and APIs (e.g., web search, TTS) to gather information or perform actions.",
-      "referenced_source_code": [
-        {
-          "qualified_name": "application.agents.base",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/agents/base.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.agents.react_agent",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/agents/react_agent.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.agents.agent_creator",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/agents/agent_creator.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.agents.tools",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/agents/tools",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.tts.elevenlabs",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/tts/elevenlabs.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        }
-      ],
-      "can_expand": true
-    },
-    {
-      "name": "Asynchronous Task Worker",
-      "description": "Manages and executes long-running or computationally intensive tasks asynchronously (e.g., document ingestion, remote data synchronization, agent webhooks), preventing blocking of the main API.",
-      "referenced_source_code": [
-        {
-          "qualified_name": "application.worker",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/worker.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.celery_init",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/celery_init.py",
-          "reference_start_line": 0,
-          "reference_end_line": 0
-        },
-        {
-          "qualified_name": "application.celeryconfig",
-          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/DocsGPT/application/celeryconfig.py",
+          "qualified_name": "starfish/core/_display/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/_display.py",
           "reference_start_line": 0,
           "reference_end_line": 0
         }
@@ -288,64 +172,49 @@
   ],
   "components_relations": [
     {
-      "relation": "sends User Requests to",
-      "src_name": "User Interface (UI)",
-      "dst_name": "Backend Core"
+      "relation": "provides SpaceTx Experiment Data to",
+      "src_name": "Data Input & Validation Layer",
+      "dst_name": "Core Data Structures"
     },
     {
-      "relation": "sends Generated Responses to",
-      "src_name": "Backend Core",
-      "dst_name": "User Interface (UI)"
+      "relation": "supplies Image Stacks to",
+      "src_name": "Core Data Structures",
+      "dst_name": "Image Processing Engine"
     },
     {
-      "relation": "enqueues Background Tasks to",
-      "src_name": "Backend Core",
-      "dst_name": "Asynchronous Task Worker"
+      "relation": "provides Codebook to",
+      "src_name": "Core Data Structures",
+      "dst_name": "Spot Analysis Engine"
     },
     {
-      "relation": "sends User Queries to",
-      "src_name": "Backend Core",
-      "dst_name": "Retrieval Module"
+      "relation": "outputs Processed Image Stacks to",
+      "src_name": "Image Processing Engine",
+      "dst_name": "Core Data Structures"
     },
     {
-      "relation": "forwards User Queries & Context to",
-      "src_name": "Backend Core",
-      "dst_name": "LLM Integration Layer"
+      "relation": "feeds Processed Images to",
+      "src_name": "Image Processing Engine",
+      "dst_name": "Spot Analysis Engine"
     },
     {
-      "relation": "triggers Document Processing & Storage in",
-      "src_name": "Asynchronous Task Worker",
-      "dst_name": "Data Ingestion & Storage"
+      "relation": "generates Binary Masks for",
+      "src_name": "Image Processing Engine",
+      "dst_name": "Output & Export Layer"
     },
     {
-      "relation": "stores Embedded Chunks in",
-      "src_name": "Data Ingestion & Storage",
-      "dst_name": "Vector Database / Knowledge Base"
+      "relation": "outputs Decoded Spot Data & Intensity Tables to",
+      "src_name": "Spot Analysis Engine",
+      "dst_name": "Output & Export Layer"
     },
     {
-      "relation": "queries for Relevant Documents from",
-      "src_name": "Retrieval Module",
-      "dst_name": "Vector Database / Knowledge Base"
+      "relation": "provides Data for Visualization to",
+      "src_name": "Core Data Structures",
+      "dst_name": "Visualization Utilities"
     },
     {
-      "relation": "requests Context from",
-      "src_name": "LLM Integration Layer",
-      "dst_name": "Retrieval Module"
-    },
-    {
-      "relation": "delegates Tool Execution to",
-      "src_name": "LLM Integration Layer",
-      "dst_name": "Agentic Reasoning & External Tools"
-    },
-    {
-      "relation": "returns Tool Results to",
-      "src_name": "Agentic Reasoning & External Tools",
-      "dst_name": "LLM Integration Layer"
-    },
-    {
-      "relation": "sends Generated Answers to",
-      "src_name": "LLM Integration Layer",
-      "dst_name": "Backend Core"
+      "relation": "provides Decoded Spots for Plotting to",
+      "src_name": "Spot Analysis Engine",
+      "dst_name": "Visualization Utilities"
     }
   ]
 }

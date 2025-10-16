@@ -6,10 +6,20 @@ import warnings
 from pathlib import Path
 from typing import Any, Dict, IO, Iterator, List, Optional, Union
 
-from jsonschema import Draft4Validator, RefResolver, ValidationError
+from jsonschema import Draft4Validator, ValidationError
 from pkg_resources import resource_filename
 from semantic_version import Version
 from slicedimage import VERSIONS as SLICEDIMAGE_VERSIONS
+
+try:
+    # jsonschema >= 4.18.0
+    from referencing import Registry, Resource
+    from referencing.jsonschema import DRAFT4
+    HAS_REFERENCING = True
+except ImportError:
+    # jsonschema < 4.18.0
+    from jsonschema import RefResolver
+    HAS_REFERENCING = False
 
 from starfish.core.codebook._format import CURRENT_VERSION as CODEBOOK_CURRENT_VERSION
 from starfish.core.experiment.version import CURRENT_VERSION as EXPERIMENT_CURRENT_VERSION
@@ -61,8 +71,45 @@ class SpaceTxValidator:
 
         package_root_path = experiment_schema_path.parent.parent
         base_uri = f"{package_root_path.as_uri()}/"
-        resolver = RefResolver(base_uri, schema)
-        return Draft4Validator(schema, resolver=resolver)
+
+        if HAS_REFERENCING:
+            # jsonschema >= 4.18.0: use Registry
+            
+            # Build registry by discovering all schema files
+            registry_dict = {}
+            
+            # Discover and load all schema files
+            schema_dir = package_root_path / "spacetx_format" / "schema"
+            for schema_file in schema_dir.rglob("*.json"):
+                try:
+                    with open(schema_file, 'r') as f:
+                        schema_content = json.load(f)
+                    
+                    # Add schemas using their relative path from package_root_path
+                    # This allows resolving references like "schema/version.json"
+                    relative_path = schema_file.relative_to(package_root_path)
+                    relative_uri = str(relative_path).replace('\\', '/')  # Ensure forward slashes
+                    registry_dict[base_uri + relative_uri] = Resource.from_contents(
+                        schema_content, default_specification=DRAFT4
+                    )
+                    
+                    # Also add by $id if present for absolute references
+                    if "$id" in schema_content:
+                        registry_dict[schema_content["$id"]] = Resource.from_contents(
+                            schema_content, default_specification=DRAFT4
+                        )
+                except (json.JSONDecodeError, KeyError, OSError):
+                    # Skip files that can't be loaded or don't have proper structure
+                    continue
+            
+            # Create registry from the dictionary
+            registry = Registry().with_resources(registry_dict.items())
+            
+            return Draft4Validator(schema, registry=registry)
+        else:
+            # jsonschema < 4.18.0: use deprecated RefResolver
+            resolver = RefResolver(base_uri, schema)
+            return Draft4Validator(schema, resolver=resolver)
 
     @staticmethod
     def load_json(json_file: str) -> Dict:

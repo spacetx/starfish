@@ -79,7 +79,7 @@ class SpaceTxValidator:
             registry_dict = {}
             
             # Discover and load all schema files
-            schema_dir = package_root_path / "spacetx_format" / "schema"
+            schema_dir = package_root_path / "schema"
             for schema_file in schema_dir.rglob("*.json"):
                 try:
                     with open(schema_file, 'r') as f:

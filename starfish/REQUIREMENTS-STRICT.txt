@@ -33,6 +33,7 @@ python-dateutil==2.9.0.post0
 pytz==2025.2
 PyYAML==6.0.2
 read-roi==1.6.0
+referencing==0.35.0
 regional==1.1.2
 requests==2.32.4
 s3transfer==0.12.0

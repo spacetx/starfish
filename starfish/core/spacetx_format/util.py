@@ -6,7 +6,16 @@ import warnings
 from pathlib import Path
 from typing import Any, Dict, IO, Iterator, List, Optional, Union
 
-from jsonschema import Draft4Validator, RefResolver, ValidationError
+from jsonschema import Draft4Validator, ValidationError
+try:
+    # jsonschema >= 4.18 uses the new referencing library
+    from referencing import Registry, Resource
+    from referencing.jsonschema import DRAFT4
+    _USE_NEW_REFERENCING = True
+except ImportError:
+    # jsonschema < 4.18 uses the old RefResolver
+    from jsonschema import RefResolver
+    _USE_NEW_REFERENCING = False
 from pkg_resources import resource_filename
 from semantic_version import Version
 from slicedimage import VERSIONS as SLICEDIMAGE_VERSIONS
@@ -61,8 +70,75 @@ class SpaceTxValidator:
 
         package_root_path = experiment_schema_path.parent.parent
         base_uri = f"{package_root_path.as_uri()}/"
-        resolver = RefResolver(base_uri, schema)
-        return Draft4Validator(schema, resolver=resolver)
+        
+        if _USE_NEW_REFERENCING:
+            # jsonschema >= 4.18: use the new referencing library
+            # Create a registry and load referenced schemas
+            registry = SpaceTxValidator._build_schema_registry(package_root_path, base_uri)
+            
+            # Remove $id from schema to avoid conflicts with retrieval URI
+            schema_without_id = schema.copy()
+            schema_without_id.pop('$id', None)
+            
+            # Create a resolver anchored at the base_uri
+            resolver = registry.resolver(base_uri)
+            return Draft4Validator(schema_without_id, _resolver=resolver)
+        else:
+            # jsonschema < 4.18: use the deprecated RefResolver
+            from jsonschema import RefResolver
+            resolver = RefResolver(base_uri, schema)
+            return Draft4Validator(schema, resolver=resolver)
+
+    @staticmethod
+    def _build_schema_registry(package_root_path: Path, base_uri: str):
+        """Build a schema registry for the new referencing library (jsonschema >= 4.18)
+        
+        Parameters
+        ----------
+        package_root_path : Path
+            Path to the spacetx_format directory
+        base_uri : str
+            Base URI for schema resolution
+            
+        Returns
+        -------
+        Registry :
+            A registry with all schemas that might be referenced
+        """
+        from referencing import Registry, Resource
+        from referencing.jsonschema import DRAFT4
+        import glob
+        
+        schema_dir = package_root_path / "schema"
+        
+        # Find all JSON schema files
+        schema_files = []
+        for pattern in ["*.json", "*/*.json", "*/*/*.json", "*/*/*/*.json"]:
+            schema_files.extend(glob.glob(str(schema_dir / pattern)))
+        
+        # Build registry by loading all schemas
+        resources = []
+        for schema_file in schema_files:
+            schema_path = Path(schema_file)
+            # Calculate the URI for this schema relative to package_root_path
+            relative_path = schema_path.relative_to(package_root_path)
+            schema_uri = base_uri + str(relative_path).replace('\\', '/')
+            
+            try:
+                with open(schema_path, 'r') as f:
+                    schema_content = json.load(f)
+                
+                # Remove $id to avoid conflicts
+                schema_content_copy = schema_content.copy()
+                schema_content_copy.pop('$id', None)
+                
+                resource = Resource.from_contents(schema_content_copy, default_specification=DRAFT4)
+                resources.append((schema_uri, resource))
+            except Exception:
+                # Skip files that can't be loaded
+                pass
+        
+        return Registry().with_resources(resources)
 
     @staticmethod
     def load_json(json_file: str) -> Dict:

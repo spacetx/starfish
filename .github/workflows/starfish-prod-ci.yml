@@ -1,5 +1,7 @@
 
 name: starfish-prod-ci
+permissions:
+  contents: read
 
 on:
 

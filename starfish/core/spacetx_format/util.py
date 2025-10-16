@@ -74,17 +74,17 @@ class SpaceTxValidator:
 
         if HAS_REFERENCING:
             # jsonschema >= 4.18.0: use Registry
-            
+
             # Build registry by discovering all schema files
             registry_dict = {}
-            
+
             # Discover and load all schema files
             schema_dir = package_root_path / "schema"
             for schema_file in schema_dir.rglob("*.json"):
                 try:
                     with open(schema_file, 'r') as f:
                         schema_content = json.load(f)
-                    
+
                     # Add schemas using their relative path from package_root_path
                     # This allows resolving references like "schema/version.json"
                     relative_path = schema_file.relative_to(package_root_path)
@@ -92,7 +92,7 @@ class SpaceTxValidator:
                     registry_dict[base_uri + relative_uri] = Resource.from_contents(
                         schema_content, default_specification=DRAFT4
                     )
-                    
+
                     # Also add by $id if present for absolute references
                     if "$id" in schema_content:
                         registry_dict[schema_content["$id"]] = Resource.from_contents(
@@ -101,10 +101,10 @@ class SpaceTxValidator:
                 except (json.JSONDecodeError, KeyError, OSError):
                     # Skip files that can't be loaded or don't have proper structure
                     continue
-            
+
             # Create registry from the dictionary
             registry = Registry().with_resources(registry_dict.items())
-            
+
             return Draft4Validator(schema, registry=registry)
         else:
             # jsonschema < 4.18.0: use deprecated RefResolver

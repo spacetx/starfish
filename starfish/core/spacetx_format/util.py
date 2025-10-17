@@ -45,16 +45,18 @@ class SpaceTxValidator:
 
         """
         self._schema: Dict = self.load_json(schema)
-        self._validator: Draft4Validator = self._create_validator(self._schema)
+        self._validator: Draft4Validator = self._create_validator(self._schema, schema)
 
     @staticmethod
-    def _create_validator(schema: Dict) -> Draft4Validator:
+    def _create_validator(schema: Dict, schema_path: str = None) -> Draft4Validator:
         """resolve $ref links in a loaded json schema and return a validator
 
         Parameters
         ----------
         schema : Dict
             loaded json schema
+        schema_path : str, optional
+            file path to the schema (needed for jsonschema >= 4.18)
 
         Returns
         -------
@@ -76,9 +78,22 @@ class SpaceTxValidator:
             # Create a registry and load referenced schemas
             registry = SpaceTxValidator._build_schema_registry(package_root_path)
 
-            # Pass the registry to the validator
-            # The validator will use the schema's $id to resolve $refs
-            return Draft4Validator(schema, registry=registry)
+            # Remove $id from schema to use file-based URI resolution
+            # This matches the behavior of the old RefResolver
+            schema_without_id = schema.copy()
+            schema_without_id.pop('$id', None)
+
+            # If we have the schema path, use it to create a resolver anchored at that URI
+            if schema_path:
+                schema_file_path = Path(schema_path)
+                if schema_file_path.is_absolute():
+                    relative_path = schema_file_path.relative_to(package_root_path)
+                    schema_file_uri = base_uri + str(relative_path).replace('\\', '/')
+                    resolver = registry.resolver(schema_file_uri)
+                    return Draft4Validator(schema_without_id, _resolver=resolver)
+
+            # Fallback: just use registry (refs may not resolve correctly)
+            return Draft4Validator(schema_without_id, registry=registry)
         else:
             # jsonschema < 4.18: use the deprecated RefResolver
             from jsonschema import RefResolver
@@ -104,6 +119,7 @@ class SpaceTxValidator:
         import glob
 
         schema_dir = package_root_path / "schema"
+        base_uri = f"{package_root_path.as_uri()}/"
 
         # Find all JSON schema files
         schema_files = []
@@ -111,6 +127,7 @@ class SpaceTxValidator:
             schema_files.extend(glob.glob(str(schema_dir / pattern)))
 
         # Build registry by loading all schemas
+        # Use file-based URIs (not $id) so refs resolve correctly
         resources = []
         for schema_file in schema_files:
             schema_path = Path(schema_file)
@@ -119,16 +136,15 @@ class SpaceTxValidator:
                 with open(schema_path, 'r') as f:
                     schema_content = json.load(f)
 
-                # Use the schema's $id if present, otherwise use file-based URI
-                if "$id" in schema_content:
-                    schema_uri = schema_content["$id"]
-                else:
-                    # Fallback: calculate the URI based on file path
-                    relative_path = schema_path.relative_to(package_root_path)
-                    base_uri = f"{package_root_path.as_uri()}/"
-                    schema_uri = base_uri + str(relative_path).replace('\\', '/')
+                # Calculate the URI based on file path (like the old RefResolver)
+                relative_path = schema_path.relative_to(package_root_path)
+                schema_uri = base_uri + str(relative_path).replace('\\', '/')
 
-                resource = Resource.from_contents(schema_content, default_specification=DRAFT4)
+                # Remove $id to avoid conflicts with file-based URI resolution
+                schema_content_copy = schema_content.copy()
+                schema_content_copy.pop('$id', None)
+
+                resource = Resource.from_contents(schema_content_copy, default_specification=DRAFT4)
                 resources.append((schema_uri, resource))
             except Exception:
                 # Skip files that can't be loaded

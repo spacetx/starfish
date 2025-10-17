@@ -72,10 +72,12 @@ class ZeroByChannelMagnitude(FilterAlgorithm):
         # compute channel magnitude mask
         for r, dat in channels_per_round:
             # nervous about how xarray orders dimensions so i put this here explicitly ....
+            # After groupby, 'r' dimension is removed, so we transpose the remaining dimensions
             dat = dat.transpose(Axes.CH.value,
                                 Axes.ZPLANE.value,
                                 Axes.Y.value,
-                                Axes.X.value
+                                Axes.X.value,
+                                ...  # Allow for missing dimensions in newer xarray versions
                                 )
             # ... to account for this line taking the norm across axis 0, or the channel axis
             ch_magnitude = np.linalg.norm(dat, ord=2, axis=0)

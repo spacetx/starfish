@@ -20,5 +20,4 @@ sympy
 tqdm
 trackpy
 validators
-# xarray 2023.09 causses a ValueError: new dimensions ('y', 'x') must be a superset of existing dimensions ('dim_0', 'dim_1')
-xarray<2023.09
+xarray

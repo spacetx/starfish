@@ -7,15 +7,8 @@ from pathlib import Path
 from typing import Any, Dict, IO, Iterator, List, Optional, Union
 
 from jsonschema import Draft4Validator, ValidationError
-try:
-    # jsonschema >= 4.18 uses the new referencing library
-    from referencing import Registry, Resource  # noqa: F401
-    from referencing.jsonschema import DRAFT4  # noqa: F401
-    _USE_NEW_REFERENCING = True
-except ImportError:
-    # jsonschema < 4.18 uses the old RefResolver
-    from jsonschema import RefResolver  # noqa: F401
-    _USE_NEW_REFERENCING = False
+from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT4
 from pkg_resources import resource_filename
 from semantic_version import Version
 from slicedimage import VERSIONS as SLICEDIMAGE_VERSIONS
@@ -45,18 +38,16 @@ class SpaceTxValidator:
 
         """
         self._schema: Dict = self.load_json(schema)
-        self._validator: Draft4Validator = self._create_validator(self._schema, schema)
+        self._validator: Draft4Validator = self._create_validator(self._schema)
 
     @staticmethod
-    def _create_validator(schema: Dict, schema_path: str = None) -> Draft4Validator:
+    def _create_validator(schema: Dict) -> Draft4Validator:
         """resolve $ref links in a loaded json schema and return a validator
 
         Parameters
         ----------
         schema : Dict
             loaded json schema
-        schema_path : str, optional
-            file path to the schema (needed for jsonschema >= 4.18)
 
         Returns
         -------
@@ -73,32 +64,20 @@ class SpaceTxValidator:
         package_root_path = experiment_schema_path.parent.parent
         base_uri = f"{package_root_path.as_uri()}/"
 
-        if _USE_NEW_REFERENCING:
-            # jsonschema >= 4.18: use the new referencing library
-            # Create a registry and load referenced schemas
-            registry = SpaceTxValidator._build_schema_registry(package_root_path)
+        # jsonschema >= 4.18: use the new referencing library
+        # Create a registry and load referenced schemas
+        registry = SpaceTxValidator._build_schema_registry(package_root_path)
 
-            # Remove $id from schema to use file-based URI resolution
-            # This matches the behavior of the old RefResolver
-            schema_without_id = schema.copy()
-            schema_without_id.pop('$id', None)
-
-            # If we have the schema path, use it to create a resolver anchored at that URI
-            if schema_path:
-                schema_file_path = Path(schema_path)
-                if schema_file_path.is_absolute():
-                    relative_path = schema_file_path.relative_to(package_root_path)
-                    schema_file_uri = base_uri + str(relative_path).replace('\\', '/')
-                    resolver = registry.resolver(schema_file_uri)
-                    return Draft4Validator(schema_without_id, _resolver=resolver)
-
-            # Fallback: just use registry (refs may not resolve correctly)
-            return Draft4Validator(schema_without_id, registry=registry)
+        # Use the schema's $id if available to anchor the resolver
+        schema_id = schema.get('$id')
+        if schema_id:
+            # Create a resolver anchored at the schema's $id
+            resolver = registry.resolver(schema_id)
         else:
-            # jsonschema < 4.18: use the deprecated RefResolver
-            from jsonschema import RefResolver
-            resolver = RefResolver(base_uri, schema)
-            return Draft4Validator(schema, resolver=resolver)
+            # Fallback to base_uri if no $id
+            resolver = registry.resolver(base_uri)
+
+        return Draft4Validator(schema, _resolver=resolver)
 
     @staticmethod
     def _build_schema_registry(package_root_path: Path):
@@ -114,12 +93,9 @@ class SpaceTxValidator:
         Registry :
             A registry with all schemas that might be referenced
         """
-        from referencing import Registry, Resource
-        from referencing.jsonschema import DRAFT4
         import glob
 
         schema_dir = package_root_path / "schema"
-        base_uri = f"{package_root_path.as_uri()}/"
 
         # Find all JSON schema files
         schema_files = []
@@ -127,7 +103,6 @@ class SpaceTxValidator:
             schema_files.extend(glob.glob(str(schema_dir / pattern)))
 
         # Build registry by loading all schemas
-        # Use file-based URIs (not $id) so refs resolve correctly
         resources = []
         for schema_file in schema_files:
             schema_path = Path(schema_file)
@@ -136,15 +111,16 @@ class SpaceTxValidator:
                 with open(schema_path, 'r') as f:
                     schema_content = json.load(f)
 
-                # Calculate the URI based on file path (like the old RefResolver)
-                relative_path = schema_path.relative_to(package_root_path)
-                schema_uri = base_uri + str(relative_path).replace('\\', '/')
+                # Use the schema's $id if present, otherwise use file-based URI
+                if "$id" in schema_content:
+                    schema_uri = schema_content["$id"]
+                else:
+                    # Fallback: calculate the URI based on file path
+                    relative_path = schema_path.relative_to(package_root_path)
+                    base_uri = f"{package_root_path.as_uri()}/"
+                    schema_uri = base_uri + str(relative_path).replace('\\', '/')
 
-                # Remove $id to avoid conflicts with file-based URI resolution
-                schema_content_copy = schema_content.copy()
-                schema_content_copy.pop('$id', None)
-
-                resource = Resource.from_contents(schema_content_copy, default_specification=DRAFT4)
+                resource = Resource.from_contents(schema_content, default_specification=DRAFT4)
                 resources.append((schema_uri, resource))
             except Exception:
                 # Skip files that can't be loaded

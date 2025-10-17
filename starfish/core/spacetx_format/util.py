@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import Any, Dict, IO, Iterator, List, Optional, Union
 
 from jsonschema import Draft4Validator, ValidationError
+from pkg_resources import resource_filename
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT4
-from pkg_resources import resource_filename
 from semantic_version import Version
 from slicedimage import VERSIONS as SLICEDIMAGE_VERSIONS
 

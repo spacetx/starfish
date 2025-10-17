@@ -76,16 +76,9 @@ class SpaceTxValidator:
             # Create a registry and load referenced schemas
             registry = SpaceTxValidator._build_schema_registry(package_root_path)
 
-            # Use the schema's $id if available to anchor the resolver
-            schema_id = schema.get('$id')
-            if schema_id:
-                # Create a resolver anchored at the schema's $id
-                resolver = registry.resolver(schema_id)
-            else:
-                # Fallback to base_uri if no $id
-                resolver = registry.resolver(base_uri)
-
-            return Draft4Validator(schema, _resolver=resolver)
+            # Pass the registry to the validator
+            # The validator will use the schema's $id to resolve $refs
+            return Draft4Validator(schema, registry=registry)
         else:
             # jsonschema < 4.18: use the deprecated RefResolver
             from jsonschema import RefResolver

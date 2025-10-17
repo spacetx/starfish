@@ -74,15 +74,18 @@ class SpaceTxValidator:
         if _USE_NEW_REFERENCING:
             # jsonschema >= 4.18: use the new referencing library
             # Create a registry and load referenced schemas
-            registry = SpaceTxValidator._build_schema_registry(package_root_path, base_uri)
+            registry = SpaceTxValidator._build_schema_registry(package_root_path)
 
-            # Remove $id from schema to avoid conflicts with retrieval URI
-            schema_without_id = schema.copy()
-            schema_without_id.pop('$id', None)
-
-            # Create a resolver anchored at the base_uri
-            resolver = registry.resolver(base_uri)
-            return Draft4Validator(schema_without_id, _resolver=resolver)
+            # Use the schema's $id if available to anchor the resolver
+            schema_id = schema.get('$id')
+            if schema_id:
+                # Create a resolver anchored at the schema's $id
+                resolver = registry.resolver(schema_id)
+            else:
+                # Fallback to base_uri if no $id
+                resolver = registry.resolver(base_uri)
+            
+            return Draft4Validator(schema, _resolver=resolver)
         else:
             # jsonschema < 4.18: use the deprecated RefResolver
             from jsonschema import RefResolver
@@ -90,15 +93,13 @@ class SpaceTxValidator:
             return Draft4Validator(schema, resolver=resolver)
 
     @staticmethod
-    def _build_schema_registry(package_root_path: Path, base_uri: str):
+    def _build_schema_registry(package_root_path: Path):
         """Build a schema registry for the new referencing library (jsonschema >= 4.18)
 
         Parameters
         ----------
         package_root_path : Path
             Path to the spacetx_format directory
-        base_uri : str
-            Base URI for schema resolution
 
         Returns
         -------
@@ -120,19 +121,21 @@ class SpaceTxValidator:
         resources = []
         for schema_file in schema_files:
             schema_path = Path(schema_file)
-            # Calculate the URI for this schema relative to package_root_path
-            relative_path = schema_path.relative_to(package_root_path)
-            schema_uri = base_uri + str(relative_path).replace('\\', '/')
 
             try:
                 with open(schema_path, 'r') as f:
                     schema_content = json.load(f)
 
-                # Remove $id to avoid conflicts
-                schema_content_copy = schema_content.copy()
-                schema_content_copy.pop('$id', None)
+                # Use the schema's $id if present, otherwise use file-based URI
+                if "$id" in schema_content:
+                    schema_uri = schema_content["$id"]
+                else:
+                    # Fallback: calculate the URI based on file path
+                    relative_path = schema_path.relative_to(package_root_path)
+                    base_uri = f"{package_root_path.as_uri()}/"
+                    schema_uri = base_uri + str(relative_path).replace('\\', '/')
 
-                resource = Resource.from_contents(schema_content_copy, default_specification=DRAFT4)
+                resource = Resource.from_contents(schema_content, default_specification=DRAFT4)
                 resources.append((schema_uri, resource))
             except Exception:
                 # Skip files that can't be loaded

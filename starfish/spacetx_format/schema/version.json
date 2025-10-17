@@ -1,5 +1,5 @@
 {
-  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/version.json",
+  "$id": "https://github.com/spacetx/starfish/spacetx_format/schema/version.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "string",
   "description": "The version number of the schema in major.minor.patch format. (Unversioned schema)",

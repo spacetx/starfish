@@ -1,5 +1,5 @@
 {
-  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/field_of_view/field_of_view.json",
+  "$id": "https://github.com/spacetx/starfish/spacetx_format/schema/field_of_view_0.0.0/field_of_view.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "required": [
@@ -11,10 +11,10 @@
   "additionalProperties": false,
   "properties": {
     "version": {
-      "$ref": "schema/version.json"
+      "$ref": "../version.json"
     },
     "extras": {
-      "$ref": "schema/extras.json"
+      "$ref": "../extras.json"
     },
     "dimensions": {
       "type": "array",
@@ -44,7 +44,9 @@
           "default": 1,
           "minimum": 1,
           "examples": [
-            1, 2, 10
+            1,
+            2,
+            10
           ]
         },
         "c": {
@@ -53,7 +55,9 @@
           "minimum": 1,
           "default": 1,
           "examples": [
-            3, 5, 10
+            3,
+            5,
+            10
           ]
         },
         "z": {
@@ -62,7 +66,9 @@
           "minimum": 1,
           "default": 1,
           "examples": [
-            1, 34, 67
+            1,
+            34,
+            67
           ]
         }
       }
@@ -70,7 +76,7 @@
     "tiles": {
       "minItems": 1,
       "items": {
-        "$ref": "schema/field_of_view_0.1.0/tiles/tiles.json"
+        "$ref": "../field_of_view_0.1.0/tiles/tiles.json"
       }
     },
     "default_tile_shape": {

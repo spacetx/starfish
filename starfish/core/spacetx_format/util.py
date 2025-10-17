@@ -84,7 +84,7 @@ class SpaceTxValidator:
             else:
                 # Fallback to base_uri if no $id
                 resolver = registry.resolver(base_uri)
-            
+
             return Draft4Validator(schema, _resolver=resolver)
         else:
             # jsonschema < 4.18: use the deprecated RefResolver

@@ -75,7 +75,7 @@ class ZeroByChannelMagnitude(FilterAlgorithm):
             # We need to squeeze it out before transposing
             if Axes.ROUND.value in dat.dims and dat.sizes[Axes.ROUND.value] == 1:
                 dat = dat.squeeze(Axes.ROUND.value, drop=True)
-            
+
             # nervous about how xarray orders dimensions so i put this here explicitly ....
             dat = dat.transpose(Axes.CH.value,
                                 Axes.ZPLANE.value,

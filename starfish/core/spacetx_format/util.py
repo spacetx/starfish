@@ -6,8 +6,10 @@ import warnings
 from pathlib import Path
 from typing import Any, Dict, IO, Iterator, List, Optional, Union
 
-from jsonschema import Draft4Validator, RefResolver, ValidationError
+from jsonschema import Draft4Validator, ValidationError
 from pkg_resources import resource_filename
+from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT4
 from semantic_version import Version
 from slicedimage import VERSIONS as SLICEDIMAGE_VERSIONS
 
@@ -61,8 +63,70 @@ class SpaceTxValidator:
 
         package_root_path = experiment_schema_path.parent.parent
         base_uri = f"{package_root_path.as_uri()}/"
-        resolver = RefResolver(base_uri, schema)
-        return Draft4Validator(schema, resolver=resolver)
+
+        # jsonschema >= 4.18: use the new referencing library
+        # Create a registry and load referenced schemas
+        registry = SpaceTxValidator._build_schema_registry(package_root_path)
+
+        # Use the schema's $id if available to anchor the resolver
+        schema_id = schema.get('$id')
+        if schema_id:
+            # Create a resolver anchored at the schema's $id
+            resolver = registry.resolver(schema_id)
+        else:
+            # Fallback to base_uri if no $id
+            resolver = registry.resolver(base_uri)
+
+        return Draft4Validator(schema, _resolver=resolver)
+
+    @staticmethod
+    def _build_schema_registry(package_root_path: Path):
+        """Build a schema registry for the new referencing library (jsonschema >= 4.18)
+
+        Parameters
+        ----------
+        package_root_path : Path
+            Path to the spacetx_format directory
+
+        Returns
+        -------
+        Registry :
+            A registry with all schemas that might be referenced
+        """
+        import glob
+
+        schema_dir = package_root_path / "schema"
+
+        # Find all JSON schema files
+        schema_files = []
+        for pattern in ["*.json", "*/*.json", "*/*/*.json", "*/*/*/*.json"]:
+            schema_files.extend(glob.glob(str(schema_dir / pattern)))
+
+        # Build registry by loading all schemas
+        resources = []
+        for schema_file in schema_files:
+            schema_path = Path(schema_file)
+
+            try:
+                with open(schema_path, 'r') as f:
+                    schema_content = json.load(f)
+
+                # Use the schema's $id if present, otherwise use file-based URI
+                if "$id" in schema_content:
+                    schema_uri = schema_content["$id"]
+                else:
+                    # Fallback: calculate the URI based on file path
+                    relative_path = schema_path.relative_to(package_root_path)
+                    base_uri = f"{package_root_path.as_uri()}/"
+                    schema_uri = base_uri + str(relative_path).replace('\\', '/')
+
+                resource = Resource.from_contents(schema_content, default_specification=DRAFT4)
+                resources.append((schema_uri, resource))
+            except Exception:
+                # Skip files that can't be loaded
+                pass
+
+        return Registry().with_resources(resources)
 
     @staticmethod
     def load_json(json_file: str) -> Dict:

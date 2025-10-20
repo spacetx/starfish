@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/field_of_view/tiles/coordinates.json",
+  "$id": "https://github.com/spacetx/starfish/spacetx_format/schema/field_of_view_0.1.0/tiles/coordinates.json",
   "type": "object",
   "description": "Physical coordinates of the tile measured in micrometers.",
   "required": [
@@ -17,9 +17,18 @@
         "type": "number",
         "description": "Minimum and maximum physical x coordinate of this tile in micrometers.",
         "examples": [
-          [0, 0.00009999999747378752],
-          [4, 6],
-          [-5, -3.2]
+          [
+            0,
+            9.999999747378752e-05
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            -5,
+            -3.2
+          ]
         ]
       }
     },
@@ -31,9 +40,18 @@
         "type": "number",
         "description": "Minimum and maximum physical y coordinate of this tile in micrometers.",
         "examples": [
-          [0, 0.00009999999747378752],
-          [4, 6],
-          [-5, -3.2]
+          [
+            0,
+            9.999999747378752e-05
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            -5,
+            -3.2
+          ]
         ]
       }
     },
@@ -47,20 +65,29 @@
             "type": "number",
             "description": "Minimum and maximum physical z coordinate of this tile in micrometers.",
             "examples": [
-              [0, 0.00009999999747378752],
-              [4, 6],
-              [-5, -3.2]
+              [
+                0,
+                9.999999747378752e-05
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                -5,
+                -3.2
+              ]
             ]
           }
         },
         {
           "type": "number",
           "description": "Physical z coordinate of this tile in micrometers.",
-            "examples": [
-              0,
-              4,
-              -5
-            ]
+          "examples": [
+            0,
+            4,
+            -5
+          ]
         }
       ]
     }

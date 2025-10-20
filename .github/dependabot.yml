@@ -6,8 +6,8 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      # Check for updates to GitHub Actions every week
-      interval: "weekly"
+      # Check for updates to GitHub Actions once a month
+      interval: "monthly"
 
   # Monitor main application requirements
   - package-ecosystem: "pip"

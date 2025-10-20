@@ -719,7 +719,11 @@ class Codebook(xr.DataArray):
 
         # decode the intensities
         for i in np.arange(codes.shape[0]):  # type: ignore
-            targets[np.where(a[i] == b)[0]] = codes[Features.TARGET][i]
+            # use the Codebook coordinates directly and coerce to a Python string/scalar to
+            # avoid triggering any __array__ machinery on the coordinate object.
+            target_cell = self.coords[Features.TARGET][i].values
+            target_name = str(target_cell)
+            targets[np.where(a[i] == b)[0]] = target_name
 
         # a code passes filters if it decodes successfully
         passes_filters = ~pd.isnull(targets)

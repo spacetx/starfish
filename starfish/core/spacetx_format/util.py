@@ -2,10 +2,10 @@ import copy
 import json
 import sys
 import warnings
+from importlib.resources import files
 from pathlib import Path
 from typing import Any, Dict, IO, Iterator, List, Optional, Union
 
-from importlib.resources import files
 from jsonschema import Draft4Validator, ValidationError
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT4

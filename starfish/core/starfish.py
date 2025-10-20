@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import subprocess
 import sys
-
 from importlib.resources import files
 
 from starfish.core.spacetx_format.cli import validate as validate_cli

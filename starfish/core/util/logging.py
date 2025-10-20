@@ -1,9 +1,8 @@
 import json
 import platform
 from functools import lru_cache
-from typing import List, Mapping
-
 from importlib.metadata import version
+from typing import List, Mapping
 
 # these are import statements and not from xxx import yyy to break a circular dependency.
 import starfish.core

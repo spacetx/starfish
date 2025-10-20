@@ -1,5 +1,6 @@
-import pytest
 from importlib.resources import files
+
+import pytest
 
 from starfish.core.codebook._format import CURRENT_VERSION, DocumentKeys
 from .util import LatestCodebookValidator

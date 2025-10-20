@@ -1,5 +1,6 @@
-import pytest
 from importlib.resources import files
+
+import pytest
 from slicedimage import VERSIONS
 
 from .util import SpaceTxValidator

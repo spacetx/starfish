@@ -1,7 +1,7 @@
 import warnings
+from importlib.resources import files
 
 import pytest
-from importlib.resources import files
 
 from .util import LatestExperimentValidator
 from .validate_sptx import validate

@@ -6,7 +6,7 @@
 
 ## Technology Stack
 
-- **Language**: Python (3.9 - 3.12)
+- **Language**: Python (3.9+)
 - **Build System**: setuptools with versioneer for version management
 - **Package Management**: pip with pinned requirements
 - **Testing**: pytest with pytest-cov for coverage
@@ -16,10 +16,10 @@
 
 ## Key Dependencies
 
-- numpy (< 2.0)
-- scikit-image (> 0.22)
+- numpy
+- scikit-image
 - scikit-learn
-- xarray (< 2023.09)
+- xarray
 - h5py
 - matplotlib
 - click (for CLI)

@@ -46,8 +46,9 @@ jedi==0.19.2
 jeepney==0.9.0
 Jinja2==3.1.6
 jmespath==1.0.1
-joblib==1.5.0
-jsonschema==4.23.0
+joblib==1.5.2
+jsonschema==4.25.1
+jsonschema-specifications==2025.9.1
 jupyter_client==8.6.3
 jupyter_core==5.8.1
 jupyterlab_pygments==0.3.0
@@ -75,7 +76,7 @@ nbencdec==0.0.10
 nbformat==5.10.4
 networkx==3.2.1
 nh3==0.3.1
-numpy==1.26.4
+numpy==2.0.2
 numpydoc==1.6.0
 packaging==25.0
 pandas==2.3.3
@@ -94,7 +95,6 @@ pyflakes==3.4.0
 Pygments==2.19.2
 pyparsing==3.2.5
 pyproject_hooks==1.2.0
-pyrsistent==0.20.0
 pytest==8.4.2
 pytest-cov==7.0.0
 pytest-xdist==3.8.0
@@ -105,11 +105,13 @@ pyzmq==27.1.0
 read-roi==1.6.0
 readme_renderer==43.0
 recommonmark==0.7.1
+referencing==0.36.2
 regional==1.1.2
 requests==2.32.5
 requests-toolbelt==1.0.0
 rfc3986==2.0.0
 rich==14.2.0
+rpds-py==0.27.1
 s3transfer==0.14.0
 scikit-image==0.24.0
 scikit-learn==1.6.1

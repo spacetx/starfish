@@ -22,7 +22,7 @@ package_name = 'starfish'
 
 def _get_absolute_schema_path(schema_name: str) -> str:
     """turn the name of the schema into an absolute path by joining it to <package_root>/schema."""
-    return str(files("starfish").joinpath("spacetx_format", "schema", schema_name))
+    return str(files("starfish").joinpath("spacetx_format").joinpath("schema").joinpath(schema_name))
 
 
 class SpaceTxValidator:

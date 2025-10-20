@@ -1,5 +1,5 @@
 import pytest
-from pkg_resources import resource_filename
+from importlib.resources import files
 
 from .util import LatestManifestValidator
 
@@ -8,8 +8,8 @@ validator = LatestManifestValidator()
 
 
 def test_fov_manifest():
-    fov_manifest_example_path = resource_filename(
-        package_name, "spacetx_format/examples/fov_manifest/fov_manifest.json")
+    fov_manifest_example_path = str(files(package_name).joinpath(
+        "spacetx_format/examples/fov_manifest/fov_manifest.json"))
     assert validator.validate_file(fov_manifest_example_path)
 
 

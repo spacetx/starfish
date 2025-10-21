@@ -115,6 +115,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.REQUIREMENTS.txt-env/
+.REQUIREMENTS-*.txt.in-env/
 
 # Spyder project settings
 .spyderproject

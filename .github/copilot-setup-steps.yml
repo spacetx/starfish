@@ -1,6 +1,35 @@
 # GitHub Copilot Coding Agent Environment Setup
+#
 # This file configures the development environment for the Copilot coding agent
 # to enable running tests, linting, and building the starfish package.
+#
+# Configuration Overview:
+# -----------------------
+# - System dependencies for building scientific Python packages (HDF5, ATLAS, etc.)
+# - Python version management via pyenv (supports Python 3.9-3.13)
+# - Network access to PyPI and related package repositories
+# - Automatic installation of development dependencies
+#
+# Supported Make Commands:
+# ------------------------
+# - make install-dev         : Install development dependencies
+# - make lint                : Run flake8 linting
+# - make mypy                : Run mypy type checking
+# - make fast-test           : Run fast test suite
+# - make -B pin-all-requirements : Regenerate pinned requirements
+#
+# Python Version Management:
+# --------------------------
+# This setup installs Python versions based on pyproject.toml (3.9-3.12 supported)
+# plus Python 3.13 (next version not yet fully supported).
+# The agent can switch versions using: pyenv global X.Y
+#
+# Additional Requirements:
+# ------------------------
+# Development dependencies include:
+# - requirements/REQUIREMENTS-CI.txt (main CI dependencies)
+# - requirements/REQUIREMENTS-NAPARI-CI.txt (napari-related dependencies)
+# - requirements/REQUIREMENTS-JUPYTER.txt (Jupyter notebook support)
 
 steps:
   # Install system dependencies required for scientific Python packages
@@ -32,17 +61,18 @@ steps:
       echo 'eval "$(pyenv init -)"' >> ~/.bashrc
       source ~/.bashrc
 
-  # Install multiple Python versions
+  # Install multiple Python versions (using latest from each major.minor version)
+  # Based on pyproject.toml requires-python: ">= 3.9, <3.13" plus 3.13 as next version
   - run: |
       export PYENV_ROOT="$HOME/.pyenv"
       export PATH="$PYENV_ROOT/bin:$PATH"
       eval "$(pyenv init -)"
-      pyenv install 3.9.21
-      pyenv install 3.10.16
-      pyenv install 3.11.11
-      pyenv install 3.12.8
-      pyenv install 3.13.1
-      pyenv global 3.9.21
+      pyenv install 3.9
+      pyenv install 3.10
+      pyenv install 3.11
+      pyenv install 3.12
+      pyenv install 3.13
+      pyenv global 3.9
 
   # Upgrade pip and install build tools
   - run: |
@@ -52,14 +82,17 @@ steps:
       python -m pip install --upgrade pip==25.1 setuptools wheel
 
   # Install starfish development dependencies
+  # Includes CI, napari, and Jupyter requirements
   - run: |
       export PYENV_ROOT="$HOME/.pyenv"
       export PATH="$PYENV_ROOT/bin:$PATH"
       eval "$(pyenv init -)"
       make install-dev
+      pip install -r requirements/REQUIREMENTS-NAPARI-CI.txt || true
+      pip install -r requirements/REQUIREMENTS-JUPYTER.txt || true
 
 # Network access configuration
-# Allow access to PyPI and related package repositories
+# Allow access to PyPI, GitHub, and documentation sites
 network:
   allowed-domains:
     - pypi.org
@@ -74,3 +107,5 @@ network:
     - www.python.org
     - npmjs.org
     - registry.npmjs.org
+    - spacetx-starfish.readthedocs.io
+    - readthedocs.org

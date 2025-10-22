@@ -38,25 +38,6 @@ Reporting bugs
   starfish version, slicedimage version, and python version. Whenever possible, please also include a brief,
   self-contained code example that demonstrates the problem, including a full traceback.
 
-GitHub Copilot Agent Setup
---------------------------
-
-This repository is configured to work with GitHub Copilot coding agent. The setup is defined in
-`.github/copilot-setup-steps.yml` and includes:
-
-- System dependencies for building scientific Python packages (HDF5, ATLAS, etc.)
-- Python version management via pyenv (supports Python 3.9-3.13)
-- Network access to PyPI and related package repositories
-- Automatic installation of development dependencies
-
-The following make commands are supported in the Copilot environment:
-
-- `make install-dev` - Install development dependencies
-- `make lint` - Run flake8 linting
-- `make mypy` - Run mypy type checking
-- `make fast-test` - Run fast test suite
-- `make -B pin-all-requirements` - Regenerate pinned requirements
-
 Code contributions
 ------------------
 

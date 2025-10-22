@@ -1,4 +1,4 @@
-# Set update schedule for GitHub Actions
+# Set update schedule for GitHub Actions and pip dependencies
 
 version: 2
 updates:
@@ -6,5 +6,23 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      # Check for updates to GitHub Actions every week
-      interval: "weekly"
+      # Check for updates to GitHub Actions once a month
+      interval: "monthly"
+
+  # Monitor main application requirements
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      # Check for updates to pip dependencies once a month
+      interval: "monthly"
+    # Allow up to 10 open pull requests for pip dependencies
+    open-pull-requests-limit: 10
+
+  # Monitor CI requirements
+  - package-ecosystem: "pip"
+    directory: "/requirements"
+    schedule:
+      # Check for updates to CI dependencies once a month
+      interval: "monthly"
+    # Allow up to 10 open pull requests for CI dependencies
+    open-pull-requests-limit: 10

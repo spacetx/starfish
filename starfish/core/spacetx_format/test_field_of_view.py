@@ -1,14 +1,15 @@
+from importlib.resources import files
+
 import pytest
-from pkg_resources import resource_filename
 
 from .util import LatestFOVValidator
 
 package_name = "starfish"
 validator = LatestFOVValidator()
-example = resource_filename(
-    package_name, "spacetx_format/examples/field_of_view/field_of_view.json")
-too_large = resource_filename(
-    package_name, "spacetx_format/examples/field_of_view/too_large.json")
+example = str(files(package_name).joinpath(
+    "spacetx_format/examples/field_of_view/field_of_view.json"))
+too_large = str(files(package_name).joinpath(
+    "spacetx_format/examples/field_of_view/too_large.json"))
 
 
 def test_field_of_view():
@@ -16,14 +17,14 @@ def test_field_of_view():
 
 
 def test_dartfish_example_field_of_view():
-    dartfish_example_path = resource_filename(
-        package_name, "spacetx_format/examples/field_of_view/dartfish_field_of_view.json")
+    dartfish_example_path = str(files(package_name).joinpath(
+        "spacetx_format/examples/field_of_view/dartfish_field_of_view.json"))
     assert validator.validate_file(dartfish_example_path)
 
 
 def test_dartfish_nuclei_example_field_of_view():
-    dartfish_example_path = resource_filename(
-        package_name, "spacetx_format/examples/field_of_view/dartfish_nuclei.json")
+    dartfish_example_path = str(files(package_name).joinpath(
+        "spacetx_format/examples/field_of_view/dartfish_nuclei.json"))
     assert validator.validate_file(dartfish_example_path)
 
 

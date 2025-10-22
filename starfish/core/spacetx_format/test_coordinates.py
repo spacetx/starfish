@@ -1,5 +1,6 @@
+from importlib.resources import files
+
 import pytest
-from pkg_resources import resource_filename
 from slicedimage import VERSIONS
 
 from .util import SpaceTxValidator
@@ -8,12 +9,12 @@ from .util import SpaceTxValidator
 package_name = "starfish"
 current_version = VERSIONS[-1].VERSION
 
-coordinates_path = resource_filename(
-    package_name, f"spacetx_format/schema/field_of_view_{current_version}/tiles/coordinates.json")
+coordinates_path = str(files(package_name).joinpath(
+    f"spacetx_format/schema/field_of_view_{current_version}/tiles/coordinates.json"))
 validator = SpaceTxValidator(coordinates_path)
 
-example = resource_filename(
-    package_name, "spacetx_format/examples/field_of_view/coordinates_%s.json")
+example = str(files(package_name).joinpath(
+    "spacetx_format/examples/field_of_view/coordinates_%s.json"))
 
 
 @pytest.mark.parametrize("name", (

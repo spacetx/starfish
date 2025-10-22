@@ -1,0 +1,143 @@
+# GitHub Copilot Coding Agent Environment Setup
+#
+# This file configures the development environment for the Copilot coding agent
+# to enable running ALL make targets from the Makefile, including tests, linting,
+# documentation generation, Docker builds, napari tests, and notebook examples.
+#
+# Configuration Overview:
+# -----------------------
+# - System dependencies for building scientific Python packages (HDF5, ATLAS, etc.)
+# - Python version management via pyenv (supports Python 3.9-3.13)
+# - Network access to PyPI and related package repositories
+# - Automatic installation of development dependencies
+# - Docker support (pre-installed in environment)
+#
+# Supported Make Targets (ALL):
+# -----------------------------
+# Unit Testing & Quality:
+#   - make all / make fast    : Run lint, mypy, fast-test, and docs-html
+#   - make test               : Run full test suite (including napari tests)
+#   - make fast-test          : Run fast test suite (exclude slow and napari tests)
+#   - make slow-test          : Run slow tests only
+#   - make napari-test        : Run napari-specific tests (requires GUI libraries)
+#   - make lint               : Run flake8 linting on all modules
+#   - make mypy               : Run mypy type checking
+#
+# Documentation:
+#   - make docs-html          : Generate HTML documentation with Sphinx
+#   - make docs-clean         : Clean documentation build artifacts
+#   - make docs-*             : Any docs target (passes to docs/Makefile)
+#
+# Requirements Management:
+#   - make pin-requirements   : Pin requirements with minimal changes
+#   - make pin-all-requirements : Regenerate all pinned requirements
+#   - make check-requirements : Verify requirements files are unchanged
+#
+# Integration & Examples:
+#   - make run-notebooks      : Run all Jupyter notebook examples
+#   - make test-examples      : Run example pipelines
+#   - make slow               : Run fast + notebooks + examples + docker
+#
+# Docker:
+#   - make docker             : Build Docker image and run smoke test
+#
+# Installation:
+#   - make install-dev        : Install development dependencies
+#   - make install-src        : Install from source
+#   - make install-released-notebooks-support : Install for released version
+#
+# Deployment (for maintainers):
+#   - make release-*          : Various release preparation and upload targets
+#   - make clean              : Clean build artifacts
+#
+# Python Version Management:
+# --------------------------
+# This setup installs Python versions based on pyproject.toml (3.9-3.12 supported)
+# plus Python 3.13 (next version not yet fully supported).
+# The agent can switch versions using: pyenv global X.Y
+#
+# Additional Requirements:
+# ------------------------
+# Development dependencies include:
+# - requirements/REQUIREMENTS-CI.txt (main CI dependencies, includes Sphinx)
+# - requirements/REQUIREMENTS-NAPARI-CI.txt (napari-related dependencies)
+# - requirements/REQUIREMENTS-JUPYTER.txt (Jupyter notebook support)
+
+steps:
+  # Install system dependencies required for scientific Python packages
+  - run: |
+      sudo apt-get update
+      sudo apt-get install -y \
+        build-essential \
+        libhdf5-dev \
+        libatlas-base-dev \
+        gfortran \
+        pkg-config \
+        curl \
+        git \
+        make \
+        libbz2-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        libssl-dev \
+        libffi-dev \
+        liblzma-dev \
+        zlib1g-dev
+
+  # Set up pyenv for Python version management
+  # This allows switching between Python 3.9, 3.10, 3.11, 3.12, and 3.13
+  - run: |
+      curl https://pyenv.run | bash
+      echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+      echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+      echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+      source ~/.bashrc
+
+  # Install multiple Python versions (using latest from each major.minor version)
+  # Based on pyproject.toml requires-python: ">= 3.9, <3.13" plus 3.13 as next version
+  - run: |
+      export PYENV_ROOT="$HOME/.pyenv"
+      export PATH="$PYENV_ROOT/bin:$PATH"
+      eval "$(pyenv init -)"
+      pyenv install 3.9
+      pyenv install 3.10
+      pyenv install 3.11
+      pyenv install 3.12
+      pyenv install 3.13
+      pyenv global 3.9
+
+  # Upgrade pip and install build tools
+  - run: |
+      export PYENV_ROOT="$HOME/.pyenv"
+      export PATH="$PYENV_ROOT/bin:$PATH"
+      eval "$(pyenv init -)"
+      python -m pip install --upgrade pip==25.1 setuptools wheel
+
+  # Install starfish development dependencies
+  # Includes CI, napari, and Jupyter requirements
+  - run: |
+      export PYENV_ROOT="$HOME/.pyenv"
+      export PATH="$PYENV_ROOT/bin:$PATH"
+      eval "$(pyenv init -)"
+      make install-dev
+      pip install -r requirements/REQUIREMENTS-NAPARI-CI.txt || true
+      pip install -r requirements/REQUIREMENTS-JUPYTER.txt || true
+
+# Network access configuration
+# Allow access to PyPI, GitHub, and documentation sites
+network:
+  allowed-domains:
+    - pypi.org
+    - files.pythonhosted.org
+    - pythonhosted.org
+    - github.com
+    - raw.githubusercontent.com
+    - objects.githubusercontent.com
+    - codeload.github.com
+    - pyenv.run
+    - python.org
+    - www.python.org
+    - npmjs.org
+    - registry.npmjs.org
+    - spacetx-starfish.readthedocs.io
+    - readthedocs.org

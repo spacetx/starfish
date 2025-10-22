@@ -31,9 +31,14 @@ def test_synthetic_spot_creation_produces_an_imagestack_with_correct_spot_locati
         np.array([g.shape[0]])
     ])
     for i in np.arange(len(breaks) - 1):
-        x[breaks[i]: breaks[i + 1]] = true_intensities.coords[Axes.X.value][i]
-        y[breaks[i]: breaks[i + 1]] = true_intensities.coords[Axes.Y.value][i]
-        z[breaks[i]: breaks[i + 1]] = true_intensities.coords[Axes.ZPLANE.value][i]
+        # extract plain Python ints from the xarray coordinates to avoid calling __array__
+        x_coord = int(true_intensities.coords[Axes.X.value][i].values)
+        y_coord = int(true_intensities.coords[Axes.Y.value][i].values)
+        z_coord = int(true_intensities.coords[Axes.ZPLANE.value][i].values)
+
+        x[breaks[i]: breaks[i + 1]] = x_coord
+        y[breaks[i]: breaks[i + 1]] = y_coord
+        z[breaks[i]: breaks[i + 1]] = z_coord
 
     # only 8 values should be set, since there are only 8 locations across the tensor
     assert np.sum(image.xarray != 0) == 8

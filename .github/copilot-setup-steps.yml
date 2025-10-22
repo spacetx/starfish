@@ -1,0 +1,76 @@
+# GitHub Copilot Coding Agent Environment Setup
+# This file configures the development environment for the Copilot coding agent
+# to enable running tests, linting, and building the starfish package.
+
+steps:
+  # Install system dependencies required for scientific Python packages
+  - run: |
+      sudo apt-get update
+      sudo apt-get install -y \
+        build-essential \
+        libhdf5-dev \
+        libatlas-base-dev \
+        gfortran \
+        pkg-config \
+        curl \
+        git \
+        make \
+        libbz2-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        libssl-dev \
+        libffi-dev \
+        liblzma-dev \
+        zlib1g-dev
+
+  # Set up pyenv for Python version management
+  # This allows switching between Python 3.9, 3.10, 3.11, 3.12, and 3.13
+  - run: |
+      curl https://pyenv.run | bash
+      echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+      echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+      echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+      source ~/.bashrc
+
+  # Install multiple Python versions
+  - run: |
+      export PYENV_ROOT="$HOME/.pyenv"
+      export PATH="$PYENV_ROOT/bin:$PATH"
+      eval "$(pyenv init -)"
+      pyenv install 3.9.21
+      pyenv install 3.10.16
+      pyenv install 3.11.11
+      pyenv install 3.12.8
+      pyenv install 3.13.1
+      pyenv global 3.9.21
+
+  # Upgrade pip and install build tools
+  - run: |
+      export PYENV_ROOT="$HOME/.pyenv"
+      export PATH="$PYENV_ROOT/bin:$PATH"
+      eval "$(pyenv init -)"
+      python -m pip install --upgrade pip==25.1 setuptools wheel
+
+  # Install starfish development dependencies
+  - run: |
+      export PYENV_ROOT="$HOME/.pyenv"
+      export PATH="$PYENV_ROOT/bin:$PATH"
+      eval "$(pyenv init -)"
+      make install-dev
+
+# Network access configuration
+# Allow access to PyPI and related package repositories
+network:
+  allowed-domains:
+    - pypi.org
+    - files.pythonhosted.org
+    - pythonhosted.org
+    - github.com
+    - raw.githubusercontent.com
+    - objects.githubusercontent.com
+    - codeload.github.com
+    - pyenv.run
+    - python.org
+    - www.python.org
+    - npmjs.org
+    - registry.npmjs.org

@@ -244,7 +244,15 @@ class ImageStack:
 
     def __repr__(self):
         shape = ', '.join(f'{k}: {v}' for k, v in self._data.sizes.items())
-        return f"<starfish.ImageStack ({shape})>"
+        prefix = ""
+        if hasattr(self, 'aligned_group') and hasattr(self, '_coordinate_group_count'):
+            one_based = self.aligned_group + 1
+            prefix = f"(aligned_group={one_based}/{self._coordinate_group_count}) "
+        return f"<starfish.ImageStack {prefix}({shape})>"
+
+    def _repr_html_(self):
+        """Provide HTML representation for Jupyter notebooks."""
+        return f"<pre>{self.__repr__()}</pre>"
 
     @classmethod
     def from_tileset(

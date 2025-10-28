@@ -50,7 +50,7 @@ jsonpointer==3.0.0
 jsonschema==4.23.0
 jupyter==1.1.1
 jupyter-console==6.6.3
-jupyter-events==0.6.3
+jupyter-events==0.12.0
 jupyter-lsp==2.3.0
 jupyter_client==8.6.3
 jupyter_core==5.8.1

@@ -21,8 +21,8 @@ import matplotlib.pyplot as plt
 
 # equivalent to %gui qt and %matplotlib inline
 ipython = get_ipython()
-ipython.magic("gui qt5")
-ipython.magic("matplotlib inline")
+ipython.run_line_magic("gui", "qt5")
+ipython.run_line_magic("matplotlib", "inline")
 
 matplotlib.rcParams["figure.dpi"] = 150
 

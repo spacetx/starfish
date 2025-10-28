@@ -10,7 +10,7 @@ m2r2>=0.3.3
 # pinning mistune for m2r2
 mistune==0.8.4
 # temporarily limiting mypy as 1.11 introduces errors
-mypy<1.11
+mypy<1.19
 numpydoc
 nbencdec>=0.0.5
 pycodestyle

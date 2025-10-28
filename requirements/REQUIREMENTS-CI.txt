@@ -113,7 +113,7 @@ rich==14.2.0
 s3transfer==0.14.0
 scikit-image==0.24.0
 scikit-learn==1.6.1
-scipy==1.13.1
+scipy==1.16.3
 seaborn==0.13.2
 SecretStorage==3.3.3
 semantic-version==2.10.0

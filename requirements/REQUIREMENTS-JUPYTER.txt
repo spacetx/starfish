@@ -107,7 +107,7 @@ rfc3986-validator==0.1.1
 s3transfer==0.14.0
 scikit-image==0.24.0
 scikit-learn==1.6.1
-scipy==1.13.1
+scipy==1.16.3
 seaborn==0.13.2
 semantic-version==2.10.0
 Send2Trash==1.8.3

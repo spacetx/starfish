@@ -16,7 +16,7 @@ imageio==2.37.0
 importlib_resources==6.5.2
 jmespath==1.0.1
 joblib==1.5.0
-jsonschema==4.23.0
+jsonschema==4.25.1
 kiwisolver==1.4.7
 lazy_loader==0.4
 looseversion==1.3.0

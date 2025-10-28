@@ -47,7 +47,7 @@ jmespath==1.0.1
 joblib==1.5.2
 json5==0.12.1
 jsonpointer==3.0.0
-jsonschema==4.23.0
+jsonschema==4.25.1
 jupyter==1.1.1
 jupyter-console==6.6.3
 jupyter-events==0.6.3

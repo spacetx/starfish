@@ -65,7 +65,7 @@ jobs:
 
       - name: Run tests
         run: |
-          make fast-test docs-html
+          make fast-test
 
   starfish-slow:
     name: Python-${{ matrix.python-version }}-${{ matrix.os }}
@@ -143,6 +143,31 @@ jobs:
   #       run: |
   #         python -c "import vispy; print(vispy.sys_info())"
   #         make napari-test
+
+  sphinx-docs:
+    name: Documentation generation with Sphinx
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Python 3.9
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.9'
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Generate HTML docs
+        run: |
+          make docs-html
 
   docker-smoketest:
     name: Docker Smoketest

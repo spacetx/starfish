@@ -1,13 +1,12 @@
 import copy
 import json
-import posixpath
 import sys
 import warnings
+from importlib.resources import files
 from pathlib import Path
 from typing import Any, Dict, IO, Iterator, List, Optional, Union
 
 from jsonschema import Draft4Validator, ValidationError
-from pkg_resources import resource_filename
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT4
 from semantic_version import Version
@@ -23,7 +22,9 @@ package_name = 'starfish'
 
 def _get_absolute_schema_path(schema_name: str) -> str:
     """turn the name of the schema into an absolute path by joining it to <package_root>/schema."""
-    return resource_filename("starfish", posixpath.join("spacetx_format", "schema", schema_name))
+    return str(
+        files("starfish").joinpath("spacetx_format").joinpath("schema").joinpath(schema_name)
+    )
 
 
 class SpaceTxValidator:
@@ -58,8 +59,8 @@ class SpaceTxValidator:
 
         # Note: we are using 5.0.0 here as the first known file. It does *not* need to
         # be upgraded with each version bump since only the dirname is used.
-        experiment_schema_path = Path(resource_filename(
-            package_name, "spacetx_format/schema/experiment_5.0.0.json"))
+        experiment_schema_path = Path(str(files(package_name).joinpath(
+            "spacetx_format/schema/experiment_5.0.0.json")))
 
         package_root_path = experiment_schema_path.parent.parent
         base_uri = f"{package_root_path.as_uri()}/"
@@ -185,11 +186,11 @@ class SpaceTxValidator:
         --------
         Validate a codebook file::
 
-            >>> from pkg_resources import resource_filename
+            >>> from importlib.resources import files
             >>> from starfish.core.spacetx_format.util import SpaceTxValidator
-            >>> schema_path = resource_filename(
-                    "starfish", "spacetx_format/schema/codebook/codebook.json")
-            >>> validator = SpaceTxValidator(schema_path)
+            >>> schema_path = files("starfish").joinpath(
+            ...     "spacetx_format/schema/codebook/codebook.json")
+            >>> validator = SpaceTxValidator(str(schema_path))
             >>> if not validator.validate_file(your_codebook_filename):
             >>>     raise Exception("invalid")
 
@@ -221,10 +222,10 @@ class SpaceTxValidator:
         --------
         Validate an experiment json string ::
 
-            >>> from pkg_resources import resource_filename
+            >>> from importlib.resources import files
             >>> from starfish.core.spacetx_format.util import SpaceTxValidator
-            >>> schema_path = resource_filename("starfish", "spacetx_format/schema/experiment.json")
-            >>> validator = SpaceTxValidator(schema_path)
+            >>> schema_path = files("starfish").joinpath("spacetx_format/schema/experiment.json")
+            >>> validator = SpaceTxValidator(str(schema_path))
             >>> if not validator.validate_object(your_experiment_object):
             >>>     raise Exception("invalid")
 

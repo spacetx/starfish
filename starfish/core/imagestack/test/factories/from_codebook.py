@@ -27,7 +27,9 @@ def create_imagestack_from_codebook(
     imagestack_data = np.zeros(data_shape, dtype=np.float32)
 
     for ((z, y, x), f) in zip(spot_coordinates, range(codebook.sizes[Features.TARGET])):
-        imagestack_data[:, :, z, y, x] = codebook[f].transpose(Axes.ROUND.value, Axes.CH.value)
+        # get a plain numpy array from the xarray DataArray to avoid calling its __array__
+        arr = codebook[f].transpose(Axes.ROUND.value, Axes.CH.value).values
+        imagestack_data[:, :, z, y, x] = arr
 
     # blur with a small non-isotropic kernel
     imagestack_data = gaussian_filter(imagestack_data, sigma=(0, 0, 0.7, 1.5, 1.5))

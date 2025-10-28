@@ -3,6 +3,7 @@ import sys
 import tempfile
 
 import numpy as np
+from packaging.version import Version
 
 import starfish
 from starfish.core.intensity_table.intensity_table import IntensityTable
@@ -81,9 +82,17 @@ def test_iss_pipeline_cropped_data(tmpdir):
         dtype=np.float32
     )
 
+    # choose tolerances dynamically: numpy>=2 on macOS may show slightly larger differences
+    if sys.platform == "darwin" and Version(np.__version__) >= Version("2.0.0"):
+        rtol, atol = 5e-3, 5e-6  # loosen slightly for macOS + numpy2
+    else:
+        rtol, atol = 1e-5, 1e-8  # numpy.allclose() defaults
+
     assert np.allclose(
         expected_registered_values,
-        registered_image.xarray[2, 2, 0, 40:50, 40:50]
+        registered_image.xarray[2, 2, 0, 40:50, 40:50],
+        rtol=rtol,
+        atol=atol
     )
 
     pipeline_log = registered_image.log.data

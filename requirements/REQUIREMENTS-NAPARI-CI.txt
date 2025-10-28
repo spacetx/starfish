@@ -74,7 +74,7 @@ networkx==3.2.1
 npe2==0.7.9
 numba==0.60.0
 numcodecs==0.12.1
-numpy==1.26.4
+numpy==2.0.2
 numpydoc==1.6.0
 packaging==25.0
 pandas==2.3.3

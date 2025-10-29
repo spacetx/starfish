@@ -103,7 +103,7 @@ pytz==2025.2
 PyYAML==6.0.3
 pyzmq==27.1.0
 read-roi==1.6.0
-readme_renderer==43.0
+readme_renderer==44.0
 recommonmark==0.7.1
 referencing==0.36.2
 regional==1.1.2

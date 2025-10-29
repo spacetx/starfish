@@ -83,8 +83,9 @@ def image(
     # Add colorbar if requested
     if bar:
         cb = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-        rng = abs(cb.vmax - cb.vmin) * 0.05
-        cb.set_ticks([np.around(cb.vmin + rng, 1), np.around(cb.vmax - rng, 1)])
+        vmin, vmax = cb.mappable.get_clim()
+        rng = abs(vmax - vmin) * 0.05
+        cb.set_ticks([float(np.around(vmin + rng, 1)), float(np.around(vmax - rng, 1))])
         cb.outline.set_visible(False)
 
     ax.axis('off')

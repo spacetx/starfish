@@ -73,7 +73,7 @@ napari-svg==0.2.1
 nest-asyncio==1.6.0
 networkx==3.2.1
 npe2==0.7.9
-numba==0.60.0
+numba==0.62.1
 numcodecs==0.12.1
 numpy==2.0.2
 numpydoc==1.6.0

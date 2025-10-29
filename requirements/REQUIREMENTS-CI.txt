@@ -120,7 +120,6 @@ seaborn==0.13.2
 SecretStorage==3.3.3
 semantic-version==2.10.0
 setuptools==80.9.0
-showit==1.1.4
 six==1.17.0
 slicedimage==4.1.1
 snowballstemmer==3.0.1

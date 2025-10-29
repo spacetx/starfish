@@ -229,7 +229,7 @@ masks = segmenter.run(
 )
 
 import matplotlib.pyplot as plt
-from showit import image
+from starfish.util.plot import image
 
 plt.figure(figsize=(10, 10))
 

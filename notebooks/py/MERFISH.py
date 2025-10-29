@@ -25,7 +25,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from showit import image as show_image
+from starfish.util.plot import image as show_image
 
 from starfish import display
 from starfish import data, FieldOfView

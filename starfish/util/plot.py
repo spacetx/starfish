@@ -12,6 +12,86 @@ from starfish.core.intensity_table.intensity_table import IntensityTable
 from starfish.core.types import Axes, Features
 
 
+def image(
+    img: np.ndarray,
+    cmap: str = 'gray',
+    bar: bool = False,
+    nans: bool = True,
+    clim: Optional[tuple] = None,
+    size: int = 7,
+    ax=None
+):
+    """
+    Display an image using matplotlib.
+    
+    This function provides a simple interface for displaying images with optional
+    colorbar, NaN handling, and color scaling. It is designed to replace the
+    showit.image function.
+
+    Parameters
+    ----------
+    img : np.ndarray
+        The image to display. Can be 2D (grayscale) or 3D (RGB).
+    cmap : str, optional
+        Colormap to use for grayscale images. Default is 'gray'.
+    bar : bool, optional
+        Whether to append a colorbar. Default is False.
+    nans : bool, optional
+        Whether to replace NaNs with 0s. Default is True.
+    clim : tuple, optional
+        Limits for scaling image as (vmin, vmax). Default is None.
+    size : int, optional
+        Size of the figure if ax is not provided. Default is 7.
+    ax : matplotlib axis, optional
+        An existing axis to plot into. If None, creates a new figure.
+
+    Returns
+    -------
+    im : matplotlib.image.AxesImage
+        The image object created by imshow.
+    """
+    img = np.asarray(img)
+    
+    # Replace NaNs if requested and image is not boolean
+    if nans and img.dtype != bool:
+        img = np.nan_to_num(img)
+    
+    # Create figure and axis if not provided
+    if ax is None:
+        plt.figure(figsize=(size, size))
+        ax = plt.gca()
+    
+    # Handle RGB images (3D arrays with 3 channels)
+    if img.ndim == 3:
+        if bar:
+            raise ValueError("Cannot show meaningful colorbar for RGB images")
+        if img.shape[2] != 3:
+            raise ValueError(
+                f"Size of third dimension must be 3 for RGB images, got {img.shape[2]}"
+            )
+        mn = img.min()
+        mx = img.max()
+        if mn < 0.0 or mx > 1.0:
+            raise ValueError(
+                f"Values must be between 0.0 and 1.0 for RGB images, got range ({mn}, {mx})"
+            )
+        im = ax.imshow(img, interpolation='nearest', clim=clim)
+    else:
+        # Grayscale image
+        im = ax.imshow(img, cmap=cmap, interpolation='nearest', clim=clim)
+    
+    # Add colorbar if requested
+    if bar:
+        cb = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+        rng = abs(cb.vmax - cb.vmin) * 0.05
+        cb.set_ticks([np.around(cb.vmin + rng, 1), np.around(cb.vmax - rng, 1)])
+        cb.outline.set_visible(False)
+    
+    ax.axis('off')
+    
+    return im
+
+
 def imshow_plane(
     image_stack: ImageStack,
     sel: Optional[Mapping[Axes, Union[int, tuple]]] = None,

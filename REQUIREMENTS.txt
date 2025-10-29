@@ -12,7 +12,6 @@ scikit-image>0.22
 scikit-learn
 seaborn
 semantic_version
-showit
 slicedimage
 sympy
 tqdm

@@ -53,7 +53,7 @@ jsonschema==4.25.1
 jsonschema-specifications==2025.9.1
 jupyter_client==8.6.3
 jupyter_core==5.8.1
-kiwisolver==1.4.7
+kiwisolver==1.4.9
 lazy_loader==0.4
 llvmlite==0.43.0
 locket==1.0.0

@@ -23,7 +23,7 @@ def image(
 ):
     """
     Display an image using matplotlib.
-    
+
     This function provides a simple interface for displaying images with optional
     colorbar, NaN handling, and color scaling. It is designed to replace the
     showit.image function.
@@ -51,16 +51,16 @@ def image(
         The image object created by imshow.
     """
     img = np.asarray(img)
-    
+
     # Replace NaNs if requested and image is not boolean
     if nans and img.dtype != bool:
         img = np.nan_to_num(img)
-    
+
     # Create figure and axis if not provided
     if ax is None:
         plt.figure(figsize=(size, size))
         ax = plt.gca()
-    
+
     # Handle RGB images (3D arrays with 3 channels)
     if img.ndim == 3:
         if bar:
@@ -79,16 +79,16 @@ def image(
     else:
         # Grayscale image
         im = ax.imshow(img, cmap=cmap, interpolation='nearest', clim=clim)
-    
+
     # Add colorbar if requested
     if bar:
         cb = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
         rng = abs(cb.vmax - cb.vmin) * 0.05
         cb.set_ticks([np.around(cb.vmin + rng, 1), np.around(cb.vmax - rng, 1)])
         cb.outline.set_visible(False)
-    
+
     ax.axis('off')
-    
+
     return im
 
 

@@ -270,7 +270,7 @@ class _WatershedSegmenter:
     def show(self, figsize=(10, 10)):
         import matplotlib.pyplot as plt
         from starfish.util.plot import image
-        
+
         plt.figure(figsize=figsize)
 
         plt.subplot(321)

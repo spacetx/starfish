@@ -45,7 +45,7 @@ Output is a :py:class:`.BinaryMaskCollection`:
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from showit import image
+from starfish.util.plot import image
 from starfish.image import ApplyTransform, LearnTransform, Filter
 from starfish.types import Axes, Levels
 from starfish import data, FieldOfView

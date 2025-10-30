@@ -1,7 +1,6 @@
 from typing import Optional, Tuple
 
 import numpy as np
-from showit import image
 from skimage.morphology import disk
 
 from starfish.core.imagestack.imagestack import ImageStack
@@ -270,6 +269,8 @@ class _WatershedSegmenter:
 
     def show(self, figsize=(10, 10)):
         import matplotlib.pyplot as plt
+        from starfish.util.plot import image
+
         plt.figure(figsize=figsize)
 
         plt.subplot(321)

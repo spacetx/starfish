@@ -86,7 +86,7 @@ def image(
         vmin, vmax = cb.mappable.get_clim()
         rng = abs(vmax - vmin) * 0.05
         cb.set_ticks([float(np.around(vmin + rng, 1)), float(np.around(vmax - rng, 1))])
-        cb.outline.set_visible(False)  # type: ignore[attr-defined]
+        cb.outline.set_visible(False)  # type: ignore[operator]
 
     ax.axis('off')
 

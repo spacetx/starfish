@@ -37,7 +37,7 @@ idna==3.11
 imageio==2.37.0
 importlib_metadata==8.7.0
 importlib_resources==6.5.2
-ipykernel==6.30.1
+ipykernel==6.31.0
 ipython==8.18.1
 ipywidgets==8.1.7
 isoduration==20.11.0

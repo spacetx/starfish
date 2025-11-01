@@ -42,7 +42,7 @@ importlib_metadata==8.7.0
 importlib_resources==6.5.2
 in-n-out==0.2.1
 iniconfig==2.1.0
-ipykernel==6.30.1
+ipykernel==6.31.0
 ipython==8.18.1
 ipython_pygments_lexers==1.1.1
 jedi==0.19.2

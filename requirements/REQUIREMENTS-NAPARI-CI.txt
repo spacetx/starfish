@@ -89,7 +89,7 @@ platformdirs==4.4.0
 pluggy==1.6.0
 pooch==1.8.2
 prompt_toolkit==3.0.52
-psutil==7.1.1
+psutil==7.1.2
 psygnal==0.14.2
 ptyprocess==0.7.0
 pure_eval==0.2.3

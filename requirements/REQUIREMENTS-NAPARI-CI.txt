@@ -151,7 +151,7 @@ tqdm==4.67.1
 trackpy==0.7
 traitlets==5.14.3
 triangle==20250106
-typer==0.19.2
+typer==0.20.0
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 tzdata==2025.2

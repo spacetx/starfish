@@ -1,7 +1,7 @@
 # You should not edit this file directly.  Instead, you should edit one of the following files (requirements/REQUIREMENTS-NAPARI-CI.txt.in) and run make requirements/REQUIREMENTS-NAPARI-CI.txt
 alabaster==0.7.16
 annotated-types==0.7.0
-app-model==0.3.2
+app-model==0.5.0
 appdirs==1.4.4
 asciitree==0.3.3
 asttokens==3.0.0

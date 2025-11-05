@@ -62,7 +62,7 @@ m2r2==0.3.4
 markdown-it-py==3.0.0
 MarkupSafe==3.0.3
 matplotlib==3.9.4
-matplotlib-inline==0.1.7
+matplotlib-inline==0.2.1
 mccabe==0.7.0
 mdurl==0.1.2
 mistune==0.8.4

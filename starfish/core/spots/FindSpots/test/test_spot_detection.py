@@ -168,7 +168,7 @@ def test_blob_detector_2d_spot_coordinates():
     """
     # Create a simple 2D image with a bright spot
     image_2d = np.zeros((100, 100), dtype=np.float32)
-    # Add a bright spot at y=50, x=60
+    # Add a 5x5 bright spot centered approximately at y=50, x=60
     image_2d[48:53, 58:63] = 1.0
 
     # Create an ImageStack with this 2D image
@@ -199,7 +199,7 @@ def test_blob_detector_2d_spot_coordinates():
     assert not np.all(y_values == 0), "All y-values are 0, indicating the bug is present"
 
     # Check that the detected spot is near the expected location (y=50, x=60)
-    # Use tighter tolerance (5 pixels) for more robust testing
+    # Allow 5 pixel tolerance since blob detection may not find exact center
     assert np.any(np.abs(y_values - 50) < 5), f"No spot found near y=50, found: {y_values}"
 
     x_values = spots.data['x'].values

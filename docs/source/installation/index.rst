@@ -66,6 +66,12 @@ install napari:
 
     $ pip install starfish[napari]
 
+To install starfish with both napari and jupyter for interactive visualization and notebook support:
+
+.. code-block:: bash
+
+    $ pip install starfish[jupyter]
+
 Interactive visualization with napari also requires using Qt (e.g. by running the magic command
 `%gui qt` in a jupyter notebook or ipython shell.)
 

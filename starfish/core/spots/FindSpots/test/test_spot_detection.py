@@ -172,6 +172,7 @@ def test_blob_detector_2d_spot_coordinates():
     image_2d[48:53, 58:63] = 1.0
 
     # Create an ImageStack with this 2D image
+    # Shape: (rounds=1, channels=1, z-planes=1, height=100, width=100)
     image_stack = ImageStack.from_numpy(image_2d.reshape(1, 1, 1, 100, 100))
 
     # Create a BlobDetector with is_volume=False
@@ -198,11 +199,11 @@ def test_blob_detector_2d_spot_coordinates():
     assert not np.all(y_values == 0), "All y-values are 0, indicating the bug is present"
 
     # Check that the detected spot is near the expected location (y=50, x=60)
-    # Allow some tolerance since blob detection may not be exact
-    assert np.any(np.abs(y_values - 50) < 10), f"No spot found near y=50, found: {y_values}"
+    # Use tighter tolerance (5 pixels) for more robust testing
+    assert np.any(np.abs(y_values - 50) < 5), f"No spot found near y=50, found: {y_values}"
 
     x_values = spots.data['x'].values
-    assert np.any(np.abs(x_values - 60) < 10), f"No spot found near x=60, found: {x_values}"
+    assert np.any(np.abs(x_values - 60) < 5), f"No spot found near x=60, found: {x_values}"
 
     # Check that radius is reasonable (not extremely large like 843.0 in the bug)
     radius_values = spots.data['radius'].values

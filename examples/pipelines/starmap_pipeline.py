@@ -11,14 +11,21 @@ authors.
 
 """
 
-from IPython import get_ipython
+import sys
+from pprint import pprint
+
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+from IPython import get_ipython
 
-# equivalent to %gui qt and %matplotlib inline
+# equivalent to using in a notebook cell: %matplotlib inline
 ipython = get_ipython()
-ipython.run_line_magic("gui", "qt5")
-ipython.run_line_magic("matplotlib", "inline")
+if ipython is not None:
+    if 'ipykernel' in sys.modules:  # running in Jupyter
+        ipython.run_line_magic('matplotlib', 'inline')
+    else:  # terminal IPython
+        ipython.run_line_magic('matplotlib', 'qt5')
 
 matplotlib.rcParams["figure.dpi"] = 150
 
@@ -35,8 +42,7 @@ matplotlib.rcParams["figure.dpi"] = 150
 # shifts, that can indicate systematic registration offsets which should be corrected prior to
 # analysis.
 
-from starfish import data
-from starfish import FieldOfView
+from starfish import data, FieldOfView
 from starfish.util.plot import imshow_plane
 from starfish.types import Axes
 
@@ -87,8 +93,6 @@ transforms = ltt.run(projection)
 
 ###################################################################################################
 # How big are the identified translations?
-
-from pprint import pprint
 
 pprint([t[2].translation for t in transforms.transforms])
 
@@ -178,7 +182,6 @@ f = plot_scaling_result(stack, scaled)
 # decoding. Because of the stringency built into the STARmap codebook, it is OK to be relatively
 # permissive with the spot finding parameters for this assay.
 
-import numpy as np
 from starfish.spots import FindSpots
 
 bd = FindSpots.BlobDetector(

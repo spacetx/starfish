@@ -13,14 +13,24 @@ from raw images into spatially resolved gene expression profiles
 
 """
 
-from IPython import get_ipython
+import sys
+
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from IPython import get_ipython
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Rectangle
 
-# equivalent to %gui qt and %matplotlib inline
+# equivalent to using in a notebook cell: %matplotlib inline
 ipython = get_ipython()
-ipython.run_line_magic("gui", "qt5")
-ipython.run_line_magic("matplotlib", "inline")
+if ipython is not None:
+    if 'ipykernel' in sys.modules:  # running in Jupyter
+        ipython.run_line_magic('matplotlib', 'inline')
+    else:  # terminal IPython
+        ipython.run_line_magic('matplotlib', 'qt5')
 
 matplotlib.rcParams["figure.dpi"] = 150
 
@@ -32,8 +42,7 @@ matplotlib.rcParams["figure.dpi"] = 150
 # field of view correspond to 18 images from 6 imaging rounds (r) 3 color channels (c) and 1 z-plane
 # (z). Each image is 988x988 (y,x)
 
-from starfish import data
-from starfish import FieldOfView
+from starfish import data, FieldOfView
 
 experiment = data.DARTFISH(use_test_data=False)
 imgs = experiment.fov().get_image(FieldOfView.PRIMARY_IMAGES)
@@ -96,8 +105,6 @@ filtered_imgs = z_filt.run(norm_imgs)
 # we look at a distribution of pixel vector barcode magnitudes to determine the minimum magnitude
 # threshold at which we will attempt to decode the pixel vector.
 
-import numpy as np
-import seaborn as sns
 from starfish import IntensityTable
 
 
@@ -146,7 +153,7 @@ psd = DetectPixels.PixelSpotDecoder(
 initial_spot_intensities, results = psd.run(filtered_imgs)
 
 spots_df = initial_spot_intensities.to_features_dataframe()
-spots_df['area'] = np.pi*spots_df['radius']**2
+spots_df['area'] = np.pi * spots_df['radius']**2
 spots_df = spots_df.loc[spots_df[Features.PASSES_THRESHOLDS]]
 spots_df.head()
 
@@ -157,17 +164,15 @@ spots_df.head()
 # results to the same copy numbers from the authors' pipeline. This can likely be improved by
 # tweaking parameters in the above algorithms.
 
-import pandas as pd
-
 # load results from authors' pipeline
 cnts_benchmark = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/20181005/DARTFISH/fov_001/counts.csv')
 cnts_benchmark.head()
 
 # select spots with distance less than a threshold, and count the number of each target gene
 min_dist = 0.6
-cnts_starfish = spots_df[spots_df.distance<=min_dist].groupby('target').count()['area']
+cnts_starfish = spots_df[spots_df.distance <= min_dist].groupby('target').count()['area']
 cnts_starfish = cnts_starfish.reset_index(level=0)
-cnts_starfish.rename(columns = {'target':'gene', 'area':'cnt_starfish'}, inplace=True)
+cnts_starfish.rename(columns={'target': 'gene', 'area': 'cnt_starfish'}, inplace=True)
 
 benchmark_comparison = pd.merge(cnts_benchmark, cnts_starfish, on='gene', how='left')
 benchmark_comparison.head(20)
@@ -175,9 +180,9 @@ benchmark_comparison.head(20)
 x = benchmark_comparison.dropna().cnt.values
 y = benchmark_comparison.dropna().cnt_starfish.values
 r = np.corrcoef(x, y)
-r = r[0,1]
+r = r[0, 1]
 
-plt.scatter(x, y, 50,zorder=2)
+plt.scatter(x, y, 50, zorder=2)
 
 plt.xlabel('Gene copy number Benchmark')
 plt.ylabel('Gene copy number Starfish')
@@ -195,15 +200,12 @@ sns.despine(offset=2)
 area_lookup = lambda x: 0 if x == 0 else results.region_properties[x - 1].area
 vfunc = np.vectorize(area_lookup)
 mask = np.squeeze(vfunc(results.label_image))
-new_image = np.squeeze(results.decoded_image)*(mask > area_threshold[0])*(mask < area_threshold[1])
+new_image = np.squeeze(results.decoded_image) * (mask > area_threshold[0]) * (mask < area_threshold[1])
 
-plt.figure(figsize=(10,10))
+plt.figure(figsize=(10, 10))
 plt.imshow(new_image, cmap='nipy_spectral')
 plt.axis('off')
 plt.title('Coded rolonies')
-
-from matplotlib.collections import PatchCollection
-from matplotlib.patches import Rectangle
 
 rect = [Rectangle((100, 600), width=200, height=200)]
 pc = PatchCollection(rect, facecolor='none', alpha=1.0, edgecolor='w', linewidth=1.5)
@@ -232,7 +234,7 @@ plt.vlines(magnitude_threshold, ymin=plt.gca().get_ylim()[0], ymax=plt.gca().get
 plt.title('Set magnitude threshod')
 
 plt.subplot(132)
-spots_df['area'] = np.pi*spots_df.radius**2
+spots_df['area'] = np.pi * spots_df.radius**2
 spots_df.area.hist(bins=30)
 plt.xlabel('area')
 plt.ylabel('number of spots')
@@ -274,7 +276,7 @@ pixel_traces = spot_intensities.stack(traces=(Axes.ROUND.value, Axes.CH.value))
 
 # extract dataframe from spot intensity table for indexing purposes
 pixel_traces_df = pixel_traces.to_features_dataframe()
-pixel_traces_df['area'] = np.pi*pixel_traces_df.radius**2
+pixel_traces_df['area'] = np.pi * pixel_traces_df.radius**2
 
 # pick index of a barcode that was read and decoded from the ImageStack
 ind = 4
@@ -283,7 +285,7 @@ ind = 4
 gene = pixel_traces_df.loc[ind].target
 
 # query the codebook for the actual barcode corresponding to this gene
-real_barcode = experiment.codebook[experiment.codebook.target==gene].stack(traces=(Axes.ROUND.value, Axes.CH.value)).values[0]
+real_barcode = experiment.codebook[experiment.codebook.target == gene].stack(traces=(Axes.ROUND.value, Axes.CH.value)).values[0]
 read_out_barcode = pixel_traces[ind, :]
 
 plt.plot(real_barcode, 'ok')

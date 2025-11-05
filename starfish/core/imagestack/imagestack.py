@@ -512,7 +512,8 @@ class ImageStack:
             cls._validate_data_dtype_and_range(data.values)
         except TypeError:
             warnings.warn(f"ImageStack detected as {data.dtype}. Converting to float32...")
-            data = data.astype(np.float32)
+            # Create a copy to avoid modifying the caller's data
+            data = data.copy()
             data.values[:] = img_as_float32(data.values)
 
         tile_data = XarrayData(data)

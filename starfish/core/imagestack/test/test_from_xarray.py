@@ -174,3 +174,29 @@ def test_from_xarray_round_trip():
     # Verify all stacks have the same data
     assert np.array_equal(stack1.xarray.values, stack2.xarray.values)
     assert np.array_equal(stack2.xarray.values, stack3.xarray.values)
+
+
+def test_from_xarray_does_not_modify_original():
+    """Test that from_xarray does not modify the original DataArray when type conversion occurs."""
+    # Create a uint16 array
+    array = np.random.randint(0, 1000, (2, 3, 4, 50, 60), dtype=np.uint16)
+    stack1 = ImageStack.from_numpy(array)
+
+    # Get the xarray (which is float32)
+    xarr = stack1.xarray
+
+    # Make it non-float32 to trigger conversion
+    xarr_uint16 = xarr.astype(np.uint16)
+    original_data = xarr_uint16.values.copy()
+
+    # Create ImageStack from the uint16 xarray
+    stack2 = ImageStack.from_xarray(xarr_uint16)
+
+    # Verify the original xarray was not modified
+    assert xarr_uint16.dtype == np.uint16, "Original xarray dtype should not change"
+    assert np.array_equal(
+        xarr_uint16.values, original_data
+    ), "Original xarray data should not change"
+
+    # Verify the new stack has float32 data
+    assert stack2.xarray.dtype == np.float32

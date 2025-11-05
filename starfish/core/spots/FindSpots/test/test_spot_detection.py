@@ -158,3 +158,53 @@ def test_spot_detection_with_image_with_labeled_axes():
     data_stack = _make_labeled_image()
     spot_results = gaussian_spot_detector.run(image_stack=data_stack)
     return spot_results
+
+
+def test_blob_detector_2d_spot_coordinates():
+    """Test that BlobDetector with is_volume=False produces correct y, x coordinates and radius.
+    
+    This is a regression test for the bug where y-values were all 0 and radius was incorrect
+    due to incorrect indexing of 2D images.
+    """
+    # Create a simple 2D image with a bright spot
+    image_2d = np.zeros((100, 100), dtype=np.float32)
+    # Add a bright spot at y=50, x=60
+    image_2d[48:53, 58:63] = 1.0
+    
+    # Create an ImageStack with this 2D image
+    image_stack = ImageStack.from_numpy(image_2d.reshape(1, 1, 1, 100, 100))
+    
+    # Create a BlobDetector with is_volume=False
+    detector_2d = BlobDetector(
+        min_sigma=1,
+        max_sigma=3,
+        num_sigma=5,
+        threshold=0.01,
+        is_volume=False,
+        measurement_type='max'
+    )
+    
+    # Run detection
+    spot_results = detector_2d.run(image_stack=image_stack)
+    
+    # Get the spot attributes
+    spots = spot_results.spot_attrs
+    
+    # Verify we found at least one spot
+    assert len(spots.data) > 0, "No spots detected"
+    
+    # Check that y-values are not all 0 (the bug symptom)
+    y_values = spots.data['y'].values
+    assert not np.all(y_values == 0), "All y-values are 0, indicating the bug is present"
+    
+    # Check that the detected spot is near the expected location (y=50, x=60)
+    # Allow some tolerance since blob detection may not be exact
+    assert np.any(np.abs(y_values - 50) < 10), f"No spot found near y=50, found: {y_values}"
+    
+    x_values = spots.data['x'].values
+    assert np.any(np.abs(x_values - 60) < 10), f"No spot found near x=60, found: {x_values}"
+    
+    # Check that radius is reasonable (not extremely large like 843.0 in the bug)
+    radius_values = spots.data['radius'].values
+    assert np.all(radius_values < 100), f"Radius values too large: {radius_values}"
+    assert np.all(radius_values > 0), f"Radius values should be positive: {radius_values}"

@@ -188,8 +188,8 @@ def test_blob_detector_2d_spot_coordinates():
     # Run detection
     spot_results = detector_2d.run(image_stack=image_stack)
 
-    # Get the spot attributes
-    spots = spot_results.spot_attrs
+    # Get the spot attributes for round 0, channel 0
+    spots = spot_results[{Axes.ROUND: 0, Axes.CH: 0}].spot_attrs
 
     # Verify we found at least one spot
     assert len(spots.data) > 0, "No spots detected"

@@ -500,7 +500,7 @@ class ImageStack:
 
         # Validate required coordinates
         required_coords = {Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE.value}
-        actual_coords = set(data.coords.keys())
+        actual_coords: Set[str] = {str(k) for k in data.coords.keys()}
         if not required_coords.issubset(actual_coords):
             missing = required_coords - actual_coords
             raise ValueError(

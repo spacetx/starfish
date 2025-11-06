@@ -1,0 +1,220 @@
+{
+  "description": "The Starfish project is structured around a robust data processing pipeline for spatial transcriptomics. It begins with a `Data Input & Validation Layer` responsible for ingesting and validating raw experimental data against the SpaceTx format. This validated data is then transformed into `Core Data Structures`, primarily multi-dimensional image stacks and codebooks, which serve as the central in-memory representation. The `Image Processing Engine` operates on these image stacks, applying various algorithms for enhancement and transformation. Concurrently, the `Spot Analysis Engine` identifies, quantifies, and decodes biological spots using both the processed images and the codebook. Finally, the `Output & Export Layer` handles the serialization and persistence of all processed data, while `Visualization Utilities` provide crucial tools for inspecting intermediate and final results. This modular design ensures clear separation of concerns and facilitates a streamlined data flow from raw input to interpretable biological insights.",
+  "components": [
+    {
+      "name": "Data Input & Validation Layer",
+      "description": "Responsible for loading raw experimental data and metadata, ensuring it conforms to the SpaceTx format. It acts as the initial entry point for all data processing pipelines.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish/core/experiment/experiment.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/experiment/experiment.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/experiment/builder/builder.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/experiment/builder/builder.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/spacetx_format/validate_sptx.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spacetx_format/validate_sptx.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Core Data Structures",
+      "description": "Defines and manages the fundamental in-memory data structures used throughout the Starfish pipeline, primarily multi-dimensional image stacks and codebooks.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish/core/imagestack/imagestack.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/imagestack/imagestack.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/imagestack/parser/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/imagestack/parser/",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/codebook/codebook.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/codebook/codebook.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Image Processing Engine",
+      "description": "Applies various algorithms to transform and enhance image data, including filtering, registration, and basic segmentation operations.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish/core/image/Filter/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/image/Filter/",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/image/_registration/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/image/_registration/",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/image/Segment/watershed.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/image/Segment/watershed.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/morphology/Binarize/threshold.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/morphology/Binarize/threshold.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/morphology/label_image/label_image.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/morphology/label_image/label_image.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Spot Analysis Engine",
+      "description": "Dedicated to identifying, quantifying, and decoding biological spots within processed image data. It integrates spot detection, intensity measurement, and genetic decoding.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish/core/spots/FindSpots/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spots/FindSpots/",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/intensity_table/intensity_table.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/intensity_table/intensity_table.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/spots/DecodeSpots/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spots/DecodeSpots/",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/spots/AssignTargets/label.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spots/AssignTargets/label.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/spots/DetectPixels/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/spots/DetectPixels/",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Output & Export Layer",
+      "description": "Handles the serialization and export of all processed data, including transformed image stacks, decoded spot information, and generated masks, into various persistent formats.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish/core/imagestack/imagestack.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/imagestack/imagestack.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/types/_decoded_spots.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/types/_decoded_spots.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/morphology/binary_mask/_io.py",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/morphology/binary_mask/_io.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Visualization Utilities",
+      "description": "Provides tools and functions for generating visual representations of intermediate and final analysis results, aiding in quality control, debugging, and interpretation.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish/util/plot/",
+          "reference_file": null,
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "starfish/core/_display/",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/_display.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    }
+  ],
+  "components_relations": [
+    {
+      "relation": "provides SpaceTx Experiment Data to",
+      "src_name": "Data Input & Validation Layer",
+      "dst_name": "Core Data Structures"
+    },
+    {
+      "relation": "supplies Image Stacks to",
+      "src_name": "Core Data Structures",
+      "dst_name": "Image Processing Engine"
+    },
+    {
+      "relation": "provides Codebook to",
+      "src_name": "Core Data Structures",
+      "dst_name": "Spot Analysis Engine"
+    },
+    {
+      "relation": "outputs Processed Image Stacks to",
+      "src_name": "Image Processing Engine",
+      "dst_name": "Core Data Structures"
+    },
+    {
+      "relation": "feeds Processed Images to",
+      "src_name": "Image Processing Engine",
+      "dst_name": "Spot Analysis Engine"
+    },
+    {
+      "relation": "generates Binary Masks for",
+      "src_name": "Image Processing Engine",
+      "dst_name": "Output & Export Layer"
+    },
+    {
+      "relation": "outputs Decoded Spot Data & Intensity Tables to",
+      "src_name": "Spot Analysis Engine",
+      "dst_name": "Output & Export Layer"
+    },
+    {
+      "relation": "provides Data for Visualization to",
+      "src_name": "Core Data Structures",
+      "dst_name": "Visualization Utilities"
+    },
+    {
+      "relation": "provides Decoded Spots for Plotting to",
+      "src_name": "Spot Analysis Engine",
+      "dst_name": "Visualization Utilities"
+    }
+  ]
+}

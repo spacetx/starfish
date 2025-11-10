@@ -55,15 +55,27 @@ starfish supports python 3.9-3.12 and can easily be installed from PyPI:
 
 .. code-block:: bash
 
+    $ pip install starfish
+
+for the most updated version install directly from Github (starfish release on PyPI might be a few months behind the repo's master branch):
+
+.. code-block:: bash
+
+    $ pip install starfish@git+https://github.com/spacetx/starfish.git
+
+To install starfish with napari (for interactive visualization), use:
+
+.. code-block:: bash
+
     $ pip install starfish[napari]
 
-To install starfish with both napari (for interactive visualization) and jupyter (for notebook support), use:
+To install starfish with both napari and jupyter (for notebook support), use:
 
 .. code-block:: bash
 
     $ pip install starfish[jupyter]
 
-`Some operating systems might need different dependencies for napari. For more detailed installation instructions, see here <https://spacetx-starfish.readthedocs.io/en/latest/installation/>`_.
+`For any difficulties with dependencies, see more detailed installation instructions at https://spacetx-starfish.readthedocs.io/en/latest/installation/ <https://spacetx-starfish.readthedocs.io/en/latest/installation/>`_.
 
 Python Version Notice
 ---------------------

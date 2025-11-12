@@ -211,7 +211,9 @@ plt.title(f'r = {r}')
 # This image applies a pseudo-color to each gene channel to visualize the position and size of all
 # called spots in a subset of the test image.
 
-from showit import image as show_image
+from starfish.util.plot import image as show_image
+from scipy.stats import scoreatpercentile
+import warnings
 
 f, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
 

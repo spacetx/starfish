@@ -14,14 +14,23 @@ starfish can accurately reproduce the results from the authors' original Python 
 .. _pipeline: http://linnarssonlab.org/osmFISH/image_analysis/
 """
 
-from IPython import get_ipython
+import os
+import pickle
+import sys
+
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from IPython import get_ipython
 
-# equivalent to %gui qt and %matplotlib inline
+# equivalent to using in a notebook cell: %matplotlib inline
 ipython = get_ipython()
-ipython.run_line_magic("gui", "qt5")
-ipython.run_line_magic("matplotlib", "inline")
+if ipython is not None:
+    if 'ipykernel' in sys.modules:  # running in Jupyter
+        ipython.run_line_magic('matplotlib', 'inline')
+    else:  # terminal IPython
+        ipython.run_line_magic('matplotlib', 'qt5')
 
 matplotlib.rcParams["figure.dpi"] = 150
 
@@ -35,8 +44,7 @@ matplotlib.rcParams["figure.dpi"] = 150
 # 2048x2048. The data are taken from mouse somatosensory cortex, and the gene in this channel is
 # Adloc.
 
-from starfish import data
-from starfish import FieldOfView
+from starfish import data, FieldOfView
 
 experiment = data.osmFISH(use_test_data=True)
 imgs = experiment["fov_000"].get_image(FieldOfView.PRIMARY_IMAGES)
@@ -69,9 +77,7 @@ mp = imgs_ghp_laplace.reduce({Axes.ZPLANE}, func="max")
 ###################################################################################################
 # We can now visualize our data before and after filtering.
 
-import numpy as np
-
-single_plane = imgs.reduce({Axes.ZPLANE}, func="max").xarray.sel({Axes.CH:0}).squeeze()
+single_plane = imgs.reduce({Axes.ZPLANE}, func="max").xarray.sel({Axes.CH: 0}).squeeze()
 single_plane_filtered = mp.xarray.sel({Axes.CH: 0}).squeeze()
 
 plt.figure(figsize=(10, 10))
@@ -122,11 +128,6 @@ decoded_intensities = decoder.run(spots=spots)
 # position 33. We've also packaged the results from the osmFISH publication for this target to
 # demonstrate that starfish is capable of recovering the same results.
 
-import os
-import pandas as pd
-import pickle
-
-
 def load_results(pickle_file):
     with open(pickle_file, "rb") as f:
         return pickle.load(f)
@@ -136,14 +137,14 @@ def get_benchmark_peaks(loaded_results, redo_flag=False):
     if not redo_flag:
         sp = pd.DataFrame(
             {
-                "y":loaded_results["selected_peaks"][:, 0],
-                "x":loaded_results["selected_peaks"][:, 1],
+                "y": loaded_results["selected_peaks"][:, 0],
+                "x": loaded_results["selected_peaks"][:, 1],
                 "selected_peaks_int": loaded_results["selected_peaks_int"],
             }
         )
     else:
         p = peaks(loaded_results)
-        coords = p[p.thr_array==loaded_results["selected_thr"]].peaks_coords
+        coords = p[p.thr_array == loaded_results["selected_thr"]].peaks_coords
         coords = coords.values[0]
         sp = pd.DataFrame({"x": coords[:, 0], "y": coords[:, 1]})
 

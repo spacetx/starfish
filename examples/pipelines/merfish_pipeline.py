@@ -15,14 +15,25 @@ the current Matlab based MERFISH `pipeline`_.
 .. _pipeline: https://github.com/ZhuangLab/MERFISH_analysis
 """
 
-from IPython import get_ipython
+import pprint
+import sys
+import warnings
+from copy import deepcopy
+
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from IPython import get_ipython
+from scipy.stats import scoreatpercentile
 
-# equivalent to %gui qt and %matplotlib inline
+# equivalent to using in a notebook cell: %matplotlib inline
 ipython = get_ipython()
-ipython.run_line_magic("gui", "qt5")
-ipython.run_line_magic("matplotlib", "inline")
+if ipython is not None:
+    if 'ipykernel' in sys.modules:  # running in Jupyter
+        ipython.run_line_magic('matplotlib', 'inline')
+    else:  # terminal IPython
+        ipython.run_line_magic('matplotlib', 'qt5')
 
 matplotlib.rcParams["figure.dpi"] = 150
 
@@ -34,9 +45,7 @@ matplotlib.rcParams["figure.dpi"] = 150
 # field of view correspond to 18 images from 6 imaging rounds (r) 3 color channels (c) and 1 z-plane
 # (z). Each image is 988x988 (y,x)
 
-import pprint
-from starfish import data
-from starfish import FieldOfView
+from starfish import data, FieldOfView
 
 experiment = data.MERFISH(use_test_data=False)
 
@@ -61,7 +70,6 @@ experiment.codebook
 # Visualize raw data
 # ------------------
 # We can view an image from the first round and color channel.
-
 
 from starfish.types import Axes
 
@@ -118,7 +126,6 @@ scale_factors = {
 
 # this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to
 # at least we can do it with get_slice and set_slice right now.
-from copy import deepcopy
 filtered_imgs = deepcopy(low_passed)
 
 for selector in imgs._iter_axes():
@@ -129,8 +136,6 @@ for selector in imgs._iter_axes():
 ###################################################################################################
 # Visualize processed data
 # ------------------------
-
-import numpy as np
 
 single_plane_filtered = filtered_imgs.sel({Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0})
 single_plane_filtered = single_plane_filtered.xarray.squeeze()
@@ -159,12 +164,12 @@ from starfish.types import Features
 
 psd = DetectPixels.PixelSpotDecoder(
     codebook=experiment.codebook,
-    metric='euclidean', # distance metric to use for computing distance between a pixel vector and a codeword
-    norm_order=2, # the L_n norm is taken of each pixel vector and codeword before computing the distance. this is n
-    distance_threshold=0.5176, # minimum distance between a pixel vector and a codeword for it to be called as a gene
-    magnitude_threshold=1.77e-5, # discard any pixel vectors below this magnitude
-    min_area=2, # do not call a 'spot' if it's area is below this threshold (measured in pixels)
-    max_area=np.inf, # do not call a 'spot' if it's area is above this threshold (measured in pixels)
+    metric='euclidean',  # distance metric to use for computing distance between a pixel vector and a codeword
+    norm_order=2,  # the L_n norm is taken of each pixel vector and codeword before computing the distance. this is n
+    distance_threshold=0.5176,  # minimum distance between a pixel vector and a codeword for it to be called as a gene
+    magnitude_threshold=1.77e-5,  # discard any pixel vectors below this magnitude
+    min_area=2,  # do not call a 'spot' if it's area is below this threshold (measured in pixels)
+    max_area=np.inf,  # do not call a 'spot' if it's area is above this threshold (measured in pixels)
 )
 
 initial_spot_intensities, prop_results = psd.run(filtered_imgs)
@@ -178,8 +183,6 @@ spot_intensities = initial_spot_intensities.loc[initial_spot_intensities[Feature
 # the results to the published counts in the MERFISH paper. Note that Starfish detects a lower
 # number of transcripts than the authors' results. This can likely be improved by tweaking the
 # parameters of the algorithms above.
-
-import pandas as pd
 
 bench = pd.read_csv('https://d2nhj9g34unfro.cloudfront.net/MERFISH/benchmark_results.csv',
                     dtype={'barcode': object})
@@ -219,7 +222,7 @@ with warnings.catch_warnings():
     area_lookup = lambda x: 0 if x == 0 else prop_results.region_properties[x - 1].area
     vfunc = np.vectorize(area_lookup)
     mask = np.squeeze(vfunc(prop_results.label_image))
-    show_image(np.squeeze(prop_results.decoded_image)*(mask > 2), cmap='nipy_spectral', ax=ax1)
+    show_image(np.squeeze(prop_results.decoded_image) * (mask > 2), cmap='nipy_spectral', ax=ax1)
     ax1.axes.set_axis_off()
 
     mp_numpy = filtered_imgs.reduce({Axes.ROUND, Axes.CH, Axes.ZPLANE}, func="max")._squeezed_numpy(

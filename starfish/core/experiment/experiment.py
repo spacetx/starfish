@@ -1,4 +1,5 @@
 import json
+import warnings
 from typing import (
     Any,
     Callable,
@@ -142,9 +143,34 @@ class FieldOfView:
             raise RuntimeError("The parameter 'aligned_group` is no longer accepted. Please use"
                                "FieldOfView.get_images() and  provide sets of selected axes "
                                "instead")
-        stack_iterator = self.get_images(item=item, rounds=rounds,
-                                         chs=chs, zplanes=zplanes, x=x, y=y)
-        return next(stack_iterator)
+
+        # Parse aligned groups to check if there are multiple
+        aligned_groups = CropParameters.parse_aligned_groups(
+            self._images[item], rounds=rounds, chs=chs, zplanes=zplanes, x=x, y=y
+        )
+        n_groups = len(aligned_groups)
+
+        # Warn if there are multiple aligned groups
+        if n_groups > 1:
+            warnings.warn(
+                f"Multiple aligned coordinate groups detected ({n_groups} groups). "
+                f"get_image() returns only the first group (group 0). "
+                f"Use get_images() to access all groups.",
+                UserWarning
+            )
+
+        # Get the first aligned group
+        aligned_stack_iterator = AlignedImageStackIterator(
+            tileset=self._images[item], aligned_groups=aligned_groups
+        )
+        stack = next(aligned_stack_iterator)
+
+        # Add attributes to indicate this is from a multi-group dataset
+        if n_groups > 1:
+            stack.aligned_group = 0  # type: ignore[attr-defined]
+            stack._coordinate_group_count = n_groups  # type: ignore[attr-defined]
+
+        return stack
 
     def get_images(self, item: str,
                    rounds: Optional[Collection[int]] = None,

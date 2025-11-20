@@ -125,6 +125,15 @@ class BlobDetector(FindSpotsAlgorithm):
         if self.detector_method == blob_dog:
             del spot_finding_args['num_sigma']
 
+        # Squeeze out singleton z-dimension for consistency
+        # This ensures (1, y, x) produces same results as (y, x)
+        data_image = np.asarray(data_image)
+        original_shape = data_image.shape
+        squeezed = False
+        if data_image.ndim == 3 and data_image.shape[0] == 1:
+            data_image = np.squeeze(data_image, axis=0)
+            squeezed = True
+
         fitted_blobs_array: np.ndarray = self.detector_method(
             data_image,
             **spot_finding_args
@@ -136,7 +145,9 @@ class BlobDetector(FindSpotsAlgorithm):
             return PerImageSliceSpotResults(spot_attrs=empty_spot_attrs, extras=None)
 
         # measure intensities
-        data_image = np.asarray(data_image)
+        # Restore original shape if it was squeezed for consistency in indexing
+        if squeezed:
+            data_image = data_image.reshape(original_shape)
         # Check the number of columns in fitted_blobs_array to determine dimensionality
         # - 4 columns: [z, y, x, sigma] from 3D blob detection
         # - 3 columns: [y, x, sigma] from 2D blob detection

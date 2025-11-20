@@ -125,17 +125,19 @@ class BlobDetector(FindSpotsAlgorithm):
         if self.detector_method == blob_dog:
             del spot_finding_args['num_sigma']
 
-        # Squeeze out singleton z-dimension for consistency
+        # Convert to numpy array and handle singleton z-dimension for consistency
         # This ensures (1, y, x) produces same results as (y, x)
         data_image = np.asarray(data_image)
-        original_shape = data_image.shape
-        squeezed = False
+        squeeze_z = False
         if data_image.ndim == 3 and data_image.shape[0] == 1:
-            data_image = np.squeeze(data_image, axis=0)
-            squeezed = True
+            # Squeeze out the singleton z-dimension before blob detection
+            data_image_for_detection = np.squeeze(data_image, axis=0)
+            squeeze_z = True
+        else:
+            data_image_for_detection = data_image
 
         fitted_blobs_array: np.ndarray = self.detector_method(
-            data_image,
+            data_image_for_detection,
             **spot_finding_args
         )  # type: ignore  # error: Cannot call function of unknown type  [operator]
 
@@ -145,9 +147,6 @@ class BlobDetector(FindSpotsAlgorithm):
             return PerImageSliceSpotResults(spot_attrs=empty_spot_attrs, extras=None)
 
         # measure intensities
-        # Restore original shape if it was squeezed for consistency in indexing
-        if squeezed:
-            data_image = data_image.reshape(original_shape)
         # Check the number of columns in fitted_blobs_array to determine dimensionality
         # - 4 columns: [z, y, x, sigma] from 3D blob detection
         # - 3 columns: [y, x, sigma] from 2D blob detection

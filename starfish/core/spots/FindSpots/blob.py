@@ -137,19 +137,24 @@ class BlobDetector(FindSpotsAlgorithm):
 
         # measure intensities
         data_image = np.asarray(data_image)
-        if self.is_volume:
+        # Check the number of columns in fitted_blobs_array to determine dimensionality
+        # - 4 columns: [z, y, x, sigma] from 3D blob detection
+        # - 3 columns: [y, x, sigma] from 2D blob detection
+        # Note: This can differ from is_volume when using reference_image with multiple z-planes
+        if fitted_blobs_array.shape[1] == 4:
+            # 3D blob detection result
             z_inds = fitted_blobs_array[:, 0].astype(int)
             y_inds = fitted_blobs_array[:, 1].astype(int)
             x_inds = fitted_blobs_array[:, 2].astype(int)
             radius = np.round(fitted_blobs_array[:, 3] * np.sqrt(3))
             intensities = data_image[tuple([z_inds, y_inds, x_inds])]
         else:
+            # 2D blob detection result
             y_inds = fitted_blobs_array[:, 0].astype(int)
             x_inds = fitted_blobs_array[:, 1].astype(int)
             radius = np.round(fitted_blobs_array[:, 2] * np.sqrt(2))
             z_inds = np.zeros(len(fitted_blobs_array), dtype=int)
-            # Handle both 2D and 3D data_image when is_volume=False
-            # (3D can occur when using reference_image with multiple z-planes)
+            # For 2D results, handle both 2D and 3D data_image
             if data_image.ndim == 3:
                 intensities = data_image[z_inds, y_inds, x_inds]
             else:

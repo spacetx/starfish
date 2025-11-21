@@ -158,3 +158,108 @@ def test_spot_detection_with_image_with_labeled_axes():
     data_stack = _make_labeled_image()
     spot_results = gaussian_spot_detector.run(image_stack=data_stack)
     return spot_results
+
+
+def test_blob_detector_2d_spot_coordinates():
+    """Test that BlobDetector with is_volume=False produces correct y, x coordinates and radius.
+
+    This is a regression test for the bug where y-values were all 0 and radius was incorrect
+    due to incorrect indexing of 2D images.
+    """
+    # Create a simple 2D image with a bright spot
+    image_2d = np.zeros((100, 100), dtype=np.float32)
+    # Add a 5x5 bright spot centered approximately at y=50, x=60
+    image_2d[48:53, 58:63] = 1.0
+
+    # Create an ImageStack with this 2D image
+    # Shape: (rounds=1, channels=1, z-planes=1, height=100, width=100)
+    image_stack = ImageStack.from_numpy(image_2d.reshape(1, 1, 1, 100, 100))
+
+    # Create a BlobDetector with is_volume=False
+    detector_2d = BlobDetector(
+        min_sigma=1,
+        max_sigma=3,
+        num_sigma=5,
+        threshold=0.01,
+        is_volume=False,
+        measurement_type='max'
+    )
+
+    # Run detection
+    spot_results = detector_2d.run(image_stack=image_stack)
+
+    # Get the spot attributes for round 0, channel 0
+    spots = spot_results[{Axes.ROUND: 0, Axes.CH: 0}].spot_attrs
+
+    # Verify we found at least one spot
+    assert len(spots.data) > 0, "No spots detected"
+
+    # Check that y-values are not all 0 (the bug symptom)
+    y_values = spots.data['y'].values
+    assert not np.all(y_values == 0), "All y-values are 0, indicating the bug is present"
+
+    # Check that the detected spot is near the expected location (y=50, x=60)
+    # Allow 5 pixel tolerance since blob detection may not find exact center
+    assert np.any(np.abs(y_values - 50) < 5), f"No spot found near y=50, found: {y_values}"
+
+    x_values = spots.data['x'].values
+    assert np.any(np.abs(x_values - 60) < 5), f"No spot found near x=60, found: {x_values}"
+
+    # Check that radius is reasonable (not extremely large like 843.0 in the bug)
+    radius_values = spots.data['radius'].values
+    assert np.all(radius_values < 100), f"Radius values too large: {radius_values}"
+    assert np.all(radius_values > 0), f"Radius values should be positive: {radius_values}"
+
+
+def test_blob_detector_2d_with_reference_image():
+    """Test BlobDetector with is_volume=False and a reference_image.
+
+    This tests the case where reference_image has multiple z-planes, which results in
+    a 3D data_image after squeezing ROUND and CH dimensions.
+    """
+    # Create a 3D reference image with multiple z-planes
+    reference_3d = np.zeros((3, 100, 100), dtype=np.float32)
+    # Add a bright spot at z=0, y=30, x=40
+    reference_3d[0, 28:33, 38:43] = 1.0
+
+    # Create ImageStacks with the reference image (3 z-planes, 1 round, 1 channel)
+    reference_stack = ImageStack.from_numpy(reference_3d.reshape(1, 1, 3, 100, 100))
+    # Create a primary image stack (same dimensions)
+    primary_stack = ImageStack.from_numpy(reference_3d.reshape(1, 1, 3, 100, 100))
+
+    # Create a BlobDetector with is_volume=False
+    detector_2d = BlobDetector(
+        min_sigma=1,
+        max_sigma=3,
+        num_sigma=5,
+        threshold=0.01,
+        is_volume=False,
+        measurement_type='max'
+    )
+
+    # Run detection with reference_image
+    spot_results = detector_2d.run(image_stack=primary_stack, reference_image=reference_stack)
+
+    # The reference image approach produces spots for all (round, ch) combinations
+    # For our case: 1 round x 1 channel = 1 combination
+    total_spots = spot_results.count_total_spots()
+    assert total_spots > 0, "No spots detected with reference image"
+
+    # Check a specific round/channel
+    spots = spot_results[{Axes.ROUND: 0, Axes.CH: 0}].spot_attrs
+
+    # Verify spot coordinates and radius are correct
+    y_values = spots.data['y'].values
+    x_values = spots.data['x'].values
+    radius_values = spots.data['radius'].values
+
+    # Check that y-values are not all 0
+    assert not np.all(y_values == 0), "All y-values are 0, bug is present"
+
+    # Check that the spot is near the expected location (y=30, x=40)
+    assert np.any(np.abs(y_values - 30) < 5), f"No spot found near y=30, found: {y_values}"
+    assert np.any(np.abs(x_values - 40) < 5), f"No spot found near x=40, found: {x_values}"
+
+    # Check that radius is reasonable
+    assert np.all(radius_values < 100), f"Radius values too large: {radius_values}"
+    assert np.all(radius_values > 0), f"Radius values should be positive: {radius_values}"

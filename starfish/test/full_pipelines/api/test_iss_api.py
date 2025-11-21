@@ -103,14 +103,14 @@ def test_iss_pipeline_cropped_data(tmpdir):
     # decode
     decoded = iss.decoded
 
-    # decoding identifies 4 genes, each with 1 count
+    # decoding identifies 15 genes, each with at least 1 count
     genes, gene_counts = iss.genes, iss.counts
-    assert np.array_equal(genes, np.array(['ACTB', 'CD68', 'CTSL2', 'EPCAM',
+    assert np.array_equal(genes, np.array(['ACTB', 'CCNB1', 'CD68', 'CTSL2', 'EPCAM',
                                            'ETV4', 'GAPDH', 'GUS', 'HER2', 'RAC1',
-                                           'TFRC', 'TP53', 'VEGF']))
+                                           'RPLP0', 'STK15', 'TFRC', 'TP53', 'VEGF']))
 
-    assert np.array_equal(gene_counts, [19, 1, 5, 2, 1, 11, 1, 3, 2, 1, 1, 2])
-    assert decoded.sizes[Features.AXIS] == 99
+    assert np.array_equal(gene_counts, [21, 1, 1, 6, 2, 1, 12, 1, 3, 3, 1, 1, 1, 1, 2])
+    assert decoded.sizes[Features.AXIS] == 102
 
     masks = iss.masks
 
@@ -145,11 +145,11 @@ def test_iss_pipeline_cropped_data(tmpdir):
     assert pipeline_log[2]['method'] == 'BlobDetector'
     assert pipeline_log[3]['method'] == 'PerRoundMaxChannel'
 
-    # 28 of the spots are assigned to cell 0 (although most spots do not decode!)
-    assert np.sum(assigned['cell_id'] == '1') == 28
+    # 29 of the spots are assigned to cell 0 (although most spots do not decode!)
+    assert np.sum(assigned['cell_id'] == '1') == 29
 
     expression_matrix = iss.cg
     # test that nans were properly removed from the expression matrix
     assert 'nan' not in expression_matrix.genes.data
     # test the number of spots that did not decode per cell
-    assert np.array_equal(expression_matrix.number_of_undecoded_spots.data, [13, 1, 36])
+    assert np.array_equal(expression_matrix.number_of_undecoded_spots.data, [10, 1, 34])

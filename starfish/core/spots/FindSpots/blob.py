@@ -128,18 +128,9 @@ class BlobDetector(FindSpotsAlgorithm):
         # Convert to numpy array and handle singleton z-dimension for consistency
         # This ensures (1, y, x) produces same results as (y, x)
         data_image = np.asarray(data_image)
-        squeeze_z = False
         if data_image.ndim == 3 and data_image.shape[0] == 1:
             # Squeeze out the singleton z-dimension before blob detection
             data_image_for_detection = np.squeeze(data_image, axis=0)
-            squeeze_z = True
-            
-            # Adjust sigma parameters for 2D detection if they were specified for 3D
-            # If sigma is a 3-element tuple (z, y, x), drop the z component to get (y, x)
-            if isinstance(spot_finding_args["min_sigma"], tuple) and len(spot_finding_args["min_sigma"]) == 3:
-                spot_finding_args["min_sigma"] = spot_finding_args["min_sigma"][1:]
-            if isinstance(spot_finding_args["max_sigma"], tuple) and len(spot_finding_args["max_sigma"]) == 3:
-                spot_finding_args["max_sigma"] = spot_finding_args["max_sigma"][1:]
         else:
             data_image_for_detection = data_image
 
@@ -159,13 +150,13 @@ class BlobDetector(FindSpotsAlgorithm):
         # - Scalar sigma: (n_blobs, ndim + 1) where columns are [coords..., sigma]
         # - Anisotropic sigma: (n_blobs, 2*ndim) where columns are [coords..., sigmas...]
         # We use data_image_for_detection.ndim to know if we did 2D or 3D detection
-        is_3d_detection = data_image_for_detection.ndim == 3
-        if is_3d_detection:
+        if data_image_for_detection.ndim == 3:
             # 3D blob detection result: [z, y, x, sigma] or [z, y, x, sigma_z, sigma_y, sigma_x]
             z_inds = fitted_blobs_array[:, 0].astype(int)
             y_inds = fitted_blobs_array[:, 1].astype(int)
             x_inds = fitted_blobs_array[:, 2].astype(int)
-            # For radius, use first sigma column (scalar sigma) or average of sigma columns (anisotropic)
+            # For radius, use first sigma column (scalar sigma)
+            # or average of sigma columns (anisotropic)
             if fitted_blobs_array.shape[1] == 4:
                 # Scalar sigma
                 radius = np.round(fitted_blobs_array[:, 3] * np.sqrt(3))
@@ -177,7 +168,8 @@ class BlobDetector(FindSpotsAlgorithm):
             # 2D blob detection result: [y, x, sigma] or [y, x, sigma_y, sigma_x]
             y_inds = fitted_blobs_array[:, 0].astype(int)
             x_inds = fitted_blobs_array[:, 1].astype(int)
-            # For radius, use first sigma column (scalar sigma) or average of sigma columns (anisotropic)
+            # For radius, use first sigma column (scalar sigma)
+            # or average of sigma columns (anisotropic)
             if fitted_blobs_array.shape[1] == 3:
                 # Scalar sigma
                 radius = np.round(fitted_blobs_array[:, 2] * np.sqrt(2))

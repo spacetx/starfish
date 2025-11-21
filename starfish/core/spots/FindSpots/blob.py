@@ -133,6 +133,13 @@ class BlobDetector(FindSpotsAlgorithm):
             # Squeeze out the singleton z-dimension before blob detection
             data_image_for_detection = np.squeeze(data_image, axis=0)
             squeeze_z = True
+            
+            # Adjust sigma parameters for 2D detection if they were specified for 3D
+            # If sigma is a 3-element tuple (z, y, x), drop the z component to get (y, x)
+            if isinstance(spot_finding_args["min_sigma"], tuple) and len(spot_finding_args["min_sigma"]) == 3:
+                spot_finding_args["min_sigma"] = spot_finding_args["min_sigma"][1:]
+            if isinstance(spot_finding_args["max_sigma"], tuple) and len(spot_finding_args["max_sigma"]) == 3:
+                spot_finding_args["max_sigma"] = spot_finding_args["max_sigma"][1:]
         else:
             data_image_for_detection = data_image
 

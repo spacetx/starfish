@@ -154,22 +154,36 @@ class BlobDetector(FindSpotsAlgorithm):
             return PerImageSliceSpotResults(spot_attrs=empty_spot_attrs, extras=None)
 
         # measure intensities
-        # Check the number of columns in fitted_blobs_array to determine dimensionality
-        # - 4 columns: [z, y, x, sigma] from 3D blob detection
-        # - 3 columns: [y, x, sigma] from 2D blob detection
-        # Note: This can differ from is_volume when using reference_image with multiple z-planes
-        if fitted_blobs_array.shape[1] == 4:
-            # 3D blob detection result
+        # Determine dimensionality from the data passed to blob detector
+        # blob_log returns:
+        # - Scalar sigma: (n_blobs, ndim + 1) where columns are [coords..., sigma]
+        # - Anisotropic sigma: (n_blobs, 2*ndim) where columns are [coords..., sigmas...]
+        # We use data_image_for_detection.ndim to know if we did 2D or 3D detection
+        is_3d_detection = data_image_for_detection.ndim == 3
+        if is_3d_detection:
+            # 3D blob detection result: [z, y, x, sigma] or [z, y, x, sigma_z, sigma_y, sigma_x]
             z_inds = fitted_blobs_array[:, 0].astype(int)
             y_inds = fitted_blobs_array[:, 1].astype(int)
             x_inds = fitted_blobs_array[:, 2].astype(int)
-            radius = np.round(fitted_blobs_array[:, 3] * np.sqrt(3))
+            # For radius, use first sigma column (scalar sigma) or average of sigma columns (anisotropic)
+            if fitted_blobs_array.shape[1] == 4:
+                # Scalar sigma
+                radius = np.round(fitted_blobs_array[:, 3] * np.sqrt(3))
+            else:
+                # Anisotropic sigma - average the three sigma values
+                radius = np.round(fitted_blobs_array[:, 3:6].mean(axis=1) * np.sqrt(3))
             intensities = data_image[tuple([z_inds, y_inds, x_inds])]
         else:
-            # 2D blob detection result
+            # 2D blob detection result: [y, x, sigma] or [y, x, sigma_y, sigma_x]
             y_inds = fitted_blobs_array[:, 0].astype(int)
             x_inds = fitted_blobs_array[:, 1].astype(int)
-            radius = np.round(fitted_blobs_array[:, 2] * np.sqrt(2))
+            # For radius, use first sigma column (scalar sigma) or average of sigma columns (anisotropic)
+            if fitted_blobs_array.shape[1] == 3:
+                # Scalar sigma
+                radius = np.round(fitted_blobs_array[:, 2] * np.sqrt(2))
+            else:
+                # Anisotropic sigma - average the two sigma values
+                radius = np.round(fitted_blobs_array[:, 2:4].mean(axis=1) * np.sqrt(2))
             z_inds = np.zeros(len(fitted_blobs_array), dtype=int)
             # For 2D results, handle both 2D and 3D data_image
             if data_image.ndim == 3:

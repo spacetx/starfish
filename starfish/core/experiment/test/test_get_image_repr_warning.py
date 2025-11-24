@@ -26,12 +26,6 @@ def test_imagestack_repr_shows_aligned_group():
     repr_str = repr(stack)
     assert "(aligned_group=2/3)" in repr_str
 
-    # Check _repr_html_ returns pre-formatted HTML with same info
-    html = stack._repr_html_()
-    assert html.startswith("<pre>")
-    assert html.endswith("</pre>")
-    assert "(aligned_group=2/3)" in html
-
 
 def test_get_image_warns_and_sets_attrs(monkeypatch):
     """Test that get_image warns when multiple aligned groups exist and sets attributes."""

@@ -1,34 +1,46 @@
+## [0.3.4] - 2025-11-24
+- feat: Add ImageStack.from_xarray() constructor for memory-efficient round processing (#2155)
+- fix: BlobDetector coordinate extraction ensuring consistent results across dimensionalities (#2154)
+- fix: remove _repr_html function from imagestack (#2163)
+- fix: Replace unmaintained showit dependency with matplotlib (#2135)
+- feat: Add jupyter extras_require for single-command installation with napari (#2156)
+- fix: replace ipython.run_line_magic(matplotlib,inline) with if-else for Jupyter vs. Ipython usage (#2151)
+- ci: set ubuntu version to use latest in readthedocs.yml (#2158)
+- feat: Add aligned group info to ImageStack repr and warn when get_image returns first of multiple groups (#2111)
+- ci: Remove redundant location for dependency update and group patch updates (#2146)
+- fix: add .python-version file to force dependabot to use python 3.9 for pip updates (#2133)
+- fix: numpy 2 support and update pinned dependencies (#2103)
+- fix: Replace deprecated pkg_resources with importlib alternatives (#2102)
+- fix: Replace deprecated magic() with run_line_magic() (#2104)
+- ci: Add GitHub Copilot coding agent environment setup configuration (#2108)
+- ci: Configure Dependabot to automatically upgrade dependencies monthly (#2099)
+- ci: Add GitHub Copilot instructions for the repository (#2093)
+- ci: Add CodeQL analysis workflow configuration (#2106)
+- ci: move docs generation run to a separate job (#2098)
+- fix: xarray compatibility issues to support versions 2023.9+ (#2096)
+- fix: Migrate from deprecated RefResolver to new referencing library for jsonschema 4.18+ (#2090)
+- fix: changing pip install flag from -c to -r due to dependabot relative path error (#2078)
+- fix: Upgrading dependency Matplotlib 3.8+ (#2074)
+
 ## [0.3.3] - 2025-05-09
-- Updating CHANGELOG.md for release 0.3.3
 - add MacOS to Github actions workflow (#2068)
 - Add normalization argument to LearnTransform.Translation with default value None (#2063)
 - updating REQUIREMENTS-JUPYTER.txt to resolve h11 dependency vulnerability (#2066)
 - fix: blob.py 2d intensities shape and pd.concat instead of append (#2064)
 - Clear outputs of SeqFISH notebook and bug fix on SeqFISH.py (#2059)
 - removing mistune package from REQUIREMENTS.txt and minor updates to other requirements files (#2054)
-- Bump jinja2 from 3.1.5 to 3.1.6 in /requirements (#2053)
 
 ## [0.3.2] - 2025-02-16
-- Updating CHANGELOG.md for release 0.3.2
-- Bump cryptography from 44.0.0 to 44.0.1 in /requirements (#2051)
 - rolling back to Sphinx v5 as v6-8 introduce issues on ReadTheDocs with navbar logo and sub-menus (#2050)
 - Scikit image update from 0.21 to 0.23+ (#2049)
-- Bump jinja2 from 3.1.4 to 3.1.5 in /requirements (#2048)
 - Missing pypi description fix by adding pyproject.toml (#2047)
-- Bump actions/setup-python from 2 to 5 (#2042)
-- Bump actions/cache from 2 to 4 (#2041)
-- Bump actions/checkout from 2 to 4 (#2040)
 - Create dependabot.yml to auto update Github Action versions (#2039)
-- Bump tornado from 6.4.1 to 6.4.2 in /requirements (#2038)
 - replace scipy.ndimage.filters with scipy.ndimage for scipy v2 (#2035)
-- Bump lxml-html-clean from 0.3.1 to 0.4.0 in /requirements (#2036)
 
 ## [0.3.1] - 2024-11-12
-- Updating CHANGELOG.md for release 0.3.1
 - Adding support to Python 3.12 (#2027)
 - Numpy 1.26 update to support Python 3.12 (#2025)
 - fixing blob radius calculation in 2d (#2023)
-- Release 0.3.0 (#2021)
 
 ## [0.3.0] - 2024-10-05
 - Dropping support for Python 3.8 and setting Python 3.9 as minimum (#2018)
@@ -37,7 +49,6 @@
 - Add min_distance parameter to peak_local_max call (#2008)
 - Various Small Fixes/Improvements (#1985)
 - Updated seqFISH Decoding Method: CheckAll Decoder (#1978)
-- Bump dask from 2021.9.0 to 2021.10.0 in /requirements (#1968)
 - Revert "Revert "Fix coords assignment in CombineAdjustFeatures.run (#1965)" (#1966)" (#1967)
 - Revert "Fix coords assignment in CombineAdjustFeatures.run (#1965)" (#1966)
 - Fix coords assignment in CombineAdjustFeatures.run (#1965)
@@ -305,6 +316,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.3.4]: https://github.com/spacetx/starfish/releases/tag/0.3.4
 [0.3.3]: https://github.com/spacetx/starfish/releases/tag/0.3.3
 [0.3.2]: https://github.com/spacetx/starfish/releases/tag/0.3.2
 [0.3.1]: https://github.com/spacetx/starfish/releases/tag/0.3.1

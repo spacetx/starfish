@@ -263,3 +263,93 @@ def test_blob_detector_2d_with_reference_image():
     # Check that radius is reasonable
     assert np.all(radius_values < 100), f"Radius values too large: {radius_values}"
     assert np.all(radius_values > 0), f"Radius values should be positive: {radius_values}"
+
+
+def test_blob_detector_round_channel_assignment():
+    """Test that BlobDetector with is_volume=False assigns spots to correct (round, channel) pairs.
+
+    This is a regression test for a bug where spots were assigned to incorrect round/channel
+    combinations due to a mismatch between the sorted (r, ch) tuples and the iteration order
+    from _iter_axes({Axes.ROUND, Axes.CH}).
+    """
+    # Create a test ImageStack with 2 rounds, 3 channels, 1 z-plane
+    # Each (round, channel) pair gets a spot at a unique location
+    data = np.zeros((2, 3, 1, 100, 100), dtype=np.float32)
+
+    # Add spots at different y-coordinates for each (round, channel)
+    # Round 0, Channel 0: y=10
+    data[0, 0, 0, 8:13, 8:13] = 1.0
+    # Round 0, Channel 1: y=20
+    data[0, 1, 0, 18:23, 18:23] = 1.0
+    # Round 0, Channel 2: y=30
+    data[0, 2, 0, 28:33, 28:33] = 1.0
+    # Round 1, Channel 0: y=40
+    data[1, 0, 0, 38:43, 38:43] = 1.0
+    # Round 1, Channel 1: y=50
+    data[1, 1, 0, 48:53, 48:53] = 1.0
+    # Round 1, Channel 2: y=60
+    data[1, 2, 0, 58:63, 58:63] = 1.0
+
+    image_stack = ImageStack.from_numpy(data)
+
+    # Test with is_volume=False
+    detector_2d = BlobDetector(
+        min_sigma=1,
+        max_sigma=3,
+        num_sigma=5,
+        threshold=0.01,
+        is_volume=False,
+        measurement_type='mean'
+    )
+
+    spots_2d = detector_2d.run(image_stack=image_stack)
+
+    # Test with is_volume=True for comparison
+    detector_3d = BlobDetector(
+        min_sigma=1,
+        max_sigma=3,
+        num_sigma=5,
+        threshold=0.01,
+        is_volume=True,
+        measurement_type='mean'
+    )
+
+    spots_3d = detector_3d.run(image_stack=image_stack)
+
+    # Define expected y-coordinates for each (round, channel) pair
+    expected_y = {
+        (0, 0): 10,
+        (0, 1): 20,
+        (0, 2): 30,
+        (1, 0): 40,
+        (1, 1): 50,
+        (1, 2): 60,
+    }
+
+    # Check that both is_volume=False and is_volume=True produce the same results
+    for r in range(2):
+        for ch in range(3):
+            # Get spots for this (round, channel)
+            spots_2d_data = spots_2d[{Axes.ROUND: r, Axes.CH: ch}].spot_attrs.data
+            spots_3d_data = spots_3d[{Axes.ROUND: r, Axes.CH: ch}].spot_attrs.data
+
+            # Both should have found the spot
+            assert len(spots_2d_data) > 0, \
+                f"No spots found for Round={r}, CH={ch} with is_volume=False"
+            assert len(spots_3d_data) > 0, \
+                f"No spots found for Round={r}, CH={ch} with is_volume=True"
+
+            # Check that the y-coordinate matches the expected value
+            y_2d = spots_2d_data['y'].values[0]
+            y_3d = spots_3d_data['y'].values[0]
+            expected = expected_y[(r, ch)]
+
+            assert np.abs(y_2d - expected) < 5, \
+                f"is_volume=False: Round={r}, CH={ch} has y={y_2d:.0f}, expected ~{expected}"
+            assert np.abs(y_3d - expected) < 5, \
+                f"is_volume=True: Round={r}, CH={ch} has y={y_3d:.0f}, expected ~{expected}"
+
+            # Both should produce the same y-coordinate
+            assert np.abs(y_2d - y_3d) < 2, \
+                f"Round={r}, CH={ch}: is_volume=False has y={y_2d:.0f} " \
+                f"but is_volume=True has y={y_3d:.0f}"

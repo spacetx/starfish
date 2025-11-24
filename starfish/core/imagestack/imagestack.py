@@ -250,10 +250,6 @@ class ImageStack:
             prefix = f"(aligned_group={one_based}/{self._coordinate_group_count}) "
         return f"<starfish.ImageStack {prefix}({shape})>"
 
-    def _repr_html_(self):
-        """Provide HTML representation for Jupyter notebooks."""
-        return f"<pre>{self.__repr__()}</pre>"
-
     @classmethod
     def from_tileset(
             cls,

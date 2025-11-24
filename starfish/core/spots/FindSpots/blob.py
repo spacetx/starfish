@@ -251,13 +251,15 @@ class BlobDetector(FindSpotsAlgorithm):
                     merged_z_tables[(r, ch)] = pd.concat(
                         [merged_z_tables[(r, ch)], spot_attributes_list[i][0].spot_attrs.data])
                 new = []
-                r_chs = sorted([*merged_z_tables])
-                selectors = list(image_stack._iter_axes({Axes.ROUND, Axes.CH}))
-                for i, (r, ch) in enumerate(r_chs):
-                    merged_z_tables[(r, ch)]['spot_id'] = range(len(merged_z_tables[(r, ch)]))
-                    spot_attrs = SpotAttributes(merged_z_tables[(r, ch)].reset_index(drop=True))
-                    new.append((PerImageSliceSpotResults(spot_attrs=spot_attrs, extras=None),
-                               selectors[i]))
+                # Iterate through the merged tables in the order expected by _iter_axes
+                for selector in image_stack._iter_axes({Axes.ROUND, Axes.CH}):
+                    r = selector[Axes.ROUND]
+                    ch = selector[Axes.CH]
+                    if (r, ch) in merged_z_tables:
+                        merged_z_tables[(r, ch)]['spot_id'] = range(len(merged_z_tables[(r, ch)]))
+                        spot_attrs = SpotAttributes(merged_z_tables[(r, ch)].reset_index(drop=True))
+                        new.append((PerImageSliceSpotResults(spot_attrs=spot_attrs, extras=None),
+                                   selector))
 
                 spot_attributes_list = new
 

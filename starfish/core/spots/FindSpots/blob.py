@@ -243,8 +243,6 @@ class BlobDetector(FindSpotsAlgorithm):
             # If not a volume, merge spots from the same round/channel but different z slices
             if not self.is_volume:
                 merged_z_tables = defaultdict(pd.DataFrame)  # type: ignore
-                # Build a mapping from (round, ch) to the correct selector
-                selector_map = {}
                 for i in range(len(spot_attributes_list)):
                     spot_attributes_list[i][0].spot_attrs.data['z'] = \
                         spot_attributes_list[i][1]['z']
@@ -252,9 +250,6 @@ class BlobDetector(FindSpotsAlgorithm):
                     ch = spot_attributes_list[i][1][Axes.CH]
                     merged_z_tables[(r, ch)] = pd.concat(
                         [merged_z_tables[(r, ch)], spot_attributes_list[i][0].spot_attrs.data])
-                    # Store the selector without the ZPLANE dimension for this (r, ch) pair
-                    if (r, ch) not in selector_map:
-                        selector_map[(r, ch)] = {Axes.ROUND: r, Axes.CH: ch}
                 new = []
                 # Iterate through the merged tables in the order expected by _iter_axes
                 for selector in image_stack._iter_axes({Axes.ROUND, Axes.CH}):

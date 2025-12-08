@@ -42,7 +42,7 @@ def test_intensity_table_can_be_constructed_from_an_imagestack():
     intensities = IntensityTable.from_image_stack(image_stack)
 
     # there should be 100 features
-    assert np.product(intensities.shape) == 100
+    assert np.prod(intensities.shape) == 100
 
     # the max features should be equal to the array extent (2, 2, 5) minus one, since indices
     # are being compared and python is zero based

@@ -21,6 +21,10 @@ setuptools.setup(
     install_requires=install_requires,
     extras_require={
         'napari': [f"napari[all]>={napari_version}"],
+        'jupyter': [
+            f"napari[all]>={napari_version}",
+            "jupyter",
+        ],
     },
     include_package_data=True,
     version=versioneer.get_version(),

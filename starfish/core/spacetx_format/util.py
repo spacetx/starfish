@@ -1,13 +1,14 @@
 import copy
 import json
-import posixpath
 import sys
 import warnings
+from importlib.resources import files
 from pathlib import Path
 from typing import Any, Dict, IO, Iterator, List, Optional, Union
 
-from jsonschema import Draft4Validator, RefResolver, ValidationError
-from pkg_resources import resource_filename
+from jsonschema import Draft4Validator, ValidationError
+from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT4
 from semantic_version import Version
 from slicedimage import VERSIONS as SLICEDIMAGE_VERSIONS
 
@@ -21,7 +22,9 @@ package_name = 'starfish'
 
 def _get_absolute_schema_path(schema_name: str) -> str:
     """turn the name of the schema into an absolute path by joining it to <package_root>/schema."""
-    return resource_filename("starfish", posixpath.join("spacetx_format", "schema", schema_name))
+    return str(
+        files("starfish").joinpath("spacetx_format").joinpath("schema").joinpath(schema_name)
+    )
 
 
 class SpaceTxValidator:
@@ -56,13 +59,75 @@ class SpaceTxValidator:
 
         # Note: we are using 5.0.0 here as the first known file. It does *not* need to
         # be upgraded with each version bump since only the dirname is used.
-        experiment_schema_path = Path(resource_filename(
-            package_name, "spacetx_format/schema/experiment_5.0.0.json"))
+        experiment_schema_path = Path(str(files(package_name).joinpath(
+            "spacetx_format/schema/experiment_5.0.0.json")))
 
         package_root_path = experiment_schema_path.parent.parent
         base_uri = f"{package_root_path.as_uri()}/"
-        resolver = RefResolver(base_uri, schema)
-        return Draft4Validator(schema, resolver=resolver)
+
+        # jsonschema >= 4.18: use the new referencing library
+        # Create a registry and load referenced schemas
+        registry = SpaceTxValidator._build_schema_registry(package_root_path)
+
+        # Use the schema's $id if available to anchor the resolver
+        schema_id = schema.get('$id')
+        if schema_id:
+            # Create a resolver anchored at the schema's $id
+            resolver = registry.resolver(schema_id)
+        else:
+            # Fallback to base_uri if no $id
+            resolver = registry.resolver(base_uri)
+
+        return Draft4Validator(schema, _resolver=resolver)
+
+    @staticmethod
+    def _build_schema_registry(package_root_path: Path):
+        """Build a schema registry for the new referencing library (jsonschema >= 4.18)
+
+        Parameters
+        ----------
+        package_root_path : Path
+            Path to the spacetx_format directory
+
+        Returns
+        -------
+        Registry :
+            A registry with all schemas that might be referenced
+        """
+        import glob
+
+        schema_dir = package_root_path / "schema"
+
+        # Find all JSON schema files
+        schema_files = []
+        for pattern in ["*.json", "*/*.json", "*/*/*.json", "*/*/*/*.json"]:
+            schema_files.extend(glob.glob(str(schema_dir / pattern)))
+
+        # Build registry by loading all schemas
+        resources = []
+        for schema_file in schema_files:
+            schema_path = Path(schema_file)
+
+            try:
+                with open(schema_path, 'r') as f:
+                    schema_content = json.load(f)
+
+                # Use the schema's $id if present, otherwise use file-based URI
+                if "$id" in schema_content:
+                    schema_uri = schema_content["$id"]
+                else:
+                    # Fallback: calculate the URI based on file path
+                    relative_path = schema_path.relative_to(package_root_path)
+                    base_uri = f"{package_root_path.as_uri()}/"
+                    schema_uri = base_uri + str(relative_path).replace('\\', '/')
+
+                resource = Resource.from_contents(schema_content, default_specification=DRAFT4)
+                resources.append((schema_uri, resource))
+            except Exception:
+                # Skip files that can't be loaded
+                pass
+
+        return Registry().with_resources(resources)
 
     @staticmethod
     def load_json(json_file: str) -> Dict:
@@ -121,11 +186,11 @@ class SpaceTxValidator:
         --------
         Validate a codebook file::
 
-            >>> from pkg_resources import resource_filename
+            >>> from importlib.resources import files
             >>> from starfish.core.spacetx_format.util import SpaceTxValidator
-            >>> schema_path = resource_filename(
-                    "starfish", "spacetx_format/schema/codebook/codebook.json")
-            >>> validator = SpaceTxValidator(schema_path)
+            >>> schema_path = files("starfish").joinpath(
+            ...     "spacetx_format/schema/codebook/codebook.json")
+            >>> validator = SpaceTxValidator(str(schema_path))
             >>> if not validator.validate_file(your_codebook_filename):
             >>>     raise Exception("invalid")
 
@@ -157,10 +222,10 @@ class SpaceTxValidator:
         --------
         Validate an experiment json string ::
 
-            >>> from pkg_resources import resource_filename
+            >>> from importlib.resources import files
             >>> from starfish.core.spacetx_format.util import SpaceTxValidator
-            >>> schema_path = resource_filename("starfish", "spacetx_format/schema/experiment.json")
-            >>> validator = SpaceTxValidator(schema_path)
+            >>> schema_path = files("starfish").joinpath("spacetx_format/schema/experiment.json")
+            >>> validator = SpaceTxValidator(str(schema_path))
             >>> if not validator.validate_object(your_experiment_object):
             >>>     raise Exception("invalid")
 

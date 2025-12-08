@@ -1,11 +1,13 @@
 {
-  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/extras.json",
+  "$id": "https://github.com/spacetx/starfish/spacetx_format/schema/extras.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "description": "Unstructured field used to contain additional data about this data manifest. (Unversioned schema)",
   "default": null,
   "examples": [
     null,
     "spaceTx is great",
-    {"extra_metadata": "critical_info"}
+    {
+      "extra_metadata": "critical_info"
+    }
   ]
 }

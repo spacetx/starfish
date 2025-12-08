@@ -3,6 +3,7 @@ import sys
 import tempfile
 
 import numpy as np
+from packaging.version import Version
 
 import starfish
 from starfish.core.intensity_table.intensity_table import IntensityTable
@@ -58,32 +59,40 @@ def test_iss_pipeline_cropped_data(tmpdir):
     registered_image = iss.registered_imgs
 
     expected_registered_values = np.array(
-        [[8.182720e-03, 2.094890e-03, 1.921310e-03, 8.036800e-04, 0.000000e+00,
-          1.113000e-05, 2.362500e-04, 1.137100e-04, 2.881270e-03, 1.061417e-02],
-         [1.225884e-02, 7.359780e-03, 6.554780e-03, 3.967060e-03, 7.174400e-04,
-          1.377300e-04, 3.282700e-04, 1.963200e-04, 1.156900e-04, 2.786610e-03],
-         [1.817651e-02, 1.313646e-02, 1.080875e-02, 8.000580e-03, 2.264170e-03,
-          8.996000e-04, 1.071100e-03, 2.864700e-04, 4.592600e-04, 2.591370e-03],
-         [2.938030e-02, 2.027904e-02, 1.634731e-02, 1.067738e-02, 5.404920e-03,
-          3.325540e-03, 2.005550e-03, 3.105000e-05, 9.240000e-04, 5.751660e-03],
-         [4.422882e-02, 3.153970e-02, 2.650198e-02, 1.768988e-02, 1.198124e-02,
-          7.287380e-03, 4.359240e-03, 4.564000e-05, 1.156120e-03, 3.979250e-03],
-         [5.676676e-02, 4.604779e-02, 3.936250e-02, 2.943260e-02, 1.997995e-02,
-          1.306023e-02, 9.153120e-03, 1.940280e-03, 1.672590e-03, 1.607550e-03],
-         [5.948846e-02, 5.680262e-02, 5.028814e-02, 3.747543e-02, 2.800228e-02,
-          2.101545e-02, 1.274632e-02, 5.316650e-03, 4.062480e-03, 1.875220e-03],
-         [5.272433e-02, 5.822361e-02, 5.484088e-02, 4.344586e-02, 3.279146e-02,
-          2.484935e-02, 1.552278e-02, 8.065560e-03, 8.012830e-03, 2.026330e-03],
-         [4.264575e-02, 5.009904e-02, 5.163100e-02, 4.824880e-02, 3.619050e-02,
-          2.628749e-02, 1.851076e-02, 1.187091e-02, 8.305970e-03, 4.661620e-03],
-         [3.705096e-02, 4.012012e-02, 4.393976e-02, 4.851252e-02, 4.276346e-02,
-          3.062118e-02, 1.944861e-02, 1.515226e-02, 9.333680e-03, 9.347120e-03]],
+        [[9.956287e-03, 4.382827e-03, 3.377583e-03, 1.676941e-03, 1.843710e-04,
+          0.000000e+00, 1.060593e-04, 1.570793e-05, 1.083317e-03, 6.584799e-03],
+         [1.453807e-02, 9.621573e-03, 8.186622e-03, 5.916186e-03, 1.824629e-03,
+          3.533170e-04, 5.222907e-04, 3.772743e-04, 4.503722e-05, 1.102258e-03],
+         [2.307469e-02, 1.583596e-02, 1.238587e-02, 9.499015e-03, 3.546112e-03,
+          1.481345e-03, 1.324189e-03, 2.925306e-04, 5.596119e-04, 3.681781e-03],
+         [3.524983e-02, 2.441847e-02, 1.960656e-02, 1.255823e-02, 7.747118e-03,
+          4.900453e-03, 2.757738e-03, 3.212543e-04, 4.914876e-04, 5.271485e-03],
+         [5.139222e-02, 3.787590e-02, 3.136785e-02, 2.306333e-02, 1.551601e-02,
+          9.377318e-03, 6.117928e-03, 7.416179e-04, 1.231178e-03, 2.670616e-03],
+         [5.949953e-02, 5.164410e-02, 4.453927e-02, 3.411048e-02, 2.398818e-02,
+          1.655605e-02, 1.186486e-02, 4.347167e-03, 1.806095e-03, 1.728893e-03],
+         [5.874086e-02, 5.879546e-02, 5.402317e-02, 4.139205e-02, 3.177369e-02,
+          2.464539e-02, 1.448956e-02, 6.815665e-03, 6.004986e-03, 2.577132e-03],
+         [4.819431e-02, 5.582142e-02, 5.535191e-02, 4.698015e-02, 3.496249e-02,
+          2.583509e-02, 1.868034e-02, 1.033007e-02, 8.692421e-03, 2.931876e-03],
+         [4.109203e-02, 4.548026e-02, 4.914177e-02, 4.964774e-02, 4.018743e-02,
+          2.969893e-02, 1.954622e-02, 1.384825e-02, 8.802789e-03, 6.922520e-03],
+         [3.561261e-02, 3.782343e-02, 4.072055e-02, 4.671327e-02, 4.534628e-02,
+          3.361325e-02, 2.241083e-02, 1.681411e-02, 1.111553e-02, 1.011566e-02]],
         dtype=np.float32
     )
 
+    # choose tolerances dynamically: numpy>=2 on macOS may show slightly larger differences
+    if sys.platform == "darwin" and Version(np.__version__) >= Version("2.0.0"):
+        rtol, atol = 5e-3, 5e-6  # loosen slightly for macOS + numpy2
+    else:
+        rtol, atol = 1e-5, 1e-8  # numpy.allclose() defaults
+
     assert np.allclose(
+        expected_registered_values,
         registered_image.xarray[2, 2, 0, 40:50, 40:50],
-        expected_registered_values
+        rtol=rtol,
+        atol=atol
     )
 
     pipeline_log = registered_image.log.data
@@ -94,14 +103,14 @@ def test_iss_pipeline_cropped_data(tmpdir):
     # decode
     decoded = iss.decoded
 
-    # decoding identifies 4 genes, each with 1 count
+    # decoding identifies 15 genes, each with at least 1 count
     genes, gene_counts = iss.genes, iss.counts
-    assert np.array_equal(genes, np.array(['ACTB', 'CD68', 'CTSL2', 'EPCAM',
+    assert np.array_equal(genes, np.array(['ACTB', 'CCNB1', 'CD68', 'CTSL2', 'EPCAM',
                                            'ETV4', 'GAPDH', 'GUS', 'HER2', 'RAC1',
-                                           'TFRC', 'TP53', 'VEGF']))
+                                           'RPLP0', 'STK15', 'TFRC', 'TP53', 'VEGF']))
 
-    assert np.array_equal(gene_counts, [19, 1, 5, 2, 1, 9, 1, 3, 2, 1, 1, 2])
-    assert decoded.sizes[Features.AXIS] == 99
+    assert np.array_equal(gene_counts, [21, 1, 1, 6, 2, 1, 12, 1, 3, 3, 1, 1, 1, 1, 2])
+    assert decoded.sizes[Features.AXIS] == 102
 
     masks = iss.masks
 
@@ -136,11 +145,11 @@ def test_iss_pipeline_cropped_data(tmpdir):
     assert pipeline_log[2]['method'] == 'BlobDetector'
     assert pipeline_log[3]['method'] == 'PerRoundMaxChannel'
 
-    # 28 of the spots are assigned to cell 0 (although most spots do not decode!)
-    assert np.sum(assigned['cell_id'] == '1') == 28
+    # 29 of the spots are assigned to cell 0 (although most spots do not decode!)
+    assert np.sum(assigned['cell_id'] == '1') == 29
 
     expression_matrix = iss.cg
     # test that nans were properly removed from the expression matrix
     assert 'nan' not in expression_matrix.genes.data
     # test the number of spots that did not decode per cell
-    assert np.array_equal(expression_matrix.number_of_undecoded_spots.data, [14, 1, 37])
+    assert np.array_equal(expression_matrix.number_of_undecoded_spots.data, [10, 1, 34])

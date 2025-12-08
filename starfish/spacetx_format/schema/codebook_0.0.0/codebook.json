@@ -1,5 +1,5 @@
 {
-  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/codebook/codebook.json",
+  "$id": "https://github.com/spacetx/starfish/spacetx_format/schema/codebook_0.0.0/codebook.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "description": "Codebook for mapping image features to target molecules.",
@@ -10,7 +10,7 @@
   "additionalProperties": false,
   "properties": {
     "version": {
-      "$ref": "schema/version.json"
+      "$ref": "../version.json"
     },
     "mappings": {
       "type": "array",
@@ -23,7 +23,7 @@
         ],
         "properties": {
           "codeword": {
-            "$ref": "schema/codebook_0.0.0/codeword.json"
+            "$ref": "codeword.json"
           },
           "target": {
             "type": "string",

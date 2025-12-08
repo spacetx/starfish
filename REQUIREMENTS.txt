@@ -3,23 +3,18 @@ click
 # sphinx 5.3.0 requires docutils<0.20
 docutils<0.20
 h5py
-# jsonschema 4.18.0 made RefResolver deprecated
-jsonschema<4.18
-# matplotlib 3.8 changes colormap module
-matplotlib<3.8
-# numpy 2.0 breaks code and migration requires additional work
-numpy<2
+jsonschema>=4.18
+matplotlib
+numpy
 read_roi
 regional
 scikit-image>0.22
 scikit-learn
 seaborn
 semantic_version
-showit
 slicedimage
 sympy
 tqdm
 trackpy
 validators
-# xarray 2023.09 causses a ValueError: new dimensions ('y', 'x') must be a superset of existing dimensions ('dim_0', 'dim_1')
-xarray<2023.09
+xarray

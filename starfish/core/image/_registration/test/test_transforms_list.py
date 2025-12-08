@@ -9,7 +9,7 @@ from starfish.core.image._registration.transforms_list import TransformsList
 from starfish.core.types import Axes, TransformType
 
 
-ISS_SHIFTS = [[-23, 6], [-22, 2], [-22, -4], [-15, -4]]
+ISS_SHIFTS = [[-23, 6], [-22, 2], [-22, -3], [-15, -4]]
 
 
 def test_export_import_transforms_object():

@@ -125,8 +125,17 @@ class BlobDetector(FindSpotsAlgorithm):
         if self.detector_method == blob_dog:
             del spot_finding_args['num_sigma']
 
+        # Convert to numpy array and handle singleton z-dimension for consistency
+        # This ensures (1, y, x) produces same results as (y, x)
+        data_image = np.asarray(data_image)
+        if data_image.ndim == 3 and data_image.shape[0] == 1:
+            # Squeeze out the singleton z-dimension before blob detection
+            data_image_for_detection = np.squeeze(data_image, axis=0)
+        else:
+            data_image_for_detection = data_image
+
         fitted_blobs_array: np.ndarray = self.detector_method(
-            data_image,
+            data_image_for_detection,
             **spot_finding_args
         )  # type: ignore  # error: Cannot call function of unknown type  [operator]
 
@@ -136,19 +145,43 @@ class BlobDetector(FindSpotsAlgorithm):
             return PerImageSliceSpotResults(spot_attrs=empty_spot_attrs, extras=None)
 
         # measure intensities
-        data_image = np.asarray(data_image)
-        if self.is_volume:
+        # Determine dimensionality from the data passed to blob detector
+        # blob_log returns:
+        # - Scalar sigma: (n_blobs, ndim + 1) where columns are [coords..., sigma]
+        # - Anisotropic sigma: (n_blobs, 2*ndim) where columns are [coords..., sigmas...]
+        # We use data_image_for_detection.ndim to know if we did 2D or 3D detection
+        if data_image_for_detection.ndim == 3:
+            # 3D blob detection result: [z, y, x, sigma] or [z, y, x, sigma_z, sigma_y, sigma_x]
             z_inds = fitted_blobs_array[:, 0].astype(int)
             y_inds = fitted_blobs_array[:, 1].astype(int)
             x_inds = fitted_blobs_array[:, 2].astype(int)
-            radius = np.round(fitted_blobs_array[:, 3] * np.sqrt(3))
+            # For radius, use first sigma column (scalar sigma)
+            # or average of sigma columns (anisotropic)
+            if fitted_blobs_array.shape[1] == 4:
+                # Scalar sigma
+                radius = np.round(fitted_blobs_array[:, 3] * np.sqrt(3))
+            else:
+                # Anisotropic sigma - average the three sigma values
+                radius = np.round(fitted_blobs_array[:, 3:6].mean(axis=1) * np.sqrt(3))
             intensities = data_image[tuple([z_inds, y_inds, x_inds])]
         else:
-            z_inds = np.asarray([0 for x in range(len(fitted_blobs_array))])
+            # 2D blob detection result: [y, x, sigma] or [y, x, sigma_y, sigma_x]
             y_inds = fitted_blobs_array[:, 0].astype(int)
             x_inds = fitted_blobs_array[:, 1].astype(int)
-            radius = np.round(fitted_blobs_array[:, 2] * np.sqrt(2))
-            intensities = data_image[tuple([y_inds, x_inds])]
+            # For radius, use first sigma column (scalar sigma)
+            # or average of sigma columns (anisotropic)
+            if fitted_blobs_array.shape[1] == 3:
+                # Scalar sigma
+                radius = np.round(fitted_blobs_array[:, 2] * np.sqrt(2))
+            else:
+                # Anisotropic sigma - average the two sigma values
+                radius = np.round(fitted_blobs_array[:, 2:4].mean(axis=1) * np.sqrt(2))
+            z_inds = np.zeros(len(fitted_blobs_array), dtype=int)
+            # For 2D results, handle both 2D and 3D data_image
+            if data_image.ndim == 3:
+                intensities = data_image[z_inds, y_inds, x_inds]
+            else:
+                intensities = data_image[y_inds, x_inds]
 
         # construct dataframe
         spot_data = pd.DataFrame(
@@ -215,16 +248,18 @@ class BlobDetector(FindSpotsAlgorithm):
                         spot_attributes_list[i][1]['z']
                     r = spot_attributes_list[i][1][Axes.ROUND]
                     ch = spot_attributes_list[i][1][Axes.CH]
-                    merged_z_tables[(r, ch)] = merged_z_tables[(r, ch)].append(
-                        spot_attributes_list[i][0].spot_attrs.data)
+                    merged_z_tables[(r, ch)] = pd.concat(
+                        [merged_z_tables[(r, ch)], spot_attributes_list[i][0].spot_attrs.data])
                 new = []
-                r_chs = sorted([*merged_z_tables])
-                selectors = list(image_stack._iter_axes({Axes.ROUND, Axes.CH}))
-                for i, (r, ch) in enumerate(r_chs):
-                    merged_z_tables[(r, ch)]['spot_id'] = range(len(merged_z_tables[(r, ch)]))
-                    spot_attrs = SpotAttributes(merged_z_tables[(r, ch)].reset_index(drop=True))
-                    new.append((PerImageSliceSpotResults(spot_attrs=spot_attrs, extras=None),
-                               selectors[i]))
+                # Iterate through the merged tables in the order expected by _iter_axes
+                for selector in image_stack._iter_axes({Axes.ROUND, Axes.CH}):
+                    r = selector[Axes.ROUND]
+                    ch = selector[Axes.CH]
+                    if (r, ch) in merged_z_tables:
+                        merged_z_tables[(r, ch)]['spot_id'] = range(len(merged_z_tables[(r, ch)]))
+                        spot_attrs = SpotAttributes(merged_z_tables[(r, ch)].reset_index(drop=True))
+                        new.append((PerImageSliceSpotResults(spot_attrs=spot_attrs, extras=None),
+                                   selector))
 
                 spot_attributes_list = new
 

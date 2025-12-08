@@ -1,5 +1,5 @@
 {
-  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/fov-manifest.json",
+  "$id": "https://github.com/spacetx/starfish/spacetx_format/schema/fov_manifest_0.0.0.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "description": "A manifest listing one or more json files that each describe a field of view.",
   "type": "object",
@@ -9,7 +9,7 @@
   ],
   "properties": {
     "version": {
-      "$ref": "schema/version.json"
+      "$ref": "version.json"
     },
     "contents": {
       "description": "One or more {key: file} pairs that describe the location of fov.json files.",
@@ -26,7 +26,7 @@
       }
     },
     "extras": {
-      "$ref": "schema/extras.json"
+      "$ref": "extras.json"
     }
   }
 }

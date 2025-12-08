@@ -79,7 +79,9 @@
       "examples": [
         null,
         "spaceTx is great",
-        {"extra_metadata": "critical_info"}
+        {
+          "extra_metadata": "critical_info"
+        }
       ]
     }
   }

@@ -7,7 +7,7 @@
 # Configuration Overview:
 # -----------------------
 # - System dependencies for building scientific Python packages (HDF5, ATLAS, etc.)
-# - Python version management via pyenv (supports Python 3.9-3.13)
+# - Python version management via pyenv (supports Python 3.10-3.13)
 # - Network access to PyPI and related package repositories
 # - Automatic installation of development dependencies
 # - Docker support (pre-installed in environment)
@@ -52,7 +52,7 @@
 #
 # Python Version Management:
 # --------------------------
-# This setup installs Python versions based on pyproject.toml (3.9-3.12 supported)
+# This setup installs Python versions based on pyproject.toml (3.10-3.12 supported)
 # plus Python 3.13 (next version not yet fully supported).
 # The agent can switch versions using: pyenv global X.Y
 #

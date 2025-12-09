@@ -36,7 +36,7 @@
 ##
 ##   $ docker run -e TEST_ISS_KEEP_DATA=true --entrypoint=pytest spacetx/starfish -vsxk TestWithIssData
 ##
-FROM python:3.9-slim-buster
+FROM python:3.10-slim-buster
 
 RUN useradd -m starfish
 USER starfish

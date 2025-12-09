@@ -231,10 +231,11 @@ class SyntheticData:
         image += np.random.normal(scale=background_electrons, size=image.shape)  # type: ignore
 
         # mimic analog to digital conversion
-        image = (image / graylevel).astype(int).clip(0, 2 ** ad_conversion_bits)
+        image = (image / graylevel).astype(int).clip(
+            0, 2 ** ad_conversion_bits)  # type: ignore[assignment]
 
         # clip in case we've picked up some negative values
-        image = np.clip(image, 0, a_max=None)
+        image = np.clip(image, 0, a_max=None)  # type: ignore[assignment]
 
         # set the smallest int datatype that supports the data's intensity range
         image = select_uint_dtype(image)

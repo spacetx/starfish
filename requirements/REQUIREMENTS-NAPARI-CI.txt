@@ -29,7 +29,7 @@ executing==2.2.1
 fasteners==0.20
 flexcache==0.3
 flexparser==0.4
-fonttools==4.60.1
+fonttools==4.61.0
 freetype-py==2.5.1
 fsspec==2025.9.0
 h5py==3.14.0

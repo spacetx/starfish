@@ -52,8 +52,7 @@
 #
 # Python Version Management:
 # --------------------------
-# This setup installs Python versions based on pyproject.toml (3.10-3.12 supported)
-# plus Python 3.13 (next version not yet fully supported).
+# This setup installs Python versions based on pyproject.toml (3.10-3.13 supported).
 # The agent can switch versions using: pyenv global X.Y
 #
 # Additional Requirements:
@@ -94,17 +93,16 @@ steps:
       source ~/.bashrc
 
   # Install multiple Python versions (using latest from each major.minor version)
-  # Based on pyproject.toml requires-python: ">= 3.9, <3.13" plus 3.13 as next version
+  # Based on pyproject.toml requires-python: ">= 3.10, <3.14"
   - run: |
       export PYENV_ROOT="$HOME/.pyenv"
       export PATH="$PYENV_ROOT/bin:$PATH"
       eval "$(pyenv init -)"
-      pyenv install 3.9
       pyenv install 3.10
       pyenv install 3.11
       pyenv install 3.12
       pyenv install 3.13
-      pyenv global 3.9
+      pyenv global 3.10
 
   # Upgrade pip and install build tools
   - run: |

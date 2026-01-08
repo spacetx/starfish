@@ -51,7 +51,7 @@ See `spacetx-starfish.readthedocs.io <https://spacetx-starfish.readthedocs.io/en
 Installation
 ------------
 
-starfish supports python 3.10-3.12 and can easily be installed from PyPI:
+starfish supports python 3.10-3.13 and can easily be installed from PyPI:
 
 .. code-block:: bash
 

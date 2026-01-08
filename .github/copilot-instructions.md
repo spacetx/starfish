@@ -6,7 +6,7 @@
 
 ## Technology Stack
 
-- **Language**: Python (3.10+)
+- **Language**: Python (3.10-3.13)
 - **Build System**: setuptools with versioneer for version management
 - **Package Management**: pip with pinned requirements
 - **Testing**: pytest with pytest-cov for coverage

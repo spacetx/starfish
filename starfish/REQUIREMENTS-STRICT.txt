@@ -15,7 +15,7 @@ idna==3.11
 imageio==2.37.2
 importlib_resources==6.5.2
 jmespath==1.0.1
-joblib==1.5.2
+joblib==1.5.3
 jsonschema==4.25.1
 jsonschema-specifications==2025.9.1
 kiwisolver==1.4.7

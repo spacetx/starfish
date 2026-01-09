@@ -1,3 +1,11 @@
+## [0.4.0] - 2026-01-09
+- ci: Add Python 3.13 support (#2181)
+- ci: End python 3.9 support (#2174)
+- ci: Bump the patch group with 7 updates (#2176)
+- ci: Bump actions/cache from 4 to 5 (#2175)
+- ci: Bump the patch group with 9 updates (#2166)
+- ci: Bump actions/checkout from 5 to 6 (#2165)
+
 ## [0.3.4] - 2025-11-24
 - feat: Add ImageStack.from_xarray() constructor for memory-efficient round processing (#2155)
 - fix: BlobDetector coordinate extraction ensuring consistent results across dimensionalities (#2154)
@@ -316,6 +324,7 @@
 ## [0.0.33] - 2019.02.14
 - Last release without a changelog!
 
+[0.4.0]: https://github.com/spacetx/starfish/releases/tag/0.4.0
 [0.3.4]: https://github.com/spacetx/starfish/releases/tag/0.3.4
 [0.3.3]: https://github.com/spacetx/starfish/releases/tag/0.3.3
 [0.3.2]: https://github.com/spacetx/starfish/releases/tag/0.3.2

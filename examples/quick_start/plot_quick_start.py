@@ -13,7 +13,7 @@ Approximate time to complete tutorial: 10 minutes
 Prerequisites
 -------------
 
-* Python 3.9+ installed (Python 3.10 recommended)
+* Python 3.10+ installed (Python 3.12 recommended)
 * Some basic knowledge of scientific computing in Python_
 * :ref:`Starfish library installed <installation>`
 

@@ -5,6 +5,7 @@ This module provides fixtures and hooks for pytest to properly manage resources
 during test execution, particularly for Python 3.13 compatibility where stricter
 resource management warnings are enabled.
 """
+import gc
 import pytest
 import warnings
 
@@ -53,6 +54,8 @@ def cleanup_diskcache_per_test():
     """
     yield
     _cleanup_diskcache_caches()
+    # Force garbage collection after cleanup to prevent warnings
+    gc.collect()
 
 
 @pytest.fixture(scope="session", autouse=True)

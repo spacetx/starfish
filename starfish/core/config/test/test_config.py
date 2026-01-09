@@ -167,6 +167,7 @@ def test_cache_merfish(tmpdir, name, expected, config, monkeypatch):
             # Enforce smallest size
             cache = Cache(str(tmpdir / "caching"))
             cache.cull()
+            cache.close()
 
         cache_size = get_size(tmpdir / "caching")
         min, max = expected

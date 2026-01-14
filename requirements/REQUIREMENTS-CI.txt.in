@@ -4,28 +4,12 @@
 build
 flake8
 flake8-import-order
-lxml_html_clean
-# pin m2r2: https://github.com/CrossNox/m2r2/issues/52
-m2r2>=0.3.3
-# pinning mistune for m2r2
-mistune==0.8.4
 # temporarily limiting mypy as 1.11 introduces errors
 mypy<1.11
-numpydoc
 nbencdec>=0.0.5
-pycodestyle
 pytest>=4.4.0
 pytest-cov>=2.5.1
 pytest-xdist
-recommonmark
-requests
-sphinx>5,<6
-sphinx_autodoc_typehints
-sphinx_bootstrap_theme
-sphinxcontrib-programoutput
-sphinx-gallery
-sphinx_rtd_theme
 twine
-types-setuptools
 types-PyYAML
 types-requests

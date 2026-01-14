@@ -1,13 +1,7 @@
 click
-# docutils 0.22 introduces an AttributeError: module 'docutils.nodes' has no attribute 'reprunicode'
-# sphinx 5.3.0 requires docutils<0.20
-docutils<0.20
 h5py
 jsonschema>=4.18
-matplotlib
-numpy
 read_roi
-regional
 scikit-image>0.22
 scikit-learn
 seaborn
@@ -16,5 +10,4 @@ slicedimage
 sympy
 tqdm
 trackpy
-validators
 xarray

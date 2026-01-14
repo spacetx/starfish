@@ -31,7 +31,7 @@ all:	fast
 
 ### UNIT #####################################################
 #
-fast:	lint mypy fast-test docs-html
+fast:	lint mypy fast-test
 
 lint:   lint-non-init lint-init
 
@@ -68,20 +68,24 @@ help-unit:
 
 ### DOCS #####################################################
 #
+build-docs:
+	make docs-html
+
 docs-%:
 	make -C docs $*
 
 help-docs:
+	$(call print_help, build-docs, builds HTML docs using Sphinx)
 	$(call print_help, docs-TASK, alias for 'make TASK' in the docs subdirectory)
 
-.PHONY: help-docs
+.PHONY: build-docs help-docs
 #
 ##############################################################
 
 ### REQUIREMENTS #############################################
 #
-GENERATED_REQUIREMENT_FILES=starfish/REQUIREMENTS-STRICT.txt requirements/REQUIREMENTS-CI.txt requirements/REQUIREMENTS-NAPARI-CI.txt requirements/REQUIREMENTS-JUPYTER.txt
-SOURCE_REQUIREMENT_FILES=REQUIREMENTS.txt requirements/REQUIREMENTS-CI.txt.in requirements/REQUIREMENTS-NAPARI-CI.txt.in requirements/REQUIREMENTS-JUPYTER.txt.in
+GENERATED_REQUIREMENT_FILES=starfish/REQUIREMENTS-STRICT.txt requirements/REQUIREMENTS-CI.txt requirements/REQUIREMENTS-NAPARI-CI.txt requirements/REQUIREMENTS-JUPYTER.txt requirements/REQUIREMENTS-DOCS.txt
+SOURCE_REQUIREMENT_FILES=REQUIREMENTS.txt requirements/REQUIREMENTS-CI.txt.in requirements/REQUIREMENTS-NAPARI-CI.txt.in requirements/REQUIREMENTS-JUPYTER.txt.in requirements/REQUIREMENTS-DOCS.txt.in
 
 # This rule pins the requirements with the minimal set of changes required to satisfy the
 # requirements.  This is typically run when a new requirement is added, and we want to
@@ -164,6 +168,12 @@ install-dev:
 	pip install -e .
 	pip freeze
 
+install-build-docs:
+	python -m pip install --upgrade pip==$(PIP_VERSION)
+	pip install -r requirements/REQUIREMENTS-DOCS.txt
+	pip install -e .
+	pip freeze
+
 install-src:
 	python -m pip install --upgrade pip==$(PIP_VERSION) -e .
 	pip freeze
@@ -176,10 +186,11 @@ install-released-notebooks-support:
 
 help-install:
 	$(call print_help, install-dev, pip install from the current directory with pinned requirements and tooling for CI)
+	$(call print_help, install-build-docs, pip install from the current directory with pinned requirements and tooling for DOCS)
 	$(call print_help, install-src, pip install from the current directory)
 	$(call print_help, install-released-notebooks, pip install tooling to run notebooks against the released version of starfish)
 
-.PHONY: install-dev install-src install-released-notebooks-support help-install
+.PHONY: install-dev install-build-docs install-src install-released-notebooks-support help-install
 #
 ###############################################################
 

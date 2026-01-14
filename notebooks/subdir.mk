@@ -8,8 +8,7 @@ ipynb_regenerate_targets := $(addprefix regenerate__notebooks/, $(addsuffix .ipy
 py_regenerate_targets := $(addprefix regenerate__notebooks/py/, $(addsuffix .py, $(notdir $(basename $(ipynb_files)))))
 PYTHON := ipython
 
-fast: $(ipynb_validate_targets)
-run-notebooks: $(py_run_targets)
+run-notebooks: $(ipynb_validate_targets) $(py_run_targets)
 check-notebooks: $(py_check_targets)
 validate-notebooks: $(ipynb_validate_targets)
 regenerate-ipynb: $(ipynb_regenerate_targets)

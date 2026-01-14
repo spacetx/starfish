@@ -163,11 +163,11 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          make install-dev
+          make install-build-docs
 
       - name: Generate HTML docs
         run: |
-          make docs-html
+          make build-docs
 
   docker-smoketest:
     name: Docker Smoketest

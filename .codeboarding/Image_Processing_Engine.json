@@ -1,0 +1,156 @@
+{
+  "description": "The `Image Processing Engine` subsystem is primarily defined by the `starfish.core.image` and `starfish.core.morphology` packages, specifically focusing on `Filter`, `_registration`, `Segment`, `Binarize`, and `label_image` modules. It operates as a pipeline, where raw or pre-processed images are fed into various transformation and analysis steps. This modular and pipeline-driven structure aligns with the project's \"Data Pipeline / ETL\" and \"Modular Design\" architectural patterns, allowing for flexible construction of image analysis workflows.",
+  "components": [
+    {
+      "name": "Image Filtering",
+      "description": "Responsible for applying various image enhancement and noise reduction algorithms to raw or pre-processed image data.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.image.Filter",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/image/Filter/__init__.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Image Registration",
+      "description": "Manages the application of geometric transformations to align and register images, correcting for spatial distortions between different acquisitions or time points.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.image._registration.ApplyTransform",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/image/_registration/ApplyTransform",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Transformation Parameters",
+      "description": "Provides a standardized mechanism for defining, serializing, and deserializing parameters required for various image transformations.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.image._registration.transforms_list",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/image/_registration/transforms_list.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "Image Segmentation",
+      "description": "Implements the watershed algorithm to segment images into distinct regions, typically used for separating touching objects or identifying individual structures.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.image.Segment.watershed",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/image/Segment/watershed.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Image Binarization",
+      "description": "Performs image binarization by applying a threshold, converting grayscale images into binary (black and white) masks based on pixel intensity.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.morphology.Binarize.threshold",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/morphology/Binarize/threshold.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "Labeled Image Representation",
+      "description": "Encapsulates and manages image data where pixels are assigned integer labels corresponding to distinct regions or objects identified through segmentation.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.morphology.label_image.label_image",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/morphology/label_image/label_image.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "Binary Mask Collection",
+      "description": "Manages collections of binary masks, providing an organized structure for handling multiple mask datasets, often derived from binarization or segmentation.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.morphology.binary_mask.binary_mask",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/morphology/binary_mask/binary_mask.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": true
+    },
+    {
+      "name": "Mask Persistence",
+      "description": "Handles the reading and writing of binary mask data to and from persistent storage, ensuring data integrity and reusability.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "starfish.core.morphology.binary_mask._io",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/morphology/binary_mask/_io.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": false
+    }
+  ],
+  "components_relations": [
+    {
+      "relation": "provides processed images to",
+      "src_name": "Image Filtering",
+      "dst_name": "Image Segmentation"
+    },
+    {
+      "relation": "provides processed images to",
+      "src_name": "Image Filtering",
+      "dst_name": "Image Binarization"
+    },
+    {
+      "relation": "utilizes",
+      "src_name": "Image Registration",
+      "dst_name": "Transformation Parameters"
+    },
+    {
+      "relation": "provides transformation parameters to",
+      "src_name": "Transformation Parameters",
+      "dst_name": "Image Registration"
+    },
+    {
+      "relation": "outputs segmented regions, which are represented by",
+      "src_name": "Image Segmentation",
+      "dst_name": "Labeled Image Representation"
+    },
+    {
+      "relation": "generates binary output, which is managed by",
+      "src_name": "Image Binarization",
+      "dst_name": "Binary Mask Collection"
+    },
+    {
+      "relation": "contributes to the creation or population of",
+      "src_name": "Labeled Image Representation",
+      "dst_name": "Binary Mask Collection"
+    },
+    {
+      "relation": "uses",
+      "src_name": "Binary Mask Collection",
+      "dst_name": "Mask Persistence"
+    },
+    {
+      "relation": "provides persistence services for",
+      "src_name": "Mask Persistence",
+      "dst_name": "Binary Mask Collection"
+    }
+  ]
+}

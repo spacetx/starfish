@@ -3,7 +3,7 @@
 Installation
 ============
 
-Starfish supports python 3.9-3.12. To install the starfish package,
+Starfish supports python 3.10-3.13. To install the starfish package,
 first verify that your python version is compatible. You can check this by running :code:`python
 --version`.
 
@@ -12,7 +12,7 @@ The output should look similar to this:
 .. code-block:: bash
 
    $ python --version
-   Python 3.9.18
+   Python 3.10.19
 
 .. warning::
     While starfish itself should work on any operating system, some napari dependencies might not be
@@ -44,7 +44,7 @@ Conda_ users can set one up like so:
 
 .. code-block:: bash
 
-    $ conda create -n starfish "python=3.9"
+    $ conda create -n starfish "python=3.10"
     $ conda activate starfish
 
 Installing *starfish*
@@ -84,7 +84,7 @@ Installing *starfish* on Windows
 --------------------------------
 
 Windows (cmd.exe) users can install starfish in the same way. Again, we recommend using a conda or virtual
-environment with python 3.9+. Here is how you would install starfish in a virtual environment
+environment with python 3.10+. Here is how you would install starfish in a virtual environment
 created with python's ``venv`` module:
 
 .. code-block:: bat

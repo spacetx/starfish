@@ -6,8 +6,8 @@ babel==2.17.0
 backports.tarfile==1.2.0
 beautifulsoup4==4.14.3
 bleach==6.3.0
-boto3==1.42.24
-botocore==1.42.24
+boto3==1.42.39
+botocore==1.42.39
 build==1.4.0
 certifi==2026.1.4
 cffi==2.0.0
@@ -15,8 +15,8 @@ charset-normalizer==3.4.4
 click==8.3.1
 commonmark==0.9.1
 contourpy==1.3.2
-coverage==7.13.1
-cryptography==46.0.3
+coverage==7.13.2
+cryptography==46.0.4
 cycler==0.12.1
 decorator==5.2.1
 defusedxml==0.7.1
@@ -71,7 +71,7 @@ mypy==1.10.1
 mypy_extensions==1.1.0
 nbclient==0.10.4
 nbconvert==6.5.4
-nbencdec==0.0.10
+nbencdec==0.0.11
 nbformat==5.10.4
 networkx==3.4.2
 nh3==0.3.2
@@ -92,7 +92,7 @@ pycodestyle==2.14.0
 pycparser==2.23
 pyflakes==3.4.0
 Pygments==2.19.2
-pyparsing==3.3.1
+pyparsing==3.3.2
 pyproject_hooks==1.2.0
 pytest==9.0.2
 pytest-cov==7.0.0
@@ -122,7 +122,7 @@ setuptools==80.9.0
 six==1.17.0
 slicedimage==4.1.1
 snowballstemmer==3.0.1
-soupsieve==2.8.1
+soupsieve==2.8.3
 Sphinx==5.3.0
 sphinx-autodoc-typehints==1.23.0
 sphinx-bootstrap-theme==0.8.1
@@ -144,7 +144,7 @@ tifffile==2025.5.10
 tinycss2==1.5.1
 tomli==2.3.0
 tornado==6.5.4
-tqdm==4.67.1
+tqdm==4.67.2
 trackpy==0.7
 traitlets==5.14.3
 twine==6.2.0

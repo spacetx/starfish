@@ -113,7 +113,7 @@ scipy==1.15.3
 seaborn==0.13.2
 semantic-version==2.10.0
 Send2Trash==2.0.0
-setuptools==80.9.0
+setuptools==80.10.2
 six==1.17.0
 slicedimage==4.1.1
 soupsieve==2.8.3

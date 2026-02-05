@@ -36,10 +36,19 @@ class SpotAttributes(ValidatedTable):
 
     @classmethod
     def combine(cls, spot_attribute_tables: Sequence["SpotAttributes"]) -> "SpotAttributes":
-        return cls(pd.concat([
-            spot_attribute_table.data
-            for spot_attribute_table in spot_attribute_tables
-        ]))
+        data_list = [spot_attribute_table.data for spot_attribute_table in spot_attribute_tables]
+        non_empty_list = [df for df in data_list if not df.empty]
+        
+        if non_empty_list:
+            # Concat only non-empty DataFrames to avoid FutureWarning
+            combined = pd.concat(non_empty_list)
+        elif data_list:
+            # All DataFrames are empty - use structure from first one
+            combined = data_list[0].copy()
+        else:
+            # No DataFrames at all - create minimal empty DataFrame
+            combined = pd.DataFrame(columns=[field[0] for field in cls.required_fields])
+        return cls(combined)
 
     def save_geojson(self, output_file_name: str) -> None:
         """Save to geojson for web visualization

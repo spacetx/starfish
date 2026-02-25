@@ -55,10 +55,20 @@ def build_traces_sequential(spot_results: SpotFindingResults, **kwargs) -> Inten
 
     """
 
-    all_spots = pd.concat([sa.spot_attrs.data for sa in spot_results.values()],
-                          ignore_index=True, sort=True)
+    all_data_list = [sa.spot_attrs.data for sa in spot_results.values()]
+    spot_data_list = [df for df in all_data_list if not df.empty]
+    
+    if spot_data_list:
+        all_spots = pd.concat(spot_data_list, ignore_index=True, sort=True)
+    elif all_data_list:
+        # All DataFrames are empty - use structure from first one
+        all_spots = all_data_list[0].copy()
+    else:
+        all_spots = pd.DataFrame()
+    
     # reassign spot_ids to index number so they are unique
-    all_spots['spot_id'] = all_spots.index
+    if not all_spots.empty:
+        all_spots['spot_id'] = all_spots.index
 
     intensity_table = IntensityTable.zeros(
         spot_attributes=SpotAttributes(all_spots),

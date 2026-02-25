@@ -152,9 +152,15 @@ def _merge_spots_by_round(
         round_data[r].append(df)
 
     # create one dataframe per round
-    round_dataframes = {
-        k: pd.concat(v, axis=0).reset_index().drop('index', axis=1)
-        for k, v in round_data.items()
-    }
+    round_dataframes = {}
+    for k, v in round_data.items():
+        non_empty = [df for df in v if not df.empty]
+        if non_empty:
+            round_dataframes[k] = pd.concat(non_empty, axis=0).reset_index(drop=True)
+        elif v:
+            # All DataFrames are empty - use structure from first one
+            round_dataframes[k] = v[0].copy()
+        else:
+            round_dataframes[k] = pd.DataFrame()
 
     return round_dataframes

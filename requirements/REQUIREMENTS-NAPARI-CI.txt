@@ -88,7 +88,7 @@ pandas==2.3.3
 parso==0.8.5
 partd==1.4.2
 pexpect==4.9.0
-pillow==12.1.0
+pillow==12.1.1
 Pint==0.24.4
 platformdirs==4.5.1
 pluggy==1.6.0

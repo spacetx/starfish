@@ -83,7 +83,7 @@ pandas==2.3.3
 pandocfilters==1.5.1
 parso==0.8.5
 pexpect==4.9.0
-pillow==12.1.0
+pillow==12.1.1
 platformdirs==4.5.1
 prometheus_client==0.23.1
 prompt_toolkit==3.0.52

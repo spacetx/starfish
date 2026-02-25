@@ -312,11 +312,11 @@ release-docker: release-check
 # public: print commands for uploading artifacts
 release-upload: release-check
 	@printf '\n# Please execute the following steps\n'
-	@echo git push origin $(VERSION)
+	@echo git push origin tag $(VERSION)
 	@echo docker push $(DOCKER_IMAGE)
 	@echo docker push $(DOCKER_IMAGE):$(VERSION)
 	@echo docker push $(DOCKER_IMAGE):$(VERSION)-$(DOCKER_BUILD)
-	@echo twine upload dist/starfish-$(VERSION).tar.gz
+	@echo twine upload dist/starfish-$(VERSION)*
 
 clean:
 	rm -rf release-env

@@ -1,190 +1,166 @@
 #!/usr/bin/env python
 # coding: utf-8
 #
-# EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "starfish", "language": "python", "name": "starfish"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.6.5"}}, "nbformat": 4, "nbformat_minor": 2}
+# EPY: stripped_notebook: {"metadata": {"kernelspec": {"display_name": "Python 3 (ipykernel)", "language": "python", "name": "python3"}, "language_info": {"codemirror_mode": {"name": "ipython", "version": 3}, "file_extension": ".py", "mimetype": "text/x-python", "name": "python", "nbconvert_exporter": "python", "pygments_lexer": "ipython3", "version": "3.10.19"}}, "nbformat": 4, "nbformat_minor": 5}
 
 # EPY: START markdown
-## Starfish SeqFISH Work-in-progress Processing Example
+### seqFISH Processing Example
 # EPY: END markdown
 
 # EPY: START code
-# EPY: ESCAPE %gui qt
-
-import os
-from copy import deepcopy
-from itertools import product
-
-import numpy as np
-import pandas as pd
-import skimage.filters
-import skimage.morphology
-from skimage.transform import SimilarityTransform, warp
-from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 import starfish
 import starfish.data
-from starfish.types import Axes, Levels, TraceBuildingStrategies
+from starfish.types import Levels, TraceBuildingStrategies
 # EPY: END code
 
 # EPY: START markdown
-#Select data for a single field of view.
+#### Load Image
 # EPY: END markdown
 
 # EPY: START code
 exp = starfish.data.SeqFISH(use_test_data=True)
-# EPY: END code
-
-# EPY: START code
 img = exp['fov_000'].get_image('primary')
 # EPY: END code
 
 # EPY: START markdown
-#The first step in SeqFISH is to do some rough registration. For this data, the rough registration has been done for us by the authors, so it is omitted from this notebook.
-# EPY: END markdown
-
-# EPY: START markdown
-### Remove image background
-# EPY: END markdown
-
-# EPY: START markdown
-#To remove image background, use a White Tophat filter, which measures the background with a rolling disk morphological element and subtracts it from the image.
+#### Processing
 # EPY: END markdown
 
 # EPY: START code
-from skimage.morphology import opening, dilation, disk
-from functools import partial
+# Remove cellular autofluorescence w/ gaussian high-pass filter
+ghp = starfish.image.Filter.GaussianHighPass(sigma=3)
+ghp.run(img, verbose=False, in_place=True)
+
+# Increase resolution by deconvolving w/ point spread function
+dpsf = starfish.image.Filter.DeconvolvePSF(num_iter=15, sigma=3)
+dpsf.run(img, verbose=False, in_place=True)
+
+# Scale intensities in each volume and clip all but high intensity pixels
+clip = starfish.image.Filter.Clip(
+    p_min=90,
+    p_max=99.9,
+    is_volume=True,
+    level_method=Levels.SCALE_BY_CHUNK)
+
+scaled = clip.run(img, in_place=False)
 # EPY: END code
 
 # EPY: START markdown
-#If desired, the background that is being subtracted can be visualized
+#### Spot Finding
 # EPY: END markdown
 
 # EPY: START code
-opening = partial(opening, footprint=disk(3))
-
-background = img.apply(
-    opening,
-    group_by={Axes.ROUND, Axes.CH, Axes.ZPLANE}, verbose=False, in_place=False
-)
-
-starfish.display(background)
-# EPY: END code
-
-# EPY: START code
-wth = starfish.image.Filter.WhiteTophat(masking_radius=3)
-background_corrected = wth.run(img, in_place=False)
-starfish.display(background_corrected)
-# EPY: END code
-
-# EPY: START markdown
-### Scale images to equalize spot intensities across channels
-#
-#The number of peaks are not uniform across rounds and channels, which prevents histogram matching across channels. Instead, a percentile value is identified and set as the maximum across channels, and the dynamic range is extended to equalize the channel intensities
-# EPY: END markdown
-
-# EPY: START code
-clip = starfish.image.Filter.Clip(p_max=99.9, is_volume=True, level_method=Levels.SCALE_BY_CHUNK)
-scaled = clip.run(background_corrected, in_place=False)
-# EPY: END code
-
-# EPY: START code
-starfish.display(scaled)
-# EPY: END code
-
-# EPY: START markdown
-### Remove residual background
-#
-#The background is fairly uniformly present below intensity=0.5. However, starfish's clip method currently only supports percentiles. To solve this problem, the intensities can be directly edited in the underlying numpy array.
-# EPY: END markdown
-
-# EPY: START code
-from copy import deepcopy
-clipped = deepcopy(scaled)
-clipped.xarray.values[clipped.xarray.values < 0.7] = 0
-# EPY: END code
-
-# EPY: START code
-starfish.display(clipped)
-# EPY: END code
-
-# EPY: START markdown
-### Detect Spots
-#
-#Detect spots with a local search blob detector that identifies spots in all rounds and channels and matches them using a local search method. The local search starts in an anchor channel (default ch=1) and identifies the nearest spot in all subsequent imaging rounds.
-# EPY: END markdown
-
-# EPY: START code
-threshold = 0.5
+threshold = 0.1
 
 bd = starfish.spots.FindSpots.BlobDetector(
-    min_sigma=(1.5, 1.5, 1.5),
-    max_sigma=(8, 8, 8),
+    min_sigma=(1, 1, 1),
+    max_sigma=(5, 5, 5),
     num_sigma=10,
     threshold=threshold)
 
-spots = bd.run(clipped)
-decoder = starfish.spots.DecodeSpots.PerRoundMaxChannel(
-    codebook=exp.codebook,
-    search_radius=7,
-    trace_building_strategy=TraceBuildingStrategies.NEAREST_NEIGHBOR)
-
-decoded = decoder.run(spots=spots)
-# EPY: END code
-
-# EPY: START code
-starfish.display(clipped, decoded)
+spots = bd.run(scaled)
 # EPY: END code
 
 # EPY: START markdown
-#Based on visual inspection, it looks like the spot correspondence across rounds isn't being detected well. Try the PixelSpotDecoder.
+#### Decoding
+#
+#Comparison between using PerRoundMaxChannel w/ NEAREST_NEIGHBOR TraceBuildingStrategies and the three different accuracy modes of the CheckAll decoder.
+#
+#Runs each decoder for three different search radii parameters (1, 2, and 3) and creates a bar plot showing the total number of decoded mRNA targets found by each method. For the CheckAll decoder columns, the number of non-error corrected barcodes is denoted by a black line in the bar while the full height of the bar shows the combined number of error-corrected and non-error-corrected barcodes.
 # EPY: END markdown
 
 # EPY: START code
-glp = starfish.image.Filter.GaussianLowPass(sigma=(0.3, 1, 1), is_volume=True)
-blurred = glp.run(clipped)
-# EPY: END code
+# Set the number of cpu cores to use in parallel for the CheckAll decoder.
+# This significantly cuts down on run time.
+n_cpus = 24
 
-# EPY: START code
-psd = starfish.spots.DetectPixels.PixelSpotDecoder(
-    codebook=exp.codebook, metric='euclidean', distance_threshold=0.5,
-    magnitude_threshold=0.1, min_area=7, max_area=50,
-)
-pixel_decoded, ccdr = psd.run(blurred)
-# EPY: END code
+# Run each decoder for different search radius values
+for radius in [2, 3, 4]:
 
-# EPY: START code
-import matplotlib.pyplot as plt
-# EPY: END code
+    # Decode using PerRoundMaxChannel NEAREST_NEIGHBOR method
+    decoder = starfish.spots.DecodeSpots.PerRoundMaxChannel(
+        codebook=exp.codebook,
+        search_radius=radius,
+        trace_building_strategy=TraceBuildingStrategies.NEAREST_NEIGHBOR)
 
-# EPY: START code
-# look at the label image in napari
-label_image = starfish.ImageStack.from_numpy(np.reshape(ccdr.decoded_image, (1, 1, 29, 280, 280)))
-starfish.display(label_image)
-# EPY: END code
+    decoded_prmc = decoder.run(spots=spots)
+    decoded_prmc = decoded_prmc[decoded_prmc['passes_thresholds']]
 
-# EPY: START markdown
-#Compare the number of spots being detected by the two spot finders
-# EPY: END markdown
+    # Decode using high accuracy CheckAll method
+    decoder = starfish.spots.DecodeSpots.CheckAll(codebook=exp.codebook,
+                                                  search_radius=radius,
+                                                  error_rounds=1,
+                                                  mode='high')
 
-# EPY: START code
-print("pixel_decoder spots detected", int(np.sum(pixel_decoded['target'] != 'nan')))
-print("local search spot detector spots detected", int(np.sum(decoded['target'] != 'nan')))
-# EPY: END code
+    checkall_high = decoder.run(spots=spots, n_processes=n_cpus)
 
-# EPY: START markdown
-#Report the correlation between the two methods
-# EPY: END markdown
+    # Decode using medium accuracy CheckAll method
+    decoder = starfish.spots.DecodeSpots.CheckAll(codebook=exp.codebook,
+                                                  search_radius=radius,
+                                                  error_rounds=1,
+                                                  mode='med')
 
-# EPY: START code
-from scipy.stats import pearsonr
+    checkall_med = decoder.run(spots=spots, n_processes=n_cpus)
 
-# get the total counts for each gene from each spot detector
-pixel_decoded_gene_counts = pd.Series(*np.unique(pixel_decoded['target'], return_counts=True)[::-1])
-decoded_gene_counts = pd.Series(*np.unique(decoded['target'], return_counts=True)[::-1])
+    # Decode using low accuracy CheckAll method
+    decoder = starfish.spots.DecodeSpots.CheckAll(codebook=exp.codebook,
+                                                  search_radius=radius,
+                                                  error_rounds=1,
+                                                  mode='low')
 
-# get the genes that are detected by both spot finders
-codetected = pixel_decoded_gene_counts.index.intersection(decoded_gene_counts.index).dropna()
+    checkall_low = decoder.run(spots=spots, n_processes=n_cpus)
 
-# report the correlation
-pearsonr(pixel_decoded_gene_counts[codetected], decoded_gene_counts[codetected])
+    # Plot total number of barcodes from each method (black line shows number of full barcodes
+    # while bar height is the combined number of both error-corrected and non-error-corrected)
+    fig, axes = plt.subplots(1, 1, figsize=(15, 15))
+
+    labels = ['PerRoundMaxChannel', 'CheckAll (high)', 'CheckAll (med)', 'CheckAll (low)']
+    axes.bar(
+        [1], len(decoded_prmc),
+        color=(0 / 256, 119 / 256, 187 / 256), width=1, label='PerRoundMaxChannel',
+    )
+    axes.plot([0.5, 1.5], [len(decoded_prmc), len(decoded_prmc)], color='black', linewidth=3)
+    axes.bar(
+        [2], len(checkall_high),
+        color=(0 / 256, 153 / 256, 136 / 256), width=1, label='CheckAll (high)',
+    )
+    axes.plot(
+        [1.5, 2.5],
+        [len(checkall_high[checkall_high['rounds_used'] == 5]),
+         len(checkall_high[checkall_high['rounds_used'] == 5])],
+        color='black', linewidth=3,
+    )
+    axes.bar(
+        [3], len(checkall_med),
+        color=(238 / 256, 119 / 256, 51 / 256), width=1, label='CheckAll (med)',
+    )
+    axes.plot(
+        [2.5, 3.5],
+        [len(checkall_med[checkall_med['rounds_used'] == 5]),
+         len(checkall_med[checkall_med['rounds_used'] == 5])],
+        color='black', linewidth=3,
+    )
+    axes.bar(
+        [4], len(checkall_low),
+        color=(238 / 256, 51 / 256, 119 / 256), width=1, label='CheckAll (low)',
+    )
+    axes.plot(
+        [3.5, 4.5],
+        [len(checkall_low[checkall_low['rounds_used'] == 5]),
+         len(checkall_low[checkall_low['rounds_used'] == 5])],
+        color='black', linewidth=3,
+    )
+
+    axes.set_xticks(range(1, 5))
+    axes.set_xticklabels(labels, size=16)
+    axes.set_yticks(range(0, int(len(checkall_low) + len(checkall_low) / 10 + 1), 100))
+    axes.set_yticklabels(
+        range(0, int(len(checkall_low) + len(checkall_low) / 10 + 1), 100), size=16,
+    )
+    axes.set_ylim(0, len(checkall_low) + len(checkall_low) / 10)
+    axes.set_xlabel('Decoding Method', size=20)
+    axes.set_ylabel('Total Decoded mRNAs', size=20)
+    axes.set_title(f'Search Radius = {radius}', size=30)
 # EPY: END code

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Mapping, Union
 
 import numpy as np
-from skimage.io import imsave
+import tifffile
 from slicedimage import ImageFormat
 
 from starfish.core.types import Axes, Coordinates, CoordinateValue
@@ -127,7 +127,7 @@ def write_image(
 
                     data = np.random.random(size=(SHAPE[Axes.Y], SHAPE[Axes.X])).astype(np.float32)
 
-                    imsave(os.fspath(path), data, plugin="tifffile")
+                    tifffile.imwrite(os.fspath(path), data)
 
 
 def write_inplace(tmpdir: Path, num_fovs: int = 2):

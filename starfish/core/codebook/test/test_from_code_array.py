@@ -137,7 +137,7 @@ def test_create_codebook():
     targets = [x[Features.TARGET] for x in code_array]
 
     # Loop performed by from_code_array
-    data = np.zeros((2, 2, 3), dtype=np.uint8)
+    data = np.zeros((2, 2, 3), dtype=float)
     for i, code_dict in enumerate(code_array):
         for bit in code_dict[Features.CODEWORD]:
             ch = int(bit[Axes.CH])

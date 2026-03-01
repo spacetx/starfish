@@ -11,9 +11,9 @@ asttokens==3.0.1
 async-timeout==5.0.1
 attrs==25.4.0
 babel==2.17.0
-bermuda==0.1.6
-boto3==1.42.39
-botocore==1.42.39
+bermuda==0.1.7
+boto3==1.42.59
+botocore==1.42.59
 build==1.4.0
 cachey==0.2.1
 certifi==2026.1.4
@@ -73,8 +73,8 @@ mpmath==1.3.0
 multidict==6.7.1
 napari==0.6.6
 napari-console==0.1.4
-napari-plugin-engine==0.2.0
-napari-plugin-manager==0.1.9
+napari-plugin-engine==0.2.1
+napari-plugin-manager==0.1.10
 napari-svg==0.2.1
 nest-asyncio==1.6.0
 networkx==3.4.2
@@ -85,7 +85,7 @@ numpy==2.2.6
 numpydoc==1.6.0
 packaging==25.0
 pandas==2.3.3
-parso==0.8.5
+parso==0.8.6
 partd==1.4.2
 pexpect==4.9.0
 pillow==12.1.1
@@ -116,7 +116,7 @@ python-dateutil==2.9.0.post0
 pytz==2025.2
 PyYAML==6.0.3
 pyzmq==27.1.0
-qtconsole==5.7.0
+qtconsole==5.7.1
 QtPy==2.4.3
 read-roi==1.6.0
 referencing==0.37.0
@@ -143,7 +143,7 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==2.0.0
 sphinxcontrib-serializinghtml==2.0.0
 stack-data==0.6.3
-superqt==0.7.7
+superqt==0.7.8
 sympy==1.14.0
 tabulate==0.9.0
 threadpoolctl==3.6.0
@@ -152,7 +152,7 @@ tomli==2.3.0
 tomli_w==1.2.0
 toolz==1.1.0
 tornado==6.5.4
-tqdm==4.67.2
+tqdm==4.67.3
 trackpy==0.7
 traitlets==5.14.3
 triangle==20250106

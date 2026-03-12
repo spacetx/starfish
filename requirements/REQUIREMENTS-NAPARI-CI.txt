@@ -2,7 +2,7 @@
 aiohappyeyeballs==2.6.1
 aiohttp==3.13.3
 aiosignal==1.4.0
-alabaster==0.7.16
+alabaster==1.0.0
 annotated-types==0.7.0
 app-model==0.4.0
 appdirs==1.4.4

@@ -89,7 +89,7 @@ prompt_toolkit==3.0.52
 ptyprocess==0.7.0
 pure_eval==0.2.3
 pycodestyle==2.14.0
-pycparser==2.23
+pycparser==3.0
 pyflakes==3.4.0
 Pygments==2.19.2
 pyparsing==3.3.2

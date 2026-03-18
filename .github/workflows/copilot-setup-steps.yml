@@ -36,6 +36,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - uses: actions/cache@v5
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
       - name: Install Dependencies
         run: |
           make install-dev
@@ -43,7 +48,3 @@ jobs:
       - name: flake8 linting and mypy static type checker
         run: |
           make lint mypy
-
-      - name: Run ci tests
-        run: |
-          make fast-test

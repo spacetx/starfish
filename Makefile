@@ -142,7 +142,7 @@ include examples/how_to/subdir.mk
 
 test-examples: export TESTING=1
 test-examples: run-pipelines run-quick-start run-how-to
-slow: fast run-notebooks test-examples docker
+slow: fast validate-notebooks run-notebooks test-examples docker
 
 docker:
 	docker build -f docker/Dockerfile -t $(DOCKER_IMAGE) .
@@ -314,11 +314,11 @@ release-docker: release-check
 # public: print commands for uploading artifacts
 release-upload: release-check
 	@printf '\n# Please execute the following steps\n'
-	@echo git push origin $(VERSION)
+	@echo git push origin tag $(VERSION)
 	@echo docker push $(DOCKER_IMAGE)
 	@echo docker push $(DOCKER_IMAGE):$(VERSION)
 	@echo docker push $(DOCKER_IMAGE):$(VERSION)-$(DOCKER_BUILD)
-	@echo twine upload dist/starfish-$(VERSION).tar.gz
+	@echo twine upload dist/starfish-$(VERSION)*
 
 clean:
 	rm -rf release-env

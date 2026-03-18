@@ -95,7 +95,7 @@ jobs:
 
       - name: Run tests
         run: |
-          make -j check-notebooks slow-test
+          make -j check-notebooks validate-notebooks slow-test
 
   # Disabling napari tests for now since github actions runner has no
   # display so will need to modify tests to have napari run headless maybe?

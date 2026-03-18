@@ -137,9 +137,11 @@ help-requirements:
 #
 include notebooks/subdir.mk
 include examples/pipelines/subdir.mk
+include examples/quick_start/subdir.mk
+include examples/how_to/subdir.mk
 
 test-examples: export TESTING=1
-test-examples: run-examples
+test-examples: run-pipelines run-quick-start run-how-to
 slow: fast validate-notebooks run-notebooks test-examples docker
 
 docker:

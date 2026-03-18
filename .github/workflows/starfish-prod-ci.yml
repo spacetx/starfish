@@ -458,3 +458,53 @@ jobs:
       - name: Run Data Processing Example Test
         run: |
           make TESTING=1 iss_pipeline.py
+
+  quick-start-examples:
+    name: Quick Start Examples
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - uses: actions/cache@v5
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run Quick Start Examples
+        run: |
+          make run-quick-start
+
+  how-to-examples:
+    name: How-To Examples
+    needs: starfish-slow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - uses: actions/cache@v5
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          make install-dev
+
+      - name: Run How-To Examples
+        run: |
+          make run-how-to

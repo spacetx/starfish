@@ -6,7 +6,7 @@ sh_run_targets := $(patsubst $(path)/%,%,$(sh_files))
 
 PYTHON := ipython
 
-run-examples: $(py_run_targets) $(sh_run_targets)
+run-pipelines: $(py_run_targets) $(sh_run_targets)
 
 $(py_run_targets): % :
 	[ -e $(path)/$*.skip ] || $(PYTHON) $(path)/$*

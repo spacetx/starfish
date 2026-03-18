@@ -17,7 +17,7 @@ botocore==1.42.80
 build==1.5.0
 cachey==0.2.1
 certifi==2026.1.4
-charset-normalizer==3.4.7
+charset-normalgzer==3.4.7
 click==8.3.3
 cloudpickle==3.1.2
 comm==0.2.3

@@ -140,7 +140,7 @@ include examples/pipelines/subdir.mk
 
 test-examples: export TESTING=1
 test-examples: run-examples
-slow: fast run-notebooks test-examples docker
+slow: fast validate-notebooks run-notebooks test-examples docker
 
 docker:
 	docker build -f docker/Dockerfile -t $(DOCKER_IMAGE) .

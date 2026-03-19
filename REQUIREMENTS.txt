@@ -1,7 +1,7 @@
 click
 # docutils 0.22 introduces an AttributeError: module 'docutils.nodes' has no attribute 'reprunicode'
-# sphinx 5.3.0 requires docutils<0.20
-docutils<0.20
+# sphinx 5.3.0 requires docutils<0.23
+docutils<0.23
 h5py
 jsonschema>=4.18
 matplotlib

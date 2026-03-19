@@ -1,5 +1,4 @@
 import warnings
-from functools import partial
 from typing import Optional, Tuple
 
 import numpy as np
@@ -174,7 +173,7 @@ class TrackpyLocalMaxPeakFinder(FindSpotsAlgorithm):
         n_processes : Optional[int] = None,
             Number of processes to devote to spot finding.
         """
-        spot_finding_method = partial(self.image_to_spots, *args)
+        spot_finding_method = self.image_to_spots
         if reference_image:
             data_image = reference_image._squeezed_numpy(*{Axes.ROUND, Axes.CH})
             reference_spots = spot_finding_method(data_image)

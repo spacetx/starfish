@@ -62,7 +62,7 @@ class GaussianHighPass(FilterAlgorithm):
     @staticmethod
     def _high_pass(
             image: xr.DataArray,
-            sigma: Union[Number, Tuple[Number]],
+            sigma: Union[Number, Tuple[Number, ...]],
     ) -> xr.DataArray:
         """
         Applies a gaussian high pass filter to an image

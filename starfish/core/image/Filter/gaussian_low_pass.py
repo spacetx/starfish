@@ -60,7 +60,7 @@ class GaussianLowPass(FilterAlgorithm):
     @staticmethod
     def _low_pass(
             image: xr.DataArray,
-            sigma: Union[Number, Tuple[Number]],
+            sigma: Union[Number, Tuple[Number, ...]],
     ) -> xr.DataArray:
         """
         Apply a Gaussian blur operation over a multi-dimensional image.

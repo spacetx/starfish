@@ -86,7 +86,7 @@ class Laplace(FilterAlgorithm):
 
     @staticmethod
     def _gaussian_laplace(
-        image: xr.DataArray, sigma: Union[Number, Tuple[Number]],
+        image: xr.DataArray, sigma: Union[Number, Tuple[Number, ...]],
         mode: str = 'reflect', cval: float = 0.0
     ) -> xr.DataArray:
         filtered = gaussian_laplace(

@@ -38,8 +38,7 @@ def test_display(qtbot, stack, spots, masks):
     from napari import Viewer
 
     viewer = Viewer()
-    view = viewer.window.qt_viewer
-    qtbot.addWidget(view)
+    qtbot.addWidget(viewer.window._qt_window)
 
     if stack is None and spots is None and masks is None:
         with pytest.raises(TypeError):

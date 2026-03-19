@@ -62,7 +62,7 @@ class MeanHighPass(FilterAlgorithm):
 
     @staticmethod
     def _high_pass(
-        image: xr.DataArray, size: Number, rescale: bool = False
+        image: xr.DataArray, size: Union[Number, Tuple[Number, ...]], rescale: bool = False
     ) -> xr.DataArray:
         """
         Applies a mean high pass filter to an image

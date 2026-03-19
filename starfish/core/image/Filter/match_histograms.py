@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Optional, Set
+from typing import Optional, Set, Union
 
 import numpy as np
 import xarray as xr
@@ -57,7 +57,7 @@ class MatchHistograms(FilterAlgorithm):
 
     @staticmethod
     def _match_histograms(
-        image: xr.DataArray, reference: np.ndarray
+        image: xr.DataArray, reference: Union[np.ndarray, xr.DataArray]
     ) -> np.ndarray:
         """
         matches the intensity distribution of image to reference

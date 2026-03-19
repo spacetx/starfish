@@ -4,9 +4,11 @@ from concurrent.futures.process import ProcessPoolExecutor
 from copy import deepcopy
 from functools import partial
 from itertools import chain, islice, permutations, product
+from typing import cast
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 from scipy.spatial import cKDTree
 
 from starfish.core.codebook.codebook import Codebook
@@ -487,7 +489,7 @@ def decoder(roundData: pd.DataFrame,
     # and the values are the modified codebooks corresponding to the rounds used
     permCodeDict = {}
     for currentRounds in roundPermutations:
-        codes = codebook.argmax(Axes.CH.value)
+        codes = cast(xr.DataArray, codebook.argmax(Axes.CH.value))
         if currentRoundOmitNum > 0:
             omittedRounds = np.argwhere(~np.asarray(currentRounds))
             codes.data[:, omittedRounds] = -1

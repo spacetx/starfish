@@ -150,14 +150,14 @@ def test_reference_image_spot_detection_with_image_with_labeled_axes():
     reference_image = data_stack.reduce((Axes.ROUND, Axes.CH), func=FunctionSource.np("max"))
     spot_results = gaussian_spot_detector.run(image_stack=data_stack,
                                               reference_image=reference_image)
-    return spot_results
+    assert spot_results.count_total_spots() == 12
 
 
 def test_spot_detection_with_image_with_labeled_axes():
     """This testing method uses no reference image to identify spot locations."""
     data_stack = _make_labeled_image()
     spot_results = gaussian_spot_detector.run(image_stack=data_stack)
-    return spot_results
+    assert spot_results.count_total_spots() == 12
 
 
 def test_blob_detector_2d_spot_coordinates():

@@ -279,10 +279,10 @@ def display(
             viewer.add_points(
                 coords,
                 face_color="red",
-                edge_color="red",
+                border_color="red",
                 symbol="ring",
-                size=np.mean(sizes[:, 2:4], axis=1) * radius_multiplier,
-                n_dimensional=True,
+                size=np.nan_to_num(np.mean(sizes[:, 2:4], axis=1), nan=1.0) * radius_multiplier,
+                out_of_slice_display=True,
                 name="spots"
             )
 

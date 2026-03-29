@@ -1,0 +1,88 @@
+{
+  "description": "The `starfish` core data persistence layer is responsible for serializing and exporting processed biological data, ensuring data integrity and accessibility for downstream analysis. Key components include `ImageStack` for managing and exporting multi-dimensional image data into formats like multi-page TIFF, `DecodedSpots` for persisting decoded biological spot information into tabular formats such as CSV, and `BinaryMaskIO` which handles the specialized, versioned storage of binary mask data. These components primarily interact by taking processed in-memory data structures and writing them to disk in standardized formats, facilitating data sharing and reproducibility in scientific workflows.",
+  "components": [
+    {
+      "name": "ImageStack",
+      "description": "This component represents and manages multi-dimensional image data. Its primary responsibility within this layer is to provide methods for serializing and exporting processed image stacks into standard persistent formats, specifically multi-page TIFF files, which are crucial for scientific image data.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "ImageStack:to_multipage_tiff",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/imagestack/imagestack.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        },
+        {
+          "qualified_name": "ImageStack:export",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/imagestack/imagestack.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "DecodedSpots",
+      "description": "This component encapsulates the results of the decoding process, holding information about identified biological spots (e.g., coordinates, intensities, gene assignments). Its core responsibility in this layer is to facilitate the persistence of this structured data, typically by saving it into tabular formats like CSV, enabling easy access and analysis.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "DecodedSpots:save_csv",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/types/_decoded_spots.py",
+          "reference_start_line": 0,
+          "reference_end_line": 0
+        }
+      ],
+      "can_expand": false
+    },
+    {
+      "name": "BinaryMaskIO",
+      "description": "This component is responsible for the specialized handling and persistence of binary mask data. It provides both low-level writing capabilities and a higher-level interface that ensures proper versioning of mask files, aligning with data integrity and reproducibility requirements in scientific workflows. This component abstracts the direct file writing operations for masks by delegating to specific versioned implementations.",
+      "referenced_source_code": [
+        {
+          "qualified_name": "write_binary_mask",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/morphology/binary_mask/_io.py",
+          "reference_start_line": 136,
+          "reference_end_line": 162
+        },
+        {
+          "qualified_name": "write_versioned_binary_mask",
+          "reference_file": "/home/ivan/StartUp/CodeBoarding/repos/starfish/starfish/core/morphology/binary_mask/_io.py",
+          "reference_start_line": 58,
+          "reference_end_line": 74
+        }
+      ],
+      "can_expand": true
+    }
+  ],
+  "components_relations": [
+    {
+      "relation": "exports",
+      "src_name": "ImageStack",
+      "dst_name": "Multi-page TIFF files"
+    },
+    {
+      "relation": "serializes",
+      "src_name": "ImageStack",
+      "dst_name": "Image data"
+    },
+    {
+      "relation": "saves to",
+      "src_name": "DecodedSpots",
+      "dst_name": "CSV files"
+    },
+    {
+      "relation": "persists",
+      "src_name": "DecodedSpots",
+      "dst_name": "Decoded spot data"
+    },
+    {
+      "relation": "delegates writing to",
+      "src_name": "BinaryMaskIO",
+      "dst_name": "Versioned Binary Mask Writers"
+    },
+    {
+      "relation": "manages versioning for",
+      "src_name": "BinaryMaskIO",
+      "dst_name": "Binary Mask Data"
+    }
+  ]
+}

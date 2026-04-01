@@ -1,6 +1,6 @@
 # You should not edit this file directly.  Instead, you should edit one of the following files (requirements/REQUIREMENTS-NAPARI-CI.txt.in) and run make requirements/REQUIREMENTS-NAPARI-CI.txt
 aiohappyeyeballs==2.6.1
-aiohttp==3.13.3
+aiohttp==3.13.4
 aiosignal==1.4.0
 alabaster==0.7.16
 annotated-types==0.7.0

@@ -1,6 +1,6 @@
 # You should not edit this file directly.  Instead, you should edit one of the following files (requirements/REQUIREMENTS-NAPARI-CI.txt.in) and run make requirements/REQUIREMENTS-NAPARI-CI.txt
 aiohappyeyeballs==2.6.1
-aiohttp==3.13.3
+aiohttp==3.13.5
 aiosignal==1.4.0
 alabaster==0.7.16
 annotated-types==0.7.0
@@ -12,12 +12,12 @@ async-timeout==5.0.1
 attrs==25.4.0
 babel==2.17.0
 bermuda==0.1.7
-boto3==1.42.59
-botocore==1.42.59
-build==1.4.0
+boto3==1.42.80
+botocore==1.42.80
+build==1.4.2
 cachey==0.2.1
 certifi==2026.1.4
-charset-normalizer==3.4.4
+charset-normalizer==3.4.6
 click==8.3.1
 cloudpickle==3.1.2
 comm==0.2.3
@@ -42,7 +42,7 @@ h5py==3.15.1
 HeapDict==1.0.1
 hsluv==5.0.4
 idna==3.11
-ImageIO==2.37.2
+ImageIO==2.37.3
 imagesize==1.4.1
 importlib_metadata==8.7.1
 in-n-out==0.2.1
@@ -74,7 +74,7 @@ multidict==6.7.1
 napari==0.6.6
 napari-console==0.1.4
 napari-plugin-engine==0.2.1
-napari-plugin-manager==0.1.10
+napari-plugin-manager==0.1.11
 napari-svg==0.2.1
 nest-asyncio==1.6.0
 networkx==3.4.2
@@ -116,7 +116,7 @@ python-dateutil==2.9.0.post0
 pytz==2025.2
 PyYAML==6.0.3
 pyzmq==27.1.0
-qtconsole==5.7.1
+qtconsole==5.7.2
 QtPy==2.4.3
 read-roi==1.6.0
 referencing==0.37.0

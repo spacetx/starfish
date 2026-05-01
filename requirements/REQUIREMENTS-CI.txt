@@ -83,7 +83,7 @@ pandocfilters==1.5.1
 parso==0.8.6
 pexpect==4.9.0
 pillow==12.2.0
-platformdirs==4.5.1
+platformdirs==4.9.6
 pluggy==1.6.0
 prompt_toolkit==3.0.52
 ptyprocess==0.7.0

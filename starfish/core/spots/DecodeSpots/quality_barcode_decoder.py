@@ -172,20 +172,18 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
         targets = consistent_targets
         targets[missing_rounds] = "missing"
 
-        qual_targets = np.empty((len(intensities),), dtype=object)
-        for i in range(len(intensities)):
-            spots_qual = []
+        qual_targets = {target: np.empty((len(intensities),), dtype=object) for target in self.codebook.target.values}
+        for i in range(len(targets)):
             targets_temp = []
             for t in targets[i].split(","):
                 if t in self.codebook.target.values:
                     target_vector = self.codebook.values[self.codebook.target.values == t][0]
                     spot_vector = intensities.values[i]
                     quality = (spot_vector * target_vector).sum() / target_vector.sum()
+                    qual_targets[t][i] = quality
                     if quality >= self.min_target_quality:
-                        spots_qual.append(np.round(quality, 3))
                         targets_temp.append(t)
             targets[i] = ",".join(targets_temp)
-            qual_targets[i] = ",".join([str(q) for q in spots_qual])
 
         # only to check whether filter is passed: normalize both the intensities and the codebook
         norm_intensities, norms = self.codebook._normalize_features(intensities, norm_order=self.norm_order)

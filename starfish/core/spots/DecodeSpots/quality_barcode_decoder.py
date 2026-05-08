@@ -67,7 +67,7 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
         search_radius: int = 3,
         return_original_intensities: bool = True,
         raw_intensity_threshold: float = 0.05,
-        min_target_quality: float = 0.5,
+        min_target_quality: float = 0.03,
     ) -> None:
         self.codebook = codebook
         self.max_distance = max_distance
@@ -135,8 +135,7 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
                 if len(subset) == 0:
                     combined = np.zeros_like(self.codebook[0])
                 else:
-                    combined = np.sum(subset, axis=0)
-                    combined = np.clip(combined, 0, 1)
+                    combined = np.clip(np.sum(subset, axis=0), 0, 1)
                 codebook_comb[count] = combined
                 count += 1
         codebook_comb = np.nan_to_num(codebook_comb[1:]/codebook_comb[1:].sum(axis=2, keepdims=True))
@@ -165,23 +164,19 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
         
         cbs = self.codebook.stack(traces=(Axes.ROUND.value, Axes.CH.value)) > 0
         consistencies = np.stack([consistent_with_target(st, c).values for c in cbs], axis=1)
-        consistent_targets = np.array([",".join(cbs.target.values[c]) for c in consistencies])
-        valid_pattern = np.array([np.all(st.values[i] == np.any(cbs.values[consistencies[i]], axis=0)) for i in range(st.shape[0])])
+        targets = np.array([",".join(cbs.target.values[c]) for c in consistencies])
         
-        # assign targets
-        targets = consistent_targets
         targets[missing_rounds] = "missing"
 
-        qual_targets = {target: np.empty((len(intensities),), dtype=object) for target in self.codebook.target.values}
+        qual_targets = {target: np.empty((len(intensities),), dtype=float) for target in self.codebook.target.values}
         for i in range(len(targets)):
             targets_temp = []
             for t in targets[i].split(","):
                 if t in self.codebook.target.values:
                     target_vector = self.codebook.values[self.codebook.target.values == t][0]
                     spot_vector = intensities.values[i]
-                    quality = (spot_vector * target_vector).sum() / target_vector.sum()
-                    qual_targets[t][i] = quality
-                    if quality >= self.min_target_quality:
+                    qual_targets[t][i] = (spot_vector * target_vector).sum() / target_vector.sum()
+                    if qual_targets[t][i] >= self.min_target_quality:
                         targets_temp.append(t)
             targets[i] = ",".join(targets_temp)
 
@@ -196,7 +191,7 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
         )
 
         
-        norm_metric_outputs = (metric_outputs - min(metric_outputs)) / (max(metric_outputs) - min(metric_outputs))
+        norm_metric_outputs = metric_outputs / max(metric_outputs)
         rounded_metric_outputs = [round(i, 3) for i in norm_metric_outputs.reshape(len(norm_metric_outputs),)]
         return_intensities = intensities if self.return_original_intensities else norm_intensities
         return_intensities["binarized"] = ((Features.AXIS, Axes.ROUND.value, Axes.CH.value), binarized)
@@ -206,5 +201,6 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
             targets=(Features.AXIS, targets),
             distances=(Features.AXIS, rounded_metric_outputs),
             passes_threshold=(Features.AXIS, passes_filters))
-        output["target_quality"] = (Features.AXIS, qual_targets)
+        for target in qual_targets:
+            output[target+"_quality"] = (Features.AXIS, qual_targets[target])
         return output

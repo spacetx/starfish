@@ -128,17 +128,17 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
         missing_rounds = st.sum([Axes.ROUND.value,Axes.CH.value]).round() < rounds
 
         # generate all possible binary activation patterns
-        count = 0
-        codebook_comb = np.empty((2 ** len(self.codebook), rounds, channels), dtype=float)
+        codebook_comb = []
         for n in range(len(self.codebook) +1):
             for subset in itertools.combinations(self.codebook, n):
                 if len(subset) == 0:
                     combined = np.zeros_like(self.codebook[0])
                 else:
                     combined = np.clip(np.sum(subset, axis=0), 0, 1)
-                codebook_comb[count] = combined
-                count += 1
-        codebook_comb = np.nan_to_num(codebook_comb[1:]/codebook_comb[1:].sum(axis=2, keepdims=True))
+                codebook_comb.append(combined)
+                
+        codebook_comb = np.array(codebook_comb, dtype=float)
+        codebook_comb = np.nan_to_num(codebook_comb/codebook_comb.sum(axis=2, keepdims=True))
         codebook_comb = [codebook_comb[i].flatten(order = 'C') for i in range(len(codebook_comb))]
 
         # compute closest binary activation pattern for each spot

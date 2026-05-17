@@ -78,7 +78,7 @@ napari-plugin-manager==0.1.11
 napari-svg==0.2.1
 nest-asyncio==1.6.0
 networkx==3.4.2
-npe2==0.7.9
+npe2==0.8.2
 numba==0.63.1
 numcodecs==0.13.1
 numpy==2.2.6

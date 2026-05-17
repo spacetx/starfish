@@ -52,6 +52,6 @@ tqdm==4.67.3
 trackpy==0.7
 typing_extensions==4.15.0
 tzdata==2025.3
-urllib3==2.6.3
+urllib3==2.7.0
 validators==0.35.0
 xarray==2025.6.1

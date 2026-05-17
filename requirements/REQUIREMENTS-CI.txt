@@ -153,7 +153,7 @@ types-requests==2.32.4.20260107
 types-setuptools==80.9.0.20251223
 typing_extensions==4.15.0
 tzdata==2025.3
-urllib3==2.6.3
+urllib3==2.7.0
 validators==0.35.0
 wcwidth==0.2.14
 webencodings==0.5.1

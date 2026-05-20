@@ -138,7 +138,8 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
                 codebook_comb.append(combined)
                 
         codebook_comb = np.array(codebook_comb, dtype=float)
-        codebook_comb = np.nan_to_num(codebook_comb/codebook_comb.sum(axis=2, keepdims=True))
+        with np.errstate(divide='ignore', invalid='ignore'):
+            codebook_comb = np.nan_to_num(codebook_comb/codebook_comb.sum(axis=2, keepdims=True))
         codebook_comb = [codebook_comb[i].flatten(order = 'C') for i in range(len(codebook_comb))]
 
         # compute closest binary activation pattern for each spot

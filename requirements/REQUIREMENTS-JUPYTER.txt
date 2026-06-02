@@ -101,7 +101,7 @@ PyYAML==6.0.2
 pyzmq==26.3.0
 read-roi==1.6.0
 regional==1.1.2
-requests==2.32.3
+requests==2.32.4
 rfc3339-validator==0.1.4
 rfc3986-validator==0.1.1
 s3transfer==0.12.0
@@ -111,7 +111,7 @@ scipy==1.13.1
 seaborn==0.13.2
 semantic-version==2.10.0
 Send2Trash==1.8.3
-setuptools==80.3.1
+setuptools==78.1.1
 showit==1.1.4
 six==1.17.0
 slicedimage==4.1.1
@@ -124,7 +124,7 @@ threadpoolctl==3.6.0
 tifffile==2024.8.30
 tinycss2==1.4.0
 tomli==2.2.1
-tornado==6.4.2
+tornado==6.5.1
 tqdm==4.67.1
 trackpy==0.6.4
 traitlets==5.14.3

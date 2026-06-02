@@ -1,6 +1,7 @@
 import itertools
 from typing import Any, cast, Hashable, Mapping, Optional, Union
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
@@ -54,7 +55,7 @@ def imshow_plane(
 
     # set imshow default kwargs
     if "cmap" not in kwargs:
-        kwargs["cmap"] = plt.cm.gray
+        kwargs["cmap"] = mpl.colormaps["gray"]
 
     ax.imshow(data, **kwargs)
     ax.axis("off")
@@ -208,12 +209,12 @@ def diagnose_registration(
     # map at 0 from clobbering previously plotted images. Functionally this
     # enables high intensity spots to be co-visualized in the same frame.
     cmaps = [
-        plt.cm.Blues,
-        plt.cm.Reds,
-        plt.cm.Greens,
-        plt.cm.Purples,
-        plt.cm.Greys,
-        plt.cm.Oranges
+        mpl.colormaps["Blues"],
+        mpl.colormaps["Reds"],
+        mpl.colormaps["Greens"],
+        mpl.colormaps["Purples"],
+        mpl.colormaps["Greys"],
+        mpl.colormaps["Oranges"]
     ]
 
     alpha_cmap_cycle = itertools.cycle([_linear_alpha_cmap(cm) for cm in cmaps])

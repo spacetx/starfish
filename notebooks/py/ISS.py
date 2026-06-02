@@ -6,7 +6,7 @@
 # EPY: START markdown
 ### Reproduce In-situ Sequencing results with Starfish
 #
-#In Situ Sequencing (ISS) is an image based transcriptomics technique that can spatially resolve hundreds RNA species and their expression levels in-situ. The protocol and data analysis are described in this [publication](https://www.ncbi.nlm.nih.gov/pubmed/23852452). This notebook walks through how to use Starfish to process the raw images from an ISS experiment into a spatially resolved cell by gene expression matrix. We verify that Starfish can accurately reproduce the results from the authors' original [pipeline](https://cellprofiler.org/previous_examples/#sequencing-rna-molecules-in-situ-combining-cellprofiler-with-imagej-plugins)
+#In Situ Sequencing (ISS) is an image based transcriptomics technique that can spatially resolve hundreds RNA species and their expression levels in-situ. The protocol and data analysis are described in this [publication](https://www.ncbi.nlm.nih.gov/pubmed/23852452). This notebook walks through how to use Starfish to process the raw images from an ISS experiment into a spatially resolved cell by gene expression matrix. We verify that Starfish can accurately reproduce the results from the authors' original [pipeline](https://cellprofiler.org/previous_examples#sequencing-rna-molecules-in-situ-combining-cellprofiler-with-imagej-plugins)
 #
 #Please see [documentation](https://spacetx-starfish.readthedocs.io/en/stable/) for detailed descriptions of all the data structures and methods used here.
 # EPY: END markdown
@@ -21,7 +21,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pprint
 
-from starfish import data, FieldOfView
+from starfish import data, display, FieldOfView
 from starfish.types import Axes, Features, FunctionSource
 from starfish.util.plot import imshow_plane
 # EPY: END code
@@ -73,10 +73,13 @@ experiment.codebook
 # EPY: END markdown
 
 # EPY: START code
-# # Display all the data in an interactive pop-up window. Uncomment to have this version work.
+# Display all the data in an interactive pop-up window. Uncomment to have this version work.
+
 # %gui qt5
 # display(imgs)
+# EPY: END code
 
+# EPY: START code
 # Display a single plane of data
 sel={Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0}
 single_plane = imgs.sel(sel)
@@ -193,6 +196,7 @@ table
 # EPY: START code
 from starfish.morphology import Binarize, Filter, Merge, Segment
 from starfish.types import Levels
+from starfish.util.plot import image
 
 dapi_thresh = .18  # binary mask for cell (nuclear) locations
 stain_thresh = .22  # binary mask for overall cells // binarization of stain
@@ -227,9 +231,6 @@ masks = segmenter.run(
     watershed_markers,
     watershed_mask,
 )
-
-import matplotlib.pyplot as plt
-from showit import image
 
 plt.figure(figsize=(10, 10))
 

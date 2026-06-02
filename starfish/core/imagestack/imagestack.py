@@ -244,7 +244,11 @@ class ImageStack:
 
     def __repr__(self):
         shape = ', '.join(f'{k}: {v}' for k, v in self._data.sizes.items())
-        return f"<starfish.ImageStack ({shape})>"
+        prefix = ""
+        if hasattr(self, 'aligned_group') and hasattr(self, '_coordinate_group_count'):
+            one_based = self.aligned_group + 1
+            prefix = f"(aligned_group={one_based}/{self._coordinate_group_count}) "
+        return f"<starfish.ImageStack {prefix}({shape})>"
 
     @classmethod
     def from_tileset(
@@ -432,6 +436,91 @@ class ImageStack:
             assert len(coordinates[Coordinates.Z]) == n_z
 
         tile_data = NumpyData(array, index_labels, coordinates)
+        return ImageStack.from_tile_collection_data(tile_data)
+
+    @classmethod
+    def from_xarray(cls, data: xr.DataArray) -> "ImageStack":
+        """Create an ImageStack from an xarray DataArray.
+
+        This method enables construction of ImageStacks from xarray DataArrays, which is useful
+        for concatenating ImageStacks or performing other xarray operations before creating an
+        ImageStack.
+
+        Parameters
+        ----------
+        data : xr.DataArray
+            5-d xarray DataArray with dimensions (r, c, z, y, x). Must have coordinates for
+            r, c, and z dimensions. Physical coordinates (xc, yc, zc) are optional but recommended.
+
+        Returns
+        -------
+        ImageStack :
+            An ImageStack wrapping the provided xarray DataArray
+
+        Raises
+        ------
+        ValueError
+            If the DataArray does not have the required dimensions or coordinates.
+        TypeError
+            If the data is not float32 or not in the range [0, 1].
+
+        Examples
+        --------
+        Create an ImageStack from numpy, get its xarray, perform operations, and reconstruct:
+
+            >>> import numpy as np
+            >>> from starfish import ImageStack
+            >>> # Create initial stack
+            >>> array = np.random.rand(2, 3, 4, 50, 60).astype(np.float32)
+            >>> stack1 = ImageStack.from_numpy(array)
+            >>> # Get xarray and perform operations
+            >>> xarr = stack1.xarray
+            >>> # Reconstruct ImageStack
+            >>> stack2 = ImageStack.from_xarray(xarr)
+
+        Concatenate multiple ImageStacks along the round dimension:
+
+            >>> import xarray as xr
+            >>> # Create two stacks
+            >>> stack1 = ImageStack.from_numpy(np.random.rand(2, 3, 4, 50, 60).astype(np.float32))
+            >>> stack2 = ImageStack.from_numpy(np.random.rand(2, 3, 4, 50, 60).astype(np.float32))
+            >>> # Concatenate their xarrays
+            >>> concatenated = xr.concat([stack1.xarray, stack2.xarray], dim='r')
+            >>> # Create new ImageStack from concatenated data
+            >>> combined_stack = ImageStack.from_xarray(concatenated)
+
+        """
+        from starfish.core.imagestack.parser.xarray import XarrayData
+
+        # Validate dimensions
+        required_dims = {
+            Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE.value, Axes.Y.value, Axes.X.value
+        }
+        actual_dims = set(data.dims)
+        if required_dims != actual_dims:
+            raise ValueError(
+                f"DataArray must have dimensions {required_dims}, but has {actual_dims}"
+            )
+
+        # Validate required coordinates
+        required_coords = {Axes.ROUND.value, Axes.CH.value, Axes.ZPLANE.value}
+        actual_coords: Set[str] = {str(k) for k in data.coords.keys()}
+        if not required_coords.issubset(actual_coords):
+            missing = required_coords - actual_coords
+            raise ValueError(
+                f"DataArray must have coordinates {required_coords}. Missing: {missing}"
+            )
+
+        # Validate data type and range
+        try:
+            cls._validate_data_dtype_and_range(data.values)
+        except TypeError:
+            warnings.warn(f"ImageStack detected as {data.dtype}. Converting to float32...")
+            # Create a copy to avoid modifying the caller's data
+            data = data.copy()
+            data.values[:] = img_as_float32(data.values)
+
+        tile_data = XarrayData(data)
         return ImageStack.from_tile_collection_data(tile_data)
 
     @property

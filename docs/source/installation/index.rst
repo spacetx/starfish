@@ -3,7 +3,7 @@
 Installation
 ============
 
-Starfish supports python 3.9-3.12. To install the starfish package,
+Starfish supports python 3.10-3.13. To install the starfish package,
 first verify that your python version is compatible. You can check this by running :code:`python
 --version`.
 
@@ -12,7 +12,7 @@ The output should look similar to this:
 .. code-block:: bash
 
    $ python --version
-   Python 3.9.18
+   Python 3.10.19
 
 .. warning::
     While starfish itself should work on any operating system, some napari dependencies might not be
@@ -44,7 +44,7 @@ Conda_ users can set one up like so:
 
 .. code-block:: bash
 
-    $ conda create -n starfish "python=3.9"
+    $ conda create -n starfish "python=3.10"
     $ conda activate starfish
 
 Installing *starfish*
@@ -56,8 +56,11 @@ Starfish can easily be installed using pip:
 
     $ pip install starfish
 
-.. note::
-    If using Windows or Apple Silicon (M1+), first install napari using pip before installing starfish.
+for the most updated version install directly from Github (starfish release on PyPI might be a few months behind the repo's master branch):
+
+.. code-block:: bash
+
+    $ pip install starfish@git+https://github.com/spacetx/starfish.git
 
 To use napari for interactive image visualization via :py:func:`.display` you must also
 install napari:
@@ -66,14 +69,22 @@ install napari:
 
     $ pip install starfish[napari]
 
-Interactive visualization with napari also requires using Qt (e.g. by running the magic command
-`%gui qt` in a jupyter notebook or ipython shell.)
+.. note::
+    If using Windows or Apple Silicon (M1+), one might need to first install napari using pip before installing starfish (see below). Also, interactive visualization with napari requires using Qt (for more information about Qt backend see choosing-a-different-qt-backend_).
+
+.. _choosing-a-different-qt-backend: https://napari.org/dev/tutorials/fundamentals/installation.html#choosing-a-different-qt-backend
+
+To install starfish with both napari and jupyter for notebook support:
+
+.. code-block:: bash
+
+    $ pip install starfish[jupyter]
 
 Installing *starfish* on Windows
 --------------------------------
 
 Windows (cmd.exe) users can install starfish in the same way. Again, we recommend using a conda or virtual
-environment with python 3.9+. Here is how you would install starfish in a virtual environment
+environment with python 3.10+. Here is how you would install starfish in a virtual environment
 created with python's ``venv`` module:
 
 .. code-block:: bat

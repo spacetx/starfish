@@ -25,12 +25,13 @@
 # EPY: END markdown
 
 # EPY: START code
+import sys
+from functools import partial
 from typing import Optional, Tuple
-from IPython import get_ipython
 
 import starfish
 import starfish.data
-from starfish import FieldOfView, DecodedIntensityTable
+from starfish import DecodedIntensityTable, FieldOfView
 from starfish.types import TraceBuildingStrategies
 # EPY: END code
 
@@ -89,8 +90,6 @@ tlmpf = starfish.spots.FindSpots.TrackpyLocalMaxPeakFinder(
 
 # EPY: START code
 # override print to print to stderr for cromwell
-from functools import partial
-import sys
 print = partial(print, file=sys.stderr)
 
 
@@ -165,8 +164,9 @@ def processing_pipeline(
 experiment = starfish.data.allen_smFISH(use_test_data=True)
 
 image, intensities = processing_pipeline(experiment, fov_name='fov_001')
+# EPY: END code
 
+# EPY: START code
 # uncomment the below line to visualize the output with the spot calls.
-# %gui qt
 # viewer = starfish.display(image, intensities)
 # EPY: END code

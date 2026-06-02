@@ -1,5 +1,5 @@
 {
-  "$id": "https://github.com/spacetx/starfish/sptx-format/schema/experiment.json",
+  "$id": "https://github.com/spacetx/starfish/spacetx_format/schema/experiment_5.0.0.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "description": "An image-based transcriptomics or proteomics experiment.",
@@ -11,7 +11,7 @@
   "additionalProperties": false,
   "properties": {
     "version": {
-      "$ref": "schema/version.json"
+      "$ref": "version.json"
     },
     "codebook": {
       "type": "string",
@@ -48,7 +48,7 @@
       ]
     },
     "extras": {
-      "$ref": "schema/extras.json"
+      "$ref": "extras.json"
     }
   }
 }

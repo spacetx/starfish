@@ -13,14 +13,23 @@ This example processes a single field of view extracted from a tissue slide that
 expression in mouse primary visual cortex.
 """
 
-from IPython import get_ipython
+import sys
+from functools import partial
+
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from IPython import get_ipython
+from skimage.morphology import disk, opening
 
-# equivalent to %gui qt and %matplotlib inline
+# equivalent to using in a notebook cell: %matplotlib inline
 ipython = get_ipython()
-ipython.magic("gui qt5")
-ipython.magic("matplotlib inline")
+if ipython is not None:
+    if 'ipykernel' in sys.modules:  # running in Jupyter
+        ipython.run_line_magic('matplotlib', 'inline')
+    else:  # terminal IPython
+        ipython.run_line_magic('matplotlib', 'qt5')
 
 matplotlib.rcParams["figure.dpi"] = 150
 
@@ -29,8 +38,7 @@ matplotlib.rcParams["figure.dpi"] = 150
 # ---------
 # Import starfish and extract a single field of view.
 
-from starfish import data
-from starfish import FieldOfView
+from starfish import data, FieldOfView
 
 exp = data.BaristaSeq(use_test_data=False)
 nissl = exp.fov().get_image('nuclei')
@@ -128,8 +136,6 @@ registration_corrected: ImageStack = z_projected_image.sel(
 # The following matrix contains bleed correction factors for Illumina sequencing-by-synthesis
 # reagents. Starfish provides a LinearUnmixing method that will unmix the fluorescence intensities
 
-import numpy as np
-import pandas as pd
 from starfish.image import Filter
 
 data = np.array(
@@ -180,9 +186,6 @@ f.tight_layout()
 # -----------------------
 # To remove image background, BaristaSeq uses a White Tophat filter, which measures the background
 # with a rolling disk morphological element and subtracts it from the image.
-
-from skimage.morphology import opening, dilation, disk
-from functools import partial
 
 # calculate the background
 opening = partial(opening, footprint=disk(5))

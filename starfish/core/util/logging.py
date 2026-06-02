@@ -1,9 +1,8 @@
 import json
 import platform
 from functools import lru_cache
+from importlib.metadata import version
 from typing import List, Mapping
-
-import pkg_resources
 
 # these are import statements and not from xxx import yyy to break a circular dependency.
 import starfish.core
@@ -60,7 +59,7 @@ def get_core_dependency_info() -> Mapping[str, str]:
 
 
 def get_dependency_version(dependency: str) -> str:
-    return pkg_resources.get_distribution(dependency).version
+    return version(dependency)
 
 
 @lru_cache(maxsize=1)

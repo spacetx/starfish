@@ -165,7 +165,8 @@ class DeconvolvePSF(FilterAlgorithm):
                 'All-NaN output data detected. Likely cause is that deconvolution has been run for '
                 'too many iterations.')
 
-        return xr.DataArray(im_deconv)
+        # Preserve the dimensions and coordinates from the input image
+        return xr.DataArray(im_deconv, dims=image.dims, coords=image.coords)
 
     def run(
             self,

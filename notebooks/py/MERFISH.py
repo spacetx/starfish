@@ -25,14 +25,11 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from showit import image as show_image
 
-from starfish import display
-from starfish import data, FieldOfView
+from starfish import data, display, FieldOfView
 from starfish.types import Axes, Features
-
 from starfish.util.plot import (
-    imshow_plane, intensity_histogram, overlay_spot_calls
+    image, imshow_plane, intensity_histogram, overlay_spot_calls
 )
 # EPY: END code
 
@@ -77,7 +74,9 @@ experiment.codebook
 
 # %gui qt5
 # display(imgs)
+# EPY: END code
 
+# EPY: START code
 # Display a single plane of data
 single_plane = imgs.sel({Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0})
 single_plane = single_plane.xarray.squeeze()
@@ -97,6 +96,7 @@ plt.axis('off');
 
 # EPY: START code
 from starfish.image import Filter
+
 ghp = Filter.GaussianHighPass(sigma=3)
 high_passed = ghp.run(imgs, verbose=True, in_place=False)
 # EPY: END code
@@ -107,6 +107,7 @@ high_passed = ghp.run(imgs, verbose=True, in_place=False)
 
 # EPY: START code
 from starfish.types import Levels
+
 dpsf = Filter.DeconvolvePSF(num_iter=15, sigma=2, level_method=Levels.SCALE_SATURATED_BY_CHUNK)
 deconvolved = dpsf.run(high_passed, verbose=True, in_place=False)
 # EPY: END code
@@ -125,6 +126,8 @@ low_passed = glp.run(deconvolved, in_place=False, verbose=True)
 # EPY: END markdown
 
 # EPY: START code
+from copy import deepcopy
+
 scale_factors = {
     (t[Axes.ROUND], t[Axes.CH]): t['scale_factor']
     for t in experiment.extras['scale_factors']
@@ -132,7 +135,6 @@ scale_factors = {
 
 # this is a scaling method. It would be great to use image.apply here. It's possible, but we need to expose H & C to
 # at least we can do it with get_slice and set_slice right now.
-from copy import deepcopy
 filtered_imgs = deepcopy(low_passed)
 
 for selector in imgs._iter_axes():
@@ -194,6 +196,7 @@ spot_intensities = initial_spot_intensities.loc[initial_spot_intensities[Feature
 # instead of just calling read_csv with the url, we are using python requests to load it to avoid a
 # SSL certificate error on some platforms.
 import io, requests
+
 bench = pd.read_csv(
     io.BytesIO(requests.get('https://d2nhj9g34unfro.cloudfront.net/MERFISH/benchmark_results.csv').content),
     dtype={'barcode': object})
@@ -234,17 +237,13 @@ with warnings.catch_warnings():
     area_lookup = lambda x: 0 if x == 0 else prop_results.region_properties[x - 1].area
     vfunc = np.vectorize(area_lookup)
     mask = np.squeeze(vfunc(prop_results.label_image))
-    show_image(np.squeeze(prop_results.decoded_image)*(mask > 2), cmap='nipy_spectral', ax=ax1)
+    image(np.squeeze(prop_results.decoded_image)*(mask > 2), cmap='nipy_spectral', ax=ax1)
     ax1.axes.set_axis_off()
 
     mp_numpy = filtered_imgs.reduce({Axes.ROUND, Axes.CH, Axes.ZPLANE}, func="max")._squeezed_numpy(
         Axes.ROUND, Axes.CH, Axes.ZPLANE)
     clim = scoreatpercentile(mp_numpy, [0.5, 99.5])
-    show_image(mp_numpy, clim=clim, ax=ax2)
+    image(mp_numpy, clim=clim, ax=ax2)
 
     f.tight_layout()
-# EPY: END code
-
-# EPY: START code
-
 # EPY: END code

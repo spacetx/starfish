@@ -121,7 +121,7 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
         st.values[st.values < self.raw_intensity_threshold] = 0
 
         # normalize
-        st.values = np.nan_to_num(st/st.sum(axis=2))
+        st.values = np.nan_to_num(st/st.max(axis=2))
 
         channels = intensities.sizes[Axes.CH.value]
         rounds = intensities.sizes[Axes.ROUND.value]
@@ -138,8 +138,6 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
                 codebook_comb.append(combined)
                 
         codebook_comb = np.array(codebook_comb, dtype=float)
-        with np.errstate(divide='ignore', invalid='ignore'):
-            codebook_comb = np.nan_to_num(codebook_comb/codebook_comb.sum(axis=2, keepdims=True))
         codebook_comb = [codebook_comb[i].flatten(order = 'C') for i in range(len(codebook_comb))]
 
         # compute closest binary activation pattern for each spot
@@ -166,20 +164,21 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
         cbs = self.codebook.stack(traces=(Axes.ROUND.value, Axes.CH.value)) > 0
         consistencies = np.stack([consistent_with_target(st, c).values for c in cbs], axis=1)
         targets = np.array([",".join(cbs.target.values[c]) for c in consistencies])
+        targets_nn = targets.copy()
 
-        qual_targets = {target: np.empty((len(intensities),), dtype=float) for target in self.codebook.target.values}
+        targets[missing_rounds] = ""
+
+        qual_targets = {target: np.zeros((len(intensities),), dtype=float) for target in self.codebook.target.values}
         for i in range(len(targets)):
             targets_temp = []
             for t in targets[i].split(","):
                 if t in self.codebook.target.values:
                     target_vector = self.codebook.values[self.codebook.target.values == t][0]
-                    spot_vector = intensities.values[i]
+                    spot_vector = st.values[i]
                     qual_targets[t][i] = (spot_vector * target_vector).sum() / target_vector.sum()
                     if qual_targets[t][i] >= self.min_target_quality:
                         targets_temp.append(t)
             targets[i] = ",".join(targets_temp)
-
-        targets[missing_rounds] = "missing"
 
         # only to check whether filter is passed: normalize both the intensities and the codebook
         norm_intensities, norms = self.codebook._normalize_features(intensities, norm_order=self.norm_order)
@@ -202,6 +201,7 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
             targets=(Features.AXIS, targets),
             distances=(Features.AXIS, rounded_metric_outputs),
             passes_threshold=(Features.AXIS, passes_filters))
+        output["nn_targets"] = (Features.AXIS, targets_nn)
         for target in qual_targets:
             output[target+"_quality"] = (Features.AXIS, qual_targets[target])
         return output

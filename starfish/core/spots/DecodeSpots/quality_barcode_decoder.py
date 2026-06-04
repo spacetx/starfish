@@ -122,6 +122,7 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
 
         # normalize
         st.values = np.nan_to_num(st/st.max(axis=2))
+        for_tar_qual = st.values.copy()
 
         channels = intensities.sizes[Axes.CH.value]
         rounds = intensities.sizes[Axes.ROUND.value]
@@ -174,7 +175,7 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
             for t in targets[i].split(","):
                 if t in self.codebook.target.values:
                     target_vector = self.codebook.values[self.codebook.target.values == t][0]
-                    spot_vector = st.values[i]
+                    spot_vector = for_tar_qual[i]
                     qual_targets[t][i] = (spot_vector * target_vector).sum() / target_vector.sum()
                     if qual_targets[t][i] >= self.min_target_quality:
                         targets_temp.append(t)

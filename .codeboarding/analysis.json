@@ -1,15 +1,15 @@
 {
   "metadata": {
-    "generated_at": "2026-06-15T16:32:35.817933+00:00",
-    "commit_hash": "d73ca44b54cc9549505b254a5daa6688752cd831",
+    "generated_at": "2026-06-15T16:52:53.881432+00:00",
+    "commit_hash": "cf6aebf87a13d4cd23714d8c353b0b408be9b603",
     "repo_name": "starfish",
     "depth_level": 2,
     "file_coverage_summary": {
-      "total_files": 495,
+      "total_files": 496,
       "analyzed": 176,
-      "not_analyzed": 319,
+      "not_analyzed": 320,
       "not_analyzed_by_reason": {
-        "other": 104,
+        "other": 105,
         "codeboardingignore": 215
       }
     }

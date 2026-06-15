@@ -165,7 +165,6 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
         cbs = self.codebook.stack(traces=(Axes.ROUND.value, Axes.CH.value)) > 0
         consistencies = np.stack([consistent_with_target(st, c).values for c in cbs], axis=1)
         targets = np.array([",".join(cbs.target.values[c]) for c in consistencies])
-        targets_nn = targets.copy()
 
         targets[missing_rounds] = ""
 
@@ -202,7 +201,6 @@ class QualityBarcodeDecoder(DecodeSpotsAlgorithm):
             targets=(Features.AXIS, targets),
             distances=(Features.AXIS, rounded_metric_outputs),
             passes_threshold=(Features.AXIS, passes_filters))
-        output["nn_targets"] = (Features.AXIS, targets_nn)
         for target in qual_targets:
             output[target+"_quality"] = (Features.AXIS, qual_targets[target])
         return output

@@ -158,4 +158,4 @@ validators==0.35.0
 wcwidth==0.2.14
 webencodings==0.5.1
 xarray==2025.6.1
-zipp==3.23.1
+zipp==4.1.0

@@ -1,0 +1,3321 @@
+{
+  "repository_name": "starfish",
+  "timestamp": "2026-06-15T16:52:53.663309+00:00",
+  "overall_score": 0.8233880656788146,
+  "check_summaries": [
+    {
+      "check_name": "function_size",
+      "description": "Checks that functions/methods do not exceed line count thresholds",
+      "check_type": "standard",
+      "total_entities_checked": 660,
+      "findings_count": 4,
+      "warning_count": 4,
+      "score": 0.9939393939393939,
+      "finding_groups": [
+        {
+          "severity": "warning",
+          "threshold": 150,
+          "description": "Functions exceeding 150.0 lines",
+          "entities": [
+            {
+              "entity_name": "starfish.core.spots.DecodeSpots.check_all_decoder.CheckAll.run",
+              "file_path": "starfish/core/spots/DecodeSpots/check_all_decoder.py",
+              "line_start": 126,
+              "line_end": 459,
+              "metric_value": 333
+            },
+            {
+              "entity_name": "versioneer.get_cmdclass",
+              "file_path": "versioneer.py",
+              "line_start": 1874,
+              "line_end": 2121,
+              "metric_value": 247
+            },
+            {
+              "entity_name": "starfish.core._display.display",
+              "file_path": "starfish/core/_display.py",
+              "line_start": 121,
+              "line_end": 296,
+              "metric_value": 175
+            },
+            {
+              "entity_name": "starfish.core.spots.DecodeSpots.check_all_funcs.cleanup",
+              "file_path": "starfish/core/spots/DecodeSpots/check_all_funcs.py",
+              "line_start": 673,
+              "line_end": 839,
+              "metric_value": 166
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "check_name": "fan_out",
+      "description": "Checks efferent coupling: how many other functions each function calls",
+      "check_type": "standard",
+      "total_entities_checked": 660,
+      "findings_count": 6,
+      "warning_count": 6,
+      "score": 0.990909090909091,
+      "finding_groups": [
+        {
+          "severity": "warning",
+          "threshold": 10,
+          "description": "Functions calling more than 10.0 other functions",
+          "entities": [
+            {
+              "entity_name": "starfish.core.spots.DecodeSpots.check_all_decoder.CheckAll.run",
+              "file_path": "starfish/core/spots/DecodeSpots/check_all_decoder.py",
+              "line_start": 126,
+              "line_end": 459,
+              "metric_value": 15
+            },
+            {
+              "entity_name": "starfish.core.imagestack.imagestack.ImageStack.export",
+              "file_path": "starfish/core/imagestack/imagestack.py",
+              "line_start": 1126,
+              "line_end": 1215,
+              "metric_value": 12
+            },
+            {
+              "entity_name": "starfish.core.morphology.Segment.watershed.WatershedSegment.run",
+              "file_path": "starfish/core/morphology/Segment/watershed.py",
+              "line_start": 29,
+              "line_end": 82,
+              "metric_value": 12
+            },
+            {
+              "entity_name": "starfish.core.spots.FindSpots.blob.BlobDetector.run",
+              "file_path": "starfish/core/spots/FindSpots/blob.py",
+              "line_start": 167,
+              "line_end": 234,
+              "metric_value": 11
+            },
+            {
+              "entity_name": "starfish.core.morphology.Binarize.threshold.ThresholdBinarize.run",
+              "file_path": "starfish/core/morphology/Binarize/threshold.py",
+              "line_start": 25,
+              "line_end": 60,
+              "metric_value": 10
+            },
+            {
+              "entity_name": "workflows.wdl.iss_published.recipe.process_fov",
+              "file_path": "workflows/wdl/iss_published/recipe.py",
+              "line_start": 9,
+              "line_end": 68,
+              "metric_value": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "check_name": "fan_in",
+      "description": "Checks afferent coupling: how many other functions call each function",
+      "check_type": "standard",
+      "total_entities_checked": 660,
+      "findings_count": 6,
+      "warning_count": 6,
+      "score": 0.990909090909091,
+      "finding_groups": [
+        {
+          "severity": "warning",
+          "threshold": 10,
+          "description": "Functions called by more than 10.0 other functions",
+          "entities": [
+            {
+              "entity_name": "starfish.core.imagestack.imagestack.ImageStack.xarray",
+              "file_path": "starfish/core/imagestack/imagestack.py",
+              "line_start": 438,
+              "line_end": 441,
+              "metric_value": 31
+            },
+            {
+              "entity_name": "starfish.core.types._validated_table.ValidatedTable.data",
+              "file_path": "starfish/core/types/_validated_table.py",
+              "line_start": 41,
+              "line_end": 42,
+              "metric_value": 16
+            },
+            {
+              "entity_name": "starfish.core.imagestack.imagestack.ImageStack.apply",
+              "file_path": "starfish/core/imagestack/imagestack.py",
+              "line_start": 771,
+              "line_end": 870,
+              "metric_value": 14
+            },
+            {
+              "entity_name": "starfish.core.experiment.experiment.Experiment.from_json",
+              "file_path": "starfish/core/experiment/experiment.py",
+              "line_start": 260,
+              "line_end": 336,
+              "metric_value": 13
+            },
+            {
+              "entity_name": "starfish.core.image.Filter.util.determine_axes_to_group_by",
+              "file_path": "starfish/core/image/Filter/util.py",
+              "line_start": 71,
+              "line_end": 76,
+              "metric_value": 12
+            },
+            {
+              "entity_name": "starfish.core.morphology.util._get_axes_names",
+              "file_path": "starfish/core/morphology/util.py",
+              "line_start": 9,
+              "line_end": 34,
+              "metric_value": 12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "check_name": "god_class",
+      "description": "Detects classes with too many methods, too much code, or too many outgoing dependencies",
+      "check_type": "standard",
+      "total_entities_checked": 95,
+      "findings_count": 3,
+      "warning_count": 3,
+      "score": 0.968421052631579,
+      "finding_groups": [
+        {
+          "severity": "warning",
+          "threshold": 25,
+          "description": "Classes exceeding god class criteria (methods, LOC, or fan-out)",
+          "entities": [
+            {
+              "entity_name": "starfish.core.imagestack.imagestack.ImageStack",
+              "file_path": "starfish/core/imagestack/imagestack.py",
+              "metric_value": 1178.0
+            },
+            {
+              "entity_name": "starfish.core.codebook.codebook.Codebook",
+              "file_path": "starfish/core/codebook/codebook.py",
+              "metric_value": 733.0
+            },
+            {
+              "entity_name": "starfish.core.morphology.binary_mask.binary_mask.BinaryMaskCollection",
+              "file_path": "starfish/core/morphology/binary_mask/binary_mask.py",
+              "metric_value": 693.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "check_name": "unused_code_diagnostics",
+      "description": "Detects unused imports, variables, functions, and dead code via LSP diagnostics",
+      "check_type": "standard",
+      "total_entities_checked": 422,
+      "findings_count": 422,
+      "warning_count": 410,
+      "score": 0.0,
+      "finding_groups": [
+        {
+          "severity": "warning",
+          "threshold": 0,
+          "description": "Variables declared but never used",
+          "entities": [
+            {
+              "entity_name": "[unused_variable] \"overlay_spot_calls\" is not accessed",
+              "file_path": "notebooks/py/BaristaSeq.py",
+              "line_start": 32,
+              "line_end": 32,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"dilation\" is not accessed",
+              "file_path": "notebooks/py/BaristaSeq.py",
+              "line_start": 211,
+              "line_end": 211,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"config\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"image\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"spots\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"display\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 14,
+              "line_end": 14,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Codebook\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 16,
+              "line_end": 16,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Experiment\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 17,
+              "line_end": 17,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ExpressionMatrix\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 18,
+              "line_end": 18,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ImageStack\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 19,
+              "line_end": 19,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"DecodedIntensityTable\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 20,
+              "line_end": 20,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"IntensityTable\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 21,
+              "line_end": 21,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"BinaryMaskCollection\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 22,
+              "line_end": 22,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"LabelImage\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 23,
+              "line_end": 23,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"SegmentationMaskCollection\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 24,
+              "line_end": 24,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Log\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 25,
+              "line_end": 25,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"nrows\" is not accessed",
+              "file_path": "starfish/core/codebook/codebook.py",
+              "line_start": 671,
+              "line_end": 671,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ApplyTransform\" is not accessed",
+              "file_path": "starfish/core/image/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"LearnTransform\" is not accessed",
+              "file_path": "starfish/core/image/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Bandpass\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Clip\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ClipPercentileToZero\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ClipValueToZero\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ElementWiseMultiply\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 6,
+              "line_end": 6,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"GaussianHighPass\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"GaussianLowPass\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 8,
+              "line_end": 8,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"IlastikPretrainedProbability\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 9,
+              "line_end": 9,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Laplace\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 10,
+              "line_end": 10,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"LinearUnmixing\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 11,
+              "line_end": 11,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Map\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 12,
+              "line_end": 12,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"MatchHistograms\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 13,
+              "line_end": 13,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"MeanHighPass\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 14,
+              "line_end": 14,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Reduce\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 15,
+              "line_end": 15,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"DeconvolvePSF\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 16,
+              "line_end": 16,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"WhiteTophat\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 17,
+              "line_end": 17,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ZeroByChannelMagnitude\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 18,
+              "line_end": 18,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/clip.py",
+              "line_start": 101,
+              "line_end": 101,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/linear_unmixing.py",
+              "line_start": 111,
+              "line_end": 111,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/reduce.py",
+              "line_start": 147,
+              "line_end": 147,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/white_tophat.py",
+              "line_start": 87,
+              "line_end": 87,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"dimension_value\" is not accessed",
+              "file_path": "starfish/core/imagestack/imagestack.py",
+              "line_start": 740,
+              "line_end": 740,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"dims\" is not accessed",
+              "file_path": "starfish/core/imagestack/imagestack.py",
+              "line_start": 1217,
+              "line_end": 1217,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"display\" is not accessed",
+              "file_path": "notebooks/py/DARTFISH.py",
+              "line_start": 23,
+              "line_end": 23,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"n_processes\" is not accessed",
+              "file_path": "starfish/core/image/Filter/zero_by_channel_magnitude.py",
+              "line_start": 39,
+              "line_end": 39,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/zero_by_channel_magnitude.py",
+              "line_start": 40,
+              "line_end": 40,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] Expression value is unused",
+              "file_path": "notebooks/py/ISS.py",
+              "line_start": 184,
+              "line_end": 184,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] Expression value is unused",
+              "file_path": "notebooks/py/ISS.py",
+              "line_start": 280,
+              "line_end": 280,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] Expression value is unused",
+              "file_path": "notebooks/py/ISS.py",
+              "line_start": 294,
+              "line_end": 294,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ExpressionMatrix\" is not accessed",
+              "file_path": "notebooks/py/ISS.py",
+              "line_start": 289,
+              "line_end": 289,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Warp\" is not accessed",
+              "file_path": "starfish/core/image/_registration/ApplyTransform/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/_registration/ApplyTransform/warp.py",
+              "line_start": 43,
+              "line_end": 43,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Translation\" is not accessed",
+              "file_path": "starfish/core/image/_registration/LearnTransform/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/_registration/LearnTransform/translation.py",
+              "line_start": 44,
+              "line_end": 44,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"phasediff\" is not accessed",
+              "file_path": "starfish/core/image/_registration/LearnTransform/translation.py",
+              "line_start": 74,
+              "line_end": 74,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ThresholdBinarize\" is not accessed",
+              "file_path": "starfish/core/morphology/Binarize/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/morphology/Binarize/threshold.py",
+              "line_start": 25,
+              "line_end": 25,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"AreaFilter\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/__init__.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Map\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/__init__.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"MinDistanceLabel\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/__init__.py",
+              "line_start": 6,
+              "line_end": 6,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Reduce\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/__init__.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/areafilter.py",
+              "line_start": 63,
+              "line_end": 63,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/min_distance_label.py",
+              "line_start": 42,
+              "line_end": 42,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"kwargs\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/min_distance_label.py",
+              "line_start": 43,
+              "line_end": 43,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"n_processes\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/reduce.py",
+              "line_start": 69,
+              "line_end": 69,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/reduce.py",
+              "line_start": 70,
+              "line_end": 70,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"kwargs\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/reduce.py",
+              "line_start": 71,
+              "line_end": 71,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"SimpleMerge\" is not accessed",
+              "file_path": "starfish/core/morphology/Merge/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/morphology/Merge/simple.py",
+              "line_start": 18,
+              "line_end": 18,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"kwargs\" is not accessed",
+              "file_path": "starfish/core/morphology/Merge/simple.py",
+              "line_start": 19,
+              "line_end": 19,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"WatershedSegment\" is not accessed",
+              "file_path": "starfish/core/morphology/Segment/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"BinaryMaskCollection\" is not accessed",
+              "file_path": "starfish/core/morphology/binary_mask/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ix\" is not accessed",
+              "file_path": "starfish/core/morphology/binary_mask/binary_mask.py",
+              "line_start": 155,
+              "line_end": 155,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ix\" is not accessed",
+              "file_path": "starfish/core/morphology/binary_mask/binary_mask.py",
+              "line_start": 223,
+              "line_end": 223,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"label\" is not accessed",
+              "file_path": "starfish/core/morphology/binary_mask/binary_mask.py",
+              "line_start": 307,
+              "line_end": 307,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"expected_axes\" is not accessed",
+              "file_path": "starfish/core/morphology/binary_mask/binary_mask.py",
+              "line_start": 453,
+              "line_end": 453,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Label\" is not accessed",
+              "file_path": "starfish/core/spots/AssignTargets/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"kwargs\" is not accessed",
+              "file_path": "starfish/core/spots/AssignTargets/label.py",
+              "line_start": 16,
+              "line_end": 16,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"parser\" is not accessed",
+              "file_path": "starfish/core/spots/AssignTargets/label.py",
+              "line_start": 20,
+              "line_end": 20,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"in_place\" is not accessed",
+              "file_path": "starfish/core/spots/AssignTargets/label.py",
+              "line_start": 27,
+              "line_end": 27,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"verbose\" is not accessed",
+              "file_path": "starfish/core/spots/AssignTargets/label.py",
+              "line_start": 73,
+              "line_end": 73,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"CheckAll\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"MetricDistance\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"PerRoundMaxChannel\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/__init__.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"SimpleLookupDecoder\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/__init__.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/per_round_max_channel_decoder.py",
+              "line_start": 48,
+              "line_end": 48,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"PixelSpotDecoder\" is not accessed",
+              "file_path": "starfish/core/spots/DetectPixels/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/spots/DetectPixels/pixel_spot_decoder.py",
+              "line_start": 53,
+              "line_end": 53,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"BlobDetector\" is not accessed",
+              "file_path": "starfish/core/spots/FindSpots/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"LocalMaxPeakFinder\" is not accessed",
+              "file_path": "starfish/core/spots/FindSpots/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"TrackpyLocalMaxPeakFinder\" is not accessed",
+              "file_path": "starfish/core/spots/FindSpots/__init__.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"x\" is not accessed",
+              "file_path": "starfish/core/spots/FindSpots/blob.py",
+              "line_start": 147,
+              "line_end": 147,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Axes\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Coordinates\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 8,
+              "line_end": 8,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"CORE_DEPENDENCIES\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 9,
+              "line_end": 9,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Features\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 10,
+              "line_end": 10,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Levels\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 11,
+              "line_end": 11,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"LOG\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 12,
+              "line_end": 12,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"OverlapStrategy\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 13,
+              "line_end": 13,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"PHYSICAL_COORDINATE_DIMENSION\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 14,
+              "line_end": 14,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"PhysicalCoordinateTypes\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 15,
+              "line_end": 15,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"STARFISH_EXTRAS_KEY\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 16,
+              "line_end": 16,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"TraceBuildingStrategies\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 17,
+              "line_end": 17,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"TransformType\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 18,
+              "line_end": 18,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"DecodedSpots\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 20,
+              "line_end": 20,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"FunctionSource\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 21,
+              "line_end": 21,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"SpotAttributes\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 22,
+              "line_end": 22,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"PerImageSliceSpotResults\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 23,
+              "line_end": 23,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"use_test_data\" is not accessed",
+              "file_path": "starfish/data.py",
+              "line_start": 152,
+              "line_end": 152,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"use_test_data\" is not accessed",
+              "file_path": "starfish/data.py",
+              "line_start": 176,
+              "line_end": 176,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"use_test_data\" is not accessed",
+              "file_path": "starfish/data.py",
+              "line_start": 226,
+              "line_end": 226,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ApplyTransform\" is not accessed",
+              "file_path": "starfish/image.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Filter\" is not accessed",
+              "file_path": "starfish/image.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"LearnTransform\" is not accessed",
+              "file_path": "starfish/image.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Segment\" is not accessed",
+              "file_path": "starfish/image.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Binarize\" is not accessed",
+              "file_path": "starfish/morphology.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Filter\" is not accessed",
+              "file_path": "starfish/morphology.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Merge\" is not accessed",
+              "file_path": "starfish/morphology.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Segment\" is not accessed",
+              "file_path": "starfish/morphology.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"BinaryMaskCollection\" is not accessed",
+              "file_path": "starfish/morphology.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"LabelImage\" is not accessed",
+              "file_path": "starfish/morphology.py",
+              "line_start": 8,
+              "line_end": 8,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"AssignTargets\" is not accessed",
+              "file_path": "starfish/spots.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"DecodeSpots\" is not accessed",
+              "file_path": "starfish/spots.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"DetectPixels\" is not accessed",
+              "file_path": "starfish/spots.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"FindSpots\" is not accessed",
+              "file_path": "starfish/spots.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ArrayLike\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Axes\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Coordinates\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"CoordinateValue\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 6,
+              "line_end": 6,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"CORE_DEPENDENCIES\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Features\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 8,
+              "line_end": 8,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"FunctionSource\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 9,
+              "line_end": 9,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"FunctionSourceBundle\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 10,
+              "line_end": 10,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Levels\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 11,
+              "line_end": 11,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"LOG\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 12,
+              "line_end": 12,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Number\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 13,
+              "line_end": 13,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"OverlapStrategy\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 14,
+              "line_end": 14,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"PerImageSliceSpotResults\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 15,
+              "line_end": 15,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"PHYSICAL_COORDINATE_DIMENSION\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 16,
+              "line_end": 16,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"PhysicalCoordinateTypes\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 17,
+              "line_end": 17,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"STARFISH_EXTRAS_KEY\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 18,
+              "line_end": 18,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"TraceBuildingStrategies\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 19,
+              "line_end": 19,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"TransformType\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 20,
+              "line_end": 20,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"display\" is not accessed",
+              "file_path": "notebooks/py/MERFISH.py",
+              "line_start": 30,
+              "line_end": 30,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"imshow_plane\" is not accessed",
+              "file_path": "notebooks/py/MERFISH.py",
+              "line_start": 35,
+              "line_end": 35,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"IntensityTable\" is not accessed",
+              "file_path": "notebooks/py/STARmap.py",
+              "line_start": 27,
+              "line_end": 27,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"os\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 13,
+              "line_end": 13,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"product\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 15,
+              "line_end": 15,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"SimilarityTransform\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 21,
+              "line_end": 21,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"tqdm\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 22,
+              "line_end": 22,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"dilation\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 54,
+              "line_end": 54,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"plt\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 156,
+              "line_end": 156,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"skimage.filters\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 19,
+              "line_end": 19,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"skimage.morphology\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 20,
+              "line_end": 20,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] Expression value is unused",
+              "file_path": "notebooks/py/Starfish_simulation.py",
+              "line_start": 95,
+              "line_end": 95,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"permutation\" is not accessed",
+              "file_path": "notebooks/py/Starfish_simulation.py",
+              "line_start": 30,
+              "line_end": 30,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ones\" is not accessed",
+              "file_path": "notebooks/py/Starfish_simulation.py",
+              "line_start": 31,
+              "line_end": 31,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"i\" is not accessed",
+              "file_path": "notebooks/py/Starfish_simulation.py",
+              "line_start": 66,
+              "line_end": 66,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"get_ipython\" is not accessed",
+              "file_path": "notebooks/py/smFISH.py",
+              "line_start": 29,
+              "line_end": 29,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"environ\" is not accessed",
+              "file_path": "starfish/config.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/config/__init__.py",
+              "line_start": 48,
+              "line_end": 48,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"tileset_url\" is not accessed",
+              "file_path": "starfish/core/experiment/builder/inplace.py",
+              "line_start": 21,
+              "line_end": 21,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"tile_url\" is not accessed",
+              "file_path": "starfish/core/experiment/builder/inplace.py",
+              "line_start": 26,
+              "line_end": 26,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"tile_format\" is not accessed",
+              "file_path": "starfish/core/experiment/builder/inplace.py",
+              "line_start": 28,
+              "line_end": 28,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"backend_config\" is not accessed",
+              "file_path": "starfish/core/experiment/builder/inplace.py",
+              "line_start": 29,
+              "line_end": 29,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/experiment/builder/providers.py",
+              "line_start": 16,
+              "line_end": 16,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"fov_id\" is not accessed",
+              "file_path": "starfish/core/experiment/builder/providers.py",
+              "line_start": 69,
+              "line_end": 69,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/bandpass.py",
+              "line_start": 110,
+              "line_end": 110,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/call_bases.py",
+              "line_start": 126,
+              "line_end": 126,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/clip_percentile_to_zero.py",
+              "line_start": 88,
+              "line_end": 88,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/clip_value_to_zero.py",
+              "line_start": 76,
+              "line_end": 76,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"verbose\" is not accessed",
+              "file_path": "starfish/core/image/Filter/element_wise_mult.py",
+              "line_start": 55,
+              "line_end": 55,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"n_processes\" is not accessed",
+              "file_path": "starfish/core/image/Filter/element_wise_mult.py",
+              "line_start": 56,
+              "line_end": 56,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/element_wise_mult.py",
+              "line_start": 57,
+              "line_end": 57,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/gaussian_high_pass.py",
+              "line_start": 97,
+              "line_end": 97,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/gaussian_low_pass.py",
+              "line_start": 98,
+              "line_end": 98,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"in_place\" is not accessed",
+              "file_path": "starfish/core/image/Filter/ilastik_pre_trained_probability.py",
+              "line_start": 44,
+              "line_end": 44,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"verbose\" is not accessed",
+              "file_path": "starfish/core/image/Filter/ilastik_pre_trained_probability.py",
+              "line_start": 45,
+              "line_end": 45,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"n_processes\" is not accessed",
+              "file_path": "starfish/core/image/Filter/ilastik_pre_trained_probability.py",
+              "line_start": 46,
+              "line_end": 46,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/ilastik_pre_trained_probability.py",
+              "line_start": 47,
+              "line_end": 47,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/laplace.py",
+              "line_start": 105,
+              "line_end": 105,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/map.py",
+              "line_start": 114,
+              "line_end": 114,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/match_histograms.py",
+              "line_start": 85,
+              "line_end": 85,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"rescale\" is not accessed",
+              "file_path": "starfish/core/image/Filter/mean_high_pass.py",
+              "line_start": 65,
+              "line_end": 65,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/mean_high_pass.py",
+              "line_start": 97,
+              "line_end": 97,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Filter/richardson_lucy_deconvolution.py",
+              "line_start": 176,
+              "line_end": 176,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Watershed\" is not accessed",
+              "file_path": "starfish/core/image/Segment/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/image/Segment/watershed.py",
+              "line_start": 60,
+              "line_end": 60,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"_get_physical_coordinates_of_z_plane\" is not accessed",
+              "file_path": "starfish/core/imagestack/physical_coordinates.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"TileKey\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"TileCollectionData\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"tilekey\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/_tiledata.py",
+              "line_start": 42,
+              "line_end": 42,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"tilekey\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/_tiledata.py",
+              "line_start": 65,
+              "line_end": 65,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"r\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/_tiledata.py",
+              "line_start": 68,
+              "line_end": 68,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"tilekey\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/numpy/__init__.py",
+              "line_start": 77,
+              "line_end": 77,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"TileFetcherData\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/tilefetcher/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"tilekey\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/tilefetcher/_parser.py",
+              "line_start": 90,
+              "line_end": 90,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"TileSetData\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/tileset/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"_get_dimension_size\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/tileset/_parser.py",
+              "line_start": 172,
+              "line_end": 172,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"_get_axes_names\" is not accessed",
+              "file_path": "starfish/core/morphology/util.py",
+              "line_start": 9,
+              "line_end": 9,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"_normalize_pixel_ticks\" is not accessed",
+              "file_path": "starfish/core/morphology/util.py",
+              "line_start": 37,
+              "line_end": 37,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"_normalize_physical_ticks\" is not accessed",
+              "file_path": "starfish/core/morphology/util.py",
+              "line_start": 57,
+              "line_end": 57,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"_ticks_equal\" is not accessed",
+              "file_path": "starfish/core/morphology/util.py",
+              "line_start": 76,
+              "line_end": 76,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"n_processes\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/map.py",
+              "line_start": 75,
+              "line_end": 75,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/map.py",
+              "line_start": 76,
+              "line_end": 76,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"kwargs\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/map.py",
+              "line_start": 77,
+              "line_end": 77,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/structural_label.py",
+              "line_start": 28,
+              "line_end": 28,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"kwargs\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/structural_label.py",
+              "line_start": 29,
+              "line_end": 29,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"tf\" is not accessed",
+              "file_path": "starfish/core/morphology/binary_mask/_io.py",
+              "line_start": 76,
+              "line_end": 76,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"file_obj\" is not accessed",
+              "file_path": "starfish/core/morphology/binary_mask/_io.py",
+              "line_start": 79,
+              "line_end": 79,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"LabelImage\" is not accessed",
+              "file_path": "starfish/core/morphology/label_image/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"SegmentationMaskCollection\" is not accessed",
+              "file_path": "starfish/core/segmentation_mask/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ctx\" is not accessed",
+              "file_path": "starfish/core/spacetx_format/cli.py",
+              "line_start": 30,
+              "line_end": 30,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/spacetx_format/util.py",
+              "line_start": 264,
+              "line_end": 264,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/spacetx_format/util.py",
+              "line_start": 265,
+              "line_end": 265,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/spacetx_format/util.py",
+              "line_start": 266,
+              "line_end": 266,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/spacetx_format/util.py",
+              "line_start": 267,
+              "line_end": 267,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"fuzz\" is not accessed",
+              "file_path": "starfish/core/spacetx_format/util.py",
+              "line_start": 345,
+              "line_end": 345,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"fuzz\" is not accessed",
+              "file_path": "starfish/core/spacetx_format/util.py",
+              "line_start": 354,
+              "line_end": 354,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"baseurl\" is not accessed",
+              "file_path": "starfish/core/spacetx_format/validate_sptx.py",
+              "line_start": 51,
+              "line_end": 51,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"key\" is not accessed",
+              "file_path": "starfish/core/spacetx_format/validate_sptx.py",
+              "line_start": 69,
+              "line_end": 69,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"baseurl\" is not accessed",
+              "file_path": "starfish/core/spacetx_format/validate_sptx.py",
+              "line_start": 113,
+              "line_end": 113,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/check_all_decoder.py",
+              "line_start": 129,
+              "line_end": 129,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"spotIntensities\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/check_all_decoder.py",
+              "line_start": 223,
+              "line_end": 223,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"sr\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/check_all_decoder.py",
+              "line_start": 290,
+              "line_end": 290,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"j\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/check_all_decoder.py",
+              "line_start": 433,
+              "line_end": 433,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"currentRound\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/check_all_funcs.py",
+              "line_start": 440,
+              "line_end": 440,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"code\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/check_all_funcs.py",
+              "line_start": 642,
+              "line_end": 642,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"currentRound\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/check_all_funcs.py",
+              "line_start": 590,
+              "line_end": 590,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"currentRoundOmitNum\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/check_all_funcs.py",
+              "line_start": 677,
+              "line_end": 677,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/metric_decoder.py",
+              "line_start": 71,
+              "line_end": 71,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/simple_lookup_decoder.py",
+              "line_start": 26,
+              "line_end": 26,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"kwargs\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/trace_builders.py",
+              "line_start": 16,
+              "line_end": 16,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"kwargs\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/trace_builders.py",
+              "line_start": 41,
+              "line_end": 41,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"_match_spots\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/util.py",
+              "line_start": 12,
+              "line_end": 12,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"_build_intensity_table\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/util.py",
+              "line_start": 59,
+              "line_end": 59,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"_merge_spots_by_round\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/util.py",
+              "line_start": 127,
+              "line_end": 127,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"args\" is not accessed",
+              "file_path": "starfish/core/spots/FindSpots/local_max_peak_finder.py",
+              "line_start": 317,
+              "line_end": 317,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"kwargs\" is not accessed",
+              "file_path": "starfish/core/spots/FindSpots/local_max_peak_finder.py",
+              "line_start": 318,
+              "line_end": 318,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"index\" is not accessed",
+              "file_path": "starfish/core/types/_spot_attributes.py",
+              "line_start": 59,
+              "line_end": 59,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ch\" is not accessed",
+              "file_path": "starfish/core/types/_spot_finding_results.py",
+              "line_start": 201,
+              "line_end": 201,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"r\" is not accessed",
+              "file_path": "starfish/core/types/_spot_finding_results.py",
+              "line_start": 209,
+              "line_end": 209,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"__value\" is not accessed",
+              "file_path": "starfish/core/util/config.py",
+              "line_start": 40,
+              "line_end": 40,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"argument\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Choice\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"command\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Group\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"group\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 8,
+              "line_end": 8,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"ParamType\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 10,
+              "line_end": 10,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"pass_context\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 11,
+              "line_end": 11,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"Path\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 12,
+              "line_end": 12,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"inplace\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"build_image\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"build_irregular_image\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 6,
+              "line_end": 6,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"TileIdentifier\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"write_experiment_json\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 8,
+              "line_end": 8,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"write_irregular_experiment_json\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 9,
+              "line_end": 9,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"FetchedTile\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 11,
+              "line_end": 11,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"format_structured_dataset\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 13,
+              "line_end": 13,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_variable] \"prop_results\" is not accessed",
+              "file_path": "workflows/wdl/merfish_published/recipe.py",
+              "line_start": 68,
+              "line_end": 68,
+              "metric_value": 0.0
+            }
+          ]
+        },
+        {
+          "severity": "warning",
+          "threshold": 0,
+          "description": "Unused import statements that should be removed",
+          "entities": [
+            {
+              "entity_name": "[unused_import] Import \"overlay_spot_calls\" is not accessed",
+              "file_path": "notebooks/py/BaristaSeq.py",
+              "line_start": 32,
+              "line_end": 32,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"dilation\" is not accessed",
+              "file_path": "notebooks/py/BaristaSeq.py",
+              "line_start": 211,
+              "line_end": 211,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"config\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"image\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"spots\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"display\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 14,
+              "line_end": 14,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Codebook\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 16,
+              "line_end": 16,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Experiment\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 17,
+              "line_end": 17,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ExpressionMatrix\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 18,
+              "line_end": 18,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ImageStack\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 19,
+              "line_end": 19,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"DecodedIntensityTable\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 20,
+              "line_end": 20,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"IntensityTable\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 21,
+              "line_end": 21,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"BinaryMaskCollection\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 22,
+              "line_end": 22,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"LabelImage\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 23,
+              "line_end": 23,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"SegmentationMaskCollection\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 24,
+              "line_end": 24,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Log\" is not accessed",
+              "file_path": "starfish/__init__.py",
+              "line_start": 25,
+              "line_end": 25,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ApplyTransform\" is not accessed",
+              "file_path": "starfish/core/image/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"LearnTransform\" is not accessed",
+              "file_path": "starfish/core/image/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Bandpass\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Clip\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ClipPercentileToZero\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ClipValueToZero\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ElementWiseMultiply\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 6,
+              "line_end": 6,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"GaussianHighPass\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"GaussianLowPass\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 8,
+              "line_end": 8,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"IlastikPretrainedProbability\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 9,
+              "line_end": 9,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Laplace\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 10,
+              "line_end": 10,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"LinearUnmixing\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 11,
+              "line_end": 11,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Map\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 12,
+              "line_end": 12,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"MatchHistograms\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 13,
+              "line_end": 13,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"MeanHighPass\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 14,
+              "line_end": 14,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Reduce\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 15,
+              "line_end": 15,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"DeconvolvePSF\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 16,
+              "line_end": 16,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"WhiteTophat\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 17,
+              "line_end": 17,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ZeroByChannelMagnitude\" is not accessed",
+              "file_path": "starfish/core/image/Filter/__init__.py",
+              "line_start": 18,
+              "line_end": 18,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"display\" is not accessed",
+              "file_path": "notebooks/py/DARTFISH.py",
+              "line_start": 23,
+              "line_end": 23,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ExpressionMatrix\" is not accessed",
+              "file_path": "notebooks/py/ISS.py",
+              "line_start": 289,
+              "line_end": 289,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Warp\" is not accessed",
+              "file_path": "starfish/core/image/_registration/ApplyTransform/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Translation\" is not accessed",
+              "file_path": "starfish/core/image/_registration/LearnTransform/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ThresholdBinarize\" is not accessed",
+              "file_path": "starfish/core/morphology/Binarize/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"AreaFilter\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/__init__.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Map\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/__init__.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"MinDistanceLabel\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/__init__.py",
+              "line_start": 6,
+              "line_end": 6,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Reduce\" is not accessed",
+              "file_path": "starfish/core/morphology/Filter/__init__.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"SimpleMerge\" is not accessed",
+              "file_path": "starfish/core/morphology/Merge/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"WatershedSegment\" is not accessed",
+              "file_path": "starfish/core/morphology/Segment/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"BinaryMaskCollection\" is not accessed",
+              "file_path": "starfish/core/morphology/binary_mask/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Label\" is not accessed",
+              "file_path": "starfish/core/spots/AssignTargets/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"CheckAll\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"MetricDistance\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"PerRoundMaxChannel\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/__init__.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"SimpleLookupDecoder\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/__init__.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"PixelSpotDecoder\" is not accessed",
+              "file_path": "starfish/core/spots/DetectPixels/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"BlobDetector\" is not accessed",
+              "file_path": "starfish/core/spots/FindSpots/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"LocalMaxPeakFinder\" is not accessed",
+              "file_path": "starfish/core/spots/FindSpots/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"TrackpyLocalMaxPeakFinder\" is not accessed",
+              "file_path": "starfish/core/spots/FindSpots/__init__.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Axes\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Coordinates\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 8,
+              "line_end": 8,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"CORE_DEPENDENCIES\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 9,
+              "line_end": 9,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Features\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 10,
+              "line_end": 10,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Levels\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 11,
+              "line_end": 11,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"LOG\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 12,
+              "line_end": 12,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"OverlapStrategy\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 13,
+              "line_end": 13,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"PHYSICAL_COORDINATE_DIMENSION\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 14,
+              "line_end": 14,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"PhysicalCoordinateTypes\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 15,
+              "line_end": 15,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"STARFISH_EXTRAS_KEY\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 16,
+              "line_end": 16,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"TraceBuildingStrategies\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 17,
+              "line_end": 17,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"TransformType\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 18,
+              "line_end": 18,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"DecodedSpots\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 20,
+              "line_end": 20,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"FunctionSource\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 21,
+              "line_end": 21,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"SpotAttributes\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 22,
+              "line_end": 22,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"PerImageSliceSpotResults\" is not accessed",
+              "file_path": "starfish/core/types/__init__.py",
+              "line_start": 23,
+              "line_end": 23,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ApplyTransform\" is not accessed",
+              "file_path": "starfish/image.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Filter\" is not accessed",
+              "file_path": "starfish/image.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"LearnTransform\" is not accessed",
+              "file_path": "starfish/image.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Segment\" is not accessed",
+              "file_path": "starfish/image.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Binarize\" is not accessed",
+              "file_path": "starfish/morphology.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Filter\" is not accessed",
+              "file_path": "starfish/morphology.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Merge\" is not accessed",
+              "file_path": "starfish/morphology.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Segment\" is not accessed",
+              "file_path": "starfish/morphology.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"BinaryMaskCollection\" is not accessed",
+              "file_path": "starfish/morphology.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"LabelImage\" is not accessed",
+              "file_path": "starfish/morphology.py",
+              "line_start": 8,
+              "line_end": 8,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"AssignTargets\" is not accessed",
+              "file_path": "starfish/spots.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"DecodeSpots\" is not accessed",
+              "file_path": "starfish/spots.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"DetectPixels\" is not accessed",
+              "file_path": "starfish/spots.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"FindSpots\" is not accessed",
+              "file_path": "starfish/spots.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ArrayLike\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Axes\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Coordinates\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"CoordinateValue\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 6,
+              "line_end": 6,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"CORE_DEPENDENCIES\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Features\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 8,
+              "line_end": 8,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"FunctionSource\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 9,
+              "line_end": 9,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"FunctionSourceBundle\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 10,
+              "line_end": 10,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Levels\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 11,
+              "line_end": 11,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"LOG\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 12,
+              "line_end": 12,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Number\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 13,
+              "line_end": 13,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"OverlapStrategy\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 14,
+              "line_end": 14,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"PerImageSliceSpotResults\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 15,
+              "line_end": 15,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"PHYSICAL_COORDINATE_DIMENSION\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 16,
+              "line_end": 16,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"PhysicalCoordinateTypes\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 17,
+              "line_end": 17,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"STARFISH_EXTRAS_KEY\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 18,
+              "line_end": 18,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"TraceBuildingStrategies\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 19,
+              "line_end": 19,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"TransformType\" is not accessed",
+              "file_path": "starfish/types.py",
+              "line_start": 20,
+              "line_end": 20,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"display\" is not accessed",
+              "file_path": "notebooks/py/MERFISH.py",
+              "line_start": 30,
+              "line_end": 30,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"imshow_plane\" is not accessed",
+              "file_path": "notebooks/py/MERFISH.py",
+              "line_start": 35,
+              "line_end": 35,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"IntensityTable\" is not accessed",
+              "file_path": "notebooks/py/STARmap.py",
+              "line_start": 27,
+              "line_end": 27,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"os\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 13,
+              "line_end": 13,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"product\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 15,
+              "line_end": 15,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"SimilarityTransform\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 21,
+              "line_end": 21,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"tqdm\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 22,
+              "line_end": 22,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"dilation\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 54,
+              "line_end": 54,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"plt\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 156,
+              "line_end": 156,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"skimage.filters\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 19,
+              "line_end": 19,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"skimage.morphology\" is not accessed",
+              "file_path": "notebooks/py/SeqFISH.py",
+              "line_start": 20,
+              "line_end": 20,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"permutation\" is not accessed",
+              "file_path": "notebooks/py/Starfish_simulation.py",
+              "line_start": 30,
+              "line_end": 30,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ones\" is not accessed",
+              "file_path": "notebooks/py/Starfish_simulation.py",
+              "line_start": 31,
+              "line_end": 31,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"get_ipython\" is not accessed",
+              "file_path": "notebooks/py/smFISH.py",
+              "line_start": 29,
+              "line_end": 29,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"environ\" is not accessed",
+              "file_path": "starfish/config.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Watershed\" is not accessed",
+              "file_path": "starfish/core/image/Segment/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"TileKey\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"TileCollectionData\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"TileFetcherData\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/tilefetcher/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"TileSetData\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/tileset/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"LabelImage\" is not accessed",
+              "file_path": "starfish/core/morphology/label_image/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"SegmentationMaskCollection\" is not accessed",
+              "file_path": "starfish/core/segmentation_mask/__init__.py",
+              "line_start": 1,
+              "line_end": 1,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"argument\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Choice\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 3,
+              "line_end": 3,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"command\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Group\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"group\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 8,
+              "line_end": 8,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"ParamType\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 10,
+              "line_end": 10,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"pass_context\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 11,
+              "line_end": 11,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"Path\" is not accessed",
+              "file_path": "starfish/core/util/click/__init__.py",
+              "line_start": 12,
+              "line_end": 12,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"inplace\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 2,
+              "line_end": 2,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"build_image\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 5,
+              "line_end": 5,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"build_irregular_image\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 6,
+              "line_end": 6,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"TileIdentifier\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 7,
+              "line_end": 7,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"write_experiment_json\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 8,
+              "line_end": 8,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"write_irregular_experiment_json\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 9,
+              "line_end": 9,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"FetchedTile\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 11,
+              "line_end": 11,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_import] Import \"format_structured_dataset\" is not accessed",
+              "file_path": "starfish/experiment/builder.py",
+              "line_start": 13,
+              "line_end": 13,
+              "metric_value": 0.0
+            }
+          ]
+        },
+        {
+          "severity": "info",
+          "threshold": 0,
+          "description": "Code that cannot be reached during execution",
+          "entities": [
+            {
+              "entity_name": "[unreachable_code] Type analysis indicates code is unreachable",
+              "file_path": "starfish/core/intensity_table/intensity_table.py",
+              "line_start": 127,
+              "line_end": 127,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unreachable_code] Type analysis indicates code is unreachable",
+              "file_path": "starfish/core/intensity_table/intensity_table.py",
+              "line_start": 193,
+              "line_end": 193,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unreachable_code] Code is unreachable",
+              "file_path": "versioneer.py",
+              "line_start": 327,
+              "line_end": 330,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unreachable_code] Code is unreachable",
+              "file_path": "versioneer.py",
+              "line_start": 475,
+              "line_end": 477,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unreachable_code] Code is unreachable",
+              "file_path": "versioneer.py",
+              "line_start": 1305,
+              "line_end": 1305,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unreachable_code] Code is unreachable",
+              "file_path": "versioneer.py",
+              "line_start": 1436,
+              "line_end": 1436,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unreachable_code] Code is unreachable",
+              "file_path": "starfish/core/_version.py",
+              "line_start": 95,
+              "line_end": 97,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unreachable_code] Code is unreachable",
+              "file_path": "starfish/core/_version.py",
+              "line_start": 267,
+              "line_end": 267,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unreachable_code] Type analysis indicates code is unreachable",
+              "file_path": "starfish/core/image/Filter/bandpass.py",
+              "line_start": 63,
+              "line_end": 63,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unreachable_code] Type analysis indicates code is unreachable",
+              "file_path": "starfish/core/morphology/Filter/map.py",
+              "line_start": 60,
+              "line_end": 60,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unreachable_code] Type analysis indicates code is unreachable",
+              "file_path": "starfish/core/morphology/Filter/map.py",
+              "line_start": 68,
+              "line_end": 68,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unreachable_code] Type analysis indicates code is unreachable",
+              "file_path": "starfish/core/morphology/binary_mask/_io.py",
+              "line_start": 121,
+              "line_end": 121,
+              "metric_value": 0.0
+            }
+          ]
+        },
+        {
+          "severity": "warning",
+          "threshold": 0,
+          "description": "Functions/methods defined but never called",
+          "entities": [
+            {
+              "entity_name": "[unused_function] Function \"_get_physical_coordinates_of_z_plane\" is not accessed",
+              "file_path": "starfish/core/imagestack/physical_coordinates.py",
+              "line_start": 4,
+              "line_end": 4,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_function] Function \"_get_dimension_size\" is not accessed",
+              "file_path": "starfish/core/imagestack/parser/tileset/_parser.py",
+              "line_start": 172,
+              "line_end": 172,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_function] Function \"_get_axes_names\" is not accessed",
+              "file_path": "starfish/core/morphology/util.py",
+              "line_start": 9,
+              "line_end": 9,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_function] Function \"_normalize_pixel_ticks\" is not accessed",
+              "file_path": "starfish/core/morphology/util.py",
+              "line_start": 37,
+              "line_end": 37,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_function] Function \"_normalize_physical_ticks\" is not accessed",
+              "file_path": "starfish/core/morphology/util.py",
+              "line_start": 57,
+              "line_end": 57,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_function] Function \"_ticks_equal\" is not accessed",
+              "file_path": "starfish/core/morphology/util.py",
+              "line_start": 76,
+              "line_end": 76,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_function] Function \"_match_spots\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/util.py",
+              "line_start": 12,
+              "line_end": 12,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_function] Function \"_build_intensity_table\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/util.py",
+              "line_start": 59,
+              "line_end": 59,
+              "metric_value": 0.0
+            },
+            {
+              "entity_name": "[unused_function] Function \"_merge_spots_by_round\" is not accessed",
+              "file_path": "starfish/core/spots/DecodeSpots/util.py",
+              "line_start": 127,
+              "line_end": 127,
+              "metric_value": 0.0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "file_summaries": [
+    {
+      "file_path": "starfish/__init__.py",
+      "total_findings": 28,
+      "warning_findings": 28,
+      "composite_risk_score": 100.0
+    },
+    {
+      "file_path": "starfish/core/image/Filter/__init__.py",
+      "total_findings": 34,
+      "warning_findings": 34,
+      "composite_risk_score": 100.0
+    },
+    {
+      "file_path": "starfish/core/types/__init__.py",
+      "total_findings": 32,
+      "warning_findings": 32,
+      "composite_risk_score": 100.0
+    },
+    {
+      "file_path": "starfish/morphology.py",
+      "total_findings": 12,
+      "warning_findings": 12,
+      "composite_risk_score": 100.0
+    },
+    {
+      "file_path": "starfish/types.py",
+      "total_findings": 36,
+      "warning_findings": 36,
+      "composite_risk_score": 100.0
+    },
+    {
+      "file_path": "notebooks/py/SeqFISH.py",
+      "total_findings": 16,
+      "warning_findings": 16,
+      "composite_risk_score": 100.0
+    },
+    {
+      "file_path": "starfish/core/util/click/__init__.py",
+      "total_findings": 16,
+      "warning_findings": 16,
+      "composite_risk_score": 100.0
+    },
+    {
+      "file_path": "starfish/experiment/builder.py",
+      "total_findings": 16,
+      "warning_findings": 16,
+      "composite_risk_score": 100.0
+    },
+    {
+      "file_path": "starfish/core/morphology/util.py",
+      "total_findings": 9,
+      "warning_findings": 9,
+      "composite_risk_score": 95.0
+    },
+    {
+      "file_path": "starfish/core/morphology/Filter/__init__.py",
+      "total_findings": 8,
+      "warning_findings": 8,
+      "composite_risk_score": 90.0
+    },
+    {
+      "file_path": "starfish/core/spots/DecodeSpots/__init__.py",
+      "total_findings": 8,
+      "warning_findings": 8,
+      "composite_risk_score": 90.0
+    },
+    {
+      "file_path": "starfish/image.py",
+      "total_findings": 8,
+      "warning_findings": 8,
+      "composite_risk_score": 90.0
+    },
+    {
+      "file_path": "starfish/spots.py",
+      "total_findings": 8,
+      "warning_findings": 8,
+      "composite_risk_score": 90.0
+    },
+    {
+      "file_path": "starfish/core/spots/DecodeSpots/check_all_decoder.py",
+      "total_findings": 6,
+      "warning_findings": 6,
+      "composite_risk_score": 80.0
+    },
+    {
+      "file_path": "starfish/core/imagestack/imagestack.py",
+      "total_findings": 6,
+      "warning_findings": 6,
+      "composite_risk_score": 80.0
+    },
+    {
+      "file_path": "starfish/core/spots/FindSpots/__init__.py",
+      "total_findings": 6,
+      "warning_findings": 6,
+      "composite_risk_score": 80.0
+    },
+    {
+      "file_path": "notebooks/py/Starfish_simulation.py",
+      "total_findings": 6,
+      "warning_findings": 6,
+      "composite_risk_score": 80.0
+    },
+    {
+      "file_path": "starfish/core/spacetx_format/util.py",
+      "total_findings": 6,
+      "warning_findings": 6,
+      "composite_risk_score": 80.0
+    },
+    {
+      "file_path": "starfish/core/spots/DecodeSpots/util.py",
+      "total_findings": 6,
+      "warning_findings": 6,
+      "composite_risk_score": 80.0
+    },
+    {
+      "file_path": "starfish/core/spots/DecodeSpots/check_all_funcs.py",
+      "total_findings": 5,
+      "warning_findings": 5,
+      "composite_risk_score": 75.0
+    }
+  ]
+}

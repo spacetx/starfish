@@ -5,7 +5,7 @@ attrs==25.4.0
 babel==2.17.0
 backports.tarfile==1.2.0
 beautifulsoup4==4.14.3
-bleach==6.3.0
+bleach==6.4.0
 boto3==1.42.80
 botocore==1.42.80
 build==1.4.2

@@ -130,6 +130,7 @@ def test_iss_pipeline_cropped_data(tmpdir):
 
     assert pipeline_log[0]['method'] == 'WhiteTophat'
     assert pipeline_log[1]['method'] == 'Warp'
+    assert 'transforms_list' in pipeline_log[1]['method_runtime_parameters']
     assert pipeline_log[2]['method'] == 'BlobDetector'
     assert pipeline_log[3]['method'] == 'PerRoundMaxChannel'
 

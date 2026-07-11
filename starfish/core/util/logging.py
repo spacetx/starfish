@@ -17,20 +17,23 @@ class Log:
         """
         self._log: List[dict] = list()
 
-    def update_log(self, class_instance) -> None:
+    def update_log(self, class_instance, method_runtime_parameters=None) -> None:
         """
         Adds a new entry to the log list.
 
         Parameters
         ----------
         class_instance: The instance of a class being applied to the imagestack
+
+        method_runtime_parameters: Any runtime parameters passed to the method
         """
         entry = {"method": class_instance.__class__.__name__,
+                 "method_runtime_parameters": method_runtime_parameters,
                  "arguments": class_instance.__dict__,
                  "os": get_os_info(),
                  "dependencies": get_core_dependency_info(),
                  "release tag": get_release_tag(),
-                 "starfish version": get_dependency_version('starfish')
+                 "starfish version": get_dependency_version('starfish'),
                  }
         self._log.append(entry)
 

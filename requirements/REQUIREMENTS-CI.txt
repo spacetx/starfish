@@ -149,7 +149,7 @@ trackpy==0.7
 traitlets==5.14.3
 twine==6.2.0
 types-PyYAML==6.0.12.20250915
-types-requests==2.32.4.20260107
+types-requests==2.33.0.20260518
 types-setuptools==80.9.0.20251223
 typing_extensions==4.15.0
 tzdata==2025.3

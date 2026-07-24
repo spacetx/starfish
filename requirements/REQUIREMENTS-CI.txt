@@ -82,7 +82,7 @@ pandas==2.3.3
 pandocfilters==1.5.1
 parso==0.8.7
 pexpect==4.9.0
-pillow==12.2.0
+pillow==12.3.0
 platformdirs==4.10.0
 pluggy==1.6.0
 prompt_toolkit==3.0.52

@@ -8,7 +8,7 @@ beautifulsoup4==4.14.3
 bleach==6.4.0
 boto3==1.42.80
 botocore==1.42.80
-build==1.4.2
+build==1.5.0
 certifi==2026.1.4
 cffi==2.0.0
 charset-normalizer==3.4.7

@@ -1,11 +1,11 @@
 from functools import partial
-from typing import Optional
+from typing import Optional, Set
 
 import numpy as np
 import xarray as xr
 
 from starfish.core.imagestack.imagestack import ImageStack
-from starfish.core.types import Levels
+from starfish.core.types import Levels, Axes
 from ._base import FilterAlgorithm
 from .util import determine_axes_to_group_by
 
@@ -59,6 +59,7 @@ class ClipPercentileToZero(FilterAlgorithm):
             max_coeff: float = 1.0,
             is_volume: bool = False,
             level_method: Levels = Levels.CLIP,
+            group_by: Optional[Set[Axes]] = None
     ) -> None:
 
         self.p_min = p_min
@@ -67,6 +68,7 @@ class ClipPercentileToZero(FilterAlgorithm):
         self.max_coeff = max_coeff
         self.is_volume = is_volume
         self.level_method = level_method
+        self.group_by = group_by
 
     _DEFAULT_TESTING_PARAMETERS = {"p_min": 0, "p_max": 100,
                                    "min_coeff": 1.0, "max_coeff": 1.0}
@@ -107,7 +109,9 @@ class ClipPercentileToZero(FilterAlgorithm):
             Otherwise return the original stack.
 
         """
-        group_by = determine_axes_to_group_by(self.is_volume)
+        group_by = self.group_by
+        if group_by is None:
+            group_by = determine_axes_to_group_by(self.is_volume)
         clip_percentile_to_zero = partial(
             self._clip_percentile_to_zero,
             p_min=self.p_min, p_max=self.p_max,

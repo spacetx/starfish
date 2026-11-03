@@ -11,8 +11,6 @@ DOCKER_IMAGE?=spacetx/starfish
 DOCKER_BUILD?=1
 
 VERSION=$(shell sh -c "git describe --exact --dirty 2> /dev/null")
-# if you update this, you will need to update the version pin for the "Install Napari & Test napari (pinned)" test in .travis.yml
-PIP_VERSION=25.1
 
 define print_help
     @printf "    %-28s   $(2)\n" $(1)
@@ -102,21 +100,21 @@ pin-all-requirements:
 starfish/REQUIREMENTS-STRICT.txt : REQUIREMENTS.txt
 	[ ! -e .$<-env ] || exit 1
 	$(call create_venv, .$<-env)
-	.$<-env/bin/pip install --upgrade --no-cache-dir pip==$(PIP_VERSION) setuptools
+	.$<-env/bin/pip install --upgrade --no-cache-dir pip setuptools
 	.$<-env/bin/pip install -r $<
 	echo "# You should not edit this file directly.  Instead, you should edit one of the following files ($^) and run make $@" >| $@
-	.$<-env/bin/pip freeze --all | grep -v "pip==$(PIP_VERSION)" >> $@
+	.$<-env/bin/pip freeze --all | grep -v "^pip==" >> $@
 	rm -rf .$<-env
 
 requirements/REQUIREMENTS-%.txt : requirements/REQUIREMENTS-%.txt.in REQUIREMENTS.txt
 	[ ! -e .$<-env ] || exit 1
 	$(call create_venv, .$<-env)
-	.$<-env/bin/pip install --upgrade --no-cache-dir pip==$(PIP_VERSION) setuptools
+	.$<-env/bin/pip install --upgrade --no-cache-dir pip setuptools
 	for src in $^; do \
 		.$<-env/bin/pip install -r $$src; \
 	done
 	echo "# You should not edit this file directly.  Instead, you should edit one of the following files ($<) and run make $@" >| $@
-	.$<-env/bin/pip freeze --all | grep -v "pip==$(PIP_VERSION)" >> $@
+	.$<-env/bin/pip freeze --all | grep -v "^pip==" >> $@
 	rm -rf .$<-env
 
 check-requirements:
@@ -159,17 +157,17 @@ help-integration:
 ### INSTALL ##################################################
 #
 install-dev:
-	python -m pip install --upgrade pip==$(PIP_VERSION)
+	python -m pip install --upgrade pip
 	pip install -r requirements/REQUIREMENTS-CI.txt
 	pip install -e .
 	pip freeze
 
 install-src:
-	python -m pip install --upgrade pip==$(PIP_VERSION) -e .
+	python -m pip install --upgrade pip -e .
 	pip freeze
 
 install-released-notebooks-support:
-	python -m pip install --upgrade pip==$(PIP_VERSION)
+	python -m pip install --upgrade pip
 	pip install -r requirements/REQUIREMENTS-CI.txt
 	pip install starfish
 	pip freeze
@@ -282,7 +280,7 @@ release-env: release-env/bin/activate release-env/bin/make_shell
 # private: call virtualenv and pip install
 release-env/bin/activate:
 	$(call create_venv, release-env)
-	release-env/bin/pip install --force-reinstall --upgrade pip==$(PIP_VERSION)
+	release-env/bin/pip install --force-reinstall --upgrade pip
 	release-env/bin/pip install -r requirements/REQUIREMENTS-CI.txt
 	touch release-env/bin/activate
 

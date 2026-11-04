@@ -122,7 +122,7 @@ setuptools==80.10.2
 six==1.17.0
 slicedimage==4.1.1
 snowballstemmer==3.0.1
-soupsieve==2.8.4
+soupsieve==2.9
 Sphinx==5.3.0
 sphinx-autodoc-typehints==1.23.0
 sphinx-bootstrap-theme==0.8.1

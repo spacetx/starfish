@@ -116,7 +116,7 @@ Send2Trash==2.0.0
 setuptools==80.10.2
 six==1.17.0
 slicedimage==4.1.1
-soupsieve==2.8.4
+soupsieve==2.9
 stack-data==0.6.3
 sympy==1.14.0
 terminado==0.18.1

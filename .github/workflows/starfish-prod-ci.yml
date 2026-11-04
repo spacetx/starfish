@@ -17,14 +17,14 @@ jobs:
     name: Lint
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -47,14 +47,14 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -77,14 +77,14 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -104,7 +104,7 @@ jobs:
   #   name: Napari Pinned
   #   runs-on: "ubuntu-latest"
   #   steps:
-  #     - uses: actions/checkout@v6
+  #     - uses: actions/checkout@v7
 
   #     - name: Install dependencies
   #       run: |
@@ -127,7 +127,7 @@ jobs:
   #   needs: napari-pinned
   #   runs-on: "ubuntu-latest"
   #   steps:
-  #     - uses: actions/checkout@v6
+  #     - uses: actions/checkout@v7
 
   #     - name: Install dependencies
   #       run: |
@@ -149,14 +149,14 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -174,7 +174,7 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Build Docker Image
         run: |
@@ -189,14 +189,14 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -214,14 +214,14 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -239,14 +239,14 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -264,14 +264,14 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -289,14 +289,14 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -314,14 +314,14 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -339,14 +339,14 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -364,14 +364,14 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -389,14 +389,14 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
       
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -414,14 +414,14 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}
@@ -439,14 +439,14 @@ jobs:
     needs: starfish-slow
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.OS }}-${{ env.pythonLocation }}-${{ hashFiles('requirements/REQUIREMENTS-CI.txt') }}

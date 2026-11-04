@@ -1,5 +1,5 @@
 # You should not edit this file directly.  Instead, you should edit one of the following files (requirements/REQUIREMENTS-JUPYTER.txt.in) and run make requirements/REQUIREMENTS-JUPYTER.txt
-anyio==4.12.1
+anyio==4.14.2
 argon2-cffi==25.1.0
 argon2-cffi-bindings==25.1.0
 arrow==1.4.0

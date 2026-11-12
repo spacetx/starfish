@@ -51,7 +51,7 @@ See `spacetx-starfish.readthedocs.io <https://spacetx-starfish.readthedocs.io/en
 Installation
 ------------
 
-starfish supports python 3.10-3.13 and can easily be installed from PyPI:
+starfish supports python 3.11-3.13 and can easily be installed from PyPI:
 
 .. code-block:: bash
 
@@ -80,8 +80,8 @@ To install starfish with both napari and jupyter (for notebook support), use:
 Python Version Notice
 ---------------------
 
-starfish will be dropping support for python 3.10 in future release when
-upstream dependencies will require a minimum python=3.11 version.
+starfish will be dropping support for python 3.11 in a future release when
+upstream dependencies will require a minimum python=3.12 version.
 
 Contributing
 ------------

@@ -34,9 +34,9 @@ def test_create_spot_attributes():
 
     # each feature should be correctly localized to z, y, x, and the SpotAttributes should be
     # sorted in that order
-    assert np.array_equal(spot_attributes.data[Axes.ZPLANE], [0, 0, 0, 0])
-    assert np.array_equal(spot_attributes.data[Axes.Y], [0, 0, 1, 1])
-    assert np.array_equal(spot_attributes.data[Axes.X], [0, 1, 0, 1])
+    assert np.array_equal(spot_attributes.data[Axes.ZPLANE.value], [0, 0, 0, 0])
+    assert np.array_equal(spot_attributes.data[Axes.Y.value], [0, 0, 1, 1])
+    assert np.array_equal(spot_attributes.data[Axes.X.value], [0, 1, 0, 1])
 
     # spots should map to edcb -- the decoded image has 4 values: [5, 4, 3, 2]. The target map
     # starts at np.nan, then counts sequentially from 1. Thus, 2 should map to b, and from there

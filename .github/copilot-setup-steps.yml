@@ -7,7 +7,7 @@
 # Configuration Overview:
 # -----------------------
 # - System dependencies for building scientific Python packages (HDF5, ATLAS, etc.)
-# - Python version management via pyenv (supports Python 3.11-3.13)
+# - Python version management via pyenv (supports Python 3.11-3.14)
 # - Network access to PyPI and related package repositories
 # - Automatic installation of development dependencies
 # - Docker support (pre-installed in environment)
@@ -52,7 +52,7 @@
 #
 # Python Version Management:
 # --------------------------
-# This setup installs Python versions based on pyproject.toml (3.11-3.13 supported).
+# This setup installs Python versions based on pyproject.toml (3.11-3.14 supported).
 # The agent can switch versions using: pyenv global X.Y
 #
 # Additional Requirements:
@@ -84,7 +84,7 @@ steps:
         zlib1g-dev
 
   # Set up pyenv for Python version management
-  # This allows switching between Python 3.11, 3.12, and 3.13
+  # This allows switching between Python 3.11, 3.12, 3.13, and 3.14
   - run: |
       curl https://pyenv.run | bash
       echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
@@ -93,7 +93,7 @@ steps:
       source ~/.bashrc
 
   # Install multiple Python versions (using latest from each major.minor version)
-  # Based on pyproject.toml requires-python: ">= 3.11, <3.14"
+  # Based on pyproject.toml requires-python: ">= 3.11, <3.15"
   - run: |
       export PYENV_ROOT="$HOME/.pyenv"
       export PATH="$PYENV_ROOT/bin:$PATH"
@@ -101,6 +101,7 @@ steps:
       pyenv install 3.11
       pyenv install 3.12
       pyenv install 3.13
+      pyenv install 3.14
       pyenv global 3.11
 
   # Upgrade pip and install build tools

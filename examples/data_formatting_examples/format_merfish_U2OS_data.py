@@ -195,7 +195,7 @@ def format_data(input_dir, output_dir):
 
 
 if __name__ == "__main__":
-    s3_bucket = "s3://czi.starfish.data.public/browse/raw/20180820/merfish_u2os/"
+    s3_bucket = "s3://spacetx.starfish.data.public/browse/raw/20180820/merfish_u2os/"
     input_help_msg = "Path to raw data. Raw data can be downloaded from: {}".format(s3_bucket)
     output_help_msg = "Path to output experment.json and all formatted images it references"
     parser = argparse.ArgumentParser()

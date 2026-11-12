@@ -180,14 +180,14 @@ def format_data(input_dir, output_dir, num_fov):
 if __name__ == "__main__":
     """
     This TileFetcher should be run on data found at:
-    s3://spacetx.starfish.data/mignardi_breast_1/raw/
+    s3://spacetx.starfish.data.public/browse/raw/20180820/iss_breast/
 
     The data produced by this TileFetcher have been uploaded and can be found at the following
     prefix:
     s3://spacetx.starfish.data.public/browse/formatted/iss/20190506
     """
 
-    s3_bucket = "s3://czi.starfish.data.public/browse/raw/20180820/iss_breast/"
+    s3_bucket = "s3://spacetx.starfish.data.public/browse/raw/20180820/iss_breast/"
     input_help_msg = "Path to raw data. Raw data can be downloaded from: {}".format(s3_bucket)
     output_help_msg = "Path to output experment.json and all formatted images it references"
     fov_help_msg = "The number of fovs that should be extracted from the directory"

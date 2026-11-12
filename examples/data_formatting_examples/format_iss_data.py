@@ -43,7 +43,9 @@ input data structure:
             ├── c1.TIF
             └── c2.TIF
 
-The locations of the data files for use with this script can be found in the url variable.
+The raw data for this script is downloaded from a CloudFront URL in the ``url`` variable.
+Processed data can be accessed at:
+s3://spacetx.starfish.data.public/browse/formatted/iss/20190506/
 """
 import argparse
 import io

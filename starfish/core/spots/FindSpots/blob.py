@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -18,7 +18,7 @@ from starfish.core.types import (
 )
 from ._base import FindSpotsAlgorithm
 
-blob_detectors = {
+blob_detectors: Dict[str, Any] = {
     'blob_dog': blob_dog,
     'blob_doh': blob_doh,
     'blob_log': blob_log

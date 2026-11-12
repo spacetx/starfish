@@ -92,9 +92,9 @@ def _build_intensity_table(
     dims = (Features.AXIS, Axes.CH.value, Axes.ROUND.value)
     coords: Mapping[Hashable, Tuple[str, Any]] = {
         Features.SPOT_RADIUS: (Features.AXIS, anchor_df[Features.SPOT_RADIUS]),
-        Axes.ZPLANE.value: (Features.AXIS, anchor_df[Axes.ZPLANE]),
-        Axes.Y.value: (Features.AXIS, anchor_df[Axes.Y]),
-        Axes.X.value: (Features.AXIS, anchor_df[Axes.X]),
+        Axes.ZPLANE.value: (Features.AXIS, anchor_df[Axes.ZPLANE.value]),
+        Axes.Y.value: (Features.AXIS, anchor_df[Axes.Y.value]),
+        Axes.X.value: (Features.AXIS, anchor_df[Axes.X.value]),
         Features.SPOT_ID: (Features.AXIS, np.arange(len(anchor_df))),
         Features.AXIS: (Features.AXIS, np.arange(len(anchor_df))),
         Axes.ROUND.value: (Axes.ROUND.value, rounds),
@@ -107,7 +107,7 @@ def _build_intensity_table(
         # get intensity data and indices
         spot_indices = ind[r]
         intensity_data = round_dataframes[r].loc[spot_indices, Features.INTENSITY]
-        channel_index = round_dataframes[r].loc[spot_indices, Axes.CH]
+        channel_index = round_dataframes[r].loc[spot_indices, Axes.CH.value]
         round_index = np.full(ind.shape[0], fill_value=r, dtype=int)
         feature_index = np.arange(ind.shape[0], dtype=int)
 

@@ -130,7 +130,7 @@ def format_data(input_dir, output_dir) -> None:
     output_dir : str
         Output directory containing formatted data in SpaceTx format. Example output data can be
         downloaded from
-        https://d2nhj9g34unfro.cloudfront.net/browse/formatted/20181028/ \
+        s3://spacetx.starfish.data.public/browse/formatted/20181028/ \
         BaristaSeq/cropped_formatted/experiment.json"
     """
 

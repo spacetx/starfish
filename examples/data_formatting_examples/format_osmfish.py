@@ -229,7 +229,7 @@ def cli(input_dir, metadata_yaml, output_dir):
     spaceTx-formatted data to <output-dir>.
 
     Raw data (input for this tool) for this experiment can be found at:
-    s3://spacetx.starfish.data.upload/simone/
+    s3://spacetx.starfish.data.public/browse/raw/20180912/osmFISH/
 
     Processed data (output of this tool) can be found at:
     s3://spacetx.starfish.data.public/20181031/osmFISH/

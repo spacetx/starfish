@@ -1,6 +1,7 @@
 import tempfile
 
 import numpy as np
+from skimage.transform._geometric import SimilarityTransform
 
 from starfish import data
 from starfish.core.image import Filter
@@ -28,3 +29,11 @@ def test_export_import_transforms_object():
         # assert that each TransformationObject has the correct translation shift
         assert transform_type == TransformType.SIMILARITY
         assert np.array_equal(transform.translation, shift)
+
+
+def test_repr_labels_x_and_y_correctly():
+    transforms = TransformsList()
+    # SimilarityTransform.translation is ordered (x, y)
+    transforms.append({Axes.ROUND: 0}, TransformType.SIMILARITY,
+                      SimilarityTransform(translation=(3, 5)))
+    assert "x=3.0, y=5.0" in repr(transforms)

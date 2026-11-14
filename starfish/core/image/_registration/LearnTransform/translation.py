@@ -81,7 +81,7 @@ class Translation(LearnTransformAlgorithm):
             if verbose:
                 print(f"For {self.axes}: {a}, Shift: {shift}, Error: {error}")
             selectors = {self.axes: a}
-            # reverse shift because SimilarityTransform stores in y,x format
+            # phase_cross_correlation returns (y, x); SimilarityTransform.translation is (x, y)
             shift = shift[::-1]
             transforms.append(selectors,
                               TransformType.SIMILARITY,

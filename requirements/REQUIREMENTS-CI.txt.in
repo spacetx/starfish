@@ -12,6 +12,8 @@ mistune==0.8.4
 mypy
 numpydoc
 nbencdec>=0.0.5
+# nbencdec imports IPython.core.inputtransformer, which was removed in IPython 9
+ipython<9
 pycodestyle
 pytest>=9.0.3
 pytest-cov>=2.5.1

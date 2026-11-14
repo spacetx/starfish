@@ -33,7 +33,7 @@ if ipython is not None:
     if 'ipykernel' in sys.modules:  # running in Jupyter
         ipython.run_line_magic('matplotlib', 'inline')
     else:  # terminal IPython
-        ipython.run_line_magic('matplotlib', 'qt5')
+        ipython.run_line_magic('matplotlib', 'qt')
 
 matplotlib.rcParams["figure.dpi"] = 150
 

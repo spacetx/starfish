@@ -46,8 +46,8 @@ class TransformsList:
 
     def __repr__(self) -> str:
         translation_strings = [
-            f"tile indices: {t[0]}\ntranslation: y={t[2].translation[0]}, "
-            f"x={t[2].translation[1]}, rotation: {t[2].rotation}, scale: {t[2].scale}"
+            f"tile indices: {t[0]}\ntranslation: x={t[2].translation[0]}, "
+            f"y={t[2].translation[1]}, rotation: {t[2].rotation}, scale: {t[2].scale}"
             for t in self.transforms
         ]
         return "\n".join(translation_strings)

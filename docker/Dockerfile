@@ -44,7 +44,7 @@ WORKDIR /home/starfish/
 
 # create a virtual environment
 RUN python -m venv .venv
-ENV PATH /home/starfish/.venv/bin/:$PATH
+ENV PATH=/home/starfish/.venv/bin/:$PATH
 
 # Prepare for build
 COPY --chown=starfish:starfish . /home/starfish/src
@@ -52,6 +52,6 @@ COPY --chown=starfish:starfish . /home/starfish/src
 # Build and configure for running
 RUN pip install -e src --ignore-installed --no-cache-dir
 
-env MPLBACKEND Agg
+ENV MPLBACKEND=Agg
 
 CMD ["bash"]

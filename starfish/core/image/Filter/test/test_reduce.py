@@ -1,3 +1,4 @@
+import contextlib
 import warnings
 from collections import OrderedDict
 
@@ -124,7 +125,12 @@ def test_image_stack_reduce(expected_result, func, module, kwargs):
         actual_kwargs = kwargs.copy()
     if module is not None:
         actual_kwargs['module'] = module
-    red = Reduce(dims=[Axes.ROUND], func=func, **actual_kwargs)
+    # passing a module together with a string func is deprecated
+    expectation = (
+        pytest.warns(DeprecationWarning) if module is not None else contextlib.nullcontext()
+    )
+    with expectation:
+        red = Reduce(dims=[Axes.ROUND], func=func, **actual_kwargs)
     reduced = red.run(test_stack)
 
     assert np.allclose(reduced.xarray, expected_result.xarray)

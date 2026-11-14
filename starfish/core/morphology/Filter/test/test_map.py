@@ -7,7 +7,7 @@ from ..map import Map
 
 def test_apply():
     input_mask_collection = binary_mask_collection_2d()
-    filt = Map("morphology.binary_dilation", module=FunctionSource.skimage)
+    filt = Map(FunctionSource.skimage("morphology.dilation"))
     output_mask_collection = filt.run(input_mask_collection)
 
     assert input_mask_collection._pixel_ticks == output_mask_collection._pixel_ticks

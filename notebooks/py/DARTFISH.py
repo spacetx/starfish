@@ -62,7 +62,7 @@ experiment.codebook
 # EPY: END markdown
 
 # EPY: START code
-# %gui qt5
+# %gui qt
 # display(stack)
 
 single_plane = imgs.sel({Axes.ROUND: 0, Axes.CH: 0, Axes.ZPLANE: 0})

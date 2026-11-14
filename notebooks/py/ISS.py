@@ -75,7 +75,7 @@ experiment.codebook
 # EPY: START code
 # Display all the data in an interactive pop-up window. Uncomment to have this version work.
 
-# %gui qt5
+# %gui qt
 # display(imgs)
 # EPY: END code
 

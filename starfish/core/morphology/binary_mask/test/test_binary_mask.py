@@ -1,7 +1,7 @@
 import os
 
 import numpy as np
-from skimage.morphology import binary_dilation
+from skimage.morphology import dilation
 
 from starfish import ImageStack
 from starfish.core.morphology.label_image import LabelImage
@@ -182,7 +182,7 @@ def test_from_empty_label_image(tmp_path):
 
 def test_apply():
     input_mask_collection = binary_mask_collection_2d()
-    output_mask_collection = input_mask_collection._apply(binary_dilation)
+    output_mask_collection = input_mask_collection._apply(dilation)
 
     assert input_mask_collection._pixel_ticks == output_mask_collection._pixel_ticks
     assert input_mask_collection._physical_ticks == output_mask_collection._physical_ticks

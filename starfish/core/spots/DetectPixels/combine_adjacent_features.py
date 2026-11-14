@@ -288,7 +288,7 @@ class CombineAdjacentFeatures:
         non_zero_target_candidates = target_candidates[target_candidates != 0]
         target_index = cast(int, np.argmax(np.bincount(non_zero_target_candidates)))
         spot_attrs[Features.TARGET] = target_map.target_as_str(target_index)
-        spot_attrs[Features.SPOT_RADIUS] = spot_property.equivalent_diameter / 2
+        spot_attrs[Features.SPOT_RADIUS] = spot_property.equivalent_diameter_area / 2
 
         # filter intensities for which radius is too small
         passes_area_filter = 1 if min_area <= spot_property.area < max_area else 0

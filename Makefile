@@ -139,6 +139,8 @@ include examples/quick_start/subdir.mk
 include examples/how_to/subdir.mk
 
 test-examples: export TESTING=1
+# run Qt-backed examples headless so they work without a display server
+test-examples: export QT_QPA_PLATFORM=offscreen
 test-examples: run-pipelines run-quick-start run-how-to
 slow: fast validate-notebooks run-notebooks test-examples docker
 

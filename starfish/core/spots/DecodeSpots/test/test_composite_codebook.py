@@ -351,6 +351,6 @@ def test_composite_codebook_mixed_round():
     decoded_sequential_part_1 = lookup_decoder.run(spots=sequential_spots_part_1)
     decoded_sequential_part_2 = lookup_decoder.run(spots=sequential_spots_part_2)
     decoded_sequential = xr.concat([decoded_sequential_part_1, decoded_sequential_part_2],
-                                   dim="features")
+                                   dim="features", join="outer")
 
     assert np.array_equal(sorted(decoded_sequential[Features.TARGET].values), ['GENE_D', 'GENE_E'])

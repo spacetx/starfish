@@ -171,7 +171,7 @@ cnts_benchmark.head()
 min_dist = 0.6
 cnts_starfish = spots_df[spots_df.distance<=min_dist].groupby('target').count()['area']
 cnts_starfish = cnts_starfish.reset_index(level=0)
-cnts_starfish.rename(columns = {'target':'gene', 'area':'cnt_starfish'}, inplace=True)
+cnts_starfish = cnts_starfish.rename(columns = {'target':'gene', 'area':'cnt_starfish'})
 
 benchmark_comparison = pd.merge(cnts_benchmark, cnts_starfish, on='gene', how='left')
 benchmark_comparison.head(20)

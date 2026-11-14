@@ -159,12 +159,12 @@ class DecodedIntensityTable(IntensityTable):
         grouped = self.to_features_dataframe().groupby([Features.CELL_ID, Features.TARGET])
         counts = grouped.count().iloc[:, 0].unstack().fillna(0)
         # rename unassigned spots
-        counts.rename(index={'nan': 'unassigned'}, inplace=True)
+        counts = counts.rename(index={'nan': 'unassigned'})
         # remove and store 'nan' target counts
         nan_target_counts = np.zeros(counts.shape[0])
         if 'nan' in counts.columns:
             nan_target_counts = counts['nan'].values
-            counts.drop(columns='nan', inplace=True)
+            counts = counts.drop(columns='nan')
         if self.has_physical_coords:
             grouped = self.to_features_dataframe().groupby([Features.CELL_ID])[[
                 Axes.X.value, Axes.Y.value, Axes.ZPLANE.value, Coordinates.X.value,

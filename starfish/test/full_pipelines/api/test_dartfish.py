@@ -176,7 +176,7 @@ def test_dartfish_pipeline_cropped_data(tmpdir):
     min_dist = 0.6
     cnts_starfish = spots_df[spots_df.distance <= min_dist].groupby('target').count()['area']
     cnts_starfish = cnts_starfish.reset_index(level=0)
-    cnts_starfish.rename(columns={'target': 'gene', 'area': 'cnt_starfish'}, inplace=True)
+    cnts_starfish = cnts_starfish.rename(columns={'target': 'gene', 'area': 'cnt_starfish'})
 
     # get top 5 genes and verify they are correct
     high_expression_genes = cnts_starfish.sort_values('cnt_starfish', ascending=False,

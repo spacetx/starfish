@@ -38,6 +38,16 @@ versionfile_build = "starfish/core/_version.py"
 parentdir_prefix = "starfish-"
 tag_prefix = ""
 
+[tool.mypy]
+# honor follow_imports for .pyi files so the override below applies
+follow_imports_for_stubs = true
+
+[[tool.mypy.overrides]]
+# PyQt6 6.12.0 ships stubs with invalid syntax that mypy cannot parse; it is only imported
+# transitively (e.g. via qtpy) when napari is installed
+module = "PyQt6.*"
+follow_imports = "skip"
+
 [project.urls]
 Homepage = "https://spacetx-starfish.readthedocs.io/en/latest/"
 Documentation = "https://spacetx-starfish.readthedocs.io/en/latest/"

@@ -92,8 +92,7 @@ class ZeroByChannelMagnitude(FilterAlgorithm):
                 stack._data[ind] = stack._data[ind] * magnitude_mask
 
                 if self.normalize:
+                    # divide by 1 where masked out: those values are already zero
                     stack._data[ind] = np.divide(stack._data[ind],
-                                                 ch_magnitude,
-                                                 where=magnitude_mask
-                                                 )
+                                                 np.where(magnitude_mask, ch_magnitude, 1))
         return None

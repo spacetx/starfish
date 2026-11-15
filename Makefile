@@ -141,6 +141,8 @@ include examples/how_to/subdir.mk
 test-examples: export TESTING=1
 # run Qt-backed examples headless so they work without a display server
 test-examples: export QT_QPA_PLATFORM=offscreen
+# the offscreen platform warns that it cannot raise windows or propagate size hints
+test-examples: export QT_LOGGING_RULES=default.warning=false
 test-examples: run-pipelines run-quick-start run-how-to
 slow: fast validate-notebooks run-notebooks test-examples docker
 

@@ -42,7 +42,6 @@ def test_allen_smFISH_cropped_data():
         percentile=10,
         # this is irrelevant when min_mass, spot_diameter, and max_size are set properly
         verbose=True,
-        is_volume=True,
     )
     spots = tlmpf.run(z_filtered_image)  # noqa
 

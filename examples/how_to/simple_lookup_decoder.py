@@ -46,7 +46,6 @@ tlmpf = starfish.spots.FindSpots.TrackpyLocalMaxPeakFinder(
     preprocess=False,
     percentile=10,
     verbose=True,
-    is_volume=True,
 )
 clip1.run(image, in_place=True)
 bandpass.run(image, in_place=True)

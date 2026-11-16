@@ -47,7 +47,7 @@ def generate_default_data():
     return ImageStack.from_numpy(data)
 
 
-@pytest.mark.parametrize('filter_class', methods.values())
+@pytest.mark.parametrize('filter_class', list(methods.values()))
 def test_all_methods_adhere_to_contract(filter_class):
     """Test that all filter algorithms adhere to the filtering contract"""
 

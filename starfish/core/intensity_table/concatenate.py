@@ -31,5 +31,6 @@ def concatenate(intensity_tables: Iterable[IntensityTable]) -> IntensityTable:
     Sparse Arrays in xarray: https://github.com/pydata/xarray/issues/1375
     Combine_first: http://xarray.pydata.org/en/stable/combining.html#combine
     """
-    concatenated_intensities: xr.DataArray = xr.concat(list(intensity_tables), Features.AXIS)
+    concatenated_intensities: xr.DataArray = xr.concat(
+        list(intensity_tables), Features.AXIS, join="outer")
     return IntensityTable(concatenated_intensities)

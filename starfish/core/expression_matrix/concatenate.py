@@ -28,5 +28,6 @@ def concatenate(expression_matrices: Iterable[ExpressionMatrix]) -> ExpressionMa
     Combine_first: http://xarray.pydata.org/en/stable/combining.html#combine
 
     """
-    concatenated_matrix: xr.DataArray = xr.concat(list(expression_matrices), Features.CELLS)
+    concatenated_matrix: xr.DataArray = xr.concat(
+        list(expression_matrices), Features.CELLS, join="outer")
     return ExpressionMatrix(concatenated_matrix)

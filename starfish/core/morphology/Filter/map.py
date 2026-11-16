@@ -47,7 +47,7 @@ class Map(FilterAlgorithm):
         self,
             func: Union[str, FunctionSourceBundle],
             *func_args,
-            module: FunctionSource = FunctionSource.np,
+            module: Optional[FunctionSource] = None,
             **func_kwargs,
     ) -> None:
         if isinstance(func, str):

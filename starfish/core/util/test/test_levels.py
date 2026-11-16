@@ -73,7 +73,7 @@ def combos(make_xarrays: bool):
     )
 
     if make_xarrays:
-        return (
+        return tuple(
             (xr.DataArray(source),
              xr.DataArray(expected_clip_output),
              xr.DataArray(expected_rescale_output),
